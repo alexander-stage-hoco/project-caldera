@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+}
+
+group = 'info.picocli'
+description = 'Picocli Shell JLine2 - easily build interactive shell applications with JLine 2 and picocli.'
+version = "$projectVersion"
+ext.moduleName = 'info.picocli.shell.jline2'
+
+dependencies {
+    api rootProject
+    api supportDependencies.jline2
+}
+
+apply plugin: 'org.beryx.jar' // for compiling module-info on Java 8
+compileJava {
+    inputs.property("moduleName", moduleName)
+}
+moduleConfig {
+    // copy module-info.class to META-INF/versions/9
+    multiReleaseVersion = 9
+    moduleInfoPath = 'src/main/java9/module-info.java'
+    version = project.version
+    neverCompileModuleInfo = true
+}
+
+jar {
+    manifest {
+        attributes  'Specification-Title'   : 'Picocli Shell JLine2',
+                    'Specification-Vendor'  : 'Remko Popma',
+                    'Specification-Version' : archiveVersion.get(),
+                    'Implementation-Title'  : 'Picocli Shell JLine2',
+                    'Implementation-Vendor' : 'Remko Popma',
+                    'Implementation-Version': archiveVersion.get()
+    }
+}
+
+ext {
+    PUBLISH_GROUP_ID = group
+    PUBLISH_ARTIFACT_ID = project.name
+    PUBLISH_VERSION = "$projectVersion"
+}
+apply from: "${rootProject.projectDir}/gradle/publish-mavencentral.gradle"

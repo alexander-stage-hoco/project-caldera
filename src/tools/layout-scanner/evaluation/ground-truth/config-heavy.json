@@ -1,0 +1,56 @@
+{
+  "repository": "config-heavy",
+  "description": "Configuration-heavy repository with extensive config files",
+  "expected": {
+    "total_files": 34,
+    "total_directories": 9,
+    "max_depth": 3,
+    "classifications": {
+      "source": 1,
+      "config": 28,
+      "ci": 4,
+      "docs": 1
+    },
+    "specific_files": {
+      "src/app.py": {
+        "classification": "source",
+        "language": "python"
+      },
+      ".vscode/settings.json": {
+        "classification": "config",
+        "language": "json"
+      },
+      ".github/workflows/ci.yml": {
+        "classification": "ci",
+        "language": "yaml"
+      },
+      "docker/Dockerfile": {
+        "classification": "config"
+      },
+      "terraform/main.tf": {
+        "classification": "config",
+        "language": "hcl"
+      },
+      "kubernetes/deployment.yaml": {
+        "classification": "config",
+        "language": "yaml"
+      },
+      "package.json": {
+        "classification": "config",
+        "language": "json"
+      },
+      "Jenkinsfile": {
+        "classification": "ci"
+      },
+      "README.md": {
+        "classification": "docs",
+        "language": "markdown"
+      }
+    }
+  },
+  "thresholds": {
+    "classification_accuracy": 0.85,
+    "count_tolerance": 0,
+    "max_scan_time_seconds": 2.0
+  }
+}

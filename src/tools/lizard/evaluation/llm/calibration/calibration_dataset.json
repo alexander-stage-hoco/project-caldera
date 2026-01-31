@@ -1,0 +1,268 @@
+{
+  "version": "1.0",
+  "description": "Expert-labeled calibration examples for LLM judges",
+  "created_at": "2026-01-04T00:00:00Z",
+  "dimensions": {
+    "ccn_accuracy": {
+      "weight": 0.35,
+      "calibration_examples": [
+        {
+          "id": "ccn-1",
+          "scenario": "Simple getter function with no branches",
+          "function": {
+            "name": "get_name",
+            "code_snippet": "def get_name(self):\n    return self.name",
+            "reported_ccn": 1,
+            "expected_ccn": 1
+          },
+          "expert_score": 5,
+          "expert_reasoning": "CCN=1 is correct for straight-line code with no decision points"
+        },
+        {
+          "id": "ccn-2",
+          "scenario": "Function with single if-else",
+          "function": {
+            "name": "is_adult",
+            "code_snippet": "def is_adult(age):\n    if age >= 18:\n        return True\n    return False",
+            "reported_ccn": 2,
+            "expected_ccn": 2
+          },
+          "expert_score": 5,
+          "expert_reasoning": "CCN=2 correctly counts one decision point (if statement)"
+        },
+        {
+          "id": "ccn-3",
+          "scenario": "Complex function with multiple conditions",
+          "function": {
+            "name": "validate_input",
+            "code_snippet": "def validate_input(data):\n    if not data:\n        return False\n    if len(data) < 5:\n        return False\n    for item in data:\n        if not item.is_valid():\n            return False\n    return True",
+            "reported_ccn": 4,
+            "expected_ccn": 4
+          },
+          "expert_score": 5,
+          "expert_reasoning": "CCN=4 correctly counts: 1 base + if + if + for + if = 4"
+        },
+        {
+          "id": "ccn-4",
+          "scenario": "Function with short-circuit operators",
+          "function": {
+            "name": "check_range",
+            "code_snippet": "def check_range(x, min_val, max_val):\n    return x >= min_val and x <= max_val",
+            "reported_ccn": 2,
+            "expected_ccn": 2
+          },
+          "expert_score": 4,
+          "expert_reasoning": "CCN=2 for 'and' operator is acceptable; some tools count it as CCN=3"
+        },
+        {
+          "id": "ccn-5",
+          "scenario": "CCN under-counting edge case",
+          "function": {
+            "name": "process_list",
+            "code_snippet": "def process_list(items):\n    return [x for x in items if x > 0 and x < 100]",
+            "reported_ccn": 1,
+            "expected_ccn": 3
+          },
+          "expert_score": 2,
+          "expert_reasoning": "List comprehension with conditions should add CCN but Lizard doesn't always count them"
+        }
+      ]
+    },
+    "function_detection": {
+      "weight": 0.25,
+      "calibration_examples": [
+        {
+          "id": "fd-1",
+          "scenario": "Regular function detection",
+          "file": "simple.py",
+          "expected_functions": ["greet", "add", "subtract"],
+          "detected_functions": ["greet", "add", "subtract"],
+          "expert_score": 5,
+          "expert_reasoning": "All regular functions correctly detected"
+        },
+        {
+          "id": "fd-2",
+          "scenario": "Class method detection",
+          "file": "user.py",
+          "expected_functions": ["User.__init__", "User.get_name", "User.set_name"],
+          "detected_functions": ["User.__init__", "User.get_name", "User.set_name"],
+          "expert_score": 5,
+          "expert_reasoning": "Class methods correctly detected with qualified names"
+        },
+        {
+          "id": "fd-3",
+          "scenario": "Nested function detection",
+          "file": "closure.py",
+          "expected_functions": ["outer", "outer.inner"],
+          "detected_functions": ["outer", "inner"],
+          "expert_score": 4,
+          "expert_reasoning": "Nested function detected but without full qualified name"
+        },
+        {
+          "id": "fd-4",
+          "scenario": "Lambda function detection",
+          "file": "functional.py",
+          "expected_functions": ["process", "(lambda)"],
+          "detected_functions": ["process"],
+          "expert_score": 3,
+          "expert_reasoning": "Lambda not detected; many tools don't track lambdas"
+        },
+        {
+          "id": "fd-5",
+          "scenario": "Empty file handling",
+          "file": "empty.py",
+          "expected_functions": [],
+          "detected_functions": [],
+          "expert_score": 5,
+          "expert_reasoning": "Correctly reports 0 functions for empty file"
+        }
+      ]
+    },
+    "statistics": {
+      "weight": 0.20,
+      "calibration_examples": [
+        {
+          "id": "stat-1",
+          "scenario": "Valid distribution statistics",
+          "distribution": {
+            "min": 1,
+            "max": 25,
+            "mean": 4.2,
+            "median": 3,
+            "p25": 1,
+            "p50": 3,
+            "p75": 5,
+            "p90": 8,
+            "p95": 12,
+            "p99": 20,
+            "gini": 0.45
+          },
+          "expert_score": 5,
+          "expert_reasoning": "All statistics valid: monotonic percentiles, mean in range, valid Gini"
+        },
+        {
+          "id": "stat-2",
+          "scenario": "Non-monotonic percentiles (error)",
+          "distribution": {
+            "min": 1,
+            "max": 25,
+            "mean": 4.2,
+            "p25": 3,
+            "p50": 2,
+            "p75": 5,
+            "p90": 8
+          },
+          "expert_score": 2,
+          "expert_reasoning": "Error: p50 (2) < p25 (3) violates monotonicity"
+        },
+        {
+          "id": "stat-3",
+          "scenario": "Gini out of range (error)",
+          "distribution": {
+            "min": 1,
+            "max": 10,
+            "mean": 3.5,
+            "gini": 1.5
+          },
+          "expert_score": 2,
+          "expert_reasoning": "Error: Gini (1.5) must be in [0, 1] range"
+        },
+        {
+          "id": "stat-4",
+          "scenario": "Missing advanced metrics (acceptable)",
+          "distribution": {
+            "min": 1,
+            "max": 10,
+            "mean": 3.5,
+            "median": 3,
+            "stddev": 2.1
+          },
+          "expert_score": 4,
+          "expert_reasoning": "Basic stats present and valid; missing percentiles and Gini is minor issue"
+        },
+        {
+          "id": "stat-5",
+          "scenario": "All zero values (edge case)",
+          "distribution": {
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "median": 0,
+            "stddev": 0,
+            "gini": 0
+          },
+          "expert_score": 5,
+          "expert_reasoning": "Valid for constant distribution where all values are the same"
+        }
+      ]
+    },
+    "hotspot_ranking": {
+      "weight": 0.20,
+      "calibration_examples": [
+        {
+          "id": "hs-1",
+          "scenario": "Correct hotspot ranking",
+          "top_functions": [
+            {"name": "mega_process", "ccn": 45},
+            {"name": "complex_validate", "ccn": 28},
+            {"name": "parse_data", "ccn": 15}
+          ],
+          "distribution_max": 45,
+          "expert_score": 5,
+          "expert_reasoning": "Functions correctly ranked by CCN, max matches top function"
+        },
+        {
+          "id": "hs-2",
+          "scenario": "Missing high-CCN function in top list",
+          "top_functions": [
+            {"name": "process_a", "ccn": 12},
+            {"name": "process_b", "ccn": 8}
+          ],
+          "distribution_max": 25,
+          "expert_score": 2,
+          "expert_reasoning": "Error: distribution max is 25 but top function only has CCN=12"
+        },
+        {
+          "id": "hs-3",
+          "scenario": "Multi-metric hotspot correlation",
+          "top_by_ccn": [
+            {"name": "big_process", "ccn": 20, "nloc": 150}
+          ],
+          "top_by_nloc": [
+            {"name": "big_process", "nloc": 150, "ccn": 20}
+          ],
+          "expert_score": 5,
+          "expert_reasoning": "Good correlation: same function appears in both CCN and NLOC hotspots"
+        },
+        {
+          "id": "hs-4",
+          "scenario": "Directory-level concentration",
+          "directory_hotspots": [
+            {"path": "src/legacy", "total_ccn": 250, "function_count": 15},
+            {"path": "src/core", "total_ccn": 80, "function_count": 20}
+          ],
+          "expert_score": 5,
+          "expert_reasoning": "Correctly identifies legacy directory as complexity hotspot"
+        },
+        {
+          "id": "hs-5",
+          "scenario": "No high-complexity functions",
+          "top_functions": [
+            {"name": "simple_a", "ccn": 3},
+            {"name": "simple_b", "ccn": 2}
+          ],
+          "functions_over_10": 0,
+          "expert_score": 5,
+          "expert_reasoning": "Correctly reports no functions over threshold; codebase is well-structured"
+        }
+      ]
+    }
+  },
+  "scoring_guidelines": {
+    "5": "Perfect or near-perfect accuracy, no issues",
+    "4": "Minor issues (1-2 small problems), generally accurate",
+    "3": "Moderate issues, main functionality works but edge cases problematic",
+    "2": "Significant issues, multiple errors or inconsistencies",
+    "1": "Major issues, unreliable or systematically wrong"
+  }
+}

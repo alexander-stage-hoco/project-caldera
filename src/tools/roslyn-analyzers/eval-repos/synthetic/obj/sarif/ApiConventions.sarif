@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json.schemastore.org/sarif-1.0.0",
+  "version": "1.0.0",
+  "runs": [
+    {
+      "tool": {
+        "name": "Microsoft (R) Visual C# Compiler",
+        "version": "5.0.0.0",
+        "fileVersion": "5.0.0-2.25569.105 (fad253f5)",
+        "semanticVersion": "5.0.0",
+        "language": "en-DE"
+      },
+      "results": [
+        {
+          "ruleId": "CS0426",
+          "level": "error",
+          "message": "The type name 'Collections' does not exist in the type 'System'",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/api-conventions/NamingViolations.cs",
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 36,
+                  "endLine": 26,
+                  "endColumn": 47
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "rules": {
+        "CS0426": {
+          "id": "CS0426",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS0426)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

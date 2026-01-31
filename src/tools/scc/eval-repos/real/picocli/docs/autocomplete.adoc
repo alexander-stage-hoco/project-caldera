@@ -1,0 +1,429 @@
+= Autocomplete for Java Command Line Applications
+//:author: Remko Popma
+//:email: rpopma@apache.org
+:revnumber: 4.7.8-SNAPSHOT
+:revdate: 2025-04-16
+:toc: left
+:numbered:
+:toclevels: 3
+:toc-title: Table of Contents
+:source-highlighter: coderay
+:icons: font
+:imagesdir: images
+:docinfo: shared-head,private-head
+ifdef::env-github[]
+:tip-caption: :bulb:
+endif::[]
+
+[link=https://github.com/remkop/picocli]
+image::https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png[Fork me on GitHub,float="right"]
+[quote]
+Every main method deserves picocli!
+
+== Command Line Completion
+Starting from version 1.0.0, picocli-based applications can have command line completion in Bash or ZSH Unix shells.
+Picocli can generate an autocompletion script tailored to your application.
+
+With this script installed, users can type the first few letters of a subcommand or an option,
+then press the TAB key, and the Unix shell will complete the subcommand or option.
+
+In the case of multiple possible completions, the Unix shell will display all subcommands or options beginning
+with those few characters. The user can type more characters and press TAB again to see a new, narrowed-down
+list if the typed characters are still ambiguous, or else complete the subcommand or option.
+
+image:picocli-autocompletion-demo.gif[Autocompletion demo animation]
+
+== Quick Start Tutorial
+This tutorial uses the link:index.html#CheckSum-application[CheckSum example application] from the picocli user manual. We created a class `com.myproject.CheckSum` and put it in a jar file, `myproject.jar`.
+
+Follow these steps to give this application command line autocompletion.
+
+=== Create Command
+First, create an executable command that runs the main application class. For this tutorial, the command name is `jchecksum`.
+
+We use an https://en.wikipedia.org/wiki/Alias_(command)[alias] here to create the command (see <<Alternative Ways to Define Commands,alternatives>>):
+
+[source,bash]
+----
+alias jchecksum='java -cp "picocli-1.0.0.jar;myproject.jar" com.myproject.CheckSum'
+----
+
+Let's test that the command works:
+
+[source,bash]
+----
+$ jchecksum --help
+Usage: jchecksum [-h] [-a=<algorithm>] <file>
+Prints the checksum (MD5 by default) of a file to STDOUT.
+      file                    The file whose checksum to calculate.
+  -a, --algorithm=<algorithm> MD5, SHA-1, SHA-256, ...
+  -h, --help                  Show this help message and exit.
+----
+
+=== Generate Completion Script
+To generate the completion script, run the `picocli.AutoComplete` class as a java application. Pass it the command name and the fully qualified class name of the annotated command class. (See also <<Completion Script Generation Details,full description>> for using `AutoComplete`.)
+
+[source,bash]
+----
+java -cp "picocli-1.0.0.jar;myproject.jar" picocli.AutoComplete -n jchecksum com.myproject.CheckSum
+----
+
+This generates a `jchecksum_completion` script in the current directory. To verify:
+
+[source,bash]
+----
+$ ls
+jchecksum_completion  myproject.jar  picocli-1.0.0.jar
+----
+
+=== Install Completion Script
+Finally, https://tldp.org/HOWTO/Bash-Prompt-HOWTO/x237.html[source] the completion script:
+
+.Bash or ZSH
+[source,bash]
+----
+. jchecksum_completion
+----
+
+...and you are done. The `jchecksum` command now has autocompletion:
+
+[source,bash]
+----
+$ jchecksum <TAB><TAB>
+-a           --algorithm  -h           --help
+----
+
+=== Permanent Installation
+The above will last for the duration of your shell session. If you want to make this permanent you need to modify your ~/.bashrc or ~/.zshrc file to add a line that defines the command alias and a line that sources the completion script:
+
+.Bash
+[source,bash]
+----
+echo "alias jchecksum='java -cp \"picocli-1.0.0.jar;myproject.jar\" com.myproject.CheckSum'" >> ~/.bashrc
+echo ". jchecksum_completion" >> ~/.bashrc
+----
+Make sure to use `>>` (append), using a single `>` would overwrite the file.
+
+`~/.bashrc` indicates `.bashrc` is in your home directory.
+
+(See <<Installing Completion Scripts Permanently in Bash/ZSH>>.)
+
+=== Distribution
+
+TIP: Have a subcommand that generates a completion script.
+
+You could generate completion scripts for your commands <<Generating Completion Scripts During the Build,during the build>> and distribute them with your application,
+but an alternative is to give your application the ability to generate its own completion script on demand.
+
+That allows end users to install completion for your application with a single command.
+For example, if your utility is called `mycommand`, users can install completion for it by running the following command:
+
+.Bash
+[source,bash]
+----
+$ source <(mycommand generate-completion)
+----
+
+This can be accomplished by registering the built-in `picocli.AutoComplete.GenerateCompletion` class as a subcommand of the top-level command.
+
+For example:
+
+
+[source,java]
+----
+import picocli.AutoComplete.GenerateCompletion;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+
+@Command(name = "mycommand", subcommands = GenerateCompletion.class)
+public class MyApp implements Runnable {
+
+    @Override
+    public void run() { // top-level command business logic here
+    }
+
+    public static void main(String[] args) {
+        new CommandLine(new MyApp()).execute(args);
+    }
+}
+----
+
+By default, the `generate-completion` command shows up as a subcommand in the usage help message of its parent command.
+Applications that want the completion subcommand to be hidden in the usage help message, can do the following:
+
+[source,java]
+----
+public static void main(String... args) {
+    CommandLine cmd = new CommandLine(new MyApp());
+    CommandLine gen = cmd.getSubcommands().get("generate-completion");
+    gen.getCommandSpec().usageMessage().hidden(true);
+    int exitCode = cmd.execute(args);
+    // ...
+}
+----
+
+
+
+
+== Designing for Completion
+
+When writing a link:index.html[picocli]-based command line application there are a few things to consider to facilitate autocompletion.
+
+=== Register Subcommands Declaratively
+
+Register subcommands link:index.html#_registering_subcommands_declaratively[declaratively] in your application with `@Command(subcommands = { ... })` annotations where possible.
+
+This way, you can generate a completion script by passing a single command class name to `picocli.AutoComplete`, and picocli will be able to infer the full hierarchy of command and subcommands from that top-level command class.
+
+If your application registers subcommands programmatically, you can still generate a completion script, it is just <<Programmatically Registered Subcommands,more work>>.
+
+=== Use Strong Typing
+When generating the completion script, picocli inspects the type of the fields annotated with `@Option`. For some types,
+tab completion can also generate possible option _values_.
+
+Picocli can generate completion matches for the following types:
+
+* `java.io.File`
+* `java.nio.file.Path`
+* `java.net.InetAddress`
+* any java `enum`
+
+==== Files and Directories
+Generating autocomplete matches for `@Option` fields of type `java.io.File` or `java.nio.file.Path` will display a list of all files and directories in the current directory.
+
+[source,bash]
+----
+$ demo --file <TAB><TAB>
+basic.bash              hierarchy               nestedSubcommands.bash
+----
+
+==== Host Names
+Generating autocomplete matches for `@Option` fields of type `java.net.InetAddress` will display a list of known hosts (from your `/etc/hosts` file).
+
+[source,bash]
+----
+$ demo --host <TAB><TAB>
+cluster-p-1                          openvpn-client.myvpn.picocli.com
+cluster-p-2                          picop1
+cluster-p-3                          picop2
+cluster-p-4                          picop3
+cluster-scm-1                        picop4
+client.openvpn.net                   picoscm1
+----
+
+==== Java `enum` Values
+Generating autocomplete matches for `@Option` fields of any Java `enum` type will display the list of enum values.
+
+For example:
+
+[source,bash]
+----
+$ demo --timeUnit <TAB><TAB>
+DAYS     HOURS     MICROSECONDS  MILLISECONDS  MINUTES    NANOSECONDS   SECONDS
+----
+
+
+=== Other Completion Candidates
+Picocli 3.2 introduces a `completionCandidates` API that can be used to generate completion candidates
+regardless of the type of the option or positional parameter.
+
+Picocli calls this iterator when the completion script is generated.
+
+== Alternative Ways to Define Commands
+This section describes creating commands in more depth than the <<Quick Start Tutorial>>.
+
+In Bash and ZSH, there are multiple ways to create an executable command for a java class.
+
+=== Alias
+One way is to define an alias:
+
+[source,bash]
+----
+alias jchecksum='java -cp "picocli-1.0.0.jar;myproject.jar" com.myproject.CheckSum'
+----
+
+Be aware that the alias only lasts as long as the current shell session.
+To make it permanent, add it to your `~/.bashrc` or `~/.zshrc` file.
+
+You may also want to specify the full path to the jar files in the classpath so that the command can be executed anywhere.
+
+=== Function
+Another way is to define a function:
+
+[source,bash]
+----
+jchecksum() {
+    java -cp "picocli-1.0.0.jar;myproject.jar" com.myproject.CheckSum "$@"
+}
+----
+
+To make it permanent, add it to your `~/.bashrc` or `~/.zshrc` file.
+
+
+=== Script
+Yet another way is to create a script:
+
+[source,bash]
+----
+$ echo '#!/usr/bin/env bash' > jchecksum
+$ echo 'java -cp "picocli-1.0.0.jar;myproject.jar" com.myproject.CheckSum $@' >> jchecksum
+$ chmod 755 jchecksum
+
+$ cat jchecksum
+#!/usr/bin/env bash
+java -cp "picocli-1.0.0.jar;myproject.jar" com.myproject.CheckSum $@
+----
+
+== Completion Script Generation Details
+This section describes generating completion scripts in more depth than the <<Quick Start Tutorial>>.
+
+=== Running AutoComplete
+
+To generate the completion script, run the `picocli.AutoComplete` class as a java application, passing it
+the fully qualified class name of the annotated command object.
+
+[source,bash]
+----
+$ java -cp "picocli-1.0.0.jar;myproject.jar" picocli.AutoComplete com.myproject.CheckSum
+----
+
+This will instantiate your command, and inspect it for http://picocli.info/apidocs-all/info.picocli/picocli/CommandLine.Option.html[`@Option`]
+and http://picocli.info/apidocs-all/info.picocli/picocli/CommandLine.Command.html[`@Command`] annotations.
+Based on these annotations it will generate a completion script in the current directory.
+
+Because of this, the command class needs to be on the classpath when running the `picocli.AutoComplete` class.
+
+=== Command Name
+The name of the generated completion script is based on the `@Command(name ="<COMMAND-NAME>")` link:index.html#_command_name[annotation], or, if that is missing, the command class name.
+Use the `-n` or `--name` option to control the name of the command that the completion script is for.
+
+[source,bash]
+----
+$ java -cp "picocli-1.0.0.jar;myproject.jar" picocli.AutoComplete -n jchecksum com.myproject.CheckSum
+----
+
+This will generate a  `jchecksum_completion` script in the current directory.
+
+Other options are:
+
+* Use `-o` or `--completionScript` to specify the full path to the completion script to generate.
+* Use the `-f` or `--force` option to overwrite existing files.
+* Use the `-w`, `--writeCommandScript` option to generate a sample command script.
+
+=== Subcommands
+For commands with subcommands, bear in mind that the class that generates the completion script (`picocli.AutoComplete`)
+needs the full hierarchy of command and subcommands to generate a completion script that also works for the subcommands.
+
+The above will work when subcommands are registered declaratively with annotations like `@Command(subcommands = { ... })`.
+
+=== Programmatically Registered Subcommands
+When subcommands are not registered declaratively, you need to do a bit more work. You need to create a small program that does the following:
+
+* Create a `CommandLine` instance with the full hierarchy of nested subcommands.
+
+[source,java]
+----
+// programmatically (see above for declarative example)
+CommandLine hierarchy = new CommandLine(new TopLevel())
+        .addSubcommand("sub1", new Subcommand1())
+        .addSubcommand("sub2", new Subcommand2());
+----
+
+* Pass this `CommandLine` instance and the name of the script to the `picocli.AutoComplete::bash` method. The method will return the source code of a completion script. Save the source code to a file and install it.
+
+
+== Installing Completion Scripts Permanently in Bash/ZSH
+This section describes installing completion scripts in more depth than the <<Quick Start Tutorial>>.
+
+
+http://tldp.org/HOWTO/Bash-Prompt-HOWTO/x237.html[Source] the generated completion script to install it in your current bash or zsh session.
+
+=== ZSH
+Zsh can handle bash completions functions. The latest development version of zsh has a function `bashcompinit`, that when run will allow zsh to read bash completion specifications and functions. The zshcompsys man page has details.
+
+Since picocli 4.1, the generated completion script contains the following code to run `bashcompinit` after `compinit`; this will define `complete` and `compgen` functions corresponding to the bash builtins.
+It is no longer necessary to manually run the below commands.
+
+[source,bash]
+----
+autoload -U +X compinit && compinit
+autoload -U +X bashcompinit && bashcompinit
+----
+
+
+=== If https://github.com/scop/bash-completion[`bash-completion`] is Installed
+To install it more permanently, place the completion script file in `/etc/bash_completion.d` (or `/usr/local/etc/bash_completion.d` on a Mac). If `bash-completion` is installed, placing the completion script in either of these directories should be sufficient. (Source your `~/.bash_profile` or launch a new terminal to start using this completion script.)
+
+=== Without `bash-completion` Installed
+Alternatively, make a directory `mkdir ~/bash_completion.d`, and place the completion script in this directory. Edit your `~/.bashrc` file (or `~/.zshrc` file on ZSH) and add the following:
+
+[source,bash]
+----
+for bcfile in ~/bash_completion.d/* ; do
+  . $bcfile
+done
+----
+
+All completion scripts in the `~/bash_completion.d` directory will now be available every time you launch a new shell.
+
+Source the generated completion script or launch a new terminal to start using this completion script.
+
+
+
+== Generating Completion Scripts During the Build
+
+It may be useful to generate your completion scripts automatically during the build.
+Below is an example Maven snippet that demonstrates how to achieve this.
+
+=== Maven Example
+TIP: Setting system property `picocli.autocomplete.systemExitOnError` ensures the build fails if there is any problem generating the completion script (requires picocli v3.9.1).
+
+[source,xml]
+----
+<plugin>
+  <groupId>org.codehaus.mojo</groupId>
+  <artifactId>exec-maven-plugin</artifactId>
+  <version>${exec-maven-plugin.version}</version>
+  <executions>
+    <execution>
+      <id>generate-autocompletion-script</id>
+      <phase>package</phase>
+      <goals>
+        <goal>exec</goal>
+      </goals>
+    </execution>
+  </executions>
+  <configuration>
+    <executable>java</executable>
+    <arguments>
+      <argument>-Dpicocli.autocomplete.systemExitOnError</argument>
+      <argument>-cp</argument>
+      <classpath/>
+      <argument>picocli.AutoComplete</argument>
+      <argument>--force</argument><!-- overwrite if exists -->
+      <argument>--completionScript</argument>
+      <argument>${project.build.directory}/mycommand_completion.sh</argument>
+      <argument>mypackage.MyCommand</argument><!-- replace with your class -->
+    </arguments>
+  </configuration>
+</plugin>
+----
+
+
+== Picocli User Manual
+The link:index.html[picocli user manual] explains how to build Java command line applications with picocli.
+
+== GitHub Project
+The https://github.com/remkop/picocli[GitHub project] has the source code, tests, build scripts, etc.
+
+Star icon:star-o[] or fork icon:code-fork[] this project on GitHub if you like it!
+(Projects with many icon:code-fork[] forks are easier to find on GitHub Search.)
+
+== Issue Tracker
+Please use the https://github.com/remkop/picocli/issues[Issue Tracker] to report bugs or request features.
+
+== License
+Picocli is licensed under the https://github.com/remkop/picocli/blob/main/LICENSE[Apache License 2.0].
+
+== Releases
+Previous versions are available from the GitHub project https://github.com/remkop/picocli/releases[Releases].

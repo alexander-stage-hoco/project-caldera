@@ -1,0 +1,19 @@
+{
+  "repository": "edge-cases",
+  "description": "Repository with edge cases: unicode, special chars, etc.",
+  "expected": {
+    "total_files": 13,
+    "total_directories": 9,
+    "max_depth": 2,
+    "classifications": {
+      "source": 5,
+      "docs": 3,
+      "config": 5
+    }
+  },
+  "thresholds": {
+    "classification_accuracy": 0.85,
+    "count_tolerance": 0,
+    "max_scan_time_seconds": 1.0
+  }
+}

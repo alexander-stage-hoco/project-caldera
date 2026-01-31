@@ -1,0 +1,223 @@
+{
+  "metadata": {
+    "tool_name": "layout-scanner",
+    "tool_version": "1.0.0",
+    "run_id": "66666666-6666-6666-6666-666666666666",
+    "repo_id": "55555555-5555-5555-5555-555555555555",
+    "branch": "main",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-01-26T12:00:00+00:00",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "schema_version": "1.0.0",
+    "tool": "layout-scanner",
+    "tool_version": "1.0.0",
+    "run_id": "layout-20260126-120000-demo",
+    "timestamp": "2026-01-26T12:00:00Z",
+    "repository": "demo",
+    "repository_path": "demo",
+    "passes_completed": [
+      "filesystem"
+    ],
+    "statistics": {
+      "total_files": 2,
+      "total_directories": 3,
+      "total_size_bytes": 20,
+      "max_depth": 2,
+      "scan_duration_ms": 12,
+      "files_per_second": 166.7,
+      "by_classification": {
+        "source": 2
+      },
+      "by_language": {
+        "Python": 2
+      }
+    },
+    "files": {
+      "src/app.py": {
+        "id": "f-000000000001",
+        "path": "src/app.py",
+        "name": "app.py",
+        "extension": ".py",
+        "size_bytes": 10,
+        "modified_time": "2026-01-26T12:00:00Z",
+        "is_symlink": false,
+        "language": "Python",
+        "classification": "source",
+        "classification_reason": "path",
+        "classification_confidence": 0.9,
+        "parent_directory_id": "d-000000000002",
+        "depth": 1
+      },
+      "src/utils/helpers.py": {
+        "id": "f-000000000002",
+        "path": "src/utils/helpers.py",
+        "name": "helpers.py",
+        "extension": ".py",
+        "size_bytes": 10,
+        "modified_time": "2026-01-26T12:00:00Z",
+        "is_symlink": false,
+        "language": "Python",
+        "classification": "source",
+        "classification_reason": "path",
+        "classification_confidence": 0.9,
+        "parent_directory_id": "d-000000000003",
+        "depth": 2
+      },
+      "package-lock.json": {
+        "id": "f-000000000003",
+        "path": "package-lock.json",
+        "name": "package-lock.json",
+        "extension": ".json",
+        "size_bytes": 5000,
+        "modified_time": "2026-01-26T12:00:00Z",
+        "is_symlink": false,
+        "language": "JSON",
+        "classification": "config",
+        "classification_reason": "path",
+        "classification_confidence": 0.9,
+        "parent_directory_id": "d-000000000001",
+        "depth": 0
+      },
+      "requirements.txt": {
+        "id": "f-000000000004",
+        "path": "requirements.txt",
+        "name": "requirements.txt",
+        "extension": ".txt",
+        "size_bytes": 100,
+        "modified_time": "2026-01-26T12:00:00Z",
+        "is_symlink": false,
+        "language": "Text",
+        "classification": "config",
+        "classification_reason": "path",
+        "classification_confidence": 0.9,
+        "parent_directory_id": "d-000000000001",
+        "depth": 0
+      },
+      "Dockerfile": {
+        "id": "f-000000000005",
+        "path": "Dockerfile",
+        "name": "Dockerfile",
+        "extension": "",
+        "size_bytes": 500,
+        "modified_time": "2026-01-26T12:00:00Z",
+        "is_symlink": false,
+        "language": "Dockerfile",
+        "classification": "config",
+        "classification_reason": "path",
+        "classification_confidence": 0.9,
+        "parent_directory_id": "d-000000000001",
+        "depth": 0
+      }
+    },
+    "directories": {
+      "": {
+        "id": "d-000000000001",
+        "path": "",
+        "name": "demo",
+        "modified_time": "2026-01-26T12:00:00Z",
+        "is_symlink": false,
+        "classification": "source",
+        "classification_reason": "default",
+        "parent_directory_id": null,
+        "depth": 0,
+        "child_directory_ids": [
+          "d-000000000002"
+        ],
+        "child_file_ids": [],
+        "direct_file_count": 0,
+        "direct_directory_count": 1,
+        "recursive_file_count": 2,
+        "recursive_directory_count": 3,
+        "direct_size_bytes": 0,
+        "recursive_size_bytes": 20,
+        "classification_distribution": {
+          "source": 2
+        },
+        "language_distribution": {
+          "Python": 2
+        }
+      },
+      "src": {
+        "id": "d-000000000002",
+        "path": "src",
+        "name": "src",
+        "modified_time": "2026-01-26T12:00:00Z",
+        "is_symlink": false,
+        "classification": "source",
+        "classification_reason": "default",
+        "parent_directory_id": "d-000000000001",
+        "depth": 1,
+        "child_directory_ids": [
+          "d-000000000003"
+        ],
+        "child_file_ids": [
+          "f-000000000001"
+        ],
+        "direct_file_count": 1,
+        "direct_directory_count": 1,
+        "recursive_file_count": 2,
+        "recursive_directory_count": 2,
+        "direct_size_bytes": 10,
+        "recursive_size_bytes": 20,
+        "classification_distribution": {
+          "source": 2
+        },
+        "language_distribution": {
+          "Python": 2
+        }
+      },
+      "src/utils": {
+        "id": "d-000000000003",
+        "path": "src/utils",
+        "name": "utils",
+        "modified_time": "2026-01-26T12:00:00Z",
+        "is_symlink": false,
+        "classification": "source",
+        "classification_reason": "default",
+        "parent_directory_id": "d-000000000002",
+        "depth": 2,
+        "child_directory_ids": [],
+        "child_file_ids": [
+          "f-000000000002"
+        ],
+        "direct_file_count": 1,
+        "direct_directory_count": 0,
+        "recursive_file_count": 1,
+        "recursive_directory_count": 1,
+        "direct_size_bytes": 10,
+        "recursive_size_bytes": 10,
+        "classification_distribution": {
+          "source": 1
+        },
+        "language_distribution": {
+          "Python": 1
+        }
+      }
+    },
+    "hierarchy": {
+      "root_id": "d-000000000001",
+      "max_depth": 2,
+      "total_files": 2,
+      "total_directories": 3,
+      "total_size_bytes": 20,
+      "children": {
+        "d-000000000001": ["d-000000000002"],
+        "d-000000000002": ["d-000000000003", "f-000000000001"],
+        "d-000000000003": ["f-000000000002"]
+      },
+      "parents": {
+        "d-000000000002": "d-000000000001",
+        "d-000000000003": "d-000000000002",
+        "f-000000000001": "d-000000000002",
+        "f-000000000002": "d-000000000003"
+      },
+      "depth_distribution": {
+        "0": 1,
+        "1": 1,
+        "2": 1
+      }
+    }
+  }
+}

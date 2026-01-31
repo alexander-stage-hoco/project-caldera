@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-all
+  namespace: default
+spec:
+  # MISCONFIG: Allows all ingress and egress traffic
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # MISCONFIG: Allow from anywhere
+    - from: []
+  egress:
+    # MISCONFIG: Allow to anywhere
+    - to: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: default-admin
+# MISCONFIG: Granting cluster-admin to default service account
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  # MISCONFIG: cluster-admin is overly permissive
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io

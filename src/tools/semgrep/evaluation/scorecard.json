@@ -1,0 +1,304 @@
+{
+  "tool": "semgrep",
+  "version": "1.0.0",
+  "generated_at": "2026-01-30T20:52:55.524718+00:00",
+  "description": "Evaluation scorecard for Semgrep static analysis",
+  "summary": {
+    "total_checks": 34,
+    "passed": 18,
+    "failed": 16,
+    "score": 0.4706,
+    "score_percent": 47.06,
+    "normalized_score": 2.35,
+    "decision": "FAIL"
+  },
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "Accuracy",
+      "weight": 0.16666666666666666,
+      "total_checks": 9,
+      "passed": 5,
+      "failed": 4,
+      "score": 1.94,
+      "weighted_score": 0.32,
+      "checks": [
+        {
+          "check_id": "AC-1",
+          "name": "SQL injection detection",
+          "passed": false,
+          "message": "Detected 0 SQL injections (expected ~28)"
+        },
+        {
+          "check_id": "AC-2",
+          "name": "Empty catch detection",
+          "passed": false,
+          "message": "Detected 0 empty catches (expected ~13)"
+        },
+        {
+          "check_id": "AC-3",
+          "name": "Catch-all detection",
+          "passed": false,
+          "message": "Detected 0 catch-all patterns"
+        },
+        {
+          "check_id": "AC-4",
+          "name": "Async void detection",
+          "passed": false,
+          "message": "Detected 0 async void methods"
+        },
+        {
+          "check_id": "AC-5",
+          "name": "HttpClient/HTTP-related detection",
+          "passed": true,
+          "message": "Detected 0 HTTP-related issues"
+        },
+        {
+          "check_id": "AC-6",
+          "name": "High complexity detection",
+          "passed": true,
+          "message": "Detected 0 high complexity (Semgrep focuses on security)"
+        },
+        {
+          "check_id": "AC-7",
+          "name": "God class detection",
+          "passed": true,
+          "message": "Detected 0 god classes (Semgrep focuses on security)"
+        },
+        {
+          "check_id": "AC-8",
+          "name": "Overall detection quality",
+          "passed": true,
+          "message": "Categorization: 100.0% (0/0 properly categorized)"
+        },
+        {
+          "check_id": "AC-9",
+          "name": "Line number accuracy",
+          "passed": true,
+          "message": "Line accuracy: 100.0% (0 exact, 0 near \u00b12, 0 missed)"
+        }
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Coverage",
+      "weight": 0.16666666666666666,
+      "total_checks": 8,
+      "passed": 0,
+      "failed": 8,
+      "score": 0.0,
+      "weighted_score": 0.0,
+      "checks": [
+        {
+          "check_id": "CV-1",
+          "name": "Python coverage",
+          "passed": false,
+          "message": "0 files, 0 smells, 0 categories"
+        },
+        {
+          "check_id": "CV-2",
+          "name": "JavaScript coverage",
+          "passed": false,
+          "message": "0 files, 0 smells, 0 categories"
+        },
+        {
+          "check_id": "CV-3",
+          "name": "TypeScript coverage",
+          "passed": false,
+          "message": "0 files, 0 smells, 0 categories"
+        },
+        {
+          "check_id": "CV-4",
+          "name": "C# coverage",
+          "passed": false,
+          "message": "0 files, 0 smells, 0 categories"
+        },
+        {
+          "check_id": "CV-5",
+          "name": "Java coverage",
+          "passed": false,
+          "message": "0 files, 0 smells, 0 categories"
+        },
+        {
+          "check_id": "CV-6",
+          "name": "Go coverage",
+          "passed": false,
+          "message": "0 files, 0 smells, 0 categories"
+        },
+        {
+          "check_id": "CV-7",
+          "name": "Rust coverage",
+          "passed": false,
+          "message": "0 files, 0 smells, 0 categories"
+        },
+        {
+          "check_id": "CV-8",
+          "name": "DD category coverage",
+          "passed": false,
+          "message": "Covered 0/13 DD categories"
+        }
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Edge Cases",
+      "weight": 0.16666666666666666,
+      "total_checks": 8,
+      "passed": 7,
+      "failed": 1,
+      "score": 4.06,
+      "weighted_score": 0.68,
+      "checks": [
+        {
+          "check_id": "EC-1",
+          "name": "Empty files handling",
+          "passed": true,
+          "message": "Analysis completed without empty file errors"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "Unicode content handling",
+          "passed": true,
+          "message": "Unicode files processed without errors"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "Large files handling",
+          "passed": true,
+          "message": "Processed 0 files > 500 LOC"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "Deep nesting handling",
+          "passed": true,
+          "message": "Deep nesting handled correctly"
+        },
+        {
+          "check_id": "EC-5",
+          "name": "Mixed language files (JS/TS)",
+          "passed": true,
+          "message": "Processed 0 JS/TS files"
+        },
+        {
+          "check_id": "EC-6",
+          "name": "No false positives in clean files",
+          "passed": true,
+          "message": "0 false positives in 0 clean files"
+        },
+        {
+          "check_id": "EC-7",
+          "name": "Syntax error tolerance",
+          "passed": true,
+          "message": "Analysis completed (syntax errors handled gracefully)"
+        },
+        {
+          "check_id": "EC-8",
+          "name": "Path handling",
+          "passed": false,
+          "message": "Handled 0 file paths correctly"
+        }
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "Integration Fit",
+      "weight": 0.16666666666666666,
+      "total_checks": 2,
+      "passed": 2,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.83,
+      "checks": [
+        {
+          "check_id": "IF-1",
+          "name": "Relative file paths",
+          "passed": true,
+          "message": "0/0 files have relative paths"
+        },
+        {
+          "check_id": "IF-2",
+          "name": "Smell entries include required fields",
+          "passed": true,
+          "message": "0/0 smells include required fields"
+        }
+      ]
+    },
+    {
+      "id": "D5",
+      "name": "Output Quality",
+      "weight": 0.16666666666666666,
+      "total_checks": 3,
+      "passed": 1,
+      "failed": 2,
+      "score": 1.67,
+      "weighted_score": 0.28,
+      "checks": [
+        {
+          "check_id": "OQ-1",
+          "name": "Required sections present",
+          "passed": false,
+          "message": "Missing sections: ['tool', 'tool_version', 'summary', 'directories', 'files', 'by_language', 'statistics']"
+        },
+        {
+          "check_id": "OQ-2",
+          "name": "File entries include required fields",
+          "passed": true,
+          "message": "0/0 files include required fields"
+        },
+        {
+          "check_id": "OQ-3",
+          "name": "Schema validation",
+          "passed": false,
+          "message": "Schema validation failed"
+        }
+      ]
+    },
+    {
+      "id": "D6",
+      "name": "Performance",
+      "weight": 0.16666666666666666,
+      "total_checks": 4,
+      "passed": 3,
+      "failed": 1,
+      "score": 3.75,
+      "weighted_score": 0.62,
+      "checks": [
+        {
+          "check_id": "PF-1",
+          "name": "Synthetic repo analysis speed",
+          "passed": true,
+          "message": "Completed in 0.00s (threshold: 45.0s)"
+        },
+        {
+          "check_id": "PF-2",
+          "name": "Per-file analysis efficiency",
+          "passed": true,
+          "message": "0ms per file (threshold: 1000ms)"
+        },
+        {
+          "check_id": "PF-3",
+          "name": "Analysis throughput",
+          "passed": false,
+          "message": "0 LOC/s (threshold: 100 LOC/s)"
+        },
+        {
+          "check_id": "PF-4",
+          "name": "Startup overhead",
+          "passed": true,
+          "message": "Estimated startup: 0% of total time"
+        }
+      ]
+    }
+  ],
+  "critical_failures": [],
+  "thresholds": {
+    "STRONG_PASS": ">= 4.0 (80%+)",
+    "PASS": ">= 3.5 (70%+)",
+    "WEAK_PASS": ">= 3.0 (60%+)",
+    "FAIL": "< 3.0 (below 60%)"
+  },
+  "metadata": {
+    "analysis_path": "/var/folders/zr/c7zp4x316wvg0rsvdnq_dcm40000gn/T/tool-compliance-5rgj1z8j/output.json",
+    "ground_truth_dir": "evaluation/ground-truth"
+  }
+}

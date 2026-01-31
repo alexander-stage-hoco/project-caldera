@@ -1,0 +1,100 @@
+{
+  "schema_version": "2.0",
+  "scenario": "edge-case-unicode",
+  "description": "Tests handling of Unicode characters in file names, paths, and content",
+  "generated_at": "2026-01-20T00:00:00Z",
+  "repo_path": "eval-repos/synthetic/unicode",
+
+  "expected_behavior": {
+    "file_parsing": {
+      "description": "All files with Unicode content should parse successfully",
+      "all_files_parsed": true,
+      "no_encoding_errors": true
+    },
+    "path_handling": {
+      "description": "Paths with Unicode characters should be handled correctly",
+      "unicode_paths_preserved": true,
+      "no_path_corruption": true
+    },
+    "metrics_accuracy": {
+      "description": "LOC counts should be accurate despite Unicode content",
+      "lines_counted_correctly": true,
+      "complexity_calculated": true
+    }
+  },
+
+  "test_cases": {
+    "unicode_filenames": {
+      "description": "Files with Unicode characters in their names",
+      "patterns": [
+        "日本語.py",
+        "中文.py",
+        "Ελληνικά.py",
+        "한국어.py"
+      ],
+      "expected": {
+        "all_detected": true,
+        "names_preserved": true
+      }
+    },
+    "unicode_content": {
+      "description": "Files containing Unicode string literals and comments",
+      "expected": {
+        "lines_counted": true,
+        "no_parse_errors": true
+      }
+    },
+    "mixed_encoding": {
+      "description": "Files with mixed ASCII and Unicode content",
+      "expected": {
+        "handles_gracefully": true
+      }
+    },
+    "emoji_content": {
+      "description": "Files containing emoji characters in strings/comments",
+      "expected": {
+        "no_crashes": true,
+        "lines_counted": true
+      }
+    }
+  },
+
+  "per_language_expectations": {
+    "Python": {
+      "extension": ".py",
+      "unicode_file_count": 7,
+      "expected_parsing": "successful",
+      "min_loc": 10,
+      "max_loc": 100
+    },
+    "JavaScript": {
+      "extension": ".js",
+      "unicode_file_count": 7,
+      "expected_parsing": "successful",
+      "min_loc": 10,
+      "max_loc": 100
+    }
+  },
+
+  "invariants": {
+    "no_empty_paths": "All detected files must have non-empty paths",
+    "non_negative_metrics": "All numeric metrics must be >= 0",
+    "valid_json_output": "Output must be valid JSON",
+    "deterministic": "Multiple runs should produce identical output"
+  },
+
+  "edge_cases": {
+    "zero_width_characters": {
+      "description": "Files containing zero-width Unicode characters",
+      "expected": "handled gracefully, may affect line count slightly"
+    },
+    "rtl_text": {
+      "description": "Files containing right-to-left text",
+      "expected": "parsed correctly"
+    },
+    "combining_characters": {
+      "description": "Files with Unicode combining characters",
+      "expected": "no crashes, accurate line counts"
+    }
+  }
+}

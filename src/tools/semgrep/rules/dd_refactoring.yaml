@@ -1,0 +1,99 @@
+rules:
+  # B6: Message Chains (Law of Demeter violation)
+  - id: DD-B6-MESSAGE-CHAIN-csharp
+    pattern: $A.$B.$C.$D.$E
+    languages: [csharp]
+    message: "Long method chain violates Law of Demeter - consider encapsulating"
+    severity: INFO
+    metadata:
+      dd_smell_id: B6_MESSAGE_CHAINS
+      dd_category: refactoring
+
+  - id: DD-B6-MESSAGE-CHAIN-java
+    pattern: $A.$B.$C.$D.$E
+    languages: [java]
+    message: "Long method chain violates Law of Demeter - consider encapsulating"
+    severity: INFO
+    metadata:
+      dd_smell_id: B6_MESSAGE_CHAINS
+      dd_category: refactoring
+
+  - id: DD-B6-MESSAGE-CHAIN-python
+    pattern: $A.$B.$C.$D.$E
+    languages: [python]
+    message: "Long method chain violates Law of Demeter - consider encapsulating"
+    severity: INFO
+    metadata:
+      dd_smell_id: B6_MESSAGE_CHAINS
+      dd_category: refactoring
+
+  # B8: Switch on Type (should use polymorphism)
+  - id: DD-B8-SWITCH-ON-TYPE-csharp
+    pattern: |
+      switch ($OBJ) {
+        case $TYPE1 $_: ...
+        ...
+      }
+    languages: [csharp]
+    message: "Switch on type - consider using polymorphism instead"
+    severity: INFO
+    metadata:
+      dd_smell_id: B8_SWITCH_STATEMENTS
+      dd_category: refactoring
+
+  # B8: Type checking with is/as pattern (alternative to switch)
+  - id: DD-B8-TYPE-CHECK-csharp
+    pattern: |
+      if ($OBJ is $TYPE1) { ... }
+      else if ($OBJ is $TYPE2) { ... }
+    languages: [csharp]
+    message: "Type checking chain - consider using polymorphism instead"
+    severity: INFO
+    metadata:
+      dd_smell_id: B8_SWITCH_STATEMENTS
+      dd_category: refactoring
+
+  # B8: Java instanceof chain
+  - id: DD-B8-INSTANCEOF-CHAIN-java
+    pattern: |
+      if ($OBJ instanceof $TYPE1) { ... }
+      else if ($OBJ instanceof $TYPE2) { ... }
+    languages: [java]
+    message: "instanceof chain - consider using polymorphism instead"
+    severity: INFO
+    metadata:
+      dd_smell_id: B8_SWITCH_STATEMENTS
+      dd_category: refactoring
+
+  # B8: Python type checking chain
+  - id: DD-B8-ISINSTANCE-CHAIN-python
+    pattern: |
+      if isinstance($OBJ, $TYPE1):
+          ...
+      elif isinstance($OBJ, $TYPE2):
+          ...
+    languages: [python]
+    message: "isinstance chain - consider using polymorphism instead"
+    severity: INFO
+    metadata:
+      dd_smell_id: B8_SWITCH_STATEMENTS
+      dd_category: refactoring
+
+  # B2: Long Parameter List (6+ parameters)
+  - id: DD-B2-LONG-PARAM-LIST-6-csharp
+    pattern: public $RET $NAME($P1, $P2, $P3, $P4, $P5, $P6, ...) { ... }
+    languages: [csharp]
+    message: "Method has 6+ parameters - consider using a parameter object or builder pattern"
+    severity: WARNING
+    metadata:
+      dd_smell_id: B2_LONG_PARAMETER_LIST
+      dd_category: refactoring
+
+  - id: DD-B2-LONG-CTOR-PARAMS-csharp
+    pattern-regex: 'public\s+\w+\s*\([^)]*,[^)]*,[^)]*,[^)]*,[^)]*,[^)]*\)'
+    languages: [csharp]
+    message: "Constructor has 6+ parameters - consider using builder pattern"
+    severity: WARNING
+    metadata:
+      dd_smell_id: B2_LONG_PARAMETER_LIST
+      dd_category: refactoring

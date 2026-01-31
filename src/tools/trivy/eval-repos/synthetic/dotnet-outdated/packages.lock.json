@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net6.0": {
+      "Microsoft.EntityFrameworkCore": {
+        "type": "Direct",
+        "requested": "[3.1.0, )",
+        "resolved": "3.1.0",
+        "contentHash": "D3OlN4LT7Bvk+LqYHAT4jLXvPv3r8JqJk+D4w0f5L0g="
+      },
+      "Newtonsoft.Json": {
+        "type": "Direct",
+        "requested": "[12.0.1, )",
+        "resolved": "12.0.1",
+        "contentHash": "pBR3wCgYWZGiaZDYP+HHYnalVnPJlpP+q1qd8bzkAaM="
+      },
+      "System.Text.Json": {
+        "type": "Direct",
+        "requested": "[6.0.0, )",
+        "resolved": "6.0.0",
+        "contentHash": "r8K0+2LvXY8M4TJZLfq1iYdJiHN9E3JbT7L6b4r5V0o="
+      },
+      "log4net": {
+        "type": "Direct",
+        "requested": "[2.0.8, )",
+        "resolved": "2.0.8",
+        "contentHash": "xL5+PZ6K7b9GQJ1VkFhBbD8F+P3LGU8VmT7nQ9Q1W4o="
+      },
+      "Microsoft.AspNetCore.Razor": {
+        "type": "Direct",
+        "requested": "[2.2.0, )",
+        "resolved": "2.2.0",
+        "contentHash": "s1XhL2DZVS3q7K8L2Q1d4h5J6j8b8R9K5f3g6h7I8J9K="
+      },
+      "NuGet.Protocol": {
+        "type": "Direct",
+        "requested": "[5.9.0, )",
+        "resolved": "5.9.0",
+        "contentHash": "a2B3c4D5e6F7g8H9i0J1k2L3m4N5o6P7q8R9s0T1u2V="
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+plugins {
+    id 'java'
+    id 'groovy'
+}
+
+group = 'info.picocli'
+description = 'Picocli Groovy - easily use picocli in Groovy scripts.'
+version = "$projectVersion"
+ext.moduleName = 'info.picocli.groovy'
+
+apply plugin: 'org.beryx.jar' // for compiling module-info on Java 8
+compileJava {
+    inputs.property("moduleName", moduleName)
+}
+moduleConfig {
+    // copy module-info.class to META-INF/versions/9
+    multiReleaseVersion = 9
+    moduleInfoPath = 'src/main/java9/module-info.java'
+    version = project.version
+    neverCompileModuleInfo = true
+}
+
+configurations {
+    ivy
+}
+dependencies {
+    api            rootProject
+    compileOnly    supportDependencies.groovy
+    ivy            supportDependencies.ivy // for Gradle
+}
+tasks.withType(GroovyCompile) {
+    // this, and the `configurations {ivy}` section, are a workaround for the dreaded
+    // java.lang.NoClassDefFoundError: org/apache/ivy/core/report/ResolveReport
+    // that occurs when trying to compile a groovy script containing a @Grab annotation in gradle.
+    // see https://stackoverflow.com/questions/18173908/error-compiling-a-groovy-project-using-grab-annotation
+    groovyClasspath += configurations.ivy
+}
+
+javadoc.options.links += [
+        'http://docs.groovy-lang.org/2.4.9/html/gapi'
+]
+//javadoc.options.linksOffline 'http://docs.groovy-lang.org/2.4.9/html/gapi', 'gradle/javadocs/jdk/9/'
+
+jar {
+    manifest {
+        attributes  'Specification-Title'   : 'Picocli Groovy',
+                    'Specification-Vendor'  : 'Remko Popma',
+                    'Specification-Version' : archiveVersion.get(),
+                    'Implementation-Title'  : 'Picocli Groovy',
+                    'Implementation-Vendor' : 'Remko Popma',
+                    'Implementation-Version': archiveVersion.get()
+    }
+}
+
+ext {
+    PUBLISH_GROUP_ID = group
+    PUBLISH_ARTIFACT_ID = project.name
+    PUBLISH_VERSION = "$projectVersion"
+}
+apply from: "${rootProject.projectDir}/gradle/publish-mavencentral.gradle"

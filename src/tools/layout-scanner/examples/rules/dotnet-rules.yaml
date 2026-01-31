@@ -1,0 +1,80 @@
+# Layout Scanner Rules for .NET/C# Projects
+# Use with: layout-scanner /path/to/repo --rules dotnet-rules.yaml
+
+version: "1.0"
+
+# Subcategory definitions
+subcategories:
+  test:
+    - unit
+    - integration
+    - benchmark
+  config:
+    - build
+    - ci
+  generated:
+    - designer
+    - migrations
+
+# Path-based rules with subcategories
+path_rules:
+  test::unit:
+    - "*.UnitTests/"
+    - "*.Tests.Unit/"
+    - "UnitTests/"
+  test::integration:
+    - "*.IntegrationTests/"
+    - "*.Tests.Integration/"
+    - "IntegrationTests/"
+  test::benchmark:
+    - "*.Benchmarks/"
+    - "Benchmarks/"
+  generated:
+    - "obj/"
+    - "bin/"
+    - "packages/"
+  generated::migrations:
+    - "Migrations/"
+    - "*/Migrations/"
+  config::build:
+    - ".config/"
+    - "build/"
+
+# Filename patterns (regex)
+filename_rules:
+  test:
+    - ".*Tests?\\.cs$"
+    - ".*Specs?\\.cs$"
+  generated::designer:
+    - ".*\\.g\\.cs$"
+    - ".*\\.Designer\\.cs$"
+    - ".*\\.designer\\.cs$"
+    - ".*\\.generated\\.cs$"
+    - "^AssemblyInfo\\.cs$"
+    - "^GlobalUsings\\.g\\.cs$"
+  config:
+    - "^Directory\\.Build\\.props$"
+    - "^Directory\\.Build\\.targets$"
+    - "^Directory\\.Packages\\.props$"
+    - "^nuget\\.config$"
+    - "^global\\.json$"
+    - "^dotnet-tools\\.json$"
+
+# Extension rules
+extension_rules:
+  source:
+    - ".cs"
+    - ".fs"
+    - ".vb"
+  config:
+    - ".csproj"
+    - ".fsproj"
+    - ".vbproj"
+    - ".sln"
+    - ".slnx"
+    - ".props"
+    - ".targets"
+    - ".config"
+  docs:
+    - ".md"
+    - ".xml"

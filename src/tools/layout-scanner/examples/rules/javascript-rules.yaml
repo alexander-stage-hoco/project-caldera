@@ -1,0 +1,87 @@
+# Layout Scanner Rules for JavaScript/TypeScript Projects
+# Use with: layout-scanner /path/to/repo --rules javascript-rules.yaml
+
+version: "1.0"
+
+# Subcategory definitions
+subcategories:
+  test:
+    - unit
+    - integration
+    - e2e
+    - snapshot
+  config:
+    - build
+    - lint
+    - ci
+  generated:
+    - bundle
+    - types
+
+# Path-based rules with subcategories
+path_rules:
+  test::unit:
+    - "__tests__/unit/"
+    - "test/unit/"
+    - "tests/unit/"
+  test::integration:
+    - "__tests__/integration/"
+    - "test/integration/"
+    - "tests/integration/"
+  test::e2e:
+    - "cypress/"
+    - "playwright/"
+    - "e2e/"
+    - "__tests__/e2e/"
+  test::snapshot:
+    - "__snapshots__/"
+  vendor:
+    - "node_modules/"
+    - ".pnpm-store/"
+    - ".yarn/"
+  generated::bundle:
+    - "dist/"
+    - "build/"
+    - ".next/"
+    - ".nuxt/"
+    - ".output/"
+  config::build:
+    - "scripts/build/"
+
+# Filename patterns (regex)
+filename_rules:
+  test:
+    - ".*\\.test\\.[jt]sx?$"
+    - ".*\\.spec\\.[jt]sx?$"
+    - "^jest\\.setup\\.[jt]s$"
+  generated::types:
+    - ".*\\.d\\.ts$"
+  generated::bundle:
+    - ".*\\.min\\.[jc]ss?$"
+    - ".*\\.bundle\\.js$"
+  config:
+    - "^jest\\.config\\.[jt]s$"
+    - "^vitest\\.config\\.[jt]s$"
+    - "^webpack\\.config\\.[jt]s$"
+    - "^vite\\.config\\.[jt]s$"
+    - "^rollup\\.config\\.[jt]s$"
+    - "^tsconfig.*\\.json$"
+    - "^\\.eslintrc.*$"
+    - "^\\.prettierrc.*$"
+
+# Extension rules
+extension_rules:
+  source:
+    - ".js"
+    - ".jsx"
+    - ".ts"
+    - ".tsx"
+    - ".mjs"
+    - ".cjs"
+  config:
+    - ".json"
+    - ".yaml"
+    - ".yml"
+  docs:
+    - ".md"
+    - ".mdx"

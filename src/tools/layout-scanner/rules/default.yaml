@@ -1,0 +1,266 @@
+# Layout Scanner Default Classification Rules
+# Version 1.0
+#
+# This file contains the default classification rules for the Layout Scanner.
+# You can create a custom rules file to extend or override these defaults.
+#
+# To use custom rules:
+#   1. Create a .layout-scanner-rules.yaml in your repository root, or
+#   2. Use the --rules flag: python -m scripts.layout_scanner /path --rules my-rules.yaml
+
+version: "1.0"
+
+# Signal weights determine the confidence contribution of each signal type
+# Higher weights = stronger signal
+weights:
+  path: 0.9       # Path patterns are highly reliable
+  filename: 0.8   # Filename patterns are reliable
+  extension: 0.5  # Extensions alone are less reliable
+
+# Base classification categories
+categories:
+  - source      # Production source code
+  - test        # Test files and fixtures
+  - config      # Configuration files
+  - generated   # Auto-generated code
+  - docs        # Documentation
+  - vendor      # Third-party dependencies
+  - build       # Build artifacts
+  - ci          # CI/CD configuration
+  - other       # Unclassified
+
+# Subcategories for finer-grained classification
+# Use category::subcategory syntax in rules (e.g., test::unit)
+subcategories:
+  test:
+    - unit
+    - integration
+    - e2e
+  config:
+    - build
+    - lint
+    - ci
+
+# Path-based rules (highest priority)
+# Match if the path contains any of these patterns
+path_rules:
+  # Note: Source patterns are matched at path start only to avoid conflicts
+  # with paths like "vendor/github.com/pkg/" or "third_party/protobuf/src/"
+  source:
+    - "src/"
+    - "app/"
+    - "internal/"
+    - "cmd/"
+
+  vendor:
+    - "vendor/"
+    - "node_modules/"
+    - "third_party/"
+    - "external/"
+    - "packages/"
+    - ".nuget/"
+    - "bower_components/"
+    - "jspm_packages/"
+    - "web_modules/"
+    - "lib/"
+    - "libs/"
+
+  test:
+    - "tests/"
+    - "test/"
+    - "__tests__/"
+    - "spec/"
+    - "testing/"
+    - "test_fixtures/"
+    - "testdata/"
+    - "fixtures/"
+    - "e2e/"
+    - "integration/"
+    - "unit/"
+    - "__mocks__/"
+    - "mocks/"
+
+  test::unit:
+    - "tests/unit/"
+    - "test/unit/"
+
+  test::integration:
+    - "tests/integration/"
+    - "test/integration/"
+
+  test::e2e:
+    - "tests/e2e/"
+    - "test/e2e/"
+    - "e2e/"
+
+  docs:
+    - "docs/"
+    - "documentation/"
+    - "doc/"
+    - "wiki/"
+    - "man/"
+
+  generated:
+    - "generated/"
+    - "gen/"
+    - "dist/"
+    - "build/"
+    - "out/"
+    - ".next/"
+    - ".nuxt/"
+    - "target/"
+    - "bin/"
+    - "obj/"
+    - "_build/"
+    - "__pycache__/"
+    - ".cache/"
+
+  ci:
+    - ".github/"
+    - ".gitlab-ci/"
+    - ".circleci/"
+    - ".travis/"
+    - ".azure-pipelines/"
+    - ".buildkite/"
+    - "jenkins/"
+
+  config:
+    - ".vscode/"
+    - ".idea/"
+    - ".devcontainer/"
+    - ".husky/"
+
+# Filename pattern rules (regex)
+# Match if the filename matches any pattern
+filename_rules:
+  test:
+    - "^test_.*\\.py$"           # Python: test_*.py
+    - ".*_test\\.py$"            # Python: *_test.py
+    - ".*\\.test\\.[jt]sx?$"     # JS/TS: *.test.js, *.test.tsx
+    - ".*\\.spec\\.[jt]sx?$"     # JS/TS: *.spec.ts
+    - ".*Tests?\\.cs$"           # C#: *Test.cs, *Tests.cs
+    - ".*Tests?\\.java$"         # Java: *Test.java
+    - ".*_test\\.go$"            # Go: *_test.go
+    - ".*_test\\.rs$"            # Rust: *_test.rs
+    - ".*_spec\\.rb$"            # Ruby: *_spec.rb
+    - "^conftest\\.py$"          # pytest fixtures
+    - "^jest\\.config\\.[jt]s$"  # Jest config
+    - "^vitest\\.config\\.[jt]s$" # Vitest config
+
+  generated:
+    - ".*\\.g\\.cs$"             # C#: *.g.cs
+    - ".*\\.generated\\..*$"     # *.generated.*
+    - ".*\\.min\\.[jc]ss?$"      # *.min.js, *.min.css
+    - ".*\\.bundle\\.js$"        # *.bundle.js
+    - ".*\\.d\\.ts$"             # TypeScript declarations
+    - ".*_pb2\\.py$"             # Protobuf Python
+    - ".*\\.pb\\.go$"            # Protobuf Go
+    - ".*_pb2_grpc\\.py$"        # gRPC Python
+    - ".*\\.designer\\.cs$"      # Visual Studio designer
+    - ".*\\.Designer\\.cs$"      # Visual Studio designer (capital)
+    - "^package-lock\\.json$"    # npm lock file
+    - "^yarn\\.lock$"            # Yarn lock file
+    - "^pnpm-lock\\.yaml$"       # pnpm lock file
+    - "^Pipfile\\.lock$"         # Pipenv lock file
+    - "^poetry\\.lock$"          # Poetry lock file
+    - "^Cargo\\.lock$"           # Rust lock file
+
+  config:
+    - "^\\..*rc$"                # .eslintrc, .prettierrc
+    - "^\\..*rc\\.json$"         # .eslintrc.json
+    - "^\\..*rc\\.ya?ml$"        # .eslintrc.yaml
+    - "^\\..*rc\\.js$"           # .eslintrc.js
+    - "^.*\\.config\\.[jt]s$"    # webpack.config.js
+    - "^.*\\.config\\.mjs$"      # vite.config.mjs
+    - "^Makefile$"
+    - "^Dockerfile.*$"
+    - "^docker-compose.*$"
+    - "^Jenkinsfile$"
+    - "^Vagrantfile$"
+    - "^Procfile$"
+    - "^\\.gitignore$"
+    - "^\\.gitattributes$"
+    - "^\\.editorconfig$"
+    - "^\\.env.*$"
+    - "^tsconfig.*\\.json$"
+    - "^jsconfig.*\\.json$"
+    - "^babel\\.config.*$"
+    - "^webpack\\..*$"
+    - "^rollup\\.config.*$"
+    - "^vite\\.config.*$"
+    - "^turbo\\.json$"
+    - "^lerna\\.json$"
+    - "^nx\\.json$"
+    - "^angular\\.json$"
+    - "^nuxt\\.config.*$"
+    - "^next\\.config.*$"
+    # Dependency files
+    - "^requirements.*\\.txt$"   # Python dependencies
+    - "^constraints.*\\.txt$"    # Python constraints
+    - "^go\\.mod$"               # Go module file
+    - "^go\\.sum$"               # Go module checksums
+    - ".*\\.ndproj$"             # NDepend project files
+
+  docs:
+    - "^README.*$"
+    - "^CHANGELOG.*$"
+    - "^CHANGES.*$"
+    - "^HISTORY.*$"
+    - "^CONTRIBUTING.*$"
+    - "^LICENSE.*$"
+    - "^LICENCE.*$"
+    - "^AUTHORS.*$"
+    - "^MAINTAINERS.*$"
+    - "^CODE_OF_CONDUCT.*$"
+    - "^SECURITY.*$"
+    - "^CLAUDE\\.md$"
+
+  ci:
+    - "^\\.travis\\.ya?ml$"
+    - "^\\.gitlab-ci\\.ya?ml$"
+    - "^azure-pipelines\\.ya?ml$"
+    - "^cloudbuild\\.ya?ml$"
+    - "^bitbucket-pipelines\\.ya?ml$"
+    - "^appveyor\\.ya?ml$"
+    - "^\\.drone\\.ya?ml$"
+
+# Extension rules (lowest priority)
+# Match if the file extension matches
+extension_rules:
+  config:
+    - ".json"
+    - ".yaml"
+    - ".yml"
+    - ".toml"
+    - ".ini"
+    - ".cfg"
+    - ".conf"
+    - ".config"
+    - ".props"
+    - ".targets"
+    - ".env"
+    - ".properties"
+    - ".plist"
+    # Infrastructure as Code
+    - ".tf"
+    - ".tfvars"
+    - ".hcl"
+    # .NET project files
+    - ".csproj"
+    - ".fsproj"
+    - ".vbproj"
+    - ".sln"
+    - ".slnx"
+    - ".vcxproj"
+    - ".vcproj"
+    - ".esproj"
+
+  docs:
+    - ".md"
+    - ".rst"
+    - ".txt"
+    - ".adoc"
+    - ".asciidoc"
+    - ".tex"
+    - ".htm"
+    - ".html"

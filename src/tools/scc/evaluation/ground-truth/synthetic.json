@@ -1,0 +1,198 @@
+{
+  "schema_version": "2.0",
+  "description": "Ground truth for scc evaluation on synthetic repositories (v2.0 with extended dimensions)",
+  "repository": "eval-repos/synthetic",
+
+  "languages": {
+    "Python": {
+      "expected_language_name": "Python",
+      "file_extension": ".py",
+      "expected_file_count": 9
+    },
+    "C#": {
+      "expected_language_name": "C#",
+      "file_extension": ".cs",
+      "expected_file_count": 9
+    },
+    "JavaScript": {
+      "expected_language_name": "JavaScript",
+      "file_extension": ".js",
+      "expected_file_count": 9
+    },
+    "TypeScript": {
+      "expected_language_name": "TypeScript",
+      "file_extension": ".ts",
+      "expected_file_count": 9
+    },
+    "Go": {
+      "expected_language_name": "Go",
+      "file_extension": ".go",
+      "expected_file_count": 9
+    },
+    "Rust": {
+      "expected_language_name": "Rust",
+      "file_extension": ".rs",
+      "expected_file_count": 9
+    },
+    "Java": {
+      "expected_language_name": "Java",
+      "file_extension": ".java",
+      "expected_file_count": 9
+    }
+  },
+
+  "aggregate_expectations": {
+    "total_languages": 7,
+    "total_files": 63,
+    "minimum_total_loc": 4500,
+    "maximum_total_loc": 10000
+  },
+
+  "edge_case_requirements": {
+    "empty_files": {
+      "count": 7,
+      "pattern": "*/edge_cases/empty.*",
+      "should_be_counted": true,
+      "should_have_zero_loc": true
+    },
+    "comments_only_files": {
+      "count": 7,
+      "pattern": "*/edge_cases/comments_only.*",
+      "should_be_counted": true,
+      "should_have_zero_code_lines": true,
+      "comments_should_be_counted": true
+    },
+    "single_line_files": {
+      "count": 7,
+      "pattern": "*/edge_cases/single_line.*",
+      "should_be_counted": true,
+      "should_have_one_code_line": true
+    },
+    "unicode_files": {
+      "count": 7,
+      "pattern": "*/edge_cases/unicode.*",
+      "should_parse_successfully": true,
+      "should_count_lines_correctly": true
+    },
+    "deep_nesting_files": {
+      "count": 7,
+      "pattern": "*/edge_cases/deep_nesting.*",
+      "should_parse_successfully": true,
+      "should_report_complexity": true
+    }
+  },
+
+  "per_file_output": {
+    "description": "Expected fields when using --by-file --uloc --min --gen flags",
+    "required_fields": {
+      "Location": {
+        "type": "string",
+        "description": "Relative path to the file",
+        "expected": "non-empty for all files"
+      },
+      "Complexity": {
+        "type": "integer",
+        "description": "Cyclomatic complexity of the file",
+        "expected": ">= 0 for all files"
+      },
+      "Uloc": {
+        "type": "integer",
+        "description": "Unique lines of code (with --uloc flag)",
+        "expected": ">= 0 for all files"
+      },
+      "Minified": {
+        "type": "boolean",
+        "description": "Whether file is minified (with --min flag)",
+        "expected": "field present for all files"
+      },
+      "Generated": {
+        "type": "boolean",
+        "description": "Whether file is auto-generated (with --gen flag)",
+        "expected": "field present for all files"
+      }
+    },
+    "expectations": {
+      "all_files_have_location": true,
+      "all_files_have_complexity": true,
+      "all_files_have_uloc": true,
+      "all_files_have_minified_field": true,
+      "all_files_have_generated_field": true,
+      "expected_minified_count": 0,
+      "expected_generated_count": 0
+    }
+  },
+
+  "directory_analysis": {
+    "description": "Expected output from directory analysis script",
+    "expected_directory_count": 23,
+    "required_per_directory": {
+      "path": {
+        "type": "string",
+        "description": "Directory path",
+        "expected": "non-empty"
+      },
+      "direct": {
+        "type": "object",
+        "description": "Stats for files directly in this directory",
+        "required_fields": ["file_count", "loc", "complexity"]
+      },
+      "recursive": {
+        "type": "object",
+        "description": "Stats for all files in subtree",
+        "required_fields": ["file_count", "loc", "complexity"]
+      },
+      "hotspot_score": {
+        "type": "float",
+        "description": "Computed hotspot score",
+        "expected_range": [0.0, 1.0]
+      }
+    },
+    "distribution_fields": {
+      "description": "Required statistical fields for each distribution",
+      "required": ["min", "max", "mean", "median", "stddev", "p25", "p75", "p90", "p95"]
+    },
+    "invariants": {
+      "recursive_gte_direct": "recursive.file_count >= direct.file_count for all directories",
+      "sum_of_direct_equals_total": "sum of direct file counts equals total files"
+    }
+  },
+
+  "cocomo_estimation": {
+    "description": "Expected COCOMO output from json2 format",
+    "required_fields": {
+      "estimatedCost": {
+        "type": "float",
+        "description": "Estimated development cost in USD"
+      },
+      "estimatedScheduleMonths": {
+        "type": "float",
+        "description": "Estimated development duration in months"
+      },
+      "estimatedPeople": {
+        "type": "float",
+        "description": "Estimated team size"
+      }
+    },
+    "preset_expectations": {
+      "organic": {
+        "description": "Default COCOMO model (a=2.4, b=1.05, c=2.5, d=0.38)",
+        "notes": "Baseline for comparison"
+      },
+      "embedded": {
+        "description": "Embedded COCOMO model (a=3.6, b=1.20, c=2.5, d=0.32)",
+        "comparison": "embedded_cost > organic_cost (expected ~95% higher)"
+      },
+      "sme": {
+        "description": "Custom SME preset (a=3.0, b=1.12, c=2.5, d=0.35)",
+        "avg_wage": 120000,
+        "overhead": 2.4,
+        "eaf": 1.0,
+        "expected_ranges": {
+          "cost": [300000, 800000],
+          "schedule_months": [5, 15],
+          "people": [1, 5]
+        }
+      }
+    }
+  }
+}

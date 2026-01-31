@@ -1,0 +1,77 @@
+rules:
+  # SQL Injection detections for synthetic eval repos (multi-language)
+  - id: DD-SQL-INJECTION-csharp
+    pattern-either:
+      - pattern-regex: '(?i)string\s+query\s*=\s*\"SELECT.*\"\s*\+'
+      - pattern-regex: '(?i)string\s+query\s*=\s*\$\".*SELECT.*\{'
+      - pattern-regex: '(?i)string\s+query\s*=\s*string\.Format\('
+      - pattern-regex: 'ExecuteSqlRaw\(\s*\"UPDATE.*\+'
+    languages: [csharp]
+    message: "Potential SQL injection via string-concatenated SQL"
+    severity: ERROR
+    metadata:
+      dd_smell_id: SQL_INJECTION
+      dd_category: security
+
+  - id: DD-SQL-INJECTION-java
+    pattern-either:
+      - pattern-regex: '(?i)String\s+query\s*=\s*\"SELECT.*\"\s*\+'
+      - pattern-regex: '(?i)String\s+query\s*=\s*String\.format\('
+      - pattern-regex: '(?i)sb\.append\(\"SELECT.*'
+      - pattern-regex: '(?i)String\s+query\s*=\s*\"UPDATE.*\"\.concat'
+    languages: [java]
+    message: "Potential SQL injection via string-concatenated SQL"
+    severity: ERROR
+    metadata:
+      dd_smell_id: SQL_INJECTION
+      dd_category: security
+
+  - id: DD-SQL-INJECTION-go
+    pattern-either:
+      - pattern-regex: 'fmt\.Sprintf\(\"SELECT.*%'
+      - pattern-regex: 'fmt\.Sprintf\(\"DELETE.*%'
+      - pattern-regex: 'fmt\.Sprintf\(\"UPDATE.*%'
+      - pattern-regex: 'query\s*:=\s*\"SELECT.*\"\s*\+'
+    languages: [go]
+    message: "Potential SQL injection via string-concatenated SQL"
+    severity: ERROR
+    metadata:
+      dd_smell_id: SQL_INJECTION
+      dd_category: security
+
+  - id: DD-SQL-INJECTION-javascript
+    pattern-either:
+      - pattern-regex: 'const\s+query\s*=\s*`SELECT.*\$\{'
+      - pattern-regex: 'const\s+query\s*=\s*\"SELECT.*\"\s*\+'
+      - pattern-regex: '\.execute\(\"DELETE.*\"\s*\+'
+    languages: [javascript]
+    message: "Potential SQL injection via string-concatenated SQL"
+    severity: ERROR
+    metadata:
+      dd_smell_id: SQL_INJECTION
+      dd_category: security
+
+  - id: DD-SQL-INJECTION-typescript
+    pattern-either:
+      - pattern-regex: 'const\s+query\s*=\s*`SELECT.*\$\{'
+      - pattern-regex: 'const\s+query\s*=\s*\"SELECT.*\"\s*\+'
+      - pattern-regex: '\.query\(\"DELETE.*\"\s*\+'
+    languages: [typescript]
+    message: "Potential SQL injection via string-concatenated SQL"
+    severity: ERROR
+    metadata:
+      dd_smell_id: SQL_INJECTION
+      dd_category: security
+
+  - id: DD-SQL-INJECTION-python
+    pattern-either:
+      - pattern-regex: 'query\s*=\s*f\".*SELECT.*\{'
+      - pattern-regex: 'query\s*=\s*\"SELECT.*\"\s*\+'
+      - pattern-regex: 'query\s*=\s*\"DELETE.*\"\s*%'
+      - pattern-regex: 'query\s*=\s*\"SELECT.*\"\.format\('
+    languages: [python]
+    message: "Potential SQL injection via string-formatted SQL"
+    severity: ERROR
+    metadata:
+      dd_smell_id: SQL_INJECTION
+      dd_category: security

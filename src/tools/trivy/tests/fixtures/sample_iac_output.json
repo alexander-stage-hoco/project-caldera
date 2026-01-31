@@ -1,0 +1,58 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-01-15T10:00:00Z",
+  "ArtifactName": "iac-repo",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "Dockerfile",
+      "Class": "config",
+      "Type": "dockerfile",
+      "Misconfigurations": [
+        {
+          "ID": "DS002",
+          "AVDID": "AVD-DS-0002",
+          "Severity": "HIGH",
+          "Title": "Image user should not be 'root'",
+          "Description": "Running containers as root may lead to security issues.",
+          "Resolution": "Add a USER instruction to the Dockerfile to switch to a non-root user.",
+          "CauseMetadata": {
+            "StartLine": 1,
+            "EndLine": 1
+          }
+        },
+        {
+          "ID": "DS001",
+          "AVDID": "AVD-DS-0001",
+          "Severity": "MEDIUM",
+          "Title": "':latest' tag used",
+          "Description": "Using the 'latest' tag is not recommended.",
+          "Resolution": "Specify a tag version.",
+          "CauseMetadata": {
+            "StartLine": 1,
+            "EndLine": 1
+          }
+        }
+      ]
+    },
+    {
+      "Target": "deployment.yaml",
+      "Class": "config",
+      "Type": "kubernetes",
+      "Misconfigurations": [
+        {
+          "ID": "KSV001",
+          "AVDID": "AVD-KSV-0001",
+          "Severity": "CRITICAL",
+          "Title": "Process can elevate its own privileges",
+          "Description": "Container can elevate its privileges.",
+          "Resolution": "Set allowPrivilegeEscalation to false.",
+          "CauseMetadata": {
+            "StartLine": 15,
+            "EndLine": 20
+          }
+        }
+      ]
+    }
+  ]
+}

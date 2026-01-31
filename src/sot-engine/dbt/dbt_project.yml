@@ -1,0 +1,19 @@
+name: caldera_sot
+version: "1.0.0"
+profile: caldera_sot
+
+model-paths: ["models"]
+analysis-paths: ["analysis"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  caldera_sot:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

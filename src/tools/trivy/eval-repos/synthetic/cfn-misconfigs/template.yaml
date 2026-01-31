@@ -1,0 +1,162 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template with intentional security misconfigurations
+
+Resources:
+  # MISCONFIG: S3 bucket without encryption
+  VulnerableBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: vulnerable-bucket-12345
+      # MISCONFIG: Public access not blocked
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      # MISCONFIG: No encryption
+      # BucketEncryption: missing
+      # MISCONFIG: No versioning
+      # VersioningConfiguration: missing
+      # MISCONFIG: No logging
+      # LoggingConfiguration: missing
+
+  # MISCONFIG: S3 bucket policy allowing public access
+  VulnerableBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref VulnerableBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # MISCONFIG: Allow all principals
+          - Effect: Allow
+            Principal: '*'
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+            Resource: !Sub 'arn:aws:s3:::${VulnerableBucket}/*'
+
+  # MISCONFIG: Security group with open ingress
+  OpenSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Insecure security group
+      VpcId: vpc-12345678
+      SecurityGroupIngress:
+        # MISCONFIG: Open to all IPs on all ports
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+        # MISCONFIG: SSH open to internet
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        # MISCONFIG: RDP open to internet
+        - IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        # MISCONFIG: Unrestricted egress
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+  # MISCONFIG: EC2 instance without IMDSv2
+  VulnerableInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-12345678
+      InstanceType: t3.micro
+      SecurityGroupIds:
+        - !Ref OpenSecurityGroup
+      # MISCONFIG: No IMDSv2 requirement
+      # MetadataOptions:
+      #   HttpTokens: required
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 100
+            VolumeType: gp3
+            # MISCONFIG: Unencrypted EBS
+            Encrypted: false
+
+  # MISCONFIG: RDS instance with public access and no encryption
+  VulnerableDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: vulnerable-db
+      DBInstanceClass: db.t3.micro
+      Engine: mysql
+      EngineVersion: '8.0'
+      MasterUsername: admin
+      # MISCONFIG: Hardcoded password in template
+      MasterUserPassword: SuperSecretPassword123!
+      AllocatedStorage: 20
+      # MISCONFIG: Public access enabled
+      PubliclyAccessible: true
+      # MISCONFIG: No encryption
+      StorageEncrypted: false
+      # MISCONFIG: No Multi-AZ
+      MultiAZ: false
+      # MISCONFIG: Backup disabled
+      BackupRetentionPeriod: 0
+      # MISCONFIG: Deletion protection disabled
+      DeletionProtection: false
+      VPCSecurityGroups:
+        - !Ref OpenSecurityGroup
+
+  # MISCONFIG: IAM role with overly permissive policy
+  AdminRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: overly-permissive-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            # MISCONFIG: Any AWS service can assume
+            Principal:
+              Service: '*'
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AdminAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # MISCONFIG: Full admin access
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+
+  # MISCONFIG: Lambda function with admin role
+  VulnerableLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: vulnerable-function
+      Runtime: python3.9
+      Handler: index.handler
+      Role: !GetAtt AdminRole.Arn
+      # MISCONFIG: No VPC configuration (public access)
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              return "Hello"
+      # MISCONFIG: Tracing disabled
+      TracingConfig:
+        Mode: PassThrough
+      # MISCONFIG: No reserved concurrency (DoS risk)
+
+  # MISCONFIG: CloudWatch log group without encryption
+  UnencryptedLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/vulnerable-function
+      RetentionInDays: 7
+      # MISCONFIG: No KMS encryption
+      # KmsKeyId: missing
+
+Outputs:
+  BucketArn:
+    Value: !GetAtt VulnerableBucket.Arn
+  InstanceId:
+    Value: !Ref VulnerableInstance

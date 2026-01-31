@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "scenario": "js-fullstack",
+  "description": "JavaScript fullstack repo with vulnerable frontend (jQuery, Angular, Bootstrap, Handlebars, Underscore, DOMPurify) and backend (yargs-parser, node-fetch, qs, shelljs) packages",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/js-fullstack",
+  "expected": {
+    "expected_vulnerabilities": {
+      "min": 10,
+      "max": 100
+    },
+    "expected_critical": {
+      "min": 1,
+      "max": 20
+    },
+    "expected_high": {
+      "min": 3,
+      "max": 50
+    },
+    "required_packages": [
+      "jquery",
+      "angular",
+      "handlebars",
+      "node-fetch",
+      "underscore"
+    ],
+    "expected_targets": {
+      "min": 1,
+      "max": 2
+    },
+    "expected_fix_available_pct": {
+      "min": 50,
+      "max": 100
+    },
+    "freshness_expected": true,
+    "expected_outdated_count": {
+      "min": 8,
+      "max": 50
+    },
+    "expected_outdated_pct": {
+      "min": 50,
+      "max": 100
+    }
+  }
+}

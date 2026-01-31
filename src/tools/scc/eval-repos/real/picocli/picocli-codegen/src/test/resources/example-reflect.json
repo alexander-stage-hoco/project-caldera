@@ -1,0 +1,67 @@
+[
+  {
+    "name" : "java.util.Collections$UnmodifiableRandomAccessList",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true
+  },
+  {
+    "name" : "java.util.concurrent.TimeUnit",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true
+  },
+  {
+    "name" : "picocli.CommandLine$AutoHelpMixin",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "helpRequested" },
+      { "name" : "versionRequested" }
+    ]
+  },
+  {
+    "name" : "picocli.CommandLine$HelpCommand",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "commands" },
+      { "name" : "helpRequested" }
+    ]
+  },
+  {
+    "name" : "picocli.codegen.aot.graalvm.Example",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "file" },
+      { "name" : "mixin" },
+      { "name" : "spec" },
+      { "name" : "timeUnit", "allowWrite" : true },
+      { "name" : "unmatched", "allowWrite" : true }
+    ],
+    "methods" : [
+      { "name" : "multiply", "parameterTypes" : ["int", "int"] },
+      { "name" : "setMinimum", "parameterTypes" : ["int"] },
+      { "name" : "setOtherFiles", "parameterTypes" : ["java.util.List"] }
+    ]
+  },
+  {
+    "name" : "picocli.codegen.aot.graalvm.Example$ExampleMixin",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "length" }
+    ]
+  }
+]

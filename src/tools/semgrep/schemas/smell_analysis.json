@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Semgrep Smell Analysis Output",
+  "description": "Output schema for smell_analyzer.py (v2.0, aligned with TOOL_REQUIREMENTS.md)",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "repo_name", "repo_path", "results"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Schema version (semver, e.g., '2.0.0')"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of analysis"
+    },
+    "repo_name": {
+      "type": "string",
+      "description": "Repository identifier"
+    },
+    "repo_path": {
+      "type": "string",
+      "description": "Path to analyzed repository"
+    },
+    "results": {
+      "type": "object",
+      "description": "Tool-specific analysis results",
+      "required": ["metadata", "summary", "files"],
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "required": ["schema_version", "timestamp", "root_path", "semgrep_version"],
+          "properties": {
+            "schema_version": {"type": "string"},
+            "run_id": {"type": "string"},
+            "timestamp": {"type": "string", "format": "date-time"},
+            "root_path": {"type": "string"},
+            "semgrep_version": {"type": "string"},
+            "rules_used": {"type": "array", "items": {"type": "string"}},
+            "analysis_duration_ms": {"type": "number"}
+          }
+        },
+        "summary": {
+          "type": "object",
+          "required": ["total_files", "total_smells", "files_with_smells"],
+          "properties": {
+            "total_files": {"type": "integer"},
+            "total_directories": {"type": "integer"},
+            "total_smells": {"type": "integer"},
+            "total_lines": {"type": "integer"},
+            "files_with_smells": {"type": "integer"},
+            "smells_by_category": {
+              "type": "object",
+              "additionalProperties": {"type": "integer"}
+            },
+            "smells_by_type": {
+              "type": "object",
+              "additionalProperties": {"type": "integer"}
+            },
+            "smells_by_language": {
+              "type": "object",
+              "additionalProperties": {"type": "integer"}
+            },
+            "smells_by_severity": {
+              "type": "object",
+              "additionalProperties": {"type": "integer"}
+            }
+          }
+        },
+        "directories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {"type": "string"},
+              "name": {"type": "string"},
+              "depth": {"type": "integer"},
+              "is_leaf": {"type": "boolean"},
+              "child_count": {"type": "integer"},
+              "subdirectories": {"type": "array", "items": {"type": "string"}},
+              "direct": {"$ref": "#/definitions/directory_stats"},
+              "recursive": {"$ref": "#/definitions/directory_stats"}
+            }
+          }
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "language", "smells"],
+            "properties": {
+              "path": {"type": "string"},
+              "language": {"type": "string"},
+              "lines": {"type": "integer"},
+              "smell_count": {"type": "integer"},
+              "smell_density": {"type": "number"},
+              "by_category": {"type": "object", "additionalProperties": {"type": "integer"}},
+              "by_severity": {"type": "object", "additionalProperties": {"type": "integer"}},
+              "by_smell_type": {"type": "object", "additionalProperties": {"type": "integer"}},
+              "smells": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["rule_id", "line_start", "severity"],
+                  "properties": {
+                    "rule_id": {"type": "string"},
+                    "dd_smell_id": {"type": "string"},
+                    "dd_category": {"type": "string"},
+                    "line_start": {"type": "integer"},
+                    "line_end": {"type": "integer"},
+                    "column_start": {"type": "integer"},
+                    "column_end": {"type": "integer"},
+                    "severity": {"type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"]},
+                    "message": {"type": "string"},
+                    "code_snippet": {"type": "string"},
+                    "fix_suggestion": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "by_language": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "files": {"type": "integer"},
+              "lines": {"type": "integer"},
+              "smell_count": {"type": "integer"},
+              "categories_covered": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "statistics": {
+          "type": "object",
+          "properties": {
+            "smell_distribution": {"$ref": "#/definitions/distribution"},
+            "language_coverage": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "language": {"type": "string"},
+                  "files_analyzed": {"type": "integer"},
+                  "smells_found": {"type": "integer"},
+                  "categories_covered": {"type": "array", "items": {"type": "string"}}
+                }
+              }
+            },
+            "category_coverage": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "category": {"type": "string"},
+                  "smell_count": {"type": "integer"},
+                  "file_count": {"type": "integer"},
+                  "percentage_of_total": {"type": "number"}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "directory_stats": {
+      "type": "object",
+      "properties": {
+        "file_count": {"type": "integer"},
+        "lines_code": {"type": "integer"},
+        "smell_count": {"type": "integer"},
+        "by_category": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "by_severity": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "by_smell_type": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "smell_density": {"type": "number"},
+        "smell_distribution": {"$ref": "#/definitions/distribution"}
+      }
+    },
+    "distribution": {
+      "type": "object",
+      "properties": {
+        "count": {"type": "integer"},
+        "min": {"type": "number"},
+        "max": {"type": "number"},
+        "mean": {"type": "number"},
+        "median": {"type": "number"},
+        "stddev": {"type": "number"},
+        "p25": {"type": "number"},
+        "p50": {"type": "number"},
+        "p75": {"type": "number"},
+        "p90": {"type": "number"},
+        "p95": {"type": "number"},
+        "p99": {"type": "number"},
+        "skewness": {"type": "number"},
+        "kurtosis": {"type": "number"},
+        "cv": {"type": "number"},
+        "iqr": {"type": "number"},
+        "gini": {"type": "number"},
+        "theil": {"type": "number"},
+        "hoover": {"type": "number"},
+        "palma": {"type": "number"},
+        "top_10_pct_share": {"type": "number"},
+        "top_20_pct_share": {"type": "number"},
+        "bottom_50_pct_share": {"type": "number"}
+      }
+    }
+  }
+}

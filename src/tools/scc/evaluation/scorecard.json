@@ -1,0 +1,721 @@
+{
+  "tool": "scc",
+  "version": "1.0.0",
+  "generated_at": "2026-01-25T10:18:37.196661+00:00",
+  "description": "Evaluation scorecard for scc lines of code analysis",
+  "summary": {
+    "total_checks": 63,
+    "passed": 61,
+    "failed": 2,
+    "score": 1.0,
+    "score_percent": 100.0,
+    "normalized_score": 5.0,
+    "decision": "STRONG_PASS"
+  },
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "Output Quality",
+      "weight": 0.2,
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 5,
+      "weighted_score": 1.0,
+      "checks": [
+        {
+          "check_id": "OQ-1",
+          "name": "JSON Valid",
+          "passed": true,
+          "message": "Valid JSON with 7 entries",
+          "expected": null,
+          "actual": null
+        },
+        {
+          "check_id": "OQ-2",
+          "name": "Array Structure",
+          "passed": true,
+          "message": "Root is array",
+          "expected": "list",
+          "actual": "list"
+        },
+        {
+          "check_id": "OQ-3",
+          "name": "Required Fields",
+          "passed": true,
+          "message": "All required fields present",
+          "expected": [
+            "Name",
+            "Count",
+            "Lines",
+            "Code",
+            "Comment",
+            "Blank"
+          ],
+          "actual": "all present"
+        },
+        {
+          "check_id": "OQ-4",
+          "name": "Numeric Types",
+          "passed": true,
+          "message": "All numeric fields valid",
+          "expected": null,
+          "actual": null
+        },
+        {
+          "check_id": "OQ-5",
+          "name": "Non-Empty Output",
+          "passed": true,
+          "message": "Output has 7 entries",
+          "expected": ">= 1",
+          "actual": 7
+        },
+        {
+          "check_id": "OQ-6",
+          "name": "Bytes Present",
+          "passed": true,
+          "message": "All entries have Bytes",
+          "expected": null,
+          "actual": null
+        },
+        {
+          "check_id": "OQ-7",
+          "name": "Complexity Present",
+          "passed": true,
+          "message": "All entries have Complexity",
+          "expected": null,
+          "actual": null
+        },
+        {
+          "check_id": "OQ-8",
+          "name": "No Parse Errors",
+          "passed": true,
+          "message": "No errors",
+          "expected": "exit_code=0, no errors",
+          "actual": "exit_code=0, stderr=empty"
+        }
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Integration Fit",
+      "weight": 0.15,
+      "total_checks": 6,
+      "passed": 6,
+      "failed": 0,
+      "score": 5,
+      "weighted_score": 0.75,
+      "checks": [
+        {
+          "check_id": "IF-1",
+          "name": "Output Generated",
+          "passed": true,
+          "message": "output.json present",
+          "expected": null,
+          "actual": null
+        },
+        {
+          "check_id": "IF-2",
+          "name": "Schema Valid",
+          "passed": true,
+          "message": "Output validates against schema",
+          "expected": null,
+          "actual": null
+        },
+        {
+          "check_id": "IF-3",
+          "name": "Required Fields Present",
+          "passed": true,
+          "message": "All required fields present",
+          "expected": [
+            "summary",
+            "languages"
+          ],
+          "actual": []
+        },
+        {
+          "check_id": "IF-4",
+          "name": "No Data Loss",
+          "passed": true,
+          "message": "Totals match",
+          "expected": {
+            "files": 63,
+            "loc": 5885
+          },
+          "actual": {
+            "files": 63,
+            "loc": 5885
+          }
+        },
+        {
+          "check_id": "IF-5",
+          "name": "Metadata Complete",
+          "passed": true,
+          "message": "Metadata complete",
+          "expected": null,
+          "actual": null
+        },
+        {
+          "check_id": "IF-6",
+          "name": "Relative Paths",
+          "passed": true,
+          "message": "All paths are repo-relative",
+          "expected": null,
+          "actual": null
+        }
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Reliability",
+      "weight": 0.1,
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 5,
+      "weighted_score": 0.5,
+      "checks": [
+        {
+          "check_id": "RL-1",
+          "name": "Empty File Handled",
+          "passed": true,
+          "message": "Found 7/7 empty files, all 0 LOC: True",
+          "expected": {
+            "count": 7,
+            "all_zero_loc": true
+          },
+          "actual": {
+            "count": 7,
+            "all_zero_loc": true
+          }
+        },
+        {
+          "check_id": "RL-2",
+          "name": "Comments Only Handled",
+          "passed": true,
+          "message": "Found 7 files, Code=0: True, Comment>0: True",
+          "expected": {
+            "count": 7,
+            "code_zero": true,
+            "has_comments": true
+          },
+          "actual": {
+            "count": 7,
+            "code_zero": true,
+            "has_comments": true
+          }
+        },
+        {
+          "check_id": "RL-3",
+          "name": "Single Line Handled",
+          "passed": true,
+          "message": "Found 7 files, Code=1: True",
+          "expected": {
+            "count": 7,
+            "code_one": true
+          },
+          "actual": {
+            "count": 7,
+            "code_one": true
+          }
+        },
+        {
+          "check_id": "RL-4",
+          "name": "Unicode Handled",
+          "passed": true,
+          "message": "Found 7 unicode files, all parsed: True",
+          "expected": {
+            "count": 7,
+            "all_parsed": true
+          },
+          "actual": {
+            "count": 7,
+            "all_parsed": true
+          }
+        },
+        {
+          "check_id": "RL-5",
+          "name": "Deep Nesting Handled",
+          "passed": true,
+          "message": "Found 7 files, complexity reported: True",
+          "expected": {
+            "count": 7,
+            "has_complexity": true
+          },
+          "actual": {
+            "count": 7,
+            "has_complexity": true
+          }
+        },
+        {
+          "check_id": "RL-6",
+          "name": "Deterministic Output",
+          "passed": true,
+          "message": "3 runs identical: True",
+          "expected": "all hashes identical",
+          "actual": "unique hashes: 1"
+        },
+        {
+          "check_id": "RL-7",
+          "name": "All Files Detected",
+          "passed": true,
+          "message": "Found 63/63 files",
+          "expected": 63,
+          "actual": 63
+        },
+        {
+          "check_id": "RL-8",
+          "name": "No Crashes",
+          "passed": true,
+          "message": "Exit code: 0",
+          "expected": 0,
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "Performance",
+      "weight": 0.1,
+      "total_checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "score": 5,
+      "weighted_score": 0.5,
+      "checks": [
+        {
+          "check_id": "PF-1",
+          "name": "Fast Execution",
+          "passed": true,
+          "message": "Execution time: 6ms (threshold: 5000ms)",
+          "expected": "< 5000ms",
+          "actual": "6ms"
+        },
+        {
+          "check_id": "PF-2",
+          "name": "Very Fast Execution",
+          "passed": true,
+          "message": "Execution time: 6ms (threshold: 1000ms)",
+          "expected": "< 1000ms",
+          "actual": "6ms"
+        },
+        {
+          "check_id": "PF-3",
+          "name": "Sub-Second",
+          "passed": true,
+          "message": "Execution time: 5ms (threshold: 500ms)",
+          "expected": "< 500ms",
+          "actual": "5ms"
+        },
+        {
+          "check_id": "PF-4",
+          "name": "Memory Reasonable",
+          "passed": true,
+          "message": "Peak memory: 21.5MB (threshold: 100MB)",
+          "expected": "< 100MB",
+          "actual": "21.5MB"
+        }
+      ]
+    },
+    {
+      "id": "D5",
+      "name": "Installation",
+      "weight": 0.05,
+      "total_checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "score": 5,
+      "weighted_score": 0.25,
+      "checks": [
+        {
+          "check_id": "IN-1",
+          "name": "Binary Exists",
+          "passed": true,
+          "message": "Binary exists: True, executable: True",
+          "expected": "exists and executable",
+          "actual": "exists=True, executable=True"
+        },
+        {
+          "check_id": "IN-2",
+          "name": "Version Check",
+          "passed": true,
+          "message": "Version output: scc version 3.6.0",
+          "expected": "version string",
+          "actual": "scc version 3.6.0"
+        },
+        {
+          "check_id": "IN-3",
+          "name": "Help Available",
+          "passed": true,
+          "message": "Help available: True",
+          "expected": "help text with usage/options",
+          "actual": "has_help=True, length=6637"
+        },
+        {
+          "check_id": "IN-4",
+          "name": "No Dependencies",
+          "passed": true,
+          "message": "Runs without external dependencies",
+          "expected": "no dependency errors",
+          "actual": "returncode=0, has_errors=False"
+        }
+      ]
+    },
+    {
+      "id": "D6",
+      "name": "Coverage",
+      "weight": 0.05,
+      "total_checks": 9,
+      "passed": 9,
+      "failed": 0,
+      "score": 5,
+      "weighted_score": 0.25,
+      "checks": [
+        {
+          "check_id": "CV-1",
+          "name": "Python Detected",
+          "passed": true,
+          "message": "Python detected: True",
+          "expected": "Python in languages",
+          "actual": "detected=True"
+        },
+        {
+          "check_id": "CV-2",
+          "name": "C# Detected",
+          "passed": true,
+          "message": "C# detected: True",
+          "expected": "C# in languages",
+          "actual": "detected=True"
+        },
+        {
+          "check_id": "CV-3",
+          "name": "JavaScript Detected",
+          "passed": true,
+          "message": "JavaScript detected: True",
+          "expected": "JavaScript in languages",
+          "actual": "detected=True"
+        },
+        {
+          "check_id": "CV-4",
+          "name": "TypeScript Detected",
+          "passed": true,
+          "message": "TypeScript detected: True",
+          "expected": "TypeScript in languages",
+          "actual": "detected=True"
+        },
+        {
+          "check_id": "CV-5",
+          "name": "Go Detected",
+          "passed": true,
+          "message": "Go detected: True",
+          "expected": "Go in languages",
+          "actual": "detected=True"
+        },
+        {
+          "check_id": "CV-6",
+          "name": "Rust Detected",
+          "passed": true,
+          "message": "Rust detected: True",
+          "expected": "Rust in languages",
+          "actual": "detected=True"
+        },
+        {
+          "check_id": "CV-7",
+          "name": "Java Detected",
+          "passed": true,
+          "message": "Java detected: True",
+          "expected": "Java in languages",
+          "actual": "detected=True"
+        },
+        {
+          "check_id": "CV-8",
+          "name": "File Counts Match",
+          "passed": true,
+          "message": "All file counts match",
+          "expected": "9 files per language",
+          "actual": "mismatches=[], missing=[]"
+        },
+        {
+          "check_id": "CV-9",
+          "name": "LOC Within Range",
+          "passed": true,
+          "message": "Total LOC: 5885 (expected 4500-10000)",
+          "expected": "4500-10000",
+          "actual": 5885
+        }
+      ]
+    },
+    {
+      "id": "D7",
+      "name": "License",
+      "weight": 0.05,
+      "total_checks": 3,
+      "passed": 3,
+      "failed": 0,
+      "score": 5,
+      "weighted_score": 0.25,
+      "checks": [
+        {
+          "check_id": "CL-1",
+          "name": "MIT License",
+          "passed": true,
+          "message": "scc is dual-licensed under MIT and Unlicense",
+          "expected": "MIT or Unlicense",
+          "actual": "MIT and Unlicense (dual-licensed)"
+        },
+        {
+          "check_id": "CL-2",
+          "name": "Open Source",
+          "passed": true,
+          "message": "scc source available on GitHub (6.4K+ stars)",
+          "expected": "source on GitHub",
+          "actual": "https://github.com/boyter/scc"
+        },
+        {
+          "check_id": "CL-3",
+          "name": "No Usage Fees",
+          "passed": true,
+          "message": "scc is free for all use (MIT/Unlicense)",
+          "expected": "no fees",
+          "actual": "free (MIT/Unlicense)"
+        }
+      ]
+    },
+    {
+      "id": "D8",
+      "name": "Per File",
+      "weight": 0.1,
+      "total_checks": 6,
+      "passed": 6,
+      "failed": 0,
+      "score": 5,
+      "weighted_score": 0.5,
+      "checks": [
+        {
+          "check_id": "PF-1",
+          "name": "Per-File JSON Valid",
+          "passed": true,
+          "message": "Valid JSON with 7 language entries",
+          "expected": "valid JSON",
+          "actual": "7 language entries"
+        },
+        {
+          "check_id": "PF-2",
+          "name": "Files Have Location",
+          "passed": true,
+          "message": "63/63 files have Location field",
+          "expected": 63,
+          "actual": 63
+        },
+        {
+          "check_id": "PF-3",
+          "name": "Files Have Complexity",
+          "passed": true,
+          "message": "63/63 files have valid Complexity",
+          "expected": 63,
+          "actual": 63
+        },
+        {
+          "check_id": "PF-4",
+          "name": "Files Have ULOC",
+          "passed": true,
+          "message": "63/63 files have Uloc field",
+          "expected": 63,
+          "actual": 63
+        },
+        {
+          "check_id": "PF-5",
+          "name": "Minified Detection",
+          "passed": true,
+          "message": "Minified field present: 63/63, flagged: 0",
+          "expected": 63,
+          "actual": 63
+        },
+        {
+          "check_id": "PF-6",
+          "name": "Generated Detection",
+          "passed": true,
+          "message": "Generated field present: 63/63, flagged: 0",
+          "expected": 63,
+          "actual": 63
+        }
+      ]
+    },
+    {
+      "id": "D9",
+      "name": "Directory Analysis",
+      "weight": 0.1,
+      "total_checks": 12,
+      "passed": 10,
+      "failed": 2,
+      "score": 5,
+      "weighted_score": 0.5,
+      "checks": [
+        {
+          "check_id": "DA-1",
+          "name": "Directory Stats Complete",
+          "passed": true,
+          "message": "23/23 directories have complete stats",
+          "expected": 23,
+          "actual": 23
+        },
+        {
+          "check_id": "DA-2",
+          "name": "Distribution Stats Valid (22 fields)",
+          "passed": true,
+          "message": "16/16 distributions have all 22 fields",
+          "expected": 16,
+          "actual": 16
+        },
+        {
+          "check_id": "DA-3",
+          "name": "Structural Metrics Valid",
+          "passed": true,
+          "message": "23/23 directories have valid structural metrics",
+          "expected": 23,
+          "actual": 23
+        },
+        {
+          "check_id": "DA-4",
+          "name": "File Count Matches",
+          "passed": true,
+          "message": "Sum of direct.file_count (63), root files (63), total (63)",
+          "expected": 63,
+          "actual": 63
+        },
+        {
+          "check_id": "DA-5",
+          "name": "Recursive Includes Direct",
+          "passed": true,
+          "message": "23/23 directories have recursive >= direct",
+          "expected": 23,
+          "actual": 23
+        },
+        {
+          "check_id": "DA-6",
+          "name": "Inequality Metrics Valid",
+          "passed": true,
+          "message": "16/16 distributions have valid inequality metrics",
+          "expected": 16,
+          "actual": 16
+        },
+        {
+          "check_id": "DA-7",
+          "name": "File Classification Counts",
+          "passed": true,
+          "message": "Classification sum (63) == total_files (63)",
+          "expected": 63,
+          "actual": 63
+        },
+        {
+          "check_id": "DA-8",
+          "name": "Per-Language Consistency",
+          "passed": false,
+          "message": "Language LOC sum (0) != total_loc (5885)",
+          "expected": 5885,
+          "actual": 0
+        },
+        {
+          "check_id": "DA-9",
+          "name": "COCOMO Preset Ordering",
+          "passed": true,
+          "message": "COCOMO presets valid",
+          "expected": 0,
+          "actual": 0
+        },
+        {
+          "check_id": "DA-10",
+          "name": "P99 Monotonicity",
+          "passed": true,
+          "message": "16/16 distributions have p95 <= p99 <= max",
+          "expected": 16,
+          "actual": 16
+        },
+        {
+          "check_id": "DA-11",
+          "name": "Summary Structure Complete",
+          "passed": true,
+          "message": "7/7 summary sections present",
+          "expected": 7,
+          "actual": 7
+        },
+        {
+          "check_id": "DA-12",
+          "name": "File Entry Fields Complete",
+          "passed": false,
+          "message": "0/63 files have all 22 fields",
+          "expected": 63,
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "id": "D10",
+      "name": "Cocomo",
+      "weight": 0.1,
+      "total_checks": 3,
+      "passed": 3,
+      "failed": 0,
+      "score": 5,
+      "weighted_score": 0.5,
+      "checks": [
+        {
+          "check_id": "CO-1",
+          "name": "COCOMO Output Present",
+          "passed": true,
+          "message": "Cost: True, Schedule: True, People: True",
+          "expected": "all COCOMO fields present",
+          "actual": {
+            "estimatedCost": 173711.71848678964,
+            "estimatedScheduleMonths": 7.072111853598879,
+            "estimatedPeople": 2.1822068330246003
+          }
+        },
+        {
+          "check_id": "CO-2",
+          "name": "Custom Params Applied",
+          "passed": true,
+          "message": "Default: $173,712, Embedded: $339,924",
+          "expected": "embedded cost > default cost",
+          "actual": {
+            "default_cost": 173711.71848678964,
+            "embedded_cost": 339924.4048214503,
+            "difference_pct": 95.7
+          }
+        },
+        {
+          "check_id": "CO-3",
+          "name": "Preset Values Match",
+          "passed": true,
+          "message": "Cost: $524,141 (OK), Schedule: 7.4mo (OK), People: 3.0 (OK)",
+          "expected": {
+            "cost_range": [
+              300000,
+              800000
+            ],
+            "schedule_range": [
+              5,
+              15
+            ],
+            "people_range": [
+              1,
+              5
+            ]
+          },
+          "actual": {
+            "cost": 524141.490868683,
+            "schedule": 7.356530890827333,
+            "people": 2.9686857990939575
+          }
+        }
+      ]
+    }
+  ],
+  "critical_failures": [],
+  "thresholds": {
+    "STRONG_PASS": ">= 4.0 (80%+)",
+    "PASS": ">= 3.5 (70%+)",
+    "WEAK_PASS": ">= 3.0 (60%+)",
+    "FAIL": "< 3.0 (below 60%)"
+  }
+}

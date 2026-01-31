@@ -1,0 +1,179 @@
+{
+  "schema_version": "2.0",
+  "scenario": "multi-language",
+  "description": "Tests analysis of polyglot repositories with multiple programming languages",
+  "generated_at": "2026-01-20T00:00:00Z",
+  "repo_path": "eval-repos/synthetic",
+
+  "language_coverage": {
+    "description": "Tests language detection and per-language metrics",
+    "required_languages": [
+      "Python",
+      "JavaScript",
+      "TypeScript",
+      "C#",
+      "Java",
+      "Go",
+      "Rust"
+    ],
+    "optional_languages": [
+      "C",
+      "C++",
+      "Ruby",
+      "PHP",
+      "Swift",
+      "Kotlin",
+      "Scala"
+    ]
+  },
+
+  "per_language_expectations": {
+    "Python": {
+      "extension": ".py",
+      "expected_file_count": 9,
+      "expected_file_count_tolerance": 0,
+      "comment_style": "hash",
+      "min_total_loc": 100,
+      "max_total_loc": 500
+    },
+    "JavaScript": {
+      "extension": ".js",
+      "expected_file_count": 9,
+      "expected_file_count_tolerance": 0,
+      "comment_style": "slash",
+      "min_total_loc": 100,
+      "max_total_loc": 500
+    },
+    "TypeScript": {
+      "extension": ".ts",
+      "expected_file_count": 9,
+      "expected_file_count_tolerance": 0,
+      "comment_style": "slash",
+      "min_total_loc": 100,
+      "max_total_loc": 500
+    },
+    "C#": {
+      "extension": ".cs",
+      "expected_file_count": 9,
+      "expected_file_count_tolerance": 0,
+      "comment_style": "slash",
+      "min_total_loc": 100,
+      "max_total_loc": 500
+    },
+    "Java": {
+      "extension": ".java",
+      "expected_file_count": 9,
+      "expected_file_count_tolerance": 0,
+      "comment_style": "slash",
+      "min_total_loc": 100,
+      "max_total_loc": 500
+    },
+    "Go": {
+      "extension": ".go",
+      "expected_file_count": 9,
+      "expected_file_count_tolerance": 0,
+      "comment_style": "slash",
+      "min_total_loc": 100,
+      "max_total_loc": 500
+    },
+    "Rust": {
+      "extension": ".rs",
+      "expected_file_count": 9,
+      "expected_file_count_tolerance": 0,
+      "comment_style": "slash",
+      "min_total_loc": 100,
+      "max_total_loc": 500
+    }
+  },
+
+  "aggregate_expectations": {
+    "total_languages": {
+      "value": 7,
+      "tolerance": 0,
+      "description": "Exactly 7 languages should be detected"
+    },
+    "total_files": {
+      "value": 63,
+      "tolerance": 0,
+      "description": "9 files per language * 7 languages = 63 files"
+    },
+    "total_loc": {
+      "min": 4500,
+      "max": 10000,
+      "description": "Total LOC across all languages"
+    }
+  },
+
+  "cross_language_tests": {
+    "identical_structure": {
+      "description": "Each language directory has identical file structure",
+      "files_per_language": [
+        "simple.*",
+        "complex.*",
+        "module/nested.*",
+        "edge_cases/empty.*",
+        "edge_cases/comments_only.*",
+        "edge_cases/single_line.*",
+        "edge_cases/unicode.*",
+        "edge_cases/deep_nesting.*",
+        "edge_cases/whitespace.*"
+      ]
+    },
+    "complexity_comparison": {
+      "description": "Similar code should have similar complexity across languages",
+      "tolerance_percent": 20
+    },
+    "loc_comparison": {
+      "description": "Similar files should have comparable LOC",
+      "tolerance_percent": 30
+    }
+  },
+
+  "language_detection_tests": {
+    "by_extension": {
+      "description": "Languages should be detected by file extension",
+      "confidence": "high"
+    },
+    "by_shebang": {
+      "description": "Scripts with shebangs should be detected",
+      "applicable_to": ["Python", "JavaScript", "Ruby"]
+    },
+    "ambiguous_extensions": {
+      "description": "Files like .h should be correctly categorized",
+      "expected": "consistent categorization"
+    }
+  },
+
+  "edge_cases": {
+    "polyglot_files": {
+      "description": "Files that could be multiple languages (e.g., header files)",
+      "expected": "consistent classification"
+    },
+    "generated_code": {
+      "description": "Auto-generated code in each language",
+      "expected": "detected if --gen flag used"
+    },
+    "minified_code": {
+      "description": "Minified JS/CSS files",
+      "expected": "detected if --min flag used"
+    }
+  },
+
+  "invariants": {
+    "all_languages_present": "All 7 required languages must be detected",
+    "no_unknown_languages": "No files should be classified as 'Unknown'",
+    "file_count_per_language": "Each language should have exactly 9 files",
+    "non_negative_metrics": "All metrics must be non-negative integers"
+  },
+
+  "output_format_requirements": {
+    "per_language_breakdown": {
+      "required_fields": ["Name", "Count", "Lines", "Code", "Comment", "Blank", "Complexity", "Bytes"],
+      "description": "Each language entry must have all required fields"
+    },
+    "sorted_output": {
+      "description": "Languages should be sorted by LOC (descending) or alphabetically",
+      "acceptable_orderings": ["by_loc_desc", "alphabetical"]
+    }
+  }
+}

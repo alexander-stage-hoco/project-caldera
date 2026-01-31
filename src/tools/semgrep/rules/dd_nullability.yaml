@@ -1,0 +1,40 @@
+rules:
+  # G1: Nullable reference types disabled
+  - id: DD-G1-NULLABLE-DISABLED
+    pattern-regex: '#nullable\s+disable'
+    languages: [csharp]
+    severity: WARNING
+    message: "Nullable reference types disabled - enable for better null safety"
+    metadata:
+      dd_smell_id: G1_NULLABLE_DISABLED
+      dd_category: nullability
+
+  # G2: Null-forgiving operator usage (may hide null bugs)
+  - id: DD-G2-NULL-FORGIVING-csharp
+    pattern: $EXPR!
+    languages: [csharp]
+    severity: INFO
+    message: "Null-forgiving operator (!) suppresses null warnings - ensure null is truly impossible"
+    metadata:
+      dd_smell_id: G2_NULL_FORGIVING
+      dd_category: nullability
+
+  # G2: Null-forgiving on member access
+  - id: DD-G2-NULL-FORGIVING-MEMBER-csharp
+    pattern: $EXPR!.$MEMBER
+    languages: [csharp]
+    severity: INFO
+    message: "Null-forgiving on member access - consider null check or refactoring"
+    metadata:
+      dd_smell_id: G2_NULL_FORGIVING
+      dd_category: nullability
+
+  # G3: Inconsistent nullable annotation (nullable disable in specific region)
+  - id: DD-G3-NULLABLE-RESTORE
+    pattern-regex: '#nullable\s+restore'
+    languages: [csharp]
+    severity: INFO
+    message: "Nullable restore suggests inconsistent null handling in file"
+    metadata:
+      dd_smell_id: G3_INCONSISTENT_NULLABLE
+      dd_category: nullability

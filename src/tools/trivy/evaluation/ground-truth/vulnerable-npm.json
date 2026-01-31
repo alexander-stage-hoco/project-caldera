@@ -1,0 +1,11 @@
+{
+  "id": "vulnerable-npm",
+  "description": "npm project with known vulnerable dependencies",
+  "package_manager": "npm",
+  "expected_targets": ["package-lock.json"],
+  "expected_vulnerabilities": { "min": 3, "max": 20 },
+  "expected_critical": { "min": 0, "max": 5 },
+  "expected_high": { "min": 1, "max": 10 },
+  "known_cves": ["CVE-2021-23337", "CVE-2020-28469"],
+  "notes": "Uses lodash 4.17.15 with prototype pollution vulnerability"
+}

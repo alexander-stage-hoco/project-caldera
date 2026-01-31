@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "scenario": "wide-tree",
+  "description": "Repository with directories containing many files. Simulates a project with auto-generated code, asset directories, or flat file structures that stress Git's tree handling.",
+  "repo_path": "eval-repos/synthetic/wide-tree",
+  "expected": {
+    "health_grade": {
+      "acceptable": ["C", "C+", "D", "D+"],
+      "description": "Repository should receive C or D grade due to tree width violations"
+    },
+    "metrics": {
+      "max_blob_size": {
+        "max": 262144,
+        "description": "Individual files under 256 KB"
+      },
+      "blob_total_size": {
+        "min": 1048576,
+        "max": 20971520,
+        "description": "Total blob size 1-20 MB from many small files"
+      },
+      "blob_count": {
+        "min": 500,
+        "max": 2000,
+        "description": "Large number of files"
+      },
+      "tree_count": {
+        "min": 5,
+        "max": 50,
+        "description": "Relatively few directories (files are concentrated)"
+      },
+      "max_tree_entries": {
+        "min": 500,
+        "max": 2000,
+        "description": "At least one directory with 500+ entries"
+      },
+      "tree_total_entries": {
+        "min": 500,
+        "max": 5000,
+        "description": "Many total tree entries"
+      },
+      "max_path_depth": {
+        "max": 6,
+        "description": "Shallow but wide structure"
+      },
+      "max_path_length": {
+        "max": 150,
+        "description": "Normal path lengths"
+      },
+      "commit_count": {
+        "min": 5,
+        "max": 100,
+        "description": "Normal commit history"
+      },
+      "branch_count": {
+        "min": 1,
+        "max": 10,
+        "description": "Few branches"
+      },
+      "tag_count": {
+        "min": 0,
+        "max": 20,
+        "description": "Normal tag count"
+      }
+    },
+    "lfs_candidates": {
+      "min_count": 0,
+      "max_count": 5,
+      "description": "Few or no LFS candidates - files are small individually"
+    },
+    "threshold_violations": {
+      "min_count": 1,
+      "max_count": 3,
+      "expected_violations": [
+        {
+          "metric": "max_tree_entries",
+          "min_level": 2,
+          "max_level": 4,
+          "description": "Tree width warning (** to !!!!)"
+        },
+        {
+          "metric": "blob_count",
+          "min_level": 1,
+          "max_level": 2,
+          "description": "Possible blob count warning"
+        },
+        {
+          "metric": "tree_total_entries",
+          "min_level": 1,
+          "max_level": 2,
+          "description": "Possible total entries warning"
+        }
+      ]
+    }
+  },
+  "thresholds": {
+    "max_analysis_time_ms": 10000,
+    "description": "Analysis time depends on tree traversal"
+  }
+}

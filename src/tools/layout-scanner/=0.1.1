@@ -1,0 +1,28 @@
+(eval):1: /opt/homebrew/bin/pip: bad interpreter: /opt/homebrew/opt/python@3.12/bin/python3.12: no such file or directory
+Defaulting to user installation because normal site-packages is not writeable
+Collecting enry
+  Downloading enry-0.1.1.tar.gz (3.5 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Installing backend dependencies: started
+  Installing backend dependencies: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'error'
+  error: subprocess-exited-with-error
+  
+  × Preparing metadata (pyproject.toml) did not run successfully.
+  │ exit code: 1
+  ╰─> [1 lines of output]
+      error in enry setup command: 'build_enry.py' does not name an existing file
+      [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+error: metadata-generation-failed
+
+× Encountered error while generating package metadata.
+╰─> enry
+
+note: This is an issue with the package mentioned above, not pip.
+hint: See above for details.

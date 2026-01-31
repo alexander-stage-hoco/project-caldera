@@ -1,0 +1,11 @@
+/src/bin/Debug/net8.0/csharp-clean.deps.json
+/src/bin/Debug/net8.0/csharp-clean.dll
+/src/bin/Debug/net8.0/csharp-clean.pdb
+/src/obj/Debug/net8.0/csharp-clean.GeneratedMSBuildEditorConfig.editorconfig
+/src/obj/Debug/net8.0/csharp-clean.AssemblyInfoInputs.cache
+/src/obj/Debug/net8.0/csharp-clean.AssemblyInfo.cs
+/src/obj/Debug/net8.0/csharp-clean.csproj.CoreCompileInputs.cache
+/src/obj/Debug/net8.0/csharp-clean.dll
+/src/obj/Debug/net8.0/refint/csharp-clean.dll
+/src/obj/Debug/net8.0/csharp-clean.pdb
+/src/obj/Debug/net8.0/ref/csharp-clean.dll

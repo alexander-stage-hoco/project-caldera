@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "scenario": "design-violations",
+  "description": ".NET code with design pattern violations",
+  "repo_path": "eval-repos/synthetic/csharp-design-violations",
+  "expected": {
+    "total_files": {"min": 5, "max": 30},
+    "total_violations": {"min": 10, "max": 60},
+    "design_violations": {"min": 8, "max": 50},
+    "key_rules_expected": {
+      "CA1051": "Visible instance fields",
+      "CA1040": "Empty interface",
+      "CA1001": "Type owns disposable but not IDisposable",
+      "CA1502": "Avoid excessive complexity",
+      "CA1506": "Avoid excessive coupling"
+    }
+  },
+  "assertions": [
+    "Visible instance fields detected (CA1051)",
+    "Empty interfaces flagged (CA1040)",
+    "Disposable ownership issues caught (CA1001)",
+    "Excessive complexity/coupling identified"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "scenario": "dead-code",
+  "description": ".NET code with unused imports, fields, and parameters",
+  "repo_path": "eval-repos/synthetic/csharp-dead-code",
+  "expected": {
+    "total_files": {"min": 5, "max": 20},
+    "total_violations": {"min": 15, "max": 80},
+    "dead_code_violations": {"min": 12, "max": 70},
+    "key_rules_expected": {
+      "IDE0005": "Unnecessary using directive",
+      "IDE0060": "Remove unused parameter",
+      "IDE0052": "Remove unread private member",
+      "IDE0051": "Remove unused private member"
+    }
+  },
+  "assertions": [
+    "Unused using directives detected (IDE0005)",
+    "Unused parameters flagged (IDE0060)",
+    "Unused private members identified (IDE0051, IDE0052)"
+  ]
+}

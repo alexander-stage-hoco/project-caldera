@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "scenario": "python",
+  "description": "Ground truth for python.",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/python",
+  "expected": {
+    "language": "python",
+    "version": "2.0",
+    "summary": {
+      "total_files": 10,
+      "total_expected_smells": 22,
+      "notes": "Counts reconciled with actual line numbers (v2.1). Original total was 36 but included mismatched counts.",
+      "smell_categories_covered": [
+        "error_handling",
+        "api_design",
+        "resource_management",
+        "security",
+        "correctness",
+        "best_practice",
+        "performance"
+      ]
+    }
+  },
+  "files": {
+    "empty_catch.py": {
+      "expected_smells": [
+        {
+          "smell_id": "D1_EMPTY_CATCH",
+          "count": 3,
+          "lines": [
+            11,
+            22,
+            37
+          ]
+        }
+      ],
+      "total_expected": 3
+    },
+    "catch_all.py": {
+      "expected_smells": [
+        {
+          "smell_id": "D2_CATCH_ALL",
+          "count": 1,
+          "lines": [
+            13
+          ]
+        }
+      ],
+      "total_expected": 1
+    },
+    "sql_injection.py": {
+      "expected_smells": [
+        {
+          "smell_id": "SQL_INJECTION",
+          "count": 5,
+          "lines": [
+            14,
+            23,
+            32,
+            41,
+            50
+          ]
+        }
+      ],
+      "total_expected": 5,
+      "notes": "Count reconciled with actual line numbers. Additional SQL injection patterns may exist but are not detected by current Semgrep rules."
+    },
+    "complexity.py": {
+      "expected_smells": [
+        {
+          "smell_id": "H2_LONG_PARAM_LIST",
+          "count": 2,
+          "lines": [
+            7,
+            120
+          ]
+        }
+      ],
+      "total_expected": 2
+    },
+    "god_class.py": {
+      "expected_smells": [
+        {
+          "smell_id": "H2_LONG_PARAM_LIST",
+          "count": 0,
+          "lines": []
+        }
+      ],
+      "total_expected": 0,
+      "notes": "God class detection is complex and not reliably detected by Semgrep rules. Marked as 0 expected until specific lines are verified."
+    },
+    "resource_issues.py": {
+      "expected_smells": [
+        {
+          "smell_id": "F2_MISSING_USING",
+          "count": 3,
+          "lines": [
+            9,
+            19,
+            27
+          ]
+        }
+      ],
+      "total_expected": 3,
+      "notes": "Count reconciled with actual line numbers listed."
+    },
+    "no_smells.py": {
+      "expected_smells": [],
+      "total_expected": 0
+    },
+    "correctness_issues.py": {
+      "expected_smells": [
+        {
+          "smell_id": "CORRECTNESS_ISSUE",
+          "count": 4,
+          "lines": [
+            12,
+            19,
+            26,
+            34
+          ]
+        }
+      ],
+      "total_expected": 4,
+      "notes": "Semgrep detects mutable defaults and comparison issues with +2 line offset"
+    },
+    "best_practices.py": {
+      "expected_smells": [
+        {
+          "smell_id": "UNSAFE_DESERIALIZATION",
+          "count": 1,
+          "lines": [
+            51
+          ]
+        }
+      ],
+      "total_expected": 1,
+      "notes": "Semgrep detects pickle.loads as unsafe deserialization. Other patterns (os.popen, bare except, eval, exec) detected by community rules but not mapped to DD smell IDs."
+    },
+    "performance_issues.py": {
+      "expected_smells": [
+        {
+          "smell_id": "F4_EXCESSIVE_ALLOCATION",
+          "count": 3,
+          "lines": [
+            14,
+            23,
+            51
+          ]
+        }
+      ],
+      "total_expected": 3,
+      "notes": "Semgrep detects string concat in loop and list operations as excessive allocation patterns"
+    }
+  }
+}

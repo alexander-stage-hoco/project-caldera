@@ -1,0 +1,120 @@
+rules:
+  # H1: Mutable DTO (public mutable data transfer objects)
+  - id: DD-H1-MUTABLE-DTO-csharp
+    pattern-regex: 'public\s+(class|struct)\s+\w*Dto\b'
+    languages: [csharp]
+    message: "DTO classes should be immutable. Consider using records or readonly properties"
+    severity: INFO
+    metadata:
+      dd_smell_id: H1_MUTABLE_DTO
+      dd_category: api_design
+
+  # H2: Long Parameter List (more than 4-5 parameters)
+  - id: DD-H2-LONG-PARAM-LIST-python
+    pattern-regex: 'def\s+\w+\s*\([^)]{100,}\)'
+    languages: [python]
+    message: "Method has too many parameters. Consider using a parameter object"
+    severity: INFO
+    metadata:
+      dd_smell_id: H2_LONG_PARAM_LIST
+      dd_category: api_design
+
+  - id: DD-H2-LONG-PARAM-LIST-csharp
+    pattern-regex: 'public\s+\w+\s+\w+\s*\([^)]*,[^)]*,[^)]*,[^)]*,[^)]*,[^)]*\)'
+    languages: [csharp]
+    message: "Method has more than 5 parameters. Consider using a parameter object"
+    severity: INFO
+    metadata:
+      dd_smell_id: H2_LONG_PARAM_LIST
+      dd_category: api_design
+
+  # H4: Boolean Blindness (boolean parameters obscure intent)
+  - id: DD-H4-BOOLEAN-BLINDNESS-python
+    pattern: |
+      def $FUNC(..., $PARAM = True, ...):
+          ...
+    languages: [python]
+    message: "Boolean parameter obscures intent. Consider using enum or separate methods"
+    severity: INFO
+    metadata:
+      dd_smell_id: H4_BOOLEAN_BLINDNESS
+      dd_category: api_design
+
+  # H5: Public Mutable Collection
+  - id: DD-H5-PUBLIC-MUTABLE-COLLECTION-csharp-list
+    pattern-regex: 'public\s+List<[^>]+>\s+\w+\s*\{\s*get;\s*set;\s*\}'
+    languages: [csharp]
+    message: "Public mutable collection allows modification. Consider IReadOnlyList or defensive copying"
+    severity: WARNING
+    metadata:
+      dd_smell_id: H5_PUBLIC_MUTABLE_COLLECTION
+      dd_category: api_design
+
+  - id: DD-H5-PUBLIC-MUTABLE-COLLECTION-csharp-dict
+    pattern-regex: 'public\s+Dictionary<[^>]+>\s+\w+\s*\{\s*get;\s*set;\s*\}'
+    languages: [csharp]
+    message: "Public mutable collection allows modification. Consider IReadOnlyDictionary or defensive copying"
+    severity: WARNING
+    metadata:
+      dd_smell_id: H5_PUBLIC_MUTABLE_COLLECTION
+      dd_category: api_design
+
+  # H3: Boolean Blindness (boolean parameters obscure intent at call site)
+  - id: DD-H3-BOOLEAN-BLINDNESS-csharp
+    pattern: public $RET $NAME(..., bool $PARAM, ...) { ... }
+    languages: [csharp]
+    message: "Boolean parameter obscures intent at call site. Consider enum or separate methods"
+    severity: INFO
+    metadata:
+      dd_smell_id: H3_BOOLEAN_BLINDNESS
+      dd_category: api_design
+
+  # H4: Complex Conditionals (hard to understand)
+  - id: DD-H4-COMPLEX-CONDITIONAL-csharp
+    pattern-regex: 'if\s*\([^)]*&&[^)]*\|\|[^)]*\)'
+    languages: [csharp]
+    message: "Complex conditional with mixed && and || - extract into well-named boolean method"
+    severity: INFO
+    metadata:
+      dd_smell_id: H4_COMPLEX_CONDITIONALS
+      dd_category: api_design
+
+  # H6: Static Mutable State (thread safety, test flakiness)
+  - id: DD-H6-STATIC-MUTABLE-STATE-csharp
+    pattern-regex: 'private\s+static\s+(?!readonly\s+)\w+\s+\w+\s*='
+    languages: [csharp]
+    message: "Static mutable state causes thread safety issues and test flakiness. Use readonly or instance state"
+    severity: WARNING
+    metadata:
+      dd_smell_id: H6_STATIC_MUTABLE_STATE
+      dd_category: api_design
+
+  # H6: Public static mutable state (even worse)
+  - id: DD-H6-PUBLIC-STATIC-MUTABLE-csharp
+    pattern-regex: 'public\s+static\s+(?!readonly\s+)\w+\s+\w+\s*='
+    languages: [csharp]
+    message: "Public static mutable state is a global variable - avoid for testability and thread safety"
+    severity: ERROR
+    metadata:
+      dd_smell_id: H6_STATIC_MUTABLE_STATE
+      dd_category: api_design
+
+  # H8: Dynamic type usage (no compile-time type checking)
+  - id: DD-H8-DYNAMIC-USAGE-csharp
+    pattern: dynamic $NAME = ...;
+    languages: [csharp]
+    message: "Dynamic type bypasses compile-time type checking - use strongly typed alternatives"
+    severity: WARNING
+    metadata:
+      dd_smell_id: H8_DYNAMIC_USAGE
+      dd_category: api_design
+
+  # H8: Dynamic parameter (API boundary risk)
+  - id: DD-H8-DYNAMIC-PARAM-csharp
+    pattern: public $RET $NAME(..., dynamic $PARAM, ...) { ... }
+    languages: [csharp]
+    message: "Dynamic parameter in public API reduces type safety and discoverability"
+    severity: WARNING
+    metadata:
+      dd_smell_id: H8_DYNAMIC_USAGE
+      dd_category: api_design

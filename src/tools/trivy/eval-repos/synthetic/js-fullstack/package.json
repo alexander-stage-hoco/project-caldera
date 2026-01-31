@@ -1,0 +1,19 @@
+{
+  "name": "vulnerable-fullstack-app",
+  "version": "1.0.0",
+  "description": "Test repository with vulnerable frontend and backend JavaScript packages",
+  "main": "src/backend/index.js",
+  "dependencies": {
+    "jquery": "1.11.3",
+    "angular": "1.4.8",
+    "bootstrap": "3.3.6",
+    "handlebars": "2.0.0",
+    "underscore": "1.8.3",
+    "dompurify": "2.0.0",
+    "yargs-parser": "18.1.0",
+    "node-fetch": "2.6.6",
+    "serialize-javascript": "3.1.0",
+    "qs": "6.5.2",
+    "shelljs": "0.8.4"
+  }
+}

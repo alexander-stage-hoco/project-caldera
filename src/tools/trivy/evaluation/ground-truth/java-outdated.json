@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "scenario": "java-outdated",
+  "description": "Java repository with outdated Maven packages including Log4Shell and Spring4Shell",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/java-outdated",
+  "expected": {
+    "expected_vulnerabilities": {
+      "min": 5,
+      "max": 150
+    },
+    "expected_critical": {
+      "min": 1,
+      "max": 30
+    },
+    "expected_high": {
+      "min": 2,
+      "max": 80
+    },
+    "required_packages": [
+      "org.apache.logging.log4j:log4j-core",
+      "com.fasterxml.jackson.core:jackson-databind",
+      "org.springframework:spring-core"
+    ],
+    "expected_targets": {
+      "min": 1,
+      "max": 2
+    },
+    "expected_fix_available_pct": {
+      "min": 50,
+      "max": 100
+    },
+    "freshness_expected": true,
+    "expected_outdated_count": {
+      "min": 5,
+      "max": 30
+    },
+    "expected_outdated_pct": {
+      "min": 50,
+      "max": 100
+    }
+  }
+}

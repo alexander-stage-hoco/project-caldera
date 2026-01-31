@@ -1,0 +1,15 @@
+# PoC #20: Roslyn Analyzers
+# Python dependencies for evaluation framework
+
+# Core analysis
+rich>=13.0.0          # Terminal dashboard and progress
+typer>=0.9.0          # CLI framework
+
+# Data processing
+pydantic>=2.0.0       # Data validation
+
+# Testing
+pytest>=7.0.0         # Test framework
+
+# LLM evaluation (optional)
+anthropic>=0.34.0     # Claude API for LLM judges

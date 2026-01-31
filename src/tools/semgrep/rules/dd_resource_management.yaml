@@ -1,0 +1,224 @@
+rules:
+  # F2: Missing Using Statement (IDisposable without proper cleanup)
+  - id: DD-F2-MISSING-USING-streamreader
+    patterns:
+      - pattern: new StreamReader(...)
+      - pattern-not-inside: |
+          using ($_ = new StreamReader(...)) { ... }
+      - pattern-not-inside: |
+          using var $_ = new StreamReader(...);
+    languages: [csharp]
+    message: "StreamReader should be used with 'using' statement for proper disposal"
+    severity: WARNING
+    metadata:
+      dd_smell_id: F2_MISSING_USING
+      dd_category: resource_management
+
+  - id: DD-F2-MISSING-USING-streamwriter
+    patterns:
+      - pattern: new StreamWriter(...)
+      - pattern-not-inside: |
+          using ($_ = new StreamWriter(...)) { ... }
+      - pattern-not-inside: |
+          using var $_ = new StreamWriter(...);
+    languages: [csharp]
+    message: "StreamWriter should be used with 'using' statement for proper disposal"
+    severity: WARNING
+    metadata:
+      dd_smell_id: F2_MISSING_USING
+      dd_category: resource_management
+
+  - id: DD-F2-MISSING-USING-sqlconnection
+    patterns:
+      - pattern: new SqlConnection(...)
+      - pattern-not-inside: |
+          using ($_ = new SqlConnection(...)) { ... }
+      - pattern-not-inside: |
+          using var $_ = new SqlConnection(...);
+    languages: [csharp]
+    message: "SqlConnection should be used with 'using' statement for proper disposal"
+    severity: WARNING
+    metadata:
+      dd_smell_id: F2_MISSING_USING
+      dd_category: resource_management
+
+  # F3: HttpClient Instantiation (should be shared)
+  - id: DD-F3-HTTPCLIENT-NEW
+    patterns:
+      - pattern: new HttpClient()
+      - pattern: new HttpClient(...)
+    languages: [csharp]
+    message: "Creating new HttpClient instances can exhaust socket pool. Use IHttpClientFactory or a shared instance"
+    severity: ERROR
+    metadata:
+      dd_smell_id: F3_HTTPCLIENT_NEW
+      dd_category: resource_management
+
+  # F5: Disposable Field Not Disposed
+  - id: DD-F5-DISPOSABLE-FIELD-csharp
+    patterns:
+      - pattern: |
+          private $TYPE $NAME = new $TYPE(...);
+      - metavariable-regex:
+          metavariable: $TYPE
+          regex: (StreamReader|StreamWriter|SqlConnection|DbConnection|HttpClient|FileStream|MemoryStream)
+    languages: [csharp]
+    message: "Disposable field may not be properly disposed. Implement IDisposable pattern"
+    severity: WARNING
+    metadata:
+      dd_smell_id: F5_DISPOSABLE_FIELD
+      dd_category: resource_management
+
+  # Python resource management
+  - id: DD-F2-MISSING-WITH-python-file
+    patterns:
+      - pattern: open($PATH, ...)
+      - pattern-not-inside: |
+          with open($PATH, ...) as $_:
+              ...
+    languages: [python]
+    message: "File should be opened with 'with' statement for proper cleanup"
+    severity: WARNING
+    metadata:
+      dd_smell_id: F2_MISSING_USING
+      dd_category: resource_management
+
+  - id: DD-F2-MISSING-WITH-python-connection
+    patterns:
+      - pattern: $DB.connect(...)
+      - pattern-not-inside: |
+          with $DB.connect(...) as $_:
+              ...
+    languages: [python]
+    message: "Database connection should be used with 'with' statement for proper cleanup"
+    severity: WARNING
+    metadata:
+      dd_smell_id: F2_MISSING_USING
+      dd_category: resource_management
+
+  # F4: String Concatenation in Loop (Excessive Allocation)
+  - id: DD-F4-STRING-CONCAT-FOR-csharp
+    patterns:
+      - pattern: $STR = $STR + ...;
+      - pattern-inside: |
+          for ($I = 0; $I < $N; $I++) {
+            ...
+          }
+    languages: [csharp]
+    message: "String concatenation in loop causes excessive allocation - use StringBuilder"
+    severity: INFO
+    metadata:
+      dd_smell_id: F4_EXCESSIVE_ALLOCATION
+      dd_category: resource_management
+
+  - id: DD-F4-STRING-CONCAT-WHILE-csharp
+    patterns:
+      - pattern: $STR = $STR + ...;
+      - pattern-inside: |
+          while ($COND) {
+            ...
+          }
+    languages: [csharp]
+    message: "String concatenation in loop causes excessive allocation - use StringBuilder"
+    severity: INFO
+    metadata:
+      dd_smell_id: F4_EXCESSIVE_ALLOCATION
+      dd_category: resource_management
+
+  - id: DD-F4-STRING-CONCAT-FOREACH-csharp
+    patterns:
+      - pattern: $STR = $STR + ...;
+      - pattern-inside: |
+          foreach ($ITEM in $COLLECTION) {
+            ...
+          }
+    languages: [csharp]
+    message: "String concatenation in loop causes excessive allocation - use StringBuilder"
+    severity: INFO
+    metadata:
+      dd_smell_id: F4_EXCESSIVE_ALLOCATION
+      dd_category: resource_management
+
+  - id: DD-F4-STRING-PLUSEQUALS-csharp
+    patterns:
+      - pattern: $STR += ...;
+      - pattern-inside: |
+          for ($I = 0; $I < $N; $I++) {
+            ...
+          }
+    languages: [csharp]
+    message: "String concatenation in loop causes excessive allocation - use StringBuilder"
+    severity: INFO
+    metadata:
+      dd_smell_id: F4_EXCESSIVE_ALLOCATION
+      dd_category: resource_management
+
+  - id: DD-F4-STRING-CONCAT-python
+    pattern: |
+      for $X in ...:
+          ...
+          $STR = $STR + ...
+    languages: [python]
+    message: "String concatenation in loop - consider using ''.join() or list comprehension"
+    severity: INFO
+    metadata:
+      dd_smell_id: F4_EXCESSIVE_ALLOCATION
+      dd_category: resource_management
+
+  - id: DD-F4-STRING-PLUSEQUALS-python
+    pattern: |
+      for $X in ...:
+          ...
+          $STR += ...
+    languages: [python]
+    message: "String concatenation in loop - consider using ''.join() or list comprehension"
+    severity: INFO
+    metadata:
+      dd_smell_id: F4_EXCESSIVE_ALLOCATION
+      dd_category: resource_management
+
+  # F6: Event Handler Subscription Leak
+  - id: DD-F6-EVENT-SUBSCRIPTION-csharp
+    pattern: $OBJ.$EVENT += $HANDLER;
+    languages: [csharp]
+    message: "Event subscription - ensure corresponding unsubscription to prevent memory leaks"
+    severity: INFO
+    metadata:
+      dd_smell_id: F6_EVENT_HANDLER_LEAK
+      dd_category: resource_management
+
+  # F6: Event subscription in constructor (high risk of leak)
+  - id: DD-F6-EVENT-IN-CONSTRUCTOR-csharp
+    patterns:
+      - pattern: $OBJ.$EVENT += ...;
+      - pattern-inside: |
+          class $C {
+            $C(...) {
+              ...
+            }
+          }
+    languages: [csharp]
+    message: "Event subscription in constructor - implement IDisposable to unsubscribe"
+    severity: WARNING
+    metadata:
+      dd_smell_id: F6_EVENT_HANDLER_LEAK
+      dd_category: resource_management
+
+  # Java listener leak risk
+  - id: DD-F6-LISTENER-ADD-java
+    pattern: $OBJ.addListener($HANDLER)
+    languages: [java]
+    message: "Listener added - ensure corresponding removeListener to prevent memory leaks"
+    severity: INFO
+    metadata:
+      dd_smell_id: F6_EVENT_HANDLER_LEAK
+      dd_category: resource_management
+
+  - id: DD-F6-ADDEVENTLISTENER-js
+    pattern: $OBJ.addEventListener($EVENT, $HANDLER)
+    languages: [javascript, typescript]
+    message: "Event listener added - ensure corresponding removeEventListener to prevent memory leaks"
+    severity: INFO
+    metadata:
+      dd_smell_id: F6_EVENT_HANDLER_LEAK
+      dd_category: resource_management

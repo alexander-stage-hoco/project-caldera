@@ -1,0 +1,216 @@
+rules:
+  # D1: Empty Catch Block
+  - id: DD-D1-EMPTY-CATCH-python
+    pattern: |
+      try:
+          ...
+      except $X:
+          pass
+    languages: [python]
+    message: "Empty catch block swallows exceptions silently"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D1_EMPTY_CATCH
+      dd_category: error_handling
+
+  - id: DD-D1-EMPTY-CATCH-csharp
+    pattern: catch ($T $E) { }
+    languages: [csharp]
+    message: "Empty catch block swallows exceptions silently"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D1_EMPTY_CATCH
+      dd_category: error_handling
+
+  - id: DD-D1-EMPTY-CATCH-java
+    pattern: catch ($T $E) { }
+    languages: [java]
+    message: "Empty catch block swallows exceptions silently"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D1_EMPTY_CATCH
+      dd_category: error_handling
+
+  - id: DD-D1-EMPTY-CATCH-js
+    pattern: catch ($E) { }
+    languages: [javascript, typescript]
+    message: "Empty catch block swallows exceptions silently"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D1_EMPTY_CATCH
+      dd_category: error_handling
+
+  # D2: Catch-All / Generic Exception Catching
+  - id: DD-D2-CATCH-ALL-python-bare
+    pattern: |
+      except:
+          ...
+    languages: [python]
+    message: "Catching all exceptions may hide important errors"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D2_CATCH_ALL
+      dd_category: error_handling
+
+  - id: DD-D2-CATCH-ALL-python-exception
+    pattern: |
+      try:
+          ...
+      except Exception as $E:
+          ...
+    languages: [python]
+    message: "Catching all exceptions may hide important errors"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D2_CATCH_ALL
+      dd_category: error_handling
+
+  - id: DD-D2-CATCH-ALL-csharp
+    pattern: catch (Exception $E) { ... }
+    languages: [csharp]
+    message: "Catching all exceptions may hide important errors"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D2_CATCH_ALL
+      dd_category: error_handling
+
+  - id: DD-D2-CATCH-ALL-java
+    pattern: catch (Exception $E) { ... }
+    languages: [java]
+    message: "Catching all exceptions may hide important errors"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D2_CATCH_ALL
+      dd_category: error_handling
+
+  # D4: Incorrect Re-throw (losing stack trace)
+  - id: DD-D4-INCORRECT-RETHROW-csharp
+    pattern: catch ($T $E) { ... throw $E; ... }
+    languages: [csharp]
+    message: "'throw ex' loses the original stack trace. Use 'throw' instead"
+    severity: ERROR
+    metadata:
+      dd_smell_id: D4_INCORRECT_RETHROW
+      dd_category: error_handling
+
+  - id: DD-D4-INCORRECT-RETHROW-python
+    pattern: |
+      try:
+          ...
+      except $T as $E:
+          ...
+          raise $E
+    languages: [python]
+    message: "Re-raising caught exception may lose context. Use 'raise' or 'raise ... from e'"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D4_INCORRECT_RETHROW
+      dd_category: error_handling
+
+  # D5: Throwing Generic Exception
+  - id: DD-D5-GENERIC-EXCEPTION-python
+    pattern: raise Exception(...)
+    languages: [python]
+    message: "Throwing generic Exception. Use a specific exception type"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D5_GENERIC_EXCEPTION
+      dd_category: error_handling
+
+  - id: DD-D5-GENERIC-EXCEPTION-csharp
+    pattern: throw new Exception(...);
+    languages: [csharp]
+    message: "Throwing generic Exception. Use a specific exception type"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D5_GENERIC_EXCEPTION
+      dd_category: error_handling
+
+  - id: DD-D5-GENERIC-EXCEPTION-java
+    pattern: throw new Exception(...);
+    languages: [java]
+    message: "Throwing generic Exception. Use a specific exception type"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D5_GENERIC_EXCEPTION
+      dd_category: error_handling
+
+  # D3: Log and Swallow (exception logged but not rethrown)
+  - id: DD-D3-LOG-AND-SWALLOW-csharp
+    pattern: |
+      catch ($T $E) {
+        ...
+        $LOG.Log...($E);
+      }
+    languages: [csharp]
+    message: "Exception logged but swallowed - consider rethrowing or handling properly"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D3_LOG_AND_CONTINUE
+      dd_category: error_handling
+
+  - id: DD-D3-LOG-AND-SWALLOW-csharp-error
+    pattern: |
+      catch ($T $E) {
+        ...
+        $LOG.LogError(..., $E);
+      }
+    languages: [csharp]
+    message: "Exception logged but swallowed - consider rethrowing or handling properly"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D3_LOG_AND_CONTINUE
+      dd_category: error_handling
+
+  # D7: Catch returns default value (hiding errors)
+  - id: DD-D7-CATCH-RETURN-NULL-csharp
+    pattern: |
+      catch (...) {
+        ...
+        return null;
+      }
+    languages: [csharp]
+    message: "Catch block returns null - errors are silently hidden"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D7_CATCH_RETURN_DEFAULT
+      dd_category: error_handling
+
+  - id: DD-D7-CATCH-RETURN-FALSE-csharp
+    pattern: |
+      catch (...) {
+        ...
+        return false;
+      }
+    languages: [csharp]
+    message: "Catch block returns false - errors are silently hidden"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D7_CATCH_RETURN_DEFAULT
+      dd_category: error_handling
+
+  - id: DD-D7-CATCH-RETURN-DEFAULT-csharp
+    pattern: |
+      catch (...) {
+        ...
+        return default;
+      }
+    languages: [csharp]
+    message: "Catch block returns default - errors are silently hidden"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D7_CATCH_RETURN_DEFAULT
+      dd_category: error_handling
+
+  - id: DD-D7-CATCH-RETURN-ZERO-csharp
+    pattern: |
+      catch (...) {
+        ...
+        return 0;
+      }
+    languages: [csharp]
+    message: "Catch block returns 0 - errors are silently hidden"
+    severity: WARNING
+    metadata:
+      dd_smell_id: D7_CATCH_RETURN_DEFAULT
+      dd_category: error_handling

@@ -1,0 +1,131 @@
+# EditorConfig for Roslyn Analyzers PoC
+# This enables the full set of analyzers for testing
+
+root = true
+
+[*.cs]
+# Indentation and spacing
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Enable all security analyzers as warnings
+dotnet_diagnostic.CA3001.severity = warning  # SQL Injection
+dotnet_diagnostic.CA3002.severity = warning  # XSS
+dotnet_diagnostic.CA2100.severity = warning  # SQL Review
+dotnet_diagnostic.CA5350.severity = warning  # Weak Crypto (DES)
+dotnet_diagnostic.CA5351.severity = warning  # Broken Crypto (MD5)
+dotnet_diagnostic.CA5385.severity = warning  # RSA Key Size
+dotnet_diagnostic.CA5390.severity = warning  # Hardcoded Keys
+dotnet_diagnostic.CA5364.severity = warning  # Deprecated TLS
+dotnet_diagnostic.CA5397.severity = warning  # Deprecated SSL
+dotnet_diagnostic.CA2300.severity = warning  # BinaryFormatter
+dotnet_diagnostic.CA2301.severity = warning  # BinaryFormatter without binder
+dotnet_diagnostic.CA2305.severity = warning  # LosFormatter
+dotnet_diagnostic.CA2311.severity = warning  # NetDataContractSerializer
+dotnet_diagnostic.CA2315.severity = warning  # ObjectStateFormatter
+dotnet_diagnostic.CA3147.severity = warning  # Missing CSRF
+
+# Enable design analyzers
+dotnet_diagnostic.CA1051.severity = warning  # Visible instance fields
+dotnet_diagnostic.CA1040.severity = warning  # Empty interfaces
+dotnet_diagnostic.CA1000.severity = warning  # Static on generics
+dotnet_diagnostic.CA1001.severity = warning  # Missing IDisposable
+dotnet_diagnostic.CA1063.severity = warning  # Improper IDisposable
+dotnet_diagnostic.CA1061.severity = warning  # Hidden base methods
+dotnet_diagnostic.CA1502.severity = warning  # Excessive complexity
+dotnet_diagnostic.CA1506.severity = warning  # Excessive coupling
+
+# IDisposableAnalyzers - enhanced disposal pattern detection
+dotnet_diagnostic.IDISP014.severity = warning  # Use a single instance of HttpClient
+dotnet_diagnostic.IDISP017.severity = warning  # Prefer using over try-finally
+
+# Enable resource management analyzers
+dotnet_diagnostic.CA2000.severity = warning  # Objects not disposed
+dotnet_diagnostic.CA2016.severity = warning  # Missing CancellationToken
+dotnet_diagnostic.CA2007.severity = warning  # Task await issues
+
+# Enable dead code analyzers (IDE rules)
+dotnet_diagnostic.IDE0005.severity = warning  # Unused imports
+dotnet_diagnostic.IDE0040.severity = warning  # Missing accessibility
+dotnet_diagnostic.IDE0052.severity = warning  # Unused private members
+dotnet_diagnostic.IDE0059.severity = warning  # Unused locals
+dotnet_diagnostic.IDE0060.severity = warning  # Unused parameters
+dotnet_diagnostic.CA1801.severity = warning  # Unused parameters (CA)
+dotnet_diagnostic.CA1812.severity = warning  # Uninstantiated classes
+
+# Enable performance analyzers
+dotnet_diagnostic.CA1825.severity = warning  # Empty array allocation
+dotnet_diagnostic.CA1826.severity = warning  # LINQ alternatives
+dotnet_diagnostic.CA1829.severity = warning  # Length/Count property
+
+# ==============================================================================
+# Due Diligence Profile: Suppress non-critical style rules
+# These rules create noise without providing value for technical due diligence
+# ==============================================================================
+
+# StyleCop - Documentation rules (noise for due diligence)
+dotnet_diagnostic.SA1633.severity = none  # File requires header
+dotnet_diagnostic.SA1649.severity = none  # File name must match type
+dotnet_diagnostic.SA1402.severity = none  # File may only contain single type
+
+# StyleCop - Formatting rules (noise for due diligence)
+dotnet_diagnostic.SA1200.severity = none  # Using directives placement
+dotnet_diagnostic.SA1516.severity = none  # Elements separated by blank line
+dotnet_diagnostic.SA1101.severity = none  # Prefix this. on local calls
+dotnet_diagnostic.SA1309.severity = none  # Field names underscore prefix
+dotnet_diagnostic.SA1503.severity = none  # Braces should not be omitted
+dotnet_diagnostic.SA1502.severity = none  # Element should not be on single line
+dotnet_diagnostic.SA1413.severity = none  # Trailing comma
+dotnet_diagnostic.SA1515.severity = none  # Single-line comment preceded by blank line
+
+# Meziantou - Good practice noise (not critical for due diligence)
+dotnet_diagnostic.MA0048.severity = none  # File name doesn't match type
+dotnet_diagnostic.MA0007.severity = none  # Add comma after last value
+dotnet_diagnostic.MA0004.severity = none  # Use Task.ConfigureAwait
+
+# SonarAnalyzer - Method could be static (too noisy)
+dotnet_diagnostic.S2325.severity = none   # Method could be made static
+
+# Additional suppressions for clean file noise
+dotnet_diagnostic.CA2007.severity = warning   # Re-enabled for async pattern detection
+dotnet_diagnostic.CA1510.severity = none   # Use throw helper
+dotnet_diagnostic.CA1513.severity = none   # Use ObjectDisposedException throw helper
+dotnet_diagnostic.CA1819.severity = none   # Properties should not return arrays
+dotnet_diagnostic.CA1031.severity = none   # Do not catch general exception types
+dotnet_diagnostic.CA1850.severity = none   # Prefer static HashData method
+dotnet_diagnostic.CA1721.severity = none   # Property names should not match get methods
+dotnet_diagnostic.CA1822.severity = none   # Mark members as static (too noisy)
+
+# More StyleCop suppressions
+dotnet_diagnostic.SA1202.severity = none   # Elements should be ordered by access
+dotnet_diagnostic.SA1512.severity = none   # Single-line comments should not be followed by blank
+dotnet_diagnostic.SA1201.severity = none   # Elements should appear in correct order
+dotnet_diagnostic.SA1025.severity = none   # Code should not contain multiple whitespace
+dotnet_diagnostic.SA1204.severity = none   # Static elements should appear before instance
+dotnet_diagnostic.SA1210.severity = none   # Using directives should be ordered alphabetically
+
+# ErrorProne.NET - Suspicion rules (noise)
+dotnet_diagnostic.EPC12.severity = none    # Suspicion of unassigned member
+
+# SonarAnalyzer - Additional noise
+dotnet_diagnostic.S3459.severity = none    # Unassigned members
+dotnet_diagnostic.S4144.severity = none    # Duplicate method
+dotnet_diagnostic.S6967.severity = none    # Model binding issues (design choice)
+
+# Roslynator - Style preferences
+dotnet_diagnostic.RCS1169.severity = none  # Mark field as read-only
+dotnet_diagnostic.RCS1163.severity = none  # Unused parameter
+
+# Meziantou - Additional noise
+dotnet_diagnostic.MA0038.severity = none   # Make method static
+dotnet_diagnostic.MA0076.severity = none   # Do not use implicit culture-sensitive ToString
+
+# Compiler warnings (noise for evaluation)
+dotnet_diagnostic.CS0649.severity = none   # Field never assigned
+
+# SecurityCodeScan - CBC mode false positive (CBC with IV is acceptable)
+dotnet_diagnostic.SCS0013.severity = none  # Weak CipherMode (false positive for CBC with IV)

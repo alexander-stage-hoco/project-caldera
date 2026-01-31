@@ -1,0 +1,10 @@
+{
+  "name": "no-vulnerabilities",
+  "version": "1.0.0",
+  "description": "A project with no known vulnerable dependencies",
+  "dependencies": {
+    "express": "4.21.0",
+    "lodash": "4.17.21",
+    "axios": "1.7.7"
+  }
+}

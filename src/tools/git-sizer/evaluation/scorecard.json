@@ -1,0 +1,244 @@
+{
+  "tool": "git-sizer",
+  "version": "1.0.0",
+  "generated_at": "2026-01-30T22:17:05.045904",
+  "description": "Evaluation scorecard for git-sizer repository health analysis",
+  "summary": {
+    "total_checks": 28,
+    "passed": 28,
+    "failed": 0,
+    "score": 1.0,
+    "score_percent": 100.0,
+    "normalized_score": 5.0,
+    "decision": "STRONG_PASS"
+  },
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "Accuracy",
+      "weight": 0.25,
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.25,
+      "checks": [
+        {
+          "check_id": "AC-1",
+          "name": "Large blob detection",
+          "passed": true,
+          "message": "Detected max blob size: 10.0 MiB"
+        },
+        {
+          "check_id": "AC-2",
+          "name": "Total blob size accuracy",
+          "passed": true,
+          "message": "Detected total blob size: 22.0 MiB"
+        },
+        {
+          "check_id": "AC-3",
+          "name": "Commit count accuracy",
+          "passed": true,
+          "message": "Detected 501 commits (expected ~501)"
+        },
+        {
+          "check_id": "AC-4",
+          "name": "Tree entries detection",
+          "passed": true,
+          "message": "Detected max tree entries: 1000 (expected ~1000)"
+        },
+        {
+          "check_id": "AC-5",
+          "name": "Path depth detection",
+          "passed": true,
+          "message": "Detected max path depth: 21 (expected ~20)"
+        },
+        {
+          "check_id": "AC-6",
+          "name": "Health grade accuracy",
+          "passed": true,
+          "message": "Correct grades: 3/3"
+        },
+        {
+          "check_id": "AC-7",
+          "name": "LFS candidate identification",
+          "passed": true,
+          "message": "Identified 1 LFS candidates"
+        },
+        {
+          "check_id": "AC-8",
+          "name": "Threshold violation detection",
+          "passed": true,
+          "message": "Violation detection: 4/4 repos correct"
+        }
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Coverage",
+      "weight": 0.25,
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.25,
+      "checks": [
+        {
+          "check_id": "CV-1",
+          "name": "Blob metrics coverage",
+          "passed": true,
+          "message": "Blob metrics: 15/15 present"
+        },
+        {
+          "check_id": "CV-2",
+          "name": "Tree metrics coverage",
+          "passed": true,
+          "message": "Tree metrics: 20/20 present"
+        },
+        {
+          "check_id": "CV-3",
+          "name": "Commit metrics coverage",
+          "passed": true,
+          "message": "Commit metrics: 20/20 present"
+        },
+        {
+          "check_id": "CV-4",
+          "name": "Reference metrics coverage",
+          "passed": true,
+          "message": "Reference metrics: 15/15 present"
+        },
+        {
+          "check_id": "CV-5",
+          "name": "Path metrics coverage",
+          "passed": true,
+          "message": "Path metrics: 10/10 present"
+        },
+        {
+          "check_id": "CV-6",
+          "name": "Expanded checkout metrics",
+          "passed": true,
+          "message": "Expanded metrics: 15/15 present"
+        },
+        {
+          "check_id": "CV-7",
+          "name": "Health grade coverage",
+          "passed": true,
+          "message": "Health grades: 5/5 repos have grades"
+        },
+        {
+          "check_id": "CV-8",
+          "name": "Violation detail coverage",
+          "passed": true,
+          "message": "Violation details: 3/3 complete"
+        }
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Edge Cases",
+      "weight": 0.25,
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.25,
+      "checks": [
+        {
+          "check_id": "EC-1",
+          "name": "Minimal repo handling",
+          "passed": true,
+          "message": "Minimal repo analyzed successfully"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "Large history handling",
+          "passed": true,
+          "message": "Deep history repo analyzed successfully"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "Wide tree handling",
+          "passed": true,
+          "message": "Wide tree repo analyzed successfully"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "Deep path handling",
+          "passed": true,
+          "message": "Deep paths detected correctly"
+        },
+        {
+          "check_id": "EC-5",
+          "name": "No violations case",
+          "passed": true,
+          "message": "Healthy repo correctly has no violations"
+        },
+        {
+          "check_id": "EC-6",
+          "name": "Multiple violations case",
+          "passed": true,
+          "message": "Multiple violations detected correctly"
+        },
+        {
+          "check_id": "EC-7",
+          "name": "JSON output validity",
+          "passed": true,
+          "message": "JSON structure: 5/5 repos have required fields"
+        },
+        {
+          "check_id": "EC-8",
+          "name": "Raw output preservation",
+          "passed": true,
+          "message": "Raw output preserved: 5/5 repos"
+        }
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "Performance",
+      "weight": 0.25,
+      "total_checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.25,
+      "checks": [
+        {
+          "check_id": "PF-1",
+          "name": "Total analysis speed",
+          "passed": true,
+          "message": "Total duration: 866ms (threshold: 5000ms)"
+        },
+        {
+          "check_id": "PF-2",
+          "name": "Per-repo analysis speed",
+          "passed": true,
+          "message": "5/5 repos under 2000ms"
+        },
+        {
+          "check_id": "PF-3",
+          "name": "Large repo handling",
+          "passed": true,
+          "message": "Deep history: 371ms (threshold: 30000ms)"
+        },
+        {
+          "check_id": "PF-4",
+          "name": "Output size efficiency",
+          "passed": true,
+          "message": "Raw output: 7.2KB (threshold: 98KB)"
+        }
+      ]
+    }
+  ],
+  "critical_failures": [],
+  "thresholds": {
+    "STRONG_PASS": ">= 4.0 (80%+)",
+    "PASS": ">= 3.5 (70%+)",
+    "WEAK_PASS": ">= 3.0 (60%+)",
+    "FAIL": "< 3.0 (below 60%)"
+  },
+  "metadata": {
+    "analysis_path": "evaluation/results",
+    "ground_truth_dir": "evaluation/ground-truth"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "scenario": "resource-management",
+  "description": ".NET code with resource management issues (undisposed objects)",
+  "repo_path": "eval-repos/synthetic/csharp-resources",
+  "expected": {
+    "total_files": {"min": 3, "max": 15},
+    "total_violations": {"min": 5, "max": 30},
+    "resource_violations": {"min": 4, "max": 25},
+    "key_rules_expected": {
+      "CA2000": "Dispose objects before losing scope",
+      "CA2016": "Forward CancellationToken parameter",
+      "CA2007": "Consider calling ConfigureAwait on awaited task"
+    }
+  },
+  "assertions": [
+    "Undisposed objects detected (CA2000)",
+    "Missing CancellationToken forwarding flagged (CA2016)",
+    "Async best practices checked (CA2007)"
+  ]
+}

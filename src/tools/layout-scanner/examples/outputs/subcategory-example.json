@@ -1,0 +1,505 @@
+{
+  "schema_version": "1.0",
+  "tool": "layout-scanner",
+  "tool_version": "1.0.0",
+  "run_id": "layout-20260110-211802-tmpz34cv7te",
+  "timestamp": "2026-01-10T21:18:02.942486Z",
+  "repository": "tmpz34cv7te",
+  "repository_path": "/private/var/folders/zr/c7zp4x316wvg0rsvdnq_dcm40000gn/T/tmpz34cv7te",
+  "passes_completed": [
+    "filesystem"
+  ],
+  "statistics": {
+    "total_files": 8,
+    "total_directories": 8,
+    "total_size_bytes": 137,
+    "max_depth": 3,
+    "scan_duration_ms": 2,
+    "files_per_second": 4000.0,
+    "by_classification": {
+      "config": 1,
+      "test": 1,
+      "test::unit": 2,
+      "test::integration": 1,
+      "test::e2e": 1,
+      "source": 1,
+      "ci": 1
+    },
+    "by_language": {
+      "makefile": 1,
+      "python": 6,
+      "yaml": 1
+    }
+  },
+  "files": {
+    "Makefile": {
+      "id": "f-76ed074a9305",
+      "path": "Makefile",
+      "name": "Makefile",
+      "extension": "",
+      "size_bytes": 17,
+      "modified_time": "2026-01-10T21:18:02.902196Z",
+      "is_symlink": false,
+      "language": "makefile",
+      "classification": "config",
+      "classification_reason": "filename:^Makefile$...",
+      "classification_confidence": 0.55,
+      "parent_directory_id": "d-000000000000",
+      "depth": 1,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "tests/conftest.py": {
+      "id": "f-e52e4ddd58b7",
+      "path": "tests/conftest.py",
+      "name": "conftest.py",
+      "extension": ".py",
+      "size_bytes": 13,
+      "modified_time": "2026-01-10T21:18:02.902047Z",
+      "is_symlink": false,
+      "language": "python",
+      "classification": "test",
+      "classification_reason": "path:tests/, filename:^conftest\\.py$...",
+      "classification_confidence": 1.0,
+      "parent_directory_id": "d-59830ebc3a41",
+      "depth": 2,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "tests/unit/test_math.py": {
+      "id": "f-0f32d37461fa",
+      "path": "tests/unit/test_math.py",
+      "name": "test_math.py",
+      "extension": ".py",
+      "size_bytes": 20,
+      "modified_time": "2026-01-10T21:18:02.901716Z",
+      "is_symlink": false,
+      "language": "python",
+      "classification": "test::unit",
+      "classification_reason": "path:tests/unit/",
+      "classification_confidence": 0.61,
+      "parent_directory_id": "d-3fcb9fec680b",
+      "depth": 3,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "tests/unit/test_utils.py": {
+      "id": "f-a28b281ee090",
+      "path": "tests/unit/test_utils.py",
+      "name": "test_utils.py",
+      "extension": ".py",
+      "size_bytes": 23,
+      "modified_time": "2026-01-10T21:18:02.901807Z",
+      "is_symlink": false,
+      "language": "python",
+      "classification": "test::unit",
+      "classification_reason": "path:tests/unit/",
+      "classification_confidence": 0.61,
+      "parent_directory_id": "d-3fcb9fec680b",
+      "depth": 3,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "tests/integration/test_api.py": {
+      "id": "f-50b3f8c533e7",
+      "path": "tests/integration/test_api.py",
+      "name": "test_api.py",
+      "extension": ".py",
+      "size_bytes": 20,
+      "modified_time": "2026-01-10T21:18:02.901895Z",
+      "is_symlink": false,
+      "language": "python",
+      "classification": "test::integration",
+      "classification_reason": "path:tests/integration/",
+      "classification_confidence": 0.61,
+      "parent_directory_id": "d-b40bc1374968",
+      "depth": 3,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "tests/e2e/test_flow.py": {
+      "id": "f-69eb511ed3a9",
+      "path": "tests/e2e/test_flow.py",
+      "name": "test_flow.py",
+      "extension": ".py",
+      "size_bytes": 21,
+      "modified_time": "2026-01-10T21:18:02.901973Z",
+      "is_symlink": false,
+      "language": "python",
+      "classification": "test::e2e",
+      "classification_reason": "path:tests/e2e/",
+      "classification_confidence": 0.61,
+      "parent_directory_id": "d-2e56a3eb2f50",
+      "depth": 3,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "src/app.py": {
+      "id": "f-04791d82dd15",
+      "path": "src/app.py",
+      "name": "app.py",
+      "extension": ".py",
+      "size_bytes": 15,
+      "modified_time": "2026-01-10T21:18:02.901623Z",
+      "is_symlink": false,
+      "language": "python",
+      "classification": "source",
+      "classification_reason": "default",
+      "classification_confidence": 0.2,
+      "parent_directory_id": "d-25a6634263c1",
+      "depth": 2,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    ".github/workflows/ci.yml": {
+      "id": "f-b803fcb7f17e",
+      "path": ".github/workflows/ci.yml",
+      "name": "ci.yml",
+      "extension": ".yml",
+      "size_bytes": 8,
+      "modified_time": "2026-01-10T21:18:02.902122Z",
+      "is_symlink": false,
+      "language": "yaml",
+      "classification": "ci",
+      "classification_reason": "path:.github/",
+      "classification_confidence": 0.61,
+      "parent_directory_id": "d-87ee5504a3e2",
+      "depth": 3,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    }
+  },
+  "directories": {
+    "": {
+      "id": "d-000000000000",
+      "path": "",
+      "name": "tmpz34cv7te",
+      "modified_time": "2026-01-10T21:18:02.902167Z",
+      "is_symlink": false,
+      "classification": "config",
+      "classification_reason": "majority config (100%)",
+      "parent_directory_id": null,
+      "depth": 0,
+      "child_directory_ids": [
+        "d-bdcc6a2a85f6",
+        "d-25a6634263c1",
+        "d-59830ebc3a41"
+      ],
+      "child_file_ids": [
+        "f-76ed074a9305"
+      ],
+      "direct_file_count": 1,
+      "direct_directory_count": 3,
+      "recursive_file_count": 1,
+      "recursive_directory_count": 3,
+      "direct_size_bytes": 17,
+      "recursive_size_bytes": 17,
+      "classification_distribution": {
+        "config": 1
+      },
+      "language_distribution": {
+        "makefile": 1
+      }
+    },
+    ".github": {
+      "id": "d-bdcc6a2a85f6",
+      "path": ".github",
+      "name": ".github",
+      "modified_time": "2026-01-10T21:18:02.901500Z",
+      "is_symlink": false,
+      "classification": "ci",
+      "classification_reason": "majority ci (100%)",
+      "parent_directory_id": "d-000000000000",
+      "depth": 1,
+      "child_directory_ids": [
+        "d-87ee5504a3e2"
+      ],
+      "child_file_ids": [],
+      "direct_file_count": 0,
+      "direct_directory_count": 1,
+      "recursive_file_count": 1,
+      "recursive_directory_count": 1,
+      "direct_size_bytes": 0,
+      "recursive_size_bytes": 8,
+      "classification_distribution": {
+        "ci": 1
+      },
+      "language_distribution": {
+        "yaml": 1
+      }
+    },
+    "src": {
+      "id": "d-25a6634263c1",
+      "path": "src",
+      "name": "src",
+      "modified_time": "2026-01-10T21:18:02.901560Z",
+      "is_symlink": false,
+      "classification": "source",
+      "classification_reason": "majority source (100%)",
+      "parent_directory_id": "d-000000000000",
+      "depth": 1,
+      "child_directory_ids": [],
+      "child_file_ids": [
+        "f-04791d82dd15"
+      ],
+      "direct_file_count": 1,
+      "direct_directory_count": 0,
+      "recursive_file_count": 1,
+      "recursive_directory_count": 0,
+      "direct_size_bytes": 15,
+      "recursive_size_bytes": 15,
+      "classification_distribution": {
+        "source": 1
+      },
+      "language_distribution": {
+        "python": 1
+      }
+    },
+    "tests": {
+      "id": "d-59830ebc3a41",
+      "path": "tests",
+      "name": "tests",
+      "modified_time": "2026-01-10T21:18:02.902017Z",
+      "is_symlink": false,
+      "classification": "test::unit",
+      "classification_reason": "majority test::unit (40%)",
+      "parent_directory_id": "d-000000000000",
+      "depth": 1,
+      "child_directory_ids": [
+        "d-2e56a3eb2f50",
+        "d-b40bc1374968",
+        "d-3fcb9fec680b"
+      ],
+      "child_file_ids": [
+        "f-e52e4ddd58b7"
+      ],
+      "direct_file_count": 1,
+      "direct_directory_count": 3,
+      "recursive_file_count": 5,
+      "recursive_directory_count": 3,
+      "direct_size_bytes": 13,
+      "recursive_size_bytes": 97,
+      "classification_distribution": {
+        "test": 1,
+        "test::e2e": 1,
+        "test::integration": 1,
+        "test::unit": 2
+      },
+      "language_distribution": {
+        "python": 5
+      }
+    },
+    "tests/e2e": {
+      "id": "d-2e56a3eb2f50",
+      "path": "tests/e2e",
+      "name": "e2e",
+      "modified_time": "2026-01-10T21:18:02.901943Z",
+      "is_symlink": false,
+      "classification": "test::e2e",
+      "classification_reason": "majority test::e2e (100%)",
+      "parent_directory_id": "d-59830ebc3a41",
+      "depth": 2,
+      "child_directory_ids": [],
+      "child_file_ids": [
+        "f-69eb511ed3a9"
+      ],
+      "direct_file_count": 1,
+      "direct_directory_count": 0,
+      "recursive_file_count": 1,
+      "recursive_directory_count": 0,
+      "direct_size_bytes": 21,
+      "recursive_size_bytes": 21,
+      "classification_distribution": {
+        "test::e2e": 1
+      },
+      "language_distribution": {
+        "python": 1
+      }
+    },
+    "tests/integration": {
+      "id": "d-b40bc1374968",
+      "path": "tests/integration",
+      "name": "integration",
+      "modified_time": "2026-01-10T21:18:02.901862Z",
+      "is_symlink": false,
+      "classification": "test::integration",
+      "classification_reason": "majority test::integration (100%)",
+      "parent_directory_id": "d-59830ebc3a41",
+      "depth": 2,
+      "child_directory_ids": [],
+      "child_file_ids": [
+        "f-50b3f8c533e7"
+      ],
+      "direct_file_count": 1,
+      "direct_directory_count": 0,
+      "recursive_file_count": 1,
+      "recursive_directory_count": 0,
+      "direct_size_bytes": 20,
+      "recursive_size_bytes": 20,
+      "classification_distribution": {
+        "test::integration": 1
+      },
+      "language_distribution": {
+        "python": 1
+      }
+    },
+    "tests/unit": {
+      "id": "d-3fcb9fec680b",
+      "path": "tests/unit",
+      "name": "unit",
+      "modified_time": "2026-01-10T21:18:02.901766Z",
+      "is_symlink": false,
+      "classification": "test::unit",
+      "classification_reason": "majority test::unit (100%)",
+      "parent_directory_id": "d-59830ebc3a41",
+      "depth": 2,
+      "child_directory_ids": [],
+      "child_file_ids": [
+        "f-0f32d37461fa",
+        "f-a28b281ee090"
+      ],
+      "direct_file_count": 2,
+      "direct_directory_count": 0,
+      "recursive_file_count": 2,
+      "recursive_directory_count": 0,
+      "direct_size_bytes": 43,
+      "recursive_size_bytes": 43,
+      "classification_distribution": {
+        "test::unit": 2
+      },
+      "language_distribution": {
+        "python": 2
+      }
+    },
+    ".github/workflows": {
+      "id": "d-87ee5504a3e2",
+      "path": ".github/workflows",
+      "name": "workflows",
+      "modified_time": "2026-01-10T21:18:02.902092Z",
+      "is_symlink": false,
+      "classification": "ci",
+      "classification_reason": "majority ci (100%)",
+      "parent_directory_id": "d-bdcc6a2a85f6",
+      "depth": 2,
+      "child_directory_ids": [],
+      "child_file_ids": [
+        "f-b803fcb7f17e"
+      ],
+      "direct_file_count": 1,
+      "direct_directory_count": 0,
+      "recursive_file_count": 1,
+      "recursive_directory_count": 0,
+      "direct_size_bytes": 8,
+      "recursive_size_bytes": 8,
+      "classification_distribution": {
+        "ci": 1
+      },
+      "language_distribution": {
+        "yaml": 1
+      }
+    }
+  },
+  "hierarchy": {
+    "root_id": "d-000000000000",
+    "max_depth": 3,
+    "total_files": 8,
+    "total_directories": 8,
+    "total_size_bytes": 137,
+    "children": {
+      "d-000000000000": [
+        "d-bdcc6a2a85f6",
+        "d-25a6634263c1",
+        "d-59830ebc3a41",
+        "f-76ed074a9305"
+      ],
+      "d-59830ebc3a41": [
+        "d-2e56a3eb2f50",
+        "d-b40bc1374968",
+        "d-3fcb9fec680b",
+        "f-e52e4ddd58b7"
+      ],
+      "d-bdcc6a2a85f6": [
+        "d-87ee5504a3e2"
+      ],
+      "d-3fcb9fec680b": [
+        "f-0f32d37461fa",
+        "f-a28b281ee090"
+      ],
+      "d-b40bc1374968": [
+        "f-50b3f8c533e7"
+      ],
+      "d-2e56a3eb2f50": [
+        "f-69eb511ed3a9"
+      ],
+      "d-25a6634263c1": [
+        "f-04791d82dd15"
+      ],
+      "d-87ee5504a3e2": [
+        "f-b803fcb7f17e"
+      ]
+    },
+    "parents": {
+      "d-bdcc6a2a85f6": "d-000000000000",
+      "d-25a6634263c1": "d-000000000000",
+      "d-59830ebc3a41": "d-000000000000",
+      "d-2e56a3eb2f50": "d-59830ebc3a41",
+      "d-b40bc1374968": "d-59830ebc3a41",
+      "d-3fcb9fec680b": "d-59830ebc3a41",
+      "d-87ee5504a3e2": "d-bdcc6a2a85f6",
+      "f-76ed074a9305": "d-000000000000",
+      "f-e52e4ddd58b7": "d-59830ebc3a41",
+      "f-0f32d37461fa": "d-3fcb9fec680b",
+      "f-a28b281ee090": "d-3fcb9fec680b",
+      "f-50b3f8c533e7": "d-b40bc1374968",
+      "f-69eb511ed3a9": "d-2e56a3eb2f50",
+      "f-04791d82dd15": "d-25a6634263c1",
+      "f-b803fcb7f17e": "d-87ee5504a3e2"
+    },
+    "depth_distribution": {
+      "0": 1,
+      "1": 4,
+      "2": 6,
+      "3": 5
+    }
+  }
+}

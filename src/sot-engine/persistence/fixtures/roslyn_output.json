@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "tool_name": "roslyn-analyzers",
+    "tool_version": "1.0.0",
+    "run_id": "99999999-9999-9999-9999-999999999999",
+    "repo_id": "88888888-8888-8888-8888-888888888888",
+    "branch": "main",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-01-26T12:00:00Z",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "roslyn-analyzers",
+    "tool_version": "1.0.0",
+    "analysis_duration_ms": 1500,
+    "summary": {
+      "total_files_analyzed": 2,
+      "total_violations": 3,
+      "files_with_violations": 2,
+      "violations_by_severity": {
+        "high": 2,
+        "medium": 1
+      },
+      "violations_by_category": {
+        "security": 1,
+        "dead_code": 1,
+        "design": 1
+      },
+      "violations_by_rule": {
+        "CS0219": 1,
+        "CA1063": 1,
+        "SCS0016": 1
+      }
+    },
+    "files": [
+      {
+        "path": "src/app.py",
+        "language": "csharp",
+        "lines_of_code": 120,
+        "violation_count": 2,
+        "violations": [
+          {
+            "rule_id": "CS0219",
+            "dd_category": "dead_code",
+            "severity": "HIGH",
+            "message": "The variable 'unused' is assigned but its value is never used",
+            "line_start": 15,
+            "line_end": 15,
+            "column_start": 12,
+            "column_end": 18
+          },
+          {
+            "rule_id": "SCS0016",
+            "dd_category": "security",
+            "severity": "HIGH",
+            "message": "Possible hardcoded credential",
+            "line_start": 42,
+            "line_end": 42,
+            "column_start": 20,
+            "column_end": 45
+          }
+        ]
+      },
+      {
+        "path": "src/utils/helpers.py",
+        "language": "csharp",
+        "lines_of_code": 80,
+        "violation_count": 1,
+        "violations": [
+          {
+            "rule_id": "CA1063",
+            "dd_category": "design",
+            "severity": "MEDIUM",
+            "message": "Implement IDisposable correctly",
+            "line_start": 25,
+            "line_end": 30,
+            "column_start": 5,
+            "column_end": 6
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,620 @@
+{
+  "$defs": {
+    "layoutData": {
+      "$defs": {
+        "directoryObject": {
+          "additionalProperties": false,
+          "properties": {
+            "child_directory_ids": {
+              "description": "IDs of immediate child directories",
+              "items": {
+                "pattern": "^d-[a-f0-9]{12}$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "child_file_ids": {
+              "description": "IDs of immediate child files",
+              "items": {
+                "pattern": "^f-[a-f0-9]{12}$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "classification": {
+              "description": "Directory classification with optional subcategory (e.g., test::unit, config::build)",
+              "pattern": "^(source|test|config|generated|docs|vendor|build|ci|other)(::[a-z]+)?$",
+              "type": "string"
+            },
+            "classification_distribution": {
+              "additionalProperties": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "description": "File count by classification in subtree",
+              "type": "object"
+            },
+            "classification_reason": {
+              "description": "Explanation for classification",
+              "type": "string"
+            },
+            "depth": {
+              "description": "Depth in directory tree",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "direct_directory_count": {
+              "description": "Number of subdirectories directly in this directory",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "direct_file_count": {
+              "description": "Number of files directly in this directory",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "direct_size_bytes": {
+              "description": "Size of files directly in this directory",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "id": {
+              "description": "Unique directory ID",
+              "pattern": "^d-[a-f0-9]{12}$",
+              "type": "string"
+            },
+            "is_symlink": {
+              "description": "Whether directory is a symlink",
+              "type": "boolean"
+            },
+            "language_distribution": {
+              "additionalProperties": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "description": "File count by language in subtree",
+              "type": "object"
+            },
+            "modified_time": {
+              "description": "Last modification time",
+              "format": "date-time",
+              "type": "string"
+            },
+            "name": {
+              "description": "Directory name",
+              "type": "string"
+            },
+            "parent_directory_id": {
+              "description": "Parent directory ID (null for root)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "path": {
+              "description": "Relative path from repository root",
+              "type": "string"
+            },
+            "recursive_directory_count": {
+              "description": "Total directories in subtree",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "recursive_file_count": {
+              "description": "Total files in subtree",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "recursive_size_bytes": {
+              "description": "Total size of subtree",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "path",
+            "name",
+            "modified_time",
+            "is_symlink",
+            "classification",
+            "classification_reason",
+            "depth",
+            "child_directory_ids",
+            "child_file_ids",
+            "direct_file_count",
+            "direct_directory_count",
+            "recursive_file_count",
+            "recursive_directory_count",
+            "direct_size_bytes",
+            "recursive_size_bytes",
+            "classification_distribution",
+            "language_distribution"
+          ],
+          "type": "object"
+        },
+        "distributionStats": {
+          "additionalProperties": false,
+          "properties": {
+            "count": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kurtosis": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "max": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "mean": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "min": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "p25": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "p50": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "p75": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "skewness": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "std_dev": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          },
+          "type": "object"
+        },
+        "fileObject": {
+          "additionalProperties": false,
+          "properties": {
+            "author_count": {
+              "description": "Number of authors (git pass)",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "classification": {
+              "description": "File classification with optional subcategory (e.g., test::unit, config::build)",
+              "pattern": "^(source|test|config|generated|docs|vendor|build|ci|other)(::[a-z]+)?$",
+              "type": "string"
+            },
+            "classification_confidence": {
+              "description": "Classification confidence score",
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "classification_reason": {
+              "description": "Explanation for classification",
+              "type": "string"
+            },
+            "commit_count": {
+              "description": "Number of commits (git pass)",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "content_hash": {
+              "description": "Content hash (content pass)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "depth": {
+              "description": "Depth in directory tree",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "extension": {
+              "description": "File extension including dot",
+              "type": "string"
+            },
+            "first_commit_date": {
+              "description": "Date of first commit (git pass)",
+              "format": "date-time",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "id": {
+              "description": "Unique file ID",
+              "pattern": "^f-[a-f0-9]{12}$",
+              "type": "string"
+            },
+            "is_binary": {
+              "description": "Whether file is binary (content pass)",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "is_symlink": {
+              "description": "Whether file is a symlink",
+              "type": "boolean"
+            },
+            "language": {
+              "description": "Detected programming language",
+              "type": "string"
+            },
+            "last_commit_date": {
+              "description": "Date of last commit (git pass)",
+              "format": "date-time",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "line_count": {
+              "description": "Line count (content pass)",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "modified_time": {
+              "description": "Last modification time",
+              "format": "date-time",
+              "type": "string"
+            },
+            "name": {
+              "description": "Filename",
+              "type": "string"
+            },
+            "parent_directory_id": {
+              "description": "Parent directory ID",
+              "pattern": "^d-[a-f0-9]{12}$",
+              "type": "string"
+            },
+            "path": {
+              "description": "Relative path from repository root",
+              "type": "string"
+            },
+            "size_bytes": {
+              "description": "File size in bytes",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "path",
+            "name",
+            "extension",
+            "size_bytes",
+            "modified_time",
+            "is_symlink",
+            "language",
+            "classification",
+            "classification_reason",
+            "classification_confidence",
+            "parent_directory_id",
+            "depth"
+          ],
+          "type": "object"
+        },
+        "hierarchy": {
+          "additionalProperties": false,
+          "properties": {
+            "children": {
+              "additionalProperties": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "description": "Map of parent ID to child IDs",
+              "type": "object"
+            },
+            "depth_distribution": {
+              "additionalProperties": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "description": "Count of items at each depth level",
+              "type": "object"
+            },
+            "max_depth": {
+              "description": "Maximum depth",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "parents": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "Map of child ID to parent ID",
+              "type": "object"
+            },
+            "root_id": {
+              "description": "Root directory ID",
+              "pattern": "^d-[a-f0-9]{12}$",
+              "type": "string"
+            },
+            "total_directories": {
+              "description": "Total directories",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_files": {
+              "description": "Total files",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_size_bytes": {
+              "description": "Total size",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "root_id",
+            "max_depth",
+            "total_files",
+            "total_directories",
+            "total_size_bytes",
+            "children",
+            "parents",
+            "depth_distribution"
+          ],
+          "type": "object"
+        },
+        "statistics": {
+          "additionalProperties": false,
+          "properties": {
+            "by_classification": {
+              "additionalProperties": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "description": "File count by classification",
+              "type": "object"
+            },
+            "by_language": {
+              "additionalProperties": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "description": "File count by language",
+              "type": "object"
+            },
+            "directory_depth_stats": {
+              "$ref": "#/$defs/distributionStats"
+            },
+            "files_per_directory_stats": {
+              "$ref": "#/$defs/distributionStats"
+            },
+            "files_per_second": {
+              "description": "Files scanned per second",
+              "minimum": 0,
+              "type": "number"
+            },
+            "max_depth": {
+              "description": "Maximum directory depth",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "scan_duration_ms": {
+              "description": "Scan duration in milliseconds",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "size_per_file_stats": {
+              "$ref": "#/$defs/distributionStats"
+            },
+            "total_directories": {
+              "description": "Total number of directories",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_files": {
+              "description": "Total number of files",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_size_bytes": {
+              "description": "Total size in bytes",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "total_files",
+            "total_directories",
+            "total_size_bytes",
+            "max_depth",
+            "scan_duration_ms",
+            "files_per_second",
+            "by_classification",
+            "by_language"
+          ],
+          "type": "object"
+        }
+      },
+      "$id": "https://vulcan.example.com/schemas/layout-scanner/1.0/layout.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "Output schema for the Layout Scanner tool",
+      "properties": {
+        "directories": {
+          "additionalProperties": {
+            "$ref": "#/$defs/directoryObject"
+          },
+          "description": "Map of relative path to directory object",
+          "type": "object"
+        },
+        "files": {
+          "additionalProperties": {
+            "$ref": "#/$defs/fileObject"
+          },
+          "description": "Map of relative path to file object",
+          "type": "object"
+        },
+        "hierarchy": {
+          "$ref": "#/$defs/hierarchy"
+        },
+        "passes_completed": {
+          "description": "List of completed analysis passes",
+          "items": {
+            "enum": [
+              "filesystem",
+              "git",
+              "content"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "repository": {
+          "description": "Repository name",
+          "type": "string"
+        },
+        "repository_path": {
+          "description": "Absolute path to repository",
+          "type": "string"
+        },
+        "run_id": {
+          "description": "Unique run identifier",
+          "pattern": "^layout-\\d{8}-\\d{6}-.+$",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "description": "Schema version",
+          "type": "string"
+        },
+        "statistics": {
+          "$ref": "#/$defs/statistics"
+        },
+        "timestamp": {
+          "description": "ISO 8601 timestamp of scan",
+          "format": "date-time",
+          "type": "string"
+        },
+        "tool": {
+          "const": "layout-scanner",
+          "description": "Tool name",
+          "type": "string"
+        },
+        "tool_version": {
+          "description": "Tool version (semver)",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "tool",
+        "tool_version",
+        "run_id",
+        "timestamp",
+        "repository",
+        "repository_path",
+        "passes_completed",
+        "statistics",
+        "files",
+        "directories",
+        "hierarchy"
+      ],
+      "title": "Layout Scanner Output",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Envelope schema for layout-scanner output",
+  "properties": {
+    "data": {
+      "$ref": "#/$defs/layoutData"
+    },
+    "metadata": {
+      "properties": {
+        "branch": {
+          "type": "string"
+        },
+        "commit": {
+          "pattern": "^[a-f0-9]{40}$",
+          "type": "string"
+        },
+        "repo_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "run_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "tool_name": {
+          "const": "layout-scanner",
+          "type": "string"
+        },
+        "tool_version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool_name",
+        "tool_version",
+        "run_id",
+        "repo_id",
+        "branch",
+        "commit",
+        "timestamp",
+        "schema_version"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "metadata",
+    "data"
+  ],
+  "title": "Layout Scanner Output Envelope",
+  "type": "object"
+}

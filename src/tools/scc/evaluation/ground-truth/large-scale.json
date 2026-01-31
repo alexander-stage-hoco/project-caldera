@@ -1,0 +1,109 @@
+{
+  "schema_version": "2.0",
+  "scenario": "large-scale",
+  "description": "Performance testing with large repositories (10K+ files, 100K+ LOC)",
+  "generated_at": "2026-01-20T00:00:00Z",
+  "repo_path": "eval-repos/real",
+
+  "performance_requirements": {
+    "small_repo": {
+      "description": "Repository with ~1K files, ~10K LOC",
+      "max_execution_time_seconds": 5,
+      "memory_limit_mb": 100
+    },
+    "medium_repo": {
+      "description": "Repository with ~10K files, ~100K LOC",
+      "max_execution_time_seconds": 30,
+      "memory_limit_mb": 200
+    },
+    "large_repo": {
+      "description": "Repository with ~100K files, ~1M LOC",
+      "max_execution_time_seconds": 120,
+      "memory_limit_mb": 500
+    }
+  },
+
+  "scaling_expectations": {
+    "linear_time_complexity": {
+      "description": "Execution time should scale roughly linearly with file count",
+      "acceptable_variance": 0.5
+    },
+    "memory_bounded": {
+      "description": "Memory usage should not grow unboundedly",
+      "peak_memory_reasonable": true
+    }
+  },
+
+  "test_repositories": {
+    "humanizer": {
+      "name": "Humanizer",
+      "approximate_files": 500,
+      "approximate_loc": 50000,
+      "primary_language": "C#",
+      "expected_execution_seconds": 10,
+      "expected_languages_detected": ["C#", "JSON", "XML", "Markdown"]
+    },
+    "newtonsoft_json": {
+      "name": "Newtonsoft.Json",
+      "approximate_files": 800,
+      "approximate_loc": 100000,
+      "primary_language": "C#",
+      "expected_execution_seconds": 15,
+      "expected_languages_detected": ["C#", "JSON", "XML"]
+    },
+    "django": {
+      "name": "Django",
+      "approximate_files": 5000,
+      "approximate_loc": 300000,
+      "primary_language": "Python",
+      "expected_execution_seconds": 30,
+      "expected_languages_detected": ["Python", "JavaScript", "HTML", "CSS"]
+    }
+  },
+
+  "expected_metrics": {
+    "file_count_accuracy": {
+      "description": "File count should match actual files (with gitignore)",
+      "tolerance_percent": 5
+    },
+    "loc_accuracy": {
+      "description": "LOC should be within 10% of expected",
+      "tolerance_percent": 10
+    },
+    "language_detection": {
+      "description": "Primary language should be correctly identified",
+      "accuracy_threshold": 0.95
+    }
+  },
+
+  "stress_tests": {
+    "deep_nesting": {
+      "description": "Handle directories nested 20+ levels deep",
+      "expected": "no stack overflow, correct metrics"
+    },
+    "many_small_files": {
+      "description": "Handle 10K+ files with <10 LOC each",
+      "expected": "completes in reasonable time"
+    },
+    "few_large_files": {
+      "description": "Handle files with 10K+ lines",
+      "expected": "no memory issues, correct counts"
+    },
+    "binary_files": {
+      "description": "Handle repositories with binary files",
+      "expected": "binary files excluded, no crashes"
+    }
+  },
+
+  "output_requirements": {
+    "valid_json": "Output must be valid JSON even for large repos",
+    "complete_data": "All files should be represented in output",
+    "no_truncation": "Output should not be silently truncated"
+  },
+
+  "invariants": {
+    "sum_consistency": "Sum of per-language files equals total files",
+    "recursive_consistency": "Recursive stats >= direct stats for all directories",
+    "deterministic": "Multiple runs produce identical results"
+  }
+}

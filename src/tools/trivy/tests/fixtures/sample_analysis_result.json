@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-01-15T10:00:00Z",
+  "repo_name": "test-repo",
+  "repo_path": "/path/to/test-repo",
+  "results": {
+    "tool": "trivy",
+    "tool_version": "0.58.0",
+    "scan_time_ms": 150.0,
+    "summary": {
+      "total_vulnerabilities": 3,
+      "critical_count": 1,
+      "high_count": 1,
+      "medium_count": 1,
+      "low_count": 0,
+      "unknown_count": 0,
+      "fix_available_count": 3,
+      "fix_available_pct": 100.0,
+      "dependency_count": 3,
+      "oldest_cve_days": 1800,
+      "targets_scanned": 1
+    },
+    "vulnerabilities": [
+      {
+        "id": "CVE-2020-14343",
+        "severity": "CRITICAL",
+        "package": "pyyaml",
+        "installed_version": "5.3",
+        "fixed_version": "5.4",
+        "title": "Arbitrary code execution",
+        "description": "A vulnerability was discovered in PyYAML library.",
+        "cvss_score": 9.8,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "published_date": "2021-02-09T21:15:12Z",
+        "age_days": 1800,
+        "fix_available": true,
+        "target": "requirements.txt",
+        "target_type": "pip"
+      },
+      {
+        "id": "CVE-2021-33503",
+        "severity": "HIGH",
+        "package": "urllib3",
+        "installed_version": "1.26.0",
+        "fixed_version": "1.26.5",
+        "title": "ReDoS vulnerability",
+        "description": "An issue was discovered in urllib3.",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+        "published_date": "2021-06-29T11:15:07Z",
+        "age_days": 1660,
+        "fix_available": true,
+        "target": "requirements.txt",
+        "target_type": "pip"
+      },
+      {
+        "id": "CVE-2023-32681",
+        "severity": "MEDIUM",
+        "package": "requests",
+        "installed_version": "2.25.0",
+        "fixed_version": "2.31.0",
+        "title": "Proxy-Authorization header leak",
+        "description": "Requests leaks headers.",
+        "cvss_score": 6.1,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:N/A:N",
+        "published_date": "2023-05-26T18:15:14Z",
+        "age_days": 964,
+        "fix_available": true,
+        "target": "requirements.txt",
+        "target_type": "pip"
+      }
+    ],
+    "targets": [
+      {
+        "path": "requirements.txt",
+        "type": "pip",
+        "vulnerability_count": 3,
+        "critical_count": 1,
+        "high_count": 1,
+        "medium_count": 1,
+        "low_count": 0,
+        "dependency_count": 3
+      }
+    ],
+    "directories": {
+      "directory_count": 1,
+      "directories": [
+        {
+          "path": ".",
+          "direct": {
+            "vulnerability_count": 3,
+            "critical_count": 1,
+            "high_count": 1,
+            "medium_count": 1,
+            "low_count": 0,
+            "target_count": 1
+          },
+          "recursive": {
+            "vulnerability_count": 3,
+            "critical_count": 1,
+            "high_count": 1,
+            "medium_count": 1,
+            "low_count": 0,
+            "target_count": 1
+          }
+        }
+      ]
+    },
+    "iac_misconfigurations": {
+      "total_count": 0,
+      "critical_count": 0,
+      "high_count": 0,
+      "misconfigurations": []
+    },
+    "sbom": {
+      "format": "trivy-json",
+      "total_packages": 3,
+      "vulnerable_packages": 3,
+      "clean_packages": 0
+    }
+  }
+}

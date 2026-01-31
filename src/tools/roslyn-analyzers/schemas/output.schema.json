@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Roslyn Analyzers Output Schema (Caldera Envelope Format)",
+  "description": "Output format for the roslyn-analyzers tool in Caldera envelope format",
+  "type": "object",
+  "required": ["metadata", "data"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["tool_name", "tool_version", "run_id", "repo_id", "branch", "commit", "timestamp", "schema_version"],
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "const": "roslyn-analyzers",
+          "description": "Tool identifier"
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Version of the tool"
+        },
+        "run_id": {
+          "type": "string",
+          "description": "Unique identifier for this run (UUID)"
+        },
+        "repo_id": {
+          "type": "string",
+          "description": "Unique identifier for the repository (UUID)"
+        },
+        "branch": {
+          "type": "string",
+          "description": "Git branch being analyzed"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$",
+          "description": "Git commit SHA (40 hex characters)"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when the analysis was generated"
+        },
+        "schema_version": {
+          "type": "string",
+          "const": "1.0.0",
+          "description": "Schema version for this output format"
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "required": ["tool", "tool_version", "files"],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "const": "roslyn-analyzers",
+          "description": "Tool identifier"
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Version of the tool"
+        },
+        "analysis_duration_ms": {
+          "type": "integer",
+          "description": "Duration of analysis in milliseconds"
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_files_analyzed": {
+              "type": "integer",
+              "description": "Total number of files analyzed"
+            },
+            "total_violations": {
+              "type": "integer",
+              "description": "Total number of violations found"
+            },
+            "files_with_violations": {
+              "type": "integer",
+              "description": "Number of files with at least one violation"
+            },
+            "violations_by_severity": {
+              "type": "object",
+              "additionalProperties": { "type": "integer" },
+              "description": "Count of violations by severity level"
+            },
+            "violations_by_category": {
+              "type": "object",
+              "additionalProperties": { "type": "integer" },
+              "description": "Count of violations by DD category"
+            },
+            "violations_by_rule": {
+              "type": "object",
+              "additionalProperties": { "type": "integer" },
+              "description": "Count of violations by rule ID"
+            },
+            "top_violated_rules": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "rule_id": { "type": "string" },
+                  "count": { "type": "integer" },
+                  "category": { "type": "string" }
+                }
+              },
+              "description": "Top 10 most violated rules"
+            }
+          }
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "violations"],
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Relative path to the file"
+              },
+              "language": {
+                "type": "string",
+                "description": "Programming language"
+              },
+              "lines_of_code": {
+                "type": "integer",
+                "description": "Number of lines in the file"
+              },
+              "violation_count": {
+                "type": "integer",
+                "description": "Number of violations in this file"
+              },
+              "violations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["rule_id", "dd_category", "severity"],
+                  "properties": {
+                    "rule_id": { "type": "string" },
+                    "dd_category": { "type": "string" },
+                    "severity": {
+                      "type": "string",
+                      "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]
+                    },
+                    "message": { "type": "string" },
+                    "line_start": { "type": ["integer", "null"] },
+                    "line_end": { "type": ["integer", "null"] },
+                    "column_start": { "type": ["integer", "null"] },
+                    "column_end": { "type": ["integer", "null"] }
+                  }
+                }
+              }
+            }
+          },
+          "description": "Per-file analysis results"
+        },
+        "statistics": {
+          "type": "object",
+          "properties": {
+            "violations_per_file": {
+              "type": "object",
+              "properties": {
+                "mean": { "type": "number" },
+                "median": { "type": "number" },
+                "min": { "type": "integer" },
+                "max": { "type": "integer" }
+              }
+            },
+            "violations_per_1000_loc": {
+              "type": "number",
+              "description": "Violations per 1000 lines of code"
+            },
+            "category_distribution": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "count": { "type": "integer" },
+                  "severity_breakdown": {
+                    "type": "object",
+                    "additionalProperties": { "type": "integer" }
+                  }
+                }
+              }
+            },
+            "rule_coverage": {
+              "type": "object",
+              "properties": {
+                "rules_triggered": { "type": "integer" },
+                "rules_available": { "type": "integer" },
+                "coverage_percentage": { "type": "number" }
+              }
+            },
+            "file_coverage": {
+              "type": "object",
+              "properties": {
+                "files_with_violations": { "type": "integer" },
+                "files_clean": { "type": "integer" },
+                "violation_rate": { "type": "number" }
+              }
+            }
+          },
+          "description": "Aggregate statistics"
+        },
+        "directory_rollup": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "directory": {
+                "type": "string",
+                "description": "Directory path"
+              },
+              "total_violations": {
+                "type": "integer",
+                "description": "Total violations in this directory"
+              },
+              "files_analyzed": {
+                "type": "integer",
+                "description": "Number of files analyzed in this directory"
+              },
+              "by_category": {
+                "type": "object",
+                "additionalProperties": { "type": "integer" },
+                "description": "Violations by category"
+              },
+              "by_severity": {
+                "type": "object",
+                "additionalProperties": { "type": "integer" },
+                "description": "Violations by severity"
+              },
+              "top_rules": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Top 5 violated rules in this directory"
+              }
+            }
+          },
+          "description": "Directory-level aggregations"
+        }
+      }
+    }
+  }
+}

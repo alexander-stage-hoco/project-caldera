@@ -1,0 +1,565 @@
+{
+  "$defs": {
+    "directoryEntry": {
+      "description": "Directory entry with direct and recursive statistics",
+      "properties": {
+        "child_count": {
+          "description": "Number of direct child directories",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "depth": {
+          "description": "Depth in directory tree",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "direct": {
+          "$ref": "#/$defs/directoryStats"
+        },
+        "is_leaf": {
+          "description": "Whether this is a leaf directory",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Directory name",
+          "type": "string"
+        },
+        "path": {
+          "description": "Directory path relative to repository root",
+          "not": {
+            "pattern": "(^\\./|\\.\\.|^[A-Za-z]:|/$|\\\\)"
+          },
+          "pattern": "^[^/].*",
+          "type": "string"
+        },
+        "recursive": {
+          "$ref": "#/$defs/directoryStats"
+        },
+        "subdirectories": {
+          "description": "List of direct child directory paths",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "direct",
+        "recursive"
+      ],
+      "type": "object"
+    },
+    "directoryStats": {
+      "description": "Complexity statistics for a directory (direct or recursive)",
+      "properties": {
+        "avg_ccn": {
+          "description": "Average cyclomatic complexity",
+          "minimum": 0,
+          "type": "number"
+        },
+        "avg_nloc": {
+          "description": "Average lines per function",
+          "minimum": 0,
+          "type": "number"
+        },
+        "avg_params": {
+          "description": "Average parameter count",
+          "minimum": 0,
+          "type": "number"
+        },
+        "ccn": {
+          "description": "Total cyclomatic complexity",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "ccn_distribution": {
+          "$ref": "#/$defs/distributionStats"
+        },
+        "file_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "function_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "functions_over_threshold": {
+          "description": "Functions exceeding CCN threshold",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_ccn": {
+          "description": "Maximum cyclomatic complexity",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_nloc": {
+          "description": "Maximum lines in any function",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_params": {
+          "description": "Maximum parameter count",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "nloc": {
+          "description": "Lines of code",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "nloc_distribution": {
+          "$ref": "#/$defs/distributionStats"
+        },
+        "params_distribution": {
+          "$ref": "#/$defs/distributionStats"
+        }
+      },
+      "type": "object"
+    },
+    "distributionStats": {
+      "description": "Statistical distribution for a metric (22 metrics)",
+      "properties": {
+        "bottom_50_pct_share": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "cv": {
+          "description": "Coefficient of variation",
+          "type": "number"
+        },
+        "gini": {
+          "description": "Gini coefficient",
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "hoover": {
+          "description": "Hoover/Robin Hood index",
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "iqr": {
+          "description": "Interquartile range",
+          "type": "number"
+        },
+        "kurtosis": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "mean": {
+          "type": "number"
+        },
+        "median": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "p25": {
+          "type": "number"
+        },
+        "p50": {
+          "type": "number"
+        },
+        "p75": {
+          "type": "number"
+        },
+        "p90": {
+          "type": "number"
+        },
+        "p95": {
+          "type": "number"
+        },
+        "p99": {
+          "type": "number"
+        },
+        "palma": {
+          "description": "Palma ratio (top 10% / bottom 40%)",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "skewness": {
+          "type": "number"
+        },
+        "stddev": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "theil": {
+          "description": "Theil entropy index",
+          "minimum": 0,
+          "type": "number"
+        },
+        "top_10_pct_share": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "top_20_pct_share": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "fileEntry": {
+      "description": "File-level complexity metrics",
+      "properties": {
+        "avg_ccn": {
+          "description": "Average CCN per function in file",
+          "minimum": 0,
+          "type": "number"
+        },
+        "function_count": {
+          "description": "Number of functions in file",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "functions": {
+          "description": "Function-level details",
+          "items": {
+            "$ref": "#/$defs/functionEntry"
+          },
+          "type": "array"
+        },
+        "language": {
+          "description": "Detected programming language",
+          "type": "string"
+        },
+        "max_ccn": {
+          "description": "Maximum CCN of any function in file",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "nloc": {
+          "description": "Lines of code in file",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "description": "File path relative to repository root",
+          "not": {
+            "pattern": "(^\\./|\\.\\.|^[A-Za-z]:|/$|\\\\)"
+          },
+          "pattern": "^[^/].*",
+          "type": "string"
+        },
+        "total_ccn": {
+          "description": "Sum of CCN for all functions in file",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "language"
+      ],
+      "type": "object"
+    },
+    "functionEntry": {
+      "description": "Individual function metrics",
+      "properties": {
+        "ccn": {
+          "description": "Cyclomatic complexity",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "line_end": {
+          "description": "Ending line number",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "line_start": {
+          "description": "Starting line number",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "long_name": {
+          "description": "Fully qualified function name",
+          "type": "string"
+        },
+        "name": {
+          "description": "Function/method name",
+          "type": "string"
+        },
+        "nloc": {
+          "description": "Lines of code in function",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "params": {
+          "description": "Number of parameters",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "token_count": {
+          "description": "Number of tokens in function",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "ccn",
+        "nloc"
+      ],
+      "type": "object"
+    },
+    "languageStats": {
+      "description": "Statistics for a programming language",
+      "properties": {
+        "avg_ccn": {
+          "description": "Average CCN in this language",
+          "minimum": 0,
+          "type": "number"
+        },
+        "ccn": {
+          "description": "Total cyclomatic complexity in this language",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "files": {
+          "description": "Number of files in this language",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "functions": {
+          "description": "Number of functions in this language",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "nloc": {
+          "description": "Total lines of code in this language",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "lizardData": {
+      "description": "Analysis results",
+      "properties": {
+        "by_language": {
+          "additionalProperties": {
+            "$ref": "#/$defs/languageStats"
+          },
+          "description": "Statistics grouped by programming language",
+          "type": "object"
+        },
+        "directories": {
+          "description": "Per-directory complexity statistics",
+          "items": {
+            "$ref": "#/$defs/directoryEntry"
+          },
+          "type": "array"
+        },
+        "files": {
+          "description": "Per-file function-level metrics",
+          "items": {
+            "$ref": "#/$defs/fileEntry"
+          },
+          "type": "array"
+        },
+        "lizard_version": {
+          "description": "Version of lizard used",
+          "type": "string"
+        },
+        "root_path": {
+          "description": "Root path of analyzed codebase",
+          "type": "string"
+        },
+        "run_id": {
+          "description": "Unique identifier for this analysis run",
+          "type": "string"
+        },
+        "summary": {
+          "description": "Summary statistics for the entire codebase",
+          "properties": {
+            "avg_ccn": {
+              "description": "Average cyclomatic complexity per function",
+              "minimum": 0,
+              "type": "number"
+            },
+            "ccn_distribution": {
+              "$ref": "#/$defs/distributionStats"
+            },
+            "ccn_threshold": {
+              "description": "CCN threshold for flagging functions (default: 15)",
+              "minimum": 1,
+              "type": "integer"
+            },
+            "functions_over_threshold": {
+              "description": "Number of functions exceeding CCN threshold",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "max_ccn": {
+              "description": "Maximum cyclomatic complexity of any function",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "nloc_distribution": {
+              "$ref": "#/$defs/distributionStats"
+            },
+            "structure": {
+              "description": "Codebase structure metadata",
+              "properties": {
+                "leaf_count": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "max_depth": {
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "total_ccn": {
+              "description": "Sum of cyclomatic complexity across all functions",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_directories": {
+              "description": "Number of directories in analysis",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_files": {
+              "description": "Total number of files analyzed",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_functions": {
+              "description": "Total number of functions/methods",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_nloc": {
+              "description": "Total lines of code (non-comment, non-blank)",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "timestamp": {
+          "description": "When the analysis was performed",
+          "format": "date-time",
+          "type": "string"
+        },
+        "tool": {
+          "const": "lizard",
+          "description": "Tool identifier",
+          "type": "string"
+        },
+        "tool_version": {
+          "description": "Version of lizard used for analysis",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version",
+        "summary",
+        "directories",
+        "files"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Envelope schema for lizard complexity analysis output",
+  "properties": {
+    "data": {
+      "$ref": "#/$defs/lizardData"
+    },
+    "errors": {
+      "items": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "recoverable": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "metadata": {
+      "properties": {
+        "branch": {
+          "type": "string"
+        },
+        "commit": {
+          "pattern": "^[a-f0-9]{40}$",
+          "type": "string"
+        },
+        "repo_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "run_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "tool_name": {
+          "const": "lizard",
+          "type": "string"
+        },
+        "tool_version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool_name",
+        "tool_version",
+        "run_id",
+        "repo_id",
+        "branch",
+        "commit",
+        "timestamp",
+        "schema_version"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "metadata",
+    "data"
+  ],
+  "title": "Lizard Tool Output Envelope",
+  "type": "object"
+}

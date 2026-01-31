@@ -1,0 +1,95 @@
+rules:
+  # C4: Service Locator Anti-Pattern (Inappropriate Intimacy)
+  - id: DD-C4-SERVICE-LOCATOR-csharp-getservice
+    pattern: $LOCATOR.GetService<$T>()
+    languages: [csharp]
+    message: "Service Locator anti-pattern - use constructor injection instead"
+    severity: WARNING
+    metadata:
+      dd_smell_id: C4_INAPPROPRIATE_INTIMACY
+      dd_category: dependency
+
+  - id: DD-C4-SERVICE-LOCATOR-csharp-resolve
+    pattern: $LOCATOR.Resolve<$T>()
+    languages: [csharp]
+    message: "Service Locator anti-pattern - use constructor injection instead"
+    severity: WARNING
+    metadata:
+      dd_smell_id: C4_INAPPROPRIATE_INTIMACY
+      dd_category: dependency
+
+  - id: DD-C4-SERVICE-LOCATOR-csharp-getinstance
+    pattern: ServiceLocator.Current.GetInstance<$T>()
+    languages: [csharp]
+    message: "Service Locator anti-pattern - use constructor injection instead"
+    severity: WARNING
+    metadata:
+      dd_smell_id: C4_INAPPROPRIATE_INTIMACY
+      dd_category: dependency
+
+  - id: DD-C4-SERVICE-LOCATOR-csharp-getrequired
+    pattern: $PROVIDER.GetRequiredService<$T>()
+    languages: [csharp]
+    message: "Direct service resolution - prefer constructor injection"
+    severity: INFO
+    metadata:
+      dd_smell_id: C4_INAPPROPRIATE_INTIMACY
+      dd_category: dependency
+
+  # C4: Java ServiceLoader usage
+  - id: DD-C4-SERVICE-LOADER-java
+    pattern: ServiceLoader.load($T)
+    languages: [java]
+    message: "ServiceLoader usage - consider dependency injection framework"
+    severity: INFO
+    metadata:
+      dd_smell_id: C4_INAPPROPRIATE_INTIMACY
+      dd_category: dependency
+
+  # H5: Hidden Dependency (new in constructor instead of injection)
+  - id: DD-H5-HIDDEN-DEPENDENCY-csharp
+    patterns:
+      - pattern: $FIELD = new $SERVICE(...);
+      - pattern-inside: |
+          class $C {
+            $C(...) {
+              ...
+            }
+          }
+    languages: [csharp]
+    message: "Hidden dependency - inject via constructor parameter instead of creating with new"
+    severity: INFO
+    metadata:
+      dd_smell_id: H5_HIDDEN_DEPENDENCIES
+      dd_category: api_design
+
+  - id: DD-H5-HIDDEN-DEPENDENCY-java
+    patterns:
+      - pattern: $FIELD = new $SERVICE(...);
+      - pattern-inside: |
+          class $C {
+            $C(...) {
+              ...
+            }
+          }
+    languages: [java]
+    message: "Hidden dependency - inject via constructor parameter instead of creating with new"
+    severity: INFO
+    metadata:
+      dd_smell_id: H5_HIDDEN_DEPENDENCIES
+      dd_category: api_design
+
+  # C4: Tight Coupling - Direct instantiation in method body
+  - id: DD-C4-TIGHT-COUPLING-csharp
+    pattern: |
+      $RET $METHOD(...) {
+        ...
+        var $VAR = new $SERVICE(...);
+        ...
+      }
+    languages: [csharp]
+    message: "Tight coupling - consider injecting dependency or using factory"
+    severity: INFO
+    metadata:
+      dd_smell_id: C4_INAPPROPRIATE_INTIMACY
+      dd_category: dependency

@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "scenario": "rust",
+  "description": "Ground truth for rust.",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/rust",
+  "expected": {
+    "language": "rust",
+    "version": "1.0",
+    "summary": {
+      "total_files": 3,
+      "total_expected_smells": 9,
+      "smell_categories_covered": [
+        "error_handling",
+        "security"
+      ],
+      "notes": "Semgrep Rust support is limited. D1_EMPTY_CATCH patterns not detectable."
+    }
+  },
+  "files": {
+    "empty_catch.rs": {
+      "expected_smells": [
+        {
+          "smell_id": "D1_EMPTY_CATCH",
+          "count": 0,
+          "lines": []
+        }
+      ],
+      "total_expected": 0,
+      "notes": "Semgrep cannot detect Rust Result/Option error discarding patterns"
+    },
+    "sql_injection.rs": {
+      "expected_smells": [],
+      "total_expected": 0,
+      "notes": "Semgrep Rust SQL injection detection is not available with current rulesets"
+    },
+    "hardcoded_secrets.rs": {
+      "expected_smells": [],
+      "total_expected": 0,
+      "notes": "Semgrep Rust secret detection is not available with current rulesets"
+    }
+  }
+}

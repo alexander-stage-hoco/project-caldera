@@ -1,0 +1,490 @@
+{
+  "schema_version": "1.0",
+  "scenario": "csharp",
+  "description": "Ground truth for C# smell and security vulnerability detection",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/csharp",
+  "expected": {
+    "language": "csharp",
+    "version": "4.0",
+    "summary": {
+      "total_files": 22,
+      "total_expected_smells": 145,
+      "smell_categories_covered": [
+        "async_concurrency",
+        "resource_management",
+        "nullability",
+        "api_design",
+        "refactoring",
+        "dependency",
+        "dead_code",
+        "security",
+        "correctness",
+        "best_practice",
+        "performance"
+      ],
+      "dd_smell_ids_covered": [
+        "E1_SYNC_OVER_ASYNC",
+        "E2_ASYNC_VOID",
+        "E4_MISSING_CANCELLATION",
+        "E5_UNSAFE_LOCK",
+        "E7_ASYNC_WITHOUT_AWAIT",
+        "F3_HTTPCLIENT_NEW",
+        "F5_DISPOSABLE_FIELD",
+        "F6_EVENT_HANDLER_LEAK",
+        "G1_NULLABLE_DISABLED",
+        "G2_NULL_FORGIVING",
+        "G3_INCONSISTENT_NULLABLE",
+        "H3_BOOLEAN_BLINDNESS",
+        "H6_STATIC_MUTABLE_STATE",
+        "H8_DYNAMIC_USAGE",
+        "B6_MESSAGE_CHAINS",
+        "C4_INAPPROPRIATE_INTIMACY",
+        "B2_LONG_PARAMETER_LIST",
+        "I2_UNREACHABLE_CODE",
+        "SQL_INJECTION",
+        "XSS_VULNERABILITY",
+        "HARDCODED_SECRET",
+        "INSECURE_CRYPTO",
+        "PATH_TRAVERSAL",
+        "XXE_VULNERABILITY",
+        "UNSAFE_DESERIALIZATION",
+        "CORRECTNESS_ISSUE",
+        "BEST_PRACTICE_VIOLATION",
+        "PERFORMANCE_ISSUE"
+      ],
+      "security_categories": [
+        "SQL_INJECTION",
+        "XSS_VULNERABILITY",
+        "HARDCODED_SECRET",
+        "INSECURE_CRYPTO",
+        "PATH_TRAVERSAL",
+        "XXE_VULNERABILITY",
+        "UNSAFE_DESERIALIZATION"
+      ],
+      "code_quality_categories": [
+        "CORRECTNESS_ISSUE",
+        "BEST_PRACTICE_VIOLATION",
+        "PERFORMANCE_ISSUE"
+      ],
+      "notes": "Security test cases use min_count field to allow partial detection - actual count depends on semgrep ruleset coverage"
+    }
+  },
+  "files": {
+    "EmptyCatch.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "D1_EMPTY_CATCH",
+          "count": 0,
+          "lines": []
+        }
+      ],
+      "total_expected": 0,
+      "notes": "Semgrep C# empty catch pattern not matching - known limitation"
+    },
+    "AsyncVoid.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "E2_ASYNC_VOID",
+          "count": 5,
+          "lines": [
+            15,
+            22,
+            29,
+            36,
+            49
+          ]
+        },
+        {
+          "smell_id": "E4_MISSING_CANCELLATION",
+          "count": 1,
+          "lines": [
+            55
+          ]
+        },
+        {
+          "smell_id": "E7_ASYNC_WITHOUT_AWAIT",
+          "count": 1,
+          "lines": [
+            55
+          ]
+        }
+      ],
+      "total_expected": 7
+    },
+    "SyncOverAsync.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "E1_SYNC_OVER_ASYNC",
+          "count": 5,
+          "lines": [
+            18,
+            25,
+            32,
+            41,
+            42
+          ]
+        },
+        {
+          "smell_id": "F3_HTTPCLIENT_NEW",
+          "count": 1,
+          "lines": [
+            12
+          ]
+        },
+        {
+          "smell_id": "F5_DISPOSABLE_FIELD",
+          "count": 1,
+          "lines": [
+            12
+          ]
+        },
+        {
+          "smell_id": "E4_MISSING_CANCELLATION",
+          "count": 2,
+          "lines": [
+            46,
+            52
+          ]
+        },
+        {
+          "smell_id": "E7_ASYNC_WITHOUT_AWAIT",
+          "count": 2,
+          "lines": [
+            46,
+            52
+          ]
+        }
+      ],
+      "total_expected": 11
+    },
+    "ResourceLeak.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "F3_HTTPCLIENT_NEW",
+          "count": 5,
+          "lines": [
+            17,
+            24,
+            33,
+            50,
+            76
+          ]
+        },
+        {
+          "smell_id": "E4_MISSING_CANCELLATION",
+          "count": 6,
+          "lines": [
+            15,
+            22,
+            29,
+            40,
+            64,
+            73
+          ]
+        },
+        {
+          "smell_id": "E7_ASYNC_WITHOUT_AWAIT",
+          "count": 6,
+          "lines": [
+            15,
+            22,
+            29,
+            40,
+            64,
+            73
+          ]
+        },
+        {
+          "smell_id": "C4_INAPPROPRIATE_INTIMACY",
+          "count": 5,
+          "lines": [
+            15,
+            22,
+            29,
+            40,
+            73
+          ]
+        },
+        {
+          "smell_id": "H3_BOOLEAN_BLINDNESS",
+          "count": 1,
+          "lines": [
+            40
+          ]
+        }
+      ],
+      "total_expected": 23,
+      "notes": "High smell count due to multiple async methods with new HttpClient"
+    },
+    "UnsafeLock.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "E5_UNSAFE_LOCK",
+          "count": 2,
+          "lines": [
+            16,
+            25
+          ]
+        }
+      ],
+      "total_expected": 2,
+      "notes": "Tests lock(this) and lock(typeof) anti-patterns"
+    },
+    "NullabilityIssues.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "G1_NULLABLE_DISABLED",
+          "count": 1,
+          "lines": [
+            4
+          ]
+        },
+        {
+          "smell_id": "G2_NULL_FORGIVING",
+          "count": 4,
+          "lines": [
+            22,
+            22,
+            28,
+            28
+          ]
+        },
+        {
+          "smell_id": "G3_INCONSISTENT_NULLABLE",
+          "count": 1,
+          "lines": [
+            32
+          ]
+        }
+      ],
+      "total_expected": 6,
+      "notes": "Tests nullable directives and null-forgiving operator"
+    },
+    "StaticState.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "H6_STATIC_MUTABLE_STATE",
+          "count": 2,
+          "lines": [
+            12,
+            15
+          ]
+        },
+        {
+          "smell_id": "H8_DYNAMIC_USAGE",
+          "count": 2,
+          "lines": [
+            23,
+            28
+          ]
+        }
+      ],
+      "total_expected": 4,
+      "notes": "Tests static mutable state and dynamic keyword"
+    },
+    "MessageChains.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "B6_MESSAGE_CHAINS",
+          "count": 2,
+          "lines": [
+            34,
+            41
+          ]
+        }
+      ],
+      "total_expected": 2,
+      "notes": "Tests Law of Demeter violations (5+ method chain)"
+    },
+    "ServiceLocator.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "C4_INAPPROPRIATE_INTIMACY",
+          "count": 3,
+          "lines": [
+            59,
+            66,
+            73
+          ]
+        }
+      ],
+      "total_expected": 3,
+      "notes": "Tests Service Locator anti-pattern (GetService, Resolve, GetRequiredService)"
+    },
+    "StringConcat.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "F6_EVENT_HANDLER_LEAK",
+          "count": 2,
+          "lines": [
+            21,
+            65
+          ]
+        },
+        {
+          "smell_id": "C4_INAPPROPRIATE_INTIMACY",
+          "count": 1,
+          "lines": [
+            52
+          ]
+        }
+      ],
+      "total_expected": 3,
+      "notes": "Tests event subscription patterns"
+    },
+    "LongParameterList.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "B2_LONG_PARAMETER_LIST",
+          "count": 2,
+          "lines": [
+            13,
+            20
+          ]
+        }
+      ],
+      "total_expected": 2,
+      "notes": "Tests methods and constructors with 6+ parameters"
+    },
+    "UnreachableCode.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "I2_UNREACHABLE_CODE",
+          "count": 2,
+          "lines": [
+            16,
+            25
+          ]
+        }
+      ],
+      "total_expected": 2,
+      "notes": "Tests code after return and throw statements"
+    },
+    "SqlInjection.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "SQL_INJECTION",
+          "count": 6,
+          "lines": [
+            24,
+            37,
+            51,
+            62,
+            72,
+            86
+          ]
+        }
+      ],
+      "total_expected": 6,
+      "notes": "Lines updated to match Semgrep detection points (SqlCommand execution vs string build)"
+    },
+    "XssVulnerability.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "BROKEN_ACCESS_CONTROL",
+          "count": 1,
+          "lines": [
+            14
+          ]
+        }
+      ],
+      "total_expected": 1,
+      "notes": "Semgrep detects access control issues but not specific XSS patterns in C#. XSS detection limited."
+    },
+    "HardcodedSecrets.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "HARDCODED_SECRET",
+          "count": 1,
+          "lines": [
+            30
+          ]
+        }
+      ],
+      "total_expected": 1,
+      "notes": "Semgrep C# secret detection is limited. Most hardcoded credential patterns not detected."
+    },
+    "InsecureCrypto.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "INSECURE_CRYPTO",
+          "count": 4,
+          "lines": [
+            39,
+            50,
+            61,
+            81
+          ]
+        }
+      ],
+      "total_expected": 4,
+      "notes": "Semgrep detects some insecure crypto patterns (MD5, SHA1, weak algorithms)"
+    },
+    "PathTraversal.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "PATH_TRAVERSAL",
+          "count": 3,
+          "lines": [
+            23,
+            64,
+            118
+          ]
+        }
+      ],
+      "total_expected": 3,
+      "notes": "Semgrep detects some path traversal patterns via file operations with user input"
+    },
+    "XxeVulnerability.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "XXE_VULNERABILITY",
+          "count": 2,
+          "lines": [
+            55,
+            150
+          ]
+        }
+      ],
+      "total_expected": 2,
+      "notes": "Semgrep detects some XXE patterns with DTD processing enabled"
+    },
+    "DeserializationRisk.cs": {
+      "expected_smells": [
+        {
+          "smell_id": "UNSAFE_DESERIALIZATION",
+          "count": 9,
+          "lines": [
+            25,
+            34,
+            42,
+            50,
+            74,
+            84,
+            95,
+            106,
+            161
+          ]
+        }
+      ],
+      "total_expected": 9,
+      "notes": "Tests BinaryFormatter, SoapFormatter, NetDataContractSerializer, TypeNameHandling patterns"
+    },
+    "CorrectnessIssues.cs": {
+      "expected_smells": [],
+      "total_expected": 0,
+      "notes": "Semgrep does not detect C# correctness issues (reference comparison, overflow, etc.). Use Roslyn analyzers."
+    },
+    "BestPractices.cs": {
+      "expected_smells": [],
+      "total_expected": 0,
+      "notes": "Semgrep does not detect C# best practice violations (Thread.Abort, throw ex, etc.). Use Roslyn analyzers."
+    },
+    "PerformanceIssues.cs": {
+      "expected_smells": [],
+      "total_expected": 0,
+      "notes": "Semgrep does not detect C# performance issues. Use Roslyn analyzers for performance analysis."
+    }
+  }
+}

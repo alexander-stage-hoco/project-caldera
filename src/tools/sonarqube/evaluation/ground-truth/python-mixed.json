@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "scenario": "python-mixed",
+  "description": "Python codebase with mixed issues for testing comprehensive analysis including code smells, bugs, and security vulnerabilities",
+  "generated_at": "2026-01-24T10:00:00Z",
+  "repo_path": "eval-repos/synthetic/python-mixed",
+  "expected": {
+    "id": "python-mixed",
+    "language": "python",
+    "expected_languages": [
+      "py"
+    ],
+    "expected_issues": {
+      "min": 15,
+      "max": 100
+    },
+    "expected_bugs": {
+      "min": 5,
+      "max": 25
+    },
+    "expected_vulnerabilities": {
+      "min": 4,
+      "max": 15
+    },
+    "expected_smells": {
+      "min": 10,
+      "max": 60
+    },
+    "expected_metrics": {
+      "ncloc": {
+        "min": 400,
+        "max": 800
+      },
+      "complexity": {
+        "min": 30,
+        "max": 150
+      }
+    },
+    "quality_gate_expected": "ERROR",
+    "expected_vulnerability_types": [
+      "SQL injection",
+      "Command injection",
+      "Hardcoded credentials",
+      "Insecure deserialization",
+      "Weak cryptography",
+      "Path traversal"
+    ],
+    "notes": "Mixed Python project with intentional issues for comprehensive analysis testing"
+  },
+  "id": "python-mixed",
+  "language": "python",
+  "expected_languages": [
+    "py"
+  ],
+  "expected_issues": {
+    "min": 15,
+    "max": 100
+  },
+  "expected_bugs": {
+    "min": 5,
+    "max": 25
+  },
+  "expected_vulnerabilities": {
+    "min": 4,
+    "max": 15
+  },
+  "expected_smells": {
+    "min": 10,
+    "max": 60
+  },
+  "expected_metrics": {
+    "ncloc": {
+      "min": 400,
+      "max": 800
+    },
+    "complexity": {
+      "min": 30,
+      "max": 150
+    }
+  },
+  "quality_gate_expected": "ERROR",
+  "expected_vulnerability_types": [
+    "SQL injection",
+    "Command injection",
+    "Hardcoded credentials",
+    "Insecure deserialization",
+    "Weak cryptography",
+    "Path traversal"
+  ],
+  "files": {
+    "data_processor.py": {
+      "expected_issues": {
+        "smells": {
+          "min": 5,
+          "max": 15
+        },
+        "bugs": {
+          "min": 1,
+          "max": 5
+        },
+        "vulnerabilities": {
+          "min": 1,
+          "max": 3
+        }
+      },
+      "issue_types": [
+        "high_complexity",
+        "duplicate_code",
+        "sql_injection",
+        "empty_except",
+        "unused_variable",
+        "too_many_parameters"
+      ],
+      "notes": "Contains SQL injection, high cyclomatic complexity, code duplication, and unused variables"
+    },
+    "api_handler.py": {
+      "expected_issues": {
+        "smells": {
+          "min": 3,
+          "max": 10
+        },
+        "bugs": {
+          "min": 1,
+          "max": 5
+        },
+        "vulnerabilities": {
+          "min": 4,
+          "max": 8
+        }
+      },
+      "issue_types": [
+        "hardcoded_credentials",
+        "command_injection",
+        "insecure_deserialization",
+        "weak_crypto",
+        "path_traversal",
+        "deep_nesting",
+        "dead_code"
+      ],
+      "notes": "Contains hardcoded credentials, command injection, insecure deserialization, MD5 usage, and path traversal"
+    },
+    "utils.py": {
+      "expected_issues": {
+        "smells": {
+          "min": 5,
+          "max": 15
+        },
+        "bugs": {
+          "min": 2,
+          "max": 6
+        },
+        "vulnerabilities": {
+          "min": 0,
+          "max": 1
+        }
+      },
+      "issue_types": [
+        "god_class",
+        "duplicate_code",
+        "magic_numbers",
+        "long_parameter_list",
+        "commented_code",
+        "comparison_with_none",
+        "mutable_default_argument"
+      ],
+      "notes": "Contains god class, duplicate functions, magic numbers, and mutable default argument bug"
+    },
+    "models.py": {
+      "expected_issues": {
+        "smells": {
+          "min": 4,
+          "max": 12
+        },
+        "bugs": {
+          "min": 2,
+          "max": 6
+        },
+        "vulnerabilities": {
+          "min": 0,
+          "max": 1
+        }
+      },
+      "issue_types": [
+        "too_many_fields",
+        "empty_class",
+        "single_method_class",
+        "missing_hash",
+        "deep_inheritance",
+        "shadowing_builtin",
+        "too_many_returns",
+        "wrong_type_hint"
+      ],
+      "notes": "Contains class design issues, missing __hash__, builtin shadowing, deep inheritance"
+    },
+    "clean_module.py": {
+      "expected_issues": {
+        "smells": {
+          "min": 0,
+          "max": 2
+        },
+        "bugs": {
+          "min": 0,
+          "max": 1
+        },
+        "vulnerabilities": {
+          "min": 0,
+          "max": 0
+        }
+      },
+      "issue_types": [],
+      "notes": "Clean module with minimal or no issues - follows Python best practices"
+    }
+  },
+  "notes": "Mixed Python project with intentional issues for comprehensive analysis testing"
+}

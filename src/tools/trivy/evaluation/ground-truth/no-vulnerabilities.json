@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "scenario": "no-vulnerabilities",
+  "description": "Clean repository with minimal vulnerable dependencies",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/no-vulnerabilities",
+  "expected": {
+    "expected_vulnerabilities": {
+      "min": 0,
+      "max": 5
+    },
+    "expected_critical": {
+      "min": 0,
+      "max": 0
+    },
+    "expected_high": {
+      "min": 0,
+      "max": 1
+    },
+    "expected_targets": {
+      "min": 0,
+      "max": 3
+    },
+    "freshness_expected": false
+  }
+}

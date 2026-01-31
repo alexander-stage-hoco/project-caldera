@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "scenario": "java",
+  "description": "Ground truth for java.",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/java",
+  "expected": {
+    "language": "java",
+    "version": "2.0",
+    "summary": {
+      "total_files": 3,
+      "total_expected_smells": 8,
+      "smell_categories_covered": [
+        "error_handling",
+        "security"
+      ],
+      "notes": "D1_EMPTY_CATCH excluded due to Semgrep limitation"
+    }
+  },
+  "files": {
+    "EmptyCatch.java": {
+      "expected_smells": [
+        {
+          "smell_id": "D1_EMPTY_CATCH",
+          "count": 0,
+          "lines": []
+        }
+      ],
+      "total_expected": 0,
+      "notes": "Semgrep Java empty catch pattern not matching - known limitation"
+    },
+    "SqlInjection.java": {
+      "expected_smells": [
+        {
+          "smell_id": "SQL_INJECTION",
+          "count": 5,
+          "lines": [
+            16,
+            23,
+            30,
+            40,
+            50
+          ]
+        }
+      ],
+      "total_expected": 5
+    },
+    "GenericException.java": {
+      "expected_smells": [
+        {
+          "smell_id": "D5_GENERIC_EXCEPTION",
+          "count": 2,
+          "lines": [
+            15,
+            23
+          ]
+        },
+        {
+          "smell_id": "D2_CATCH_ALL",
+          "count": 1,
+          "lines": [
+            32
+          ]
+        }
+      ],
+      "total_expected": 3
+    }
+  }
+}

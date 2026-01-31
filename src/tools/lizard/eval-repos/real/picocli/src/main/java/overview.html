@@ -1,0 +1,70 @@
+<html>
+<body>
+
+<p>
+    Picocli is a framework for creating Java command line applications with almost zero code.
+</p>
+<p>
+    The project contains multiple modules, but most applications only need a few of them.
+    The table below shows the JPMS module name and the Maven coordinates for all modules in the project.
+</p>
+<table border="1">
+    <caption>Picocli project modules: JPMS module name and their Maven coordinates</caption>
+    <tr>
+        <th>JPMS module name</th>
+        <th>Maven coordinates (without version)</th>
+    </tr>
+    <tr>
+        <td><code>info.picocli</code></td>
+        <td><code>info.picocli:picocli</code></td>
+    </tr>
+    <tr>
+        <td><code>info.picocli.codegen</code></td>
+        <td><code>info.picocli:picocli-codegen</code></td>
+    </tr>
+    <tr>
+        <td><code>info.picocli.groovy</code></td>
+        <td><code>info.picocli:picocli-groovy</code></td>
+    </tr>
+    <tr>
+        <td><code>info.picocli.shell.jline2</code></td>
+        <td><code>info.picocli:picocli-shell-jline2</code></td>
+    </tr>
+    <tr>
+        <td><code>info.picocli.shell.jline3</code></td>
+        <td><code>info.picocli:picocli-shell-jline3</code></td>
+    </tr>
+    <tr>
+        <td><code>info.picocli.spring.boot</code></td>
+        <td><code>info.picocli:picocli-spring-boot-starter</code></td>
+    </tr>
+</table>
+<p>
+    Most application will only need the main <code>picocli</code> module, but
+    we recommend also <a href="https://picocli.info/#_annotation_processor">configuring</a>
+    the <code>picocli-codegen</code> module as an annotation processor for your project.
+    This provides compile-time error checking and
+    generates <a href="https://www.graalvm.org/22.2/reference-manual/native-image/overview/BuildConfiguration/">GraalVM
+    configuration files</a> under
+    <code>META-INF/native-image/picocli-generated/$project</code> during compilation,
+    to be included in the application jar.
+    This in turn facilitates converting your command line application to a <a href="https://www.graalvm.org/22.0/reference-manual/native-image/">native image</a>.
+</p>
+<p>
+    The <code>picocli-groovy</code> module allows
+    <a href="https://picocli.info/#_groovy_scripts">Groovy scripts</a> to use picocli
+    annotations for even more compact code.
+</p>
+<p>
+    The <code>picocli-shell-jline2</code> and <code>picocli-shell-jline3</code> modules
+    are of interest to applications that want to provide an interactive shell-like console.
+</p>
+<p>
+    The <code>picocli-spring-boot-starter</code> module provides <a href="https://picocli.info/#_spring_boot_example">Spring integration</a>.
+    Particularly, it allows for <code>@Autowired</code> or
+    <code>@javax.inject</code>-annotated program elements in picocli components
+    (commands, subcommands, type converters, default providers, etc.)
+    to be injected with values from Spring's Application Context.
+</p>
+</body>
+</html>

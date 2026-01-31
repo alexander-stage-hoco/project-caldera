@@ -1,0 +1,5 @@
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/csharp/obj/Release/net8.0/SyntheticSmells.csproj.AssemblyReference.cache
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/csharp/obj/Release/net8.0/SyntheticSmells.GeneratedMSBuildEditorConfig.editorconfig
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/csharp/obj/Release/net8.0/SyntheticSmells.AssemblyInfoInputs.cache
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/csharp/obj/Release/net8.0/SyntheticSmells.AssemblyInfo.cs
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/csharp/obj/Release/net8.0/SyntheticSmells.csproj.CoreCompileInputs.cache

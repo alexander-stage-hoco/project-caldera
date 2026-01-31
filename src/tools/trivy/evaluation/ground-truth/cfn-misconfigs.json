@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "scenario": "cfn-misconfigs",
+  "description": "CloudFormation template with security misconfigurations (unencrypted storage, public access, open security groups)",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/cfn-misconfigs",
+  "expected": {
+    "expected_vulnerabilities": {
+      "min": 0,
+      "max": 5
+    },
+    "expected_targets": {
+      "min": 0,
+      "max": 5
+    },
+    "iac_expected": true,
+    "expected_iac": {
+      "total": {
+        "min": 20,
+        "max": 40
+      },
+      "critical": {
+        "min": 0,
+        "max": 5
+      },
+      "high": {
+        "min": 8,
+        "max": 20
+      }
+    },
+    "required_iac_types": [
+      "yaml"
+    ],
+    "required_iac_ids": [
+      "AVD-AWS-0088",
+      "AVD-AWS-0028",
+      "AVD-AWS-0107"
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+"""Trivy vulnerability scanner scripts."""

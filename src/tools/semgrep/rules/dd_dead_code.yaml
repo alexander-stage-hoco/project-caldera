@@ -1,0 +1,118 @@
+rules:
+  # I3: Unreachable Code (code after return/throw)
+  - id: DD-I3-UNREACHABLE-CODE-python
+    pattern: |
+      return ...
+      $STMT
+    languages: [python]
+    message: "Unreachable code after return statement"
+    severity: WARNING
+    metadata:
+      dd_smell_id: I3_UNREACHABLE_CODE
+      dd_category: dead_code
+
+  - id: DD-I3-UNREACHABLE-AFTER-RAISE-python
+    pattern: |
+      raise ...
+      $STMT
+    languages: [python]
+    message: "Unreachable code after raise statement"
+    severity: WARNING
+    metadata:
+      dd_smell_id: I3_UNREACHABLE_CODE
+      dd_category: dead_code
+
+  - id: DD-I3-UNREACHABLE-CODE-csharp
+    pattern: |
+      return ...;
+      $STMT;
+    languages: [csharp]
+    message: "Unreachable code after return statement"
+    severity: WARNING
+    metadata:
+      dd_smell_id: I2_UNREACHABLE_CODE
+      dd_category: dead_code
+
+  - id: DD-I3-UNREACHABLE-AFTER-THROW-csharp
+    pattern: |
+      throw ...;
+      $STMT;
+    languages: [csharp]
+    message: "Unreachable code after throw statement"
+    severity: WARNING
+    metadata:
+      dd_smell_id: I2_UNREACHABLE_CODE
+      dd_category: dead_code
+
+  - id: DD-I3-UNREACHABLE-CODE-js
+    pattern: |
+      return ...;
+      $STMT;
+    languages: [javascript, typescript]
+    message: "Unreachable code after return statement"
+    severity: WARNING
+    metadata:
+      dd_smell_id: I3_UNREACHABLE_CODE
+      dd_category: dead_code
+
+  # I5: Empty Method
+  - id: DD-I5-EMPTY-METHOD-python
+    pattern: |
+      def $NAME(...):
+          pass
+    languages: [python]
+    message: "Empty method implementation. Is this intentional?"
+    severity: INFO
+    metadata:
+      dd_smell_id: I5_EMPTY_METHOD
+      dd_category: dead_code
+
+  - id: DD-I5-EMPTY-METHOD-csharp
+    pattern: public $RET $NAME(...) { }
+    languages: [csharp]
+    message: "Empty method implementation. Is this intentional?"
+    severity: INFO
+    metadata:
+      dd_smell_id: I5_EMPTY_METHOD
+      dd_category: dead_code
+
+  # I3: Too Many Suppressions (pragma warning disable)
+  - id: DD-I3-PRAGMA-SUPPRESS-csharp
+    pattern-regex: '#pragma\s+warning\s+disable'
+    languages: [csharp]
+    message: "Warning suppression via pragma - ensure this is intentional and documented"
+    severity: INFO
+    metadata:
+      dd_smell_id: I3_TOO_MANY_SUPPRESSIONS
+      dd_category: dead_code
+
+  # I3: SuppressMessage attribute
+  - id: DD-I3-SUPPRESS-MESSAGE-csharp
+    pattern: "[SuppressMessage(...)]"
+    languages: [csharp]
+    message: "Warning suppression via attribute - ensure this is intentional"
+    severity: INFO
+    metadata:
+      dd_smell_id: I3_TOO_MANY_SUPPRESSIONS
+      dd_category: dead_code
+
+  # I3: Python noqa comments
+  - id: DD-I3-NOQA-python
+    pattern-regex: '#\s*noqa'
+    languages: [python]
+    message: "Linter suppression via noqa - ensure this is intentional"
+    severity: INFO
+    metadata:
+      dd_smell_id: I3_TOO_MANY_SUPPRESSIONS
+      dd_category: dead_code
+
+  # I3: ESLint disable comments
+  - id: DD-I3-ESLINT-DISABLE-js
+    pattern-regex: '//\s*eslint-disable'
+    languages: [javascript, typescript]
+    message: "ESLint suppression - ensure this is intentional"
+    severity: INFO
+    metadata:
+      dd_smell_id: I3_TOO_MANY_SUPPRESSIONS
+      dd_category: dead_code
+

@@ -1,0 +1,20 @@
+# Outdated Python packages for dependency freshness testing
+# These packages are significantly behind latest versions
+
+# CVE-2019-11324, CVE-2021-33503: Multiple vulnerabilities
+requests==2.20.0
+
+# CVE-2019-11236, CVE-2020-26137: Multiple CRLF injection vulns
+urllib3==1.24.0
+
+# CVE-2019-14234, CVE-2019-14232: SQL injection and ReDoS
+django==2.1.0
+
+# CVE-2019-1010083: DoS via crafted JSON
+flask==1.0.0
+
+# CVE-2020-28493: ReDoS in template parsing
+jinja2==2.10.0
+
+# CVE-2020-13757: RSA decryption issues
+pycryptodome==3.9.0

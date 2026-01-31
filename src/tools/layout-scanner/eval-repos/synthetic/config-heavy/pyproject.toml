@@ -1,0 +1,9 @@
+[project]
+name = "config-heavy"
+version = "1.0.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 100

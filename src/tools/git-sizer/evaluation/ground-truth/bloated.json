@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "scenario": "bloated-repo",
+  "description": "Repository with large binary files that should use Git LFS. Contains images, compiled binaries, and data files that inflate repository size significantly.",
+  "repo_path": "eval-repos/synthetic/bloated-repo",
+  "expected": {
+    "health_grade": {
+      "acceptable": ["C", "C+", "D", "D+"],
+      "description": "Repository should receive C or D grade due to large blob violations"
+    },
+    "metrics": {
+      "max_blob_size": {
+        "min": 5242880,
+        "max": 15728640,
+        "description": "Largest blob between 5 MB and 15 MB"
+      },
+      "blob_total_size": {
+        "min": 20971520,
+        "max": 52428800,
+        "description": "Total blob size between 20 MB and 50 MB"
+      },
+      "blob_count": {
+        "min": 10,
+        "max": 100,
+        "description": "Moderate number of files"
+      },
+      "tree_count": {
+        "min": 3,
+        "max": 30,
+        "description": "Normal directory count"
+      },
+      "max_tree_entries": {
+        "max": 100,
+        "description": "Directory width within normal range"
+      },
+      "max_path_depth": {
+        "max": 8,
+        "description": "Moderate directory depth"
+      },
+      "max_path_length": {
+        "max": 150,
+        "description": "Normal path lengths"
+      },
+      "commit_count": {
+        "min": 5,
+        "max": 200,
+        "description": "Normal commit history"
+      },
+      "branch_count": {
+        "min": 1,
+        "max": 10,
+        "description": "Few branches"
+      },
+      "tag_count": {
+        "min": 0,
+        "max": 20,
+        "description": "Normal tag count"
+      }
+    },
+    "lfs_candidates": {
+      "min_count": 2,
+      "max_count": 5,
+      "expected_patterns": ["*.png", "*.jpg", "*.bin", "*.dat", "*.zip"],
+      "description": "2-5 large files should be flagged as LFS candidates"
+    },
+    "threshold_violations": {
+      "min_count": 1,
+      "max_count": 4,
+      "expected_violations": [
+        {
+          "metric": "max_blob_size",
+          "min_level": 1,
+          "max_level": 3,
+          "description": "Large blob size warning (* to ***)"
+        },
+        {
+          "metric": "blob_total_size",
+          "min_level": 1,
+          "max_level": 2,
+          "description": "Total blob size warning (* to **)"
+        }
+      ]
+    }
+  },
+  "thresholds": {
+    "max_analysis_time_ms": 10000,
+    "description": "Analysis may take longer due to large blobs"
+  }
+}

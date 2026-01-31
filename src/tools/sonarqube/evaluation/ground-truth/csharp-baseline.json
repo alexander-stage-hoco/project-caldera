@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "scenario": "csharp-baseline",
+  "description": "C# baseline codebase with intentional code smells for evaluation testing. Despite the 'clean' directory name, this repo contains deliberate issues to validate detection.",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/csharp-clean",
+  "expected": {
+    "id": "csharp-baseline",
+    "language": "csharp",
+    "expected_languages": [
+      "cs"
+    ],
+    "expected_issues": {
+      "min": 10,
+      "max": 20
+    },
+    "expected_bugs": {
+      "min": 0,
+      "max": 2
+    },
+    "expected_vulnerabilities": {
+      "min": 0,
+      "max": 1
+    },
+    "expected_smells": {
+      "min": 10,
+      "max": 20
+    },
+    "expected_metrics": {
+      "ncloc": {
+        "min": 100,
+        "max": 500
+      },
+      "complexity": {
+        "min": 10,
+        "max": 100
+      }
+    },
+    "quality_gate_expected": "ERROR",
+    "expected_rules": {
+      "S1481": {
+        "description": "Unused local variables should be removed",
+        "category": "CODE_SMELL",
+        "min_occurrences": 1
+      },
+      "S3776": {
+        "description": "Cognitive complexity should not be too high",
+        "category": "CODE_SMELL",
+        "min_occurrences": 0
+      },
+      "S1186": {
+        "description": "Methods should not be empty",
+        "category": "CODE_SMELL",
+        "min_occurrences": 0
+      },
+      "S125": {
+        "description": "Sections of code should not be commented out",
+        "category": "CODE_SMELL",
+        "min_occurrences": 0
+      }
+    },
+    "notes": "Baseline repo with intentional issues. Quality gate fails due to code smell density. Used to validate SonarQube detects expected issues."
+  },
+  "id": "csharp-baseline",
+  "language": "csharp",
+  "expected_languages": [
+    "cs"
+  ],
+  "expected_issues": {
+    "min": 10,
+    "max": 20
+  },
+  "expected_bugs": {
+    "min": 0,
+    "max": 2
+  },
+  "expected_vulnerabilities": {
+    "min": 0,
+    "max": 1
+  },
+  "expected_smells": {
+    "min": 10,
+    "max": 20
+  },
+  "expected_metrics": {
+    "ncloc": {
+      "min": 100,
+      "max": 500
+    },
+    "complexity": {
+      "min": 10,
+      "max": 100
+    }
+  },
+  "quality_gate_expected": "ERROR",
+  "notes": "Baseline repo with intentional issues. Quality gate fails due to code smell density. Used to validate SonarQube detects expected issues."
+}

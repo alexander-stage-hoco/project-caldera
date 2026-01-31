@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "R7ijdzXqM04=",
+  "success": true,
+  "projectFilePath": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullSafety.csproj",
+  "expectedPackageFiles": [
+    "/Users/alexander.stage/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/microsoft.codeanalysis.netanalyzers.9.0.0.nupkg.sha512",
+    "/Users/alexander.stage/.nuget/packages/microsoft.netcore.app.ref/8.0.22/microsoft.netcore.app.ref.8.0.22.nupkg.sha512",
+    "/Users/alexander.stage/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.22/microsoft.aspnetcore.app.ref.8.0.22.nupkg.sha512"
+  ],
+  "logs": []
+}

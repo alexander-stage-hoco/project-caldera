@@ -1,0 +1,10 @@
+{
+  "id": "iac-terraform",
+  "description": "Terraform configuration with security misconfigurations",
+  "iac_type": "terraform",
+  "expected_targets": ["main.tf"],
+  "expected_misconfigurations": { "min": 2, "max": 10 },
+  "expected_critical": { "min": 0, "max": 2 },
+  "expected_high": { "min": 1, "max": 5 },
+  "notes": "Contains unencrypted S3 bucket and overly permissive security group"
+}

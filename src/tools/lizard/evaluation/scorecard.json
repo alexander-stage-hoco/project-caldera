@@ -1,0 +1,220 @@
+{
+  "tool": "lizard",
+  "version": "1.0.0",
+  "generated_at": "2026-01-25T09:59:18.107452+00:00",
+  "description": "Evaluation scorecard for Lizard function-level complexity analysis",
+  "summary": {
+    "total_checks": 76,
+    "passed": 76,
+    "failed": 0,
+    "score": 0.986,
+    "score_percent": 98.6,
+    "normalized_score": 4.94,
+    "decision": "STRONG_PASS"
+  },
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "Accuracy",
+      "category": "accuracy",
+      "total_checks": 56,
+      "passed": 56,
+      "failed": 0,
+      "score": 0.981,
+      "by_severity": {
+        "critical": {
+          "count": 14,
+          "passed": 14,
+          "score": 0.9927113702623906
+        },
+        "high": {
+          "count": 14,
+          "passed": 14,
+          "score": 1.0
+        },
+        "medium": {
+          "count": 21,
+          "passed": 21,
+          "score": 0.9781193344695319
+        },
+        "low": {
+          "count": 7,
+          "passed": 7,
+          "score": 0.9300539741045667
+        }
+      },
+      "check_ids": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8"
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Coverage",
+      "category": "coverage",
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 1.0,
+      "by_severity": {
+        "critical": {
+          "count": 1,
+          "passed": 1,
+          "score": 1.0
+        },
+        "high": {
+          "count": 7,
+          "passed": 7,
+          "score": 1.0
+        }
+      },
+      "check_ids": [
+        "CV-1",
+        "CV-2",
+        "CV-3",
+        "CV-4",
+        "CV-5",
+        "CV-6",
+        "CV-7",
+        "CV-8"
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Edge Cases",
+      "category": "edge_cases",
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 1.0,
+      "by_severity": {
+        "high": {
+          "count": 2,
+          "passed": 2,
+          "score": 1.0
+        },
+        "medium": {
+          "count": 3,
+          "passed": 3,
+          "score": 1.0
+        },
+        "low": {
+          "count": 3,
+          "passed": 3,
+          "score": 1.0
+        }
+      },
+      "check_ids": [
+        "EC-1",
+        "EC-2",
+        "EC-3",
+        "EC-4",
+        "EC-5",
+        "EC-6",
+        "EC-7",
+        "EC-8"
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "Performance",
+      "category": "performance",
+      "total_checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "score": 1.0,
+      "by_severity": {
+        "high": {
+          "count": 1,
+          "passed": 1,
+          "score": 1.0
+        },
+        "medium": {
+          "count": 2,
+          "passed": 2,
+          "score": 1.0
+        },
+        "low": {
+          "count": 1,
+          "passed": 1,
+          "score": 1.0
+        }
+      },
+      "check_ids": [
+        "PF-1",
+        "PF-2",
+        "PF-3",
+        "PF-4"
+      ]
+    }
+  ],
+  "critical_failures": [],
+  "thresholds": {
+    "STRONG_PASS": ">= 4.0 normalized (>= 75% raw)",
+    "PASS": ">= 3.5 normalized (>= 62.5% raw)",
+    "WEAK_PASS": ">= 3.0 normalized (>= 50% raw)",
+    "FAIL": "< 3.0 normalized (< 50% raw)"
+  },
+  "metadata": {
+    "tool_type": "complexity_analysis",
+    "primary_purpose": "function_level_ccn_analysis",
+    "languages_covered": 7,
+    "ground_truth_functions": 524,
+    "analysis_path": "output/output.json",
+    "ground_truth_path": "evaluation/ground-truth"
+  }
+}

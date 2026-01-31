@@ -1,0 +1,37 @@
+{
+  "repository": "generated-code",
+  "description": "Repository with various generated code patterns",
+  "expected": {
+    "total_files": 15,
+    "total_directories": 7,
+    "max_depth": 3,
+    "classifications": {
+      "source": 2,
+      "generated": 12,
+      "docs": 1
+    },
+    "specific_files": {
+      "src/Models.g.cs": {
+        "classification": "generated",
+        "language": "csharp"
+      },
+      "src/proto/message_pb2.py": {
+        "classification": "generated",
+        "language": "python"
+      },
+      "package-lock.json": {
+        "classification": "generated",
+        "language": "json"
+      },
+      "types/index.d.ts": {
+        "classification": "generated",
+        "language": "typescript"
+      }
+    }
+  },
+  "thresholds": {
+    "classification_accuracy": 0.9,
+    "count_tolerance": 0,
+    "max_scan_time_seconds": 1.0
+  }
+}

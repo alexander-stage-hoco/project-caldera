@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "scenario": "javascript",
+  "description": "Ground truth for javascript.",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/javascript",
+  "expected": {
+    "language": "javascript",
+    "version": "2.0",
+    "summary": {
+      "total_files": 4,
+      "total_expected_smells": 13,
+      "smell_categories_covered": [
+        "error_handling",
+        "dead_code",
+        "security"
+      ],
+      "notes": "A2_HIGH_CYCLOMATIC and A3_DEEP_NESTING excluded - use lizard for complexity metrics"
+    }
+  },
+  "files": {
+    "empty_catch.js": {
+      "expected_smells": [
+        {
+          "smell_id": "D1_EMPTY_CATCH",
+          "count": 5,
+          "lines": [
+            10,
+            18,
+            30,
+            42,
+            52
+          ]
+        }
+      ],
+      "total_expected": 5
+    },
+    "sql_injection.js": {
+      "expected_smells": [
+        {
+          "smell_id": "SQL_INJECTION",
+          "count": 6,
+          "lines": [
+            11,
+            18,
+            24,
+            30,
+            36,
+            43
+          ]
+        }
+      ],
+      "total_expected": 6
+    },
+    "complexity.js": {
+      "expected_smells": [
+        {
+          "smell_id": "A2_HIGH_CYCLOMATIC",
+          "count": 0,
+          "lines": []
+        },
+        {
+          "smell_id": "A3_DEEP_NESTING",
+          "count": 0,
+          "lines": []
+        }
+      ],
+      "total_expected": 0,
+      "notes": "Semgrep does not measure cyclomatic complexity or nesting depth - use lizard for these metrics"
+    },
+    "dead_code.js": {
+      "expected_smells": [
+        {
+          "smell_id": "I3_UNREACHABLE_CODE",
+          "count": 2,
+          "lines": [
+            8,
+            27
+          ]
+        }
+      ],
+      "total_expected": 2,
+      "notes": "Semgrep only detects code after return, not after throw"
+    }
+  }
+}

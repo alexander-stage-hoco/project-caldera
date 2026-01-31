@@ -1,0 +1,198 @@
+{
+  "schema_version": "2.0",
+  "description": "Expected tool behavior specifications for scc (v2.0 with extended dimensions)",
+
+  "output_format": {
+    "json_valid": true,
+    "json_array_at_root": true,
+    "required_fields_per_language": [
+      "Name", "Count", "Lines", "Code", "Comment", "Blank", "Bytes", "Complexity"
+    ]
+  },
+
+  "language_detection": {
+    "required_languages": ["Python", "C#", "Go", "Java", "JavaScript", "TypeScript", "Rust"]
+  },
+
+  "performance": {
+    "max_execution_time_ms": 5000,
+    "fast_execution_time_ms": 1000,
+    "very_fast_execution_time_ms": 500,
+    "max_memory_mb": 100
+  },
+
+  "reliability": {
+    "deterministic": true,
+    "handles_empty_files": true,
+    "handles_unicode": true,
+    "handles_deep_nesting": true,
+    "handles_comments_only": true
+  },
+
+  "license": {
+    "acceptable_licenses": ["MIT", "Unlicense", "Apache-2.0"],
+    "github_url": "https://github.com/boyter/scc",
+    "requires_payment": false
+  },
+
+  "per_file_mode": {
+    "description": "Behavior when using --by-file flag",
+    "command_flags": ["--by-file", "--uloc", "--min", "--gen", "-f", "json"],
+    "output_structure": {
+      "root": "array of language objects",
+      "language_object": {
+        "Name": "language name",
+        "Files": "array of file objects"
+      },
+      "file_object_fields": {
+        "Location": {
+          "type": "string",
+          "description": "Relative path to file",
+          "always_present": true
+        },
+        "Lines": {
+          "type": "integer",
+          "description": "Total lines in file",
+          "always_present": true
+        },
+        "Code": {
+          "type": "integer",
+          "description": "Lines of code",
+          "always_present": true
+        },
+        "Comment": {
+          "type": "integer",
+          "description": "Lines of comments",
+          "always_present": true
+        },
+        "Blank": {
+          "type": "integer",
+          "description": "Blank lines",
+          "always_present": true
+        },
+        "Complexity": {
+          "type": "integer",
+          "description": "Cyclomatic complexity",
+          "always_present": true,
+          "min_value": 0
+        },
+        "Uloc": {
+          "type": "integer",
+          "description": "Unique lines of code",
+          "requires_flag": "--uloc",
+          "min_value": 0
+        },
+        "Minified": {
+          "type": "boolean",
+          "description": "Whether file appears minified",
+          "requires_flag": "--min"
+        },
+        "Generated": {
+          "type": "boolean",
+          "description": "Whether file appears auto-generated",
+          "requires_flag": "--gen"
+        }
+      }
+    }
+  },
+
+  "json2_format": {
+    "description": "Extended JSON format with COCOMO estimates",
+    "command_flags": ["-f", "json2"],
+    "additional_fields": {
+      "estimatedCost": {
+        "type": "float",
+        "description": "Estimated development cost in USD",
+        "always_present": true
+      },
+      "estimatedScheduleMonths": {
+        "type": "float",
+        "description": "Estimated duration in months",
+        "always_present": true
+      },
+      "estimatedPeople": {
+        "type": "float",
+        "description": "Estimated team size",
+        "always_present": true
+      }
+    },
+    "cocomo_parameters": {
+      "project_types": ["organic", "semi-detached", "embedded", "custom"],
+      "custom_format": "custom,a,b,c,d",
+      "customizable_options": {
+        "--avg-wage": "average annual salary in USD",
+        "--overhead": "overhead multiplier",
+        "--eaf": "effort adjustment factor"
+      }
+    }
+  },
+
+  "directory_analysis_expectations": {
+    "description": "Expected behavior of directory analysis script",
+    "input": "scc JSON output + target path",
+    "output_structure": {
+      "summary": {
+        "total_files": "integer",
+        "total_loc": "integer",
+        "total_complexity": "integer"
+      },
+      "directories": {
+        "type": "array",
+        "item_structure": {
+          "path": "string",
+          "direct": {
+            "file_count": "integer",
+            "loc": "integer",
+            "complexity": "integer"
+          },
+          "recursive": {
+            "file_count": "integer",
+            "loc": "integer",
+            "complexity": "integer"
+          },
+          "files": "array of file names",
+          "distribution": {
+            "loc": {
+              "min": "float",
+              "max": "float",
+              "mean": "float",
+              "median": "float",
+              "stddev": "float",
+              "p25": "float",
+              "p75": "float",
+              "p90": "float",
+              "p95": "float"
+            }
+          },
+          "hotspot_score": "float (0.0-1.0)"
+        }
+      }
+    },
+    "invariants": [
+      "recursive.file_count >= direct.file_count",
+      "recursive.loc >= direct.loc",
+      "sum(directories[].files.length) == summary.total_files",
+      "hotspot_score in [0.0, 1.0]"
+    ]
+  },
+
+  "evaluation_dimensions": {
+    "version": "2.0",
+    "total_dimensions": 10,
+    "total_checks": 56,
+    "core_dimensions": {
+      "weight": 0.70,
+      "dimensions": ["output_quality", "integration_fit", "reliability", "performance", "installation", "coverage", "license"]
+    },
+    "extended_dimensions": {
+      "weight": 0.30,
+      "dimensions": ["per_file", "directory_analysis", "cocomo"]
+    },
+    "decision_thresholds": {
+      "STRONG_PASS": 4.0,
+      "PASS": 3.5,
+      "WEAK_PASS": 3.0,
+      "FAIL": 0.0
+    }
+  }
+}

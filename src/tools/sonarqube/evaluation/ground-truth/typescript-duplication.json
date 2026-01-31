@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "scenario": "typescript-duplication",
+  "description": "TypeScript codebase with high code duplication",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/typescript-duplication",
+  "expected": {
+    "id": "typescript-duplication",
+    "language": "typescript",
+    "expected_languages": [
+      "ts"
+    ],
+    "expected_issues": {
+      "min": 6,
+      "max": 20
+    },
+    "expected_bugs": {
+      "min": 0,
+      "max": 3
+    },
+    "expected_vulnerabilities": {
+      "min": 0,
+      "max": 1
+    },
+    "expected_smells": {
+      "min": 6,
+      "max": 20
+    },
+    "expected_metrics": {
+      "ncloc": {
+        "min": 500,
+        "max": 2000
+      },
+      "complexity": {
+        "min": 50,
+        "max": 500
+      },
+      "duplicated_lines_density": {
+        "min": 20,
+        "max": 60
+      }
+    },
+    "quality_gate_expected": "OK",
+    "notes": "Contains intentional code duplication patterns for testing duplication detection"
+  },
+  "id": "typescript-duplication",
+  "language": "typescript",
+  "expected_languages": [
+    "ts"
+  ],
+  "expected_issues": {
+    "min": 6,
+    "max": 20
+  },
+  "expected_bugs": {
+    "min": 0,
+    "max": 3
+  },
+  "expected_vulnerabilities": {
+    "min": 0,
+    "max": 1
+  },
+  "expected_smells": {
+    "min": 6,
+    "max": 20
+  },
+  "expected_metrics": {
+    "ncloc": {
+      "min": 500,
+      "max": 2000
+    },
+    "complexity": {
+      "min": 50,
+      "max": 500
+    },
+    "duplicated_lines_density": {
+      "min": 20,
+      "max": 60
+    }
+  },
+  "quality_gate_expected": "OK",
+  "notes": "Contains intentional code duplication patterns for testing duplication detection"
+}

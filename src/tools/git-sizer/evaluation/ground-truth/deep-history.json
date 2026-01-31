@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "scenario": "deep-history",
+  "description": "Repository with extensive commit history, many branches, and tags. Simulates a mature project with years of development activity.",
+  "repo_path": "eval-repos/synthetic/deep-history",
+  "expected": {
+    "health_grade": {
+      "acceptable": ["B", "B+", "C", "C+"],
+      "description": "Repository should receive B or C grade due to history depth"
+    },
+    "metrics": {
+      "max_blob_size": {
+        "max": 524288,
+        "description": "No single file larger than 512 KB"
+      },
+      "blob_total_size": {
+        "max": 10485760,
+        "description": "Total blob size under 10 MB"
+      },
+      "blob_count": {
+        "min": 20,
+        "max": 200,
+        "description": "Moderate number of files"
+      },
+      "tree_count": {
+        "min": 50,
+        "max": 500,
+        "description": "Many tree objects due to history"
+      },
+      "max_tree_entries": {
+        "max": 100,
+        "description": "Normal directory width"
+      },
+      "max_path_depth": {
+        "max": 10,
+        "description": "Moderate path depth"
+      },
+      "max_path_length": {
+        "max": 150,
+        "description": "Normal path lengths"
+      },
+      "commit_count": {
+        "min": 400,
+        "max": 600,
+        "description": "Around 500 commits expected"
+      },
+      "max_history_depth": {
+        "min": 300,
+        "max": 600,
+        "description": "Deep commit history"
+      },
+      "branch_count": {
+        "min": 10,
+        "max": 50,
+        "description": "Many branches from long development"
+      },
+      "tag_count": {
+        "min": 15,
+        "max": 100,
+        "description": "Many release tags"
+      },
+      "reference_count": {
+        "min": 30,
+        "max": 200,
+        "description": "Many references from branches and tags"
+      },
+      "max_parent_count": {
+        "min": 2,
+        "max": 10,
+        "description": "Merge commits with multiple parents"
+      }
+    },
+    "lfs_candidates": {
+      "count": 0,
+      "description": "No LFS candidates expected - repo has small files"
+    },
+    "threshold_violations": {
+      "min_count": 0,
+      "max_count": 2,
+      "expected_violations": [
+        {
+          "metric": "commit_count",
+          "min_level": 1,
+          "max_level": 2,
+          "description": "Possible commit count warning"
+        },
+        {
+          "metric": "reference_count",
+          "min_level": 1,
+          "max_level": 1,
+          "description": "Possible reference count warning"
+        }
+      ]
+    }
+  },
+  "thresholds": {
+    "max_analysis_time_ms": 15000,
+    "description": "Analysis may take longer due to history traversal"
+  }
+}

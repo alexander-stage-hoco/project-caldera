@@ -1,0 +1,6 @@
+FROM python:3.12
+
+WORKDIR /app
+RUN pip install -e .[dev]
+
+CMD ["python", "-m", "pytest"]

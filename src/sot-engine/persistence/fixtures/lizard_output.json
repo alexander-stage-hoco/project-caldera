@@ -1,0 +1,109 @@
+{
+  "metadata": {
+    "tool_name": "lizard",
+    "tool_version": "1.17.10",
+    "run_id": "33333333-3333-3333-3333-333333333333",
+    "repo_id": "44444444-4444-4444-4444-444444444444",
+    "branch": "main",
+    "commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "timestamp": "2026-01-25T11:00:00+00:00",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "lizard",
+    "tool_version": "1.17.10",
+    "run_id": "33333333-3333-3333-3333-333333333333",
+    "timestamp": "2026-01-25T11:00:00+00:00",
+    "root_path": ".",
+    "lizard_version": "1.17.10",
+    "summary": {
+      "total_files": 2,
+      "total_functions": 4,
+      "total_nloc": 200,
+      "total_ccn": 18,
+      "avg_ccn": 4.5,
+      "max_ccn": 8,
+      "functions_over_threshold": 1,
+      "ccn_threshold": 10,
+      "total_directories": 2,
+      "structure": {
+        "max_depth": 2,
+        "leaf_count": 1
+      }
+    },
+    "directories": [],
+    "files": [
+      {
+        "path": "src/app.py",
+        "language": "Python",
+        "nloc": 120,
+        "function_count": 2,
+        "total_ccn": 10,
+        "avg_ccn": 5.0,
+        "max_ccn": 7,
+        "functions": [
+          {
+            "name": "main",
+            "long_name": "app.main",
+            "ccn": 7,
+            "nloc": 80,
+            "params": 1,
+            "token_count": 200,
+            "line_start": 10,
+            "line_end": 90
+          },
+          {
+            "name": "helper",
+            "long_name": "app.helper",
+            "ccn": 3,
+            "nloc": 40,
+            "params": 2,
+            "token_count": 120,
+            "line_start": 95,
+            "line_end": 130
+          }
+        ]
+      },
+      {
+        "path": "src/utils/helpers.py",
+        "language": "Python",
+        "nloc": 80,
+        "function_count": 2,
+        "total_ccn": 8,
+        "avg_ccn": 4.0,
+        "max_ccn": 6,
+        "functions": [
+          {
+            "name": "calc",
+            "long_name": "helpers.calc",
+            "ccn": 6,
+            "nloc": 50,
+            "params": 1,
+            "token_count": 100,
+            "line_start": 5,
+            "line_end": 60
+          },
+          {
+            "name": "format",
+            "long_name": "helpers.format",
+            "ccn": 2,
+            "nloc": 30,
+            "params": 3,
+            "token_count": 80,
+            "line_start": 70,
+            "line_end": 95
+          }
+        ]
+      }
+    ],
+    "by_language": {
+      "Python": {
+        "files": 2,
+        "functions": 4,
+        "nloc": 200,
+        "ccn": 18,
+        "avg_ccn": 4.5
+      }
+    }
+  }
+}

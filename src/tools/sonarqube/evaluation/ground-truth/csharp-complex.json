@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "scenario": "csharp-complex",
+  "description": "Complex C# codebase with high complexity and many code smells",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/csharp-complex",
+  "expected": {
+    "id": "csharp-complex",
+    "language": "csharp",
+    "expected_languages": [
+      "cs"
+    ],
+    "expected_issues": {
+      "min": 3000,
+      "max": 3600
+    },
+    "expected_bugs": {
+      "min": 0,
+      "max": 2
+    },
+    "expected_vulnerabilities": {
+      "min": 0,
+      "max": 1
+    },
+    "expected_smells": {
+      "min": 3000,
+      "max": 3600
+    },
+    "expected_metrics": {
+      "ncloc": {
+        "min": 1000,
+        "max": 5000
+      },
+      "complexity": {
+        "min": 100,
+        "max": 1000
+      }
+    },
+    "quality_gate_expected": "ERROR",
+    "expected_rules": {
+      "S3776": {
+        "description": "Cognitive complexity should not be too high",
+        "category": "CODE_SMELL",
+        "min_occurrences": 10,
+        "notes": "LargeFile.cs contains deeply nested methods with high cognitive complexity"
+      },
+      "S1541": {
+        "description": "Methods should not be too complex",
+        "category": "CODE_SMELL",
+        "min_occurrences": 5
+      },
+      "S1481": {
+        "description": "Unused local variables should be removed",
+        "category": "CODE_SMELL",
+        "min_occurrences": 1
+      },
+      "S1186": {
+        "description": "Methods should not be empty",
+        "category": "CODE_SMELL",
+        "min_occurrences": 0
+      },
+      "S125": {
+        "description": "Sections of code should not be commented out",
+        "category": "CODE_SMELL",
+        "min_occurrences": 0
+      },
+      "S1134": {
+        "description": "Track uses of FIXME tags",
+        "category": "CODE_SMELL",
+        "min_occurrences": 0
+      }
+    },
+    "notes": "Intentionally complex code with nested conditionals, long methods, and duplication. High cognitive complexity expected."
+  },
+  "id": "csharp-complex",
+  "language": "csharp",
+  "expected_languages": [
+    "cs"
+  ],
+  "expected_issues": {
+    "min": 3000,
+    "max": 3600
+  },
+  "expected_bugs": {
+    "min": 0,
+    "max": 2
+  },
+  "expected_vulnerabilities": {
+    "min": 0,
+    "max": 1
+  },
+  "expected_smells": {
+    "min": 3000,
+    "max": 3600
+  },
+  "expected_metrics": {
+    "ncloc": {
+      "min": 1000,
+      "max": 5000
+    },
+    "complexity": {
+      "min": 100,
+      "max": 1000
+    }
+  },
+  "quality_gate_expected": "ERROR",
+  "notes": "Intentionally complex code with nested conditionals, long methods, and duplication"
+}

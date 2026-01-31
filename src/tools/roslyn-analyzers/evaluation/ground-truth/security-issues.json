@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "scenario": "security-issues",
+  "description": ".NET code with OWASP security vulnerabilities",
+  "repo_path": "eval-repos/synthetic/csharp-security",
+  "expected": {
+    "total_files": {"min": 5, "max": 30},
+    "total_violations": {"min": 10, "max": 50},
+    "security_violations": {"min": 8, "max": 40},
+    "owasp_categories": {
+      "sql_injection": {"min": 1, "max": 10},
+      "xss": {"min": 1, "max": 5},
+      "insecure_crypto": {"min": 1, "max": 5},
+      "insecure_deserialization": {"min": 1, "max": 5}
+    },
+    "key_rules_expected": {
+      "CA3001": "SQL injection",
+      "CA3002": "XSS vulnerability",
+      "CA5350": "Weak cryptographic algorithm",
+      "CA2300": "Insecure deserialization"
+    }
+  },
+  "assertions": [
+    "SQL injection vulnerabilities detected (CA3001)",
+    "XSS vulnerabilities flagged (CA3002)",
+    "Weak crypto usage identified (CA5350)",
+    "Insecure deserialization caught (CA2300)"
+  ]
+}

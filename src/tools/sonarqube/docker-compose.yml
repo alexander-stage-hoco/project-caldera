@@ -1,0 +1,24 @@
+services:
+  sonarqube:
+    image: sonarqube:10.7.0-community  # Pinned version to prevent orphaned images
+    container_name: vulcan-sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+      SONAR_ES_JAVAOPTS: "-Xms512m -Xmx512m"
+      SONAR_WEB_JAVAOPTS: "-Xms768m -Xmx768m"
+      SONAR_CE_JAVAOPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/api/system/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:

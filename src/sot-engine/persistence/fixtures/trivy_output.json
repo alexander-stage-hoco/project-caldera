@@ -1,0 +1,138 @@
+{
+  "metadata": {
+    "tool_name": "trivy",
+    "tool_version": "0.50.0",
+    "run_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+    "repo_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "branch": "main",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-01-27T12:00:00Z",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "trivy",
+    "tool_version": "0.50.0",
+    "scan_type": "fs",
+    "targets": [
+      {
+        "path": "package-lock.json",
+        "type": "npm",
+        "vulnerability_count": 3,
+        "critical_count": 1,
+        "high_count": 1,
+        "medium_count": 1,
+        "low_count": 0
+      },
+      {
+        "path": "requirements.txt",
+        "type": "pip",
+        "vulnerability_count": 1,
+        "critical_count": 0,
+        "high_count": 1,
+        "medium_count": 0,
+        "low_count": 0
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "id": "CVE-2024-0001",
+        "severity": "CRITICAL",
+        "package": "lodash",
+        "installed_version": "4.17.0",
+        "fixed_version": "4.17.21",
+        "title": "Prototype Pollution in lodash",
+        "description": "lodash before 4.17.21 is vulnerable to prototype pollution via the set function.",
+        "cvss_score": 9.8,
+        "published_date": "2024-01-15",
+        "age_days": 180,
+        "fix_available": true,
+        "target": "package-lock.json",
+        "target_type": "npm"
+      },
+      {
+        "id": "CVE-2024-0002",
+        "severity": "HIGH",
+        "package": "axios",
+        "installed_version": "0.21.0",
+        "fixed_version": "0.21.2",
+        "title": "Server-Side Request Forgery in axios",
+        "description": "axios before 0.21.2 allows SSRF attacks.",
+        "cvss_score": 7.5,
+        "published_date": "2024-02-20",
+        "age_days": 144,
+        "fix_available": true,
+        "target": "package-lock.json",
+        "target_type": "npm"
+      },
+      {
+        "id": "CVE-2024-0003",
+        "severity": "HIGH",
+        "package": "requests",
+        "installed_version": "2.25.0",
+        "fixed_version": "2.32.0",
+        "title": "Certificate verification bypass in requests",
+        "description": "requests before 2.32.0 allows hostname mismatch bypass.",
+        "cvss_score": 7.2,
+        "published_date": "2024-03-10",
+        "age_days": 125,
+        "fix_available": true,
+        "target": "requirements.txt",
+        "target_type": "pip"
+      },
+      {
+        "id": "GHSA-abcd-1234",
+        "severity": "MEDIUM",
+        "package": "express",
+        "installed_version": "4.17.0",
+        "fixed_version": null,
+        "title": "Open Redirect in express",
+        "description": "Express allows open redirect via redirect() function.",
+        "cvss_score": 5.4,
+        "published_date": "2024-04-01",
+        "age_days": 103,
+        "fix_available": false,
+        "target": "package-lock.json",
+        "target_type": "npm"
+      }
+    ],
+    "iac_misconfigurations": {
+      "count": 2,
+      "misconfigurations": [
+        {
+          "id": "AVD-DS-0001",
+          "severity": "HIGH",
+          "title": "Root user",
+          "description": "Running as root user is a security risk",
+          "resolution": "Add USER instruction to run as non-root",
+          "target": "Dockerfile",
+          "target_type": "dockerfile",
+          "start_line": 1,
+          "end_line": 1
+        },
+        {
+          "id": "AVD-DS-0002",
+          "severity": "MEDIUM",
+          "title": "ADD instead of COPY",
+          "description": "ADD instruction should be replaced with COPY",
+          "resolution": "Replace ADD with COPY when not extracting archives",
+          "target": "Dockerfile",
+          "target_type": "dockerfile",
+          "start_line": 5,
+          "end_line": 5
+        }
+      ]
+    },
+    "findings_summary": {
+      "total_vulnerabilities": 4,
+      "total_misconfigurations": 2,
+      "by_severity": {
+        "CRITICAL": 1,
+        "HIGH": 3,
+        "MEDIUM": 2,
+        "LOW": 0,
+        "UNKNOWN": 0
+      },
+      "fixable_count": 3
+    }
+  }
+}

@@ -1,0 +1,425 @@
+{
+  "language": "typescript",
+  "generated_at": "2026-01-04T19:02:51.221542+00:00",
+  "lizard_version": "lizard 1.19.0",
+  "total_files": 9,
+  "total_functions": 62,
+  "total_ccn": 155,
+  "files": {
+    "simple.ts": {
+      "expected_functions": 8,
+      "total_ccn": 10,
+      "functions": {
+        "greet": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 1,
+          "start_line": 17,
+          "end_line": 22
+        },
+        "formatEmail": {
+          "ccn": 2,
+          "nloc": 3,
+          "params": 0,
+          "start_line": 22,
+          "end_line": 24
+        },
+        "processId": {
+          "ccn": 2,
+          "nloc": 4,
+          "params": 1,
+          "start_line": 27,
+          "end_line": 32
+        },
+        "increment": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 0,
+          "start_line": 35,
+          "end_line": 37
+        },
+        "decrement": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 0,
+          "start_line": 39,
+          "end_line": 41
+        },
+        "getCount": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 0,
+          "start_line": 43,
+          "end_line": 45
+        },
+        "(anonymous)": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 0,
+          "start_line": 57,
+          "end_line": 57
+        },
+        "filterActiveUsers": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 1,
+          "start_line": 56,
+          "end_line": 61
+        }
+      }
+    },
+    "edge_cases/single_line.ts": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "edge_cases/deep_nesting.ts": {
+      "expected_functions": 2,
+      "total_ccn": 25,
+      "functions": {
+        "deeplyNestedFunction": {
+          "ccn": 13,
+          "nloc": 33,
+          "params": 1,
+          "start_line": 9,
+          "end_line": 57
+        },
+        "processMatrix": {
+          "ccn": 12,
+          "nloc": 29,
+          "params": 2,
+          "start_line": 58,
+          "end_line": 99
+        }
+      }
+    },
+    "edge_cases/empty.ts": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "complex.ts": {
+      "expected_functions": 25,
+      "total_ccn": 29,
+      "functions": {
+        "find": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 1,
+          "start_line": 8,
+          "end_line": 8
+        },
+        "save": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 1,
+          "start_line": 10,
+          "end_line": 10
+        },
+        "delete": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 36,
+          "end_line": 38
+        },
+        "findById": {
+          "ccn": 2,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 23,
+          "end_line": 25
+        },
+        "deleteById": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 40,
+          "end_line": 42
+        },
+        "bark": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 0,
+          "start_line": 64,
+          "end_line": 64
+        },
+        "meow": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 0,
+          "start_line": 69,
+          "end_line": 69
+        },
+        "descriptor.value": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 1,
+          "start_line": 97,
+          "end_line": 102
+        },
+        "isDog": {
+          "ccn": 3,
+          "nloc": 21,
+          "params": 3,
+          "start_line": 75,
+          "end_line": 104
+        },
+        "add": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 1,
+          "start_line": 139,
+          "end_line": 142
+        },
+        "multiply": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 2,
+          "start_line": 114,
+          "end_line": 116
+        },
+        "divide": {
+          "ccn": 2,
+          "nloc": 6,
+          "params": 2,
+          "start_line": 119,
+          "end_line": 124
+        },
+        "compareTo": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 1,
+          "start_line": 129,
+          "end_line": 129
+        },
+        "serialize": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 0,
+          "start_line": 133,
+          "end_line": 133
+        },
+        "(anonymous)": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 0,
+          "start_line": 222,
+          "end_line": 222
+        },
+        "getAll": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 0,
+          "start_line": 144,
+          "end_line": 146
+        },
+        "serializeAll": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 0,
+          "start_line": 148,
+          "end_line": 150
+        },
+        ">": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 0,
+          "start_line": 186,
+          "end_line": 187
+        },
+        "<": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 0,
+          "start_line": 204,
+          "end_line": 204
+        }
+      }
+    },
+    "edge_cases/comments_only.ts": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "edge_cases/unicode.ts": {
+      "expected_functions": 2,
+      "total_ccn": 4,
+      "functions": {
+        "getTranslation": {
+          "ccn": 2,
+          "nloc": 10,
+          "params": 1,
+          "start_line": 18,
+          "end_line": 33
+        },
+        "countEmojis": {
+          "ccn": 2,
+          "nloc": 5,
+          "params": 1,
+          "start_line": 35,
+          "end_line": 40
+        }
+      }
+    },
+    "module/nested.ts": {
+      "expected_functions": 7,
+      "total_ccn": 7,
+      "functions": {
+        "comparator": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 0,
+          "start_line": 17,
+          "end_line": 17
+        },
+        "constructor": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 0,
+          "start_line": 16,
+          "end_line": 19
+        },
+        "add": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 21,
+          "end_line": 23
+        },
+        "find": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 1,
+          "start_line": 25,
+          "end_line": 26
+        },
+        "process": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 1,
+          "start_line": 39,
+          "end_line": 42
+        },
+        "(anonymous)": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 0,
+          "start_line": 40,
+          "end_line": 40
+        }
+      }
+    },
+    "massive.ts": {
+      "expected_functions": 18,
+      "total_ccn": 80,
+      "functions": {
+        ">": {
+          "ccn": 26,
+          "nloc": 126,
+          "params": 9,
+          "start_line": 373,
+          "end_line": 527
+        },
+        "constructor": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 33,
+          "end_line": 35
+        },
+        "insert": {
+          "ccn": 7,
+          "nloc": 26,
+          "params": 1,
+          "start_line": 37,
+          "end_line": 65
+        },
+        "find": {
+          "ccn": 4,
+          "nloc": 14,
+          "params": 1,
+          "start_line": 67,
+          "end_line": 83
+        },
+        "delete": {
+          "ccn": 15,
+          "nloc": 54,
+          "params": 1,
+          "start_line": 85,
+          "end_line": 147
+        },
+        "findMin": {
+          "ccn": 2,
+          "nloc": 6,
+          "params": 1,
+          "start_line": 149,
+          "end_line": 154
+        },
+        "deleteMin": {
+          "ccn": 3,
+          "nloc": 11,
+          "params": 2,
+          "start_line": 156,
+          "end_line": 167
+        },
+        "inorderTraversal": {
+          "ccn": 1,
+          "nloc": 5,
+          "params": 0,
+          "start_line": 169,
+          "end_line": 173
+        },
+        "inorderHelper": {
+          "ccn": 2,
+          "nloc": 7,
+          "params": 2,
+          "start_line": 175,
+          "end_line": 181
+        },
+        "enqueue": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 189,
+          "end_line": 192
+        },
+        "dequeue": {
+          "ccn": 3,
+          "nloc": 13,
+          "params": 0,
+          "start_line": 194,
+          "end_line": 209
+        },
+        "bubbleUp": {
+          "ccn": 3,
+          "nloc": 13,
+          "params": 1,
+          "start_line": 211,
+          "end_line": 225
+        },
+        "bubbleDown": {
+          "ccn": 7,
+          "nloc": 27,
+          "params": 1,
+          "start_line": 227,
+          "end_line": 257
+        },
+        "get size": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 0,
+          "start_line": 259,
+          "end_line": 261
+        },
+        "(anonymous)": {
+          "ccn": 1,
+          "nloc": 1,
+          "params": 0,
+          "start_line": 507,
+          "end_line": 507
+        }
+      }
+    }
+  }
+}

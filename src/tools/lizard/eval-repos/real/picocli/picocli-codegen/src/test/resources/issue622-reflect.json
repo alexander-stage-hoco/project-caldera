@@ -1,0 +1,47 @@
+[
+  {
+    "name" : "picocli.codegen.aot.graalvm.Issue622AbstractCommand",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "file" },
+      { "name" : "verbose" }
+    ]
+  },
+  {
+    "name" : "picocli.codegen.aot.graalvm.Issue622App",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true
+  },
+  {
+    "name" : "picocli.codegen.aot.graalvm.Issue622Command1",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true
+  },
+  {
+    "name" : "picocli.codegen.aot.graalvm.Issue622Command2",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "x" }
+    ]
+  },
+  {
+    "name" : "picocli.codegen.aot.graalvm.Issue622Command2Sub",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "x" }
+    ]
+  }
+]

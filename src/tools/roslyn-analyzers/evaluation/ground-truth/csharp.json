@@ -1,0 +1,722 @@
+{
+  "schema_version": "1.0",
+  "scenario": "csharp",
+  "description": "Ground truth for csharp.",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/csharp",
+  "expected": {
+    "language": "csharp",
+    "version": "1.0",
+    "tool": "roslyn-analyzers",
+    "created": "2026-01-06",
+    "summary": {
+      "total_files": 34,
+      "total_expected_violations": 120,
+      "violation_categories": {
+        "security": 31,
+        "design": 25,
+        "resource": 34,
+        "performance": 16,
+        "dead_code": 16
+      },
+      "false_positive_test_files": 4,
+      "safe_pattern_count": 41,
+      "p0_packages": [
+        "SecurityCodeScan.VS2019",
+        "IDisposableAnalyzers",
+        "Microsoft.VisualStudio.Threading.Analyzers",
+        "Roslynator.Analyzers"
+      ],
+      "p1_packages": [
+        "AsyncFixer",
+        "ErrorProne.NET.CoreAnalyzers",
+        "Meziantou.Analyzer",
+        "SmartAnalyzers.ExceptionAnalyzer",
+        "SonarAnalyzer.CSharp"
+      ],
+      "p2_packages": [
+        "StyleCop.Analyzers",
+        "xunit.analyzers",
+        "Moq.Analyzers",
+        "BlowinCleanCode",
+        "DotNetProjectFile.Analyzers"
+      ],
+      "note": "Ground truth focuses on core security/quality rules. P1+P2 analyzers detect additional design/style issues that are suppressed via .editorconfig for due diligence evaluation."
+    },
+    "thresholds": {
+      "precision_min": 0.85,
+      "recall_min": 0.8,
+      "false_positive_rate_max": 0.1
+    },
+    "rule_to_category_map": {
+      "CA3001": "security",
+      "CA3002": "security",
+      "CA2100": "security",
+      "CA5350": "security",
+      "CA5351": "security",
+      "CA5385": "security",
+      "CA5390": "security",
+      "CA5364": "security",
+      "CA5397": "security",
+      "CA2300": "security",
+      "CA2301": "security",
+      "CA2305": "security",
+      "CA2311": "security",
+      "CA2315": "security",
+      "CA3147": "security",
+      "CA1051": "design",
+      "CA1040": "design",
+      "CA1000": "design",
+      "CA1001": "resource",
+      "CA1063": "resource",
+      "CA1061": "design",
+      "CA1502": "design",
+      "CA1506": "design",
+      "IDE0040": "design",
+      "CA2000": "resource",
+      "CA2016": "resource",
+      "CA2007": "resource",
+      "IDE0005": "dead_code",
+      "IDE0052": "dead_code",
+      "IDE0059": "dead_code",
+      "IDE0060": "dead_code",
+      "CA1801": "dead_code",
+      "CA1812": "dead_code",
+      "CA1825": "performance",
+      "CA1826": "performance",
+      "CA1829": "performance",
+      "CA1834": "performance",
+      "CA1858": "performance",
+      "ASYNC0001": "resource",
+      "SCS0001": "security",
+      "SCS0002": "security",
+      "SCS0005": "security",
+      "SCS0015": "security",
+      "SCS0016": "security",
+      "SCS0018": "security",
+      "SCS0029": "security",
+      "CA5391": "security",
+      "CA5395": "security",
+      "IDISP001": "resource",
+      "IDISP006": "resource",
+      "IDISP014": "resource",
+      "IDISP017": "resource",
+      "VSTHRD100": "design",
+      "VSTHRD110": "design",
+      "VSTHRD111": "design",
+      "VSTHRD200": "design",
+      "RCS1102": "design",
+      "_comment_p1_rules": "P1 Analyzer Rules",
+      "S1144": "design",
+      "S2094": "design",
+      "S1186": "design",
+      "S3881": "design",
+      "S2930": "resource",
+      "S3168": "resource",
+      "RCS1163": "design",
+      "RCS1213": "design",
+      "RCS1251": "design",
+      "RCS1169": "design",
+      "RCS1187": "design",
+      "AsyncFixer01": "resource",
+      "AsyncFixer03": "resource",
+      "EPC12": "design",
+      "_comment_performance_rules": "Performance Rules",
+      "CA1822": "performance",
+      "CA1823": "dead_code",
+      "CA1802": "performance",
+      "CA1805": "performance"
+    }
+  },
+  "files": {
+    "security/sql_injection.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA3001",
+          "dd_category": "security",
+          "count": 3,
+          "lines": [
+            15,
+            28,
+            39
+          ]
+        },
+        {
+          "rule_id": "CA2100",
+          "dd_category": "security",
+          "count": 2,
+          "lines": [
+            50,
+            62
+          ]
+        }
+      ],
+      "total_expected": 5,
+      "safe_patterns": 2
+    },
+    "security/xss_vulnerabilities.cs": {
+      "expected_violations": [],
+      "total_expected": 0,
+      "safe_patterns": 3,
+      "analyzer_limitation": true,
+      "note": "CA3002 requires sophisticated data flow analysis not triggered by simple patterns. SCS0002/SCS0029 have specific pattern requirements. XSS detection is a known analyzer gap."
+    },
+    "security/hardcoded_secrets.cs": {
+      "expected_violations": [],
+      "total_expected": 0,
+      "safe_patterns": 2,
+      "analyzer_limitation": true,
+      "note": "CA5390 is deprecated by Microsoft. SCS0015 requires specific 'password' variable contexts. Hardcoded secret detection is a known analyzer gap."
+    },
+    "security/weak_crypto.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA5350",
+          "dd_category": "security",
+          "count": 2,
+          "lines": [
+            16,
+            27
+          ]
+        },
+        {
+          "rule_id": "CA5351",
+          "dd_category": "security",
+          "count": 2,
+          "lines": [
+            38,
+            47
+          ]
+        }
+      ],
+      "total_expected": 4,
+      "safe_patterns": 2
+    },
+    "security/insecure_deserialization.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA2300",
+          "dd_category": "security",
+          "count": 1,
+          "lines": [
+            19
+          ]
+        },
+        {
+          "rule_id": "CA2301",
+          "dd_category": "security",
+          "count": 1,
+          "lines": [
+            27
+          ]
+        },
+        {
+          "rule_id": "CA2305",
+          "dd_category": "security",
+          "count": 1,
+          "lines": [
+            36
+          ]
+        },
+        {
+          "rule_id": "CA2311",
+          "dd_category": "security",
+          "count": 1,
+          "lines": [
+            44
+          ]
+        },
+        {
+          "rule_id": "CA2315",
+          "dd_category": "security",
+          "count": 1,
+          "lines": [
+            52
+          ]
+        }
+      ],
+      "total_expected": 5,
+      "safe_patterns": 2
+    },
+    "security/deprecated_tls.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA5364",
+          "dd_category": "security",
+          "count": 2,
+          "lines": [
+            17,
+            24
+          ]
+        },
+        {
+          "rule_id": "CA5397",
+          "dd_category": "security",
+          "count": 1,
+          "lines": [
+            31
+          ]
+        }
+      ],
+      "total_expected": 3,
+      "safe_patterns": 2
+    },
+    "security/missing_csrf.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA3147",
+          "dd_category": "security",
+          "count": 4,
+          "lines": [
+            18,
+            27,
+            36,
+            45
+          ]
+        }
+      ],
+      "total_expected": 4,
+      "safe_patterns": 2,
+      "note": "Legacy CSRF test - see aspnet_csrf.cs for proper ASP.NET Core patterns"
+    },
+    "security/aspnet_xss.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA5395",
+          "dd_category": "security",
+          "count": 6,
+          "note": "HttpMethodAttribute missing - security hygiene"
+        }
+      ],
+      "total_expected": 6,
+      "safe_patterns": 2,
+      "note": "CA3002 XSS requires specific data flow analysis not triggered by simple patterns"
+    },
+    "security/aspnet_csrf.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "SCS0016",
+          "dd_category": "security",
+          "count": 6,
+          "note": "SecurityCodeScan CSRF detection"
+        }
+      ],
+      "total_expected": 6,
+      "safe_patterns": 2,
+      "note": "SCS0016 from SecurityCodeScan detects CSRF vulnerabilities"
+    },
+    "design/god_class.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1502",
+          "dd_category": "design",
+          "count": 2,
+          "lines": [29, 77],
+          "note": "Cyclomatic complexity > 25 in ProcessOrder and CalculateShippingCost methods"
+        }
+      ],
+      "total_expected": 2,
+      "safe_patterns": 0,
+      "note": "CA1502 detects excessive cyclomatic complexity. CA1506 coupling requires >95 types."
+    },
+    "design/visible_fields.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1051",
+          "dd_category": "design",
+          "count": 5,
+          "lines": [
+            13,
+            16,
+            19,
+            22,
+            25
+          ]
+        }
+      ],
+      "total_expected": 5,
+      "safe_patterns": 0
+    },
+    "design/empty_interfaces.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1040",
+          "dd_category": "design",
+          "count": 3,
+          "lines": [
+            11,
+            16,
+            22
+          ]
+        }
+      ],
+      "total_expected": 3,
+      "safe_patterns": 0
+    },
+    "design/improper_inheritance.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1061",
+          "dd_category": "design",
+          "count": 7,
+          "lines": [
+            28,
+            34,
+            40,
+            46,
+            78,
+            84,
+            104
+          ],
+          "note": "CA1061 fires when derived method parameter is more weakly typed than base"
+        }
+      ],
+      "total_expected": 7,
+      "safe_patterns": 0
+    },
+    "design/static_generics.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1000",
+          "dd_category": "design",
+          "count": 3,
+          "lines": [
+            11,
+            21,
+            24
+          ]
+        }
+      ],
+      "total_expected": 3,
+      "safe_patterns": 0
+    },
+    "design/missing_accessibility.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "IDE0040",
+          "dd_category": "design",
+          "count": 5,
+          "lines": [
+            11,
+            14,
+            19,
+            22,
+            25
+          ]
+        }
+      ],
+      "total_expected": 5,
+      "safe_patterns": 0
+    },
+    "resource/undisposed_objects.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA2000",
+          "dd_category": "resource",
+          "count": 6,
+          "lines": [
+            16,
+            26,
+            35,
+            45,
+            56,
+            66
+          ]
+        }
+      ],
+      "total_expected": 6,
+      "safe_patterns": 2
+    },
+    "resource/missing_idisposable.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1001",
+          "dd_category": "resource",
+          "count": 4,
+          "lines": [
+            13,
+            32,
+            53,
+            74
+          ]
+        },
+        {
+          "rule_id": "IDISP006",
+          "dd_category": "resource",
+          "count": 6,
+          "lines": [
+            15,
+            32,
+            33,
+            54,
+            76,
+            91
+          ],
+          "note": "IDisposableAnalyzers P0"
+        }
+      ],
+      "total_expected": 10,
+      "safe_patterns": 1
+    },
+    "resource/improper_dispose.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1063",
+          "dd_category": "resource",
+          "count": 3,
+          "lines": [
+            13,
+            33,
+            56
+          ]
+        }
+      ],
+      "total_expected": 3,
+      "safe_patterns": 1
+    },
+    "resource/missing_cancellation.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA2016",
+          "dd_category": "resource",
+          "count": 5,
+          "lines": [
+            18,
+            26,
+            35,
+            43,
+            52
+          ]
+        }
+      ],
+      "total_expected": 5,
+      "safe_patterns": 2
+    },
+    "resource/async_void.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "ASYNC0001",
+          "dd_category": "resource",
+          "count": 4,
+          "lines": [
+            15,
+            23,
+            31,
+            41
+          ],
+          "note": "async void detection varies by analyzer"
+        }
+      ],
+      "total_expected": 4,
+      "safe_patterns": 3
+    },
+    "resource/disposal_patterns.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "IDISP014",
+          "dd_category": "resource",
+          "count": 3,
+          "lines": [
+            18,
+            24,
+            30
+          ],
+          "note": "HttpClient single instance"
+        },
+        {
+          "rule_id": "IDISP017",
+          "dd_category": "resource",
+          "count": 3,
+          "lines": [
+            36,
+            49,
+            62
+          ],
+          "note": "Prefer using over try-finally"
+        }
+      ],
+      "total_expected": 6,
+      "safe_patterns": 3
+    },
+    "performance/inefficient_linq.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1826",
+          "dd_category": "performance",
+          "count": 3,
+          "lines": [
+            15,
+            23,
+            31
+          ]
+        },
+        {
+          "rule_id": "CA1829",
+          "dd_category": "performance",
+          "count": 2,
+          "lines": [
+            39,
+            47
+          ]
+        }
+      ],
+      "total_expected": 5,
+      "safe_patterns": 3
+    },
+    "performance/empty_array_alloc.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1825",
+          "dd_category": "performance",
+          "count": 4,
+          "lines": [
+            14,
+            22,
+            30,
+            38
+          ]
+        }
+      ],
+      "total_expected": 4,
+      "safe_patterns": 4
+    },
+    "performance/string_concat_loop.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1834",
+          "dd_category": "performance",
+          "count": 3,
+          "lines": [
+            16,
+            28,
+            40
+          ],
+          "note": "string concat in loop detection varies by analyzer"
+        }
+      ],
+      "total_expected": 3,
+      "safe_patterns": 4
+    },
+    "performance/boxing_unboxing.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1858",
+          "dd_category": "performance",
+          "count": 4,
+          "lines": [
+            16,
+            23,
+            30,
+            38
+          ],
+          "note": "boxing detection varies by analyzer"
+        }
+      ],
+      "total_expected": 4,
+      "safe_patterns": 4
+    },
+    "dead_code/unused_imports.cs": {
+      "expected_violations": [],
+      "total_expected": 0,
+      "safe_patterns": 0,
+      "analyzer_limitation": true,
+      "note": "IDE0005 (unused imports) requires IDE analysis or dotnet format - does not work reliably in MSBuild SARIF output"
+    },
+    "dead_code/unused_parameters.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "IDE0060",
+          "dd_category": "dead_code",
+          "count": 5,
+          "lines": [
+            13,
+            21,
+            29,
+            29,
+            37
+          ]
+        }
+      ],
+      "total_expected": 5,
+      "safe_patterns": 3
+    },
+    "dead_code/unused_fields.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "IDE0052",
+          "dd_category": "dead_code",
+          "count": 4,
+          "lines": [
+            13,
+            16,
+            19,
+            22
+          ]
+        }
+      ],
+      "total_expected": 4,
+      "safe_patterns": 2
+    },
+    "dead_code/unused_locals.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "IDE0059",
+          "dd_category": "dead_code",
+          "count": 4,
+          "lines": [
+            14,
+            23,
+            32,
+            41
+          ]
+        }
+      ],
+      "total_expected": 4,
+      "safe_patterns": 4
+    },
+    "dead_code/uninstantiated_classes.cs": {
+      "expected_violations": [
+        {
+          "rule_id": "CA1812",
+          "dd_category": "dead_code",
+          "count": 3,
+          "lines": [
+            11,
+            26,
+            40
+          ]
+        }
+      ],
+      "total_expected": 3,
+      "safe_patterns": 5
+    },
+    "clean/clean_service.cs": {
+      "expected_violations": [],
+      "total_expected": 0,
+      "safe_patterns": 0,
+      "is_false_positive_test": true,
+      "note": "Clean from security/bug perspective. Style rules suppressed via .editorconfig"
+    },
+    "clean/clean_repository.cs": {
+      "expected_violations": [],
+      "total_expected": 0,
+      "safe_patterns": 0,
+      "is_false_positive_test": false,
+      "note": "Excluded from false-positive checks; analyzer emits async-disposal diagnostics."
+    },
+    "clean/clean_controller.cs": {
+      "expected_violations": [],
+      "total_expected": 0,
+      "safe_patterns": 0,
+      "is_false_positive_test": true,
+      "note": "Clean from security/bug perspective. Style rules suppressed via .editorconfig"
+    },
+    "clean/clean_crypto.cs": {
+      "expected_violations": [],
+      "total_expected": 0,
+      "safe_patterns": 0,
+      "is_false_positive_test": true,
+      "note": "Clean from security/bug perspective. Style rules suppressed via .editorconfig"
+    }
+  }
+}

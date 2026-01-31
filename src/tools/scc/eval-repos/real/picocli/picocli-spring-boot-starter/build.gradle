@@ -1,0 +1,87 @@
+plugins {
+    id 'java'
+}
+
+group = 'info.picocli'
+description = 'Picocli Spring Boot Starter - Enables Spring Dependency Injection and Spring Boot AutoConfiguration in Picocli Commands.'
+version = "$projectVersion"
+ext.moduleName = 'info.picocli.spring.boot'
+
+// Spring 3 requires Java 17
+boolean useJava17 = JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)
+logger.quiet("picocli-spring-boot-starter/build.gradle: JavaVersion=${JavaVersion.current()}")
+logger.quiet("picocli-spring-boot-starter/build.gradle: JavaVersion.majorVersion=${JavaVersion.current().majorVersion}")
+logger.quiet("picocli-spring-boot-starter/build.gradle: useJava17=${useJava17}")
+
+java {
+    if (useJava17) {
+        logger.quiet("picocli-spring-boot-starter/build.gradle: JavaVersion=${JavaVersion.current()}")
+        logger.quiet("picocli-spring-boot-starter/build.gradle: sourceCompatibility = 17")
+        logger.quiet("picocli-spring-boot-starter/build.gradle: targetCompatibility = 17")
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    } else { // from Java 9 and up
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
+
+apply plugin: 'org.beryx.jar' // for compiling module-info on Java 8
+compileJava {
+    inputs.property("moduleName", moduleName)
+}
+moduleConfig {
+    // copy module-info.class to META-INF/versions/9
+    multiReleaseVersion = 9
+    moduleInfoPath = 'src/main/java9/module-info.java'
+    version = project.version
+    neverCompileModuleInfo = true
+}
+
+ext['junit-jupiter.version'] = "${junit5Version}"
+
+dependencies {
+    api                 rootProject
+    if (useJava17) {
+        api                 supportDependencies.springbootstarter
+        annotationProcessor supportDependencies.springbootannproc
+        testImplementation  supportDependencies.springboottest
+
+        logger.quiet("picocli-spring-boot-starter/build.gradle: api                 ${supportDependencies.springbootstarter}")
+        logger.quiet("picocli-spring-boot-starter/build.gradle: annotationProcessor ${supportDependencies.springbootannproc}")
+        logger.quiet("picocli-spring-boot-starter/build.gradle: testImplementation  ${supportDependencies.springboottest}")
+    } else {
+        // These should not be updated by dependabot
+        String springbootstarterOld = "org.springframework.boot:spring-boot-starter:2.7.12"
+        String springbootannprocOld = "org.springframework.boot:spring-boot-configuration-processor:2.7.12"
+        String springboottestOld    = "org.springframework.boot:spring-boot-starter-test:2.7.12"
+
+        api                 springbootstarterOld
+        annotationProcessor springbootannprocOld
+        testImplementation  springboottestOld
+
+        logger.quiet("picocli-spring-boot-starter/build.gradle: api                 ${springbootstarterOld}")
+        logger.quiet("picocli-spring-boot-starter/build.gradle: annotationProcessor ${springbootannprocOld}")
+        logger.quiet("picocli-spring-boot-starter/build.gradle: testImplementation  ${springboottestOld}")
+    }
+}
+
+jar {
+    manifest {
+        attributes  'Specification-Title'   : 'Picocli Spring Boot Starter',
+                    'Specification-Vendor'  : 'Remko Popma',
+                    'Specification-Version' : archiveVersion.get(),
+                    'Implementation-Title'  : 'Picocli Spring Boot Starter',
+                    'Implementation-Vendor' : 'Remko Popma',
+                    'Implementation-Version': archiveVersion.get()
+//                    'Automatic-Module-Name' : 'info.picocli.spring'
+    }
+}
+
+ext {
+    PUBLISH_GROUP_ID = group
+    PUBLISH_ARTIFACT_ID = project.name
+    PUBLISH_VERSION = "$projectVersion"
+}
+apply from: "${rootProject.projectDir}/gradle/publish-mavencentral.gradle"
+

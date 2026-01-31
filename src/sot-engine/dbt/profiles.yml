@@ -1,0 +1,7 @@
+caldera_sot:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: /tmp/caldera_sot.duckdb
+      threads: 4

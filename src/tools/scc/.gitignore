@@ -1,0 +1,47 @@
+# =============================================================================
+# PoC #1: scc - .gitignore
+# =============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+coverage_report/
+
+# Generated Output (recreated by pipeline)
+output/
+
+# Evaluation Results (timestamped, regenerated)
+evaluation/results/
+evaluation/timing.md
+evaluation/scorecard.md
+evaluation/llm/results/
+
+# scc Binary (downloaded by Makefile)
+bin/
+
+# OS Files
+.DS_Store
+._*
+Thumbs.db
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*~

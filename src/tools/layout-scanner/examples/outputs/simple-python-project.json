@@ -1,0 +1,414 @@
+{
+  "schema_version": "1.0",
+  "tool": "layout-scanner",
+  "tool_version": "1.0.0",
+  "run_id": "layout-20260110-211753-tmp52dvct7j",
+  "timestamp": "2026-01-10T21:17:53.056687Z",
+  "repository": "tmp52dvct7j",
+  "repository_path": "/private/var/folders/zr/c7zp4x316wvg0rsvdnq_dcm40000gn/T/tmp52dvct7j",
+  "passes_completed": [
+    "filesystem"
+  ],
+  "statistics": {
+    "total_files": 7,
+    "total_directories": 6,
+    "total_size_bytes": 128,
+    "max_depth": 3,
+    "scan_duration_ms": 2,
+    "files_per_second": 3500.0,
+    "by_classification": {
+      "config": 2,
+      "test::unit": 1,
+      "test::integration": 1,
+      "source": 2,
+      "docs": 1
+    },
+    "by_language": {
+      "unknown": 1,
+      "toml": 1,
+      "python": 4,
+      "markdown": 1
+    }
+  },
+  "files": {
+    ".gitignore": {
+      "id": "f-bc37d034bad5",
+      "path": ".gitignore",
+      "name": ".gitignore",
+      "extension": "",
+      "size_bytes": 12,
+      "modified_time": "2026-01-10T21:17:53.015111Z",
+      "is_symlink": false,
+      "language": "unknown",
+      "classification": "config",
+      "classification_reason": "filename:^\\.gitignore$...",
+      "classification_confidence": 0.55,
+      "parent_directory_id": "d-000000000000",
+      "depth": 1,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "pyproject.toml": {
+      "id": "f-50c86b7ed8ac",
+      "path": "pyproject.toml",
+      "name": "pyproject.toml",
+      "extension": ".toml",
+      "size_bytes": 26,
+      "modified_time": "2026-01-10T21:17:53.015041Z",
+      "is_symlink": false,
+      "language": "toml",
+      "classification": "config",
+      "classification_reason": "extension:.toml",
+      "classification_confidence": 0.34,
+      "parent_directory_id": "d-000000000000",
+      "depth": 1,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "tests/unit/test_main.py": {
+      "id": "f-0869a95c8127",
+      "path": "tests/unit/test_main.py",
+      "name": "test_main.py",
+      "extension": ".py",
+      "size_bytes": 21,
+      "modified_time": "2026-01-10T21:17:53.014799Z",
+      "is_symlink": false,
+      "language": "python",
+      "classification": "test::unit",
+      "classification_reason": "path:tests/unit/",
+      "classification_confidence": 0.61,
+      "parent_directory_id": "d-3fcb9fec680b",
+      "depth": 3,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "tests/integration/test_api.py": {
+      "id": "f-50b3f8c533e7",
+      "path": "tests/integration/test_api.py",
+      "name": "test_api.py",
+      "extension": ".py",
+      "size_bytes": 20,
+      "modified_time": "2026-01-10T21:17:53.014880Z",
+      "is_symlink": false,
+      "language": "python",
+      "classification": "test::integration",
+      "classification_reason": "path:tests/integration/",
+      "classification_confidence": 0.61,
+      "parent_directory_id": "d-b40bc1374968",
+      "depth": 3,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "src/main.py": {
+      "id": "f-2e5ad92c43aa",
+      "path": "src/main.py",
+      "name": "main.py",
+      "extension": ".py",
+      "size_bytes": 16,
+      "modified_time": "2026-01-10T21:17:53.014623Z",
+      "is_symlink": false,
+      "language": "python",
+      "classification": "source",
+      "classification_reason": "default",
+      "classification_confidence": 0.2,
+      "parent_directory_id": "d-25a6634263c1",
+      "depth": 2,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "src/utils.py": {
+      "id": "f-51246e53255d",
+      "path": "src/utils.py",
+      "name": "utils.py",
+      "extension": ".py",
+      "size_bytes": 18,
+      "modified_time": "2026-01-10T21:17:53.014720Z",
+      "is_symlink": false,
+      "language": "python",
+      "classification": "source",
+      "classification_reason": "default",
+      "classification_confidence": 0.2,
+      "parent_directory_id": "d-25a6634263c1",
+      "depth": 2,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    },
+    "docs/README.md": {
+      "id": "f-0b5ca119d2be",
+      "path": "docs/README.md",
+      "name": "README.md",
+      "extension": ".md",
+      "size_bytes": 15,
+      "modified_time": "2026-01-10T21:17:53.014965Z",
+      "is_symlink": false,
+      "language": "markdown",
+      "classification": "docs",
+      "classification_reason": "path:docs/, filename:^README.*$..., extension:.md",
+      "classification_confidence": 1.0,
+      "parent_directory_id": "d-46b42b4229cd",
+      "depth": 2,
+      "first_commit_date": null,
+      "last_commit_date": null,
+      "commit_count": null,
+      "author_count": null,
+      "content_hash": null,
+      "is_binary": null,
+      "line_count": null
+    }
+  },
+  "directories": {
+    "": {
+      "id": "d-000000000000",
+      "path": "",
+      "name": "tmp52dvct7j",
+      "modified_time": "2026-01-10T21:17:53.015082Z",
+      "is_symlink": false,
+      "classification": "config",
+      "classification_reason": "majority config (100%)",
+      "parent_directory_id": null,
+      "depth": 0,
+      "child_directory_ids": [
+        "d-46b42b4229cd",
+        "d-25a6634263c1",
+        "d-59830ebc3a41"
+      ],
+      "child_file_ids": [
+        "f-bc37d034bad5",
+        "f-50c86b7ed8ac"
+      ],
+      "direct_file_count": 2,
+      "direct_directory_count": 3,
+      "recursive_file_count": 2,
+      "recursive_directory_count": 3,
+      "direct_size_bytes": 38,
+      "recursive_size_bytes": 38,
+      "classification_distribution": {
+        "config": 2
+      },
+      "language_distribution": {
+        "toml": 1
+      }
+    },
+    "docs": {
+      "id": "d-46b42b4229cd",
+      "path": "docs",
+      "name": "docs",
+      "modified_time": "2026-01-10T21:17:53.014930Z",
+      "is_symlink": false,
+      "classification": "docs",
+      "classification_reason": "majority docs (100%)",
+      "parent_directory_id": "d-000000000000",
+      "depth": 1,
+      "child_directory_ids": [],
+      "child_file_ids": [
+        "f-0b5ca119d2be"
+      ],
+      "direct_file_count": 1,
+      "direct_directory_count": 0,
+      "recursive_file_count": 1,
+      "recursive_directory_count": 0,
+      "direct_size_bytes": 15,
+      "recursive_size_bytes": 15,
+      "classification_distribution": {
+        "docs": 1
+      },
+      "language_distribution": {
+        "markdown": 1
+      }
+    },
+    "src": {
+      "id": "d-25a6634263c1",
+      "path": "src",
+      "name": "src",
+      "modified_time": "2026-01-10T21:17:53.014675Z",
+      "is_symlink": false,
+      "classification": "source",
+      "classification_reason": "majority source (100%)",
+      "parent_directory_id": "d-000000000000",
+      "depth": 1,
+      "child_directory_ids": [],
+      "child_file_ids": [
+        "f-2e5ad92c43aa",
+        "f-51246e53255d"
+      ],
+      "direct_file_count": 2,
+      "direct_directory_count": 0,
+      "recursive_file_count": 2,
+      "recursive_directory_count": 0,
+      "direct_size_bytes": 34,
+      "recursive_size_bytes": 34,
+      "classification_distribution": {
+        "source": 2
+      },
+      "language_distribution": {
+        "python": 2
+      }
+    },
+    "tests": {
+      "id": "d-59830ebc3a41",
+      "path": "tests",
+      "name": "tests",
+      "modified_time": "2026-01-10T21:17:53.014475Z",
+      "is_symlink": false,
+      "classification": "test::integration",
+      "classification_reason": "majority test::integration (50%)",
+      "parent_directory_id": "d-000000000000",
+      "depth": 1,
+      "child_directory_ids": [
+        "d-b40bc1374968",
+        "d-3fcb9fec680b"
+      ],
+      "child_file_ids": [],
+      "direct_file_count": 0,
+      "direct_directory_count": 2,
+      "recursive_file_count": 2,
+      "recursive_directory_count": 2,
+      "direct_size_bytes": 0,
+      "recursive_size_bytes": 41,
+      "classification_distribution": {
+        "test::integration": 1,
+        "test::unit": 1
+      },
+      "language_distribution": {
+        "python": 2
+      }
+    },
+    "tests/integration": {
+      "id": "d-b40bc1374968",
+      "path": "tests/integration",
+      "name": "integration",
+      "modified_time": "2026-01-10T21:17:53.014849Z",
+      "is_symlink": false,
+      "classification": "test::integration",
+      "classification_reason": "majority test::integration (100%)",
+      "parent_directory_id": "d-59830ebc3a41",
+      "depth": 2,
+      "child_directory_ids": [],
+      "child_file_ids": [
+        "f-50b3f8c533e7"
+      ],
+      "direct_file_count": 1,
+      "direct_directory_count": 0,
+      "recursive_file_count": 1,
+      "recursive_directory_count": 0,
+      "direct_size_bytes": 20,
+      "recursive_size_bytes": 20,
+      "classification_distribution": {
+        "test::integration": 1
+      },
+      "language_distribution": {
+        "python": 1
+      }
+    },
+    "tests/unit": {
+      "id": "d-3fcb9fec680b",
+      "path": "tests/unit",
+      "name": "unit",
+      "modified_time": "2026-01-10T21:17:53.014768Z",
+      "is_symlink": false,
+      "classification": "test::unit",
+      "classification_reason": "majority test::unit (100%)",
+      "parent_directory_id": "d-59830ebc3a41",
+      "depth": 2,
+      "child_directory_ids": [],
+      "child_file_ids": [
+        "f-0869a95c8127"
+      ],
+      "direct_file_count": 1,
+      "direct_directory_count": 0,
+      "recursive_file_count": 1,
+      "recursive_directory_count": 0,
+      "direct_size_bytes": 21,
+      "recursive_size_bytes": 21,
+      "classification_distribution": {
+        "test::unit": 1
+      },
+      "language_distribution": {
+        "python": 1
+      }
+    }
+  },
+  "hierarchy": {
+    "root_id": "d-000000000000",
+    "max_depth": 3,
+    "total_files": 7,
+    "total_directories": 6,
+    "total_size_bytes": 128,
+    "children": {
+      "d-000000000000": [
+        "d-46b42b4229cd",
+        "d-25a6634263c1",
+        "d-59830ebc3a41",
+        "f-bc37d034bad5",
+        "f-50c86b7ed8ac"
+      ],
+      "d-59830ebc3a41": [
+        "d-b40bc1374968",
+        "d-3fcb9fec680b"
+      ],
+      "d-3fcb9fec680b": [
+        "f-0869a95c8127"
+      ],
+      "d-b40bc1374968": [
+        "f-50b3f8c533e7"
+      ],
+      "d-25a6634263c1": [
+        "f-2e5ad92c43aa",
+        "f-51246e53255d"
+      ],
+      "d-46b42b4229cd": [
+        "f-0b5ca119d2be"
+      ]
+    },
+    "parents": {
+      "d-46b42b4229cd": "d-000000000000",
+      "d-25a6634263c1": "d-000000000000",
+      "d-59830ebc3a41": "d-000000000000",
+      "d-b40bc1374968": "d-59830ebc3a41",
+      "d-3fcb9fec680b": "d-59830ebc3a41",
+      "f-bc37d034bad5": "d-000000000000",
+      "f-50c86b7ed8ac": "d-000000000000",
+      "f-0869a95c8127": "d-3fcb9fec680b",
+      "f-50b3f8c533e7": "d-b40bc1374968",
+      "f-2e5ad92c43aa": "d-25a6634263c1",
+      "f-51246e53255d": "d-25a6634263c1",
+      "f-0b5ca119d2be": "d-46b42b4229cd"
+    },
+    "depth_distribution": {
+      "0": 1,
+      "1": 5,
+      "2": 5,
+      "3": 2
+    }
+  }
+}

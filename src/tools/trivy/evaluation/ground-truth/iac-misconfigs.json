@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "scenario": "iac-misconfigs",
+  "description": "Repository with IaC misconfigurations in Dockerfile and Terraform",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/iac-misconfigs",
+  "expected": {
+    "expected_vulnerabilities": {
+      "min": 0,
+      "max": 20
+    },
+    "expected_targets": {
+      "min": 1,
+      "max": 5
+    },
+    "freshness_expected": true,
+    "expected_outdated_count": {
+      "min": 2,
+      "max": 10
+    },
+    "expected_outdated_pct": {
+      "min": 30,
+      "max": 100
+    },
+    "iac_expected": true,
+    "expected_iac": {
+      "total": {
+        "min": 15,
+        "max": 25
+      },
+      "critical": {
+        "min": 1,
+        "max": 5
+      },
+      "high": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "required_iac_types": [
+      "dockerfile",
+      "terraform"
+    ],
+    "required_iac_ids": [
+      "DS002",
+      "DS031",
+      "AVD-AWS-0088"
+    ]
+  }
+}

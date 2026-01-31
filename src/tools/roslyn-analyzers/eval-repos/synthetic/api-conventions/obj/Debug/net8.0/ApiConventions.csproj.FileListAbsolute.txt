@@ -1,0 +1,4 @@
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/api-conventions/obj/Debug/net8.0/ApiConventions.GeneratedMSBuildEditorConfig.editorconfig
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/api-conventions/obj/Debug/net8.0/ApiConventions.AssemblyInfoInputs.cache
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/api-conventions/obj/Debug/net8.0/ApiConventions.AssemblyInfo.cs
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/api-conventions/obj/Debug/net8.0/ApiConventions.csproj.CoreCompileInputs.cache

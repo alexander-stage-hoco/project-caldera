@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sonarqube.output.v1.2.0",
+  "title": "SonarQube Output Schema",
+  "description": "Unified output schema for SonarQube analysis export with metadata envelope",
+  "type": "object",
+  "required": ["metadata", "data"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Envelope metadata for the analysis run",
+      "required": [
+        "tool_name",
+        "tool_version",
+        "run_id",
+        "repo_id",
+        "branch",
+        "commit",
+        "timestamp",
+        "schema_version"
+      ],
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "const": "sonarqube",
+          "description": "Tool identifier"
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Version of SonarQube server"
+        },
+        "run_id": {
+          "type": "string",
+          "description": "Unique identifier for this run"
+        },
+        "repo_id": {
+          "type": "string",
+          "description": "Repository identifier"
+        },
+        "branch": {
+          "type": "string",
+          "description": "Branch name analyzed"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$",
+          "description": "Git commit SHA"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Analysis timestamp in ISO 8601 format"
+        },
+        "schema_version": {
+          "type": "string",
+          "const": "1.2.0",
+          "description": "Schema version"
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "description": "SonarQube analysis results",
+      "required": ["schema_version", "generated_at", "repo_name", "results"],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Schema version in semver format"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "repo_name": {
+          "type": "string",
+          "description": "Name of the analyzed repository"
+        },
+        "repo_path": {
+          "type": "string",
+          "description": "Path to the analyzed repository"
+        },
+        "results": {
+          "type": "object",
+          "description": "Tool-specific analysis results",
+          "required": ["tool", "tool_version", "source"],
+          "properties": {
+            "tool": {
+              "type": "string",
+              "const": "sonarqube"
+            },
+            "tool_version": {
+              "type": "string"
+            },
+            "source": {
+              "type": "object",
+              "required": ["sonarqube_url", "project_key"],
+              "properties": {
+                "sonarqube_url": { "type": "string" },
+                "project_key": { "type": "string" },
+                "analysis_id": { "type": ["string", "null"] },
+                "revision": { "type": ["string", "null"] },
+                "repo_name": { "type": "string" },
+                "repo_path": { "type": "string" }
+              }
+            },
+            "metric_catalog": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["key", "name", "type"],
+                "properties": {
+                  "key": { "type": "string" },
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "domain": { "type": "string" },
+                  "type": { "type": "string" },
+                  "direction": { "type": "integer" },
+                  "qualitative": { "type": "boolean" },
+                  "hidden": { "type": "boolean" }
+                }
+              }
+            },
+            "components": {
+              "type": "object",
+              "properties": {
+                "root_key": { "type": "string" },
+                "by_key": { "type": "object" },
+                "children": { "type": "object" }
+              }
+            },
+            "measures": {
+              "type": "object",
+              "properties": {
+                "by_component_key": { "type": "object" },
+                "metrics_requested": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "issues": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": { "type": "object" }
+                },
+                "rollups": { "type": "object" }
+              }
+            },
+            "rules": {
+              "type": "object",
+              "properties": {
+                "by_key": { "type": "object" }
+              }
+            },
+            "duplications": { "type": "object" },
+            "quality_gate": {
+              "type": "object",
+              "required": ["status"],
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": ["OK", "WARN", "ERROR", "NONE"]
+                },
+                "name": { "type": "string" },
+                "conditions": { "type": "array" },
+                "ignored_conditions": { "type": "boolean" },
+                "failed_count": { "type": "integer" },
+                "warning_count": { "type": "integer" }
+              }
+            },
+            "analyses": { "type": "array" },
+            "derived_insights": { "type": "object" },
+            "limitations": { "type": "object" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "description": "Calibration dataset for LLM-as-Judge evaluation. Expert-labeled examples for testing judge consistency.",
+  "version": "1.0",
+  "created": "2026-01-03",
+  "examples": [
+    {
+      "id": "cal-dir-001",
+      "dimension": "directory_analysis",
+      "scenario": "perfect_structure",
+      "description": "Complete directory analysis with all fields present, accurate rollups",
+      "expected_score": 5,
+      "evidence": {
+        "directories": [
+          {
+            "path": "src",
+            "direct": {"file_count": 5, "lines_code": 500},
+            "recursive": {"file_count": 25, "lines_code": 2500},
+            "hotspot_score": 0.45,
+            "is_hotspot": false
+          }
+        ],
+        "summary": {"total_files": 25, "total_lines": 2500}
+      },
+      "reasoning": "All required fields present. Recursive >= direct. Hotspot score in valid range."
+    },
+    {
+      "id": "cal-dir-002",
+      "dimension": "directory_analysis",
+      "scenario": "aggregation_error",
+      "description": "Directory with recursive < direct (invalid)",
+      "expected_score": 2,
+      "evidence": {
+        "directories": [
+          {
+            "path": "src",
+            "direct": {"file_count": 10, "lines_code": 1000},
+            "recursive": {"file_count": 5, "lines_code": 500},
+            "hotspot_score": 0.5,
+            "is_hotspot": false
+          }
+        ],
+        "summary": {"total_files": 10}
+      },
+      "reasoning": "Recursive file count (5) less than direct (10). Major aggregation error."
+    },
+    {
+      "id": "cal-dir-003",
+      "dimension": "directory_analysis",
+      "scenario": "invalid_hotspot",
+      "description": "Hotspot score outside [0, 1] range",
+      "expected_score": 2,
+      "evidence": {
+        "directories": [
+          {
+            "path": "src",
+            "direct": {"file_count": 5},
+            "recursive": {"file_count": 25},
+            "hotspot_score": 1.5,
+            "is_hotspot": true
+          }
+        ]
+      },
+      "reasoning": "Hotspot score 1.5 exceeds valid range [0, 1]."
+    },
+    {
+      "id": "cal-stat-001",
+      "dimension": "statistics",
+      "scenario": "complete_distribution",
+      "description": "Full distribution stats with all 11 fields",
+      "expected_score": 5,
+      "evidence": {
+        "distribution": {
+          "loc": {
+            "min": 10,
+            "max": 500,
+            "mean": 120,
+            "median": 85,
+            "stddev": 95,
+            "p25": 45,
+            "p75": 150,
+            "p90": 300,
+            "p95": 420,
+            "skewness": 1.8,
+            "kurtosis": 3.2
+          }
+        },
+        "hotspot_score": 0.65
+      },
+      "reasoning": "All 11 distribution fields present. Percentiles monotonic. Valid skewness/kurtosis."
+    },
+    {
+      "id": "cal-stat-002",
+      "dimension": "statistics",
+      "scenario": "non_monotonic_percentiles",
+      "description": "Percentiles out of order",
+      "expected_score": 2,
+      "evidence": {
+        "distribution": {
+          "loc": {
+            "min": 10,
+            "max": 500,
+            "mean": 120,
+            "median": 85,
+            "p25": 100,
+            "p75": 50,
+            "p90": 300,
+            "p95": 200
+          }
+        }
+      },
+      "reasoning": "p25 (100) > p75 (50). Percentiles not monotonic."
+    },
+    {
+      "id": "cal-stat-003",
+      "dimension": "statistics",
+      "scenario": "missing_fields",
+      "description": "Only basic stats present",
+      "expected_score": 3,
+      "evidence": {
+        "distribution": {
+          "loc": {
+            "min": 10,
+            "max": 500,
+            "mean": 120
+          }
+        }
+      },
+      "reasoning": "Only min, max, mean present. Missing percentiles, stddev, skewness, kurtosis."
+    },
+    {
+      "id": "cal-int-001",
+      "dimension": "integration_fit",
+      "scenario": "perfect_mapping",
+      "description": "All scc fields map to DD Platform schema",
+      "expected_score": 5,
+      "evidence": {
+        "transformed": {
+          "id": "ev-123",
+          "source": "scc",
+          "metrics": {
+            "language": "Python",
+            "lines_code": 1000,
+            "complexity": 50
+          },
+          "provenance": {
+            "tool": "scc",
+            "version": "3.6.0"
+          }
+        }
+      },
+      "reasoning": "Complete mapping with all required fields. Provenance included."
+    },
+    {
+      "id": "cal-api-001",
+      "dimension": "api_design",
+      "scenario": "excellent_cli",
+      "description": "Intuitive flags, good defaults",
+      "expected_score": 5,
+      "evidence": {
+        "help_sample": "--format json, --by-file, --exclude-dir vendor",
+        "usage": "scc -f json . | jq '.[]'"
+      },
+      "reasoning": "Intuitive flags. JSON output pipeable. Good defaults."
+    },
+    {
+      "id": "cal-risk-001",
+      "dimension": "risk",
+      "scenario": "production_ready",
+      "description": "Active project, no known issues",
+      "expected_score": 5,
+      "evidence": {
+        "github_stars": 6400,
+        "last_release": "2024",
+        "license": "MIT/Unlicense",
+        "known_cves": 0
+      },
+      "reasoning": "Active maintenance. Permissive license. No security issues."
+    },
+    {
+      "id": "cal-edge-001",
+      "dimension": "edge_cases",
+      "scenario": "all_pass",
+      "description": "All edge cases handled correctly",
+      "expected_score": 5,
+      "evidence": {
+        "empty_files": "handled",
+        "unicode": "handled",
+        "deep_nesting": "handled",
+        "minified": "detected"
+      },
+      "reasoning": "All edge cases pass. Graceful handling."
+    }
+  ]
+}

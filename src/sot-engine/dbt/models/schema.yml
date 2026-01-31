@@ -1,0 +1,718 @@
+version: 2
+
+sources:
+  - name: lz
+    schema: main
+    tables:
+      - name: lz_tool_runs
+      - name: lz_collection_runs
+      - name: lz_layout_files
+      - name: lz_layout_directories
+      - name: lz_scc_file_metrics
+      - name: lz_lizard_file_metrics
+      - name: lz_lizard_function_metrics
+      - name: lz_semgrep_smells
+      - name: lz_roslyn_violations
+      - name: lz_sonarqube_issues
+      - name: lz_sonarqube_metrics
+      - name: lz_trivy_vulnerabilities
+      - name: lz_trivy_targets
+      - name: lz_trivy_iac_misconfigs
+      - name: lz_git_sizer_metrics
+      - name: lz_git_sizer_violations
+      - name: lz_git_sizer_lfs_candidates
+
+models:
+  - name: stg_lz_tool_runs
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - unique
+      - name: collection_run_id
+        tests:
+          - not_null
+      - name: repo_id
+        tests:
+          - not_null
+      - name: run_id
+        tests:
+          - not_null
+      - name: tool_name
+        tests:
+          - not_null
+      - name: commit
+        tests:
+          - not_null
+
+  - name: stg_lz_layout_files
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+
+  - name: stg_lz_layout_directories
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+
+  - name: stg_lz_scc_file_metrics
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+
+  - name: stg_lz_lizard_file_metrics
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+
+  - name: stg_lz_lizard_function_metrics
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: function_name
+        tests:
+          - not_null
+      - name: line_start
+        tests:
+          - not_null
+
+  - name: rollup_scc_directory_recursive_distributions
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - lines_total
+                  - code_lines
+                  - comment_lines
+                  - blank_lines
+                  - complexity
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_scc_directory_direct_distributions
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - lines_total
+                  - code_lines
+                  - comment_lines
+                  - blank_lines
+                  - complexity
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_scc_directory_counts_direct
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_lines
+        tests:
+          - not_null
+      - name: total_code_lines
+        tests:
+          - not_null
+      - name: total_complexity
+        tests:
+          - not_null
+
+  - name: rollup_scc_directory_counts_recursive
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_lines
+        tests:
+          - not_null
+      - name: total_code_lines
+        tests:
+          - not_null
+      - name: total_complexity
+        tests:
+          - not_null
+
+  - name: rollup_lizard_directory_recursive_distributions
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - nloc
+                  - total_ccn
+                  - avg_ccn
+                  - max_ccn
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_lizard_directory_direct_distributions
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - nloc
+                  - total_ccn
+                  - avg_ccn
+                  - max_ccn
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_lizard_directory_counts_direct
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_nloc
+        tests:
+          - not_null
+      - name: total_function_count
+        tests:
+          - not_null
+      - name: total_ccn
+        tests:
+          - not_null
+
+  - name: rollup_lizard_directory_counts_recursive
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_nloc
+        tests:
+          - not_null
+      - name: total_function_count
+        tests:
+          - not_null
+      - name: total_ccn
+        tests:
+          - not_null
+
+  - name: unified_file_metrics
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: loc_total
+        tests:
+          - not_null
+
+  - name: unified_run_summary
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: collection_run_id
+        tests:
+          - not_null
+      - name: repo_id
+        tests:
+          - not_null
+      - name: run_id
+        tests:
+          - not_null
+      - name: total_files
+        tests:
+          - not_null
+
+  - name: stg_semgrep_file_metrics
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: smell_count
+        tests:
+          - not_null
+
+  - name: rollup_semgrep_directory_counts_recursive
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_smell_count
+        tests:
+          - not_null
+
+  - name: rollup_semgrep_directory_counts_direct
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_smell_count
+        tests:
+          - not_null
+
+  - name: rollup_semgrep_directory_recursive_distributions
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - smell_count
+                  - severity_high_plus
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_semgrep_directory_direct_distributions
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - smell_count
+                  - severity_high_plus
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: stg_roslyn_file_metrics
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: violation_count
+        tests:
+          - not_null
+
+  - name: rollup_roslyn_directory_counts_recursive
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_violation_count
+        tests:
+          - not_null
+
+  - name: rollup_roslyn_directory_counts_direct
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_violation_count
+        tests:
+          - not_null
+
+  - name: rollup_roslyn_directory_recursive_distributions
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_roslyn_directory_direct_distributions
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: stg_sonarqube_issues
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: issue_key
+        tests:
+          - not_null
+      - name: rule_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+
+  - name: stg_sonarqube_file_metrics
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: issue_count
+        tests:
+          - not_null
+
+  - name: rollup_sonarqube_directory_counts_direct
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_issue_count
+        tests:
+          - not_null
+
+  - name: rollup_sonarqube_directory_counts_recursive
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_issue_count
+        tests:
+          - not_null
+
+  - name: stg_trivy_vulnerabilities
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: target_key
+        tests:
+          - not_null
+      - name: vulnerability_id
+        tests:
+          - not_null
+      - name: package_name
+        tests:
+          - not_null
+
+  - name: stg_trivy_targets
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: target_key
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+
+  - name: stg_trivy_iac_misconfigs
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: misconfig_id
+        tests:
+          - not_null
+
+  - name: stg_trivy_target_metrics
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: target_key
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: vulnerability_count
+        tests:
+          - not_null
+
+  - name: rollup_trivy_directory_counts_direct
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: total_vulnerability_count
+        tests:
+          - not_null
+      - name: total_iac_misconfig_count
+        tests:
+          - not_null
+
+  - name: rollup_trivy_directory_counts_recursive
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: total_vulnerability_count
+        tests:
+          - not_null
+      - name: total_iac_misconfig_count
+        tests:
+          - not_null
+
+  - name: stg_lz_git_sizer_metrics
+    description: Repository-level health metrics from git-sizer
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - unique
+      - name: repo_id
+        tests:
+          - not_null
+      - name: health_grade
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['A', 'A+', 'B', 'B+', 'C', 'C+', 'D', 'D+', 'F']
+
+  - name: stg_lz_git_sizer_violations
+    description: Threshold violations detected by git-sizer
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+      - name: level
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4]
+
+  - name: stg_lz_git_sizer_lfs_candidates
+    description: Files recommended for Git LFS migration
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_path
+        tests:
+          - not_null

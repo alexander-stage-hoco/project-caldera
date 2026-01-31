@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+
+# Output
+output/
+outputs/
+evaluation/results/
+evaluation/llm/results/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Semgrep
+.semgrep/
+
+# Community rules (cloned from external repository)
+community-rules/
+
+# OS
+.DS_Store
+Thumbs.db

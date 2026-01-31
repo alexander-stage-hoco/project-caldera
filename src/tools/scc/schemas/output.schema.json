@@ -1,0 +1,490 @@
+{
+  "$defs": {
+    "distributionStats": {
+      "description": "Statistical distribution for a metric",
+      "properties": {
+        "max": {
+          "description": "Maximum value",
+          "type": "number"
+        },
+        "mean": {
+          "description": "Arithmetic mean",
+          "type": "number"
+        },
+        "median": {
+          "description": "Median value",
+          "type": "number"
+        },
+        "min": {
+          "description": "Minimum value",
+          "type": "number"
+        },
+        "p25": {
+          "description": "25th percentile",
+          "type": "number"
+        },
+        "p75": {
+          "description": "75th percentile",
+          "type": "number"
+        },
+        "p90": {
+          "description": "90th percentile",
+          "type": "number"
+        },
+        "p95": {
+          "description": "95th percentile",
+          "type": "number"
+        },
+        "stddev": {
+          "description": "Standard deviation",
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "sccData": {
+      "description": "Analysis results",
+      "properties": {
+        "cocomo": {
+          "description": "COCOMO cost estimation",
+          "properties": {
+            "estimated_cost": {
+              "description": "Estimated development cost in USD",
+              "minimum": 0,
+              "type": "number"
+            },
+            "estimated_people": {
+              "description": "Estimated team size",
+              "minimum": 0,
+              "type": "number"
+            },
+            "estimated_schedule_months": {
+              "description": "Estimated development duration in months",
+              "minimum": 0,
+              "type": "number"
+            },
+            "preset": {
+              "description": "COCOMO preset used",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "directories": {
+          "description": "Per-directory statistics",
+          "items": {
+            "properties": {
+              "direct": {
+                "description": "Stats for files directly in this directory",
+                "properties": {
+                  "complexity": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "file_count": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "loc": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              },
+              "distribution": {
+                "description": "Statistical distribution of metrics",
+                "properties": {
+                  "complexity": {
+                    "$ref": "#/$defs/distributionStats"
+                  },
+                  "loc": {
+                    "$ref": "#/$defs/distributionStats"
+                  }
+                },
+                "type": "object"
+              },
+              "hotspot_score": {
+                "description": "Computed hotspot score (0.0 - 1.0)",
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "path": {
+                "description": "Directory path",
+                "not": {
+                  "pattern": "(^\\./|\\.\\.|^[A-Za-z]:|/$|\\\\)"
+                },
+                "pattern": "^[^/].*",
+                "type": "string"
+              },
+              "recursive": {
+                "description": "Stats for all files in subtree",
+                "properties": {
+                  "complexity": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "file_count": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "loc": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "required": [
+              "path",
+              "direct",
+              "recursive"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "files": {
+          "description": "Per-file breakdown (when using --by-file)",
+          "items": {
+            "properties": {
+              "blank": {
+                "description": "Blank lines",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "blank_ratio": {
+                "description": "Ratio of blank lines to total lines",
+                "minimum": 0,
+                "type": "number"
+              },
+              "bytes": {
+                "description": "File size in bytes",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "bytes_per_loc": {
+                "description": "Bytes per line of code",
+                "minimum": 0,
+                "type": "number"
+              },
+              "classification": {
+                "description": "File classification (source, test, config, etc.) - null if not classified",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "code": {
+                "description": "Code lines",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "code_ratio": {
+                "description": "Ratio of code to total lines",
+                "minimum": 0,
+                "type": "number"
+              },
+              "comment": {
+                "description": "Comment lines",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "comment_ratio": {
+                "description": "Ratio of comments to total lines",
+                "minimum": 0,
+                "type": "number"
+              },
+              "complexity": {
+                "description": "Cyclomatic complexity",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "complexity_density": {
+                "description": "Complexity per line of code",
+                "minimum": 0,
+                "type": "number"
+              },
+              "directory": {
+                "description": "Directory containing the file",
+                "type": "string"
+              },
+              "dryness": {
+                "description": "Unique lines / code lines ratio",
+                "type": "number"
+              },
+              "extension": {
+                "description": "File extension",
+                "type": "string"
+              },
+              "filename": {
+                "description": "Filename without path",
+                "type": "string"
+              },
+              "generated": {
+                "description": "Whether file is auto-generated (with --gen flag)",
+                "type": "boolean"
+              },
+              "is_binary": {
+                "description": "Whether file is binary",
+                "type": "boolean"
+              },
+              "is_generated": {
+                "description": "Whether file appears auto-generated",
+                "type": "boolean"
+              },
+              "is_minified": {
+                "description": "Whether file appears minified",
+                "type": "boolean"
+              },
+              "language": {
+                "description": "Detected language",
+                "type": "string"
+              },
+              "lines": {
+                "description": "Total lines",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines_blank": {
+                "description": "Blank lines (alternate field name)",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines_code": {
+                "description": "Code lines (alternate field name)",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines_comment": {
+                "description": "Comment lines (alternate field name)",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines_total": {
+                "description": "Total lines (alternate field name)",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "minified": {
+                "description": "Whether file is minified (with --min flag)",
+                "type": "boolean"
+              },
+              "path": {
+                "description": "Relative file path",
+                "not": {
+                  "pattern": "(^\\./|\\.\\.|^[A-Za-z]:|/$|\\\\)"
+                },
+                "pattern": "^[^/].*",
+                "type": "string"
+              },
+              "uloc": {
+                "description": "Unique lines of code (with --uloc flag)",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "path",
+              "language"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "languages": {
+          "description": "Per-language breakdown",
+          "items": {
+            "properties": {
+              "blank": {
+                "description": "Blank lines",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "bytes": {
+                "description": "Total bytes",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "code": {
+                "description": "Code lines",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "comment": {
+                "description": "Comment lines",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "complexity": {
+                "description": "Cyclomatic complexity",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "files": {
+                "description": "Number of files in this language",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines": {
+                "description": "Total lines",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "name": {
+                "description": "Language name",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "files",
+              "lines",
+              "code",
+              "comment",
+              "blank"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "summary": {
+          "description": "Summary statistics for the entire repository",
+          "properties": {
+            "languages_detected": {
+              "description": "Number of programming languages detected",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_blank": {
+              "description": "Total blank lines",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_code": {
+              "description": "Total code lines (excluding comments and blanks)",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_comment": {
+              "description": "Total comment lines",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_complexity": {
+              "description": "Total cyclomatic complexity",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_files": {
+              "description": "Total number of files analyzed",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "total_loc": {
+              "description": "Total lines of code",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "tool": {
+          "const": "scc",
+          "description": "Tool identifier",
+          "type": "string"
+        },
+        "tool_version": {
+          "description": "Version of scc used for analysis",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Envelope schema for scc directory analysis output",
+  "properties": {
+    "data": {
+      "$ref": "#/$defs/sccData"
+    },
+    "errors": {
+      "items": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "recoverable": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "metadata": {
+      "properties": {
+        "branch": {
+          "type": "string"
+        },
+        "commit": {
+          "pattern": "^[a-f0-9]{40}$",
+          "type": "string"
+        },
+        "repo_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "run_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "tool_name": {
+          "const": "scc",
+          "type": "string"
+        },
+        "tool_version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool_name",
+        "tool_version",
+        "run_id",
+        "repo_id",
+        "branch",
+        "commit",
+        "timestamp",
+        "schema_version"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "metadata",
+    "data"
+  ],
+  "title": "SCC Tool Output Envelope",
+  "type": "object"
+}

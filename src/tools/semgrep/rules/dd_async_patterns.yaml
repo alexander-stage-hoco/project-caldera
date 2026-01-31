@@ -1,0 +1,90 @@
+rules:
+  # E1: Sync-over-Async (blocking on async operations)
+  - id: DD-E1-SYNC-OVER-ASYNC-csharp-result
+    pattern: $TASK.Result
+    languages: [csharp]
+    message: "Blocking on async with .Result can cause deadlocks. Use await instead"
+    severity: ERROR
+    metadata:
+      dd_smell_id: E1_SYNC_OVER_ASYNC
+      dd_category: async_concurrency
+
+  - id: DD-E1-SYNC-OVER-ASYNC-csharp-wait
+    pattern: $TASK.Wait()
+    languages: [csharp]
+    message: "Blocking on async with .Wait() can cause deadlocks. Use await instead"
+    severity: ERROR
+    metadata:
+      dd_smell_id: E1_SYNC_OVER_ASYNC
+      dd_category: async_concurrency
+
+  - id: DD-E1-SYNC-OVER-ASYNC-csharp-getawaiter
+    pattern: $TASK.GetAwaiter().GetResult()
+    languages: [csharp]
+    message: "Blocking on async with GetAwaiter().GetResult() can cause deadlocks. Use await instead"
+    severity: ERROR
+    metadata:
+      dd_smell_id: E1_SYNC_OVER_ASYNC
+      dd_category: async_concurrency
+
+  # E2: Async Void (unhandled exception risk)
+  - id: DD-E2-ASYNC-VOID-csharp
+    pattern-regex: 'async\s+void\s+\w+\s*\('
+    languages: [csharp]
+    message: "async void methods can crash the application. Return Task instead"
+    severity: ERROR
+    metadata:
+      dd_smell_id: E2_ASYNC_VOID
+      dd_category: async_concurrency
+
+  # E5: Unsafe Lock - lock(this) causes deadlocks
+  - id: DD-E5-UNSAFE-LOCK-this
+    pattern: lock(this) { ... }
+    languages: [csharp]
+    message: "lock(this) can cause deadlocks. Use a private readonly object instead"
+    severity: ERROR
+    metadata:
+      dd_smell_id: E5_UNSAFE_LOCK
+      dd_category: async_concurrency
+
+  # E5: Unsafe Lock - lock(typeof) causes deadlocks
+  - id: DD-E5-UNSAFE-LOCK-typeof
+    pattern: lock(typeof($T)) { ... }
+    languages: [csharp]
+    message: "lock(typeof) can cause deadlocks. Use a private readonly object instead"
+    severity: ERROR
+    metadata:
+      dd_smell_id: E5_UNSAFE_LOCK
+      dd_category: async_concurrency
+
+  # E7: Async method without await (synchronous execution)
+  - id: DD-E7-ASYNC-WITHOUT-AWAIT-csharp
+    pattern-regex: 'async\s+(Task|ValueTask|Task<[^>]+>|ValueTask<[^>]+>)\s+\w+\s*\([^)]*\)\s*\{[^}]*\}'
+    languages: [csharp]
+    severity: WARNING
+    message: "Async method without await - method runs synchronously. Consider removing async or adding await"
+    metadata:
+      dd_smell_id: E7_ASYNC_WITHOUT_AWAIT
+      dd_category: async_concurrency
+
+  # E4: Missing CancellationToken in async method
+  - id: DD-E4-MISSING-CANCELLATION-csharp
+    patterns:
+      - pattern-regex: 'public\s+async\s+Task[<\s]'
+      - pattern-not-regex: 'CancellationToken'
+    languages: [csharp]
+    severity: INFO
+    message: "Async method missing CancellationToken parameter - consider adding for graceful cancellation"
+    metadata:
+      dd_smell_id: E4_MISSING_CANCELLATION
+      dd_category: async_concurrency
+
+  # Python asyncio patterns
+  - id: DD-E1-SYNC-OVER-ASYNC-python
+    pattern: asyncio.get_event_loop().run_until_complete($X)
+    languages: [python]
+    message: "Blocking on async inside async context can cause issues"
+    severity: WARNING
+    metadata:
+      dd_smell_id: E1_SYNC_OVER_ASYNC
+      dd_category: async_concurrency

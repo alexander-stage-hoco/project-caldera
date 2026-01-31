@@ -1,0 +1,9 @@
+{
+  "name": "iac-misconfigs",
+  "version": "1.0.0",
+  "description": "A project with IaC misconfigurations",
+  "dependencies": {
+    "express": "4.17.1",
+    "lodash": "4.17.19"
+  }
+}

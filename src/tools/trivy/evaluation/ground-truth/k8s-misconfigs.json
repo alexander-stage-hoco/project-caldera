@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "scenario": "k8s-misconfigs",
+  "description": "Kubernetes manifests with security misconfigurations (privileged pods, secrets in configmaps, host access)",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/k8s-misconfigs",
+  "expected": {
+    "expected_vulnerabilities": {
+      "min": 0,
+      "max": 5
+    },
+    "expected_targets": {
+      "min": 0,
+      "max": 5
+    },
+    "iac_expected": true,
+    "expected_iac": {
+      "total": {
+        "min": 25,
+        "max": 50
+      },
+      "critical": {
+        "min": 0,
+        "max": 5
+      },
+      "high": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "required_iac_types": [
+      "yaml"
+    ],
+    "required_iac_ids": [
+      "KSV001",
+      "KSV009",
+      "KSV012"
+    ]
+  }
+}

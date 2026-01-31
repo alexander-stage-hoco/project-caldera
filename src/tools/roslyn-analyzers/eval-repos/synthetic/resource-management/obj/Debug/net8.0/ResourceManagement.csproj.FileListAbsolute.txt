@@ -1,0 +1,4 @@
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/resource-management/obj/Debug/net8.0/ResourceManagement.GeneratedMSBuildEditorConfig.editorconfig
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/resource-management/obj/Debug/net8.0/ResourceManagement.AssemblyInfoInputs.cache
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/resource-management/obj/Debug/net8.0/ResourceManagement.AssemblyInfo.cs
+/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/resource-management/obj/Debug/net8.0/ResourceManagement.csproj.CoreCompileInputs.cache

@@ -1,0 +1,43 @@
+{
+  "repository": "mixed-types",
+  "description": "Repository with mixed file types for classification testing",
+  "expected": {
+    "total_files": 22,
+    "total_directories": 12,
+    "max_depth": 3,
+    "classifications": {
+      "source": 5,
+      "test": 4,
+      "config": 6,
+      "generated": 3,
+      "docs": 4
+    },
+    "specific_files": {
+      "src/app.ts": {
+        "classification": "source",
+        "language": "typescript"
+      },
+      "tests/test_app.py": {
+        "classification": "test",
+        "language": "python"
+      },
+      "package.json": {
+        "classification": "config",
+        "language": "json"
+      },
+      "dist/bundle.min.js": {
+        "classification": "generated",
+        "language": "javascript"
+      },
+      "README.md": {
+        "classification": "docs",
+        "language": "markdown"
+      }
+    }
+  },
+  "thresholds": {
+    "classification_accuracy": 0.9,
+    "count_tolerance": 0,
+    "max_scan_time_seconds": 1.0
+  }
+}

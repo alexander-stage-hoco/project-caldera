@@ -1,0 +1,79 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.asciidoctor:asciidoctor-gradle-jvm:3.3.2"
+    }
+}
+
+plugins {
+    id 'java'
+}
+apply plugin: 'org.asciidoctor.jvm.convert'
+
+
+group 'org.mycompany.myproject'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation group: 'junit', name: 'junit', version: '4.13.1'
+}
+dependencies {
+    implementation "info.picocli:picocli:4.7.7"
+    annotationProcessor "info.picocli:picocli-codegen:4.7.7"
+}
+
+project.ext {
+    mainClassName = "com.company.Main"
+}
+
+task generateManpageAsciiDoc(type: JavaExec) {
+    dependsOn(classes)
+    group = "Documentation"
+    description = "Generate AsciiDoc manpage"
+    classpath(configurations.compileClasspath, configurations.annotationProcessor, sourceSets.main.runtimeClasspath)
+    main 'picocli.codegen.docgen.manpage.ManPageGenerator'
+    args project.ext.mainClassName, "--outdir=${project.buildDir}/generated-picocli-docs", "-v", "--template-dir=src/docs/mantemplates"
+}
+
+apply plugin: 'org.asciidoctor.jvm.convert'
+asciidoctor {
+    dependsOn(generateManpageAsciiDoc)
+    sourceDir = file("${project.buildDir}/generated-picocli-docs")
+    outputDir = file("${project.buildDir}/docs")
+    logDocuments = true
+    outputOptions {
+        backends = ['manpage', 'html5']
+    }
+}
+assemble.dependsOn(asciidoctor)
+
+// We can now use the Gradle `distribution` plugin to include
+// the generated manpage files in the distribution archive:
+apply plugin: "distribution"
+distributions {
+    main {
+        contents {
+            from ("${project.buildDir}/docs/manpage") {
+                into('man')
+            }
+            from ("${project.buildDir}/docs/html5") {
+                into('docs')
+            }
+        }
+    }
+}

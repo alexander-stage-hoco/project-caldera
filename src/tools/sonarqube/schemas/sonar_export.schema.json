@@ -1,0 +1,748 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sonarqube.output.v1.2.0",
+  "title": "SonarQube Export Schema",
+  "description": "Schema for SonarQube analysis export",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "repo_name",
+    "repo_path",
+    "results"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.2.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "repo_name": {
+      "type": "string",
+      "description": "Name of the analyzed repository"
+    },
+    "repo_path": {
+      "type": "string",
+      "description": "Absolute path to the analyzed repository"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Execution metadata for the analysis run",
+      "properties": {
+        "start_time": { "type": "string", "format": "date-time" },
+        "end_time": { "type": "string", "format": "date-time" },
+        "duration_ms": { "type": "number", "minimum": 0 },
+        "peak_memory_mb": { "type": "number", "minimum": 0 },
+        "total_api_time_ms": { "type": "number", "minimum": 0 },
+        "api_calls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "method": { "type": "string" },
+              "endpoint": { "type": "string" },
+              "duration_ms": { "type": "number", "minimum": 0 },
+              "status_code": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+    "results": {
+      "type": "object",
+      "required": [
+        "tool",
+        "tool_version",
+        "source",
+        "metric_catalog",
+        "components",
+        "measures",
+        "issues",
+        "quality_gate"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "const": "sonarqube",
+          "description": "Tool identifier"
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Version of SonarQube used"
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "sonarqube_url",
+            "project_key",
+            "repo_name",
+            "repo_path"
+          ],
+          "properties": {
+            "sonarqube_url": {
+              "type": "string"
+            },
+            "project_key": {
+              "type": "string"
+            },
+            "analysis_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "revision": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "repo_name": {
+              "type": "string",
+              "description": "Name of the analyzed repository"
+            },
+            "repo_path": {
+              "type": "string",
+              "description": "Absolute path to the analyzed repository"
+            }
+          }
+        },
+        "metric_catalog": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "key",
+              "name",
+              "type"
+            ],
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "INT",
+                  "FLOAT",
+                  "PERCENT",
+                  "BOOL",
+                  "STRING",
+                  "MILLISEC",
+                  "DATA",
+                  "LEVEL",
+                  "DISTRIB",
+                  "RATING",
+                  "WORK_DUR"
+                ]
+              },
+              "direction": {
+                "type": "integer"
+              },
+              "qualitative": {
+                "type": "boolean"
+              },
+              "hidden": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "components": {
+          "type": "object",
+          "required": [
+            "root_key",
+            "by_key"
+          ],
+          "properties": {
+            "root_key": {
+              "type": "string"
+            },
+            "by_key": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "required": [
+                  "key",
+                  "name",
+                  "qualifier"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "qualifier": {
+                    "type": "string",
+                    "enum": [
+                      "TRK",
+                      "DIR",
+                      "FIL",
+                      "UTS",
+                      "BRC"
+                    ]
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "children": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "measures": {
+          "type": "object",
+          "required": [
+            "by_component_key"
+          ],
+          "properties": {
+            "by_component_key": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "required": [
+                  "key",
+                  "measures"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "qualifier": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "string"
+                  },
+                  "measures": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "metric"
+                      ],
+                      "properties": {
+                        "metric": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        },
+                        "best_value": {
+                          "type": "boolean"
+                        },
+                        "period_value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "metrics_requested": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "issues": {
+          "type": "object",
+          "required": [
+            "items",
+            "rollups"
+          ],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "key",
+                  "rule",
+                  "severity",
+                  "type",
+                  "status",
+                  "message",
+                  "component",
+                  "project"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "rule": {
+                    "type": "string"
+                  },
+                  "severity": {
+                    "type": "string",
+                    "enum": [
+                      "BLOCKER",
+                      "CRITICAL",
+                      "MAJOR",
+                      "MINOR",
+                      "INFO"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "BUG",
+                      "VULNERABILITY",
+                      "CODE_SMELL",
+                      "SECURITY_HOTSPOT"
+                    ]
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "OPEN",
+                      "CONFIRMED",
+                      "REOPENED",
+                      "RESOLVED",
+                      "CLOSED",
+                      "TO_REVIEW",
+                      "IN_REVIEW",
+                      "REVIEWED"
+                    ]
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "component": {
+                    "type": "string"
+                  },
+                  "project": {
+                    "type": "string"
+                  },
+                  "line": {
+                    "type": "integer"
+                  },
+                  "text_range": {
+                    "type": "object",
+                    "properties": {
+                      "start_line": {
+                        "type": "integer"
+                      },
+                      "end_line": {
+                        "type": "integer"
+                      },
+                      "start_offset": {
+                        "type": "integer"
+                      },
+                      "end_offset": {
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "effort": {
+                    "type": "string"
+                  },
+                  "debt": {
+                    "type": "string"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "creation_date": {
+                    "type": "string"
+                  },
+                  "update_date": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "rollups": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "by_severity": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  }
+                },
+                "by_type": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  }
+                },
+                "by_rule": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  }
+                },
+                "by_file": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  }
+                },
+                "by_directory": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "rules": {
+          "type": "object",
+          "properties": {
+            "by_key": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "required": [
+                  "key",
+                  "name",
+                  "type",
+                  "severity"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "severity": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "string"
+                  },
+                  "html_desc": {
+                    "type": "string"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "security_standards": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "remediation_effort": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "duplications": {
+          "type": "object",
+          "properties": {
+            "policy": {
+              "type": "object",
+              "properties": {
+                "top_n": {
+                  "type": "integer"
+                },
+                "min_density": {
+                  "type": "number"
+                }
+              }
+            },
+            "by_file_key": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "duplicated_lines": {
+                    "type": "integer"
+                  },
+                  "duplicated_lines_density": {
+                    "type": "number"
+                  },
+                  "duplicated_blocks": {
+                    "type": "integer"
+                  },
+                  "duplications": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "blocks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "file_key": {
+                                "type": "string"
+                              },
+                              "from_line": {
+                                "type": "integer"
+                              },
+                              "size": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "project_summary": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "quality_gate": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "OK",
+                "WARN",
+                "ERROR",
+                "NONE"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "metric",
+                  "status"
+                ],
+                "properties": {
+                  "metric": {
+                    "type": "string"
+                  },
+                  "comparator": {
+                    "type": "string"
+                  },
+                  "threshold": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "actual_value": {
+                    "type": "string"
+                  },
+                  "error_threshold": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "ignored_conditions": {
+              "type": "boolean"
+            },
+            "failed_count": {
+              "type": "integer"
+            },
+            "warning_count": {
+              "type": "integer"
+            }
+          }
+        },
+        "analyses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "key",
+              "date"
+            ],
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string"
+              },
+              "project_version": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "detected_ci": {
+                "type": "string"
+              },
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "derived_insights": {
+          "type": "object",
+          "properties": {
+            "hotspots": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "string"
+                  },
+                  "score": {
+                    "type": "number"
+                  },
+                  "ncloc": {
+                    "type": "integer"
+                  },
+                  "complexity": {
+                    "type": "integer"
+                  },
+                  "cognitive_complexity": {
+                    "type": "integer"
+                  },
+                  "issues": {
+                    "type": "integer"
+                  }
+                }
+              }
+            },
+            "directory_rollups": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "files": {
+                    "type": "integer"
+                  },
+                  "ncloc": {
+                    "type": "integer"
+                  },
+                  "complexity": {
+                    "type": "integer"
+                  },
+                  "issues": {
+                    "type": "integer"
+                  },
+                  "bugs": {
+                    "type": "integer"
+                  },
+                  "vulnerabilities": {
+                    "type": "integer"
+                  },
+                  "code_smells": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "limitations": {
+          "type": "object",
+          "properties": {
+            "no_symbol_graph": {
+              "type": "boolean"
+            },
+            "no_call_graph": {
+              "type": "boolean"
+            },
+            "no_data_flow": {
+              "type": "boolean"
+            },
+            "issues_may_be_truncated": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

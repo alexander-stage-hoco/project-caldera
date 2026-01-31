@@ -1,0 +1,74 @@
+# Layout Scanner Rules for Python Projects
+# Use with: layout-scanner /path/to/repo --rules python-rules.yaml
+
+version: "1.0"
+
+# Subcategory definitions for finer-grained classification
+subcategories:
+  test:
+    - unit
+    - integration
+    - e2e
+    - fixtures
+    - benchmark
+  config:
+    - build
+    - lint
+    - ci
+
+# Path-based rules with subcategories
+path_rules:
+  test::unit:
+    - "tests/unit/"
+    - "test/unit/"
+    - "unit_tests/"
+  test::integration:
+    - "tests/integration/"
+    - "test/integration/"
+    - "integration_tests/"
+  test::e2e:
+    - "tests/e2e/"
+    - "test/e2e/"
+    - "e2e_tests/"
+  test::fixtures:
+    - "fixtures/"
+    - "test_fixtures/"
+    - "testdata/"
+  test::benchmark:
+    - "benchmarks/"
+    - "bench/"
+  config::build:
+    - "build/"
+    - "scripts/build/"
+  config::lint:
+    - ".github/linters/"
+
+# Filename patterns (regex)
+filename_rules:
+  test:
+    - "^conftest\\.py$"
+    - "^pytest_.*\\.py$"
+    - "^test_.*\\.py$"
+    - ".*_test\\.py$"
+  test::benchmark:
+    - "^benchmark_.*\\.py$"
+    - "^bench_.*\\.py$"
+  config:
+    - "^setup\\.py$"
+    - "^setup\\.cfg$"
+    - "^pyproject\\.toml$"
+    - "^tox\\.ini$"
+    - "^\\.flake8$"
+    - "^\\.pylintrc$"
+    - "^mypy\\.ini$"
+
+# Extension rules
+extension_rules:
+  config:
+    - ".toml"
+    - ".cfg"
+    - ".ini"
+  docs:
+    - ".rst"
+    - ".md"
+    - ".txt"

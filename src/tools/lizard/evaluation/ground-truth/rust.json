@@ -1,0 +1,586 @@
+{
+  "language": "rust",
+  "generated_at": "2026-01-04T19:02:51.425329+00:00",
+  "lizard_version": "lizard 1.19.0",
+  "total_files": 9,
+  "total_functions": 88,
+  "total_ccn": 169,
+  "files": {
+    "complex.rs": {
+      "expected_functions": 29,
+      "total_ccn": 38,
+      "functions": {
+        "find": {
+          "ccn": 2,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 76,
+          "end_line": 79
+        },
+        "new": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 289,
+          "end_line": 292
+        },
+        "default": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 0,
+          "start_line": 277,
+          "end_line": 279
+        },
+        "find_all": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 49,
+          "end_line": 51
+        },
+        "save": {
+          "ccn": 2,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 81,
+          "end_line": 84
+        },
+        "delete": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 2,
+          "start_line": 59,
+          "end_line": 61
+        },
+        "method": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 107,
+          "end_line": 110
+        },
+        "url": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 112,
+          "end_line": 115
+        },
+        "header": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 3,
+          "start_line": 117,
+          "end_line": 120
+        },
+        "body": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 122,
+          "end_line": 125
+        },
+        "build": {
+          "ccn": 3,
+          "nloc": 10,
+          "params": 1,
+          "start_line": 127,
+          "end_line": 137
+        },
+        "fmt": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 2,
+          "start_line": 173,
+          "end_line": 175
+        },
+        "peek": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 191,
+          "end_line": 193
+        },
+        "advance": {
+          "ccn": 2,
+          "nloc": 5,
+          "params": 1,
+          "start_line": 195,
+          "end_line": 199
+        },
+        "next": {
+          "ccn": 4,
+          "nloc": 15,
+          "params": 1,
+          "start_line": 298,
+          "end_line": 314
+        },
+        "chunks": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 2,
+          "start_line": 319,
+          "end_line": 321
+        },
+        "test_state_machine": {
+          "ccn": 1,
+          "nloc": 8,
+          "params": 0,
+          "start_line": 331,
+          "end_line": 340
+        },
+        "test_chunks": {
+          "ccn": 1,
+          "nloc": 5,
+          "params": 0,
+          "start_line": 343,
+          "end_line": 347
+        },
+        "test_request_builder": {
+          "ccn": 1,
+          "nloc": 11,
+          "params": 0,
+          "start_line": 350,
+          "end_line": 361
+        }
+      }
+    },
+    "edge_cases/deep_nesting.rs": {
+      "expected_functions": 3,
+      "total_ccn": 25,
+      "functions": {
+        "deeply_nested_function": {
+          "ccn": 12,
+          "nloc": 30,
+          "params": 2,
+          "start_line": 6,
+          "end_line": 37
+        },
+        "process_matrix": {
+          "ccn": 12,
+          "nloc": 27,
+          "params": 1,
+          "start_line": 40,
+          "end_line": 68
+        },
+        "test_deeply_nested": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 0,
+          "start_line": 75,
+          "end_line": 78
+        }
+      }
+    },
+    "edge_cases/empty.rs": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "massive.rs": {
+      "expected_functions": 25,
+      "total_ccn": 70,
+      "functions": {
+        "new": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 1,
+          "start_line": 118,
+          "end_line": 123
+        },
+        "insert": {
+          "ccn": 2,
+          "nloc": 11,
+          "params": 2,
+          "start_line": 26,
+          "end_line": 37
+        },
+        "insert_recursive": {
+          "ccn": 4,
+          "nloc": 13,
+          "params": 2,
+          "start_line": 39,
+          "end_line": 51
+        },
+        "find": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 2,
+          "start_line": 53,
+          "end_line": 55
+        },
+        "find_recursive": {
+          "ccn": 3,
+          "nloc": 10,
+          "params": 2,
+          "start_line": 57,
+          "end_line": 66
+        },
+        "in_order": {
+          "ccn": 1,
+          "nloc": 5,
+          "params": 1,
+          "start_line": 68,
+          "end_line": 72
+        },
+        "in_order_recursive": {
+          "ccn": 2,
+          "nloc": 7,
+          "params": 2,
+          "start_line": 74,
+          "end_line": 80
+        },
+        "cmp": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 2,
+          "start_line": 92,
+          "end_line": 94
+        },
+        "partial_cmp": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 2,
+          "start_line": 98,
+          "end_line": 100
+        },
+        "add_edge": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 4,
+          "start_line": 125,
+          "end_line": 130
+        },
+        "dijkstra": {
+          "ccn": 7,
+          "nloc": 32,
+          "params": 2,
+          "start_line": 132,
+          "end_line": 167
+        },
+        "bfs": {
+          "ccn": 6,
+          "nloc": 21,
+          "params": 2,
+          "start_line": 169,
+          "end_line": 193
+        },
+        "dfs": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 2,
+          "start_line": 195,
+          "end_line": 200
+        },
+        "dfs_helper": {
+          "ccn": 4,
+          "nloc": 12,
+          "params": 4,
+          "start_line": 202,
+          "end_line": 214
+        },
+        "quick_sort": {
+          "ccn": 2,
+          "nloc": 7,
+          "params": 1,
+          "start_line": 219,
+          "end_line": 225
+        },
+        "quick_sort_helper": {
+          "ccn": 3,
+          "nloc": 9,
+          "params": 3,
+          "start_line": 227,
+          "end_line": 235
+        },
+        "partition": {
+          "ccn": 3,
+          "nloc": 12,
+          "params": 3,
+          "start_line": 237,
+          "end_line": 249
+        },
+        "merge_sort": {
+          "ccn": 2,
+          "nloc": 9,
+          "params": 1,
+          "start_line": 251,
+          "end_line": 261
+        },
+        "merge": {
+          "ccn": 4,
+          "nloc": 16,
+          "params": 2,
+          "start_line": 263,
+          "end_line": 280
+        },
+        "lcs": {
+          "ccn": 8,
+          "nloc": 29,
+          "params": 2,
+          "start_line": 284,
+          "end_line": 318
+        },
+        "edit_distance": {
+          "ccn": 6,
+          "nloc": 22,
+          "params": 2,
+          "start_line": 320,
+          "end_line": 345
+        },
+        "knapsack": {
+          "ccn": 4,
+          "nloc": 14,
+          "params": 3,
+          "start_line": 347,
+          "end_line": 362
+        },
+        "test_bst": {
+          "ccn": 1,
+          "nloc": 8,
+          "params": 0,
+          "start_line": 369,
+          "end_line": 376
+        },
+        "test_quick_sort": {
+          "ccn": 1,
+          "nloc": 5,
+          "params": 0,
+          "start_line": 379,
+          "end_line": 383
+        }
+      }
+    },
+    "edge_cases/comments_only.rs": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "edge_cases/single_line.rs": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "edge_cases/unicode.rs": {
+      "expected_functions": 5,
+      "total_ccn": 6,
+      "functions": {
+        "translations": {
+          "ccn": 1,
+          "nloc": 9,
+          "params": 0,
+          "start_line": 10,
+          "end_line": 18
+        },
+        "get_translation": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 21,
+          "end_line": 23
+        },
+        "format_greeting": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 26,
+          "end_line": 28
+        },
+        "get_status": {
+          "ccn": 2,
+          "nloc": 7,
+          "params": 1,
+          "start_line": 31,
+          "end_line": 37
+        },
+        "test_greeting": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 0,
+          "start_line": 44,
+          "end_line": 46
+        }
+      }
+    },
+    "simple.rs": {
+      "expected_functions": 18,
+      "total_ccn": 21,
+      "functions": {
+        "new": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 46,
+          "end_line": 48
+        },
+        "greet": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 24,
+          "end_line": 26
+        },
+        "is_valid": {
+          "ccn": 3,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 29,
+          "end_line": 31
+        },
+        "deactivate": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 34,
+          "end_line": 36
+        },
+        "increment": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 51,
+          "end_line": 53
+        },
+        "decrement": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 56,
+          "end_line": 58
+        },
+        "value": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 61,
+          "end_line": 63
+        },
+        "add": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 2,
+          "start_line": 67,
+          "end_line": 69
+        },
+        "multiply": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 2,
+          "start_line": 72,
+          "end_line": 74
+        },
+        "divide": {
+          "ccn": 2,
+          "nloc": 7,
+          "params": 2,
+          "start_line": 77,
+          "end_line": 83
+        },
+        "filter_active_users": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 86,
+          "end_line": 88
+        },
+        "map_user_names": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 91,
+          "end_line": 93
+        },
+        "is_success": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 106,
+          "end_line": 108
+        },
+        "is_failure": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 111,
+          "end_line": 113
+        },
+        "test_user_creation": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 0,
+          "start_line": 121,
+          "end_line": 126
+        },
+        "test_add": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 0,
+          "start_line": 129,
+          "end_line": 131
+        },
+        "test_divide": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 0,
+          "start_line": 134,
+          "end_line": 137
+        }
+      }
+    },
+    "module/nested.rs": {
+      "expected_functions": 8,
+      "total_ccn": 9,
+      "functions": {
+        "new": {
+          "ccn": 1,
+          "nloc": 5,
+          "params": 0,
+          "start_line": 21,
+          "end_line": 25
+        },
+        "add": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 28,
+          "end_line": 31
+        },
+        "find": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 34,
+          "end_line": 37
+        },
+        "get_all": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 1,
+          "start_line": 40,
+          "end_line": 43
+        },
+        "clear": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 1,
+          "start_line": 46,
+          "end_line": 51
+        },
+        "process": {
+          "ccn": 2,
+          "nloc": 6,
+          "params": 2,
+          "start_line": 56,
+          "end_line": 66
+        },
+        "test_nested_service": {
+          "ccn": 1,
+          "nloc": 9,
+          "params": 0,
+          "start_line": 73,
+          "end_line": 81
+        }
+      }
+    }
+  }
+}

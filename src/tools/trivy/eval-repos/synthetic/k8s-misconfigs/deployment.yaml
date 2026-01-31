@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vulnerable-app
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vulnerable-app
+  template:
+    metadata:
+      labels:
+        app: vulnerable-app
+    spec:
+      # MISCONFIG: Running as root user
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      # MISCONFIG: Host network enabled
+      hostNetwork: true
+      # MISCONFIG: Host PID enabled
+      hostPID: true
+      containers:
+        - name: app
+          image: nginx:latest
+          # MISCONFIG: Privileged container
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            # MISCONFIG: Running as root
+            runAsNonRoot: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+          ports:
+            - containerPort: 80
+          # MISCONFIG: No resource limits
+          # resources: {}
+          env:
+            # MISCONFIG: Hardcoded secrets in env
+            - name: DB_PASSWORD
+              value: "supersecretpassword123"
+            - name: API_KEY
+              value: "sk-1234567890abcdef"
+          volumeMounts:
+            - name: host-volume
+              mountPath: /host
+      volumes:
+        # MISCONFIG: Host path volume mount
+        - name: host-volume
+          hostPath:
+            path: /
+            type: Directory

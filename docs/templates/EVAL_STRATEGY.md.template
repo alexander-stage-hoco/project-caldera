@@ -1,0 +1,294 @@
+# EVAL_STRATEGY.md Template
+
+Copy this template to `src/tools/<tool-name>/EVAL_STRATEGY.md` and fill in the sections.
+
+---
+
+# <Tool Name> - Evaluation Strategy
+
+> How we measure the quality and accuracy of this tool's output.
+
+## Philosophy & Approach
+
+Brief description of evaluation philosophy:
+- What does "correct" mean for this tool?
+- How do we balance precision vs recall?
+- What are the key quality dimensions?
+
+## Dimension Summary
+
+| Dimension | Weight | Method | Target |
+|-----------|--------|--------|--------|
+| Accuracy | 40% | Programmatic + LLM | >95% |
+| Coverage | 30% | Programmatic | >90% |
+| Performance | 15% | Programmatic | <60s/10K files |
+| Actionability | 15% | LLM | >80% |
+
+## Check Catalog
+
+### Programmatic Checks
+
+Located in `scripts/checks/`:
+
+| Check Module | Dimension | Description |
+|--------------|-----------|-------------|
+| `accuracy.py` | Accuracy | Compare output against ground truth |
+| `coverage.py` | Coverage | Verify all files are analyzed |
+| `performance.py` | Performance | Measure execution time |
+| `output_quality.py` | Quality | Validate schema compliance |
+
+#### accuracy.py
+
+```python
+def check_metric_accuracy(output: dict, ground_truth: dict) -> CheckResult:
+    """Compare tool metrics against known values."""
+    # For each file in ground truth:
+    # - Find corresponding file in output
+    # - Compare metric values within tolerance
+    # - Track precision/recall
+```
+
+**Metrics:**
+- Precision: % of output values that match ground truth
+- Recall: % of ground truth values found in output
+- F1: Harmonic mean of precision and recall
+
+#### coverage.py
+
+```python
+def check_file_coverage(output: dict, repo_path: Path) -> CheckResult:
+    """Verify all analyzable files are present in output."""
+    # List all source files in repo
+    # Check each appears in output.data.files
+    # Report missing files
+```
+
+### LLM Judges
+
+Located in `evaluation/llm/judges/`:
+
+| Judge | Dimension | Evaluates |
+|-------|-----------|-----------|
+| `actionability.py` | Actionability | Are findings useful? |
+| `accuracy.py` | Accuracy | Are findings correct? |
+
+#### actionability.py
+
+Evaluates whether findings are actionable by developers:
+- Clear description of the issue
+- Location is precise (file, line)
+- Remediation guidance is provided
+
+**Rubric:**
+- 5: Immediately actionable, clear fix
+- 4: Actionable with minor clarification needed
+- 3: Requires investigation to understand
+- 2: Vague, location unclear
+- 1: Not actionable
+
+## Scoring Methodology
+
+### Aggregate Score Calculation
+
+```
+total_score = (
+    accuracy_score * 0.40 +
+    coverage_score * 0.30 +
+    performance_score * 0.15 +
+    actionability_score * 0.15
+)
+```
+
+### Per-Check Scoring
+
+Each programmatic check returns:
+- `pass`: 100 points
+- `warn`: 50 points
+- `fail`: 0 points
+
+Final dimension score = (sum of check scores) / (max possible)
+
+## Decision Thresholds
+
+### Pass/Fail Criteria
+
+| Dimension | Pass | Warn | Fail |
+|-----------|------|------|------|
+| Accuracy | ≥95% | 85-95% | <85% |
+| Coverage | ≥90% | 80-90% | <80% |
+| Performance | <60s | 60-120s | >120s |
+| Actionability | ≥80% | 60-80% | <60% |
+
+### Overall Status
+
+- **Pass**: All dimensions pass
+- **Warn**: Any dimension warns, none fail
+- **Fail**: Any dimension fails
+
+## Ground Truth Specifications
+
+### Synthetic Repositories
+
+Located in `eval-repos/synthetic/`:
+
+| Repo | Purpose | Language | Key Scenarios |
+|------|---------|----------|---------------|
+| `basic-python/` | Happy path | Python | Standard project structure |
+| `edge-cases/` | Edge cases | Mixed | Unicode, empty files, symlinks |
+| `large-repo/` | Performance | Multi | 10K+ files |
+
+### Ground Truth Format
+
+Located in `evaluation/ground-truth/`:
+
+```json
+{
+  "repo_name": "basic-python",
+  "expected_file_count": 25,
+  "files": {
+    "src/main.py": {
+      "metric_a": 42,
+      "metric_b": 3.14
+    }
+  },
+  "tolerance": {
+    "metric_a": 0,
+    "metric_b": 0.01
+  }
+}
+```
+
+### Creating Ground Truth
+
+1. Run tool on synthetic repo with known characteristics
+2. Manually verify output against expected values
+3. Document any deviations and their causes
+4. Save verified output as ground truth
+
+## Running Evaluation
+
+### Programmatic Evaluation
+
+```bash
+# Run all checks
+make evaluate
+
+# Run specific check
+python -m scripts.evaluate --check accuracy
+```
+
+### LLM Evaluation
+
+```bash
+# Run all LLM judges
+make evaluate-llm
+
+# Run specific judge
+python -m evaluation.llm.orchestrator --judge actionability
+```
+
+### Full Pipeline
+
+```bash
+# Analyze synthetic repos
+make analyze REPO_PATH=eval-repos/synthetic
+
+# Run programmatic evaluation
+make evaluate
+
+# Run LLM evaluation
+make evaluate-llm
+
+# View results
+cat evaluation/scorecard.md
+```
+
+## Extending Evaluation
+
+### Adding a Programmatic Check
+
+1. Create `scripts/checks/<dimension>.py`
+2. Implement `check_*` functions returning `CheckResult`
+3. Register in `scripts/evaluate.py`
+4. Update this document
+
+### Adding an LLM Judge
+
+1. Create `evaluation/llm/judges/<dimension>.py`
+2. Create prompt in `evaluation/llm/prompts/<dimension>.md`
+3. Register in `evaluation/llm/orchestrator.py`
+4. Update this document
+
+### Adding Ground Truth
+
+1. Create synthetic repo in `eval-repos/synthetic/`
+2. Run tool and manually verify output
+3. Save ground truth in `evaluation/ground-truth/<repo-name>.json`
+4. Add to TOOL_RULES in compliance scanner if needed
+
+---
+
+## Rollup Validation
+
+**Required section for compliance scanner.** If your tool produces directory-level rollups via dbt, document them here.
+
+Rollups:
+- directory_direct_distributions (metrics for files directly in directory)
+- directory_recursive_distributions (metrics for all files in subtree)
+
+Tests:
+- src/sot-engine/dbt/tests/test_rollup_<tool>_direct_vs_recursive.sql
+
+### Invariants Tested
+
+| Invariant | Description |
+|-----------|-------------|
+| recursive ≥ direct | Recursive counts include all descendants |
+| min ≤ p50 ≤ max | Distribution stats are consistent |
+| gini ∈ [0,1] | Gini coefficient is valid |
+
+---
+
+## Appendix: Check Results Schema
+
+```json
+{
+  "check_id": "accuracy.metric_precision",
+  "status": "pass",
+  "score": 0.97,
+  "details": {
+    "expected": 100,
+    "actual": 97,
+    "tolerance": 0.05
+  }
+}
+```
+
+## Appendix: Scorecard Format
+
+```markdown
+# <Tool> Evaluation Scorecard
+
+Generated: 2025-01-30T10:00:00Z
+
+## Summary
+
+| Dimension | Score | Status |
+|-----------|-------|--------|
+| Accuracy | 97% | Pass |
+| Coverage | 92% | Pass |
+| Performance | 45s | Pass |
+| Actionability | 85% | Pass |
+
+**Overall: PASS**
+
+## Details
+
+### Accuracy Checks
+- [x] metric_precision: 97%
+- [x] metric_recall: 95%
+
+### Coverage Checks
+- [x] file_coverage: 92%
+- [ ] language_coverage: 88% (warn: missing .xyz files)
+```

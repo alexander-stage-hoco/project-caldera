@@ -1,0 +1,40 @@
+{
+  "$schema": "../../schemas/config.json",
+  "classification": {
+    "confidence_threshold": 0.5,
+    "custom_rules": {
+      "path": {
+        "generated": ["obj/", "bin/", "packages/"],
+        "test": ["*.Tests/", "*.UnitTests/", "*.IntegrationTests/"]
+      },
+      "filename": {
+        "generated": [
+          ".*\\.g\\.cs$",
+          ".*\\.Designer\\.cs$",
+          ".*\\.generated\\.cs$",
+          "^AssemblyInfo\\.cs$"
+        ]
+      },
+      "extension": {
+        "config": [".csproj", ".sln", ".props", ".targets", ".slnx"]
+      }
+    },
+    "override": {
+      "Migrations/": "generated"
+    }
+  },
+  "ignore": {
+    "additional_patterns": [
+      "*.user",
+      "*.suo",
+      ".vs/",
+      "TestResults/",
+      "BenchmarkDotNet.Artifacts/"
+    ],
+    "respect_gitignore": true
+  },
+  "performance": {
+    "max_file_size_bytes": 104857600,
+    "skip_binary_detection": false
+  }
+}

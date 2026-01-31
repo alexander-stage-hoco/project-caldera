@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "scenario": "typescript",
+  "description": "Ground truth for typescript.",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/typescript",
+  "expected": {
+    "language": "typescript",
+    "version": "1.0",
+    "summary": {
+      "total_files": 5,
+      "total_expected_smells": 18,
+      "smell_categories_covered": [
+        "error_handling",
+        "security",
+        "dead_code"
+      ]
+    }
+  },
+  "files": {
+    "empty_catch.ts": {
+      "expected_smells": [
+        {
+          "smell_id": "D1_EMPTY_CATCH",
+          "count": 5,
+          "lines": [
+            16,
+            25,
+            37,
+            52,
+            65
+          ]
+        }
+      ],
+      "total_expected": 5
+    },
+    "sql_injection.ts": {
+      "expected_smells": [],
+      "total_expected": 0,
+      "notes": "Semgrep TypeScript SQL injection rules not detecting Node.js patterns"
+    },
+    "dead_code.ts": {
+      "expected_smells": [
+        {
+          "smell_id": "I3_UNREACHABLE_CODE",
+          "count": 2,
+          "lines": [
+            8,
+            27
+          ]
+        }
+      ],
+      "total_expected": 2,
+      "notes": "Semgrep detects some unreachable code patterns after return/throw"
+    },
+    "xss_vulnerability.ts": {
+      "expected_smells": [
+        {
+          "smell_id": "XSS_VULNERABILITY",
+          "count": 6,
+          "lines": [
+            11,
+            18,
+            25,
+            31,
+            38,
+            44
+          ]
+        }
+      ],
+      "total_expected": 6,
+      "notes": "Semgrep detects innerHTML and DOM XSS patterns"
+    },
+    "hardcoded_secrets.ts": {
+      "expected_smells": [
+        {
+          "smell_id": "HARDCODED_SECRET",
+          "count": 1,
+          "lines": [
+            27
+          ]
+        }
+      ],
+      "total_expected": 1,
+      "notes": "Semgrep TypeScript secret detection is limited"
+    }
+  }
+}

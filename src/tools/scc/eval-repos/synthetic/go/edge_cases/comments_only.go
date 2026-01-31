@@ -1,0 +1,20 @@
+// This file contains only comments
+// No executable code at all
+
+/*
+Multi-line comment block
+This serves as documentation
+But contains no actual code
+*/
+
+// Package edge_cases provides edge case tests.
+// This is just a comment, not actual package declaration.
+
+// TODO: This is a todo comment
+// FIXME: This needs fixing
+// NOTE: Important note here
+
+// The purpose of this file is to test how tools handle
+// files that have content but no executable code.
+
+// End of file

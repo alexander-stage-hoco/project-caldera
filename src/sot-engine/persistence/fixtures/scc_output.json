@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "tool_name": "scc",
+    "tool_version": "3.6.0",
+    "run_id": "11111111-1111-1111-1111-111111111111",
+    "repo_id": "22222222-2222-2222-2222-222222222222",
+    "branch": "main",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-01-25T10:00:00+00:00",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "scc",
+    "tool_version": "3.6.0",
+    "files": [
+      {
+        "path": "src/app.py",
+        "filename": "app.py",
+        "directory": "src",
+        "extension": ".py",
+        "language": "Python",
+        "lines": 120,
+        "code": 90,
+        "comment": 20,
+        "blank": 10,
+        "bytes": 2048,
+        "complexity": 12,
+        "comment_ratio": 0.166,
+        "blank_ratio": 0.083,
+        "code_ratio": 0.75,
+        "complexity_density": 0.1,
+        "dryness": 0.9,
+        "bytes_per_loc": 17.06,
+        "is_minified": false,
+        "is_generated": false,
+        "is_binary": false,
+        "classification": "source"
+      },
+      {
+        "path": "src/utils/helpers.py",
+        "filename": "helpers.py",
+        "directory": "src/utils",
+        "extension": ".py",
+        "language": "Python",
+        "lines_total": 80,
+        "lines_code": 60,
+        "lines_comment": 10,
+        "lines_blank": 10,
+        "bytes": 1536,
+        "complexity": 7,
+        "uloc": 55,
+        "comment_ratio": 0.125,
+        "blank_ratio": 0.125,
+        "code_ratio": 0.75,
+        "complexity_density": 0.0875,
+        "dryness": 0.92,
+        "bytes_per_loc": 19.2,
+        "minified": false,
+        "generated": false,
+        "is_binary": false,
+        "classification": "source"
+      }
+    ]
+  }
+}

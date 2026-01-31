@@ -1,0 +1,59 @@
+{
+  "repository": "mixed-language",
+  "description": "Multi-language repository with Python, JavaScript, C#, Go, Rust",
+  "expected": {
+    "total_files": 28,
+    "total_directories": 10,
+    "max_depth": 3,
+    "classifications": {
+      "source": 11,
+      "test": 4,
+      "config": 9,
+      "generated": 2,
+      "docs": 2
+    },
+    "specific_files": {
+      "src/python/main.py": {
+        "classification": "source",
+        "language": "python"
+      },
+      "src/javascript/index.js": {
+        "classification": "source",
+        "language": "javascript"
+      },
+      "src/csharp/Program.cs": {
+        "classification": "source",
+        "language": "csharp"
+      },
+      "src/go/main.go": {
+        "classification": "source",
+        "language": "go"
+      },
+      "src/rust/main.rs": {
+        "classification": "source",
+        "language": "rust"
+      },
+      "tests/test_main.py": {
+        "classification": "test",
+        "language": "python"
+      },
+      "src/csharp/Service.g.cs": {
+        "classification": "generated",
+        "language": "csharp"
+      },
+      "package.json": {
+        "classification": "config",
+        "language": "json"
+      },
+      "README.md": {
+        "classification": "docs",
+        "language": "markdown"
+      }
+    }
+  },
+  "thresholds": {
+    "classification_accuracy": 0.9,
+    "count_tolerance": 0,
+    "max_scan_time_seconds": 2.0
+  }
+}

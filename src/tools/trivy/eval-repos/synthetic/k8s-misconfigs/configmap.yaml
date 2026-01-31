@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: default
+data:
+  # MISCONFIG: Database credentials in configmap (should be secret)
+  database.host: "prod-db.example.com"
+  database.port: "5432"
+  database.user: "admin"
+  # MISCONFIG: Passwords should never be in ConfigMap
+  database.password: "P@ssw0rd123!"
+
+  # Application config
+  log.level: "debug"
+  api.endpoint: "https://api.example.com"
+
+  # MISCONFIG: API keys in plain text
+  api.key: "AKIAIOSFODNN7EXAMPLE"
+  api.secret: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secrets
+  namespace: default
+# MISCONFIG: Using opaque type but base64 is not encryption
+type: Opaque
+data:
+  # These are just base64 encoded, not encrypted
+  password: UEBzc3cwcmQxMjMh
+  api-key: QUtJQUlPU0ZPRE5ON0VYQU1QTEU=

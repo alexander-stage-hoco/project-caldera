@@ -1,0 +1,18 @@
+{
+  "repository": "deep-nesting",
+  "description": "Repository with deep directory nesting (20+ levels)",
+  "expected": {
+    "total_files": 12,
+    "total_directories": 17,
+    "max_depth": 15,
+    "classifications": {
+      "source": 11,
+      "docs": 1
+    }
+  },
+  "thresholds": {
+    "classification_accuracy": 0.95,
+    "count_tolerance": 0,
+    "max_scan_time_seconds": 1.0
+  }
+}

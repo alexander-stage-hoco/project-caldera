@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "scenario": "go",
+  "description": "Ground truth for go.",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/go",
+  "expected": {
+    "language": "go",
+    "version": "1.0",
+    "summary": {
+      "total_files": 2,
+      "total_expected_smells": 6,
+      "smell_categories_covered": [
+        "error_handling",
+        "security"
+      ],
+      "notes": "D1_EMPTY_CATCH excluded due to Semgrep limitation"
+    }
+  },
+  "files": {
+    "empty_error.go": {
+      "expected_smells": [
+        {
+          "smell_id": "D1_EMPTY_CATCH",
+          "count": 0,
+          "lines": []
+        }
+      ],
+      "total_expected": 0,
+      "notes": "Semgrep Go empty error handling pattern not matching - known limitation"
+    },
+    "sql_injection.go": {
+      "expected_smells": [
+        {
+          "smell_id": "SQL_INJECTION",
+          "count": 6,
+          "lines": [
+            15,
+            22,
+            29,
+            36,
+            43,
+            50
+          ]
+        }
+      ],
+      "total_expected": 6
+    }
+  }
+}

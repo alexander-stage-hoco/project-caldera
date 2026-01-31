@@ -1,0 +1,355 @@
+{
+  "language": "csharp",
+  "generated_at": "2026-01-04T19:02:50.735626+00:00",
+  "lizard_version": "lizard 1.19.0",
+  "total_files": 9,
+  "total_functions": 44,
+  "total_ccn": 139,
+  "files": {
+    "Simple.cs": {
+      "expected_functions": 1,
+      "total_ccn": 2,
+      "functions": {
+        "Program::Main": {
+          "ccn": 2,
+          "nloc": 20,
+          "params": 1,
+          "start_line": 11,
+          "end_line": 36
+        }
+      }
+    },
+    "EdgeCases/DeepNesting.cs": {
+      "expected_functions": 2,
+      "total_ccn": 19,
+      "functions": {
+        "DeepNestingTest::ProcessDeeply": {
+          "ccn": 10,
+          "nloc": 47,
+          "params": 1,
+          "start_line": 8,
+          "end_line": 57
+        },
+        "DeepNestingTest::ProcessMatrix": {
+          "ccn": 9,
+          "nloc": 41,
+          "params": 1,
+          "start_line": 59,
+          "end_line": 101
+        }
+      }
+    },
+    "EdgeCases/CommentsOnly.cs": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "EdgeCases/Empty.cs": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "EdgeCases/Unicode.cs": {
+      "expected_functions": 1,
+      "total_ccn": 1,
+      "functions": {
+        "UnicodeTest::new": {
+          "ccn": 1,
+          "nloc": 8,
+          "params": 0,
+          "start_line": 13,
+          "end_line": 20
+        }
+      }
+    },
+    "EdgeCases/SingleLine.cs": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "Module/Nested.cs": {
+      "expected_functions": 2,
+      "total_ccn": 3,
+      "functions": {
+        "NestedService::Add": {
+          "ccn": 2,
+          "nloc": 7,
+          "params": 1,
+          "start_line": 10,
+          "end_line": 16
+        },
+        "NestedProcessor::ProcessAsync": {
+          "ccn": 1,
+          "nloc": 5,
+          "params": 2,
+          "start_line": 33,
+          "end_line": 37
+        }
+      }
+    },
+    "Complex.cs": {
+      "expected_functions": 10,
+      "total_ccn": 18,
+      "functions": {
+        "CalculatorService::CalculatorService": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 0,
+          "start_line": 15,
+          "end_line": 18
+        },
+        "CalculatorService::Add": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 2,
+          "start_line": 23,
+          "end_line": 28
+        },
+        "CalculatorService::Subtract": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 2,
+          "start_line": 33,
+          "end_line": 38
+        },
+        "CalculatorService::Multiply": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 2,
+          "start_line": 43,
+          "end_line": 48
+        },
+        "CalculatorService::Divide": {
+          "ccn": 2,
+          "nloc": 10,
+          "params": 2,
+          "start_line": 54,
+          "end_line": 63
+        },
+        "CalculatorService::Power": {
+          "ccn": 4,
+          "nloc": 18,
+          "params": 2,
+          "start_line": 68,
+          "end_line": 85
+        },
+        "CalculatorService::Factorial": {
+          "ccn": 4,
+          "nloc": 18,
+          "params": 1,
+          "start_line": 90,
+          "end_line": 107
+        },
+        "CalculatorService::GetHistory": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 0,
+          "start_line": 112,
+          "end_line": 115
+        },
+        "CalculatorService::GetStatistics": {
+          "ccn": 2,
+          "nloc": 15,
+          "params": 0,
+          "start_line": 120,
+          "end_line": 136
+        },
+        "CalculatorService::RecordCalculation": {
+          "ccn": 1,
+          "nloc": 11,
+          "params": 4,
+          "start_line": 138,
+          "end_line": 148
+        }
+      }
+    },
+    "Massive.cs": {
+      "expected_functions": 28,
+      "total_ccn": 96,
+      "functions": {
+        "Graph::AddNode": {
+          "ccn": 2,
+          "nloc": 6,
+          "params": 1,
+          "start_line": 23,
+          "end_line": 28
+        },
+        "Graph::AddEdge": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 3,
+          "start_line": 30,
+          "end_line": 35
+        },
+        "Graph::Dijkstra": {
+          "ccn": 12,
+          "nloc": 50,
+          "params": 2,
+          "start_line": 37,
+          "end_line": 95
+        },
+        "Graph::BreadthFirstSearch": {
+          "ccn": 6,
+          "nloc": 26,
+          "params": 1,
+          "start_line": 97,
+          "end_line": 128
+        },
+        "Graph::DepthFirstSearch": {
+          "ccn": 4,
+          "nloc": 21,
+          "params": 1,
+          "start_line": 130,
+          "end_line": 155
+        },
+        "Graph::TopologicalSort": {
+          "ccn": 6,
+          "nloc": 31,
+          "params": 0,
+          "start_line": 157,
+          "end_line": 193
+        },
+        "TreeNode::TreeNode": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 1,
+          "start_line": 206,
+          "end_line": 209
+        },
+        "BinarySearchTree::Insert": {
+          "ccn": 7,
+          "nloc": 38,
+          "params": 1,
+          "start_line": 219,
+          "end_line": 257
+        },
+        "BinarySearchTree::Search": {
+          "ccn": 4,
+          "nloc": 15,
+          "params": 1,
+          "start_line": 259,
+          "end_line": 273
+        },
+        "BinarySearchTree::Delete": {
+          "ccn": 2,
+          "nloc": 6,
+          "params": 1,
+          "start_line": 275,
+          "end_line": 280
+        },
+        "BinarySearchTree::DeleteRecursive": {
+          "ccn": 6,
+          "nloc": 27,
+          "params": 3,
+          "start_line": 282,
+          "end_line": 310
+        },
+        "BinarySearchTree::FindMin": {
+          "ccn": 2,
+          "nloc": 6,
+          "params": 1,
+          "start_line": 312,
+          "end_line": 317
+        },
+        "BinarySearchTree::InorderTraversal": {
+          "ccn": 1,
+          "nloc": 6,
+          "params": 0,
+          "start_line": 319,
+          "end_line": 324
+        },
+        "BinarySearchTree::Inorder": {
+          "ccn": 2,
+          "nloc": 7,
+          "params": 2,
+          "start_line": 326,
+          "end_line": 332
+        },
+        "BinarySearchTree::Height": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 0,
+          "start_line": 334,
+          "end_line": 337
+        },
+        "BinarySearchTree::HeightRecursive": {
+          "ccn": 2,
+          "nloc": 5,
+          "params": 1,
+          "start_line": 339,
+          "end_line": 343
+        },
+        "BinarySearchTree::IsBalanced": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 0,
+          "start_line": 345,
+          "end_line": 348
+        },
+        "BinarySearchTree::CheckBalanced": {
+          "ccn": 4,
+          "nloc": 14,
+          "params": 1,
+          "start_line": 350,
+          "end_line": 366
+        },
+        "Sorting::if": {
+          "ccn": 1,
+          "nloc": 5,
+          "params": 0,
+          "start_line": 468,
+          "end_line": 472
+        },
+        "Sorting::for": {
+          "ccn": 1,
+          "nloc": 5,
+          "params": 0,
+          "start_line": 449,
+          "end_line": 453
+        },
+        "Sorting::while": {
+          "ccn": 2,
+          "nloc": 7,
+          "params": 0,
+          "start_line": 425,
+          "end_line": 431
+        },
+        "DynamicProgramming::LongestCommonSubsequence": {
+          "ccn": 8,
+          "nloc": 36,
+          "params": 0,
+          "start_line": 482,
+          "end_line": 520
+        },
+        "DynamicProgramming::EditDistance": {
+          "ccn": 6,
+          "nloc": 24,
+          "params": 0,
+          "start_line": 522,
+          "end_line": 548
+        },
+        "DynamicProgramming::Knapsack": {
+          "ccn": 6,
+          "nloc": 27,
+          "params": 0,
+          "start_line": 550,
+          "end_line": 579
+        },
+        "DynamicProgramming::CoinChange": {
+          "ccn": 4,
+          "nloc": 15,
+          "params": 0,
+          "start_line": 581,
+          "end_line": 597
+        },
+        "DynamicProgramming::Main": {
+          "ccn": 1,
+          "nloc": 30,
+          "params": 0,
+          "start_line": 604,
+          "end_line": 636
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "scenario": "multi-branch",
+  "description": "Repository with multiple branches (main, develop, feature-*, hotfix-*, release-*), merge commits, and tags. Tests git-sizer's ability to analyze branching complexity and reference counts.",
+  "repo_path": "eval-repos/synthetic/multi-branch",
+  "expected": {
+    "health_grade": {
+      "acceptable": ["A", "A+", "B", "B+"],
+      "description": "Repository should receive A or B grade - healthy branching patterns"
+    },
+    "metrics": {
+      "max_blob_size": {
+        "max": 102400,
+        "description": "No single file larger than 100 KB"
+      },
+      "blob_total_size": {
+        "max": 1048576,
+        "description": "Total blob size under 1 MB"
+      },
+      "blob_count": {
+        "min": 20,
+        "max": 50,
+        "description": "Moderate number of source files"
+      },
+      "tree_count": {
+        "min": 10,
+        "max": 100,
+        "description": "Multiple directories from feature branches"
+      },
+      "max_tree_entries": {
+        "max": 50,
+        "description": "Normal directory width"
+      },
+      "max_path_depth": {
+        "max": 6,
+        "description": "Moderate directory depth (src/features/, src/api/, etc.)"
+      },
+      "max_path_length": {
+        "max": 100,
+        "description": "Normal path lengths"
+      },
+      "commit_count": {
+        "min": 12,
+        "max": 25,
+        "description": "Moderate commit history including merges"
+      },
+      "branch_count": {
+        "min": 6,
+        "max": 10,
+        "description": "7 branches: master, develop, feature-auth, feature-api, feature-database, release-1.0, hotfix-security"
+      },
+      "tag_count": {
+        "min": 2,
+        "max": 5,
+        "description": "3 tags: v0.1.0, v1.0.0, v1.0.1"
+      },
+      "reference_count": {
+        "min": 8,
+        "max": 15,
+        "description": "Combined branches and tags"
+      },
+      "max_parent_count": {
+        "min": 2,
+        "max": 2,
+        "description": "Merge commits have 2 parents"
+      }
+    },
+    "lfs_candidates": {
+      "count": 0,
+      "description": "No LFS candidates - all files are small source code"
+    },
+    "threshold_violations": {
+      "min_count": 0,
+      "max_count": 0,
+      "expected_violations": [],
+      "description": "No threshold violations expected - healthy repository"
+    }
+  },
+  "thresholds": {
+    "max_analysis_time_ms": 5000,
+    "description": "Quick analysis due to small repo size"
+  }
+}

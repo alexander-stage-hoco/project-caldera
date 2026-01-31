@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "scenario": "healthy-repo",
+  "description": "Small, well-structured repository with no size or structure issues. Represents ideal repository health with minimal blob sizes, shallow tree depth, and clean history.",
+  "repo_path": "eval-repos/synthetic/healthy-repo",
+  "expected": {
+    "health_grade": {
+      "acceptable": ["A", "A+"],
+      "description": "Repository should receive A or A+ grade due to no threshold violations"
+    },
+    "metrics": {
+      "max_blob_size": {
+        "max": 102400,
+        "description": "No file larger than 100 KB"
+      },
+      "blob_total_size": {
+        "max": 1048576,
+        "description": "Total blob size under 1 MB"
+      },
+      "blob_count": {
+        "min": 5,
+        "max": 50,
+        "description": "Small number of files"
+      },
+      "tree_count": {
+        "min": 1,
+        "max": 20,
+        "description": "Few directories"
+      },
+      "max_tree_entries": {
+        "max": 50,
+        "description": "No directory with more than 50 entries"
+      },
+      "max_path_depth": {
+        "max": 5,
+        "description": "Shallow directory structure"
+      },
+      "max_path_length": {
+        "max": 100,
+        "description": "Short file paths"
+      },
+      "commit_count": {
+        "min": 3,
+        "max": 100,
+        "description": "Small commit history"
+      },
+      "branch_count": {
+        "min": 1,
+        "max": 5,
+        "description": "Few branches"
+      },
+      "tag_count": {
+        "min": 0,
+        "max": 10,
+        "description": "Few or no tags"
+      },
+      "reference_count": {
+        "min": 1,
+        "max": 20,
+        "description": "Small number of references"
+      }
+    },
+    "lfs_candidates": {
+      "count": 0,
+      "description": "No files requiring Git LFS"
+    },
+    "threshold_violations": {
+      "count": 0,
+      "description": "No threshold violations expected"
+    }
+  },
+  "thresholds": {
+    "max_analysis_time_ms": 5000,
+    "description": "Analysis should complete quickly for small repo"
+  }
+}

@@ -1,0 +1,200 @@
+# BLUEPRINT.md Template
+
+Copy this template to `src/tools/<tool-name>/BLUEPRINT.md` and fill in the sections.
+
+---
+
+# <Tool Name> - Architecture Blueprint
+
+> One-sentence description of what this tool does.
+
+## Executive Summary
+
+Brief overview (2-3 paragraphs) covering:
+- What the tool analyzes
+- Key metrics/findings it produces
+- Why it was selected for Caldera
+
+## Gap Analysis
+
+### Current State
+
+| Aspect | Status |
+|--------|--------|
+| Tool maturity | (alpha/beta/stable) |
+| Output format | (JSON/XML/text) |
+| Language support | (list languages) |
+| Performance | (fast/moderate/slow) |
+
+### Integration Gaps
+
+| Gap | Impact | Resolution |
+|-----|--------|------------|
+| (e.g., No JSON output) | Must parse text | Custom parser in analyze.py |
+| (e.g., Absolute paths) | Compliance failure | Path normalization |
+
+## Architecture
+
+### Data Flow
+
+```
+Repository
+    │
+    ▼
+┌─────────────┐
+│ Tool Binary │  (e.g., scc, lizard, trivy)
+└─────────────┘
+    │
+    ▼
+┌─────────────┐
+│ analyze.py  │  Parse, normalize, wrap in envelope
+└─────────────┘
+    │
+    ▼
+┌─────────────┐
+│ output.json │  Caldera envelope format
+└─────────────┘
+    │
+    ▼
+┌─────────────┐
+│ SoT Adapter │  Persist to landing zone
+└─────────────┘
+    │
+    ▼
+┌─────────────┐
+│ dbt Models  │  Staging → Rollups
+└─────────────┘
+```
+
+### Output Schema
+
+Key structures in `schemas/output.schema.json`:
+
+| Structure | Description |
+|-----------|-------------|
+| `data.files[]` | Per-file metrics |
+| `data.summary` | Repository-level aggregates |
+
+### Schema Migration
+
+When output schema changes:
+
+1. Increment `schema_version` in analyze.py and schema
+2. Update `const` in output.schema.json
+3. Update adapter to handle new fields
+4. Add migration notes to this section
+
+| Version | Changes |
+|---------|---------|
+| 1.0.0 | Initial release |
+
+## Implementation Plan
+
+### Phase 1: Standalone Tool
+
+- [ ] Create directory structure
+- [ ] Implement analyze.py with envelope output
+- [ ] Create output.schema.json
+- [ ] Add synthetic eval-repos
+- [ ] Implement programmatic checks
+- [ ] Pass compliance scanner
+
+### Phase 2: SoT Integration
+
+- [ ] Create entity dataclass
+- [ ] Create repository class
+- [ ] Create adapter with TABLE_DDL, LZ_TABLES
+- [ ] Add to schema.sql
+- [ ] Create dbt staging model
+- [ ] Create dbt rollup models
+- [ ] Add dbt tests
+
+### Phase 3: Evaluation
+
+- [ ] Create ground truth files
+- [ ] Implement LLM judges
+- [ ] Create LLM prompts
+- [ ] Generate scorecard
+
+## Configuration Reference
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TOOL_BINARY` | `tool` | Path to tool executable |
+| `TOOL_CONFIG` | none | Tool configuration file |
+
+### Makefile Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `REPO_PATH` | `eval-repos/synthetic` | Repository to analyze |
+| `OUTPUT_DIR` | `outputs/$(RUN_ID)` | Output directory |
+
+### Tool-Specific Options
+
+Document any tool-specific configuration (rules files, profiles, etc.).
+
+## Performance Characteristics
+
+### Benchmarks
+
+| Repository Size | Files | Time | Memory |
+|-----------------|-------|------|--------|
+| Small (<1K files) | 500 | 2s | 100MB |
+| Medium (1-10K) | 5000 | 15s | 500MB |
+| Large (>10K) | 50000 | 120s | 2GB |
+
+### Optimization Notes
+
+- (e.g., Use `--parallel` flag for large repos)
+- (e.g., Exclude `node_modules` for faster scans)
+
+## Evaluation Results
+
+Link to latest scorecard and key metrics:
+
+| Dimension | Score | Notes |
+|-----------|-------|-------|
+| Accuracy | 95% | Based on synthetic repos |
+| Coverage | 90% | Misses obscure file types |
+| Performance | Pass | Under 60s for 10K files |
+
+See [evaluation/scorecard.md](./evaluation/scorecard.md) for full results.
+
+## Risk Assessment
+
+### Known Limitations
+
+| Limitation | Impact | Mitigation |
+|------------|--------|------------|
+| (e.g., No Go support) | Missing metrics for Go repos | Planned in v2.0 |
+
+### Security Considerations
+
+- Tool runs with repository read access only
+- No network access required
+- No secrets in output
+
+## Lessons Learned
+
+Document issues encountered during implementation:
+
+| Issue | Solution |
+|-------|----------|
+| (e.g., Unicode paths failed) | Added encoding handling |
+| (e.g., Large file OOM) | Added file size limit |
+
+---
+
+## Appendix: File Inventory
+
+| File | Purpose |
+|------|---------|
+| `Makefile` | Build orchestration |
+| `analyze.py` | Main analysis script |
+| `evaluate.py` | Programmatic evaluation |
+| `output.schema.json` | Output JSON Schema |
+| `BLUEPRINT.md` | This document |
+| `EVAL_STRATEGY.md` | Evaluation methodology |

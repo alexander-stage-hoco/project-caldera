@@ -1,0 +1,11 @@
+# PoC #2: Lizard (Function-Level Complexity Analysis)
+
+# Core tool
+lizard>=1.17.10
+
+# Testing
+pytest>=7.0.0
+jsonschema>=4.0.0
+
+# Dashboard rendering (optional, for rich output)
+# rich>=13.0.0

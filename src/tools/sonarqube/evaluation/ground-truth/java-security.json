@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "scenario": "java-security",
+  "description": "Java codebase with intentional security vulnerabilities",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/java-security",
+  "expected": {
+    "id": "java-security",
+    "language": "java",
+    "expected_languages": [
+      "java"
+    ],
+    "expected_issues": {
+      "min": 4,
+      "max": 20
+    },
+    "expected_bugs": {
+      "min": 2,
+      "max": 10
+    },
+    "expected_vulnerabilities": {
+      "min": 1,
+      "max": 10
+    },
+    "expected_smells": {
+      "min": 1,
+      "max": 10
+    },
+    "expected_metrics": {
+      "ncloc": {
+        "min": 200,
+        "max": 1000
+      },
+      "complexity": {
+        "min": 20,
+        "max": 200
+      }
+    },
+    "quality_gate_expected": "OK",
+    "expected_vulnerability_types": [
+      "SQL injection",
+      "Hardcoded credentials",
+      "Path traversal"
+    ],
+    "notes": "Contains SQL injection, hardcoded secrets, and path traversal vulnerabilities"
+  },
+  "id": "java-security",
+  "language": "java",
+  "expected_languages": [
+    "java"
+  ],
+  "expected_issues": {
+    "min": 4,
+    "max": 20
+  },
+  "expected_bugs": {
+    "min": 2,
+    "max": 10
+  },
+  "expected_vulnerabilities": {
+    "min": 1,
+    "max": 10
+  },
+  "expected_smells": {
+    "min": 1,
+    "max": 10
+  },
+  "expected_metrics": {
+    "ncloc": {
+      "min": 200,
+      "max": 1000
+    },
+    "complexity": {
+      "min": 20,
+      "max": 200
+    }
+  },
+  "quality_gate_expected": "OK",
+  "expected_vulnerability_types": [
+    "SQL injection",
+    "Hardcoded credentials",
+    "Path traversal"
+  ],
+  "notes": "Contains SQL injection, hardcoded secrets, and path traversal vulnerabilities"
+}

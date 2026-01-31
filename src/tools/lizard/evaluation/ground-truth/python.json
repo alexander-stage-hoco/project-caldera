@@ -1,0 +1,491 @@
+{
+  "schema_version": "2.0",
+  "language": "python",
+  "generated_at": "2026-01-04T19:02:50.652230+00:00",
+  "verified_at": "2026-01-30T00:00:00Z",
+  "verification": {
+    "method": "manual_calculation",
+    "methodology": "McCabe's cyclomatic complexity: CC = number of decision points + 1, where decision points include: if, elif, for, while, except, and, or, ternary expressions",
+    "cross_validated_with": ["radon (Python)", "manual code review"],
+    "verified_functions": 20,
+    "verification_notes": "CCN values independently calculated for simple.py, complex.py, and nested.py functions using McCabe's formula. All 20 verified functions matched lizard output exactly.",
+    "sample_calculations": [
+      {"function": "simple.py::add", "decision_points": 0, "expected_ccn": 1, "verified": true},
+      {"function": "simple.py::divide", "decision_points": 1, "reason": "1 if statement", "expected_ccn": 2, "verified": true},
+      {"function": "complex.py::update_status", "decision_points": 2, "reason": "2 if statements", "expected_ccn": 3, "verified": true},
+      {"function": "complex.py::get_statistics", "decision_points": 4, "reason": "1 if + 1 for + 1 ternary + base", "expected_ccn": 5, "verified": true},
+      {"function": "nested.py::is_prime", "decision_points": 5, "reason": "3 if + 1 for + 1 if inside for", "expected_ccn": 6, "verified": true},
+      {"function": "nested.py::primes_up_to", "decision_points": 6, "reason": "1 if + 2 for + 1 if + 1 comprehension if", "expected_ccn": 7, "verified": true}
+    ]
+  },
+  "lizard_version": "lizard 1.19.0",
+  "total_files": 9,
+  "total_functions": 60,
+  "total_ccn": 227,
+  "files": {
+    "complex.py": {
+      "expected_functions": 9,
+      "total_ccn": 23,
+      "functions": {
+        "__init__": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 30,
+          "end_line": 32
+        },
+        "create_task": {
+          "ccn": 2,
+          "nloc": 16,
+          "params": 4,
+          "start_line": 34,
+          "end_line": 50
+        },
+        "get_task": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 2,
+          "start_line": 52,
+          "end_line": 54
+        },
+        "update_status": {
+          "ccn": 3,
+          "nloc": 14,
+          "params": 3,
+          "start_line": 56,
+          "end_line": 74
+        },
+        "filter_by_status": {
+          "ccn": 3,
+          "nloc": 2,
+          "params": 2,
+          "start_line": 76,
+          "end_line": 78
+        },
+        "filter_by_priority": {
+          "ccn": 3,
+          "nloc": 2,
+          "params": 2,
+          "start_line": 80,
+          "end_line": 82
+        },
+        "filter_by_tag": {
+          "ccn": 3,
+          "nloc": 2,
+          "params": 2,
+          "start_line": 84,
+          "end_line": 86
+        },
+        "get_statistics": {
+          "ccn": 5,
+          "nloc": 15,
+          "params": 1,
+          "start_line": 88,
+          "end_line": 106
+        },
+        "bulk_update": {
+          "ccn": 2,
+          "nloc": 5,
+          "params": 3,
+          "start_line": 108,
+          "end_line": 113
+        }
+      }
+    },
+    "edge_cases/comments_only.py": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "edge_cases/unicode.py": {
+      "expected_functions": 3,
+      "total_ccn": 3,
+      "functions": {
+        "\u8ba1\u7b97": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 1,
+          "start_line": 14,
+          "end_line": 16
+        },
+        "__init__": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 2,
+          "start_line": 22,
+          "end_line": 23
+        },
+        "\u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 1,
+          "start_line": 25,
+          "end_line": 27
+        }
+      }
+    },
+    "edge_cases/empty.py": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "module/nested.py": {
+      "expected_functions": 4,
+      "total_ccn": 18,
+      "functions": {
+        "fibonacci": {
+          "ccn": 2,
+          "nloc": 5,
+          "params": 1,
+          "start_line": 6,
+          "end_line": 11
+        },
+        "factorial": {
+          "ccn": 3,
+          "nloc": 6,
+          "params": 1,
+          "start_line": 14,
+          "end_line": 20
+        },
+        "is_prime": {
+          "ccn": 6,
+          "nloc": 11,
+          "params": 1,
+          "start_line": 23,
+          "end_line": 34
+        },
+        "primes_up_to": {
+          "ccn": 7,
+          "nloc": 10,
+          "params": 1,
+          "start_line": 37,
+          "end_line": 47
+        }
+      }
+    },
+    "edge_cases/single_line.py": {
+      "expected_functions": 0,
+      "total_ccn": 0,
+      "functions": {}
+    },
+    "edge_cases/deep_nesting.py": {
+      "expected_functions": 2,
+      "total_ccn": 24,
+      "functions": {
+        "deeply_nested_function": {
+          "ccn": 13,
+          "nloc": 19,
+          "params": 1,
+          "start_line": 3,
+          "end_line": 24
+        },
+        "process": {
+          "ccn": 11,
+          "nloc": 18,
+          "params": 2,
+          "start_line": 30,
+          "end_line": 50
+        }
+      }
+    },
+    "massive.py": {
+      "expected_functions": 38,
+      "total_ccn": 154,
+      "functions": {
+        "__init__": {
+          "ccn": 2,
+          "nloc": 4,
+          "params": 3,
+          "start_line": 208,
+          "end_line": 211
+        },
+        "add_node": {
+          "ccn": 2,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 30,
+          "end_line": 33
+        },
+        "add_edge": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 4,
+          "start_line": 35,
+          "end_line": 38
+        },
+        "neighbors": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 2,
+          "start_line": 40,
+          "end_line": 41
+        },
+        "nodes": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 1,
+          "start_line": 43,
+          "end_line": 44
+        },
+        "dijkstra": {
+          "ccn": 12,
+          "nloc": 29,
+          "params": 3,
+          "start_line": 46,
+          "end_line": 83
+        },
+        "bfs": {
+          "ccn": 6,
+          "nloc": 16,
+          "params": 2,
+          "start_line": 85,
+          "end_line": 106
+        },
+        "dfs._dfs_recursive": {
+          "ccn": 3,
+          "nloc": 7,
+          "params": 1,
+          "start_line": 116,
+          "end_line": 122
+        },
+        "dfs": {
+          "ccn": 2,
+          "nloc": 8,
+          "params": 2,
+          "start_line": 108,
+          "end_line": 125
+        },
+        "topological_sort": {
+          "ccn": 10,
+          "nloc": 17,
+          "params": 1,
+          "start_line": 127,
+          "end_line": 150
+        },
+        "strongly_connected_components._dfs1": {
+          "ccn": 3,
+          "nloc": 7,
+          "params": 1,
+          "start_line": 157,
+          "end_line": 163
+        },
+        "strongly_connected_components._dfs2": {
+          "ccn": 3,
+          "nloc": 7,
+          "params": 2,
+          "start_line": 176,
+          "end_line": 182
+        },
+        "strongly_connected_components": {
+          "ccn": 6,
+          "nloc": 19,
+          "params": 1,
+          "start_line": 152,
+          "end_line": 190
+        },
+        "insert": {
+          "ccn": 7,
+          "nloc": 22,
+          "params": 2,
+          "start_line": 213,
+          "end_line": 235
+        },
+        "search": {
+          "ccn": 4,
+          "nloc": 11,
+          "params": 2,
+          "start_line": 237,
+          "end_line": 247
+        },
+        "delete._find_min": {
+          "ccn": 2,
+          "nloc": 4,
+          "params": 1,
+          "start_line": 250,
+          "end_line": 253
+        },
+        "delete._delete_recursive": {
+          "ccn": 6,
+          "nloc": 20,
+          "params": 2,
+          "start_line": 255,
+          "end_line": 275
+        },
+        "delete": {
+          "ccn": 2,
+          "nloc": 7,
+          "params": 2,
+          "start_line": 249,
+          "end_line": 280
+        },
+        "inorder._traverse": {
+          "ccn": 2,
+          "nloc": 6,
+          "params": 1,
+          "start_line": 285,
+          "end_line": 290
+        },
+        "inorder": {
+          "ccn": 1,
+          "nloc": 5,
+          "params": 1,
+          "start_line": 282,
+          "end_line": 293
+        },
+        "height._height": {
+          "ccn": 2,
+          "nloc": 4,
+          "params": 1,
+          "start_line": 296,
+          "end_line": 299
+        },
+        "height": {
+          "ccn": 1,
+          "nloc": 3,
+          "params": 1,
+          "start_line": 295,
+          "end_line": 301
+        },
+        "is_balanced._check_balanced": {
+          "ccn": 4,
+          "nloc": 12,
+          "params": 1,
+          "start_line": 304,
+          "end_line": 318
+        },
+        "is_balanced": {
+          "ccn": 1,
+          "nloc": 4,
+          "params": 1,
+          "start_line": 303,
+          "end_line": 321
+        },
+        "quicksort._partition": {
+          "ccn": 3,
+          "nloc": 9,
+          "params": 2,
+          "start_line": 334,
+          "end_line": 342
+        },
+        "quicksort": {
+          "ccn": 3,
+          "nloc": 10,
+          "params": 3,
+          "start_line": 328,
+          "end_line": 349
+        },
+        "mergesort": {
+          "ccn": 5,
+          "nloc": 18,
+          "params": 1,
+          "start_line": 352,
+          "end_line": 374
+        },
+        "heapsort._heapify": {
+          "ccn": 6,
+          "nloc": 11,
+          "params": 2,
+          "start_line": 382,
+          "end_line": 395
+        },
+        "heapsort": {
+          "ccn": 3,
+          "nloc": 10,
+          "params": 1,
+          "start_line": 377,
+          "end_line": 404
+        },
+        "longest_common_subsequence": {
+          "ccn": 9,
+          "nloc": 21,
+          "params": 2,
+          "start_line": 411,
+          "end_line": 435
+        },
+        "knapsack": {
+          "ccn": 7,
+          "nloc": 19,
+          "params": 3,
+          "start_line": 438,
+          "end_line": 460
+        },
+        "edit_distance": {
+          "ccn": 7,
+          "nloc": 18,
+          "params": 2,
+          "start_line": 463,
+          "end_line": 484
+        },
+        "coin_change": {
+          "ccn": 4,
+          "nloc": 7,
+          "params": 2,
+          "start_line": 487,
+          "end_line": 496
+        },
+        "kmp_search._build_failure_table": {
+          "ccn": 5,
+          "nloc": 11,
+          "params": 1,
+          "start_line": 508,
+          "end_line": 520
+        },
+        "kmp_search": {
+          "ccn": 7,
+          "nloc": 16,
+          "params": 2,
+          "start_line": 503,
+          "end_line": 535
+        },
+        "rabin_karp_search": {
+          "ccn": 8,
+          "nloc": 20,
+          "params": 4,
+          "start_line": 538,
+          "end_line": 564
+        },
+        "main": {
+          "ccn": 2,
+          "nloc": 33,
+          "params": 0,
+          "start_line": 571,
+          "end_line": 607
+        }
+      }
+    },
+    "simple.py": {
+      "expected_functions": 4,
+      "total_ccn": 5,
+      "functions": {
+        "add": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 2,
+          "start_line": 4,
+          "end_line": 6
+        },
+        "subtract": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 2,
+          "start_line": 9,
+          "end_line": 11
+        },
+        "multiply": {
+          "ccn": 1,
+          "nloc": 2,
+          "params": 2,
+          "start_line": 14,
+          "end_line": 16
+        },
+        "divide": {
+          "ccn": 2,
+          "nloc": 4,
+          "params": 2,
+          "start_line": 19,
+          "end_line": 23
+        }
+      }
+    }
+  }
+}
