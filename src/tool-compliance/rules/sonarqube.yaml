@@ -1,0 +1,16 @@
+# Tool compliance rules for sonarqube
+required_check_modules:
+  - accuracy.py
+  - completeness.py
+  - coverage.py
+  - edge_cases.py
+  - performance.py
+
+required_prompts:
+  - issue_accuracy.md
+  - coverage_completeness.md
+  - actionability.md
+
+adapter:
+  module: persistence.adapters.sonarqube_adapter
+  class: SonarqubeAdapter

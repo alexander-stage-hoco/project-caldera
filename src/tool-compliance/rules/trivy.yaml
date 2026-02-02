@@ -1,0 +1,24 @@
+# Tool compliance rules for trivy
+required_check_modules:
+  - accuracy.py
+  - detection.py
+  - freshness.py
+  - iac.py
+  - integration.py
+  - output_quality.py
+  - performance.py
+
+required_prompts:
+  - actionability.md
+  - coverage_completeness.md
+  - false_positive_rate.md
+  - freshness_quality.md
+  - iac_quality.md
+  - sbom_completeness.md
+  - severity_accuracy.md
+  - vulnerability_accuracy.md
+  - vulnerability_detection.md
+
+adapter:
+  module: persistence.adapters.trivy_adapter
+  class: TrivyAdapter

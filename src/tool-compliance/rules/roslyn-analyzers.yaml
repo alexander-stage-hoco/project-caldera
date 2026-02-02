@@ -1,0 +1,16 @@
+# Tool compliance rules for roslyn-analyzers
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - edge_cases.py
+  - performance.py
+
+required_prompts:
+  - actionability.md
+  - detection_accuracy.md
+  - false_positive_rate.md
+  - security_coverage.md
+
+adapter:
+  module: persistence.adapters.roslyn_adapter
+  class: RoslynAdapter

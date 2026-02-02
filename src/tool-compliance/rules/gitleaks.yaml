@@ -1,0 +1,21 @@
+# Tool compliance rules for gitleaks
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - detection.py
+  - performance.py
+
+required_prompts:
+  - detection_accuracy.md
+  - false_positive.md
+  - secret_coverage.md
+  - severity_classification.md
+
+ground_truth_mode: synthetic_json
+
+evaluation_outputs:
+  - scorecard.md
+
+adapter:
+  module: persistence.adapters.gitleaks_adapter
+  class: GitleaksAdapter

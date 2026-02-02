@@ -1,0 +1,34 @@
+# Tool compliance rules for scc
+required_check_modules:
+  - cocomo.py
+  - coverage.py
+  - directory_analysis.py
+  - installation.py
+  - integration_fit.py
+  - license.py
+  - output_quality.py
+  - per_file.py
+  - performance.py
+  - reliability.py
+
+required_prompts:
+  - api_design.md
+  - code_quality.md
+  - comparative.md
+  - directory_analysis.md
+  - documentation.md
+  - edge_cases.md
+  - error_messages.md
+  - integration_fit.md
+  - risk.md
+  - statistics.md
+
+ground_truth_mode: synthetic_json
+
+evaluation_outputs:
+  - scorecard.md
+  - evaluation_report.json
+
+adapter:
+  module: persistence.adapters.scc_adapter
+  class: SccAdapter

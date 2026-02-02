@@ -1,0 +1,150 @@
+# Common compliance rules shared across all tools
+
+required_paths:
+  - Makefile
+  - README.md
+  - BLUEPRINT.md
+  - EVAL_STRATEGY.md
+  - requirements.txt
+  - scripts/analyze.py
+  - scripts/evaluate.py
+  - scripts/checks
+  - schemas/output.schema.json
+  - eval-repos/synthetic
+  - eval-repos/real
+  - evaluation/ground-truth
+  - evaluation/llm/orchestrator.py
+  - evaluation/llm/judges
+  - evaluation/llm/prompts
+  - evaluation/scorecard.md
+  - tests/unit
+  - tests/integration
+
+required_make_targets:
+  - setup
+  - analyze
+  - evaluate
+  - evaluate-llm
+  - test
+  - clean
+
+blueprint_required_sections:
+  - Executive Summary
+  - Architecture
+  - Implementation Plan
+  - Configuration
+  - Performance
+  - Evaluation
+  - Risk
+
+eval_strategy_required_sections:
+  - Philosophy
+  - Dimension Summary
+  - Check Catalog
+  - Scoring
+  - Decision Thresholds
+  - Ground Truth
+
+# Entity-to-repository mapping for entity.repository_alignment check
+tool_entities:
+  scc:
+    - SccFileMetric
+  lizard:
+    - LizardFileMetric
+    - LizardFunctionMetric
+  semgrep:
+    - SemgrepSmell
+  roslyn-analyzers:
+    - RoslynViolation
+  layout-scanner:
+    - LayoutFile
+    - LayoutDirectory
+  trivy:
+    - TrivyVulnerability
+    - TrivyTarget
+    - TrivyIacMisconfig
+  sonarqube:
+    - SonarqubeIssue
+    - SonarqubeMetric
+  git-sizer:
+    - GitSizerMetric
+    - GitSizerViolation
+    - GitSizerLfsCandidate
+  gitleaks:
+    - GitleaksSecret
+
+entity_repository_map:
+  SccFileMetric:
+    repository: SccRepository
+    method: insert_file_metrics
+  LizardFileMetric:
+    repository: LizardRepository
+    method: insert_file_metrics
+  LizardFunctionMetric:
+    repository: LizardRepository
+    method: insert_function_metrics
+  SemgrepSmell:
+    repository: SemgrepRepository
+    method: insert_smells
+  RoslynViolation:
+    repository: RoslynRepository
+    method: insert_violations
+  LayoutFile:
+    repository: LayoutRepository
+    method: insert_files
+  LayoutDirectory:
+    repository: LayoutRepository
+    method: insert_directories
+  TrivyVulnerability:
+    repository: TrivyRepository
+    method: insert_vulnerabilities
+  TrivyTarget:
+    repository: TrivyRepository
+    method: insert_targets
+  TrivyIacMisconfig:
+    repository: TrivyRepository
+    method: insert_iac_misconfigs
+  SonarqubeIssue:
+    repository: SonarqubeRepository
+    method: insert_issues
+  SonarqubeMetric:
+    repository: SonarqubeRepository
+    method: insert_metrics
+  GitSizerMetric:
+    repository: GitSizerRepository
+    method: insert_metrics
+  GitSizerViolation:
+    repository: GitSizerRepository
+    method: insert_violations
+  GitSizerLfsCandidate:
+    repository: GitSizerRepository
+    method: insert_lfs_candidates
+  GitleaksSecret:
+    repository: GitleaksRepository
+    method: insert_secrets
+
+# Patterns for quality rule detection
+quality_rule_patterns:
+  paths:
+    - is_repo_relative
+    - normalize_file_path
+    - path invalid
+    - normalize_dir_path
+  ranges:
+    - check_non_negative
+    - ">= 0"
+    - "<= "
+    - must be
+  ratios:
+    - check_ratio
+    - ratio
+    - / 0
+    - division
+  required_fields:
+    - check_required
+    - is None
+    - required
+  line_numbers:
+    - line_start
+    - line_end
+    - ">= 1"

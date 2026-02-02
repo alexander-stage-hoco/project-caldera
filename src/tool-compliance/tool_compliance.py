@@ -17,275 +17,35 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable, List, Optional
 
+# Import config loader for YAML-based rules
+from config import (
+    get_tool_rules,
+    get_required_paths,
+    get_required_make_targets,
+    get_blueprint_required_sections,
+    get_eval_strategy_required_sections,
+    get_tool_entities,
+    get_entity_repository_map,
+    get_quality_rule_patterns,
+    load_tool_rules,
+)
+
 # Threshold for staleness warnings on pre-existing outputs
 STALE_THRESHOLD_DAYS = 14
 
+# Configuration is loaded from YAML files in rules/ directory
+# These lazy properties provide backwards compatibility with existing code
+REQUIRED_PATHS = get_required_paths()
+REQUIRED_MAKE_TARGETS = get_required_make_targets()
+BLUEPRINT_REQUIRED_SECTIONS = get_blueprint_required_sections()
+EVAL_STRATEGY_REQUIRED_SECTIONS = get_eval_strategy_required_sections()
 
-REQUIRED_PATHS = [
-    "Makefile",
-    "README.md",
-    "BLUEPRINT.md",
-    "EVAL_STRATEGY.md",
-    "requirements.txt",
-    "scripts/analyze.py",
-    "scripts/evaluate.py",
-    "scripts/checks",
-    "schemas/output.schema.json",
-    "eval-repos/synthetic",
-    "eval-repos/real",
-    "evaluation/ground-truth",
-    "evaluation/llm/orchestrator.py",
-    "evaluation/llm/judges",
-    "evaluation/llm/prompts",
-    "evaluation/scorecard.md",
-    "tests/unit",
-    "tests/integration",
-]
+# Tool-specific rules loaded from YAML files in rules/ directory
+TOOL_RULES = get_tool_rules()
 
-REQUIRED_MAKE_TARGETS = {
-    "setup",
-    "analyze",
-    "evaluate",
-    "evaluate-llm",
-    "test",
-    "clean",
-}
-
-# Required sections for BLUEPRINT.md document validation
-BLUEPRINT_REQUIRED_SECTIONS = [
-    "Executive Summary",
-    "Architecture",
-    "Implementation Plan",
-    "Configuration",
-    "Performance",
-    "Evaluation",
-    "Risk",
-]
-
-# Required sections for EVAL_STRATEGY.md document validation
-EVAL_STRATEGY_REQUIRED_SECTIONS = [
-    "Philosophy",
-    "Dimension Summary",
-    "Check Catalog",
-    "Scoring",
-    "Decision Thresholds",
-    "Ground Truth",
-]
-
-TOOL_RULES = {
-    "scc": {
-        "required_check_modules": [
-            "cocomo.py",
-            "coverage.py",
-            "directory_analysis.py",
-            "installation.py",
-            "integration_fit.py",
-            "license.py",
-            "output_quality.py",
-            "per_file.py",
-            "performance.py",
-            "reliability.py",
-        ],
-        "required_prompts": [
-            "api_design.md",
-            "code_quality.md",
-            "comparative.md",
-            "directory_analysis.md",
-            "documentation.md",
-            "edge_cases.md",
-            "error_messages.md",
-            "integration_fit.md",
-            "risk.md",
-            "statistics.md",
-        ],
-        "ground_truth_mode": "synthetic_json",
-        "evaluation_outputs": [
-            "scorecard.md",
-            "evaluation_report.json",
-        ],
-        "adapter": ("persistence.adapters.scc_adapter", "SccAdapter"),
-    },
-    "lizard": {
-        "required_check_modules": [
-            "accuracy.py",
-            "coverage.py",
-            "edge_cases.py",
-            "performance.py",
-        ],
-        "required_prompts": [
-            "ccn_accuracy.md",
-            "function_detection.md",
-            "hotspot_ranking.md",
-            "statistics.md",
-        ],
-        "ground_truth_mode": "per_language",
-        "evaluation_outputs": [
-            "scorecard.md",
-            "evaluation_report.json",
-        ],
-        "adapter": ("persistence.adapters.lizard_adapter", "LizardAdapter"),
-    },
-    "layout-scanner": {
-        "required_check_modules": [
-            "accuracy.py",
-            "classification.py",
-            "content_metadata.py",
-            "edge_cases.py",
-            "git_metadata.py",
-            "output_quality.py",
-            "performance.py",
-            "scc_comparison.py",
-        ],
-        "required_prompts": [
-            "classification_reasoning.md",
-            "directory_taxonomy.md",
-            "hierarchy_consistency.md",
-            "language_detection.md",
-        ],
-        "adapter": ("persistence.adapters.layout_adapter", "LayoutAdapter"),
-    },
-    "semgrep": {
-        "required_check_modules": [
-            "accuracy.py",
-            "coverage.py",
-            "edge_cases.py",
-            "integration_fit.py",
-            "output_quality.py",
-            "performance.py",
-            "security.py",
-        ],
-        "required_prompts": [
-            "actionability.md",
-            "false_positive_rate.md",
-            "rule_coverage.md",
-            "smell_accuracy.md",
-        ],
-        "adapter": ("persistence.adapters.semgrep_adapter", "SemgrepAdapter"),
-    },
-    "roslyn-analyzers": {
-        "required_check_modules": [
-            "accuracy.py",
-            "coverage.py",
-            "edge_cases.py",
-            "performance.py",
-        ],
-        "required_prompts": [
-            "actionability.md",
-            "detection_accuracy.md",
-            "false_positive_rate.md",
-            "security_coverage.md",
-        ],
-        "adapter": ("persistence.adapters.roslyn_adapter", "RoslynAdapter"),
-    },
-    "trivy": {
-        "required_check_modules": [
-            "accuracy.py",
-            "detection.py",
-            "freshness.py",
-            "iac.py",
-            "integration.py",
-            "output_quality.py",
-            "performance.py",
-        ],
-        "required_prompts": [
-            "actionability.md",
-            "coverage_completeness.md",
-            "false_positive_rate.md",
-            "freshness_quality.md",
-            "iac_quality.md",
-            "sbom_completeness.md",
-            "severity_accuracy.md",
-            "vulnerability_accuracy.md",
-            "vulnerability_detection.md",
-        ],
-        "adapter": ("persistence.adapters.trivy_adapter", "TrivyAdapter"),
-    },
-    "sonarqube": {
-        "required_check_modules": [
-            "accuracy.py",
-            "completeness.py",
-            "coverage.py",
-            "edge_cases.py",
-            "performance.py",
-        ],
-        "required_prompts": [
-            "issue_accuracy.md",
-            "coverage_completeness.md",
-            "actionability.md",
-        ],
-        "adapter": ("persistence.adapters.sonarqube_adapter", "SonarqubeAdapter"),
-    },
-    "git-sizer": {
-        "required_check_modules": [
-            "accuracy.py",
-            "coverage.py",
-            "edge_cases.py",
-            "performance.py",
-        ],
-        "required_prompts": [
-            "size_accuracy.md",
-            "threshold_quality.md",
-            "actionability.md",
-            "integration_fit.md",
-        ],
-        "ground_truth_mode": "per_language",
-        "evaluation_outputs": [
-            "scorecard.md",
-        ],
-        "adapter": ("persistence.adapters.git_sizer_adapter", "GitSizerAdapter"),
-    },
-    "gitleaks": {
-        "required_check_modules": [
-            "accuracy.py",
-            "coverage.py",
-            "detection.py",
-            "performance.py",
-        ],
-        "required_prompts": [
-            "detection_accuracy.md",
-            "false_positive.md",
-            "secret_coverage.md",
-            "severity_classification.md",
-        ],
-        "ground_truth_mode": "synthetic_json",
-        "evaluation_outputs": [
-            "scorecard.md",
-        ],
-        "adapter": ("persistence.adapters.gitleaks_adapter", "GitleaksAdapter"),
-    },
-}
-
-# Entity-to-repository mapping for entity.repository_alignment check
-TOOL_ENTITIES = {
-    "scc": ["SccFileMetric"],
-    "lizard": ["LizardFileMetric", "LizardFunctionMetric"],
-    "semgrep": ["SemgrepSmell"],
-    "roslyn-analyzers": ["RoslynViolation"],
-    "layout-scanner": ["LayoutFile", "LayoutDirectory"],
-    "trivy": ["TrivyVulnerability", "TrivyTarget", "TrivyIacMisconfig"],
-    "sonarqube": ["SonarqubeIssue", "SonarqubeMetric"],
-    "git-sizer": ["GitSizerMetric", "GitSizerViolation", "GitSizerLfsCandidate"],
-    "gitleaks": ["GitleaksSecret"],
-}
-
-ENTITY_REPOSITORY_MAP = {
-    "SccFileMetric": ("SccRepository", "insert_file_metrics"),
-    "LizardFileMetric": ("LizardRepository", "insert_file_metrics"),
-    "LizardFunctionMetric": ("LizardRepository", "insert_function_metrics"),
-    "SemgrepSmell": ("SemgrepRepository", "insert_smells"),
-    "RoslynViolation": ("RoslynRepository", "insert_violations"),
-    "LayoutFile": ("LayoutRepository", "insert_files"),
-    "LayoutDirectory": ("LayoutRepository", "insert_directories"),
-    "TrivyVulnerability": ("TrivyRepository", "insert_vulnerabilities"),
-    "TrivyTarget": ("TrivyRepository", "insert_targets"),
-    "TrivyIacMisconfig": ("TrivyRepository", "insert_iac_misconfigs"),
-    "SonarqubeIssue": ("SonarqubeRepository", "insert_issues"),
-    "SonarqubeMetric": ("SonarqubeRepository", "insert_metrics"),
-    "GitSizerMetric": ("GitSizerRepository", "insert_metrics"),
-    "GitSizerViolation": ("GitSizerRepository", "insert_violations"),
-    "GitSizerLfsCandidate": ("GitSizerRepository", "insert_lfs_candidates"),
-    "GitleaksSecret": ("GitleaksRepository", "insert_secrets"),
-}
+# Entity-to-repository mapping loaded from YAML
+TOOL_ENTITIES = get_tool_entities()
+ENTITY_REPOSITORY_MAP = get_entity_repository_map()
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 
@@ -293,14 +53,8 @@ SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 _PATH_KEY_PATTERNS = {"path", "file", "dir", "folder", "location", "source"}
 _EXCLUDED_KEY_PATTERNS = {"endpoint", "url", "uri", "href", "schema", "ref", "api"}
 
-# Patterns that indicate implementation of specific quality rules
-QUALITY_RULE_PATTERNS = {
-    "paths": ["is_repo_relative", "normalize_file_path", "path invalid", "normalize_dir_path"],
-    "ranges": ["check_non_negative", ">= 0", "<= ", "must be"],
-    "ratios": ["check_ratio", "ratio", "/ 0", "division"],
-    "required_fields": ["check_required", "is None", "required"],
-    "line_numbers": ["line_start", "line_end", ">= 1"],
-}
+# Patterns that indicate implementation of specific quality rules (loaded from YAML)
+QUALITY_RULE_PATTERNS = get_quality_rule_patterns()
 
 
 @dataclass

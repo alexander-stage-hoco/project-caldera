@@ -1,0 +1,19 @@
+# Tool compliance rules for semgrep
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - edge_cases.py
+  - integration_fit.py
+  - output_quality.py
+  - performance.py
+  - security.py
+
+required_prompts:
+  - actionability.md
+  - false_positive_rate.md
+  - rule_coverage.md
+  - smell_accuracy.md
+
+adapter:
+  module: persistence.adapters.semgrep_adapter
+  class: SemgrepAdapter

@@ -1,0 +1,20 @@
+# Tool compliance rules for layout-scanner
+required_check_modules:
+  - accuracy.py
+  - classification.py
+  - content_metadata.py
+  - edge_cases.py
+  - git_metadata.py
+  - output_quality.py
+  - performance.py
+  - scc_comparison.py
+
+required_prompts:
+  - classification_reasoning.md
+  - directory_taxonomy.md
+  - hierarchy_consistency.md
+  - language_detection.md
+
+adapter:
+  module: persistence.adapters.layout_adapter
+  class: LayoutAdapter

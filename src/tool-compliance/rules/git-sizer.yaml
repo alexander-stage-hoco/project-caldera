@@ -1,0 +1,21 @@
+# Tool compliance rules for git-sizer
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - edge_cases.py
+  - performance.py
+
+required_prompts:
+  - size_accuracy.md
+  - threshold_quality.md
+  - actionability.md
+  - integration_fit.md
+
+ground_truth_mode: per_language
+
+evaluation_outputs:
+  - scorecard.md
+
+adapter:
+  module: persistence.adapters.git_sizer_adapter
+  class: GitSizerAdapter
