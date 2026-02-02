@@ -12,6 +12,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
 |------|----------|
 | Create a new tool | [docs/TOOL_GUIDE.md](docs/TOOL_GUIDE.md) |
 | Migrate from Vulcan | [docs/TOOL_GUIDE.md](docs/TOOL_GUIDE.md#part-2-migrating-from-vulcan) |
+| Create a new adapter | [docs/PERSISTENCE.md](docs/PERSISTENCE.md) |
 | Fix compliance failures | [docs/COMPLIANCE.md](docs/COMPLIANCE.md) |
 | Understand technical specs | [docs/REFERENCE.md](docs/REFERENCE.md) |
 | Set up LLM judges | [docs/EVALUATION.md](docs/EVALUATION.md) |
@@ -177,6 +178,7 @@ class SccFileMetric:
 | File | Purpose |
 |------|---------|
 | `docs/TOOL_GUIDE.md` | Creating and migrating tools |
+| `docs/PERSISTENCE.md` | Adapter pattern, entities, repositories |
 | `docs/COMPLIANCE.md` | Compliance requirements and checks |
 | `docs/REFERENCE.md` | Technical specifications (envelope, paths, patterns) |
 | `docs/EVALUATION.md` | LLM judge infrastructure and observability |
