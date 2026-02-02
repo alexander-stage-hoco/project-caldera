@@ -2,6 +2,21 @@
 
 You are evaluating the **directory tree analysis** capabilities of scc output.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
+**Important**: When evaluation_mode is "real_world":
+- Judge output quality: schema compliance, directory hierarchy correctness, aggregation accuracy
+- Judge structural integrity: Are direct/recursive stats clearly separated and valid?
+- Consider: A tool that produces well-formed directory analysis on any codebase deserves a high score
+
 ## Evaluation Dimension
 
 **Directory Tree Analysis (14% weight)**: How well does the directory analysis capture file organization and provide useful rollups?

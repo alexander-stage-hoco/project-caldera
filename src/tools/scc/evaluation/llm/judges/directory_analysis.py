@@ -187,7 +187,7 @@ Respond with JSON including sub_scores.
             "summary": summary,
         }
 
-        return {
+        evidence = {
             "directory_analysis": directory_analysis,
             "sum_direct_files": sum_direct_files,
             "total_files": total_files,
@@ -199,6 +199,26 @@ Respond with JSON including sub_scores.
             "lang_loc_sum_matches": lang_loc_sum_matches,
             "cocomo_ordered": cocomo_ordered,
         }
+
+        # Inject synthetic context for evaluation
+        evidence["evaluation_mode"] = self.evaluation_mode
+
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context:
+                evidence["synthetic_baseline"] = synthetic_context
+                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                    synthetic_context
+                )
+            else:
+                evidence["synthetic_baseline"] = "No synthetic baseline available"
+                evidence["interpretation_guidance"] = "Evaluate based on ground truth comparison only"
+        else:
+            # For synthetic mode, provide default values to avoid unresolved placeholders
+            evidence["synthetic_baseline"] = "N/A - synthetic mode uses direct ground truth comparison"
+            evidence["interpretation_guidance"] = "Strict ground truth evaluation: Compare analysis outputs directly against expected values"
+
+        return evidence
 
     def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
         """Run directory analysis ground truth assertions."""
