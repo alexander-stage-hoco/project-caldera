@@ -22,9 +22,10 @@ class BaseJudge(SharedBaseJudge):
     """Semgrep-specific base judge for code smell detection evaluation.
 
     Extends the shared BaseJudge with Semgrep-specific functionality:
-    - Multi-file analysis results loading
+    - Multi-file analysis results loading with debug output
     - Legacy single file fallback support
-    - Data extraction helpers for different output formats
+
+    Note: extract_files() and extract_summary() are inherited from SharedBaseJudge.
     """
 
     def __init__(
@@ -118,30 +119,4 @@ class BaseJudge(SharedBaseJudge):
 
         return results
 
-    @staticmethod
-    def extract_files(analysis: dict[str, Any]) -> list[dict[str, Any]]:
-        """Extract files list from analysis data, handling both formats.
-
-        Supports:
-        - data["results"]["files"] (current format)
-        - data["files"] (legacy format)
-        """
-        # Try current format first (results.files)
-        if "results" in analysis and isinstance(analysis["results"], dict):
-            return analysis["results"].get("files", [])
-        # Fallback to legacy format (direct files)
-        return analysis.get("files", [])
-
-    @staticmethod
-    def extract_summary(analysis: dict[str, Any]) -> dict[str, Any]:
-        """Extract summary dict from analysis data, handling both formats.
-
-        Supports:
-        - data["results"]["summary"] (current format)
-        - data["summary"] (legacy format)
-        """
-        # Try current format first (results.summary)
-        if "results" in analysis and isinstance(analysis["results"], dict):
-            return analysis["results"].get("summary", {})
-        # Fallback to legacy format (direct summary)
-        return analysis.get("summary", {})
+    # extract_files() and extract_summary() are inherited from SharedBaseJudge

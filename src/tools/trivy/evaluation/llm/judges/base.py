@@ -6,8 +6,6 @@ and provides Trivy-specific extensions.
 
 from __future__ import annotations
 
-import json
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -22,9 +20,8 @@ class BaseJudge(SharedBaseJudge):
     """Trivy-specific base judge for vulnerability detection evaluation.
 
     Extends the shared BaseJudge with Trivy-specific functionality:
-    - output_dir for multi-repo analysis results
-    - ground_truth_dir for validation
-    - Analysis results loading with envelope handling
+    - Trivy-specific directory defaults
+    - Custom prompt loading with string formatting
     """
 
     # Class-level attributes for legacy compatibility
@@ -77,36 +74,4 @@ class BaseJudge(SharedBaseJudge):
             return template.format(**kwargs)
         return ""
 
-    def load_analysis_results(self) -> dict[str, Any]:
-        """Load all analysis JSON files from output_dir.
-
-        Returns dict keyed by repo name -> analysis data.
-        Uses 'id' field from envelope if present, otherwise filename stem.
-        """
-        results = {}
-
-        if self.output_dir.exists() and self.output_dir.is_dir():
-            json_files = list(self.output_dir.glob("*.json"))
-            for json_file in sorted(json_files):
-                if json_file.name.startswith("."):
-                    continue
-                try:
-                    data = json.loads(json_file.read_text())
-                    # Use 'id' field from envelope for ground truth matching,
-                    # fall back to filename stem
-                    repo_name = data.get("id", json_file.stem)
-                    # Handle envelope format
-                    if "data" in data:
-                        results[repo_name] = data.get("data", {})
-                    else:
-                        results[repo_name] = data
-                except json.JSONDecodeError as e:
-                    print(f"  [DEBUG] Failed to parse {json_file.name}: {e}", file=sys.stderr)
-                    continue
-
-        return results
-
-    # Legacy interface support for old-style judges
-    def get_prompt(self, data: dict) -> str:
-        """Generate the evaluation prompt for this judge (legacy interface)."""
-        return self.build_prompt(data)
+    # load_analysis_results() and get_prompt() are inherited from SharedBaseJudge

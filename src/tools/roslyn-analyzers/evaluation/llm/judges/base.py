@@ -134,30 +134,3 @@ class BaseJudge(SharedBaseJudge):
                     continue
 
         return results
-
-    def build_prompt(self, evidence: dict[str, Any]) -> str:
-        """Build the complete prompt with evidence.
-
-        Overrides parent to support per-key placeholder replacement.
-        """
-        template = self.load_prompt_template()
-
-        # Replace placeholders in template
-        prompt = template
-        for key, value in evidence.items():
-            placeholder = f"{{{{ {key} }}}}"
-            if isinstance(value, (dict, list)):
-                value_str = json.dumps(value, indent=2)
-            else:
-                value_str = str(value)
-            prompt = prompt.replace(placeholder, value_str)
-
-        if "{{" in prompt or "}}" in prompt:
-            raise ValueError("Unresolved prompt placeholders detected")
-        if "Respond with ONLY a JSON object" not in prompt:
-            prompt = (
-                prompt
-                + "\n\nRespond with ONLY a JSON object. Do not use markdown fences or extra text."
-            )
-
-        return prompt
