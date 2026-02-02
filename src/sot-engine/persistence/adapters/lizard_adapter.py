@@ -129,10 +129,7 @@ class LizardAdapter(BaseAdapter):
                 if func.get("start_line") and func.get("end_line"):
                     if func.get("start_line") > func.get("end_line"):
                         errors.append(f"file[{idx}].functions[{fidx}] start_line > end_line")
-        if errors:
-            for error in errors:
-                self._log(f"DATA_QUALITY_ERROR: {error}")
-            raise ValueError(f"lizard data quality validation failed ({len(errors)} errors)")
+        self._raise_quality_errors(errors)
 
     def _map_metrics(
         self, run_pk: int, layout_run_pk: int, files: Iterable[dict]

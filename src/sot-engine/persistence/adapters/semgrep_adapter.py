@@ -120,10 +120,7 @@ class SemgrepAdapter(BaseAdapter):
                     )
                 )
 
-        if errors:
-            for error in errors:
-                self._log(f"DATA_QUALITY_ERROR: {error}")
-            raise ValueError(f"semgrep data quality validation failed ({len(errors)} errors)")
+        self._raise_quality_errors(errors)
 
     def _map_smells(
         self, run_pk: int, layout_run_pk: int, files: Iterable[dict]
@@ -137,9 +134,10 @@ class SemgrepAdapter(BaseAdapter):
                 file_id, directory_id = self._layout_repo.get_file_record(
                     layout_run_pk, relative_path
                 )
-            except KeyError as exc:
-                self._log(f"DATA_QUALITY_ERROR: file not in layout: {relative_path}")
-                raise ValueError(f"semgrep file not in layout: {relative_path}") from exc
+            except KeyError:
+                # Skip files not in layout (external dependencies, generated files, etc.)
+                self._log(f"WARN: skipping file not in layout: {relative_path}")
+                continue
 
             for smell in file_entry.get("smells", []):
                 key = (file_id, smell.get("rule_id", ""), smell.get("line_start"))

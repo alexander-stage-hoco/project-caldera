@@ -176,6 +176,22 @@ class BaseAdapter(ABC):
             errors.append(f"{field_prefix}.line_end must be >= line_start")
         return errors
 
+    def _raise_quality_errors(self, errors: list[str]) -> None:
+        """Log and raise quality validation errors.
+
+        Common helper to reduce duplication in validate_quality() implementations.
+
+        Args:
+            errors: List of error messages to log and raise
+
+        Raises:
+            ValueError: If errors list is non-empty
+        """
+        if errors:
+            for error in errors:
+                self._log(f"DATA_QUALITY_ERROR: {error}")
+            raise ValueError(f"{self.tool_name} data quality validation failed ({len(errors)} errors)")
+
     def validate_schema(self, payload: dict) -> None:
         """Validate payload against JSON schema.
 

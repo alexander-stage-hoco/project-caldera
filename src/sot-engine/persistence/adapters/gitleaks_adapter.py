@@ -121,10 +121,7 @@ class GitleaksAdapter(BaseAdapter):
             if line_num is not None and not line_num >= 1:
                 errors.append(f"finding[{idx}].line_number must be >= 1: {line_num}")
 
-        if errors:
-            for error in errors:
-                self._log(f"DATA_QUALITY_ERROR: {error}")
-            raise ValueError(f"gitleaks data quality validation failed ({len(errors)} errors)")
+        self._raise_quality_errors(errors)
 
     def _map_secrets(
         self, run_pk: int, layout_run_pk: int, findings: Iterable[dict]
@@ -138,9 +135,15 @@ class GitleaksAdapter(BaseAdapter):
                 file_id, directory_id = self._layout_repo.get_file_record(
                     layout_run_pk, relative_path
                 )
-            except KeyError as exc:
-                self._log(f"DATA_QUALITY_ERROR: file not in layout: {relative_path}")
-                raise ValueError(f"gitleaks file not in layout: {relative_path}") from exc
+            except KeyError:
+                in_head = finding.get("in_current_head", False)
+                if in_head:
+                    # Current secret but file not in layout (gitignored, binary, etc.)
+                    self._log(f"WARN: skipping secret in file not in layout: {relative_path}")
+                else:
+                    # Historical secret in deleted file
+                    self._log(f"WARN: skipping historical secret in deleted file: {relative_path}")
+                continue
 
             key = (file_id, finding.get("rule_id", ""), finding.get("line_number"), finding.get("fingerprint"))
             if key in seen:

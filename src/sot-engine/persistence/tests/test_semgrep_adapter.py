@@ -73,7 +73,7 @@ def test_semgrep_adapter_skips_files_not_in_layout(
     layout_repo: LayoutRepository,
     seed_layout,
 ) -> None:
-    """Verify adapter fails when files are not present in layout run."""
+    """Verify adapter skips files not present in layout run."""
     fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "semgrep_output.json"
     payload = json.loads(fixture_path.read_text())
 
@@ -94,9 +94,9 @@ def test_semgrep_adapter_skips_files_not_in_layout(
         SemgrepRepository(duckdb_conn),
         logger=logs.append,
     )
-    with pytest.raises(ValueError, match="file not in layout"):
-        adapter.persist(payload)
-    assert any("file not in layout" in log for log in logs)
+    # Adapter should succeed but skip the file not in layout
+    adapter.persist(payload)
+    assert any("skipping file not in layout" in log for log in logs)
 
 
 def test_semgrep_adapter_normalizes_repo_root_prefix(

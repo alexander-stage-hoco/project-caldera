@@ -127,10 +127,7 @@ class SccAdapter(BaseAdapter):
             lines = entry.get("lines", 0) or 0
             if (entry.get("code", 0) or 0) + (entry.get("comment", 0) or 0) + (entry.get("blank", 0) or 0) > lines:
                 errors.append(f"file[{idx}] line components exceed total lines")
-        if errors:
-            for error in errors:
-                self._log(f"DATA_QUALITY_ERROR: {error}")
-            raise ValueError(f"scc data quality validation failed ({len(errors)} errors)")
+        self._raise_quality_errors(errors)
 
     def _map_file_metrics(
         self, run_pk: int, layout_run_pk: int, files: Iterable[dict]
