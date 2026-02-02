@@ -7,113 +7,24 @@ evaluation of Trivy analysis outputs.
 from __future__ import annotations
 
 import json
-import uuid
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
 
 import click
 
-from shared.evaluation import require_observability
+from shared.evaluation import (
+    LLMEvaluatorBase,
+    ProgrammaticInput,
+)
 
 from .judges.base import BaseJudge, JudgeResult
 
 
-@dataclass
-class DimensionResult:
-    """Result for a single evaluation dimension."""
-
-    name: str
-    score: int  # 1-5
-    weight: float
-    weighted_score: float
-    confidence: float
-    reasoning: str
-    evidence_cited: list[str] = field(default_factory=list)
-    recommendations: list[str] = field(default_factory=list)
-    sub_scores: dict[str, int] = field(default_factory=dict)
-    ground_truth_passed: bool = True
-    ground_truth_failures: list[str] = field(default_factory=list)
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        return asdict(self)
-
-
-@dataclass
-class ProgrammaticInput:
-    """Reference to programmatic evaluation results."""
-
-    file: str
-    decision: str
-    score: float
-    checks_passed: int
-    checks_failed: int
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        return asdict(self)
-
-
-@dataclass
-class EvaluationResult:
-    """Complete LLM evaluation result."""
-
-    run_id: str
-    timestamp: str
-    model: str
-    dimensions: list[DimensionResult]
-    total_score: float
-    average_confidence: float
-    decision: str
-    programmatic_score: float | None = None
-    combined_score: float | None = None
-    programmatic_input: ProgrammaticInput | None = None
-    trace_id: str | None = None
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        return {
-            "timestamp": self.timestamp,
-            "model": self.model,
-            "decision": self.decision,
-            "score": self.total_score,
-            "programmatic_input": self.programmatic_input.to_dict() if self.programmatic_input else None,
-            "dimensions": [d.to_dict() for d in self.dimensions],
-            "summary": {
-                "weighted_score": self.total_score,
-                "avg_confidence": self.average_confidence,
-            },
-            # Legacy fields for backward compatibility
-            "run_id": self.run_id,
-            "total_score": self.total_score,
-            "average_confidence": self.average_confidence,
-            "programmatic_score": self.programmatic_score,
-            "combined_score": self.combined_score,
-            "trace_id": self.trace_id,
-        }
-
-    def to_json(self, indent: int = 2) -> str:
-        """Convert to JSON string."""
-        return json.dumps(self.to_dict(), indent=indent)
-
-
-class LLMEvaluator:
+class LLMEvaluator(LLMEvaluatorBase):
     """Orchestrates LLM-based evaluation of Trivy outputs.
 
     Coordinates multiple specialized judges, each evaluating a specific
     dimension of output quality.
     """
-
-    # Decision thresholds
-    STRONG_PASS_THRESHOLD = 4.0
-    PASS_THRESHOLD = 3.5
-    WEAK_PASS_THRESHOLD = 3.0
-
-    # Combined scoring weights
-    PROGRAMMATIC_WEIGHT = 0.60
-    LLM_WEIGHT = 0.40
 
     def __init__(
         self,
@@ -123,16 +34,13 @@ class LLMEvaluator:
         timeout: int = 120,
         output_dir: Path | None = None,
     ):
-        self.working_dir = working_dir or Path.cwd()
-        self.model = model
-        self.results_dir = results_dir or self.working_dir / "evaluation" / "results"
+        super().__init__(working_dir=working_dir, model=model, results_dir=results_dir)
         self.timeout = timeout
         self.output_dir = output_dir or self.working_dir / "outputs"
-        self._judges: list[BaseJudge] = []
 
-    def register_judge(self, judge: BaseJudge) -> None:
-        """Register a judge for evaluation."""
-        self._judges.append(judge)
+    def _default_results_dir(self) -> Path:
+        """Override to use 'results' instead of 'llm/results'."""
+        return self.working_dir / "evaluation" / "results"
 
     def register_all_judges(self) -> None:
         """Register all available judges for comprehensive evaluation."""
@@ -172,122 +80,7 @@ class LLMEvaluator:
         for judge in judges:
             self.register_judge(judge)
 
-    def evaluate(self, run_assertions: bool = True) -> EvaluationResult:
-        """Run evaluation with all registered judges."""
-        # Enforce observability - fail fast if disabled
-        require_observability()
-
-        run_id = f"llm-eval-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
-        timestamp = datetime.now(timezone.utc).isoformat()
-
-        # Generate trace ID to correlate all judge interactions
-        trace_id = str(uuid.uuid4())
-
-        dimension_results: list[DimensionResult] = []
-        total_weight = 0.0
-        weighted_sum = 0.0
-        confidence_sum = 0.0
-
-        for judge in self._judges:
-            # Propagate trace_id to judge
-            judge._trace_id = trace_id
-            print(f"Running {judge.dimension_name} evaluation...")
-
-            # Run ground truth assertions first
-            gt_passed = True
-            gt_failures: list[str] = []
-            if run_assertions:
-                gt_passed, gt_failures = judge.run_ground_truth_assertions()
-                if not gt_passed:
-                    print(f"  Ground truth assertions failed: {len(gt_failures)} failures")
-
-            # Run LLM evaluation
-            result = judge.evaluate()
-
-            # Apply ground truth penalty if assertions failed
-            if not gt_passed:
-                result.score = min(result.score, 2)  # Cap at 2 if assertions fail
-
-            weighted_score = result.score * judge.weight
-
-            dim_result = DimensionResult(
-                name=judge.dimension_name,
-                score=result.score,
-                weight=judge.weight,
-                weighted_score=weighted_score,
-                confidence=result.confidence,
-                reasoning=result.reasoning,
-                evidence_cited=result.evidence_cited,
-                recommendations=result.recommendations,
-                sub_scores=result.sub_scores,
-                ground_truth_passed=gt_passed,
-                ground_truth_failures=gt_failures,
-            )
-
-            dimension_results.append(dim_result)
-            weighted_sum += weighted_score
-            total_weight += judge.weight
-            confidence_sum += result.confidence
-
-            print(f"  Score: {result.score}/5 (confidence: {result.confidence:.2f})")
-
-        # Calculate totals
-        if total_weight > 0:
-            # Normalize to 5-point scale
-            total_score = weighted_sum / total_weight
-        else:
-            total_score = 0.0
-
-        avg_confidence = confidence_sum / len(self._judges) if self._judges else 0.0
-
-        # Determine decision
-        if total_score >= self.STRONG_PASS_THRESHOLD:
-            decision = "STRONG_PASS"
-        elif total_score >= self.PASS_THRESHOLD:
-            decision = "PASS"
-        elif total_score >= self.WEAK_PASS_THRESHOLD:
-            decision = "WEAK_PASS"
-        else:
-            decision = "FAIL"
-
-        return EvaluationResult(
-            run_id=run_id,
-            timestamp=timestamp,
-            model=self.model,
-            dimensions=dimension_results,
-            total_score=total_score,
-            average_confidence=avg_confidence,
-            decision=decision,
-            trace_id=trace_id,
-        )
-
-    def compute_combined_score(
-        self,
-        llm_result: EvaluationResult,
-        programmatic_score: float,
-    ) -> EvaluationResult:
-        """Compute combined score from LLM and programmatic evaluations."""
-        combined = (
-            programmatic_score * self.PROGRAMMATIC_WEIGHT +
-            llm_result.total_score * self.LLM_WEIGHT
-        )
-
-        llm_result.programmatic_score = programmatic_score
-        llm_result.combined_score = combined
-
-        # Update decision based on combined score
-        if combined >= self.STRONG_PASS_THRESHOLD:
-            llm_result.decision = "STRONG_PASS"
-        elif combined >= self.PASS_THRESHOLD:
-            llm_result.decision = "PASS"
-        elif combined >= self.WEAK_PASS_THRESHOLD:
-            llm_result.decision = "WEAK_PASS"
-        else:
-            llm_result.decision = "FAIL"
-
-        return llm_result
-
-    def save_results(self, result: EvaluationResult) -> Path:
+    def save_results(self, result) -> Path:
         """Save evaluation results to file."""
         self.results_dir.mkdir(parents=True, exist_ok=True)
         output_file = self.results_dir / "llm_evaluation.json"

@@ -12,12 +12,11 @@ import argparse
 import json
 import sys
 import uuid
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from shared.evaluation import require_observability
+from shared.evaluation import require_observability, ProgrammaticInput
 
 from .judges import (
     JUDGES,
@@ -26,27 +25,6 @@ from .judges import (
     ActionabilityJudge,
     IntegrationFitJudge,
 )
-
-
-@dataclass
-class ProgrammaticInput:
-    """Reference to programmatic evaluation results."""
-
-    file: str
-    decision: str
-    score: float
-    checks_passed: int
-    checks_failed: int
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        return {
-            "file": self.file,
-            "decision": self.decision,
-            "score": self.score,
-            "checks_passed": self.checks_passed,
-            "checks_failed": self.checks_failed,
-        }
 
 
 def run_all_judges(

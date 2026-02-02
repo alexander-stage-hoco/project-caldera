@@ -5,7 +5,8 @@ from .judges.smell_accuracy import SmellAccuracyJudge
 from .judges.rule_coverage import RuleCoverageJudge
 from .judges.false_positive_rate import FalsePositiveRateJudge
 from .judges.actionability import ActionabilityJudge
-from .orchestrator import LLMEvaluator, EvaluationResult, DimensionResult
+from .orchestrator import LLMEvaluator
+from shared.evaluation import EvaluationResult, DimensionResult
 
 __all__ = [
     "BaseJudge",

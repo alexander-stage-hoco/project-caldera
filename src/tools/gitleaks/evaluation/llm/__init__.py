@@ -5,7 +5,8 @@ from .judges.detection_accuracy import DetectionAccuracyJudge
 from .judges.false_positive import FalsePositiveJudge
 from .judges.secret_coverage import SecretCoverageJudge
 from .judges.severity_classification import SeverityClassificationJudge
-from .orchestrator import LLMEvaluator, EvaluationResult, DimensionResult
+from .orchestrator import LLMEvaluator
+from shared.evaluation import EvaluationResult, DimensionResult
 
 __all__ = [
     "BaseJudge",
