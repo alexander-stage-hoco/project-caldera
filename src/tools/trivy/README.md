@@ -87,7 +87,7 @@ The tool includes programmatic evaluation against ground truth:
 # Run programmatic evaluation
 make evaluate
 
-# Run LLM-based evaluation
+# Run LLM-based evaluation (Claude CLI, model = opus-4.5)
 make evaluate-llm
 ```
 

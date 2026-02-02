@@ -25,7 +25,7 @@ def load_latest_file(pattern: str, directory: Path) -> Path | None:
 def load_programmatic_results(file_path: Path | None, results_dir: Path) -> dict:
     """Load programmatic evaluation results."""
     if file_path is None:
-        static_path = results_dir / "checks.json"
+        static_path = results_dir / "evaluation_report.json"
         file_path = static_path if static_path.exists() else load_latest_file("eval-*_checks.json", results_dir)
 
     if file_path is None or not file_path.exists():

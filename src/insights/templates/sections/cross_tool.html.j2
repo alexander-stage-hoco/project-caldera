@@ -1,0 +1,85 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Cross-Tool Insights</h2>
+
+    {% if has_insights %}
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Compound Risks</div>
+            <div class="value">{{ risk_summary.total_risks | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Complex + Smelly</div>
+            <div class="value">{{ risk_summary.complex_smelly_count | format_number }}</div>
+            <div class="sublabel">Files with both high complexity and code smells</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Complex + Vulnerable</div>
+            <div class="value">{{ risk_summary.complex_vulnerable_count | format_number }}</div>
+            <div class="sublabel">Complex files in vulnerable areas</div>
+        </div>
+    </div>
+
+    {% if has_complex_smelly %}
+    <div class="subsection">
+        <h3>High Complexity + Code Smells</h3>
+        <p>Files with both high cyclomatic complexity (CCN >= 10) and multiple code smells (>= 3).</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Complexity</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Smells</th>
+                    <th>Language</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in complex_and_smelly[:12] %}
+                <tr>
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.complexity | format_number }}</td>
+                    <td class="number">{{ file.loc | format_number }}</td>
+                    <td class="number">{{ file.smell_count | format_number }}</td>
+                    <td>{{ file.language or 'Unknown' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_complex_vulnerable %}
+    <div class="subsection">
+        <h3>High Complexity in Vulnerable Areas</h3>
+        <p>Complex files (CCN >= 15) located in directories with known vulnerabilities.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Complexity</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Directory Vulns</th>
+                    <th>Language</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in complex_and_vulnerable[:12] %}
+                <tr>
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.complexity | format_number }}</td>
+                    <td class="number">{{ file.loc | format_number }}</td>
+                    <td class="number">{{ file.vulnerability_count | format_number }}</td>
+                    <td>{{ file.language or 'Unknown' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <p>No cross-tool compound risks identified in this run.</p>
+    </div>
+    {% endif %}
+</section>

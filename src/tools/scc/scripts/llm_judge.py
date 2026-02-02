@@ -1,17 +1,16 @@
 """LLM-as-Judge for qualitative evaluation dimensions."""
 
 import json
-import os
 from typing import Optional, Dict, Any
 from pathlib import Path
 
 
-# Check if anthropic is available
+# Check if observable provider is available
 try:
-    import anthropic
-    ANTHROPIC_AVAILABLE = True
+    from insights.evaluation.llm.providers import get_observable_provider
+    PROVIDER_AVAILABLE = True
 except ImportError:
-    ANTHROPIC_AVAILABLE = False
+    PROVIDER_AVAILABLE = False
 
 
 JUDGE_PROMPT_TEMPLATE = """You are evaluating a code analysis tool (scc) for integration into a Due Diligence platform.
@@ -42,16 +41,15 @@ Respond in JSON format:
 """
 
 
-def get_client() -> Optional[Any]:
-    """Get Anthropic client if available."""
-    if not ANTHROPIC_AVAILABLE:
+def get_provider() -> Optional[Any]:
+    """Get observable LLM provider if available."""
+    if not PROVIDER_AVAILABLE:
         return None
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
+    try:
+        return get_observable_provider("anthropic", trace_id=None)
+    except (ValueError, ImportError):
         return None
-
-    return anthropic.Anthropic(api_key=api_key)
 
 
 def judge_dimension(
@@ -61,12 +59,12 @@ def judge_dimension(
     model: str = "claude-3-haiku-20240307"
 ) -> Dict[str, Any]:
     """Use LLM to judge a qualitative dimension."""
-    client = get_client()
+    provider = get_provider()
 
-    if not client:
+    if not provider:
         return {
             "score": None,
-            "reasoning": "LLM evaluation skipped (no API key or anthropic not installed)",
+            "reasoning": "LLM evaluation skipped (provider not available)",
             "evidence": [],
             "llm_available": False
         }
@@ -78,14 +76,14 @@ def judge_dimension(
     )
 
     try:
-        response = client.messages.create(
+        response = provider.complete(
+            prompt=prompt,
             model=model,
             max_tokens=500,
-            messages=[{"role": "user", "content": prompt}]
         )
 
         # Parse JSON response
-        content = response.content[0].text
+        content = response.content
         # Find JSON in response
         start = content.find("{")
         end = content.rfind("}") + 1

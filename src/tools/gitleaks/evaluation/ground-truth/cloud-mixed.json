@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "scenario": "cloud-mixed",
+  "description": "Repository with multiple cloud provider credentials and production context",
+  "generated_at": "2026-01-23T19:00:00Z",
+  "repo_path": "eval-repos/synthetic/cloud-mixed",
+  "expected": {
+    "total_secrets": 7,
+    "unique_secrets": 7,
+    "secrets_in_head": 7,
+    "secrets_in_history": 0,
+    "files_with_secrets": 3,
+    "commits_with_secrets": 1,
+    "rule_ids": [
+      "aws-access-token",
+      "github-pat",
+      "slack-bot-token",
+      "generic-api-key",
+      "private-key"
+    ],
+    "files_with_secrets_list": [
+      ".aws/credentials",
+      ".env.production",
+      "config/gcp_key.json"
+    ],
+    "secrets_by_rule": {
+      "aws-access-token": 2,
+      "github-pat": 1,
+      "slack-bot-token": 1,
+      "generic-api-key": 2,
+      "private-key": 1
+    },
+    "secrets_by_severity": {
+      "CRITICAL": 4,
+      "HIGH": 2,
+      "MEDIUM": 1
+    },
+    "findings": [
+      {
+        "file_path": ".aws/credentials",
+        "rule_id": "aws-access-token",
+        "line_number": 2,
+        "expected_severity": "CRITICAL"
+      },
+      {
+        "file_path": ".aws/credentials",
+        "rule_id": "aws-access-token",
+        "line_number": 6,
+        "expected_severity": "CRITICAL"
+      },
+      {
+        "file_path": ".env.production",
+        "rule_id": "github-pat",
+        "line_number": 7,
+        "expected_severity": "CRITICAL"
+      },
+      {
+        "file_path": ".env.production",
+        "rule_id": "slack-bot-token",
+        "line_number": 4,
+        "expected_severity": "CRITICAL"
+      },
+      {
+        "file_path": ".env.production",
+        "rule_id": "generic-api-key",
+        "line_number": 10,
+        "expected_severity": "HIGH"
+      },
+      {
+        "file_path": "config/gcp_key.json",
+        "rule_id": "generic-api-key",
+        "line_number": 4,
+        "expected_severity": "MEDIUM"
+      },
+      {
+        "file_path": "config/gcp_key.json",
+        "rule_id": "private-key",
+        "line_number": 5,
+        "expected_severity": "HIGH"
+      }
+    ],
+    "repository": "cloud-mixed",
+    "thresholds": {
+      "max_scan_time_ms": 5000,
+      "max_ms_per_commit": 1000,
+      "max_ms_per_finding": 500,
+      "max_findings_for_test": 100
+    }
+  }
+}

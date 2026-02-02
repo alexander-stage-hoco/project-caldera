@@ -1,0 +1,1995 @@
+{
+  "tool": "gitleaks",
+  "version": "1.0.0",
+  "generated_at": "2026-02-02T18:09:10.375011+00:00",
+  "description": "Evaluation scorecard for gitleaks secret detection",
+  "summary": {
+    "total_checks": 312,
+    "passed": 312,
+    "failed": 0,
+    "score": 1.0,
+    "score_percent": 100.0,
+    "normalized_score": 5.0,
+    "decision": "STRONG_PASS"
+  },
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "Accuracy",
+      "weight": 0.125,
+      "total_checks": 88,
+      "passed": 88,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.62,
+      "checks": [
+        {
+          "check_id": "SA-1",
+          "name": "Total secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Total secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-2",
+          "name": "Unique secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Unique secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-3",
+          "name": "Secrets in HEAD: expected 2, got 2",
+          "passed": true,
+          "message": "Secrets in HEAD: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-4",
+          "name": "Secrets in history: expected 0, got 0",
+          "passed": true,
+          "message": "Secrets in history: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-5",
+          "name": "Files with secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Files with secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-6",
+          "name": "Commits with secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Commits with secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-7",
+          "name": "Expected rule IDs: all expected items found",
+          "passed": true,
+          "message": "Expected rule IDs: all expected items found"
+        },
+        {
+          "check_id": "SA-8",
+          "name": "Expected files with secrets: all expected items fo",
+          "passed": true,
+          "message": "Expected files with secrets: all expected items found"
+        },
+        {
+          "check_id": "SA-9",
+          "name": "Rule counts match",
+          "passed": true,
+          "message": "Rule counts match"
+        },
+        {
+          "check_id": "SA-10",
+          "name": "All expected findings found",
+          "passed": true,
+          "message": "All expected findings found"
+        },
+        {
+          "check_id": "SA-11",
+          "name": "All severity assignments match",
+          "passed": true,
+          "message": "All severity assignments match"
+        },
+        {
+          "check_id": "SA-1",
+          "name": "Total secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Total secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-2",
+          "name": "Unique secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Unique secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-3",
+          "name": "Secrets in HEAD: expected 2, got 2",
+          "passed": true,
+          "message": "Secrets in HEAD: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-4",
+          "name": "Secrets in history: expected 0, got 0",
+          "passed": true,
+          "message": "Secrets in history: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-5",
+          "name": "Files with secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Files with secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-6",
+          "name": "Commits with secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Commits with secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-7",
+          "name": "Expected rule IDs: all expected items found",
+          "passed": true,
+          "message": "Expected rule IDs: all expected items found"
+        },
+        {
+          "check_id": "SA-8",
+          "name": "Expected files with secrets: all expected items fo",
+          "passed": true,
+          "message": "Expected files with secrets: all expected items found"
+        },
+        {
+          "check_id": "SA-9",
+          "name": "Rule counts match",
+          "passed": true,
+          "message": "Rule counts match"
+        },
+        {
+          "check_id": "SA-10",
+          "name": "All expected findings found",
+          "passed": true,
+          "message": "All expected findings found"
+        },
+        {
+          "check_id": "SA-11",
+          "name": "All severity assignments match",
+          "passed": true,
+          "message": "All severity assignments match"
+        },
+        {
+          "check_id": "SA-1",
+          "name": "Total secrets: expected 7, got 7",
+          "passed": true,
+          "message": "Total secrets: expected 7, got 7"
+        },
+        {
+          "check_id": "SA-2",
+          "name": "Unique secrets: expected 7, got 7",
+          "passed": true,
+          "message": "Unique secrets: expected 7, got 7"
+        },
+        {
+          "check_id": "SA-3",
+          "name": "Secrets in HEAD: expected 7, got 7",
+          "passed": true,
+          "message": "Secrets in HEAD: expected 7, got 7"
+        },
+        {
+          "check_id": "SA-4",
+          "name": "Secrets in history: expected 0, got 0",
+          "passed": true,
+          "message": "Secrets in history: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-5",
+          "name": "Files with secrets: expected 3, got 3",
+          "passed": true,
+          "message": "Files with secrets: expected 3, got 3"
+        },
+        {
+          "check_id": "SA-6",
+          "name": "Commits with secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Commits with secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-7",
+          "name": "Expected rule IDs: all expected items found",
+          "passed": true,
+          "message": "Expected rule IDs: all expected items found"
+        },
+        {
+          "check_id": "SA-8",
+          "name": "Expected files with secrets: all expected items fo",
+          "passed": true,
+          "message": "Expected files with secrets: all expected items found"
+        },
+        {
+          "check_id": "SA-9",
+          "name": "Rule counts match",
+          "passed": true,
+          "message": "Rule counts match"
+        },
+        {
+          "check_id": "SA-10",
+          "name": "All expected findings found",
+          "passed": true,
+          "message": "All expected findings found"
+        },
+        {
+          "check_id": "SA-11",
+          "name": "All severity assignments match",
+          "passed": true,
+          "message": "All severity assignments match"
+        },
+        {
+          "check_id": "SA-1",
+          "name": "Total secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Total secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-2",
+          "name": "Unique secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Unique secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-3",
+          "name": "Secrets in HEAD: expected 1, got 1",
+          "passed": true,
+          "message": "Secrets in HEAD: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-4",
+          "name": "Secrets in history: expected 0, got 0",
+          "passed": true,
+          "message": "Secrets in history: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-5",
+          "name": "Files with secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Files with secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-6",
+          "name": "Commits with secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Commits with secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-7",
+          "name": "Expected rule IDs: all expected items found",
+          "passed": true,
+          "message": "Expected rule IDs: all expected items found"
+        },
+        {
+          "check_id": "SA-8",
+          "name": "Expected files with secrets: all expected items fo",
+          "passed": true,
+          "message": "Expected files with secrets: all expected items found"
+        },
+        {
+          "check_id": "SA-9",
+          "name": "Rule counts match",
+          "passed": true,
+          "message": "Rule counts match"
+        },
+        {
+          "check_id": "SA-10",
+          "name": "All expected findings found",
+          "passed": true,
+          "message": "All expected findings found"
+        },
+        {
+          "check_id": "SA-11",
+          "name": "All severity assignments match",
+          "passed": true,
+          "message": "All severity assignments match"
+        },
+        {
+          "check_id": "SA-1",
+          "name": "Total secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Total secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-2",
+          "name": "Unique secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Unique secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-3",
+          "name": "Secrets in HEAD: expected 0, got 0",
+          "passed": true,
+          "message": "Secrets in HEAD: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-4",
+          "name": "Secrets in history: expected 1, got 1",
+          "passed": true,
+          "message": "Secrets in history: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-5",
+          "name": "Files with secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Files with secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-6",
+          "name": "Commits with secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Commits with secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-7",
+          "name": "Expected rule IDs: all expected items found",
+          "passed": true,
+          "message": "Expected rule IDs: all expected items found"
+        },
+        {
+          "check_id": "SA-8",
+          "name": "Expected files with secrets: all expected items fo",
+          "passed": true,
+          "message": "Expected files with secrets: all expected items found"
+        },
+        {
+          "check_id": "SA-9",
+          "name": "Rule counts match",
+          "passed": true,
+          "message": "Rule counts match"
+        },
+        {
+          "check_id": "SA-10",
+          "name": "All expected findings found",
+          "passed": true,
+          "message": "All expected findings found"
+        },
+        {
+          "check_id": "SA-11",
+          "name": "All severity assignments match",
+          "passed": true,
+          "message": "All severity assignments match"
+        },
+        {
+          "check_id": "SA-1",
+          "name": "Total secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Total secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-2",
+          "name": "Unique secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Unique secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-3",
+          "name": "Secrets in HEAD: expected 2, got 2",
+          "passed": true,
+          "message": "Secrets in HEAD: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-4",
+          "name": "Secrets in history: expected 0, got 0",
+          "passed": true,
+          "message": "Secrets in history: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-5",
+          "name": "Files with secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Files with secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-6",
+          "name": "Commits with secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Commits with secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-7",
+          "name": "Expected rule IDs: all expected items found",
+          "passed": true,
+          "message": "Expected rule IDs: all expected items found"
+        },
+        {
+          "check_id": "SA-8",
+          "name": "Expected files with secrets: all expected items fo",
+          "passed": true,
+          "message": "Expected files with secrets: all expected items found"
+        },
+        {
+          "check_id": "SA-9",
+          "name": "Rule counts match",
+          "passed": true,
+          "message": "Rule counts match"
+        },
+        {
+          "check_id": "SA-10",
+          "name": "All expected findings found",
+          "passed": true,
+          "message": "All expected findings found"
+        },
+        {
+          "check_id": "SA-11",
+          "name": "All severity assignments match",
+          "passed": true,
+          "message": "All severity assignments match"
+        },
+        {
+          "check_id": "SA-1",
+          "name": "Total secrets: expected 0, got 0",
+          "passed": true,
+          "message": "Total secrets: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-2",
+          "name": "Unique secrets: expected 0, got 0",
+          "passed": true,
+          "message": "Unique secrets: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-3",
+          "name": "Secrets in HEAD: expected 0, got 0",
+          "passed": true,
+          "message": "Secrets in HEAD: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-4",
+          "name": "Secrets in history: expected 0, got 0",
+          "passed": true,
+          "message": "Secrets in history: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-5",
+          "name": "Files with secrets: expected 0, got 0",
+          "passed": true,
+          "message": "Files with secrets: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-6",
+          "name": "Commits with secrets: expected 0, got 0",
+          "passed": true,
+          "message": "Commits with secrets: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-7",
+          "name": "Expected rule IDs: all expected items found",
+          "passed": true,
+          "message": "Expected rule IDs: all expected items found"
+        },
+        {
+          "check_id": "SA-8",
+          "name": "No specific files expected",
+          "passed": true,
+          "message": "No specific files expected"
+        },
+        {
+          "check_id": "SA-9",
+          "name": "Rule counts match",
+          "passed": true,
+          "message": "Rule counts match"
+        },
+        {
+          "check_id": "SA-10",
+          "name": "No specific findings expected",
+          "passed": true,
+          "message": "No specific findings expected"
+        },
+        {
+          "check_id": "SA-11",
+          "name": "No severity expectations specified",
+          "passed": true,
+          "message": "No severity expectations specified"
+        },
+        {
+          "check_id": "SA-1",
+          "name": "Total secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Total secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-2",
+          "name": "Unique secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Unique secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-3",
+          "name": "Secrets in HEAD: expected 2, got 2",
+          "passed": true,
+          "message": "Secrets in HEAD: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-4",
+          "name": "Secrets in history: expected 0, got 0",
+          "passed": true,
+          "message": "Secrets in history: expected 0, got 0"
+        },
+        {
+          "check_id": "SA-5",
+          "name": "Files with secrets: expected 2, got 2",
+          "passed": true,
+          "message": "Files with secrets: expected 2, got 2"
+        },
+        {
+          "check_id": "SA-6",
+          "name": "Commits with secrets: expected 1, got 1",
+          "passed": true,
+          "message": "Commits with secrets: expected 1, got 1"
+        },
+        {
+          "check_id": "SA-7",
+          "name": "Expected rule IDs: all expected items found",
+          "passed": true,
+          "message": "Expected rule IDs: all expected items found"
+        },
+        {
+          "check_id": "SA-8",
+          "name": "Expected files with secrets: all expected items fo",
+          "passed": true,
+          "message": "Expected files with secrets: all expected items found"
+        },
+        {
+          "check_id": "SA-9",
+          "name": "Rule counts match",
+          "passed": true,
+          "message": "Rule counts match"
+        },
+        {
+          "check_id": "SA-10",
+          "name": "All expected findings found",
+          "passed": true,
+          "message": "All expected findings found"
+        },
+        {
+          "check_id": "SA-11",
+          "name": "All severity assignments match",
+          "passed": true,
+          "message": "All severity assignments match"
+        }
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Coverage",
+      "weight": 0.125,
+      "total_checks": 64,
+      "passed": 64,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.62,
+      "checks": [
+        {
+          "check_id": "SC-1",
+          "name": "Schema version present",
+          "passed": true,
+          "message": "Schema version present"
+        },
+        {
+          "check_id": "SC-2",
+          "name": "Tool version present",
+          "passed": true,
+          "message": "Tool version present"
+        },
+        {
+          "check_id": "SC-3",
+          "name": "Timestamp present",
+          "passed": true,
+          "message": "Timestamp present"
+        },
+        {
+          "check_id": "SC-4",
+          "name": "All summary metrics present",
+          "passed": true,
+          "message": "All summary metrics present"
+        },
+        {
+          "check_id": "SC-5",
+          "name": "Findings list present",
+          "passed": true,
+          "message": "Findings list present"
+        },
+        {
+          "check_id": "SC-6",
+          "name": "Files summary present",
+          "passed": true,
+          "message": "Files summary present"
+        },
+        {
+          "check_id": "SC-7",
+          "name": "Directory metrics present",
+          "passed": true,
+          "message": "Directory metrics present"
+        },
+        {
+          "check_id": "SC-8",
+          "name": "All findings have required fields",
+          "passed": true,
+          "message": "All findings have required fields"
+        },
+        {
+          "check_id": "SC-1",
+          "name": "Schema version present",
+          "passed": true,
+          "message": "Schema version present"
+        },
+        {
+          "check_id": "SC-2",
+          "name": "Tool version present",
+          "passed": true,
+          "message": "Tool version present"
+        },
+        {
+          "check_id": "SC-3",
+          "name": "Timestamp present",
+          "passed": true,
+          "message": "Timestamp present"
+        },
+        {
+          "check_id": "SC-4",
+          "name": "All summary metrics present",
+          "passed": true,
+          "message": "All summary metrics present"
+        },
+        {
+          "check_id": "SC-5",
+          "name": "Findings list present",
+          "passed": true,
+          "message": "Findings list present"
+        },
+        {
+          "check_id": "SC-6",
+          "name": "Files summary present",
+          "passed": true,
+          "message": "Files summary present"
+        },
+        {
+          "check_id": "SC-7",
+          "name": "Directory metrics present",
+          "passed": true,
+          "message": "Directory metrics present"
+        },
+        {
+          "check_id": "SC-8",
+          "name": "All findings have required fields",
+          "passed": true,
+          "message": "All findings have required fields"
+        },
+        {
+          "check_id": "SC-1",
+          "name": "Schema version present",
+          "passed": true,
+          "message": "Schema version present"
+        },
+        {
+          "check_id": "SC-2",
+          "name": "Tool version present",
+          "passed": true,
+          "message": "Tool version present"
+        },
+        {
+          "check_id": "SC-3",
+          "name": "Timestamp present",
+          "passed": true,
+          "message": "Timestamp present"
+        },
+        {
+          "check_id": "SC-4",
+          "name": "All summary metrics present",
+          "passed": true,
+          "message": "All summary metrics present"
+        },
+        {
+          "check_id": "SC-5",
+          "name": "Findings list present",
+          "passed": true,
+          "message": "Findings list present"
+        },
+        {
+          "check_id": "SC-6",
+          "name": "Files summary present",
+          "passed": true,
+          "message": "Files summary present"
+        },
+        {
+          "check_id": "SC-7",
+          "name": "Directory metrics present",
+          "passed": true,
+          "message": "Directory metrics present"
+        },
+        {
+          "check_id": "SC-8",
+          "name": "All findings have required fields",
+          "passed": true,
+          "message": "All findings have required fields"
+        },
+        {
+          "check_id": "SC-1",
+          "name": "Schema version present",
+          "passed": true,
+          "message": "Schema version present"
+        },
+        {
+          "check_id": "SC-2",
+          "name": "Tool version present",
+          "passed": true,
+          "message": "Tool version present"
+        },
+        {
+          "check_id": "SC-3",
+          "name": "Timestamp present",
+          "passed": true,
+          "message": "Timestamp present"
+        },
+        {
+          "check_id": "SC-4",
+          "name": "All summary metrics present",
+          "passed": true,
+          "message": "All summary metrics present"
+        },
+        {
+          "check_id": "SC-5",
+          "name": "Findings list present",
+          "passed": true,
+          "message": "Findings list present"
+        },
+        {
+          "check_id": "SC-6",
+          "name": "Files summary present",
+          "passed": true,
+          "message": "Files summary present"
+        },
+        {
+          "check_id": "SC-7",
+          "name": "Directory metrics present",
+          "passed": true,
+          "message": "Directory metrics present"
+        },
+        {
+          "check_id": "SC-8",
+          "name": "All findings have required fields",
+          "passed": true,
+          "message": "All findings have required fields"
+        },
+        {
+          "check_id": "SC-1",
+          "name": "Schema version present",
+          "passed": true,
+          "message": "Schema version present"
+        },
+        {
+          "check_id": "SC-2",
+          "name": "Tool version present",
+          "passed": true,
+          "message": "Tool version present"
+        },
+        {
+          "check_id": "SC-3",
+          "name": "Timestamp present",
+          "passed": true,
+          "message": "Timestamp present"
+        },
+        {
+          "check_id": "SC-4",
+          "name": "All summary metrics present",
+          "passed": true,
+          "message": "All summary metrics present"
+        },
+        {
+          "check_id": "SC-5",
+          "name": "Findings list present",
+          "passed": true,
+          "message": "Findings list present"
+        },
+        {
+          "check_id": "SC-6",
+          "name": "Files summary present",
+          "passed": true,
+          "message": "Files summary present"
+        },
+        {
+          "check_id": "SC-7",
+          "name": "Directory metrics present",
+          "passed": true,
+          "message": "Directory metrics present"
+        },
+        {
+          "check_id": "SC-8",
+          "name": "All findings have required fields",
+          "passed": true,
+          "message": "All findings have required fields"
+        },
+        {
+          "check_id": "SC-1",
+          "name": "Schema version present",
+          "passed": true,
+          "message": "Schema version present"
+        },
+        {
+          "check_id": "SC-2",
+          "name": "Tool version present",
+          "passed": true,
+          "message": "Tool version present"
+        },
+        {
+          "check_id": "SC-3",
+          "name": "Timestamp present",
+          "passed": true,
+          "message": "Timestamp present"
+        },
+        {
+          "check_id": "SC-4",
+          "name": "All summary metrics present",
+          "passed": true,
+          "message": "All summary metrics present"
+        },
+        {
+          "check_id": "SC-5",
+          "name": "Findings list present",
+          "passed": true,
+          "message": "Findings list present"
+        },
+        {
+          "check_id": "SC-6",
+          "name": "Files summary present",
+          "passed": true,
+          "message": "Files summary present"
+        },
+        {
+          "check_id": "SC-7",
+          "name": "Directory metrics present",
+          "passed": true,
+          "message": "Directory metrics present"
+        },
+        {
+          "check_id": "SC-8",
+          "name": "All findings have required fields",
+          "passed": true,
+          "message": "All findings have required fields"
+        },
+        {
+          "check_id": "SC-1",
+          "name": "Schema version present",
+          "passed": true,
+          "message": "Schema version present"
+        },
+        {
+          "check_id": "SC-2",
+          "name": "Tool version present",
+          "passed": true,
+          "message": "Tool version present"
+        },
+        {
+          "check_id": "SC-3",
+          "name": "Timestamp present",
+          "passed": true,
+          "message": "Timestamp present"
+        },
+        {
+          "check_id": "SC-4",
+          "name": "All summary metrics present",
+          "passed": true,
+          "message": "All summary metrics present"
+        },
+        {
+          "check_id": "SC-5",
+          "name": "Findings list present",
+          "passed": true,
+          "message": "Findings list present"
+        },
+        {
+          "check_id": "SC-6",
+          "name": "Files summary present",
+          "passed": true,
+          "message": "Files summary present"
+        },
+        {
+          "check_id": "SC-7",
+          "name": "Directory metrics present",
+          "passed": true,
+          "message": "Directory metrics present"
+        },
+        {
+          "check_id": "SC-8",
+          "name": "All findings have required fields",
+          "passed": true,
+          "message": "All findings have required fields"
+        },
+        {
+          "check_id": "SC-1",
+          "name": "Schema version present",
+          "passed": true,
+          "message": "Schema version present"
+        },
+        {
+          "check_id": "SC-2",
+          "name": "Tool version present",
+          "passed": true,
+          "message": "Tool version present"
+        },
+        {
+          "check_id": "SC-3",
+          "name": "Timestamp present",
+          "passed": true,
+          "message": "Timestamp present"
+        },
+        {
+          "check_id": "SC-4",
+          "name": "All summary metrics present",
+          "passed": true,
+          "message": "All summary metrics present"
+        },
+        {
+          "check_id": "SC-5",
+          "name": "Findings list present",
+          "passed": true,
+          "message": "Findings list present"
+        },
+        {
+          "check_id": "SC-6",
+          "name": "Files summary present",
+          "passed": true,
+          "message": "Files summary present"
+        },
+        {
+          "check_id": "SC-7",
+          "name": "Directory metrics present",
+          "passed": true,
+          "message": "Directory metrics present"
+        },
+        {
+          "check_id": "SC-8",
+          "name": "All findings have required fields",
+          "passed": true,
+          "message": "All findings have required fields"
+        }
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Detection",
+      "weight": 0.125,
+      "total_checks": 48,
+      "passed": 48,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.62,
+      "checks": [
+        {
+          "check_id": "SD-1",
+          "name": "Found 2 secrets, expected at least 2",
+          "passed": true,
+          "message": "Found 2 secrets, expected at least 2"
+        },
+        {
+          "check_id": "SD-2",
+          "name": "No unexpected rule IDs",
+          "passed": true,
+          "message": "No unexpected rule IDs"
+        },
+        {
+          "check_id": "SD-3",
+          "name": "Historical secrets: expected 0, found 0",
+          "passed": true,
+          "message": "Historical secrets: expected 0, found 0"
+        },
+        {
+          "check_id": "SD-4",
+          "name": "N/A - repo expected to have secrets",
+          "passed": true,
+          "message": "N/A - repo expected to have secrets"
+        },
+        {
+          "check_id": "SD-5",
+          "name": "All entropy values valid",
+          "passed": true,
+          "message": "All entropy values valid"
+        },
+        {
+          "check_id": "SD-6",
+          "name": "All secrets masked",
+          "passed": true,
+          "message": "All secrets masked"
+        },
+        {
+          "check_id": "SD-1",
+          "name": "Found 2 secrets, expected at least 2",
+          "passed": true,
+          "message": "Found 2 secrets, expected at least 2"
+        },
+        {
+          "check_id": "SD-2",
+          "name": "No unexpected rule IDs",
+          "passed": true,
+          "message": "No unexpected rule IDs"
+        },
+        {
+          "check_id": "SD-3",
+          "name": "Historical secrets: expected 0, found 0",
+          "passed": true,
+          "message": "Historical secrets: expected 0, found 0"
+        },
+        {
+          "check_id": "SD-4",
+          "name": "N/A - repo expected to have secrets",
+          "passed": true,
+          "message": "N/A - repo expected to have secrets"
+        },
+        {
+          "check_id": "SD-5",
+          "name": "All entropy values valid",
+          "passed": true,
+          "message": "All entropy values valid"
+        },
+        {
+          "check_id": "SD-6",
+          "name": "All secrets masked",
+          "passed": true,
+          "message": "All secrets masked"
+        },
+        {
+          "check_id": "SD-1",
+          "name": "Found 7 secrets, expected at least 7",
+          "passed": true,
+          "message": "Found 7 secrets, expected at least 7"
+        },
+        {
+          "check_id": "SD-2",
+          "name": "No unexpected rule IDs",
+          "passed": true,
+          "message": "No unexpected rule IDs"
+        },
+        {
+          "check_id": "SD-3",
+          "name": "Historical secrets: expected 0, found 0",
+          "passed": true,
+          "message": "Historical secrets: expected 0, found 0"
+        },
+        {
+          "check_id": "SD-4",
+          "name": "N/A - repo expected to have secrets",
+          "passed": true,
+          "message": "N/A - repo expected to have secrets"
+        },
+        {
+          "check_id": "SD-5",
+          "name": "All entropy values valid",
+          "passed": true,
+          "message": "All entropy values valid"
+        },
+        {
+          "check_id": "SD-6",
+          "name": "All secrets masked",
+          "passed": true,
+          "message": "All secrets masked"
+        },
+        {
+          "check_id": "SD-1",
+          "name": "Found 1 secrets, expected at least 1",
+          "passed": true,
+          "message": "Found 1 secrets, expected at least 1"
+        },
+        {
+          "check_id": "SD-2",
+          "name": "No unexpected rule IDs",
+          "passed": true,
+          "message": "No unexpected rule IDs"
+        },
+        {
+          "check_id": "SD-3",
+          "name": "Historical secrets: expected 0, found 0",
+          "passed": true,
+          "message": "Historical secrets: expected 0, found 0"
+        },
+        {
+          "check_id": "SD-4",
+          "name": "N/A - repo expected to have secrets",
+          "passed": true,
+          "message": "N/A - repo expected to have secrets"
+        },
+        {
+          "check_id": "SD-5",
+          "name": "All entropy values valid",
+          "passed": true,
+          "message": "All entropy values valid"
+        },
+        {
+          "check_id": "SD-6",
+          "name": "All secrets masked",
+          "passed": true,
+          "message": "All secrets masked"
+        },
+        {
+          "check_id": "SD-1",
+          "name": "Found 1 secrets, expected at least 1",
+          "passed": true,
+          "message": "Found 1 secrets, expected at least 1"
+        },
+        {
+          "check_id": "SD-2",
+          "name": "No unexpected rule IDs",
+          "passed": true,
+          "message": "No unexpected rule IDs"
+        },
+        {
+          "check_id": "SD-3",
+          "name": "Historical secrets: expected 1, found 1",
+          "passed": true,
+          "message": "Historical secrets: expected 1, found 1"
+        },
+        {
+          "check_id": "SD-4",
+          "name": "N/A - repo expected to have secrets",
+          "passed": true,
+          "message": "N/A - repo expected to have secrets"
+        },
+        {
+          "check_id": "SD-5",
+          "name": "All entropy values valid",
+          "passed": true,
+          "message": "All entropy values valid"
+        },
+        {
+          "check_id": "SD-6",
+          "name": "All secrets masked",
+          "passed": true,
+          "message": "All secrets masked"
+        },
+        {
+          "check_id": "SD-1",
+          "name": "Found 2 secrets, expected at least 2",
+          "passed": true,
+          "message": "Found 2 secrets, expected at least 2"
+        },
+        {
+          "check_id": "SD-2",
+          "name": "No unexpected rule IDs",
+          "passed": true,
+          "message": "No unexpected rule IDs"
+        },
+        {
+          "check_id": "SD-3",
+          "name": "Historical secrets: expected 0, found 0",
+          "passed": true,
+          "message": "Historical secrets: expected 0, found 0"
+        },
+        {
+          "check_id": "SD-4",
+          "name": "N/A - repo expected to have secrets",
+          "passed": true,
+          "message": "N/A - repo expected to have secrets"
+        },
+        {
+          "check_id": "SD-5",
+          "name": "All entropy values valid",
+          "passed": true,
+          "message": "All entropy values valid"
+        },
+        {
+          "check_id": "SD-6",
+          "name": "All secrets masked",
+          "passed": true,
+          "message": "All secrets masked"
+        },
+        {
+          "check_id": "SD-1",
+          "name": "Found 0 secrets, expected at least 0",
+          "passed": true,
+          "message": "Found 0 secrets, expected at least 0"
+        },
+        {
+          "check_id": "SD-2",
+          "name": "No expected rules defined, skipping check",
+          "passed": true,
+          "message": "No expected rules defined, skipping check"
+        },
+        {
+          "check_id": "SD-3",
+          "name": "Historical secrets: expected 0, found 0",
+          "passed": true,
+          "message": "Historical secrets: expected 0, found 0"
+        },
+        {
+          "check_id": "SD-4",
+          "name": "Clean repo has zero secrets: expected True, got Tr",
+          "passed": true,
+          "message": "Clean repo has zero secrets: expected True, got True"
+        },
+        {
+          "check_id": "SD-5",
+          "name": "All entropy values valid",
+          "passed": true,
+          "message": "All entropy values valid"
+        },
+        {
+          "check_id": "SD-6",
+          "name": "All secrets masked",
+          "passed": true,
+          "message": "All secrets masked"
+        },
+        {
+          "check_id": "SD-1",
+          "name": "Found 2 secrets, expected at least 2",
+          "passed": true,
+          "message": "Found 2 secrets, expected at least 2"
+        },
+        {
+          "check_id": "SD-2",
+          "name": "No unexpected rule IDs",
+          "passed": true,
+          "message": "No unexpected rule IDs"
+        },
+        {
+          "check_id": "SD-3",
+          "name": "Historical secrets: expected 0, found 0",
+          "passed": true,
+          "message": "Historical secrets: expected 0, found 0"
+        },
+        {
+          "check_id": "SD-4",
+          "name": "N/A - repo expected to have secrets",
+          "passed": true,
+          "message": "N/A - repo expected to have secrets"
+        },
+        {
+          "check_id": "SD-5",
+          "name": "All entropy values valid",
+          "passed": true,
+          "message": "All entropy values valid"
+        },
+        {
+          "check_id": "SD-6",
+          "name": "All secrets masked",
+          "passed": true,
+          "message": "All secrets masked"
+        }
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "Performance",
+      "weight": 0.125,
+      "total_checks": 32,
+      "passed": 32,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.62,
+      "checks": [
+        {
+          "check_id": "SP-1",
+          "name": "Scan time (ms): expected <= 5000, got 40.601253509",
+          "passed": true,
+          "message": "Scan time (ms): expected <= 5000, got 40.601253509521484"
+        },
+        {
+          "check_id": "SP-2",
+          "name": "Time per commit (ms): expected <= 1000, got 40.601",
+          "passed": true,
+          "message": "Time per commit (ms): expected <= 1000, got 40.601253509521484"
+        },
+        {
+          "check_id": "SP-3",
+          "name": "Time per finding (ms): expected <= 500, got 20.300",
+          "passed": true,
+          "message": "Time per finding (ms): expected <= 500, got 20.300626754760742"
+        },
+        {
+          "check_id": "SP-4",
+          "name": "Findings count: 2 (max 100)",
+          "passed": true,
+          "message": "Findings count: 2 (max 100)"
+        },
+        {
+          "check_id": "SP-1",
+          "name": "Scan time (ms): expected <= 5000, got 89.075803756",
+          "passed": true,
+          "message": "Scan time (ms): expected <= 5000, got 89.07580375671387"
+        },
+        {
+          "check_id": "SP-2",
+          "name": "Time per commit (ms): expected <= 1000, got 89.075",
+          "passed": true,
+          "message": "Time per commit (ms): expected <= 1000, got 89.07580375671387"
+        },
+        {
+          "check_id": "SP-3",
+          "name": "Time per finding (ms): expected <= 500, got 44.537",
+          "passed": true,
+          "message": "Time per finding (ms): expected <= 500, got 44.537901878356934"
+        },
+        {
+          "check_id": "SP-4",
+          "name": "Findings count: 2 (max 100)",
+          "passed": true,
+          "message": "Findings count: 2 (max 100)"
+        },
+        {
+          "check_id": "SP-1",
+          "name": "Scan time (ms): expected <= 5000, got 35.940885543",
+          "passed": true,
+          "message": "Scan time (ms): expected <= 5000, got 35.94088554382324"
+        },
+        {
+          "check_id": "SP-2",
+          "name": "Time per commit (ms): expected <= 1000, got 35.940",
+          "passed": true,
+          "message": "Time per commit (ms): expected <= 1000, got 35.94088554382324"
+        },
+        {
+          "check_id": "SP-3",
+          "name": "Time per finding (ms): expected <= 500, got 5.1344",
+          "passed": true,
+          "message": "Time per finding (ms): expected <= 500, got 5.134412220546177"
+        },
+        {
+          "check_id": "SP-4",
+          "name": "Findings count: 7 (max 100)",
+          "passed": true,
+          "message": "Findings count: 7 (max 100)"
+        },
+        {
+          "check_id": "SP-1",
+          "name": "Scan time (ms): expected <= 5000, got 36.085844039",
+          "passed": true,
+          "message": "Scan time (ms): expected <= 5000, got 36.08584403991699"
+        },
+        {
+          "check_id": "SP-2",
+          "name": "Time per commit (ms): expected <= 1000, got 36.085",
+          "passed": true,
+          "message": "Time per commit (ms): expected <= 1000, got 36.08584403991699"
+        },
+        {
+          "check_id": "SP-3",
+          "name": "Time per finding (ms): expected <= 500, got 36.085",
+          "passed": true,
+          "message": "Time per finding (ms): expected <= 500, got 36.08584403991699"
+        },
+        {
+          "check_id": "SP-4",
+          "name": "Findings count: 1 (max 100)",
+          "passed": true,
+          "message": "Findings count: 1 (max 100)"
+        },
+        {
+          "check_id": "SP-1",
+          "name": "Scan time (ms): expected <= 5000, got 33.171892166",
+          "passed": true,
+          "message": "Scan time (ms): expected <= 5000, got 33.171892166137695"
+        },
+        {
+          "check_id": "SP-2",
+          "name": "Time per commit (ms): expected <= 1000, got 33.171",
+          "passed": true,
+          "message": "Time per commit (ms): expected <= 1000, got 33.171892166137695"
+        },
+        {
+          "check_id": "SP-3",
+          "name": "Time per finding (ms): expected <= 500, got 33.171",
+          "passed": true,
+          "message": "Time per finding (ms): expected <= 500, got 33.171892166137695"
+        },
+        {
+          "check_id": "SP-4",
+          "name": "Findings count: 1 (max 100)",
+          "passed": true,
+          "message": "Findings count: 1 (max 100)"
+        },
+        {
+          "check_id": "SP-1",
+          "name": "Scan time (ms): expected <= 5000, got 32.649993896",
+          "passed": true,
+          "message": "Scan time (ms): expected <= 5000, got 32.649993896484375"
+        },
+        {
+          "check_id": "SP-2",
+          "name": "Time per commit (ms): expected <= 1000, got 32.649",
+          "passed": true,
+          "message": "Time per commit (ms): expected <= 1000, got 32.649993896484375"
+        },
+        {
+          "check_id": "SP-3",
+          "name": "Time per finding (ms): expected <= 500, got 16.324",
+          "passed": true,
+          "message": "Time per finding (ms): expected <= 500, got 16.324996948242188"
+        },
+        {
+          "check_id": "SP-4",
+          "name": "Findings count: 2 (max 100)",
+          "passed": true,
+          "message": "Findings count: 2 (max 100)"
+        },
+        {
+          "check_id": "SP-1",
+          "name": "Scan time (ms): expected <= 5000, got 31.277656555",
+          "passed": true,
+          "message": "Scan time (ms): expected <= 5000, got 31.27765655517578"
+        },
+        {
+          "check_id": "SP-2",
+          "name": "N/A - no commits with secrets",
+          "passed": true,
+          "message": "N/A - no commits with secrets"
+        },
+        {
+          "check_id": "SP-3",
+          "name": "N/A - no secrets found",
+          "passed": true,
+          "message": "N/A - no secrets found"
+        },
+        {
+          "check_id": "SP-4",
+          "name": "Findings count: 0 (max 100)",
+          "passed": true,
+          "message": "Findings count: 0 (max 100)"
+        },
+        {
+          "check_id": "SP-1",
+          "name": "Scan time (ms): expected <= 5000, got 32.599925994",
+          "passed": true,
+          "message": "Scan time (ms): expected <= 5000, got 32.59992599487305"
+        },
+        {
+          "check_id": "SP-2",
+          "name": "Time per commit (ms): expected <= 1000, got 32.599",
+          "passed": true,
+          "message": "Time per commit (ms): expected <= 1000, got 32.59992599487305"
+        },
+        {
+          "check_id": "SP-3",
+          "name": "Time per finding (ms): expected <= 500, got 16.299",
+          "passed": true,
+          "message": "Time per finding (ms): expected <= 500, got 16.299962997436523"
+        },
+        {
+          "check_id": "SP-4",
+          "name": "Findings count: 2 (max 100)",
+          "passed": true,
+          "message": "Findings count: 2 (max 100)"
+        }
+      ]
+    },
+    {
+      "id": "D5",
+      "name": "Output Quality",
+      "weight": 0.125,
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.62,
+      "checks": [
+        {
+          "check_id": "OQ-1",
+          "name": "Schema validation passed",
+          "passed": true,
+          "message": "Schema validation passed"
+        },
+        {
+          "check_id": "OQ-1",
+          "name": "Schema validation passed",
+          "passed": true,
+          "message": "Schema validation passed"
+        },
+        {
+          "check_id": "OQ-1",
+          "name": "Schema validation passed",
+          "passed": true,
+          "message": "Schema validation passed"
+        },
+        {
+          "check_id": "OQ-1",
+          "name": "Schema validation passed",
+          "passed": true,
+          "message": "Schema validation passed"
+        },
+        {
+          "check_id": "OQ-1",
+          "name": "Schema validation passed",
+          "passed": true,
+          "message": "Schema validation passed"
+        },
+        {
+          "check_id": "OQ-1",
+          "name": "Schema validation passed",
+          "passed": true,
+          "message": "Schema validation passed"
+        },
+        {
+          "check_id": "OQ-1",
+          "name": "Schema validation passed",
+          "passed": true,
+          "message": "Schema validation passed"
+        },
+        {
+          "check_id": "OQ-1",
+          "name": "Schema validation passed",
+          "passed": true,
+          "message": "Schema validation passed"
+        }
+      ]
+    },
+    {
+      "id": "D6",
+      "name": "Integration Fit",
+      "weight": 0.125,
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.62,
+      "checks": [
+        {
+          "check_id": "IF-1",
+          "name": "2/2 findings have relative paths",
+          "passed": true,
+          "message": "2/2 findings have relative paths"
+        },
+        {
+          "check_id": "IF-1",
+          "name": "2/2 findings have relative paths",
+          "passed": true,
+          "message": "2/2 findings have relative paths"
+        },
+        {
+          "check_id": "IF-1",
+          "name": "7/7 findings have relative paths",
+          "passed": true,
+          "message": "7/7 findings have relative paths"
+        },
+        {
+          "check_id": "IF-1",
+          "name": "1/1 findings have relative paths",
+          "passed": true,
+          "message": "1/1 findings have relative paths"
+        },
+        {
+          "check_id": "IF-1",
+          "name": "1/1 findings have relative paths",
+          "passed": true,
+          "message": "1/1 findings have relative paths"
+        },
+        {
+          "check_id": "IF-1",
+          "name": "2/2 findings have relative paths",
+          "passed": true,
+          "message": "2/2 findings have relative paths"
+        },
+        {
+          "check_id": "IF-1",
+          "name": "0/0 findings have relative paths",
+          "passed": true,
+          "message": "0/0 findings have relative paths"
+        },
+        {
+          "check_id": "IF-1",
+          "name": "2/2 findings have relative paths",
+          "passed": true,
+          "message": "2/2 findings have relative paths"
+        }
+      ]
+    },
+    {
+      "id": "D7",
+      "name": "Edge Cases",
+      "weight": 0.125,
+      "total_checks": 32,
+      "passed": 32,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.62,
+      "checks": [
+        {
+          "check_id": "EC-1",
+          "name": "N/A - not an empty repo scenario",
+          "passed": true,
+          "message": "N/A - not an empty repo scenario"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "All file paths are valid UTF-8",
+          "passed": true,
+          "message": "All file paths are valid UTF-8"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "N/A - no large file scenario",
+          "passed": true,
+          "message": "N/A - no large file scenario"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "N/A - no binary file scenario",
+          "passed": true,
+          "message": "N/A - no binary file scenario"
+        },
+        {
+          "check_id": "EC-1",
+          "name": "N/A - not an empty repo scenario",
+          "passed": true,
+          "message": "N/A - not an empty repo scenario"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "All file paths are valid UTF-8",
+          "passed": true,
+          "message": "All file paths are valid UTF-8"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "N/A - no large file scenario",
+          "passed": true,
+          "message": "N/A - no large file scenario"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "N/A - no binary file scenario",
+          "passed": true,
+          "message": "N/A - no binary file scenario"
+        },
+        {
+          "check_id": "EC-1",
+          "name": "N/A - not an empty repo scenario",
+          "passed": true,
+          "message": "N/A - not an empty repo scenario"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "All file paths are valid UTF-8",
+          "passed": true,
+          "message": "All file paths are valid UTF-8"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "N/A - no large file scenario",
+          "passed": true,
+          "message": "N/A - no large file scenario"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "N/A - no binary file scenario",
+          "passed": true,
+          "message": "N/A - no binary file scenario"
+        },
+        {
+          "check_id": "EC-1",
+          "name": "N/A - not an empty repo scenario",
+          "passed": true,
+          "message": "N/A - not an empty repo scenario"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "All file paths are valid UTF-8",
+          "passed": true,
+          "message": "All file paths are valid UTF-8"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "N/A - no large file scenario",
+          "passed": true,
+          "message": "N/A - no large file scenario"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "N/A - no binary file scenario",
+          "passed": true,
+          "message": "N/A - no binary file scenario"
+        },
+        {
+          "check_id": "EC-1",
+          "name": "N/A - not an empty repo scenario",
+          "passed": true,
+          "message": "N/A - not an empty repo scenario"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "All file paths are valid UTF-8",
+          "passed": true,
+          "message": "All file paths are valid UTF-8"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "N/A - no large file scenario",
+          "passed": true,
+          "message": "N/A - no large file scenario"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "N/A - no binary file scenario",
+          "passed": true,
+          "message": "N/A - no binary file scenario"
+        },
+        {
+          "check_id": "EC-1",
+          "name": "N/A - not an empty repo scenario",
+          "passed": true,
+          "message": "N/A - not an empty repo scenario"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "All file paths are valid UTF-8",
+          "passed": true,
+          "message": "All file paths are valid UTF-8"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "N/A - no large file scenario",
+          "passed": true,
+          "message": "N/A - no large file scenario"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "N/A - no binary file scenario",
+          "passed": true,
+          "message": "N/A - no binary file scenario"
+        },
+        {
+          "check_id": "EC-1",
+          "name": "N/A - not an empty repo scenario",
+          "passed": true,
+          "message": "N/A - not an empty repo scenario"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "All file paths are valid UTF-8",
+          "passed": true,
+          "message": "All file paths are valid UTF-8"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "N/A - no large file scenario",
+          "passed": true,
+          "message": "N/A - no large file scenario"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "N/A - no binary file scenario",
+          "passed": true,
+          "message": "N/A - no binary file scenario"
+        },
+        {
+          "check_id": "EC-1",
+          "name": "N/A - not an empty repo scenario",
+          "passed": true,
+          "message": "N/A - not an empty repo scenario"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "All file paths are valid UTF-8",
+          "passed": true,
+          "message": "All file paths are valid UTF-8"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "N/A - no large file scenario",
+          "passed": true,
+          "message": "N/A - no large file scenario"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "N/A - no binary file scenario",
+          "passed": true,
+          "message": "N/A - no binary file scenario"
+        }
+      ]
+    },
+    {
+      "id": "D8",
+      "name": "Rollup Validation",
+      "weight": 0.125,
+      "total_checks": 32,
+      "passed": 32,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.62,
+      "checks": [
+        {
+          "check_id": "RV-1",
+          "name": "Recursive >= Direct for all directories",
+          "passed": true,
+          "message": "Recursive >= Direct for all directories"
+        },
+        {
+          "check_id": "RV-2",
+          "name": "Recursive >= Direct for file counts",
+          "passed": true,
+          "message": "Recursive >= Direct for file counts"
+        },
+        {
+          "check_id": "RV-3",
+          "name": "All counts are non-negative",
+          "passed": true,
+          "message": "All counts are non-negative"
+        },
+        {
+          "check_id": "RV-4",
+          "name": "Root recursive (2) == total_secrets (2)",
+          "passed": true,
+          "message": "Root recursive (2) == total_secrets (2)"
+        },
+        {
+          "check_id": "RV-1",
+          "name": "Recursive >= Direct for all directories",
+          "passed": true,
+          "message": "Recursive >= Direct for all directories"
+        },
+        {
+          "check_id": "RV-2",
+          "name": "Recursive >= Direct for file counts",
+          "passed": true,
+          "message": "Recursive >= Direct for file counts"
+        },
+        {
+          "check_id": "RV-3",
+          "name": "All counts are non-negative",
+          "passed": true,
+          "message": "All counts are non-negative"
+        },
+        {
+          "check_id": "RV-4",
+          "name": "Root recursive (2) == total_secrets (2)",
+          "passed": true,
+          "message": "Root recursive (2) == total_secrets (2)"
+        },
+        {
+          "check_id": "RV-1",
+          "name": "Recursive >= Direct for all directories",
+          "passed": true,
+          "message": "Recursive >= Direct for all directories"
+        },
+        {
+          "check_id": "RV-2",
+          "name": "Recursive >= Direct for file counts",
+          "passed": true,
+          "message": "Recursive >= Direct for file counts"
+        },
+        {
+          "check_id": "RV-3",
+          "name": "All counts are non-negative",
+          "passed": true,
+          "message": "All counts are non-negative"
+        },
+        {
+          "check_id": "RV-4",
+          "name": "Root recursive (7) == total_secrets (7)",
+          "passed": true,
+          "message": "Root recursive (7) == total_secrets (7)"
+        },
+        {
+          "check_id": "RV-1",
+          "name": "Recursive >= Direct for all directories",
+          "passed": true,
+          "message": "Recursive >= Direct for all directories"
+        },
+        {
+          "check_id": "RV-2",
+          "name": "Recursive >= Direct for file counts",
+          "passed": true,
+          "message": "Recursive >= Direct for file counts"
+        },
+        {
+          "check_id": "RV-3",
+          "name": "All counts are non-negative",
+          "passed": true,
+          "message": "All counts are non-negative"
+        },
+        {
+          "check_id": "RV-4",
+          "name": "Root recursive (1) == total_secrets (1)",
+          "passed": true,
+          "message": "Root recursive (1) == total_secrets (1)"
+        },
+        {
+          "check_id": "RV-1",
+          "name": "Recursive >= Direct for all directories",
+          "passed": true,
+          "message": "Recursive >= Direct for all directories"
+        },
+        {
+          "check_id": "RV-2",
+          "name": "Recursive >= Direct for file counts",
+          "passed": true,
+          "message": "Recursive >= Direct for file counts"
+        },
+        {
+          "check_id": "RV-3",
+          "name": "All counts are non-negative",
+          "passed": true,
+          "message": "All counts are non-negative"
+        },
+        {
+          "check_id": "RV-4",
+          "name": "Root recursive (1) == total_secrets (1)",
+          "passed": true,
+          "message": "Root recursive (1) == total_secrets (1)"
+        },
+        {
+          "check_id": "RV-1",
+          "name": "Recursive >= Direct for all directories",
+          "passed": true,
+          "message": "Recursive >= Direct for all directories"
+        },
+        {
+          "check_id": "RV-2",
+          "name": "Recursive >= Direct for file counts",
+          "passed": true,
+          "message": "Recursive >= Direct for file counts"
+        },
+        {
+          "check_id": "RV-3",
+          "name": "All counts are non-negative",
+          "passed": true,
+          "message": "All counts are non-negative"
+        },
+        {
+          "check_id": "RV-4",
+          "name": "Root recursive (2) == total_secrets (2)",
+          "passed": true,
+          "message": "Root recursive (2) == total_secrets (2)"
+        },
+        {
+          "check_id": "RV-1",
+          "name": "N/A - no directory metrics present",
+          "passed": true,
+          "message": "N/A - no directory metrics present"
+        },
+        {
+          "check_id": "RV-2",
+          "name": "N/A - no directory metrics present",
+          "passed": true,
+          "message": "N/A - no directory metrics present"
+        },
+        {
+          "check_id": "RV-3",
+          "name": "N/A - no directory metrics present",
+          "passed": true,
+          "message": "N/A - no directory metrics present"
+        },
+        {
+          "check_id": "RV-4",
+          "name": "N/A - no directory metrics present",
+          "passed": true,
+          "message": "N/A - no directory metrics present"
+        },
+        {
+          "check_id": "RV-1",
+          "name": "Recursive >= Direct for all directories",
+          "passed": true,
+          "message": "Recursive >= Direct for all directories"
+        },
+        {
+          "check_id": "RV-2",
+          "name": "Recursive >= Direct for file counts",
+          "passed": true,
+          "message": "Recursive >= Direct for file counts"
+        },
+        {
+          "check_id": "RV-3",
+          "name": "All counts are non-negative",
+          "passed": true,
+          "message": "All counts are non-negative"
+        },
+        {
+          "check_id": "RV-4",
+          "name": "Root recursive (2) == total_secrets (2)",
+          "passed": true,
+          "message": "Root recursive (2) == total_secrets (2)"
+        }
+      ]
+    }
+  ],
+  "critical_failures": [],
+  "thresholds": {
+    "STRONG_PASS": ">= 4.0 (80%+)",
+    "PASS": ">= 3.5 (70%+)",
+    "WEAK_PASS": ">= 3.0 (60%+)",
+    "FAIL": "< 3.0 (below 60%)"
+  },
+  "metadata": {
+    "repositories_evaluated": 8
+  }
+}

@@ -63,11 +63,14 @@ class SeverityAccuracyJudge(BaseJudge):
 
             # Check CVSS score alignment with severity
             for vuln in vulns[:10]:  # Sample first 10
-                cvss = vuln.get("cvss_score", 0)
+                cvss = vuln.get("cvss_score")
                 severity = vuln.get("severity", "UNKNOWN")
 
                 # Expected severity based on CVSS 3.x ranges
-                if cvss >= 9.0:
+                # Handle None cvss_score (not all vulnerabilities have CVSS scores)
+                if cvss is None:
+                    expected = "UNKNOWN"
+                elif cvss >= 9.0:
                     expected = "CRITICAL"
                 elif cvss >= 7.0:
                     expected = "HIGH"

@@ -1,56 +1,29 @@
-"""Base judge class for LLM-as-a-Judge evaluation of git-sizer repository analysis."""
+"""Base judge class for LLM-as-a-Judge evaluation of git-sizer repository analysis.
+
+This module re-exports the shared BaseJudge and JudgeResult classes,
+and provides git-sizer-specific extensions.
+"""
 
 from __future__ import annotations
 
 import json
-import subprocess
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any
 
+# Import from shared module - eliminates duplicate code
+from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult
 
-@dataclass
-class JudgeResult:
-    """Result from an LLM judge evaluation."""
-
-    dimension: str
-    score: int  # 1-5
-    confidence: float  # 0.0-1.0
-    reasoning: str
-    evidence_cited: list[str] = field(default_factory=list)
-    recommendations: list[str] = field(default_factory=list)
-    sub_scores: dict[str, int] = field(default_factory=dict)
-    raw_response: str = ""
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        return asdict(self)
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> JudgeResult:
-        """Create from dictionary."""
-        return cls(
-            dimension=data.get("dimension", "unknown"),
-            score=data.get("score", 0),
-            confidence=data.get("confidence", 0.0),
-            reasoning=data.get("reasoning", ""),
-            evidence_cited=data.get("evidence_cited", []),
-            recommendations=data.get("recommendations", []),
-            sub_scores=data.get("sub_scores", {}),
-            raw_response=data.get("raw_response", ""),
-        )
+# Re-export JudgeResult for backwards compatibility
+__all__ = ["BaseJudge", "JudgeResult"]
 
 
-class BaseJudge(ABC):
-    """Base class for LLM judges.
+class BaseJudge(SharedBaseJudge):
+    """Git-sizer-specific base judge for repository health analysis.
 
-    Each judge evaluates a specific dimension of git-sizer repository
-    health analysis quality. Judges invoke Claude Code in headless mode
-    with specialized prompts.
-
-    Note: In Caldera, output files follow envelope format with metadata and data.
-    Judges should use load_analysis() to get data in a normalized structure.
+    Extends the shared BaseJudge with git-sizer-specific functionality:
+    - Caldera envelope format handling
+    - Multi-repo results support
+    - Programmatic summary building
     """
 
     def __init__(
@@ -59,43 +32,35 @@ class BaseJudge(ABC):
         timeout: int = 120,
         working_dir: Path | None = None,
         analysis_path: Path | None = None,
+        trace_id: str | None = None,
+        enable_observability: bool = True,
+        evaluation_mode: str | None = None,
     ):
-        self.model = model
-        self.timeout = timeout
-        self.working_dir = working_dir or Path.cwd()
+        """Initialize the git-sizer judge.
+
+        Args:
+            model: Model name ("sonnet", "opus", "haiku") or full API ID
+            timeout: Timeout in seconds for LLM invocation
+            working_dir: Working directory for the tool
+            analysis_path: Path to the git-sizer analysis JSON file
+            trace_id: Correlation ID for linking all judges in one evaluation run
+            enable_observability: Whether to log LLM interactions (default True)
+            evaluation_mode: Evaluation mode ("synthetic", "real_world", or None for auto-detect)
+        """
+        super().__init__(
+            model=model,
+            timeout=timeout,
+            working_dir=working_dir,
+            trace_id=trace_id,
+            enable_observability=enable_observability,
+            evaluation_mode=evaluation_mode,
+        )
         self.analysis_path = analysis_path or self.working_dir / "output" / "output.json"
-        self._prompt_template: str | None = None
-
-    @property
-    @abstractmethod
-    def dimension_name(self) -> str:
-        """Name of the evaluation dimension."""
-        ...
-
-    @property
-    @abstractmethod
-    def weight(self) -> float:
-        """Weight of this dimension in the overall score (0.0-1.0)."""
-        ...
 
     @property
     def prompt_file(self) -> Path:
         """Path to the prompt template file."""
         return Path(__file__).parent.parent / "prompts" / f"{self.dimension_name}.md"
-
-    def load_prompt_template(self) -> str:
-        """Load the prompt template from file."""
-        if self._prompt_template is None:
-            if self.prompt_file.exists():
-                self._prompt_template = self.prompt_file.read_text()
-            else:
-                self._prompt_template = self.get_default_prompt()
-        return self._prompt_template
-
-    @abstractmethod
-    def get_default_prompt(self) -> str:
-        """Return the default prompt template if file doesn't exist."""
-        ...
 
     def load_analysis(self) -> dict[str, Any]:
         """Load analysis from Caldera envelope format.
@@ -135,17 +100,61 @@ class BaseJudge(ABC):
         # Already in multi-repo format (from evaluate.py aggregation)
         return raw
 
-    @abstractmethod
-    def collect_evidence(self) -> dict[str, Any]:
-        """Collect evidence files and data for evaluation."""
-        ...
+    def _build_programmatic_summary(self) -> str:
+        """Build a short summary of programmatic checks and results."""
+        candidates = []
+        analysis_dir = self.analysis_path.parent
+        candidates.append(analysis_dir / "evaluation_report.json")
+        candidates.append(analysis_dir / "checks.json")
+        candidates.append(self.working_dir / "evaluation" / "results" / "evaluation_report.json")
+        candidates.append(self.working_dir / "evaluation" / "results" / "checks.json")
+
+        report_path = next((p for p in candidates if p.exists()), None)
+        if not report_path:
+            return "Programmatic evaluation summary unavailable."
+
+        try:
+            report = json.loads(report_path.read_text())
+        except Exception:
+            return "Programmatic evaluation summary unavailable (invalid JSON)."
+
+        summary = report.get("summary", {})
+        score = summary.get("score", report.get("score", "n/a"))
+        failed = summary.get("failed", report.get("failed", "n/a"))
+        total = summary.get("total", report.get("total", "n/a"))
+
+        lines = [
+            "Programmatic Checks Summary:",
+            f"- Score: {score} | Failed: {failed} | Total: {total}",
+        ]
+
+        checks = report.get("checks", [])
+        if checks:
+            for check in checks[:10]:
+                check_id = check.get("check_id", "unknown")
+                name = check.get("name", "check")
+                message = check.get("message", "").strip()
+                if message:
+                    lines.append(f"- {check_id} {name}: {message}")
+                else:
+                    lines.append(f"- {check_id} {name}")
+            if len(checks) > 10:
+                lines.append(f"- … {len(checks) - 10} more checks")
+
+        return "\n".join(lines)
 
     def build_prompt(self, evidence: dict[str, Any]) -> str:
-        """Build the complete prompt with evidence."""
+        """Build the complete prompt with evidence.
+
+        Overrides parent to support per-key placeholder replacement
+        and programmatic summary injection.
+        """
         template = self.load_prompt_template()
 
         # Replace placeholders in template
         prompt = template
+        if "{{ programmatic_summary }}" in prompt and "programmatic_summary" not in evidence:
+            evidence = {**evidence, "programmatic_summary": self._build_programmatic_summary()}
         for key, value in evidence.items():
             placeholder = f"{{{{ {key} }}}}"
             if isinstance(value, (dict, list)):
@@ -154,73 +163,38 @@ class BaseJudge(ABC):
                 value_str = str(value)
             prompt = prompt.replace(placeholder, value_str)
 
+        if "{{" in prompt or "}}" in prompt:
+            raise ValueError("Unresolved prompt placeholders detected")
+        if "Respond with ONLY a JSON object" not in prompt:
+            prompt = (
+                prompt
+                + "\n\nRespond with ONLY a JSON object. Do not use markdown fences or extra text."
+            )
+
         return prompt
 
     def parse_response(self, response: str) -> JudgeResult:
-        """Parse the LLM response into a structured result."""
-        try:
-            # Try to extract JSON from the response
-            json_start = response.find("{")
-            json_end = response.rfind("}") + 1
-            if json_start >= 0 and json_end > json_start:
-                json_str = response[json_start:json_end]
-                data = json.loads(json_str)
-                result = JudgeResult.from_dict(data)
-                result.dimension = self.dimension_name
-                result.raw_response = response
-                return result
-        except json.JSONDecodeError:
-            pass
+        """Parse the LLM response into a structured result.
 
-        # Fallback: extract score from text
-        score = 3  # Default to middle score
-        for i in range(5, 0, -1):
-            if f"score: {i}" in response.lower() or f"score:{i}" in response.lower():
-                score = i
-                break
-
-        return JudgeResult(
-            dimension=self.dimension_name,
-            score=score,
-            confidence=0.5,
-            reasoning=response[:500],
-            raw_response=response,
-        )
-
-    def invoke_claude(self, prompt: str) -> str:
-        """Invoke Claude Code in headless mode."""
-        try:
-            # Pass prompt directly via stdin
-            cmd = [
-                "claude",
-                "-p", "-",  # Read from stdin
-                "--model", self.model,
-                "--output-format", "text",
-                "--allowedTools", "",
-                "--max-turns", "3",
-            ]
-
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                input=prompt,
-                timeout=self.timeout,
-                cwd=str(self.working_dir),
+        Overrides parent to handle empty responses gracefully.
+        """
+        if not response.strip():
+            return JudgeResult(
+                dimension=self.dimension_name,
+                score=1,
+                confidence=0.0,
+                reasoning="Empty response from Claude.",
+                evidence_cited=[],
+                recommendations=["LLM returned empty output; check Claude CLI logs and prompt."],
+                raw_response=response,
             )
-
-            if result.returncode != 0:
-                return f"Error: {result.stderr}"
-
-            return result.stdout
-
-        except subprocess.TimeoutExpired:
-            return "Error: Claude invocation timed out"
-        except Exception as e:
-            return f"Error: {e}"
+        return super().parse_response(response)
 
     def evaluate(self) -> JudgeResult:
-        """Run the full evaluation pipeline."""
+        """Run the full evaluation pipeline.
+
+        Overrides parent to handle error responses gracefully.
+        """
         # Collect evidence
         evidence = self.collect_evidence()
 
@@ -230,16 +204,18 @@ class BaseJudge(ABC):
         # Invoke Claude
         response = self.invoke_claude(prompt)
 
+        if response.strip().startswith("Error:"):
+            return JudgeResult(
+                dimension=self.dimension_name,
+                score=1,
+                confidence=0.0,
+                reasoning=response.strip(),
+                evidence_cited=[],
+                recommendations=["LLM execution error; check Claude CLI availability and stderr"],
+                raw_response=response,
+            )
+
         # Parse response
         result = self.parse_response(response)
 
         return result
-
-    def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
-        """Run ground truth assertions before LLM evaluation.
-
-        Returns:
-            Tuple of (all_passed, list of failure messages)
-        """
-        # Default: no assertions, always pass
-        return True, []

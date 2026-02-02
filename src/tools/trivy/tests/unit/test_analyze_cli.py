@@ -212,6 +212,7 @@ class TestRunAnalysis:
 
         result = run_analysis(config)
 
-        output_file = tmp_path / "output" / "test-repo.json"
+        output_file = tmp_path / "output" / "output.json"
         assert output_file.exists()
+        assert result["id"] == "test-repo"  # ID used for ground truth matching
         assert result["metadata"]["tool_name"] == "trivy"

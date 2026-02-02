@@ -170,9 +170,9 @@ evaluate-llm: $(VENV_READY) analyze
 	@$(PYTHON_VENV) scripts/llm_evaluate.py \
 		--analysis $(OUTPUT_DIR)/output.json \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
-		--model opus
+		--model $(LLM_MODEL)
 	@mkdir -p evaluation/results
-	@cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json
+	@if [ -w evaluation/results ]; then cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json; fi
 	@echo ""
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"
 
@@ -181,7 +181,7 @@ evaluate-llm-focused: $(VENV_READY)
 	@$(PYTHON_VENV) scripts/llm_evaluate.py \
 		--analysis $(OUTPUT_DIR)/output.json \
 		--output $(OUTPUT_DIR)/llm_evaluation_focused.json \
-		--model opus \
+		--model opus-4.5 \
 		--skip-judge security_coverage \
 		--skip-judge false_positive_rate \
 		--skip-judge actionability
@@ -191,7 +191,7 @@ evaluate-combined: $(VENV_READY) analyze evaluate
 	@$(PYTHON_VENV) scripts/llm_evaluate.py \
 		--analysis $(OUTPUT_DIR)/output.json \
 		--output $(OUTPUT_DIR)/combined_evaluation.json \
-		--model opus \
+		--model opus-4.5 \
 		--programmatic-score 0.857
 	@echo ""
 	@echo "Combined results saved to $(OUTPUT_DIR)/combined_evaluation.json"

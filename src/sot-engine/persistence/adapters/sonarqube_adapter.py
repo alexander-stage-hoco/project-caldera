@@ -6,9 +6,8 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import SonarqubeIssue, SonarqubeMetric
 from ..repositories import LayoutRepository, SonarqubeRepository, ToolRunRepository
-from ..validation import (
-    check_required,
-)
+from common.path_normalization import is_repo_relative_path, normalize_file_path
+from ..validation import check_required
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "sonarqube" / "schemas" / "output.schema.json"
 LZ_TABLES = {
@@ -83,6 +82,7 @@ TABLE_DDL = {
         )
     """,
 }
+QUALITY_RULES = ["paths", "line_numbers", "required_fields"]
 
 
 class SonarqubeAdapter(BaseAdapter):
@@ -152,6 +152,14 @@ class SonarqubeAdapter(BaseAdapter):
         for issue_idx, issue in enumerate(issues):
             errors.extend(check_required(issue.get("key"), f"issues[{issue_idx}].key"))
             errors.extend(check_required(issue.get("rule"), f"issues[{issue_idx}].rule"))
+            component_key = issue.get("component", "")
+            if components:
+                component = components.get(component_key, {})
+                raw_path = component.get("path", "")
+                if raw_path:
+                    normalized = normalize_file_path(raw_path, self._repo_root)
+                    if not is_repo_relative_path(normalized):
+                        errors.append(f"issues[{issue_idx}].path is not repo-relative: {raw_path}")
             line = issue.get("line")
             if line is not None and line < 1:
                 errors.append(f"issues[{issue_idx}].line must be >= 1")

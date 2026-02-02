@@ -2,6 +2,17 @@
 # Include this file in tool Makefiles: include ../Makefile.common
 
 # =============================================================================
+# Project Root Configuration
+# =============================================================================
+
+# SRC_ROOT points to src/ directory (two levels up from each tool)
+# This enables imports of shared modules like 'from shared.evaluation import ...'
+SRC_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))..)
+
+# Export PYTHONPATH so tools can import from src/shared/
+export PYTHONPATH := $(SRC_ROOT)
+
+# =============================================================================
 # Python Virtual Environment
 # =============================================================================
 
@@ -47,7 +58,7 @@ TIMESTAMP ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 #   COMMIT ?= $(shell git -C $(REPO_PATH) rev-parse HEAD 2>/dev/null || echo "")
 
 # LLM model configuration (default: sonnet)
-LLM_MODEL ?= sonnet
+LLM_MODEL ?= opus-4.5
 
 # =============================================================================
 # Common Targets
@@ -76,3 +87,23 @@ _common-clean:
 
 _common-clean-all: _common-clean
 	rm -rf $(VENV)
+
+# =============================================================================
+# Ground Truth Seeding
+# =============================================================================
+
+# Seed ground truth from analysis output
+# Usage: make seed-ground-truth OUTPUT_FILE=outputs/run-1/output.json [OUTPUT_NAME=my_repo]
+.PHONY: _common-seed-ground-truth
+
+SEED_SCRIPT ?= ../../../scripts/seed_ground_truth.py
+TOOL_NAME ?= $(notdir $(CURDIR))
+
+_common-seed-ground-truth:
+ifndef OUTPUT_FILE
+	@echo "Error: OUTPUT_FILE is required. Usage: make seed-ground-truth OUTPUT_FILE=path/to/output.json"
+	@exit 1
+endif
+	@echo "Seeding ground truth for $(TOOL_NAME) from $(OUTPUT_FILE)..."
+	@python3 $(SEED_SCRIPT) $(TOOL_NAME) $(OUTPUT_FILE) $(if $(OUTPUT_NAME),--output-name $(OUTPUT_NAME),)
+	@echo "Ground truth seeded! Review and verify the generated file."

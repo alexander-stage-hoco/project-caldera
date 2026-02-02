@@ -166,7 +166,7 @@ def real_evaluation_results(evaluation_dir: Path) -> dict:
     if not results_dir.exists():
         pytest.skip(f"results directory not found at {results_dir}. Run 'make evaluate' first.")
 
-    results_file = results_dir / "checks.json"
+    results_file = results_dir / "evaluation_report.json"
     if not results_file.exists():
         pytest.skip("No evaluation results found. Run 'make evaluate' first.")
 

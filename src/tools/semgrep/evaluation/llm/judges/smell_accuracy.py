@@ -28,7 +28,11 @@ class SmellAccuracyJudge(BaseJudge):
         return 0.35  # 35% of total score
 
     def collect_evidence(self) -> dict[str, Any]:
-        """Load analysis output and ground truth for comparison."""
+        """Load analysis output and ground truth for comparison.
+
+        For real-world evaluation mode, also injects synthetic evaluation
+        context to help the LLM understand tool baseline capability.
+        """
         gt_dir = self.working_dir / "evaluation" / "ground-truth"
 
         # Load analysis from all output files
@@ -123,7 +127,8 @@ class SmellAccuracyJudge(BaseJudge):
 
         summary = analysis.get("summary", {})
 
-        return {
+        evidence: dict[str, Any] = {
+            "evaluation_mode": self.evaluation_mode,
             "sample_smells": sample_smells,
             "ground_truth_comparison": comparison,
             "by_category": by_category,
@@ -133,6 +138,17 @@ class SmellAccuracyJudge(BaseJudge):
             "categories_covered": list(by_category.keys()),
             "gt_expectations": gt_expectations[:15],
         }
+
+        # Inject synthetic context for real-world evaluation
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context:
+                evidence["synthetic_baseline"] = synthetic_context
+                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                    synthetic_context
+                )
+
+        return evidence
 
     def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
         """Validate smell detection against ground truth."""

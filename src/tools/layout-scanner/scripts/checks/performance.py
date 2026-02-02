@@ -283,6 +283,8 @@ def check_deep_nesting_performance(
     if max_depth == 0:
         # Try to infer from file paths
         files = output.get("files", [])
+        if isinstance(files, dict):
+            files = list(files.values())
         if files:
             max_depth = max(
                 (f.get("path", "").count("/") for f in files),

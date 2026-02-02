@@ -8,6 +8,11 @@ lizard_runs as (
     from {{ source('lz', 'lz_tool_runs') }}
     where tool_name = 'lizard'
 ),
+semgrep_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'semgrep'
+),
 layout_runs as (
     select run_pk, collection_run_id
     from {{ source('lz', 'lz_tool_runs') }}
@@ -16,23 +21,33 @@ layout_runs as (
 scc_map as (
     select
         sr.run_pk as tool_run_pk,
-        lr.run_pk as layout_run_pk
+        sr.collection_run_id,
+        lr.run_pk as layout_run_pk,
+        sg.run_pk as semgrep_run_pk
     from scc_runs sr
     join layout_runs lr
         on lr.collection_run_id = sr.collection_run_id
+    left join semgrep_runs sg
+        on sg.collection_run_id = sr.collection_run_id
 ),
 lizard_map as (
     select
         lr.run_pk as tool_run_pk,
-        lrn.run_pk as layout_run_pk
+        lr.collection_run_id,
+        lrn.run_pk as layout_run_pk,
+        sg.run_pk as semgrep_run_pk
     from lizard_runs lr
     join layout_runs lrn
         on lrn.collection_run_id = lr.collection_run_id
+    left join semgrep_runs sg
+        on sg.collection_run_id = lr.collection_run_id
 ),
 scc_files as (
     select
         sm.run_pk,
+        rm.collection_run_id,
         rm.layout_run_pk,
+        rm.semgrep_run_pk,
         sm.file_id,
         sm.lines_total,
         sm.code_lines,
@@ -46,7 +61,9 @@ scc_files as (
 lizard_files as (
     select
         lm.run_pk,
+        rm.collection_run_id,
         rm.layout_run_pk,
+        rm.semgrep_run_pk,
         lm.file_id,
         lm.nloc,
         lm.total_ccn as lizard_total_ccn,
@@ -59,6 +76,10 @@ lizard_files as (
 combined as (
     select
         coalesce(scc.run_pk, lizard.run_pk) as run_pk,
+        coalesce(scc.collection_run_id, lizard.collection_run_id) as collection_run_id,
+        scc.run_pk as scc_run_pk,
+        lizard.run_pk as lizard_run_pk,
+        coalesce(scc.semgrep_run_pk, lizard.semgrep_run_pk) as semgrep_run_pk,
         coalesce(scc.layout_run_pk, lizard.layout_run_pk) as layout_run_pk,
         coalesce(scc.file_id, lizard.file_id) as file_id,
         scc.lines_total,
@@ -82,6 +103,11 @@ combined as (
 )
 select
     combined.run_pk,
+    combined.collection_run_id,
+    combined.scc_run_pk,
+    combined.lizard_run_pk,
+    combined.semgrep_run_pk,
+    combined.layout_run_pk,
     combined.file_id,
     lf.relative_path,
     lf.directory_id,

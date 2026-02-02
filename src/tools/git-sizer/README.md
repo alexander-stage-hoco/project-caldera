@@ -23,7 +23,7 @@ make analyze REPO_PATH=/path/to/repo
 # Run evaluation
 make evaluate
 
-# Run LLM evaluation
+# Run LLM evaluation (Claude CLI, model = opus-4.5)
 make evaluate-llm
 
 # Run tests

@@ -1,0 +1,44 @@
+{
+  "scenario": "basic",
+  "description": "Basic repository with standard metrics",
+  "expected_data": {
+    "repo_health": {
+      "total_files": 150,
+      "total_loc": 25000,
+      "total_code": 20000,
+      "total_comment": 3000,
+      "avg_ccn": 4.5,
+      "max_ccn": 25,
+      "health_grade": "B"
+    },
+    "vulnerabilities": {
+      "total_count": 5,
+      "critical_count": 0,
+      "high_count": 1,
+      "summary": [
+        {"severity": "HIGH", "count": 1},
+        {"severity": "MEDIUM", "count": 2},
+        {"severity": "LOW", "count": 2}
+      ]
+    },
+    "file_hotspots": {
+      "complexity_hotspot_count": 8,
+      "has_compound_hotspots": false
+    },
+    "languages": [
+      {"language": "Python", "file_count": 80, "loc": 15000},
+      {"language": "JavaScript", "file_count": 40, "loc": 8000},
+      {"language": "Markdown", "file_count": 20, "loc": 1500}
+    ]
+  },
+  "expected_sections": [
+    "repo_health",
+    "file_hotspots",
+    "vulnerabilities"
+  ],
+  "validation_rules": {
+    "accuracy_tolerance": 0.01,
+    "require_all_sections": true,
+    "require_severity_breakdown": true
+  }
+}

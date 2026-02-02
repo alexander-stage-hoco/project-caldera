@@ -25,6 +25,14 @@ roslyn_run as (
     where tr.tool_name in ('roslyn', 'roslyn-analyzers')
     limit 1
 ),
+git_sizer_run as (
+    select tr.run_pk as git_sizer_run_pk
+    from tool_runs tr
+    join run_summary rs
+        on rs.collection_run_id = tr.collection_run_id
+    where tr.tool_name = 'git-sizer'
+    limit 1
+),
 root_scc as (
     select *
     from {{ ref('rollup_scc_directory_recursive_distributions') }}
@@ -57,6 +65,11 @@ root_roslyn as (
         partition by run_pk, metric
         order by length(directory_path), directory_path
     ) = 1
+),
+repo_health as (
+    select *
+    from {{ ref('repo_health_summary') }}
+    where run_pk = (select git_sizer_run_pk from git_sizer_run)
 )
 select
     rs.repo_id,
@@ -84,7 +97,24 @@ select
     roslyn_v.p99_value as roslyn_violation_p99,
     roslyn_v.gini_value as roslyn_violation_gini,
     roslyn_v.hoover_value as roslyn_violation_hoover,
-    roslyn_v.top_20_pct_share as roslyn_violation_top_20_share
+    roslyn_v.top_20_pct_share as roslyn_violation_top_20_share,
+    -- Git-sizer health assessment
+    rh.health_grade,
+    rh.violation_count as git_sizer_violations,
+    rh.max_violation_level,
+    rh.lfs_candidate_count,
+    -- Repository structure metrics
+    rh.commit_count,
+    rh.blob_count,
+    rh.blob_total_size,
+    rh.max_blob_size,
+    rh.tree_count,
+    rh.max_tree_entries,
+    rh.max_path_depth,
+    rh.max_path_length,
+    rh.reference_count,
+    rh.branch_count,
+    rh.tag_count
 from run_summary rs
 left join root_scc scc_loc
     on scc_loc.run_pk = rs.run_pk
@@ -93,3 +123,4 @@ left join root_lizard lizard_ccn
     on lizard_ccn.metric = 'total_ccn'
 left join root_roslyn roslyn_v
     on roslyn_v.metric = 'violation_count'
+left join repo_health rh on true

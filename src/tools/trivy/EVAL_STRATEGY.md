@@ -78,9 +78,11 @@ All evaluation dimensions with their check counts and weights:
 
 ---
 
-## Programmatic Checks (12 Total)
+## Complete Check Catalog
 
-### Accuracy Checks (TR-AC-1 to TR-AC-5)
+### Programmatic Checks (12 Total)
+
+#### Accuracy Checks (TR-AC-1 to TR-AC-5)
 
 | ID | Name | Severity | Pass Criteria |
 |----|------|----------|---------------|
@@ -90,7 +92,7 @@ All evaluation dimensions with their check counts and weights:
 | TR-AC-4 | CVE ID presence | High | All expected CVEs detected |
 | TR-AC-5 | Severity classification | Medium | Severities match CVE database |
 
-### Coverage Checks (TR-CV-1 to TR-CV-3)
+#### Coverage Checks (TR-CV-1 to TR-CV-3)
 
 | ID | Name | Severity | Pass Criteria |
 |----|------|----------|---------------|
@@ -98,7 +100,7 @@ All evaluation dimensions with their check counts and weights:
 | TR-CV-2 | Package coverage | Medium | All vulnerable packages identified |
 | TR-CV-3 | IaC file coverage | Medium | All IaC files scanned |
 
-### Completeness Checks (TR-CM-1 to TR-CM-4)
+#### Completeness Checks (TR-CM-1 to TR-CM-4)
 
 | ID | Name | Severity | Pass Criteria |
 |----|------|----------|---------------|
@@ -172,6 +174,50 @@ All evaluation dimensions with their check counts and weights:
 
 ---
 
+## Scoring Methodology
+
+### Aggregate Score Calculation
+
+The overall score combines programmatic and LLM evaluations:
+
+```
+total_score = (
+    accuracy_score * 0.40 +
+    coverage_score * 0.30 +
+    completeness_score * 0.30
+) * 0.60 + llm_score * 0.40
+```
+
+### Programmatic Check Scoring
+
+Each programmatic check returns:
+- `pass`: 100 points
+- `warn`: 50 points
+- `fail`: 0 points
+
+Dimension score = (sum of check scores) / (max possible) * 5
+
+### LLM Judge Scoring
+
+Each LLM judge returns a score 1-5:
+- 5: Excellent - all criteria met
+- 4: Good - minor issues
+- 3: Acceptable - some gaps
+- 2: Poor - significant issues
+- 1: Unacceptable - unreliable
+
+### Score Aggregation
+
+```python
+# Normalize programmatic score to 1-5 scale
+programmatic_normalized = 1 + (programmatic_score * 4)  # 0-1 -> 1-5
+
+# Weighted combination (60/40 split)
+combined_score = (0.60 * programmatic_normalized) + (0.40 * llm_score)
+```
+
+---
+
 ## Test Scenarios
 
 ### Synthetic Repositories
@@ -211,7 +257,7 @@ make evaluate VERBOSE=1
 make evaluate-llm
 
 # Specific model
-make evaluate-llm MODEL=sonnet
+make evaluate-llm MODEL=opus-4.5
 ```
 
 ---

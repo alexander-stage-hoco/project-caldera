@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "tool_name": "gitleaks",
+    "tool_version": "8.18.4",
+    "run_id": "425A3426-BD93-4D75-A0DE-3D411DCAE977",
+    "repo_id": "D4F60360-62DA-4C19-9C02-83ECF8118F50",
+    "branch": "main",
+    "commit": "dfd34ec7c7c3c4056417a9b8316946a2cae7473a",
+    "timestamp": "2026-02-02T10:10:39.521353+00:00",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "gitleaks",
+    "tool_version": "8.18.4",
+    "total_secrets": 2,
+    "unique_secrets": 2,
+    "secrets_in_head": 2,
+    "secrets_in_history": 0,
+    "files_with_secrets": 2,
+    "commits_with_secrets": 1,
+    "secrets_by_rule": {
+      "github-pat": 1,
+      "stripe-access-token": 1
+    },
+    "secrets_by_severity": {
+      "HIGH": 2
+    },
+    "findings": [
+      {
+        "file_path": ".env",
+        "line_number": 3,
+        "rule_id": "github-pat",
+        "secret_type": "github-pat",
+        "description": "Uncovered a GitHub Personal Access Token, potentially leading to unauthorized repository access and sensitive content exposure.",
+        "secret_preview": "ghp_xxxx********************************",
+        "entropy": 0.6689956,
+        "commit_hash": "dfd34ec7c7c3c4056417a9b8316946a2cae7473a",
+        "commit_author": "Test User",
+        "commit_date": "2026-01-05T23:46:55Z",
+        "fingerprint": "dfd34ec7c7c3c4056417a9b8316946a2cae7473a:.env:github-pat:3",
+        "in_current_head": true,
+        "severity": "HIGH"
+      },
+      {
+        "file_path": "config/api.py",
+        "line_number": 5,
+        "rule_id": "stripe-access-token",
+        "secret_type": "stripe-access-token",
+        "description": "Found a Stripe Access Token, posing a risk to payment processing services and sensitive financial data.",
+        "secret_preview": "sk_live_*************************************",
+        "entropy": 4.3463225,
+        "commit_hash": "dfd34ec7c7c3c4056417a9b8316946a2cae7473a",
+        "commit_author": "Test User",
+        "commit_date": "2026-01-05T23:46:55Z",
+        "fingerprint": "dfd34ec7c7c3c4056417a9b8316946a2cae7473a:config/api.py:stripe-access-token:5",
+        "in_current_head": true,
+        "severity": "HIGH"
+      }
+    ],
+    "files": {
+      ".env": {
+        "file_path": ".env",
+        "secret_count": 1,
+        "rule_ids": [
+          "github-pat"
+        ],
+        "earliest_commit": "dfd34ec7c7c3c4056417a9b8316946a2cae7473a",
+        "latest_commit": "dfd34ec7c7c3c4056417a9b8316946a2cae7473a"
+      },
+      "config/api.py": {
+        "file_path": "config/api.py",
+        "secret_count": 1,
+        "rule_ids": [
+          "stripe-access-token"
+        ],
+        "earliest_commit": "dfd34ec7c7c3c4056417a9b8316946a2cae7473a",
+        "latest_commit": "dfd34ec7c7c3c4056417a9b8316946a2cae7473a"
+      }
+    },
+    "directories": {
+      "config": {
+        "direct_secret_count": 1,
+        "recursive_secret_count": 1,
+        "direct_file_count": 1,
+        "recursive_file_count": 1,
+        "rule_id_counts": {
+          "stripe-access-token": 1
+        }
+      },
+      ".": {
+        "direct_secret_count": 1,
+        "recursive_secret_count": 2,
+        "direct_file_count": 1,
+        "recursive_file_count": 2,
+        "rule_id_counts": {
+          "github-pat": 1,
+          "stripe-access-token": 1
+        }
+      }
+    },
+    "scan_time_ms": 31.97002410888672
+  }
+}

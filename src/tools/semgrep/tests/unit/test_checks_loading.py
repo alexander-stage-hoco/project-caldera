@@ -40,3 +40,20 @@ def test_load_analysis_passes_through_flat_payload(tmp_path: Path):
     analysis = load_analysis(analysis_path)
 
     assert analysis["files"][0]["path"] == "src/app.py"
+
+
+def test_load_analysis_unwraps_envelope(tmp_path: Path):
+    payload = {
+        "metadata": {"tool_name": "semgrep"},
+        "data": {
+            "files": [{"path": "src/app.py", "smells": []}],
+            "summary": {"total_files": 1},
+        },
+    }
+    analysis_path = tmp_path / "analysis.json"
+    analysis_path.write_text(json.dumps(payload))
+
+    analysis = load_analysis(analysis_path)
+
+    assert analysis["files"][0]["path"] == "src/app.py"
+    assert analysis["_root"]["metadata"]["tool_name"] == "semgrep"

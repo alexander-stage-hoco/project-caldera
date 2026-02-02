@@ -2,6 +2,22 @@
 
 You are an expert code quality analyst evaluating Semgrep as a code smell detection tool for due diligence technical assessments.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
+**Important**: When evaluation_mode is "real_world":
+- Low smell counts are NOT automatically failures
+- Judge output quality: schema compliance, rule ID completeness, category mapping
+- Judge detection quality: Are the smells that WERE detected accurate and well-categorized?
+- Consider: A tool that finds 0 smells in a clean repo with proper output format deserves a high score
+
 ## Context
 
 This evaluation measures precision and recall for code smell detection. The tool should accurately identify smells across multiple categories: async/concurrency issues, resource management problems, nullability concerns, API design flaws, and refactoring indicators.
@@ -37,12 +53,22 @@ The following JSON contains analysis results including detected smells, ground t
 
 ## Scoring Rubric
 
+### For Synthetic Repos (with ground truth):
 Score 1-5 where:
 - **5 (Excellent)**: >90% recall on expected smells, <5% false positive rate, accurate line numbers
 - **4 (Good)**: 80-90% recall, 5-10% false positive rate, mostly accurate locations
 - **3 (Acceptable)**: 65-80% recall, 10-15% false positive rate, some location inaccuracies
 - **2 (Poor)**: 50-65% recall, 15-25% false positive rate, frequent location errors
 - **1 (Unacceptable)**: <50% recall OR >25% false positive rate
+
+### For Real-World Repos (when synthetic_baseline shows validated tool):
+- **5 (Excellent)**: Output schema compliant, any smells are accurately categorized, metadata complete
+- **4 (Good)**: Minor schema issues but smells accurate, good categorization
+- **3 (Acceptable)**: Schema issues OR questionable smell categorization
+- **2 (Poor)**: Multiple schema issues AND questionable categorization
+- **1 (Failing)**: Broken output, missing required fields, obvious false positives
+
+**Key principle**: Do NOT penalize for low smell counts on real-world repos when the tool is validated (synthetic_score >= 0.9). A clean codebase with well-formed output deserves a high score.
 
 ## Response Format
 

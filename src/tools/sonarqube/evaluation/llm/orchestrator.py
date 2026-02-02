@@ -8,10 +8,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from shared.evaluation import require_observability
 
 from .judges.base import BaseJudge, JudgeResult
 
@@ -38,6 +41,27 @@ class DimensionResult:
 
 
 @dataclass
+class ProgrammaticInput:
+    """Reference to programmatic evaluation results."""
+
+    file: str
+    decision: str
+    score: float
+    checks_passed: int
+    checks_failed: int
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary."""
+        return {
+            "file": self.file,
+            "decision": self.decision,
+            "score": self.score,
+            "checks_passed": self.checks_passed,
+            "checks_failed": self.checks_failed,
+        }
+
+
+@dataclass
 class EvaluationResult:
     """Complete LLM evaluation result."""
 
@@ -50,17 +74,25 @@ class EvaluationResult:
     decision: str
     programmatic_score: float | None = None
     combined_score: float | None = None
+    programmatic_input: ProgrammaticInput | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
-            "run_id": self.run_id,
             "timestamp": self.timestamp,
             "model": self.model,
+            "decision": self.decision,
+            "score": self.total_score,
+            "programmatic_input": self.programmatic_input.to_dict() if self.programmatic_input else None,
             "dimensions": [d.to_dict() for d in self.dimensions],
+            "summary": {
+                "weighted_score": self.total_score,
+                "avg_confidence": self.average_confidence,
+            },
+            # Legacy fields for backward compatibility
+            "run_id": self.run_id,
             "total_score": self.total_score,
             "average_confidence": self.average_confidence,
-            "decision": self.decision,
             "programmatic_score": self.programmatic_score,
             "combined_score": self.combined_score,
         }
@@ -89,7 +121,7 @@ class LLMEvaluator:
     def __init__(
         self,
         working_dir: Path | None = None,
-        model: str = "opus",
+        model: str = "opus-4.5",
         results_dir: Path | None = None,
         analysis_path: Path | None = None,
     ):
@@ -131,8 +163,14 @@ class LLMEvaluator:
 
     def evaluate(self, run_assertions: bool = True) -> EvaluationResult:
         """Run evaluation with all registered judges."""
+        # Enforce observability - fail fast if disabled
+        require_observability()
+
         run_id = f"llm-eval-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
         timestamp = datetime.now(timezone.utc).isoformat()
+
+        # Generate trace ID to correlate all judge interactions
+        trace_id = str(uuid.uuid4())
 
         dimension_results: list[DimensionResult] = []
         total_weight = 0.0
@@ -370,8 +408,8 @@ def main():
     )
     parser.add_argument(
         "--model",
-        default="opus",
-        choices=["opus", "sonnet", "haiku"],
+        default="opus-4.5",
+        choices=["opus", "opus-4.5", "sonnet", "haiku"],
         help="Claude model to use for evaluation",
     )
     parser.add_argument(
@@ -388,6 +426,11 @@ def main():
         "--programmatic-score",
         type=float,
         help="Programmatic score (0-1) to combine with LLM score",
+    )
+    parser.add_argument(
+        "--programmatic-results",
+        type=Path,
+        help="Path to programmatic evaluation JSON (evaluation_report.json)",
     )
     parser.add_argument(
         "--output",
@@ -422,9 +465,25 @@ def main():
 
     result = evaluator.evaluate(run_assertions=not args.no_assertions)
 
+    # Load programmatic results and attach to result
+    programmatic_score = args.programmatic_score
+    if args.programmatic_results and args.programmatic_results.exists():
+        prog_data = json.loads(args.programmatic_results.read_text())
+        summary = prog_data.get("summary", {})
+        result.programmatic_input = ProgrammaticInput(
+            file=str(args.programmatic_results),
+            decision=prog_data.get("decision", "UNKNOWN"),
+            score=prog_data.get("score", 0.0),
+            checks_passed=summary.get("passed", 0),
+            checks_failed=summary.get("failed", 0),
+        )
+        # Use programmatic score from file if not explicitly provided
+        if programmatic_score is None:
+            programmatic_score = prog_data.get("score", 0.0)
+
     # Combine with programmatic score if provided
-    if args.programmatic_score is not None:
-        result = evaluator.compute_combined_score(result, args.programmatic_score)
+    if programmatic_score is not None:
+        result = evaluator.compute_combined_score(result, programmatic_score)
 
     # Print summary
     print(f"\n{'='*60}")

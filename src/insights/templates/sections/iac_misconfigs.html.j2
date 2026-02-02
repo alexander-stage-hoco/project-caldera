@@ -1,0 +1,134 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>IaC Misconfigurations</h2>
+
+    {% if not has_misconfigs %}
+    <div class="empty-state">
+        <p>No Infrastructure-as-Code misconfigurations found. This project may not contain IaC files, or all configurations pass security checks.</p>
+    </div>
+    {% else %}
+
+    <div class="risk-indicator risk-{{ risk_level }}">
+        Risk Level: {{ risk_level | title }}
+    </div>
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Misconfigurations</div>
+            <div class="value">{{ total_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Critical</div>
+            <div class="value" style="color: var(--color-critical);">{{ critical_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">High</div>
+            <div class="value" style="color: var(--color-high);">{{ high_count | format_number }}</div>
+        </div>
+    </div>
+
+    {% if summary %}
+    <div class="subsection">
+        <h3>By Severity</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Severity</th>
+                    <th class="number">Count</th>
+                    <th class="number">Affected Files</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for s in summary %}
+                <tr>
+                    <td><span class="severity-badge {{ s.severity | severity_class }}">{{ s.severity }}</span></td>
+                    <td class="number">{{ s.count | format_number }}</td>
+                    <td class="number">{{ s.affected_files | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if by_type %}
+    <div class="subsection">
+        <h3>By IaC Type</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th class="number">Count</th>
+                    <th class="number">Critical</th>
+                    <th class="number">High</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for t in by_type %}
+                <tr>
+                    <td>{{ t.iac_type | title }}</td>
+                    <td class="number">{{ t.count | format_number }}</td>
+                    <td class="number">{{ t.critical_count | format_number }}</td>
+                    <td class="number">{{ t.high_count | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if top_misconfigs %}
+    <div class="subsection">
+        <h3>Top Misconfigurations</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Severity</th>
+                    <th>Type</th>
+                    <th>Title</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for m in top_misconfigs[:15] %}
+                <tr>
+                    <td><code>{{ m.misconfig_id }}</code></td>
+                    <td><span class="severity-badge {{ m.severity | severity_class }}">{{ m.severity }}</span></td>
+                    <td>{{ m.iac_type }}</td>
+                    <td class="truncate" title="{{ m.title }}">{{ m.title }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if affected_files %}
+    <div class="subsection">
+        <h3>Affected Files</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Type</th>
+                    <th class="number">Total</th>
+                    <th class="number">Critical</th>
+                    <th class="number">High</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in affected_files[:10] %}
+                <tr>
+                    <td class="truncate" title="{{ f.file_path }}">{{ f.file_path | truncate_path }}</td>
+                    <td>{{ f.iac_type }}</td>
+                    <td class="number">{{ f.misconfig_count | format_number }}</td>
+                    <td class="number">{{ f.critical_count | format_number }}</td>
+                    <td class="number">{{ f.high_count | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

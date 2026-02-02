@@ -3,6 +3,9 @@
 This module provides a standardized BaseJudge implementation for use across
 all Project Caldera analysis tools. Each tool's LLM judges should inherit
 from this class.
+
+Observability is automatically integrated - all LLM invocations are logged
+to the observability module for debugging and analysis.
 """
 
 from __future__ import annotations
@@ -11,6 +14,8 @@ import json
 import os
 import shutil
 import subprocess
+import tempfile
+import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
@@ -22,6 +27,20 @@ try:
 except Exception:
     anthropic = None
     HAS_ANTHROPIC_SDK = False
+
+# Import observability module
+try:
+    from shared.observability import (
+        get_llm_logger,
+        LLMLogger,
+        get_config as get_observability_config,
+    )
+    HAS_OBSERVABILITY = True
+except ImportError:
+    HAS_OBSERVABILITY = False
+    get_llm_logger = None  # type: ignore
+    LLMLogger = None  # type: ignore
+    get_observability_config = None  # type: ignore
 
 
 @dataclass
@@ -115,31 +134,51 @@ class BaseJudge(ABC):
                 return "..."
     """
 
-    # Model name to API ID mapping
+    # Model name to API ID mapping (for SDK/logging)
     MODEL_MAP = {
         "sonnet": "claude-sonnet-4-20250514",
         "opus": "claude-opus-4-20250514",
+        "opus-4.5": "claude-opus-4-5-20250514",
         "haiku": "claude-haiku-4-20250514",
+    }
+
+    # Model name to CLI alias mapping (CLI doesn't understand "opus-4.5")
+    CLI_MODEL_MAP = {
+        "opus-4.5": "opus",  # CLI uses "opus" for latest Opus model
+    }
+
+    # Known synthetic repo patterns for auto-detection
+    SYNTHETIC_PATTERNS = {
+        "api-keys", "aws-credentials", "database-creds", "private-keys",
+        "no-secrets", "mixed-secrets", "historical-secrets", "cloud-mixed",
+        "synthetic", "vulnerable-npm", "clean-npm", "null-safety",
+        "async-patterns", "resource-management", "api-conventions",
     }
 
     def __init__(
         self,
-        model: str = "sonnet",
+        model: str = "opus-4.5",
         timeout: int = 120,
         working_dir: Path | None = None,
         output_dir: Path | None = None,
         ground_truth_dir: Path | None = None,
         use_llm: bool = True,
+        trace_id: str | None = None,
+        enable_observability: bool = True,
+        evaluation_mode: str | None = None,
     ):
         """Initialize the judge.
 
         Args:
-            model: Model name ("sonnet", "opus", "haiku") or full API ID
+            model: Model name ("sonnet", "opus", "opus-4.5", "haiku") or full API ID
             timeout: Timeout in seconds for LLM invocation
             working_dir: Working directory for the tool
             output_dir: Directory containing analysis output files
             ground_truth_dir: Directory containing ground truth files
             use_llm: Whether to use LLM evaluation (False for heuristic-only)
+            trace_id: Correlation ID for linking all judges in one evaluation run
+            enable_observability: Whether to log LLM interactions (default True)
+            evaluation_mode: Evaluation mode ("synthetic", "real_world", or None for auto-detect)
         """
         self.model = model
         self.timeout = timeout
@@ -148,6 +187,133 @@ class BaseJudge(ABC):
         self.ground_truth_dir = ground_truth_dir or self.working_dir / "evaluation" / "ground-truth"
         self.use_llm = use_llm
         self._prompt_template: str | None = None
+        self._evaluation_mode = evaluation_mode
+
+        # Observability
+        self._trace_id = trace_id or str(uuid.uuid4())
+        self._enable_observability = enable_observability and HAS_OBSERVABILITY
+        self._logger: LLMLogger | None = None
+
+        # Initialize logger if observability is enabled
+        if self._enable_observability and get_llm_logger is not None:
+            config = get_observability_config()
+            if config and config.enabled:
+                self._logger = get_llm_logger()
+
+    @property
+    def trace_id(self) -> str:
+        """Get the trace ID for this judge."""
+        return self._trace_id
+
+    @property
+    def evaluation_mode(self) -> str:
+        """Detect whether we're evaluating synthetic or real-world repos.
+
+        Returns:
+            "synthetic" if evaluating repos with known ground truth
+            "real_world" if evaluating production/real-world repos
+        """
+        if self._evaluation_mode:
+            return self._evaluation_mode
+
+        # Auto-detect based on output directory structure
+        # Synthetic repos have known scenario names; real-world repos have UUIDs or repo names
+        if self.output_dir.exists():
+            subdirs = {d.name for d in self.output_dir.iterdir() if d.is_dir()}
+            # Also check for JSON files with synthetic pattern names
+            json_stems = {f.stem for f in self.output_dir.glob("*.json") if not f.name.startswith(".")}
+            all_names = subdirs | json_stems
+
+            if any(pattern in all_names for pattern in self.SYNTHETIC_PATTERNS):
+                return "synthetic"
+
+        return "real_world"
+
+    def load_synthetic_evaluation_context(self) -> dict[str, Any] | None:
+        """Load evaluation results from synthetic repo runs.
+
+        Returns summary of tool performance on synthetic repos with known ground truth.
+        This provides baseline context for evaluating real-world repos.
+
+        Returns:
+            Dictionary with synthetic evaluation summary, or None if not available.
+        """
+        # Look for evaluation_report.json in the evaluation results directory
+        eval_report_path = self.working_dir / "evaluation" / "results" / "evaluation_report.json"
+        if not eval_report_path.exists():
+            return None
+
+        try:
+            report = json.loads(eval_report_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            return None
+
+        # Extract relevant fields for context
+        checks = report.get("checks", [])
+        validated_capabilities = [
+            check["name"] for check in checks
+            if check.get("status") == "PASS"
+        ]
+        failed_checks = [
+            check["name"] for check in checks
+            if check.get("status") == "FAIL"
+        ]
+
+        return {
+            "tool": report.get("tool", "unknown"),
+            "synthetic_score": report.get("score", 0.0),
+            "decision": report.get("decision", "UNKNOWN"),
+            "checks_summary": report.get("summary", {}),
+            "categories": report.get("categories", {}),
+            "validated_capabilities": validated_capabilities,
+            "failed_checks": failed_checks,
+            "timestamp": report.get("timestamp", ""),
+        }
+
+    def get_interpretation_guidance(self, synthetic_context: dict[str, Any]) -> str:
+        """Generate interpretation guidance based on synthetic context.
+
+        Args:
+            synthetic_context: Results from load_synthetic_evaluation_context()
+
+        Returns:
+            Guidance string to include in evidence for the LLM.
+        """
+        score = synthetic_context.get("synthetic_score", 0.0)
+        decision = synthetic_context.get("decision", "UNKNOWN")
+        validated = synthetic_context.get("validated_capabilities", [])
+
+        if score >= 0.9:
+            quality = "fully validated"
+        elif score >= 0.7:
+            quality = "mostly validated"
+        else:
+            quality = "partially validated"
+
+        guidance = (
+            f"This tool has been {quality} against synthetic repos with known issues. "
+            f"Synthetic evaluation: {score:.0%} score ({decision}). "
+            f"Validated capabilities: {len(validated)}. "
+        )
+
+        if score >= 0.9:
+            guidance += (
+                "Low or zero finding counts on this real-world repo likely indicate a clean "
+                "codebase, NOT tool failure. Score based on output quality and schema "
+                "compliance, not finding count."
+            )
+        elif score >= 0.7:
+            guidance += (
+                "The tool has demonstrated capability but has some gaps. "
+                "Consider both output quality and detection capability when scoring."
+            )
+        else:
+            guidance += (
+                "The tool has known detection gaps. "
+                "Lower scores may be appropriate even for output quality issues."
+            )
+
+        return guidance
 
     @classmethod
     def validate_claude_cli(cls) -> tuple[bool, str]:
@@ -250,7 +416,8 @@ Respond with ONLY a JSON object:
         """Load all analysis JSON files from output_dir.
 
         Returns:
-            Dictionary keyed by repo name (filename stem) to analysis data.
+            Dictionary keyed by repo name to analysis data.
+            Uses 'id' field from envelope if present, otherwise filename stem.
         """
         results = {}
 
@@ -261,7 +428,9 @@ Respond with ONLY a JSON object:
                     continue
                 try:
                     data = json.loads(json_file.read_text())
-                    repo_name = json_file.stem
+                    # Use 'id' field from envelope for ground truth matching,
+                    # fall back to filename stem
+                    repo_name = data.get("id", json_file.stem)
                     # Handle envelope format
                     if "data" in data:
                         results[repo_name] = data.get("data", {})
@@ -339,8 +508,9 @@ Respond with ONLY a JSON object:
     def build_prompt(self, evidence: dict[str, Any]) -> str:
         """Build the complete prompt with evidence.
 
-        Uses {{ evidence }} placeholder pattern for reliability.
-        All evidence is serialized as JSON and substituted into the template.
+        Supports two placeholder patterns:
+        1. {{ evidence }} - replaced with entire evidence dict as JSON
+        2. {{ key_name }} - replaced with specific evidence[key_name] as JSON
 
         Args:
             evidence: Evidence dictionary from collect_evidence()
@@ -349,8 +519,31 @@ Respond with ONLY a JSON object:
             Complete prompt string ready for LLM invocation
         """
         template = self.load_prompt_template()
+
+        # Replace {{ evidence }} with entire dict if present
         evidence_str = json.dumps(evidence, indent=2, default=str)
-        return template.replace("{{ evidence }}", evidence_str)
+        prompt = template.replace("{{ evidence }}", evidence_str)
+
+        # Replace individual {{ key }} placeholders with their values
+        for key, value in evidence.items():
+            placeholder = "{{ " + key + " }}"
+            if placeholder in prompt:
+                value_str = json.dumps(value, indent=2, default=str)
+                prompt = prompt.replace(placeholder, value_str)
+
+        # Check for unresolved placeholders
+        if "{{" in prompt and "}}" in prompt:
+            # Find the unresolved placeholder for better error message
+            import re
+            unresolved = re.findall(r"\{\{\s*\w+\s*\}\}", prompt)
+            raise ValueError(f"Unresolved prompt placeholders: {unresolved}")
+
+        if "Respond with ONLY a JSON object" not in prompt:
+            prompt = (
+                prompt
+                + "\n\nRespond with ONLY a JSON object. Do not use markdown fences or extra text."
+            )
+        return prompt
 
     def parse_response(self, response: str) -> JudgeResult:
         """Parse the LLM response into a structured result.
@@ -404,6 +597,8 @@ Respond with ONLY a JSON object:
         """
         if not HAS_ANTHROPIC_SDK:
             return None
+        if os.environ.get("USE_ANTHROPIC_SDK") != "1":
+            return None
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
             return None
@@ -431,20 +626,44 @@ Respond with ONLY a JSON object:
         """
         claude_path = shutil.which("claude")
         if not claude_path:
-            return "Error: Claude CLI not found"
+            # Provide diagnostic information about PATH
+            path_dirs = os.environ.get("PATH", "").split(os.pathsep)[:5]
+            return f"Error: Claude CLI not found in PATH. Searched: {path_dirs}"
+
+        # Verify the binary is executable
+        if not os.access(claude_path, os.X_OK):
+            return f"Error: Claude CLI at {claude_path} is not executable"
 
         try:
+            max_turns = os.getenv("CLAUDE_MAX_TURNS", "5")
+
+            # Map model name to CLI-compatible alias
+            cli_model = self.CLI_MODEL_MAP.get(self.model, self.model)
+
+            # System prompt for LLM-as-Judge evaluation
+            # Use --system-prompt (not --append) to override default Claude Code behavior
+            # and --setting-sources user to avoid project-specific CLAUDE.md context
+            system_prompt = (
+                "You are an LLM judge performing automated code quality evaluation. "
+                "Analyze the evidence provided and return a JSON response with score, "
+                "confidence, reasoning, evidence_cited, and recommendations fields. "
+                "Follow the scoring rubric exactly. Return ONLY valid JSON."
+            )
+
+            # Use stdin (-) instead of @file to avoid Claude misinterpreting file content
             cmd = [
                 "claude",
-                "-p", prompt,
-                "--model", self.model,
+                "--print", "-",
+                "--model", cli_model,
                 "--output-format", "text",
-                "--allowedTools", "",
-                "--max-turns", "5",
+                "--max-turns", str(max_turns),
+                "--setting-sources", "user",
+                "--system-prompt", system_prompt,
             ]
 
             result = subprocess.run(
                 cmd,
+                input=prompt,
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,
@@ -453,27 +672,61 @@ Respond with ONLY a JSON object:
 
             if result.returncode != 0:
                 stderr = result.stderr.strip()
-                if "EPERM" in stderr or "permission" in stderr.lower():
-                    return "Error: Permission denied executing Claude CLI"
-                elif "ENOENT" in stderr:
-                    return "Error: Claude CLI not found"
-                return f"Error (exit {result.returncode}): {stderr[:200]}"
+                stdout = result.stdout.strip()
 
-            return result.stdout
+                # Build detailed error message
+                error_details = []
+                error_details.append(f"exit_code={result.returncode}")
+                error_details.append(f"claude_path={claude_path}")
+                error_details.append(f"working_dir={self.working_dir}")
+                error_details.append(f"model={cli_model}")
+
+                if stderr:
+                    error_details.append(f"stderr={stderr[:200]}")
+                if stdout:
+                    error_details.append(f"stdout={stdout[:200]}")
+
+                # Check for common error patterns
+                combined_output = f"{stderr} {stdout}".lower()
+                if "eperm" in combined_output or "permission" in combined_output:
+                    return f"Error: Permission denied executing Claude CLI ({'; '.join(error_details)})"
+                elif "enoent" in combined_output:
+                    return f"Error: Claude CLI not found ({'; '.join(error_details)})"
+                elif "api key" in combined_output or "authentication" in combined_output:
+                    return f"Error: Authentication failed - check ANTHROPIC_API_KEY ({'; '.join(error_details)})"
+                elif "rate limit" in combined_output:
+                    return f"Error: Rate limited by API ({'; '.join(error_details)})"
+                elif not stderr and not stdout:
+                    # No output at all - this is the layout-scanner issue
+                    return (
+                        f"Error (exit {result.returncode}): CLI returned no output. "
+                        f"Diagnostics: {'; '.join(error_details)}. "
+                        f"Check: 1) ANTHROPIC_API_KEY is set, 2) claude CLI version, "
+                        f"3) network connectivity"
+                    )
+
+                return f"Error (exit {result.returncode}): {'; '.join(error_details)}"
+
+            stdout = result.stdout.strip()
+            if not stdout:
+                return "Error: Claude returned empty response (exit 0 but no output)"
+            return stdout
 
         except subprocess.TimeoutExpired:
             return f"Error: Claude invocation timed out after {self.timeout}s"
         except PermissionError as e:
             return f"Error: Permission denied - {e}"
         except FileNotFoundError:
-            return "Error: Claude CLI not found"
+            return f"Error: Claude CLI not found (FileNotFoundError for {claude_path})"
         except OSError as e:
-            return f"Error: OS error - {e}"
+            return f"Error: OS error - {e} (claude_path={claude_path})"
         except Exception as e:
             return f"Error: Unexpected - {type(e).__name__}: {e}"
 
     def invoke_claude(self, prompt: str) -> str:
         """Invoke Claude, preferring SDK and falling back to CLI.
+
+        All invocations are logged to the observability module when enabled.
 
         Args:
             prompt: The prompt to send
@@ -481,10 +734,63 @@ Respond with ONLY a JSON object:
         Returns:
             Response text
         """
-        sdk_response = self._invoke_via_sdk(prompt)
-        if sdk_response is not None:
-            return sdk_response
-        return self._invoke_via_cli(prompt)
+        interaction_id: str | None = None
+
+        # Start observability logging
+        if self._logger is not None:
+            interaction_id = self._logger.start_interaction(
+                trace_id=self._trace_id,
+                provider_name="anthropic_sdk" if HAS_ANTHROPIC_SDK else "claude_cli",
+                judge_name=self.dimension_name,
+                model=self.MODEL_MAP.get(self.model, self.model),
+                user_prompt=prompt,
+            )
+
+        try:
+            # Try SDK first
+            sdk_response = self._invoke_via_sdk(prompt)
+            if sdk_response is not None:
+                # Log successful SDK response
+                if self._logger is not None and interaction_id:
+                    self._logger.complete_interaction(
+                        interaction_id=interaction_id,
+                        response_content=sdk_response,
+                        status="success",
+                    )
+                return sdk_response
+
+            # Fall back to CLI
+            cli_response = self._invoke_via_cli(prompt)
+
+            # Determine status from CLI response
+            # Check for both "Error:" and "Error (" patterns from _invoke_via_cli
+            if cli_response.startswith("Error"):
+                if "timed out" in cli_response.lower():
+                    if self._logger is not None and interaction_id:
+                        self._logger.log_timeout(interaction_id, self.timeout)
+                else:
+                    if self._logger is not None and interaction_id:
+                        self._logger.complete_interaction(
+                            interaction_id=interaction_id,
+                            response_content=cli_response,
+                            status="error",
+                            error_message=cli_response,
+                        )
+            else:
+                if self._logger is not None and interaction_id:
+                    self._logger.complete_interaction(
+                        interaction_id=interaction_id,
+                        response_content=cli_response,
+                        status="success",
+                    )
+
+            return cli_response
+
+        except Exception as e:
+            # Log any unexpected errors
+            if self._logger is not None and interaction_id:
+                self._logger.log_error(interaction_id, e)
+            raise
 
     def run_heuristic_evaluation(self, evidence: dict[str, Any]) -> JudgeResult:
         """Run heuristic-based evaluation without LLM.
@@ -527,7 +833,18 @@ Respond with ONLY a JSON object:
             return self.run_heuristic_evaluation(evidence)
 
         # Build prompt
-        prompt = self.build_prompt(evidence)
+        try:
+            prompt = self.build_prompt(evidence)
+        except ValueError as exc:
+            return JudgeResult(
+                dimension=self.dimension_name,
+                score=1,
+                confidence=0.0,
+                reasoning=str(exc),
+                evidence_cited=[],
+                recommendations=["Fix prompt placeholders before evaluation"],
+                raw_response="",
+            )
 
         # Invoke Claude
         response = self.invoke_claude(prompt)

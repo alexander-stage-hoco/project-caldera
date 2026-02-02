@@ -20,6 +20,32 @@ Current tools in scope:
 
 Each tool is self-contained under `src/tools/<tool>/` with its own Makefile, schemas, eval repos, and tests.
 
+## Virtual Environment
+
+**Always use the project venv for Python commands.** Never use system Python directly.
+
+Setup (one-time):
+```bash
+python3.12 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+
+All `make` targets automatically use the correct venv. For manual Python commands:
+```bash
+.venv/bin/python <script>           # Correct
+python <script>                      # WRONG - may use system Python
+```
+
+### Two-Tier Architecture
+
+1. **Project venv** (`.venv/`): Orchestrator, compliance, dbt, tests
+2. **Tool venvs** (`src/tools/<tool>/.venv/`): Isolated tool execution
+
+To use the project venv for tools (faster, shared deps):
+```bash
+make tools-test VENV=$(CURDIR)/.venv SKIP_SETUP=1
+```
+
 ## Top-Level Commands
 
 Project venv (shared tooling, Python 3.12):
@@ -70,15 +96,15 @@ evaluation/results/
 Run compliance without executing tools:
 
 ```bash
-python src/tool-compliance/tool_compliance.py --root .
+.venv/bin/python src/tool-compliance/tool_compliance.py --root .
 ```
 
 Run compliance with analysis/evaluation steps:
 
 ```bash
-python src/tool-compliance/tool_compliance.py --root . \
+.venv/bin/python src/tool-compliance/tool_compliance.py --root . \
   --run-analysis --run-evaluate \
-  --venv /tmp/scc-venv
+  --venv .venv
 ```
 
 Reports:

@@ -592,7 +592,7 @@ make evaluate GROUND_TRUTH=evaluation/ground-truth/polyglot.json
 make evaluate-llm
 
 # Specific model
-make evaluate-llm MODEL=sonnet
+make evaluate-llm MODEL=opus-4.5
 
 # Single judge
 make evaluate-llm JUDGE=directory_taxonomy

@@ -14,7 +14,7 @@ include ../Makefile.common
 # Tool-specific defaults
 REPO_PATH ?= eval-repos/synthetic/vulnerable-npm
 REPO_NAME ?= vulnerable-npm
-OUTPUT_DIR ?= output/runs
+# OUTPUT_DIR inherited from Makefile.common: outputs/$(RUN_ID)
 COMMIT ?= $(shell git -C $(REPO_PATH) rev-parse HEAD 2>/dev/null || echo "0000000000000000000000000000000000000000")
 
 # Trivy settings
@@ -86,13 +86,13 @@ evaluate-llm: $(VENV_READY)  ## Run LLM evaluation on analysis outputs
 	@mkdir -p $(EVAL_OUTPUT_DIR)
 	@mkdir -p evaluation/results
 	$(PYTHON_VENV) -m evaluation.llm.orchestrator \
-		--analysis $(OUTPUT_DIR)/$(REPO_NAME).json \
+		--analysis $(OUTPUT_DIR)/output.json \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json
-	@cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json
+	@if [ "$(EVAL_OUTPUT_DIR)" != "evaluation/results" ] && [ -w evaluation/results ]; then cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json; fi
 
 evaluate-single: $(VENV_READY)  ## Evaluate a single analysis output
 	$(PYTHON_VENV) scripts/evaluate.py \
-		--input $(OUTPUT_DIR)/$(REPO_NAME).json \
+		--input $(OUTPUT_DIR)/output.json \
 		--ground-truth evaluation/ground-truth/$(REPO_NAME).json \
 		--output $(EVAL_OUTPUT_DIR)/evaluation_report.json
 
@@ -102,7 +102,7 @@ evaluate-single: $(VENV_READY)  ## Evaluate a single analysis output
 
 validate-output: $(VENV_READY)  ## Validate output JSON against schema
 	$(PYTHON_VENV) -c "import json, jsonschema; \
-		data = json.load(open('$(OUTPUT_DIR)/$(REPO_NAME).json')); \
+		data = json.load(open('$(OUTPUT_DIR)/output.json')); \
 		schema = json.load(open('schemas/output.schema.json')); \
 		jsonschema.validate(data, schema); \
 		print('Validation passed')"
@@ -124,11 +124,9 @@ test-integration: $(VENV_READY)  ## Run integration tests only
 # ============================================
 
 clean: _common-clean  ## Clean build artifacts
-	@rm -rf output/runs/*
 	@rm -rf evaluation/llm/results/*
 	@rm -rf .ruff_cache
 	@find . -name "*.pyc" -delete
 
 clean-all: _common-clean-all  ## Clean all including venv
-	@rm -rf output/runs/*
 	@rm -rf evaluation/llm/results/*

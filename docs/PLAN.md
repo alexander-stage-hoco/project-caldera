@@ -1,81 +1,82 @@
-# Caldera Pilot Plan (scc + lizard)
+# Plan: LLM Standardization + Repo Hygiene
 
-## Cut Line (Reuse vs Replace)
-### Reuse
-- Tool implementations: `src/tools/scc/`, `src/tools/lizard/`
-- Tool schemas (update only if needed to match envelope + path rules)
-- Layout scanner (source of file registry)
-- Tool compliance evaluation - we have expectations towards tools. Adjust and add a make target to do the evaluation of all tools 
-- Evaluation framework (programmatic + LLM)
+Date: 2026-02-01
 
-### Replace / Add
-- SoT adapters for scc + lizard (JSON -> landing zone tables)
-- Landing zone schemas for scc + lizard (if missing)
-- dbt models for unified marts (file_metrics + run_summary for scc/lizard)
-- Orchestrator path to use JSON-only ingestion for scc/lizard
+## Scope
+This plan addresses five architectural corrections:
+1) Lock LLM path/model in shared base
+2) Standardize CLI invocation
+3) Prompt validation and JSON-only enforcement
+4) Explorer/report replacement decision
+5) Remove build artifacts from synthetic repos
 
-### Bypass (Pilot)
-- Aggregator path for scc/lizard (keep for other tools)
+## Phase 1: LLM Standardization (High Priority)
+### 1. Lock LLM path and model in shared base
+- **Goal:** Ensure all tools use Claude Code headless with `opus-4.5`.
+- **Changes:**
+  - Disable Anthropic SDK usage or guard behind an explicit `USE_ANTHROPIC_SDK=1` flag.
+  - Set shared base default model to `opus-4.5` and enforce when not explicitly overridden.
+- **Files:**
+  - `src/shared/evaluation/base_judge.py`
+- **Acceptance:**
+  - Any LLM judge run uses Claude CLI only.
+  - Model defaults to `opus-4.5` unless override provided.
+ - **Status:** Done
 
-## Phase 0 - Standards & Compliance (Complete)
-- Confirm envelope + tool schemas
-- Ensure outputs include `run_id`, `repo_id`, `commit`, `timestamp`
-- Enforce repo-relative path rules
-- Establish tool compliance scanner as the single readiness gate
-- Add top-level Makefile targets for tool orchestration + compliance
+### 2. Standardize CLI invocation
+- **Goal:** Avoid ARG_MAX and prompt truncation; unify invocation.
+- **Changes:**
+  - Use file-based prompt: `claude --print @prompt_file ...`.
+  - Centralize invocation logic in shared base and remove tool-specific variants.
+- **Files:**
+  - `src/shared/evaluation/base_judge.py`
+  - Tool-specific base judges: remove/align custom invokers.
+- **Acceptance:**
+  - All tools invoke through shared base logic.
+  - No tool passes prompt directly as a CLI arg.
+ - **Status:** Done
 
-Exit gate: Compliance scan passes for structure + schema checks.
+### 3. Prompt validation + JSON-only enforcement
+- **Goal:** Ensure prompts are complete and response format is consistent.
+- **Changes:**
+  - Validate prompt string has no unresolved `{{ ... }}` placeholders before invocation.
+  - Enforce JSON-only response instruction in shared base (append if missing).
+- **Files:**
+  - `src/shared/evaluation/base_judge.py`
+  - Prompts under `src/tools/*/evaluation/llm/prompts/` (if needed)
+- **Acceptance:**
+  - LLM runs fail fast if placeholders remain.
+  - Responses are JSON-only (parseable) across tools.
+ - **Status:** Done
 
-## Phase 1 - Tool Hardening (scc + lizard) (Complete)
-- Run compliance scanner with `--run-analysis` to validate output schema + path rules
-- Validate evaluation artifacts are produced and current
-- Align Makefile targets with standards (help/setup/analyze/evaluate/evaluate-llm/test/clean)
+## Phase 2: Tooling + Repo Hygiene (Medium Priority)
+### 4. Explorer/report replacement decision
+- **Goal:** Either restore a minimal DB explorer/report CLI or explicitly remove it from docs.
+- **Options:**
+  - **Option A:** Add a minimal explorer CLI (list tables, run query, show schema) under `src/explorer/`.
+  - **Option B:** Remove references to explorer/report commands from docs/Makefile and document that feature is removed.
+- **Acceptance:**
+  - Docs and Makefile are aligned with whichever option is chosen.
+ - **Status:** Done (insights CLI is the supported entrypoint)
 
-Exit gate: Compliance scan with `--run-analysis --run-evaluate` passes for both tools.
+### 5. Remove build artifacts from synthetic repos
+- **Goal:** Eliminate tracked build outputs (`bin/`, `obj/`, `.dll`, `.pdb`, etc.).
+- **Changes:**
+  - Add ignore rules for synthetic repo build outputs.
+  - Remove tracked artifacts from git index.
+- **Files:**
+  - `.gitignore` (or tool-specific ignores)
+  - Synthetic repo directories under `src/tools/roslyn-analyzers/eval-repos/synthetic/`
+- **Acceptance:**
+  - No build artifacts remain tracked.
+  - Synthetic repos contain source-only fixtures.
+ - **Status:** In progress (tracked artifacts removed; ignore rules added)
 
-Status:
-- scc + lizard pass compliance with `--run-analysis --run-evaluate --run-llm` (no skips allowed).
+## Testing/Validation
+- Run tool compliance after Phase 1.
+- Run relevant unit tests for LLM evaluation code.
+- For Phase 2, ensure docs/Makefile targets are consistent.
 
-## Phase 2 - SoT Adapters + Landing Zone (Complete)
-- Implement landing zone schema (`lz_*`) with raw per-file/per-function tables only
-- Implement repositories + adapters for scc/lizard (JSON -> entities -> repositories)
-- Add schema-compliant fixtures for scc/lizard
-- Unit tests for JSON -> entity mapping
-- Integration tests with DuckDB temp DB and layout lookup
-
-Exit gate: specs map JSON -> landing zone via repositories.
-
-## Phase 3 - dbt Marts (Complete)
-- dbt staging models for `lz_*` tables
-- dbt tests for nulls, ranges, uniqueness, run_id consistency
-- dbt marts to merge scc + lizard into unified outputs
-- Report analyses covered by DuckDB-based report tests
-- Report-specific dbt tests for repo health snapshot metrics
-
-Exit gate: dbt run + test pass on pilot run.
-
-## Phase 4 - Orchestrator Hook (Complete)
-- Orchestrator runs layout → scc/lizard adapters → dbt
-- Validate run_id/repo_id alignment on ingestion
-- Keep old path for other tools
-- Enforce one collection run per repo+commit; `--replace` overwrites prior data
-
-Exit gate: end-to-end run produces unified marts for scc + lizard.
-
-## Phase 5 - Evaluation
-- Programmatic precision/recall checks on synthetic repos
-- LLM judges supplemental on real repos; propose improvements on synthetic
-
-Exit gate: evaluation scorecard meets production threshold.
-
-## Phase 6 - Rollup Coverage (Complete)
-- Add direct rollup marts alongside recursive rollups
-- Add dbt tests asserting recursive >= direct
-- Expand rollup tests for distribution bounds (quantiles, concentration metrics)
-- Add report-specific dbt tests (`make dbt-test-reports`)
-
-## Immediate Next Steps
-1. **Wire semgrep to orchestrator** - Add to TOOL_CONFIGS and test end-to-end pipeline
-2. Add semgrep staging models and unified marts (currently smells go to lz_semgrep_smells only)
-3. Expand rollup coverage for semgrep smell counts per directory
-4. Decide next tool onboarding target after semgrep is fully integrated
+## Dependencies / Risks
+- Claude CLI authentication must be valid for LLM runs.
+- Removing artifacts may require `git rm --cached` and a full clean.

@@ -1,0 +1,43 @@
+## Roslyn Analyzer Findings
+
+{% if not has_violations %}
+*No Roslyn analyzer violations found. This is either a non-.NET project or the codebase passes all analyzer rules.*
+{% else %}
+
+### Summary
+
+- **Total Violations:** {{ total_count }}
+- **Errors:** {{ error_count }}
+- **Warnings:** {{ warning_count }}
+
+{% if by_category %}
+### By Category
+
+| Category | Count |
+|----------|-------|
+{% for cat in by_category %}
+| {{ cat.category | replace("_", " ") | title }} | {{ cat.count }} |
+{% endfor %}
+{% endif %}
+
+{% if top_violations %}
+### Top Violations
+
+| Rule ID | Severity | Category | Count | Files |
+|---------|----------|----------|-------|-------|
+{% for v in top_violations[:15] %}
+| `{{ v.rule_id }}` | {{ v.severity }} | {{ v.category }} | {{ v.count }} | {{ v.affected_files }} |
+{% endfor %}
+{% endif %}
+
+{% if hotspot_files %}
+### Files with Most Violations
+
+| File | Total | Security | Design | Performance |
+|------|-------|----------|--------|-------------|
+{% for f in hotspot_files[:10] %}
+| {{ f.relative_path }} | {{ f.violation_count }} | {{ f.security }} | {{ f.design }} | {{ f.performance }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

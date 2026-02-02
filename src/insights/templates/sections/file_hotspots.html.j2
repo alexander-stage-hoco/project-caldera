@@ -1,0 +1,137 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>File Hotspots</h2>
+
+    {% if has_compound %}
+    <div class="subsection">
+        <h3>High-Risk Files (Multiple Categories)</h3>
+        <p>These files appear in multiple hotspot categories, indicating compound risk.</p>
+        {% if remediation_guidance and remediation_guidance.compound %}
+        <div class="guidance-box guidance-critical">
+            <strong>{{ remediation_guidance.compound.title }}:</strong> {{ remediation_guidance.compound.description }}
+        </div>
+        {% endif %}
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Complexity</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Smells</th>
+                    <th>Categories</th>
+                    <th>Recommended Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in compound_hotspots[:10] %}
+                <tr class="priority-{{ file.priority | default('medium') }}">
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.complexity | format_number }}</td>
+                    <td class="number">{{ file.loc_total | format_number }}</td>
+                    <td class="number">{{ file.smell_count | format_number }}</td>
+                    <td>{{ file.categories | join(', ') }}</td>
+                    <td class="remediation">{{ file.remediation | default('Review and address') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_complexity %}
+    <div class="subsection">
+        <h3>Top Files by Complexity</h3>
+        {% if remediation_guidance and remediation_guidance.complexity %}
+        <div class="guidance-box">
+            <strong>{{ remediation_guidance.complexity.title }}:</strong> {{ remediation_guidance.complexity.description }}
+            <ul class="guidance-actions">
+            {% for action in remediation_guidance.complexity.actions %}
+                <li>{{ action }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <div class="threshold-legend">
+            <strong>Complexity Thresholds (CCN):</strong>
+            <span class="threshold-item threshold-critical">&gt;50 Critical - very difficult to test</span>
+            <span class="threshold-item threshold-high">30-50 High - should be refactored</span>
+            <span class="threshold-item threshold-medium">20-30 Medium - monitor closely</span>
+            <span class="threshold-item threshold-low">&lt;20 Acceptable</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Complexity (CCN)</th>
+                    <th class="number">Max CCN</th>
+                    <th class="number">Functions</th>
+                    <th>Language</th>
+                    <th>Recommended Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in complexity_hotspots[:15] %}
+                <tr>
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.complexity | format_number }}</td>
+                    <td class="number">{{ file.max_ccn | format_number }}</td>
+                    <td class="number">{{ file.function_count | format_number }}</td>
+                    <td>{{ file.language or 'Unknown' }}</td>
+                    <td class="remediation">{{ file.remediation | default('Review complexity') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_size %}
+    <div class="subsection">
+        <h3>Top Files by Size</h3>
+        {% if remediation_guidance and remediation_guidance.size %}
+        <div class="guidance-box">
+            <strong>{{ remediation_guidance.size.title }}:</strong> {{ remediation_guidance.size.description }}
+            <ul class="guidance-actions">
+            {% for action in remediation_guidance.size.actions %}
+                <li>{{ action }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <div class="threshold-legend">
+            <strong>Size Thresholds (LOC):</strong>
+            <span class="threshold-item threshold-critical">&gt;2000 Critical - split urgently</span>
+            <span class="threshold-item threshold-high">1000-2000 High - plan refactoring</span>
+            <span class="threshold-item threshold-medium">500-1000 Medium - consider splitting</span>
+            <span class="threshold-item threshold-low">&lt;500 Acceptable</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Lines of Code</th>
+                    <th class="number">Complexity</th>
+                    <th>Language</th>
+                    <th>Recommended Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in size_hotspots[:15] %}
+                <tr>
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.loc_total | format_number }}</td>
+                    <td class="number">{{ file.complexity | format_number }}</td>
+                    <td>{{ file.language or 'Unknown' }}</td>
+                    <td class="remediation">{{ file.remediation | default('Review file size') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if not has_complexity and not has_size and not has_compound %}
+    <div class="empty-state">
+        <p>No file hotspot data available for this run.</p>
+    </div>
+    {% endif %}
+</section>

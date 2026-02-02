@@ -1,0 +1,69 @@
+## Code Inequality Analysis
+
+{% if not has_data %}
+*No inequality data available for this run.*
+{% else %}
+
+### Summary
+
+| Metric | Value |
+|--------|-------|
+| Critical (Gini >= 0.7) | {{ summary.critical_count }} |
+| Warning (Gini >= 0.5) | {{ summary.warning_count }} |
+| Average Gini | {{ summary.avg_gini }} |
+| Max Palma Ratio | {{ summary.max_palma }} |
+| Concentrated Directories | {{ summary.concentration_count }} |
+
+{% if has_gini and critical_directories %}
+### Critical Inequality (Gini >= 0.7)
+
+Directories with severe code inequality - a few files dominate the metric distribution:
+
+| Directory | Metric | Gini | Top 10% | Top 20% | Files |
+|-----------|--------|------|---------|---------|-------|
+{% for dir in critical_directories[:15] %}
+| {{ dir.directory_path }} | {{ dir.metric }} | {{ dir.gini }} | {{ dir.top_10_pct }}% | {{ dir.top_20_pct }}% | {{ dir.file_count }} |
+{% endfor %}
+{% endif %}
+
+{% if has_concentration %}
+### High Concentration (Top 20% >= 50%)
+
+Directories where a small number of files hold the majority of the metric value:
+
+| Directory | Metric | Top 10% | Top 20% | Bottom 50% | Max/Avg |
+|-----------|--------|---------|---------|------------|---------|
+{% for dir in concentration_analysis[:15] %}
+| {{ dir.directory_path }} | {{ dir.metric }} | {{ dir.top_10_share }}% | {{ dir.top_20_share }}% | {{ dir.bottom_50_share }}% | {{ dir.max_to_avg_ratio }}x |
+{% endfor %}
+{% endif %}
+
+{% if has_palma %}
+### High Palma Ratio (>= 2.0)
+
+Palma ratio compares top 10% to bottom 40%. Higher values indicate more inequality:
+
+| Directory | Metric | Palma | Gini | Top 10% | Files |
+|-----------|--------|-------|------|---------|-------|
+{% for dir in high_palma_directories[:15] %}
+| {{ dir.directory_path }} | {{ dir.metric }} | {{ dir.palma_ratio }} | {{ dir.gini }} | {{ dir.top_10_pct }}% | {{ dir.file_count }} |
+{% endfor %}
+{% endif %}
+
+{% if has_cross_tool %}
+### Cross-Tool Inequality Patterns
+
+Compares LOC inequality vs CCN inequality:
+
+- **size_concentrated:** High LOC inequality, low CCN - few large but simple files
+- **complexity_concentrated:** Low LOC inequality, high CCN - complexity hotspots
+- **both_concentrated:** High inequality in both - needs attention
+
+| Directory | Pattern | LOC Gini | CCN Gini | Diff | Files |
+|-----------|---------|----------|----------|------|-------|
+{% for dir in cross_tool_correlation[:15] %}
+| {{ dir.directory_path }} | {{ dir.pattern }} | {{ dir.loc_gini }} | {{ dir.ccn_gini }} | {{ dir.gini_difference }} | {{ dir.loc_file_count }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

@@ -130,6 +130,26 @@ CREATE TABLE lz_semgrep_smells (
     PRIMARY KEY (run_pk, file_id, rule_id, line_start)
 );
 
+CREATE TABLE lz_gitleaks_secrets (
+    run_pk BIGINT NOT NULL,
+    file_id VARCHAR NOT NULL,
+    directory_id VARCHAR,
+    relative_path VARCHAR NOT NULL,
+    rule_id VARCHAR NOT NULL,
+    secret_type VARCHAR,
+    severity VARCHAR,
+    line_number INTEGER,
+    commit_hash VARCHAR,
+    commit_author VARCHAR,
+    commit_date VARCHAR,
+    fingerprint VARCHAR,
+    in_current_head BOOLEAN,
+    entropy DOUBLE,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, file_id, rule_id, line_number, fingerprint)
+);
+
 CREATE TABLE lz_roslyn_violations (
     run_pk BIGINT NOT NULL,
     file_id VARCHAR NOT NULL,

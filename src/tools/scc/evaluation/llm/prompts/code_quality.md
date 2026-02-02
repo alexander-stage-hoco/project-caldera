@@ -2,11 +2,23 @@
 
 You are evaluating the **output richness and expressiveness** of scc (Sloc Cloc and Code) for use in technical due diligence.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
 ## Evaluation Dimension
 
 **Output Richness (10% weight)**: How comprehensive and expressive is the data produced by scc?
 
 ## Scoring Rubric
+
+### For Synthetic Repos (strict ground truth evaluation):
 
 | Score | Criteria |
 |-------|----------|
@@ -15,6 +27,16 @@ You are evaluating the **output richness and expressiveness** of scc (Sloc Cloc 
 | 3 | Minimum acceptable: Basic counts present, limited detail |
 | 2 | Significant gaps: Missing important metrics, sparse output |
 | 1 | Fails requirements: Insufficient data for due diligence |
+
+### For Real-World Repos (when synthetic_baseline shows validated tool):
+
+| Score | Criteria |
+|-------|----------|
+| 5 | Output schema compliant, metrics present and reasonable for repo size |
+| 4 | Minor schema issues but metrics are internally consistent |
+| 3 | Schema issues OR questionable metric values |
+| 2 | Multiple schema issues AND inconsistent metrics |
+| 1 | Broken output, missing required fields |
 
 ## Evidence to Evaluate
 

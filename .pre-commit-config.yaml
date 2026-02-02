@@ -1,0 +1,44 @@
+# Pre-commit configuration for Project Caldera
+#
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+#
+# This configuration runs tool compliance checks on modified tool directories
+# to catch issues before they reach CI.
+
+repos:
+  # Local hooks for Caldera-specific validation
+  - repo: local
+    hooks:
+      - id: tool-compliance-preflight
+        name: Tool Compliance Preflight
+        description: Run preflight compliance checks on modified tool directories
+        entry: scripts/hooks/check-tool-compliance.sh
+        language: script
+        files: ^src/tools/
+        pass_filenames: false
+        stages: [commit]
+        verbose: true
+
+  # Standard Python hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(src/tools/.*/eval-repos/|.*\.sarif$)
+      - id: end-of-file-fixer
+        exclude: ^(src/tools/.*/eval-repos/|.*\.sarif$)
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+        exclude: ^src/tools/.*/outputs/
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+
+  # Python code quality (optional - can be enabled)
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  #   rev: v0.1.9
+  #   hooks:
+  #     - id: ruff
+  #       args: [--fix, --exit-non-zero-on-fix]
+  #     - id: ruff-format

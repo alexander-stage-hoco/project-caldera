@@ -1,0 +1,62 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Distribution Insights</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No distribution data available for this run.</p>
+    </div>
+    {% else %}
+
+    {% if has_concentration %}
+    <div class="subsection">
+        <h3>Top 20% Complexity Concentration</h3>
+        <p>Files in the top 20% of complexity that may need attention:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Complexity</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Percentile</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in concentration[:15] %}
+                <tr>
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.complexity | format_number }}</td>
+                    <td class="number">{{ file.loc | format_number }}</td>
+                    <td class="number">{{ file.percentile }}%</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="metric-grid">
+        {% if has_complexity and complexity_distribution %}
+        <div class="metric-card">
+            <div class="label">Complexity Distribution</div>
+            <div class="value">{{ complexity_distribution[0].total_files | format_number if complexity_distribution else 'N/A' }}</div>
+            <div class="sublabel">Total files analyzed</div>
+        </div>
+        {% endif %}
+        {% if has_loc and loc_distribution %}
+        <div class="metric-card">
+            <div class="label">LOC Distribution</div>
+            <div class="value">{{ loc_distribution[0].total_files | format_number if loc_distribution else 'N/A' }}</div>
+            <div class="sublabel">Total files analyzed</div>
+        </div>
+        {% endif %}
+        {% if has_smells and smell_distribution %}
+        <div class="metric-card">
+            <div class="label">Smell Distribution</div>
+            <div class="value">{{ smell_distribution[0].total_files | format_number if smell_distribution else 'N/A' }}</div>
+            <div class="sublabel">Files with smells</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% endif %}
+</section>

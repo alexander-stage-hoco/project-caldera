@@ -85,6 +85,7 @@ PATH_RULES: Dict[str, List[str]] = {
         "generated/", "gen/", "dist/", "build/", "out/",
         ".next/", ".nuxt/", "target/", "bin/", "obj/",
         "_build/", "__pycache__/", ".cache/",
+        ".scannerwork/", ".sonar/", ".coverage/", ".nyc_output/",
     ],
     "ci": [
         ".github/", ".gitlab-ci/", ".circleci/", ".travis/",
@@ -146,6 +147,7 @@ FILENAME_RULES: Dict[str, List[str]] = {
         r"^Procfile$",
         r"^\.gitignore$",
         r"^\.gitattributes$",
+        r"^\.gitmodules$",           # Git submodules config
         r"^\.editorconfig$",
         r"^\.env.*$",
         r"^tsconfig.*\.json$",
@@ -373,6 +375,7 @@ LANGUAGE_MAP: Dict[str, str] = {
     ".xsl": "xml",
     ".xslt": "xml",
     ".xsd": "xml",
+    ".xaml": "xaml",  # WPF/UWP/Avalonia markup
 
     # HTML
     ".html": "html",
@@ -572,8 +575,11 @@ def classify_file(
                 if not norm_path.startswith(pattern_lower):
                     continue
             else:
-                # Other categories match anywhere in path
-                if not (pattern_lower in norm_path or f"/{pattern_lower}" in f"/{norm_path}"):
+                # Other categories match at path segment boundaries
+                # Require pattern at start of path OR preceded by /
+                # This prevents "out/" from matching "About/" in paths like
+                # "UI/ViewModels/About/"
+                if not (norm_path.startswith(pattern_lower) or f"/{pattern_lower}" in f"/{norm_path}"):
                     continue
 
             # Pattern matched - apply scoring

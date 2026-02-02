@@ -339,11 +339,31 @@ def main():
 
     out_dir.mkdir(parents=True, exist_ok=True)
     scorecard = generate_scorecard(report)
-    checks_path = out_dir / "checks.json"
+    # Output uniform evaluation_report.json for compliance
+    evaluation_report_path = out_dir / "evaluation_report.json"
+    evaluation_report = {
+        "timestamp": report.timestamp,
+        "tool": "sonarqube",
+        "decision": determine_decision(report.score),
+        "score": round(report.score, 4),
+        "checks": [
+            {
+                "name": c.check_id,
+                "status": "PASS" if c.passed else "FAIL",
+                "message": c.message,
+            }
+            for c in report.checks
+        ],
+        "summary": {
+            "total": report.total,
+            "passed": report.passed,
+            "failed": report.failed,
+        },
+    }
+    with open(evaluation_report_path, "w") as f:
+        json.dump(evaluation_report, f, indent=2)
     scorecard_json_path = out_dir / "scorecard.json"
     scorecard_md_path = out_dir / "scorecard.md"
-    with open(checks_path, "w") as f:
-        json.dump(report.to_dict(), f, indent=2)
     with open(scorecard_json_path, "w") as f:
         json.dump(scorecard, f, indent=2)
     scorecard_md_path.write_text(generate_scorecard_md(scorecard))

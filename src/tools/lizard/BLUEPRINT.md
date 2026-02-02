@@ -4,6 +4,33 @@
 
 This document captures lessons learned from evaluating [Lizard](https://github.com/terryyin/lizard) as a function-level complexity analyzer for the DD Platform.
 
+## Executive Summary
+
+**Tool:** Lizard v1.17.10+
+**Purpose:** Function-level cyclomatic complexity (CCN) and metrics analysis
+**Recommendation:** ADOPT for complexity hotspot detection
+
+| Metric | Result |
+|--------|--------|
+| Programmatic Score | 98.8% (76/76 checks) |
+| LLM Score | 5.00/5.0 |
+| Combined Score | 4.84/5.0 |
+| Languages Supported | 7 (Python, C#, Java, JavaScript, TypeScript, Go, Rust) |
+| Decision | **STRONG_PASS** |
+
+**Key Strengths:**
+- Per-function CCN, NLOC, parameter count, token count
+- 22-metric distribution statistics
+- Directory rollup (recursive vs direct)
+- Multi-language support with unified output
+
+**Key Limitations:**
+- Fan-in/fan-out always returns 0
+- Duplicate function names require CCN-based disambiguation
+- Anonymous function naming not unique
+
+---
+
 ## Final Results
 
 | Metric | Value |
@@ -186,6 +213,138 @@ evaluation/results/
 14. Top Directories by CCN
 15. Top Directories by Functions
 16. Complete Directory Tree
+
+---
+
+## Architecture
+
+### Component Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              Lizard Analysis                                 │
+│                                                                             │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐        │
+│  │  function_      │───▶│  Lizard CLI     │───▶│  JSON Output    │        │
+│  │  analyzer.py    │    │  (per-language) │    │  (envelope)     │        │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘        │
+│           │                     │                       │                  │
+│           ▼                     ▼                       ▼                  │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐        │
+│  │  Dashboard      │    │  Statistics     │    │  Directory      │        │
+│  │  (16 sections)  │    │  (22 metrics)   │    │  Rollups        │        │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Evaluation Framework                               │
+│                                                                             │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐        │
+│  │  evaluate.py    │───▶│  76 checks      │───▶│  Scorecard      │        │
+│  │                 │    │  (4 categories) │    │  (JSON/MD)      │        │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘        │
+│           │                                                                 │
+│           ▼                                                                 │
+│  ┌─────────────────┐    ┌─────────────────┐                               │
+│  │  LLM Judges     │───▶│  orchestrator   │                               │
+│  │  (4 judges)     │    │                 │                               │
+│  └─────────────────┘    └─────────────────┘                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Data Flow
+
+1. **Input**: Repository path passed to `function_analyzer.py`
+2. **Analysis**: Lizard CLI extracts per-function metrics
+3. **Statistics**: 22-metric distributions computed per file/directory
+4. **Rollups**: Direct and recursive aggregations calculated
+5. **Output**: Caldera envelope JSON with full metrics
+
+---
+
+## Implementation Plan
+
+### Completed Phases
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| **Phase 1: Core Analysis** | Complete | function_analyzer.py with Lizard integration |
+| **Phase 2: Statistics** | Complete | 22-metric distributions |
+| **Phase 3: Rollups** | Complete | Directory recursive/direct aggregations |
+| **Phase 4: Dashboard** | Complete | 16-section terminal output |
+| **Phase 5: Evaluation** | Complete | 76 programmatic checks, 4 LLM judges |
+| **Phase 6: Documentation** | Complete | BLUEPRINT, EVAL_STRATEGY, README |
+
+---
+
+## Configuration
+
+### Makefile Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `REPO_PATH` | `eval-repos/synthetic` | Repository to analyze |
+| `REPO_NAME` | `synthetic` | Output file naming |
+| `OUTPUT_DIR` | `outputs/$(RUN_ID)` | Output directory |
+| `LLM_MODEL` | `opus-4.5` | Model for LLM evaluation |
+
+### CLI Options
+
+| Option | Description |
+|--------|-------------|
+| `--repo-path` | Path to repository to analyze |
+| `--output` | Output JSON file path |
+| `--threshold` | CCN threshold for violations (default: 10) |
+| `--verbose` | Enable verbose output |
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `RUN_ID` | UUID for the analysis run |
+| `REPO_ID` | UUID identifying the repository |
+| `PYTHONPATH` | Must include src/ for shared imports |
+
+---
+
+## Performance
+
+### Benchmarks
+
+| Repository Size | Files | Functions | Time | Memory |
+|-----------------|-------|-----------|------|--------|
+| Synthetic | 63 | 524 | 0.29s | ~45MB |
+| click | 62 | ~800 | 0.35s | ~50MB |
+| picocli/src | ~200 | ~2000 | 1.63s | ~80MB |
+
+### Performance Thresholds
+
+| Metric | Threshold | Rationale |
+|--------|-----------|-----------|
+| Synthetic repos | < 2s | Quick feedback loop |
+| Real repo (small) | < 5s | Acceptable CI time |
+| Real repo (large) | < 30s | Maximum acceptable |
+| Memory usage | < 500MB | Reasonable footprint |
+
+---
+
+## Risk Assessment
+
+### Risk Matrix
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| CCN miscounting | Low | Medium | Ground truth validation for 524 functions |
+| Language parser bugs | Low | Low | Lizard is well-maintained |
+| Memory on large repos | Low | Medium | Streaming output if needed |
+| Anonymous function tracking | Medium | Low | Document limitation |
+| Line range inaccuracy | Medium | Low | Tolerance in accuracy checks |
+
+### Security Considerations
+
+1. **No Code Execution**: Lizard parses AST, doesn't execute code
+2. **Path Safety**: All paths normalized to repo-relative
+3. **Output Safety**: No sensitive data in output
 
 ---
 

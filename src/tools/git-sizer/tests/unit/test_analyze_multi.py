@@ -1,0 +1,95 @@
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+from pathlib import Path
+
+import sys
+
+import pytest
+
+from scripts import analyze
+
+
+def _init_repo(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["git", "init"], cwd=path, check=True, capture_output=True)
+    (path / "README.md").write_text("test")
+    subprocess.run(["git", "add", "README.md"], cwd=path, check=True, capture_output=True)
+    env = {
+        **dict(
+            GIT_AUTHOR_NAME="Test",
+            GIT_AUTHOR_EMAIL="test@example.com",
+            GIT_COMMITTER_NAME="Test",
+            GIT_COMMITTER_EMAIL="test@example.com",
+        ),
+        **dict(os.environ),
+    }
+    subprocess.run(["git", "commit", "-m", "init"], cwd=path, check=True, capture_output=True, env=env)
+
+
+def test_analyze_directory_with_subrepos(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo_root = tmp_path / "root"
+    repo_a = repo_root / "repo-a"
+    repo_b = repo_root / "repo-b"
+    _init_repo(repo_a)
+    _init_repo(repo_b)
+
+    out_dir = tmp_path / "out"
+    def fake_analyze_repository(_: Path) -> analyze.RepositoryAnalysis:
+        return analyze.RepositoryAnalysis(
+            git_sizer_version="1.0.0",
+            duration_ms=1,
+            metrics=analyze.RepositoryMetrics(),
+            violations=[],
+            health_grade="A",
+            lfs_candidates=[],
+            raw_output={},
+        )
+
+    def fake_build_envelope(*, analysis: analyze.RepositoryAnalysis, run_id: str, repo_id: str, branch: str, commit: str) -> dict:
+        return {
+            "metadata": {
+                "tool_name": "git-sizer",
+                "schema_version": "1.0.0",
+                "run_id": run_id,
+                "repo_id": repo_id,
+                "branch": branch,
+                "commit": commit,
+            },
+            "data": {"analysis": {"health_grade": analysis.health_grade}},
+        }
+
+    monkeypatch.setattr(analyze, "analyze_repository", fake_analyze_repository)
+    monkeypatch.setattr(analyze, "build_caldera_envelope", fake_build_envelope)
+
+    argv = [
+        "analyze.py",
+        "--repo-path",
+        str(repo_root),
+        "--repo-name",
+        "root",
+        "--output-dir",
+        str(out_dir),
+        "--run-id",
+        "run-1",
+        "--repo-id",
+        "repo-1",
+        "--branch",
+        "main",
+        "--commit",
+        "0" * 40,
+        "--exit-zero",
+    ]
+    monkeypatch.setattr(sys, "argv", argv)
+
+    analyze.main()
+
+    primary = out_dir / "output.json"
+    assert primary.exists()
+    payload = json.loads(primary.read_text())
+    assert payload["metadata"]["tool_name"] == "git-sizer"
+
+    assert (out_dir / "repo-a" / "output.json").exists()
+    assert (out_dir / "repo-b" / "output.json").exists()

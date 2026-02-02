@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ report_title }} - Insights Report</title>
+    <style>
+        :root {
+            --color-critical: #dc2626;
+            --color-high: #ea580c;
+            --color-medium: #ca8a04;
+            --color-low: #16a34a;
+            --color-info: #2563eb;
+            --grade-a: #22c55e;
+            --grade-b: #84cc16;
+            --grade-c: #eab308;
+            --grade-d: #f97316;
+            --grade-f: #ef4444;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        header p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        nav#toc {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        nav#toc h2 {
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        nav#toc ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 1.5rem;
+        }
+
+        nav#toc a {
+            color: var(--color-info);
+            text-decoration: none;
+        }
+
+        nav#toc a:hover {
+            text-decoration: underline;
+        }
+
+        .report-section {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .report-section:last-child {
+            border-bottom: none;
+        }
+
+        .report-section h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 1rem 0;
+            padding-top: 1rem;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            background: var(--bg-primary);
+        }
+
+        .metric-card .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .metric-card .sublabel {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-critical { background: var(--color-critical); color: white; }
+        .severity-high { background: var(--color-high); color: white; }
+        .severity-medium { background: var(--color-medium); color: white; }
+        .severity-low { background: var(--color-low); color: white; }
+        .severity-info { background: var(--color-info); color: white; }
+        .severity-unknown { background: #9ca3af; color: white; }
+
+        .grade-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .grade-a { background: var(--grade-a); }
+        .grade-b { background: var(--grade-b); }
+        .grade-c { background: var(--grade-c); }
+        .grade-d { background: var(--grade-d); }
+        .grade-f { background: var(--grade-f); }
+        .grade-unknown { background: #9ca3af; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .truncate {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .number {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .subsection {
+            margin-bottom: 2rem;
+        }
+
+        .subsection h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+        }
+
+        .risk-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .risk-critical { background: #fef2f2; color: var(--color-critical); border: 1px solid #fecaca; }
+        .risk-high { background: #fff7ed; color: var(--color-high); border: 1px solid #fed7aa; }
+        .risk-medium { background: #fefce8; color: var(--color-medium); border: 1px solid #fef08a; }
+        .risk-low { background: #f0fdf4; color: var(--color-low); border: 1px solid #bbf7d0; }
+
+        .threshold-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 1.5rem;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .threshold-legend strong {
+            color: var(--text-primary);
+        }
+
+        .threshold-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .threshold-item::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .threshold-critical::before { background: var(--color-critical); }
+        .threshold-high::before { background: var(--color-high); }
+        .threshold-medium::before { background: var(--color-medium); }
+        .threshold-low::before { background: var(--color-low); }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        @media print {
+            body {
+                max-width: none;
+                padding: 1rem;
+            }
+            .report-section {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .metric-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{{ report_title }}</h1>
+        <p>Generated: {{ generated_at }} | Run: {{ run_pk }}{% if repository %} | Repository: {{ repository }}{% endif %}</p>
+    </header>
+
+    <nav id="toc">
+        <h2>Contents</h2>
+        <ul>
+        {% for section in sections %}
+            <li><a href="#{{ section.id }}">{{ section.title }}</a></li>
+        {% endfor %}
+        </ul>
+    </nav>
+
+    <main>
+    {% for section in sections %}
+        {{ section.content }}
+    {% endfor %}
+    </main>
+
+    <footer>
+        <p>Generated by Project Caldera Insights</p>
+    </footer>
+</body>
+</html>

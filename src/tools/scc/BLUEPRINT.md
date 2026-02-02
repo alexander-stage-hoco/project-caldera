@@ -131,9 +131,9 @@ outputs/<run-id>/
 evaluation/results/
 ├── output.json               # Envelope output for evaluation runs
 ├── raw_scc_output.json       # Raw scc output (evaluation)
-├── checks.json               # Programmatic checks (JSON)
+├── evaluation_report.json    # Programmatic evaluation (JSON)
 ├── scorecard.md              # Programmatic scorecard
-└── llm_evaluation.json       # LLM judge results (if run)
+└── llm_evaluation.json       # LLM evaluation results
 ```
 
 ### Evaluation Framework

@@ -1,0 +1,67 @@
+## Executive Summary
+
+{% if risk_summary %}
+### Risk Assessment: {{ risk_summary.overall_risk | upper }}
+
+{{ risk_summary.risk_description }}
+
+| Dimension | Status |
+|-----------|--------|
+| Security | {% if risk_summary.security_status == 'not_scanned' %}Not Scanned{% else %}{{ risk_summary.security_status | title }}{% endif %} |
+| Stability | {{ risk_summary.stability_status | title }} |
+{% if risk_summary.health_grade and risk_summary.health_grade != 'N/A' %}
+| Health Grade | {{ risk_summary.health_grade }} |
+{% endif %}
+{% endif %}
+
+{% if has_insights %}
+### Key Findings
+
+{% for insight in insights %}
+#### #{{ insight.rank }}: {{ insight.title }}
+
+**Category:** {{ insight.category | replace('_', ' ') | title }} | **Severity:** {{ insight.severity | upper }}
+
+{{ insight.description }}
+
+{% if insight.evidence %}
+**Evidence:** {{ insight.evidence }}
+{% endif %}
+
+**Recommended Action:** {{ insight.remediation }}
+
+{% if insight.files %}
+**Affected Files:**
+{% for file in insight.files[:5] %}
+- `{{ file }}`
+{% endfor %}
+{% endif %}
+
+---
+{% endfor %}
+{% endif %}
+
+{% if recommended_actions %}
+### Recommended Actions
+
+{% for action in recommended_actions %}
+{{ loop.index }}. **{{ action.category | replace('_', ' ') | title }}:** {{ action.action }}
+{% endfor %}
+{% endif %}
+
+### Quick Stats
+
+| Metric | Value |
+|--------|-------|
+| Total Files | {{ total_files | format_number }} |
+| Total LOC | {{ total_loc | format_number }} |
+{% if vuln_count > 0 %}
+| Vulnerabilities | {{ vuln_count | format_number }}{% if critical_vuln_count > 0 %} ({{ critical_vuln_count }} critical){% endif %} |
+{% endif %}
+{% if high_complexity_files > 0 %}
+| High Complexity Files | {{ high_complexity_files | format_number }} |
+{% endif %}
+
+{% if not has_insights %}
+*No critical issues identified. Repository appears to be in good health.*
+{% endif %}

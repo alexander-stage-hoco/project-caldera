@@ -1,0 +1,31 @@
+## Distribution Insights
+
+{% if not has_data %}
+*No distribution data available for this run.*
+{% else %}
+
+{% if has_concentration %}
+### Top 20% Complexity Concentration
+
+Files in the top 20% of complexity that may need attention:
+
+| File | Complexity | LOC | Percentile |
+|------|------------|-----|------------|
+{% for file in concentration[:15] %}
+| {{ file.relative_path }} | {{ file.complexity }} | {{ file.loc }} | {{ file.percentile }}% |
+{% endfor %}
+{% endif %}
+
+### Distribution Summary
+
+{% if has_complexity and complexity_distribution %}
+- **Complexity**: {{ complexity_distribution[0].total_files if complexity_distribution else 'N/A' }} files analyzed
+{% endif %}
+{% if has_loc and loc_distribution %}
+- **LOC**: {{ loc_distribution[0].total_files if loc_distribution else 'N/A' }} files analyzed
+{% endif %}
+{% if has_smells and smell_distribution %}
+- **Smells**: {{ smell_distribution[0].total_files if smell_distribution else 'N/A' }} files with smells
+{% endif %}
+
+{% endif %}

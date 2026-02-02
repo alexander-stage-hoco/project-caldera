@@ -1,0 +1,24 @@
+## Repository Health Overview
+
+| Metric | Value |
+|--------|-------|
+| Total Files | {{ total_files | format_number }} |
+| Total Lines of Code | {{ total_loc | format_number }} |
+| Code Lines | {{ total_code | format_number }} |
+| Comment Lines | {{ total_comment | format_number }} |
+| Average Complexity (CCN) | {{ avg_ccn | format_number }} |
+| Max Complexity (CCN) | {{ max_ccn | format_number }} |
+{% if has_health_grade %}
+| Health Grade | {{ health_grade or 'N/A' }} |
+| Git-sizer Violations | {{ violation_count or 0 }} |
+{% endif %}
+
+{% if languages %}
+### Top Languages
+
+| Language | Files | Lines of Code |
+|----------|------:|-------------:|
+{% for lang in languages[:8] %}
+| {{ lang.language }} | {{ lang.file_count | format_number }} | {{ lang.loc | format_number }} |
+{% endfor %}
+{% endif %}

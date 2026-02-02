@@ -9,6 +9,7 @@ from .entities import (
     GitSizerLfsCandidate,
     GitSizerMetric,
     GitSizerViolation,
+    GitleaksSecret,
     LayoutDirectory,
     LayoutFile,
     LizardFileMetric,
@@ -143,9 +144,13 @@ class CollectionRunRepository:
                 row[0]
                 for row in self._conn.execute(
                     """
-                    SELECT table_name
-                    FROM information_schema.columns
-                    WHERE column_name = 'run_pk'
+                    SELECT DISTINCT c.table_name
+                    FROM information_schema.columns c
+                    JOIN information_schema.tables t
+                      ON c.table_name = t.table_name
+                     AND c.table_schema = t.table_schema
+                    WHERE c.column_name = 'run_pk'
+                      AND t.table_type = 'BASE TABLE'
                     """
                 ).fetchall()
             ]
@@ -339,6 +344,26 @@ class SemgrepRepository(BaseRepository):
                 r.run_pk, r.file_id, r.directory_id, r.relative_path, r.rule_id,
                 r.dd_smell_id, r.dd_category, r.severity, r.line_start, r.line_end,
                 r.column_start, r.column_end, r.message, r.code_snippet,
+            ),
+        )
+
+
+class GitleaksRepository(BaseRepository):
+    _COLUMNS = (
+        "run_pk", "file_id", "directory_id", "relative_path", "rule_id",
+        "secret_type", "severity", "line_number", "commit_hash", "commit_author",
+        "commit_date", "fingerprint", "in_current_head", "entropy", "description",
+    )
+
+    def insert_secrets(self, rows: Iterable[GitleaksSecret]) -> None:
+        self._insert_bulk(
+            "lz_gitleaks_secrets",
+            self._COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.file_id, r.directory_id, r.relative_path, r.rule_id,
+                r.secret_type, r.severity, r.line_number, r.commit_hash, r.commit_author,
+                r.commit_date, r.fingerprint, r.in_current_head, r.entropy, r.description,
             ),
         )
 

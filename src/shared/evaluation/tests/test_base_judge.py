@@ -230,7 +230,7 @@ class TestBaseJudgeInit:
         """BaseJudge should initialize with default values."""
         judge = TestJudge(working_dir=tmp_path)
 
-        assert judge.model == "sonnet"
+        assert judge.model == "opus-4.5"
         assert judge.timeout == 120
         assert judge.working_dir == tmp_path
         assert judge.use_llm is True
@@ -415,10 +415,11 @@ class TestBaseJudgeInvokeClaude:
         mock_result.stdout = '{"score": 4}'
 
         with patch("shutil.which", return_value="/usr/bin/claude"):
-            with patch("subprocess.run", return_value=mock_result):
-                result = judge._invoke_via_cli("test prompt")
+            with patch("os.access", return_value=True):
+                with patch("subprocess.run", return_value=mock_result):
+                    result = judge._invoke_via_cli("test prompt")
 
-                assert result == '{"score": 4}'
+                    assert result == '{"score": 4}'
 
     def test_invoke_via_cli_not_found(self, tmp_path):
         """_invoke_via_cli should return error when CLI not found."""
@@ -436,11 +437,12 @@ class TestBaseJudgeInvokeClaude:
 
         import subprocess
         with patch("shutil.which", return_value="/usr/bin/claude"):
-            with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("claude", 5)):
-                result = judge._invoke_via_cli("test prompt")
+            with patch("os.access", return_value=True):
+                with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("claude", 5)):
+                    result = judge._invoke_via_cli("test prompt")
 
-                assert "Error" in result
-                assert "timed out" in result.lower()
+                    assert "Error" in result
+                    assert "timed out" in result.lower()
 
     def test_invoke_via_cli_nonzero_exit(self, tmp_path):
         """_invoke_via_cli should handle non-zero exit code."""
@@ -449,13 +451,15 @@ class TestBaseJudgeInvokeClaude:
         mock_result = MagicMock()
         mock_result.returncode = 1
         mock_result.stderr = "Some error occurred"
+        mock_result.stdout = ""
 
         with patch("shutil.which", return_value="/usr/bin/claude"):
-            with patch("subprocess.run", return_value=mock_result):
-                result = judge._invoke_via_cli("test prompt")
+            with patch("os.access", return_value=True):
+                with patch("subprocess.run", return_value=mock_result):
+                    result = judge._invoke_via_cli("test prompt")
 
-                assert "Error" in result
-                assert "exit 1" in result
+                    assert "Error" in result
+                    assert "exit_code=1" in result
 
 
 class TestBaseJudgeHeuristic:
@@ -629,3 +633,170 @@ class TestBaseJudgeFullEvaluation:
         new_prompt = judge.build_prompt(evidence)
 
         assert legacy_prompt == new_prompt
+
+
+class TestSyntheticContext:
+    """Tests for synthetic evaluation context loading and evaluation mode."""
+
+    def test_evaluation_mode_explicit_synthetic(self, tmp_path):
+        """evaluation_mode should return explicit value when set to synthetic."""
+        judge = TestJudge(working_dir=tmp_path, evaluation_mode="synthetic")
+
+        assert judge.evaluation_mode == "synthetic"
+
+    def test_evaluation_mode_explicit_real_world(self, tmp_path):
+        """evaluation_mode should return explicit value when set to real_world."""
+        judge = TestJudge(working_dir=tmp_path, evaluation_mode="real_world")
+
+        assert judge.evaluation_mode == "real_world"
+
+    def test_evaluation_mode_auto_detect_synthetic(self, tmp_path):
+        """evaluation_mode should auto-detect synthetic based on directory names."""
+        output_dir = tmp_path / "output"
+        output_dir.mkdir(parents=True)
+        (output_dir / "api-keys").mkdir()
+        (output_dir / "aws-credentials").mkdir()
+
+        judge = TestJudge(working_dir=tmp_path, output_dir=output_dir)
+
+        assert judge.evaluation_mode == "synthetic"
+
+    def test_evaluation_mode_auto_detect_synthetic_json_files(self, tmp_path):
+        """evaluation_mode should auto-detect synthetic based on JSON file names."""
+        output_dir = tmp_path / "output"
+        output_dir.mkdir(parents=True)
+        (output_dir / "api-keys.json").write_text('{}')
+        (output_dir / "no-secrets.json").write_text('{}')
+
+        judge = TestJudge(working_dir=tmp_path, output_dir=output_dir)
+
+        assert judge.evaluation_mode == "synthetic"
+
+    def test_evaluation_mode_auto_detect_real_world(self, tmp_path):
+        """evaluation_mode should auto-detect real_world for UUIDs and repo names."""
+        output_dir = tmp_path / "output"
+        output_dir.mkdir(parents=True)
+        (output_dir / "DiscordChatExporter.json").write_text('{}')
+        (output_dir / "a1b2c3d4-e5f6-7890-abcd-ef1234567890").mkdir()
+
+        judge = TestJudge(working_dir=tmp_path, output_dir=output_dir)
+
+        assert judge.evaluation_mode == "real_world"
+
+    def test_evaluation_mode_defaults_to_real_world(self, tmp_path):
+        """evaluation_mode should default to real_world when output_dir doesn't exist."""
+        judge = TestJudge(working_dir=tmp_path)
+
+        assert judge.evaluation_mode == "real_world"
+
+    def test_load_synthetic_evaluation_context_not_found(self, tmp_path):
+        """load_synthetic_evaluation_context should return None when file not found."""
+        judge = TestJudge(working_dir=tmp_path)
+
+        result = judge.load_synthetic_evaluation_context()
+
+        assert result is None
+
+    def test_load_synthetic_evaluation_context_success(self, tmp_path):
+        """load_synthetic_evaluation_context should load and parse evaluation_report.json."""
+        eval_results_dir = tmp_path / "evaluation" / "results"
+        eval_results_dir.mkdir(parents=True)
+
+        report = {
+            "tool": "gitleaks",
+            "score": 1.0,
+            "decision": "PASS",
+            "summary": {"total": 10, "passed": 10, "failed": 0},
+            "categories": {
+                "Accuracy": {"total": 5, "passed": 5, "pass_rate": 1.0}
+            },
+            "checks": [
+                {"name": "AC-1", "status": "PASS", "message": "Test passed"},
+                {"name": "AC-2", "status": "PASS", "message": "Test passed"},
+                {"name": "AC-3", "status": "FAIL", "message": "Test failed"},
+            ],
+            "timestamp": "2026-01-23T19:12:11.000000Z",
+        }
+        (eval_results_dir / "evaluation_report.json").write_text(json.dumps(report))
+
+        judge = TestJudge(working_dir=tmp_path)
+        result = judge.load_synthetic_evaluation_context()
+
+        assert result is not None
+        assert result["tool"] == "gitleaks"
+        assert result["synthetic_score"] == 1.0
+        assert result["decision"] == "PASS"
+        assert result["validated_capabilities"] == ["AC-1", "AC-2"]
+        assert result["failed_checks"] == ["AC-3"]
+        assert result["timestamp"] == "2026-01-23T19:12:11.000000Z"
+
+    def test_load_synthetic_evaluation_context_invalid_json(self, tmp_path):
+        """load_synthetic_evaluation_context should return None for invalid JSON."""
+        eval_results_dir = tmp_path / "evaluation" / "results"
+        eval_results_dir.mkdir(parents=True)
+        (eval_results_dir / "evaluation_report.json").write_text("not valid json")
+
+        judge = TestJudge(working_dir=tmp_path)
+        result = judge.load_synthetic_evaluation_context()
+
+        assert result is None
+
+    def test_get_interpretation_guidance_high_score(self, tmp_path):
+        """get_interpretation_guidance should indicate validated tool for high scores."""
+        judge = TestJudge(working_dir=tmp_path)
+        context = {
+            "synthetic_score": 0.95,
+            "decision": "PASS",
+            "validated_capabilities": ["AC-1", "AC-2", "AC-3"],
+        }
+
+        guidance = judge.get_interpretation_guidance(context)
+
+        assert "fully validated" in guidance
+        assert "95%" in guidance
+        assert "clean codebase" in guidance.lower()
+        assert "NOT tool failure" in guidance
+
+    def test_get_interpretation_guidance_medium_score(self, tmp_path):
+        """get_interpretation_guidance should indicate mostly validated for medium scores."""
+        judge = TestJudge(working_dir=tmp_path)
+        context = {
+            "synthetic_score": 0.75,
+            "decision": "WEAK_PASS",
+            "validated_capabilities": ["AC-1", "AC-2"],
+        }
+
+        guidance = judge.get_interpretation_guidance(context)
+
+        assert "mostly validated" in guidance
+        assert "75%" in guidance
+        assert "some gaps" in guidance.lower()
+
+    def test_get_interpretation_guidance_low_score(self, tmp_path):
+        """get_interpretation_guidance should indicate partially validated for low scores."""
+        judge = TestJudge(working_dir=tmp_path)
+        context = {
+            "synthetic_score": 0.5,
+            "decision": "FAIL",
+            "validated_capabilities": ["AC-1"],
+        }
+
+        guidance = judge.get_interpretation_guidance(context)
+
+        assert "partially validated" in guidance
+        assert "50%" in guidance
+        assert "known detection gaps" in guidance.lower()
+
+    def test_synthetic_patterns_constant(self):
+        """SYNTHETIC_PATTERNS should contain expected pattern names."""
+        patterns = BaseJudge.SYNTHETIC_PATTERNS
+
+        # Core gitleaks patterns
+        assert "api-keys" in patterns
+        assert "aws-credentials" in patterns
+        assert "no-secrets" in patterns
+
+        # Other tool patterns
+        assert "vulnerable-npm" in patterns
+        assert "null-safety" in patterns
+        assert "synthetic" in patterns

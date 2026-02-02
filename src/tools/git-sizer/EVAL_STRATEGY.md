@@ -103,6 +103,43 @@ All evaluation dimensions with their check counts and weights:
 
 ---
 
+## Scoring Methodology
+
+### Aggregate Score Calculation
+
+The overall score combines programmatic and LLM evaluations:
+
+```
+total_score = (
+    size_accuracy_score * 0.35 +
+    coverage_score * 0.20 +
+    edge_cases_score * 0.15 +
+    performance_score * 0.10 +
+    threshold_quality_score * 0.10 +
+    actionability_score * 0.10
+)
+```
+
+### Programmatic Check Scoring
+
+Each programmatic check returns:
+- `pass`: 100 points
+- `warn`: 50 points
+- `fail`: 0 points
+
+Dimension score = (sum of check scores) / (max possible) * 5
+
+### LLM Judge Scoring
+
+Each LLM judge returns a score 1-5:
+- 5: Excellent
+- 4: Good
+- 3: Acceptable
+- 2: Poor
+- 1: Unacceptable
+
+---
+
 ## Decision Thresholds
 
 | Decision | Combined Score | Interpretation |
@@ -197,6 +234,13 @@ All evaluation dimensions with their check counts and weights:
 
 ---
 
+## Rollup Validation
+
+Rollups:
+
+Tests:
+- src/sot-engine/dbt/tests/test_rollup_git_sizer_repo_level_only.sql
+
 ## Running Evaluation
 
 ### Programmatic Evaluation
@@ -222,7 +266,7 @@ make evaluate OUTPUT=evaluation/results/report.json
 make evaluate-llm
 
 # Specific model
-make evaluate-llm MODEL=sonnet
+make evaluate-llm MODEL=opus-4.5
 
 # Individual judge
 make evaluate-llm JUDGE=size_accuracy
@@ -238,13 +282,6 @@ make evaluate-llm JUDGE=size_accuracy
 | Scorecard | `evaluation/scorecard.json` |
 
 ---
-
-## Rollup Validation
-
-Rollups:
-
-Tests:
-- src/sot-engine/dbt/tests/test_rollup_git_sizer_repo_level_only.sql
 
 **Note**: git-sizer provides **repository-level** metrics, not file-level metrics. Therefore:
 - No directory rollup validation is applicable

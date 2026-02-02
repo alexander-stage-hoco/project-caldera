@@ -11,8 +11,13 @@ Usage:
 import argparse
 import json
 import sys
-from datetime import datetime
+import uuid
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
+
+from shared.evaluation import require_observability
 
 from .judges import (
     JUDGES,
@@ -23,19 +28,50 @@ from .judges import (
 )
 
 
+@dataclass
+class ProgrammaticInput:
+    """Reference to programmatic evaluation results."""
+
+    file: str
+    decision: str
+    score: float
+    checks_passed: int
+    checks_failed: int
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary."""
+        return {
+            "file": self.file,
+            "decision": self.decision,
+            "score": self.score,
+            "checks_passed": self.checks_passed,
+            "checks_failed": self.checks_failed,
+        }
+
+
 def run_all_judges(
     analysis_path: Path,
     model: str = "sonnet",
     timeout: int = 120,
     specific_judge: str | None = None,
+    programmatic_input: ProgrammaticInput | None = None,
 ) -> dict:
     """Run all judges and return combined results."""
+    # Enforce observability - fail fast if disabled
+    require_observability()
+
+    # Generate trace ID to correlate all judge interactions
+    trace_id = str(uuid.uuid4())
+    timestamp = datetime.now(timezone.utc).isoformat()
+
     results = {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": timestamp,
         "analysis_path": str(analysis_path),
         "model": model,
+        "trace_id": trace_id,
         "judges": {},
         "summary": {},
+        "programmatic_input": programmatic_input.to_dict() if programmatic_input else None,
     }
 
     judge_classes = {
@@ -98,13 +134,28 @@ def run_all_judges(
     final_score = total_weighted_score / total_weight if total_weight > 0 else 0
     final_score_5 = final_score  # Already on 1-5 scale
 
+    if final_score_5 >= 4.0:
+        verdict = "STRONG_PASS"
+    elif final_score_5 >= 3.5:
+        verdict = "PASS"
+    elif final_score_5 >= 3.0:
+        verdict = "WEAK_PASS"
+    else:
+        verdict = "FAIL"
+
     results["summary"] = {
         "total_judges": len(results["judges"]),
         "weighted_score": round(final_score_5, 2),
         "normalized_score": round(final_score_5 / 5.0, 2),  # 0-1 scale
         "grade": get_grade(final_score_5),
-        "verdict": "PASS" if final_score_5 >= 4.0 else "FAIL",
+        "verdict": verdict,
+        "avg_confidence": sum(j["confidence"] for j in results["judges"].values()) / len(results["judges"]) if results["judges"] else 0.0,
     }
+
+    # Add uniform schema fields
+    results["decision"] = verdict
+    results["score"] = round(final_score_5, 2)
+    results["dimensions"] = results["judges"]  # Alias for uniform schema
 
     return results
 
@@ -192,9 +243,9 @@ def main():
     )
     parser.add_argument(
         "--model",
-        default="sonnet",
-        choices=["opus", "sonnet", "haiku"],
-        help="Claude model to use (default: sonnet)",
+        default="opus-4.5",
+        choices=["opus", "opus-4.5", "sonnet", "haiku"],
+        help="Claude model to use (default: opus-4.5)",
     )
     parser.add_argument(
         "--timeout",
@@ -212,6 +263,11 @@ def main():
         action="store_true",
         help="Output JSON only (no console output)",
     )
+    parser.add_argument(
+        "--programmatic-results",
+        type=Path,
+        help="Path to programmatic evaluation JSON (evaluation_report.json)",
+    )
 
     args = parser.parse_args()
 
@@ -226,12 +282,26 @@ def main():
         print(f"Error: Analysis file not found: {analysis_path}", file=sys.stderr)
         sys.exit(1)
 
+    # Load programmatic results if provided
+    programmatic_input = None
+    if args.programmatic_results and args.programmatic_results.exists():
+        prog_data = json.loads(args.programmatic_results.read_text())
+        summary = prog_data.get("summary", {})
+        programmatic_input = ProgrammaticInput(
+            file=str(args.programmatic_results),
+            decision=prog_data.get("decision", "UNKNOWN"),
+            score=prog_data.get("score", 0.0),
+            checks_passed=summary.get("passed", 0),
+            checks_failed=summary.get("failed", 0),
+        )
+
     # Run judges
     results = run_all_judges(
         analysis_path=analysis_path,
         model=args.model,
         timeout=args.timeout,
         specific_judge=args.judge,
+        programmatic_input=programmatic_input,
     )
 
     # Output
@@ -251,7 +321,7 @@ def main():
 
     # Exit with appropriate code
     verdict = results["summary"]["verdict"]
-    sys.exit(0 if verdict == "PASS" else 1)
+    sys.exit(0 if verdict in ("STRONG_PASS", "PASS", "WEAK_PASS") else 1)
 
 
 if __name__ == "__main__":

@@ -110,6 +110,69 @@ def compute_accuracy_score(correct, total):
 
 ---
 
+## Dimension Summary
+
+| Dimension | Weight | Pass Criteria | Focus Area |
+|-----------|--------|---------------|------------|
+| Accuracy | 60% | 95%+ correct CCN values | CCN, NLOC, parameter accuracy |
+| Coverage | 15% | All 7 languages detected | Language support breadth |
+| Edge Cases | 15% | Handle unicode, nesting, lambdas | Robustness |
+| Performance | 10% | Within time/memory thresholds | Scalability |
+
+---
+
+## Check Catalog
+
+### Accuracy Checks (AC-1 to AC-8)
+
+| Check ID | Name | Severity | Pass Criteria |
+|----------|------|----------|---------------|
+| AC-1 | Simple functions CCN=1 | Critical | All functions with expected CCN=1 report CCN=1 |
+| AC-2 | Complex functions CCN 10-20 | High | CCN within ±2 of expected |
+| AC-3 | Massive functions CCN >= 20 | High | CCN within ±3 of expected |
+| AC-4 | Function count matches | Critical | Detected count = expected count |
+| AC-5 | NLOC accuracy within 10% | Medium | NLOC within 10% of expected |
+| AC-6 | Parameter count accuracy | Medium | Exact match for parameter count |
+| AC-7 | Line range accuracy | Low | start_line/end_line within tolerance |
+| AC-8 | Nested function detection | Medium | Nested functions detected with qualified names |
+
+### Coverage Checks (CV-1 to CV-8)
+
+| Check ID | Name | Severity | Pass Criteria |
+|----------|------|----------|---------------|
+| CV-1 | Python detected | High | Python files found with functions |
+| CV-2 | C# detected | High | C# files found with functions |
+| CV-3 | Java detected | High | Java files found with functions |
+| CV-4 | JavaScript detected | High | JavaScript files found with functions |
+| CV-5 | TypeScript detected | High | TypeScript files found with functions |
+| CV-6 | Go detected | High | Go files found with functions |
+| CV-7 | Rust detected | High | Rust files found with functions |
+| CV-8 | All languages in summary | Critical | by_language contains all 7 |
+
+### Edge Case Checks (EC-1 to EC-8)
+
+| Check ID | Name | Severity | Pass Criteria |
+|----------|------|----------|---------------|
+| EC-1 | Empty files | Medium | 0 functions reported |
+| EC-2 | Comments-only files | Medium | 0 functions reported |
+| EC-3 | Single-line files | Low | Handled without error |
+| EC-4 | Unicode function names | Medium | Detected and named correctly |
+| EC-5 | Deep nesting | High | CCN >= 8 for deeply nested functions |
+| EC-6 | Lambda functions | Low | Detected (28 expected) |
+| EC-7 | Class methods | High | Detected with qualified names |
+| EC-8 | Anonymous functions | Low | Handled appropriately |
+
+### Performance Checks (PF-1 to PF-4)
+
+| Check ID | Name | Severity | Threshold |
+|----------|------|----------|-----------|
+| PF-1 | Synthetic repos | High | < 2s |
+| PF-2 | Real repo: click | Medium | < 5s |
+| PF-3 | Real repo: picocli | Medium | < 30s |
+| PF-4 | Memory usage | Low | < 500MB |
+
+---
+
 ## LLM Judge Dimensions (4 Judges)
 
 ### Judge Weights
@@ -118,6 +181,8 @@ def compute_accuracy_score(correct, total):
 |-------|--------|-------|
 | CCN Accuracy | 35% | CCN calculation correctness |
 | Function Detection | 25% | Nested/lambda/method detection |
+| Statistics | 20% | Distribution validity |
+| Hotspot Ranking | 20% | Prioritization accuracy |
 
 ---
 

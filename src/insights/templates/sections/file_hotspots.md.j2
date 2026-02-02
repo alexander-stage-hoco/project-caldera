@@ -1,0 +1,59 @@
+## File Hotspots
+
+{% if has_compound %}
+### High-Risk Files (Multiple Categories)
+
+These files appear in multiple hotspot categories, indicating compound risk.
+
+{% if remediation_guidance and remediation_guidance.compound %}
+> **{{ remediation_guidance.compound.title }}:** {{ remediation_guidance.compound.description }}
+{% endif %}
+
+| File | Complexity | LOC | Smells | Categories | Recommended Action |
+|------|----------:|----:|-------:|------------|-------------------|
+{% for file in compound_hotspots[:10] %}
+| `{{ file.relative_path }}` | {{ file.complexity | format_number }} | {{ file.loc_total | format_number }} | {{ file.smell_count | format_number }} | {{ file.categories | join(', ') }} | {{ file.remediation | default('Review') }} |
+{% endfor %}
+
+{% endif %}
+{% if has_complexity %}
+### Top Files by Complexity
+
+{% if remediation_guidance and remediation_guidance.complexity %}
+> **{{ remediation_guidance.complexity.title }}:** {{ remediation_guidance.complexity.description }}
+
+**Recommended Actions:**
+{% for action in remediation_guidance.complexity.actions %}
+- {{ action }}
+{% endfor %}
+{% endif %}
+
+| File | Complexity (CCN) | Max CCN | Functions | Language | Recommended Action |
+|------|----------------:|--------:|----------:|----------|-------------------|
+{% for file in complexity_hotspots[:15] %}
+| `{{ file.relative_path }}` | {{ file.complexity | format_number }} | {{ file.max_ccn | format_number }} | {{ file.function_count | format_number }} | {{ file.language or 'Unknown' }} | {{ file.remediation | default('Review') }} |
+{% endfor %}
+
+{% endif %}
+{% if has_size %}
+### Top Files by Size
+
+{% if remediation_guidance and remediation_guidance.size %}
+> **{{ remediation_guidance.size.title }}:** {{ remediation_guidance.size.description }}
+
+**Recommended Actions:**
+{% for action in remediation_guidance.size.actions %}
+- {{ action }}
+{% endfor %}
+{% endif %}
+
+| File | Lines of Code | Complexity | Language | Recommended Action |
+|------|--------------:|-----------:|----------|-------------------|
+{% for file in size_hotspots[:15] %}
+| `{{ file.relative_path }}` | {{ file.loc_total | format_number }} | {{ file.complexity | format_number }} | {{ file.language or 'Unknown' }} | {{ file.remediation | default('Review') }} |
+{% endfor %}
+
+{% endif %}
+{% if not has_complexity and not has_size and not has_compound %}
+*No file hotspot data available for this run.*
+{% endif %}

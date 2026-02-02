@@ -261,6 +261,82 @@ eval-repos/synthetic/
 
 ---
 
+## Implementation Plan
+
+### Phase 1: Standalone Tool (Complete)
+
+- [x] Create directory structure following Caldera conventions
+- [x] Implement analyze.py with envelope output format
+- [x] Create output.schema.json with 8 metadata fields
+- [x] Add synthetic eval-repos (vulnerable-npm, iac-terraform)
+- [x] Implement programmatic evaluation checks
+- [x] Pass compliance scanner
+
+### Phase 2: SoT Integration (Complete)
+
+- [x] Create entity dataclasses (TrivyTarget, TrivyVulnerability, TrivyMisconfiguration)
+- [x] Create repository class (TrivyRepository)
+- [x] Create adapter (TrivyAdapter)
+- [x] Add landing zone tables to schema.sql
+- [x] Create dbt staging models
+
+### Phase 3: Evaluation (Complete)
+
+- [x] Create ground truth files for synthetic repos
+- [x] Implement LLM judges (vulnerability_accuracy, coverage, actionability)
+- [x] Create LLM prompts
+- [x] Generate scorecard
+
+---
+
+## Evaluation
+
+### Evaluation Approach
+
+The evaluation uses a hybrid approach with 60% programmatic checks and 40% LLM-as-a-Judge:
+
+| Component | Weight | Purpose |
+|-----------|--------|---------|
+| Programmatic | 60% | Objective accuracy, coverage, completeness |
+| LLM Judges | 40% | Semantic understanding, actionability |
+
+### Evaluation Dimensions
+
+| Dimension | Checks | Weight | Focus |
+|-----------|--------|--------|-------|
+| Accuracy | TR-AC-1 to TR-AC-5 | 40% | Vulnerability counts, severity classification |
+| Coverage | TR-CV-1 to TR-CV-3 | 30% | Target and package detection |
+| Completeness | TR-CM-1 to TR-CM-4 | 30% | Data structure integrity |
+
+### Running Evaluation
+
+```bash
+# Programmatic evaluation
+make evaluate
+
+# LLM evaluation
+make evaluate-llm
+
+# Single repo evaluation
+make evaluate-single REPO_NAME=vulnerable-npm
+```
+
+See `EVAL_STRATEGY.md` for detailed check catalog and scoring methodology.
+
+---
+
+## Risk Assessment
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Database staleness | Medium | High | Run `trivy image --download-db-only` before scans |
+| False positives | Medium | Medium | Document filtering strategies, use severity thresholds |
+| Large repo timeout | Medium | Low | Configurable timeout (600s default), --skip-dirs option |
+| Transitive dependencies | Low | Medium | Document that not all vulns are directly exploitable |
+| Schema migration | Low | Medium | Versioned schema (1.0.0) |
+
+---
+
 ## Configuration Reference
 
 ### Makefile Variables

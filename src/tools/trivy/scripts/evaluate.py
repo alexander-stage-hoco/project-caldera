@@ -26,13 +26,14 @@ class CheckResult:
     evidence: dict
 
 
-def generate_scorecard_md(summary: dict) -> str:
+def generate_scorecard_md(scorecard: dict) -> str:
     """Generate a minimal markdown scorecard for compliance."""
+    summary = scorecard.get("summary", {})
     overall = summary.get("overall", {})
     lines = [
         "# Trivy Evaluation Scorecard",
         "",
-        f"**Generated:** {summary.get('evaluated_at', '')}",
+        f"**Generated:** {scorecard.get('generated_at', '')}",
         f"**Decision:** {summary.get('decision', '')}",
         f"**Score:** {summary.get('score_percent', 0)}%",
         "",
@@ -64,6 +65,8 @@ def generate_scorecard_json(summary: dict) -> dict:
         "tool": "trivy",
         "version": "1.0.0",
         "generated_at": summary.get("evaluated_at", ""),
+        "decision": decision,  # Top-level decision for compliance
+        "score": round(normalized_score, 2),  # Top-level score for compliance
         "summary": {
             "total_checks": overall.get("total", 0),
             "passed": overall.get("passed", 0),
@@ -71,6 +74,8 @@ def generate_scorecard_json(summary: dict) -> dict:
             "score_percent": round(score * 100, 2),
             "normalized_score": round(normalized_score, 2),
             "decision": decision,
+            "score": round(normalized_score, 2),
+            "overall": overall,
         },
     }
 
@@ -454,7 +459,7 @@ def main(
         checks_path.write_text(json.dumps(evaluation, indent=2))
         scorecard_json = generate_scorecard_json(summary)
         scorecard_json_path.write_text(json.dumps(scorecard_json, indent=2))
-        scorecard_md_path.write_text(generate_scorecard_md(summary))
+        scorecard_md_path.write_text(generate_scorecard_md(scorecard_json))
     else:
         # Batch evaluation - find all output files
         output_dir = Path("output/runs")
@@ -497,10 +502,7 @@ def main(
             "overall": aggregate_scores(all_evaluations),
         })
         scorecard_json_path.write_text(json.dumps(scorecard_json, indent=2))
-        scorecard_md_path.write_text(generate_scorecard_md({
-            "evaluated_at": summary["evaluated_at"],
-            "overall": aggregate_scores(all_evaluations)["overall"],
-        }))
+        scorecard_md_path.write_text(generate_scorecard_md(scorecard_json))
 
 
 if __name__ == "__main__":

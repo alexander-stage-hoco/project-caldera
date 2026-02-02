@@ -1,0 +1,113 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Security Vulnerabilities</h2>
+
+    {% if has_vulnerabilities %}
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Vulnerabilities</div>
+            <div class="value">{{ total_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Critical</div>
+            <div class="value" style="color: var(--color-critical);">{{ critical_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">High</div>
+            <div class="value" style="color: var(--color-high);">{{ high_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Risk Level</div>
+            <div class="value">
+                <span class="risk-indicator risk-{{ risk_level }}">{{ risk_level | upper }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Severity Breakdown</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Severity</th>
+                    <th class="number">Count</th>
+                    <th class="number">Affected Packages</th>
+                    <th class="number">Unique CVEs</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for item in summary %}
+                <tr>
+                    <td><span class="severity-badge {{ item.severity | severity_class }}">{{ item.severity }}</span></td>
+                    <td class="number">{{ item.count | format_number }}</td>
+                    <td class="number">{{ item.affected_packages | format_number }}</td>
+                    <td class="number">{{ item.unique_cves | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if top_cves %}
+    <div class="subsection">
+        <h3>Top Vulnerabilities</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>CVE ID</th>
+                    <th>Severity</th>
+                    <th>Package</th>
+                    <th>Installed</th>
+                    <th>Fixed In</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for cve in top_cves[:15] %}
+                <tr>
+                    <td>{{ cve.cve_id }}</td>
+                    <td><span class="severity-badge {{ cve.severity | severity_class }}">{{ cve.severity }}</span></td>
+                    <td>{{ cve.package_name }}</td>
+                    <td>{{ cve.installed_version or 'N/A' }}</td>
+                    <td>{{ cve.fixed_version or 'No fix' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if affected_packages %}
+    <div class="subsection">
+        <h3>Affected Packages</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Package</th>
+                    <th>Version</th>
+                    <th class="number">Total</th>
+                    <th class="number">Critical</th>
+                    <th class="number">High</th>
+                    <th class="number">Medium</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for pkg in affected_packages[:12] %}
+                <tr>
+                    <td>{{ pkg.package_name }}</td>
+                    <td>{{ pkg.installed_version or 'N/A' }}</td>
+                    <td class="number">{{ pkg.total_vulns | format_number }}</td>
+                    <td class="number">{{ pkg.critical_count | format_number }}</td>
+                    <td class="number">{{ pkg.high_count | format_number }}</td>
+                    <td class="number">{{ pkg.medium_count | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <p>No vulnerabilities detected in this run.</p>
+    </div>
+    {% endif %}
+</section>

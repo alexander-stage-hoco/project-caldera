@@ -14,6 +14,7 @@
         "tool_version",
         "run_id",
         "repo_id",
+        "repo_name",
         "branch",
         "commit",
         "timestamp",
@@ -39,6 +40,11 @@
           "type": "string",
           "format": "uuid",
           "description": "Unique identifier for the repository"
+        },
+        "repo_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Repository name"
         },
         "branch": {
           "type": "string",
@@ -76,6 +82,11 @@
         "tool_version": {
           "type": "string",
           "description": "Version of git-sizer used"
+        },
+        "repo_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Repository name"
         },
         "health_grade": {
           "type": "string",

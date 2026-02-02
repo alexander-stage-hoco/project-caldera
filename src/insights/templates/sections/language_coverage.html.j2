@@ -1,0 +1,105 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Language Coverage</h2>
+
+    {% if has_languages %}
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Primary Language</div>
+            <div class="value">{{ primary_language }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Total Languages</div>
+            <div class="value">{{ language_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Total Files</div>
+            <div class="value">{{ total_files | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Total Lines of Code</div>
+            <div class="value">{{ total_loc | format_number }}</div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Language Distribution</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Language</th>
+                    <th class="number">Files</th>
+                    <th class="number">% Files</th>
+                    <th class="number">Lines of Code</th>
+                    <th class="number">% LOC</th>
+                    <th class="number">Avg Complexity</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lang in languages[:20] %}
+                <tr>
+                    <td>{{ lang.language }}</td>
+                    <td class="number">{{ lang.file_count | format_number }}</td>
+                    <td class="number">{{ lang.file_percent | format_percent }}</td>
+                    <td class="number">{{ lang.loc | format_number }}</td>
+                    <td class="number">{{ lang.loc_percent | format_percent }}</td>
+                    <td class="number">{{ lang.avg_complexity | format_number if lang.avg_complexity else 'N/A' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if categories.compiled %}
+    <div class="subsection">
+        <h3>Compiled Languages</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Language</th>
+                    <th class="number">Files</th>
+                    <th class="number">Lines of Code</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lang in categories.compiled %}
+                <tr>
+                    <td>{{ lang.language }}</td>
+                    <td class="number">{{ lang.file_count | format_number }}</td>
+                    <td class="number">{{ lang.loc | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if categories.scripted %}
+    <div class="subsection">
+        <h3>Scripting Languages</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Language</th>
+                    <th class="number">Files</th>
+                    <th class="number">Lines of Code</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lang in categories.scripted %}
+                <tr>
+                    <td>{{ lang.language }}</td>
+                    <td class="number">{{ lang.file_count | format_number }}</td>
+                    <td class="number">{{ lang.loc | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <p>No language data available for this run.</p>
+    </div>
+    {% endif %}
+</section>

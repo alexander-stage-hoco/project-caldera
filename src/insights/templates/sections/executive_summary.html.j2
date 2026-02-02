@@ -1,0 +1,110 @@
+<section id="{{ section_id }}" class="report-section executive-summary">
+    <h2>Executive Summary</h2>
+
+    {% if risk_summary %}
+    <div class="risk-banner risk-{{ risk_summary.overall_risk }}">
+        <div class="risk-level">
+            <span class="risk-badge">{{ risk_summary.overall_risk | upper }}</span>
+            <span class="risk-description">{{ risk_summary.risk_description }}</span>
+        </div>
+        <div class="risk-indicators">
+            {% if risk_summary.security_status == 'not_scanned' %}
+            <span class="indicator indicator-unknown">Security: Not Scanned</span>
+            {% else %}
+            <span class="indicator indicator-{{ risk_summary.security_status }}">Security: {{ risk_summary.security_status | title }}</span>
+            {% endif %}
+            <span class="indicator indicator-{{ risk_summary.stability_status }}">Stability: {{ risk_summary.stability_status | title }}</span>
+            {% if risk_summary.health_grade and risk_summary.health_grade != 'N/A' %}
+            <span class="indicator">Health Grade: {{ risk_summary.health_grade }}</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if has_insights %}
+    <div class="subsection">
+        <h3>Key Findings</h3>
+        <div class="insights-list">
+            {% for insight in insights %}
+            <div class="insight-card insight-{{ insight.severity }}">
+                <div class="insight-header">
+                    <span class="insight-rank">#{{ insight.rank }}</span>
+                    <span class="insight-category category-{{ insight.category }}">{{ insight.category | replace('_', ' ') | title }}</span>
+                    <span class="severity-badge severity-{{ insight.severity }}">{{ insight.severity | upper }}</span>
+                </div>
+                <h4 class="insight-title">{{ insight.title }}</h4>
+                <p class="insight-description">{{ insight.description }}</p>
+                {% if insight.evidence %}
+                <div class="insight-evidence">
+                    <strong>Evidence:</strong> {{ insight.evidence }}
+                </div>
+                {% endif %}
+                <div class="insight-remediation">
+                    <strong>Recommended Action:</strong> {{ insight.remediation }}
+                </div>
+                {% if insight.files %}
+                <div class="insight-files">
+                    <strong>Affected:</strong>
+                    <ul>
+                        {% for file in insight.files[:5] %}
+                        <li class="truncate" title="{{ file }}">{{ file | truncate_path }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if recommended_actions %}
+    <div class="subsection">
+        <h3>Recommended Actions</h3>
+        <ol class="action-list">
+            {% for action in recommended_actions %}
+            <li class="action-item action-{{ action.category }}">
+                <span class="action-category">{{ action.category | replace('_', ' ') | title }}:</span>
+                {{ action.action }}
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Quick Stats</h3>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="label">Total Files</div>
+                <div class="value">{{ total_files | format_number }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Total LOC</div>
+                <div class="value">{{ total_loc | format_number }}</div>
+            </div>
+            {% if vuln_count > 0 %}
+            <div class="metric-card metric-{{ 'critical' if critical_vuln_count > 0 else 'warning' }}">
+                <div class="label">Vulnerabilities</div>
+                <div class="value">{{ vuln_count | format_number }}</div>
+                {% if critical_vuln_count > 0 %}
+                <div class="sublabel">{{ critical_vuln_count }} critical</div>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% if high_complexity_files > 0 %}
+            <div class="metric-card metric-warning">
+                <div class="label">High Complexity Files</div>
+                <div class="value">{{ high_complexity_files | format_number }}</div>
+                <div class="sublabel">CCN &gt; 20 (difficult to test and maintain)</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if not has_insights %}
+    <div class="empty-state success">
+        <p>No critical issues identified. Repository appears to be in good health.</p>
+    </div>
+    {% endif %}
+</section>

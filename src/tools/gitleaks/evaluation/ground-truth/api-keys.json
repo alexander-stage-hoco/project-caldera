@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "scenario": "api-keys",
+  "description": "Repository with API keys",
+  "generated_at": "2026-01-21T18:48:53Z",
+  "repo_path": "eval-repos/synthetic/api-keys",
+  "expected": {
+    "total_secrets": 2,
+    "unique_secrets": 2,
+    "secrets_in_head": 2,
+    "secrets_in_history": 0,
+    "files_with_secrets": 2,
+    "commits_with_secrets": 1,
+    "rule_ids": [
+      "github-pat",
+      "stripe-access-token"
+    ],
+    "files_with_secrets_list": [
+      ".env",
+      "config/api.py"
+    ],
+    "secrets_by_rule": {
+      "github-pat": 1,
+      "stripe-access-token": 1
+    },
+    "findings": [
+      {
+        "file_path": ".env",
+        "rule_id": "github-pat",
+        "line_number": 3
+      },
+      {
+        "file_path": "config/api.py",
+        "rule_id": "stripe-access-token",
+        "line_number": 5
+      }
+    ],
+    "repository": "api-keys",
+    "thresholds": {
+      "max_scan_time_ms": 5000,
+      "max_ms_per_commit": 1000,
+      "max_ms_per_finding": 500,
+      "max_findings_for_test": 100
+    }
+  }
+}

@@ -1,93 +1,68 @@
-"""Base judge class for Trivy LLM evaluation."""
+"""Base judge class for Trivy LLM evaluation.
+
+This module re-exports the shared BaseJudge and JudgeResult classes,
+and provides Trivy-specific extensions.
+"""
 
 from __future__ import annotations
 
 import json
-import os
-import shutil
-import subprocess
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field, asdict
+import sys
 from pathlib import Path
 from typing import Any
 
-try:
-    import anthropic  # type: ignore
-    HAS_ANTHROPIC_SDK = True
-except Exception:
-    anthropic = None
-    HAS_ANTHROPIC_SDK = False
+# Import from shared module - eliminates duplicate code
+from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult
+
+# Re-export JudgeResult for backwards compatibility
+__all__ = ["BaseJudge", "JudgeResult"]
 
 
-@dataclass
-class JudgeResult:
-    """Result from an LLM judge evaluation."""
+class BaseJudge(SharedBaseJudge):
+    """Trivy-specific base judge for vulnerability detection evaluation.
 
-    dimension: str
-    score: int  # 1-5
-    confidence: float  # 0.0-1.0
-    reasoning: str
-    evidence_cited: list[str] = field(default_factory=list)
-    recommendations: list[str] = field(default_factory=list)
-    sub_scores: dict[str, int] = field(default_factory=dict)
-    raw_response: str = ""
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        return asdict(self)
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> JudgeResult:
-        """Create from dictionary."""
-        return cls(
-            dimension=data.get("dimension", "unknown"),
-            score=data.get("score", 0),
-            confidence=data.get("confidence", 0.0),
-            reasoning=data.get("reasoning", ""),
-            evidence_cited=data.get("evidence_cited", []),
-            recommendations=data.get("recommendations", []),
-            sub_scores=data.get("sub_scores", {}),
-            raw_response=data.get("raw_response", ""),
-        )
-
-
-class BaseJudge(ABC):
-    """Base class for LLM judges.
-
-    Each judge evaluates a specific dimension of Trivy vulnerability
-    detection quality. Judges invoke Claude in headless mode with
-    specialized prompts.
+    Extends the shared BaseJudge with Trivy-specific functionality:
+    - output_dir for multi-repo analysis results
+    - ground_truth_dir for validation
+    - Analysis results loading with envelope handling
     """
 
+    # Class-level attributes for legacy compatibility
     name: str = "base"
-    weight: float = 0.0
 
     def __init__(
         self,
-        model: str = "sonnet",
+        model: str = "opus-4.5",
         timeout: int = 120,
         working_dir: Path | None = None,
         output_dir: Path | None = None,
+        trace_id: str | None = None,
+        enable_observability: bool = True,
+        evaluation_mode: str | None = None,
     ):
-        self.model = model
-        self.timeout = timeout
-        self.working_dir = working_dir or Path(__file__).parent.parent.parent.parent
-        self.output_dir = output_dir or self.working_dir / "output" / "runs"
-        self.ground_truth_dir = self.working_dir / "evaluation" / "ground-truth"
+        """Initialize the Trivy judge.
+
+        Args:
+            model: Model name ("sonnet", "opus", "haiku") or full API ID
+            timeout: Timeout in seconds for LLM invocation
+            working_dir: Working directory for the tool
+            output_dir: Directory containing analysis output files
+            trace_id: Correlation ID for linking all judges in one evaluation run
+            enable_observability: Whether to log LLM interactions (default True)
+            evaluation_mode: Evaluation mode ("synthetic", "real_world", or None for auto-detect)
+        """
+        working_dir = working_dir or Path(__file__).parent.parent.parent.parent
+        super().__init__(
+            model=model,
+            timeout=timeout,
+            working_dir=working_dir,
+            output_dir=output_dir or working_dir / "output" / "runs",
+            ground_truth_dir=working_dir / "evaluation" / "ground-truth",
+            trace_id=trace_id,
+            enable_observability=enable_observability,
+            evaluation_mode=evaluation_mode,
+        )
         self._prompts_dir = Path(__file__).parent.parent / "prompts"
-        self._prompt_template: str | None = None
-
-    @property
-    @abstractmethod
-    def dimension_name(self) -> str:
-        """Name of the evaluation dimension."""
-        ...
-
-    @property
-    @abstractmethod
-    def weight(self) -> float:
-        """Weight of this dimension in the overall score (0.0-1.0)."""
-        ...
 
     @property
     def prompt_file(self) -> Path:
@@ -102,45 +77,12 @@ class BaseJudge(ABC):
             return template.format(**kwargs)
         return ""
 
-    def load_prompt_template(self) -> str:
-        """Load the prompt template from file."""
-        if self._prompt_template is None:
-            if self.prompt_file.exists():
-                self._prompt_template = self.prompt_file.read_text()
-            else:
-                self._prompt_template = self.get_default_prompt()
-        return self._prompt_template
-
-    def get_default_prompt(self) -> str:
-        """Return the default prompt template if file doesn't exist."""
-        return f"""# {self.dimension_name.replace('_', ' ').title()} Evaluation
-
-Evaluate the following evidence and provide a score from 1-5.
-
-## Evidence
-
-{{{{ evidence }}}}
-
-## Response Format
-
-Respond with ONLY a JSON object:
-
-{{
-  "score": <1-5>,
-  "confidence": <0.0-1.0>,
-  "reasoning": "<explanation>",
-  "evidence_cited": ["<evidence points>"],
-  "recommendations": ["<improvements>"],
-  "sub_scores": {{}}
-}}
-"""
-
     def load_analysis_results(self) -> dict[str, Any]:
         """Load all analysis JSON files from output_dir.
 
-        Returns dict keyed by repo name (filename stem) -> analysis data.
+        Returns dict keyed by repo name -> analysis data.
+        Uses 'id' field from envelope if present, otherwise filename stem.
         """
-        import sys
         results = {}
 
         if self.output_dir.exists() and self.output_dir.is_dir():
@@ -150,7 +92,9 @@ Respond with ONLY a JSON object:
                     continue
                 try:
                     data = json.loads(json_file.read_text())
-                    repo_name = json_file.stem
+                    # Use 'id' field from envelope for ground truth matching,
+                    # fall back to filename stem
+                    repo_name = data.get("id", json_file.stem)
                     # Handle envelope format
                     if "data" in data:
                         results[repo_name] = data.get("data", {})
@@ -161,175 +105,6 @@ Respond with ONLY a JSON object:
                     continue
 
         return results
-
-    def load_ground_truth(self) -> dict[str, Any]:
-        """Load all ground truth files.
-
-        Returns dict keyed by repo name -> ground truth data.
-        """
-        results = {}
-
-        if self.ground_truth_dir.exists():
-            for gt_file in sorted(self.ground_truth_dir.glob("*.json")):
-                if gt_file.name.startswith("."):
-                    continue
-                try:
-                    data = json.loads(gt_file.read_text())
-                    # Use 'id' field if present, otherwise filename stem
-                    repo_name = data.get("id", gt_file.stem)
-                    results[repo_name] = data
-                except json.JSONDecodeError:
-                    continue
-
-        return results
-
-    @abstractmethod
-    def collect_evidence(self) -> dict[str, Any]:
-        """Collect evidence files and data for evaluation."""
-        ...
-
-    def build_prompt(self, evidence: dict[str, Any]) -> str:
-        """Build the complete prompt with evidence.
-
-        Uses {{ evidence }} placeholder pattern for reliability.
-        All evidence is serialized as JSON and substituted into the template.
-        """
-        template = self.load_prompt_template()
-        evidence_str = json.dumps(evidence, indent=2, default=str)
-        return template.replace("{{ evidence }}", evidence_str)
-
-    def parse_response(self, response: str) -> JudgeResult:
-        """Parse the LLM response into a structured result."""
-        try:
-            # Try to extract JSON from the response
-            json_start = response.find("{")
-            json_end = response.rfind("}") + 1
-            if json_start >= 0 and json_end > json_start:
-                json_str = response[json_start:json_end]
-                data = json.loads(json_str)
-                result = JudgeResult.from_dict(data)
-                result.dimension = self.dimension_name
-                result.raw_response = response
-                return result
-        except json.JSONDecodeError:
-            pass
-
-        # Fallback: extract score from text
-        score = 3  # Default to middle score
-        for i in range(5, 0, -1):
-            if f"score: {i}" in response.lower() or f"score:{i}" in response.lower():
-                score = i
-                break
-
-        return JudgeResult(
-            dimension=self.dimension_name,
-            score=score,
-            confidence=0.5,
-            reasoning=response[:500],
-            raw_response=response,
-        )
-
-    def _invoke_via_sdk(self, prompt: str) -> str | None:
-        """Invoke Claude via Anthropic SDK when available."""
-        if not HAS_ANTHROPIC_SDK:
-            return None
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
-        if not api_key:
-            return None
-
-        # Map model names to API model IDs
-        model_map = {
-            "sonnet": "claude-sonnet-4-20250514",
-            "opus": "claude-opus-4-20250514",
-            "haiku": "claude-haiku-4-20250514",
-        }
-        model_id = model_map.get(self.model, self.model)
-
-        client = anthropic.Anthropic(api_key=api_key)
-        response = client.messages.create(
-            model=model_id,
-            max_tokens=1024,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        content = getattr(response, "content", []) or []
-        return "".join(getattr(block, "text", "") for block in content)
-
-    def _invoke_via_cli(self, prompt: str) -> str:
-        """Invoke Claude Code in headless mode via CLI."""
-        claude_path = shutil.which("claude")
-        if not claude_path:
-            return "Error: Claude CLI not found"
-
-        try:
-            cmd = [
-                "claude",
-                "-p", prompt,
-                "--model", self.model,
-                "--output-format", "text",
-                "--allowedTools", "",
-                "--max-turns", "5",
-            ]
-
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=self.timeout,
-                cwd=str(self.working_dir),
-            )
-
-            if result.returncode != 0:
-                stderr = result.stderr.strip()
-                if "EPERM" in stderr or "permission" in stderr.lower():
-                    return "Error: Permission denied executing Claude CLI"
-                elif "ENOENT" in stderr:
-                    return "Error: Claude CLI not found"
-                return f"Error (exit {result.returncode}): {stderr[:200]}"
-
-            return result.stdout
-
-        except subprocess.TimeoutExpired:
-            return f"Error: Claude invocation timed out after {self.timeout}s"
-        except PermissionError as e:
-            return f"Error: Permission denied - {e}"
-        except FileNotFoundError:
-            return "Error: Claude CLI not found"
-        except OSError as e:
-            return f"Error: OS error - {e}"
-        except Exception as e:
-            return f"Error: Unexpected - {type(e).__name__}: {e}"
-
-    def invoke_claude(self, prompt: str) -> str:
-        """Invoke Claude, preferring SDK and falling back to CLI."""
-        sdk_response = self._invoke_via_sdk(prompt)
-        if sdk_response is not None:
-            return sdk_response
-        return self._invoke_via_cli(prompt)
-
-    def evaluate(self) -> JudgeResult:
-        """Run the full evaluation pipeline."""
-        # Collect evidence
-        evidence = self.collect_evidence()
-
-        # Build prompt
-        prompt = self.build_prompt(evidence)
-
-        # Invoke Claude
-        response = self.invoke_claude(prompt)
-
-        # Parse response
-        result = self.parse_response(response)
-
-        return result
-
-    def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
-        """Run ground truth assertions before LLM evaluation.
-
-        Returns:
-            Tuple of (all_passed, list of failure messages)
-        """
-        # Default: no assertions, always pass
-        return True, []
 
     # Legacy interface support for old-style judges
     def get_prompt(self, data: dict) -> str:

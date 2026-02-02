@@ -143,6 +143,32 @@ class GitSizerLfsCandidate:
     file_path: str
 ```
 
+## Implementation Plan
+
+### Phase 1: Standalone Tool (Complete)
+
+- [x] Create directory structure
+- [x] Implement analyze.py with envelope output
+- [x] Create output.schema.json
+- [x] Add synthetic eval-repos (healthy, bloated, deep-history, wide-tree)
+- [x] Implement programmatic checks
+- [x] Pass compliance scanner
+
+### Phase 2: SoT Integration (Complete)
+
+- [x] Create entity dataclasses (GitSizerMetric, GitSizerViolation, GitSizerLfsCandidate)
+- [x] Create repository class (GitSizerRepository)
+- [x] Create adapter (GitSizerAdapter)
+- [x] Add to schema.sql
+- [x] Create dbt staging models
+
+### Phase 3: Evaluation (Complete)
+
+- [x] Create ground truth files
+- [x] Implement LLM judges
+- [x] Create LLM prompts
+- [x] Generate scorecard
+
 ## Configuration
 
 ### Makefile Variables

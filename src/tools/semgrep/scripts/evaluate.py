@@ -353,26 +353,43 @@ def main():
     scorecard_json = generate_scorecard_json(report)
     if args.output:
         out_dir = Path(args.output).parent if Path(args.output).suffix else Path(args.output)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        checks_path = out_dir / "checks.json"
-        scorecard_json_path = out_dir / "scorecard.json"
-        scorecard_md_path = out_dir / "scorecard.md"
-        with open(checks_path, "w") as f:
-            json.dump(report.to_dict(), f, indent=2)
-        with open(scorecard_json_path, "w") as f:
-            json.dump(scorecard_json, f, indent=2)
-        scorecard_md_path.write_text(generate_scorecard_md(scorecard_json))
-        if not args.json:
-            print(f"  Scorecard saved to: {scorecard_md_path}")
-            print()
     else:
-        scorecard_path = Path(__file__).parent.parent / "evaluation" / "scorecard.json"
-        scorecard_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(scorecard_path, "w") as f:
-            json.dump(scorecard_json, f, indent=2)
-        if not args.json:
-            print(f"  Scorecard saved to: {scorecard_path}")
-            print()
+        out_dir = Path(__file__).parent.parent / "evaluation" / "results"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Output uniform evaluation_report.json for compliance
+    evaluation_report_path = out_dir / "evaluation_report.json"
+    evaluation_report = {
+        "timestamp": report.timestamp,
+        "tool": "semgrep",
+        "decision": determine_decision(report.score),
+        "score": round(report.score, 4),
+        "checks": [
+            {
+                "name": c.check_id,
+                "status": "PASS" if c.passed else "FAIL",
+                "message": c.message,
+            }
+            for c in report.checks
+        ],
+        "summary": {
+            "total": report.total,
+            "passed": report.passed,
+            "failed": report.failed,
+        },
+    }
+    with open(evaluation_report_path, "w") as f:
+        json.dump(evaluation_report, f, indent=2)
+
+    scorecard_json_path = out_dir / "scorecard.json"
+    scorecard_md_path = out_dir / "scorecard.md"
+    with open(scorecard_json_path, "w") as f:
+        json.dump(scorecard_json, f, indent=2)
+    scorecard_md_path.write_text(generate_scorecard_md(scorecard_json))
+    if not args.json:
+        print(f"  Evaluation report saved to: {evaluation_report_path}")
+        print(f"  Scorecard saved to: {scorecard_md_path}")
+        print()
 
     # Exit with appropriate code
     sys.exit(0 if report.score >= 0.5 else 1)

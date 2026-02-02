@@ -1,22 +1,16 @@
 .PHONY: help compliance tools-setup tools-analyze tools-evaluate \
-	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test explore \
-	report-health report-hotspots report-health-latest report-hotspots-latest \
-	orchestrate test
+	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
+	orchestrate test pipeline-eval
 
 TOOLS_DIR := src/tools
 TOOL ?=
 TOOL_DIRS := $(shell find $(TOOLS_DIR) -maxdepth 1 -type d -not -path $(TOOLS_DIR) -exec test -f {}/Makefile ';' -print | sort)
-COMPLIANCE_OUT_JSON ?= /tmp/tool_compliance_report.json
-COMPLIANCE_OUT_MD ?= /tmp/tool_compliance_report.md
+COMPLIANCE_OUT_JSON ?= docs/tool_compliance_report.json
+COMPLIANCE_OUT_MD ?= docs/tool_compliance_report.md
 COMPLIANCE_FLAGS ?= --run-analysis --run-evaluate --run-llm
 DBT_BIN ?= .venv/bin/dbt
 DBT_PROFILES_DIR ?= src/sot-engine/dbt
 DBT_PROJECT_DIR ?= src/sot-engine/dbt
-EXPLORER_DB ?= /tmp/caldera_sot.duckdb
-EXPLORER_PY ?= .venv/bin/python
-RUN_PK ?=
-REPORT_LIMIT ?= 10
-REPORT_FORMAT ?= table
 ORCH_REPO_PATH ?=
 ORCH_REPO_ID ?=
 ORCH_RUN_ID ?=
@@ -74,23 +68,15 @@ help:
 	@echo "  dbt-run           Run dbt models (staging + marts)"
 	@echo "  dbt-test          Run dbt tests"
 	@echo "  dbt-test-reports  Run report-specific dbt tests"
-	@echo "  explore           List DuckDB tables (default /tmp/caldera_sot.duckdb)"
-	@echo "  explore-query     Run a SQL query (QUERY=...)"
-	@echo "  report-health     Repo health snapshot report"
-	@echo "  report-hotspots   Hotspot directories report"
-	@echo "  report-atlas      Combined health + drill-downs report"
-	@echo "  report-health-latest  Repo health (latest run for REPO_ID)"
-	@echo "  report-hotspots-latest Hotspots (latest run for REPO_ID)"
-	@echo "  report-atlas-latest   Combined report (latest run for REPO_ID)"
-	@echo "  report-runs       Collection run status report"
 	@echo "  orchestrate       Run orchestrator (REPO_PATH, REPO_ID, RUN_ID, BRANCH, COMMIT)"
+	@echo "  pipeline-eval     Full E2E: orchestrate -> insights -> LLM eval -> top 3"
 	@echo ""
 	@echo "Variables:"
 	@echo "  TOOL=<name>        Limit to a single tool directory"
 	@echo "  VENV=<path>        Pass through to tool Makefiles"
 	@echo "  REPO_PATH, REPO_NAME, OUTPUT_DIR, EVAL_OUTPUT_DIR, RUN_ID, REPO_ID, BRANCH, COMMIT"
 	@echo "  COMPLIANCE_FLAGS=\"--run-analysis --run-evaluate --run-llm\""
-	@echo "  DBT_BIN, DBT_PROFILES_DIR, DBT_PROJECT_DIR, EXPLORER_DB, EXPLORER_PY, RUN_PK, REPORT_LIMIT, REPORT_FORMAT, REPO_ID"
+	@echo "  DBT_BIN, DBT_PROFILES_DIR, DBT_PROJECT_DIR"
 	@echo "  ORCH_REPO_PATH, ORCH_REPO_ID, ORCH_RUN_ID, ORCH_BRANCH, ORCH_COMMIT, ORCH_DB_PATH"
 	@echo "  ORCH_LAYOUT_OUTPUT (optional, override layout output path)"
 	@echo "  ORCH_SCC_OUTPUT (optional, override scc output path)"
@@ -101,7 +87,7 @@ help:
 	@echo "  ORCH_SKIP_TOOLS (optional, comma-separated tool names to skip)"
 
 compliance:
-	@$(EXPLORER_PY) src/tool-compliance/tool_compliance.py \
+	@.venv/bin/python src/tool-compliance/tool_compliance.py \
 		--root $(CURDIR) \
 		--out-json $(COMPLIANCE_OUT_JSON) \
 		--out-md $(COMPLIANCE_OUT_MD) \
@@ -134,34 +120,6 @@ dbt-test:
 dbt-test-reports:
 	@DBT_PROFILES_DIR=$(DBT_PROFILES_DIR) $(DBT_BIN) test --project-dir $(DBT_PROJECT_DIR) --target-path /tmp/dbt_target --log-path /tmp/dbt_logs --select test_report_repo_health_snapshot_ccn_present test_report_repo_health_snapshot_scc_present
 
-explore:
-	@$(EXPLORER_PY) src/explorer/explorer.py --db $(EXPLORER_DB) list
-
-explore-query:
-	@test -n "$(QUERY)" || (echo "QUERY is required, e.g. QUERY=\"select 1\""; exit 1)
-	@$(EXPLORER_PY) src/explorer/explorer.py --db $(EXPLORER_DB) query "$(QUERY)"
-
-report-health:
-	@$(EXPLORER_PY) src/explorer/report_runner.py repo-health --db $(EXPLORER_DB) --run-pk $(RUN_PK) --format $(REPORT_FORMAT) $(if $(REPORT_OUT),--out $(REPORT_OUT),)
-
-report-hotspots:
-	@$(EXPLORER_PY) src/explorer/report_runner.py hotspots --db $(EXPLORER_DB) --run-pk $(RUN_PK) --limit $(REPORT_LIMIT) --format $(REPORT_FORMAT) $(if $(REPORT_OUT),--out $(REPORT_OUT),)
-
-report-atlas:
-	@$(EXPLORER_PY) src/explorer/report_runner.py atlas --db $(EXPLORER_DB) --run-pk $(RUN_PK) --limit $(REPORT_LIMIT) --format $(REPORT_FORMAT) $(if $(REPORT_OUT),--out $(REPORT_OUT),)
-
-report-health-latest:
-	@$(EXPLORER_PY) src/explorer/report_runner.py repo-health --db $(EXPLORER_DB) --repo-id $(REPO_ID) --format $(REPORT_FORMAT) $(if $(REPORT_OUT),--out $(REPORT_OUT),)
-
-report-hotspots-latest:
-	@$(EXPLORER_PY) src/explorer/report_runner.py hotspots --db $(EXPLORER_DB) --repo-id $(REPO_ID) --limit $(REPORT_LIMIT) --format $(REPORT_FORMAT) $(if $(REPORT_OUT),--out $(REPORT_OUT),)
-
-report-atlas-latest:
-	@$(EXPLORER_PY) src/explorer/report_runner.py atlas --db $(EXPLORER_DB) --repo-id $(REPO_ID) --limit $(REPORT_LIMIT) --format $(REPORT_FORMAT) $(if $(REPORT_OUT),--out $(REPORT_OUT),)
-
-report-runs:
-	@$(EXPLORER_PY) src/explorer/report_runner.py runs --db $(EXPLORER_DB) --format $(REPORT_FORMAT) $(if $(REPORT_OUT),--out $(REPORT_OUT),)
-
 orchestrate:
 	@test -n "$(ORCH_REPO_PATH)" || (echo "ORCH_REPO_PATH is required"; exit 1)
 	@test -n "$(ORCH_REPO_ID)" || (echo "ORCH_REPO_ID is required"; exit 1)
@@ -193,3 +151,88 @@ test:
 	@$(MAKE) tools-test VENV=$(CURDIR)/.venv SKIP_SETUP=1
 	@$(MAKE) dbt-run
 	@$(MAKE) dbt-test
+
+# =============================================================================
+# Full E2E Pipeline: Repo -> Orchestrate -> Insights -> LLM Eval -> Top 3
+# =============================================================================
+# Usage: make pipeline-eval ORCH_REPO_PATH=/path/to/repo
+#
+# This target runs the complete analysis pipeline:
+# 1. Orchestrate: Run 7 tools + dbt transforms
+# 2. Generate: Create insights report from dbt marts
+# 3. Evaluate: LLM evaluation with InsightQualityJudge
+# 4. Extract: Top 3 insights with improvement proposals
+#
+# Simplified usage (auto-generates IDs from repo path):
+#   make pipeline-eval ORCH_REPO_PATH=/path/to/repo
+#
+# Full control:
+#   make pipeline-eval \
+#     ORCH_REPO_PATH=/path/to/repo \
+#     ORCH_REPO_ID=my-repo \
+#     ORCH_RUN_ID=run-001 \
+#     ORCH_BRANCH=main \
+#     ORCH_COMMIT=abc123...
+# =============================================================================
+
+PIPELINE_OUTPUT_DIR ?= src/insights/output/pipeline
+PYTHON_VENV := .venv/bin/python
+
+pipeline-eval:
+	@test -n "$(ORCH_REPO_PATH)" || (echo "ORCH_REPO_PATH is required"; exit 1)
+	$(eval REPO_NAME := $(shell basename $(ORCH_REPO_PATH)))
+	$(eval AUTO_REPO_ID := $(or $(ORCH_REPO_ID),$(REPO_NAME)))
+	$(eval AUTO_RUN_ID := $(or $(ORCH_RUN_ID),$(shell date +%Y%m%d_%H%M%S)))
+	$(eval AUTO_BRANCH := $(or $(ORCH_BRANCH),$(shell cd $(ORCH_REPO_PATH) && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")))
+	$(eval AUTO_COMMIT := $(or $(ORCH_COMMIT),$(shell cd $(ORCH_REPO_PATH) && git rev-parse HEAD 2>/dev/null || echo "0000000000000000000000000000000000000000")))
+	@echo ""
+	@echo "=============================================="
+	@echo "PIPELINE EVALUATION"
+	@echo "=============================================="
+	@echo "Repository: $(ORCH_REPO_PATH)"
+	@echo "Repo ID:    $(AUTO_REPO_ID)"
+	@echo "Run ID:     $(AUTO_RUN_ID)"
+	@echo "Branch:     $(AUTO_BRANCH)"
+	@echo "Commit:     $(AUTO_COMMIT)"
+	@echo "Database:   $(ORCH_DB_PATH)"
+	@echo "=============================================="
+	@echo ""
+	@echo "=== Phase 1: Orchestrate (Tools + dbt) ==="
+	@$(MAKE) orchestrate \
+		ORCH_REPO_PATH=$(ORCH_REPO_PATH) \
+		ORCH_REPO_ID=$(AUTO_REPO_ID) \
+		ORCH_RUN_ID=$(AUTO_RUN_ID) \
+		ORCH_BRANCH=$(AUTO_BRANCH) \
+		ORCH_COMMIT=$(AUTO_COMMIT) \
+		ORCH_DB_PATH=$(ORCH_DB_PATH) \
+		$(if $(ORCH_REPLACE),ORCH_REPLACE=1,)
+	$(eval RUN_PK := $(shell duckdb $(ORCH_DB_PATH) -csv -noheader "SELECT run_pk FROM lz_tool_runs WHERE run_id='$(AUTO_RUN_ID)' LIMIT 1" 2>/dev/null || echo "1"))
+	@echo ""
+	@echo "=== Phase 2: Generate Insights Report ==="
+	@mkdir -p $(PIPELINE_OUTPUT_DIR)
+	cd src/insights && $(PYTHON_VENV) -m insights generate $(RUN_PK) \
+		--db $(ORCH_DB_PATH) \
+		--format html \
+		--output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html
+	@echo ""
+	@echo "=== Phase 3: LLM Evaluation with InsightQualityJudge ==="
+	cd src/insights && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \
+		$(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html \
+		--db $(ORCH_DB_PATH) \
+		--run-pk $(RUN_PK) \
+		--include-insight-quality \
+		--output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json
+	@echo ""
+	@echo "=== Phase 4: Extract Top 3 Insights ==="
+	cd src/insights && $(PYTHON_VENV) -m insights.scripts.extract_top_insights extract \
+		$(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json \
+		--output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/top3_insights.json \
+		--format rich
+	@echo ""
+	@echo "=============================================="
+	@echo "PIPELINE COMPLETE"
+	@echo "=============================================="
+	@echo "Report:     $(PIPELINE_OUTPUT_DIR)/report.html"
+	@echo "Evaluation: $(PIPELINE_OUTPUT_DIR)/evaluation.json"
+	@echo "Top 3:      $(PIPELINE_OUTPUT_DIR)/top3_insights.json"
+	@echo "=============================================="

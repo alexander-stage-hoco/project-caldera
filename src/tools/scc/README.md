@@ -61,7 +61,7 @@ Programmatic and LLM evaluation outputs are written to a fixed location and over
 evaluation/results/
 ├── output.json               # Envelope output for evaluation runs
 ├── raw_scc_output.json       # Raw scc output (evaluation)
-├── checks.json               # Programmatic checks (JSON)
+├── evaluation_report.json    # Programmatic evaluation (JSON)
 ├── scorecard.md              # Programmatic scorecard
 └── llm_evaluation.json       # LLM judge results (if run)
 ```
@@ -97,7 +97,7 @@ make analyze            # Run analysis with v2.0 dashboard
 make analyze-interactive # Interactive multi-repo selection
 make analyze-real       # Analyze real OSS repositories
 make evaluate           # Run programmatic evaluation (63 checks)
-make evaluate-llm       # Run LLM-as-a-Judge evaluation
+make evaluate-llm       # Run LLM-as-a-Judge evaluation (Claude CLI, model = opus-4.5)
 make test               # Run all tests
 make test-quick         # Run fast tests only
 make clean              # Remove generated files

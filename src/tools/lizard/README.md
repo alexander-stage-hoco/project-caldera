@@ -240,7 +240,7 @@ Initialize with `make setup` (uses git submodules).
 
 All checks passing across accuracy, coverage, edge cases, and performance.
 
-### LLM Evaluation (Claude Opus): 3.85/5.0 STRONG_PASS
+### LLM Evaluation (Claude Opus 4.5): 3.85/5.0 STRONG_PASS
 
 | Judge | Weight | Score | Confidence |
 |-------|--------|-------|------------|

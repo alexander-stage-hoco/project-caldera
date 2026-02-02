@@ -244,6 +244,63 @@
               "minimum": 0
             }
           }
+        },
+        "ecosystem_completeness": {
+          "type": "object",
+          "description": "Pre-scan analysis of dependency files and ecosystem completeness",
+          "properties": {
+            "dependency_files": {
+              "type": "array",
+              "description": "List of discovered dependency files",
+              "items": {
+                "type": "object",
+                "required": ["path", "ecosystem", "type"],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "description": "Repo-relative path to dependency file"
+                  },
+                  "ecosystem": {
+                    "type": "string",
+                    "description": "Package ecosystem (npm, pip, go, rust, etc.)"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["manifest", "lockfile"],
+                    "description": "Whether this is a manifest or lockfile"
+                  }
+                }
+              }
+            },
+            "ecosystems": {
+              "type": "object",
+              "description": "Status of each detected ecosystem",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "manifests": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "List of manifest file paths"
+                  },
+                  "lockfiles": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "List of lockfile paths"
+                  },
+                  "is_complete": {
+                    "type": "boolean",
+                    "description": "Whether the ecosystem has all expected files"
+                  }
+                }
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "description": "Warnings about incomplete ecosystems",
+              "items": { "type": "string" }
+            }
+          }
         }
       }
     }

@@ -1,0 +1,55 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Repository Health Overview</h2>
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Files</div>
+            <div class="value">{{ total_files | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Total Lines of Code</div>
+            <div class="value">{{ total_loc | format_number }}</div>
+            <div class="sublabel">{{ total_code | format_number }} code, {{ total_comment | format_number }} comments</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Average Complexity (CCN)</div>
+            <div class="value">{{ avg_ccn | format_number }}</div>
+            <div class="sublabel">Max: {{ max_ccn | format_number }}</div>
+        </div>
+        {% if has_health_grade %}
+        <div class="metric-card">
+            <div class="label">Health Grade</div>
+            <div class="value">
+                <span class="grade-badge {{ health_grade | grade_class }}">{{ health_grade or 'N/A' }}</span>
+            </div>
+            {% if violation_count %}
+            <div class="sublabel">{{ violation_count }} git-sizer violations</div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if languages %}
+    <div class="subsection">
+        <h3>Top Languages</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Language</th>
+                    <th class="number">Files</th>
+                    <th class="number">Lines of Code</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lang in languages[:8] %}
+                <tr>
+                    <td>{{ lang.language }}</td>
+                    <td class="number">{{ lang.file_count | format_number }}</td>
+                    <td class="number">{{ lang.loc | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>

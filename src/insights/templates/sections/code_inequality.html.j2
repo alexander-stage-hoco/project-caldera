@@ -1,0 +1,170 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Code Inequality Analysis</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No inequality data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">Gini >= 0.7</div>
+            </div>
+            <div class="metric-card {% if summary.warning_count > 0 %}warning{% endif %}">
+                <div class="label">Warning</div>
+                <div class="value">{{ summary.warning_count }}</div>
+                <div class="sublabel">Gini >= 0.5</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Avg Gini</div>
+                <div class="value">{{ summary.avg_gini }}</div>
+                <div class="sublabel">Across flagged dirs</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Max Palma</div>
+                <div class="value">{{ summary.max_palma }}</div>
+                <div class="sublabel">Top 10% / Bottom 40%</div>
+            </div>
+        </div>
+    </div>
+
+    {% if has_gini and critical_directories %}
+    <div class="subsection">
+        <h3>Critical Inequality (Gini >= 0.7)</h3>
+        <p>Directories with severe code inequality - a few files dominate the metric distribution:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th>Metric</th>
+                    <th class="number">Gini</th>
+                    <th class="number">Top 10%</th>
+                    <th class="number">Top 20%</th>
+                    <th class="number">Files</th>
+                    <th class="number">Max Value</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in critical_directories[:15] %}
+                <tr class="critical-row">
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path }}</td>
+                    <td>{{ dir.metric }}</td>
+                    <td class="number">{{ dir.gini }}</td>
+                    <td class="number">{{ dir.top_10_pct }}%</td>
+                    <td class="number">{{ dir.top_20_pct }}%</td>
+                    <td class="number">{{ dir.file_count }}</td>
+                    <td class="number">{{ dir.max_value | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_concentration %}
+    <div class="subsection">
+        <h3>High Concentration (Top 20% >= 50%)</h3>
+        <p>Directories where a small number of files hold the majority of the metric value:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th>Metric</th>
+                    <th class="number">Top 10%</th>
+                    <th class="number">Top 20%</th>
+                    <th class="number">Bottom 50%</th>
+                    <th class="number">Gini</th>
+                    <th class="number">Max/Avg</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in concentration_analysis[:15] %}
+                <tr>
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path }}</td>
+                    <td>{{ dir.metric }}</td>
+                    <td class="number">{{ dir.top_10_share }}%</td>
+                    <td class="number">{{ dir.top_20_share }}%</td>
+                    <td class="number">{{ dir.bottom_50_share }}%</td>
+                    <td class="number">{{ dir.gini }}</td>
+                    <td class="number">{{ dir.max_to_avg_ratio }}x</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_palma %}
+    <div class="subsection">
+        <h3>High Palma Ratio (>= 2.0)</h3>
+        <p>Palma ratio compares top 10% to bottom 40%. Higher values indicate more inequality:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th>Metric</th>
+                    <th class="number">Palma</th>
+                    <th class="number">Gini</th>
+                    <th class="number">Top 10%</th>
+                    <th class="number">Files</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in high_palma_directories[:15] %}
+                <tr>
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path }}</td>
+                    <td>{{ dir.metric }}</td>
+                    <td class="number">{{ dir.palma_ratio }}</td>
+                    <td class="number">{{ dir.gini }}</td>
+                    <td class="number">{{ dir.top_10_pct }}%</td>
+                    <td class="number">{{ dir.file_count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_cross_tool %}
+    <div class="subsection">
+        <h3>Cross-Tool Inequality Patterns</h3>
+        <p>Compares LOC inequality vs CCN inequality to identify mismatched patterns:</p>
+        <ul class="pattern-legend">
+            <li><strong>size_concentrated:</strong> High LOC inequality, low CCN - few large but simple files</li>
+            <li><strong>complexity_concentrated:</strong> Low LOC inequality, high CCN - complexity hotspots</li>
+            <li><strong>both_concentrated:</strong> High inequality in both - needs attention</li>
+        </ul>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th>Pattern</th>
+                    <th class="number">LOC Gini</th>
+                    <th class="number">CCN Gini</th>
+                    <th class="number">Difference</th>
+                    <th class="number">Files</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in cross_tool_correlation[:15] %}
+                <tr class="{{ dir.pattern }}-row">
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path }}</td>
+                    <td>{{ dir.pattern }}</td>
+                    <td class="number">{{ dir.loc_gini }}</td>
+                    <td class="number">{{ dir.ccn_gini }}</td>
+                    <td class="number">{{ dir.gini_difference }}</td>
+                    <td class="number">{{ dir.loc_file_count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

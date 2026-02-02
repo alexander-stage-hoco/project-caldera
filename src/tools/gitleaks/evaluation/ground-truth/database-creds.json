@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "scenario": "database-creds",
+  "description": "Repository with database SSL private key",
+  "generated_at": "2026-01-23T19:00:00Z",
+  "repo_path": "eval-repos/synthetic/database-creds",
+  "expected": {
+    "total_secrets": 1,
+    "unique_secrets": 1,
+    "secrets_in_head": 1,
+    "secrets_in_history": 0,
+    "files_with_secrets": 1,
+    "commits_with_secrets": 1,
+    "rule_ids": [
+      "private-key"
+    ],
+    "files_with_secrets_list": [
+      "config/ssl_cert.pem"
+    ],
+    "secrets_by_rule": {
+      "private-key": 1
+    },
+    "secrets_by_severity": {
+      "HIGH": 1
+    },
+    "findings": [
+      {
+        "file_path": "config/ssl_cert.pem",
+        "rule_id": "private-key",
+        "line_number": 1,
+        "expected_severity": "HIGH"
+      }
+    ],
+    "repository": "database-creds",
+    "thresholds": {
+      "max_scan_time_ms": 5000,
+      "max_ms_per_commit": 1000,
+      "max_ms_per_finding": 500,
+      "max_findings_for_test": 100
+    }
+  }
+}

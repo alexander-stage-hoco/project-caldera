@@ -7,10 +7,13 @@ evaluation of scc outputs.
 from __future__ import annotations
 
 import json
+import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from shared.evaluation import require_observability
 
 from .judges.base import BaseJudge, JudgeResult
 
@@ -37,6 +40,21 @@ class DimensionResult:
 
 
 @dataclass
+class ProgrammaticInput:
+    """Reference to programmatic evaluation results."""
+
+    file: str
+    decision: str
+    score: float
+    checks_passed: int
+    checks_failed: int
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary."""
+        return asdict(self)
+
+
+@dataclass
 class EvaluationResult:
     """Complete LLM evaluation result."""
 
@@ -49,17 +67,25 @@ class EvaluationResult:
     decision: str
     programmatic_score: float | None = None
     combined_score: float | None = None
+    programmatic_input: ProgrammaticInput | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
-            "run_id": self.run_id,
             "timestamp": self.timestamp,
             "model": self.model,
+            "decision": self.decision,
+            "score": self.total_score,
+            "programmatic_input": self.programmatic_input.to_dict() if self.programmatic_input else None,
             "dimensions": [d.to_dict() for d in self.dimensions],
+            "summary": {
+                "weighted_score": self.total_score,
+                "avg_confidence": self.average_confidence,
+            },
+            # Legacy fields for backward compatibility
+            "run_id": self.run_id,
             "total_score": self.total_score,
             "average_confidence": self.average_confidence,
-            "decision": self.decision,
             "programmatic_score": self.programmatic_score,
             "combined_score": self.combined_score,
         }
@@ -88,12 +114,14 @@ class LLMEvaluator:
     def __init__(
         self,
         working_dir: Path | None = None,
-        model: str = "opus",
+        model: str = "opus-4.5",
         results_dir: Path | None = None,
+        timeout: int = 120,
     ):
         self.working_dir = working_dir or Path.cwd()
         self.model = model
         self.results_dir = results_dir or self.working_dir / "evaluation" / "results"
+        self.timeout = timeout
         self._judges: list[BaseJudge] = []
 
     def register_judge(self, judge: BaseJudge) -> None:
@@ -114,16 +142,16 @@ class LLMEvaluator:
         from .judges.statistics import StatisticsJudge
 
         judges = [
-            CodeQualityJudge(model=self.model, working_dir=self.working_dir),
-            IntegrationFitJudge(model=self.model, working_dir=self.working_dir),
-            DocumentationJudge(model=self.model, working_dir=self.working_dir),
-            EdgeCasesJudge(model=self.model, working_dir=self.working_dir),
-            ErrorMessagesJudge(model=self.model, working_dir=self.working_dir),
-            APIDesignJudge(model=self.model, working_dir=self.working_dir),
-            ComparativeJudge(model=self.model, working_dir=self.working_dir),
-            RiskJudge(model=self.model, working_dir=self.working_dir),
-            DirectoryAnalysisJudge(model=self.model, working_dir=self.working_dir),
-            StatisticsJudge(model=self.model, working_dir=self.working_dir),
+            CodeQualityJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            IntegrationFitJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            DocumentationJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            EdgeCasesJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            ErrorMessagesJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            APIDesignJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            ComparativeJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            RiskJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            DirectoryAnalysisJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            StatisticsJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
         ]
 
         for judge in judges:
@@ -137,10 +165,10 @@ class LLMEvaluator:
         from .judges.api_design import APIDesignJudge
 
         judges = [
-            DirectoryAnalysisJudge(model=self.model, working_dir=self.working_dir),
-            StatisticsJudge(model=self.model, working_dir=self.working_dir),
-            IntegrationFitJudge(model=self.model, working_dir=self.working_dir),
-            APIDesignJudge(model=self.model, working_dir=self.working_dir),
+            DirectoryAnalysisJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            StatisticsJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            IntegrationFitJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
+            APIDesignJudge(model=self.model, working_dir=self.working_dir, timeout=self.timeout),
         ]
 
         for judge in judges:
@@ -148,8 +176,14 @@ class LLMEvaluator:
 
     def evaluate(self, run_assertions: bool = True) -> EvaluationResult:
         """Run evaluation with all registered judges."""
+        # Enforce observability - fail fast if disabled
+        require_observability()
+
         run_id = f"llm-eval-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
         timestamp = datetime.now(timezone.utc).isoformat()
+
+        # Generate trace ID to correlate all judge interactions
+        trace_id = str(uuid.uuid4())
 
         dimension_results: list[DimensionResult] = []
         total_weight = 0.0
@@ -157,6 +191,8 @@ class LLMEvaluator:
         confidence_sum = 0.0
 
         for judge in self._judges:
+            # Propagate trace_id to judge
+            judge._trace_id = trace_id
             print(f"Running {judge.dimension_name} evaluation...")
 
             # Run ground truth assertions first

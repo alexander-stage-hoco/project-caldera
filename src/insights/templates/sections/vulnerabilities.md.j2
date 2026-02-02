@@ -1,0 +1,41 @@
+## Security Vulnerabilities
+
+{% if has_vulnerabilities %}
+| Metric | Value |
+|--------|------:|
+| Total Vulnerabilities | {{ total_count | format_number }} |
+| Critical | {{ critical_count | format_number }} |
+| High | {{ high_count | format_number }} |
+| Risk Level | {{ risk_level | upper }} |
+
+### Severity Breakdown
+
+| Severity | Count | Affected Packages | Unique CVEs |
+|----------|------:|------------------:|------------:|
+{% for item in summary %}
+| {{ item.severity }} | {{ item.count | format_number }} | {{ item.affected_packages | format_number }} | {{ item.unique_cves | format_number }} |
+{% endfor %}
+
+{% if top_cves %}
+### Top Vulnerabilities
+
+| CVE ID | Severity | Package | Installed | Fixed In |
+|--------|----------|---------|-----------|----------|
+{% for cve in top_cves[:15] %}
+| {{ cve.cve_id }} | {{ cve.severity }} | {{ cve.package_name }} | {{ cve.installed_version or 'N/A' }} | {{ cve.fixed_version or 'No fix' }} |
+{% endfor %}
+{% endif %}
+
+{% if affected_packages %}
+### Affected Packages
+
+| Package | Version | Total | Critical | High | Medium |
+|---------|---------|------:|---------:|-----:|-------:|
+{% for pkg in affected_packages[:12] %}
+| {{ pkg.package_name }} | {{ pkg.installed_version or 'N/A' }} | {{ pkg.total_vulns | format_number }} | {{ pkg.critical_count | format_number }} | {{ pkg.high_count | format_number }} | {{ pkg.medium_count | format_number }} |
+{% endfor %}
+{% endif %}
+
+{% else %}
+*No vulnerabilities detected in this run.*
+{% endif %}

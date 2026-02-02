@@ -187,14 +187,14 @@ evaluate-quick: setup
 		--quick
 
 # Run LLM evaluation (4 judges)
-evaluate-llm: setup
+evaluate-llm: setup analyze
 	@echo "Running LLM evaluation (4 judges)..."
 	$(PYTHON_VENV) -m scripts.llm_evaluate \
-		--analysis $(OUTPUT_DIR)/output.json \
+		--analysis outputs \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
 		--model $(LLM_MODEL)
 	@mkdir -p evaluation/results
-	@cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json
+	@if [ -w evaluation/results ]; then cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json; fi
 	@echo ""
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"
 

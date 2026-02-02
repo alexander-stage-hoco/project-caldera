@@ -311,7 +311,7 @@ make llm-evaluate
 python -m evaluation.llm.orchestrator --focused
 
 # With specific model
-python -m evaluation.llm.orchestrator --model opus
+python -m evaluation.llm.orchestrator --model opus-4.5
 
 # Skip ground truth assertions
 python -m evaluation.llm.orchestrator --no-assertions

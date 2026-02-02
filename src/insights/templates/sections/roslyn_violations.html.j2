@@ -1,0 +1,104 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Roslyn Analyzer Findings</h2>
+
+    {% if not has_violations %}
+    <div class="empty-state">
+        <p>No Roslyn analyzer violations found. This is either a non-.NET project or the codebase passes all analyzer rules.</p>
+    </div>
+    {% else %}
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Violations</div>
+            <div class="value">{{ total_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Errors</div>
+            <div class="value" style="color: var(--color-critical);">{{ error_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Warnings</div>
+            <div class="value" style="color: var(--color-medium);">{{ warning_count | format_number }}</div>
+        </div>
+    </div>
+
+    {% if by_category %}
+    <div class="subsection">
+        <h3>By Category</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th class="number">Count</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for cat in by_category %}
+                <tr>
+                    <td>{{ cat.category | replace("_", " ") | title }}</td>
+                    <td class="number">{{ cat.count | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if top_violations %}
+    <div class="subsection">
+        <h3>Top Violations</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rule ID</th>
+                    <th>Severity</th>
+                    <th>Category</th>
+                    <th class="number">Count</th>
+                    <th class="number">Files</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for v in top_violations[:15] %}
+                <tr>
+                    <td><code>{{ v.rule_id }}</code></td>
+                    <td><span class="severity-badge {{ v.severity | lower }}">{{ v.severity }}</span></td>
+                    <td>{{ v.category }}</td>
+                    <td class="number">{{ v.count | format_number }}</td>
+                    <td class="number">{{ v.affected_files | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if hotspot_files %}
+    <div class="subsection">
+        <h3>Files with Most Violations</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Total</th>
+                    <th class="number">Security</th>
+                    <th class="number">Design</th>
+                    <th class="number">Performance</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in hotspot_files[:10] %}
+                <tr>
+                    <td class="truncate" title="{{ f.relative_path }}">{{ f.relative_path | truncate_path }}</td>
+                    <td class="number">{{ f.violation_count | format_number }}</td>
+                    <td class="number">{{ f.security | format_number }}</td>
+                    <td class="number">{{ f.design | format_number }}</td>
+                    <td class="number">{{ f.performance | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

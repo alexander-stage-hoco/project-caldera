@@ -239,6 +239,8 @@ def build_export_data(
     repo_path = source.get("repo_path", "")
 
     data = {
+        "tool": "sonarqube",
+        "tool_version": tool_version,
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "repo_name": repo_name,

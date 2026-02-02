@@ -141,13 +141,19 @@ class RoslynAdapter(BaseAdapter):
         for file_entry in files:
             relative_path = self._normalize_path(file_entry.get("path", ""))
 
+            # Skip external files (e.g., NuGet packages) that are outside the repo
+            if relative_path.startswith("Users/") or "/.nuget/" in relative_path or "\\.nuget\\" in relative_path:
+                self._log(f"WARN: skipping external file (NuGet package): {relative_path}")
+                continue
+
             try:
                 file_id, directory_id = self._layout_repo.get_file_record(
                     layout_run_pk, relative_path
                 )
-            except KeyError as exc:
-                self._log(f"DATA_QUALITY_ERROR: file not in layout: {relative_path}")
-                raise ValueError(f"roslyn file not in layout: {relative_path}") from exc
+            except KeyError:
+                # Skip files not in layout (external dependencies, generated files, etc.)
+                self._log(f"WARN: skipping file not in layout: {relative_path}")
+                continue
 
             for violation in file_entry.get("violations", []):
                 yield RoslynViolation(

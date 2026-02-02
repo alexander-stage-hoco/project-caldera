@@ -1,0 +1,202 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Module Health Scoring</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No health score data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Health Overview</h3>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="label">Avg Score</div>
+                <div class="value">{{ summary.avg_health_score }}</div>
+                <div class="sublabel">out of 100</div>
+            </div>
+            <div class="metric-card {% if summary.pct_passing >= 80 %}healthy{% elif summary.pct_passing >= 60 %}warning{% else %}critical{% endif %}">
+                <div class="label">Passing</div>
+                <div class="value">{{ summary.pct_passing }}%</div>
+                <div class="sublabel">Grade A or B</div>
+            </div>
+            <div class="metric-card {% if summary.pct_failing > 20 %}critical{% elif summary.pct_failing > 10 %}warning{% endif %}">
+                <div class="label">Failing</div>
+                <div class="value">{{ summary.pct_failing }}%</div>
+                <div class="sublabel">Grade F</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">At Risk</div>
+                <div class="value">{{ summary.risk_factor_count }}</div>
+                <div class="sublabel">2+ risk factors</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Grade Distribution</h3>
+        <div class="grade-distribution">
+            <div class="grade-bar">
+                <span class="grade-label grade-a">A</span>
+                <div class="grade-fill grade-a-fill" style="width: {{ (grade_distribution.A / (summary.total_directories or 1) * 100) | round }}%"></div>
+                <span class="grade-count">{{ grade_distribution.A }}</span>
+            </div>
+            <div class="grade-bar">
+                <span class="grade-label grade-b">B</span>
+                <div class="grade-fill grade-b-fill" style="width: {{ (grade_distribution.B / (summary.total_directories or 1) * 100) | round }}%"></div>
+                <span class="grade-count">{{ grade_distribution.B }}</span>
+            </div>
+            <div class="grade-bar">
+                <span class="grade-label grade-c">C</span>
+                <div class="grade-fill grade-c-fill" style="width: {{ (grade_distribution.C / (summary.total_directories or 1) * 100) | round }}%"></div>
+                <span class="grade-count">{{ grade_distribution.C }}</span>
+            </div>
+            <div class="grade-bar">
+                <span class="grade-label grade-d">D</span>
+                <div class="grade-fill grade-d-fill" style="width: {{ (grade_distribution.D / (summary.total_directories or 1) * 100) | round }}%"></div>
+                <span class="grade-count">{{ grade_distribution.D }}</span>
+            </div>
+            <div class="grade-bar">
+                <span class="grade-label grade-f">F</span>
+                <div class="grade-fill grade-f-fill" style="width: {{ (grade_distribution.F / (summary.total_directories or 1) * 100) | round }}%"></div>
+                <span class="grade-count">{{ grade_distribution.F }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if healthy_directories %}
+    <div class="subsection">
+        <h3>Healthiest Modules (Top 10)</h3>
+        <p>Directories with the best health scores:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th>Metric</th>
+                    <th class="number">Score</th>
+                    <th class="number">Grade</th>
+                    <th class="number">Files</th>
+                    <th class="number">Gini</th>
+                    <th class="number">CV</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in healthy_directories %}
+                <tr class="grade-{{ dir.grade | lower }}-row">
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path }}</td>
+                    <td>{{ dir.metric }}</td>
+                    <td class="number">{{ dir.health_score }}</td>
+                    <td class="number grade-{{ dir.grade | lower }}">{{ dir.grade }}</td>
+                    <td class="number">{{ dir.file_count }}</td>
+                    <td class="number">{{ dir.gini }}</td>
+                    <td class="number">{{ dir.cv }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if unhealthy_directories %}
+    <div class="subsection">
+        <h3>Unhealthiest Modules (Bottom 10)</h3>
+        <p>Directories needing attention:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th>Metric</th>
+                    <th class="number">Score</th>
+                    <th class="number">Grade</th>
+                    <th class="number">Gini</th>
+                    <th class="number">Top 10%</th>
+                    <th>Risk Factors</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in unhealthy_directories %}
+                <tr class="grade-{{ dir.grade | lower }}-row">
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path }}</td>
+                    <td>{{ dir.metric }}</td>
+                    <td class="number">{{ dir.health_score }}</td>
+                    <td class="number grade-{{ dir.grade | lower }}">{{ dir.grade }}</td>
+                    <td class="number">{{ dir.gini }}</td>
+                    <td class="number">{{ dir.top_10_pct }}%</td>
+                    <td class="risk-factors">{{ dir.risk_factors or 'N/A' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_risk_factors %}
+    <div class="subsection">
+        <h3>Risk Factor Analysis</h3>
+        <p>Directories with multiple risk factors (2+):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th>Metric</th>
+                    <th class="number">Risk Count</th>
+                    <th>Risk Factors</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in risk_breakdown[:20] %}
+                <tr>
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path }}</td>
+                    <td>{{ dir.metric }}</td>
+                    <td class="number">{{ dir.risk_factor_count }}</td>
+                    <td class="risk-factors">{{ dir.risk_factors_list }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Health Score Methodology</h3>
+        <p>Health scores (0-100) are calculated using five weighted components:</p>
+        <table class="methodology-table">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Weight</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Inequality</td>
+                    <td>25%</td>
+                    <td>Lower Gini coefficient is healthier</td>
+                </tr>
+                <tr>
+                    <td>Variability</td>
+                    <td>15%</td>
+                    <td>Lower coefficient of variation (CV) is healthier</td>
+                </tr>
+                <tr>
+                    <td>Distribution Shape</td>
+                    <td>15%</td>
+                    <td>Lower skewness is healthier (more symmetric)</td>
+                </tr>
+                <tr>
+                    <td>Concentration</td>
+                    <td>25%</td>
+                    <td>Lower top 10% share is healthier</td>
+                </tr>
+                <tr>
+                    <td>Outliers</td>
+                    <td>20%</td>
+                    <td>Lower P99/avg ratio is healthier</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% endif %}
+</section>

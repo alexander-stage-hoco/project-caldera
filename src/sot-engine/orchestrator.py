@@ -17,12 +17,14 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import LayoutAdapter, LizardAdapter, RoslynAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, TrivyAdapter
+from persistence.adapters import GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, RoslynAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
 from persistence.repositories import (
     BaseRepository,
     CollectionRunRepository,
+    GitSizerRepository,
+    GitleaksRepository,
     LayoutRepository,
     LizardRepository,
     RoslynRepository,
@@ -178,6 +180,7 @@ TOOL_CONFIGS = [
         },
     ),
     ToolConfig("trivy", "src/tools/trivy"),
+    ToolConfig("gitleaks", "src/tools/gitleaks"),
 ]
 
 
@@ -251,6 +254,8 @@ TOOL_INGESTION_CONFIGS = [
     ToolIngestionConfig("semgrep", SemgrepAdapter, SemgrepRepository),
     ToolIngestionConfig("sonarqube", SonarqubeAdapter, SonarqubeRepository, validate_metadata=False),
     ToolIngestionConfig("trivy", TrivyAdapter, TrivyRepository, validate_metadata=False),
+    ToolIngestionConfig("git-sizer", GitSizerAdapter, GitSizerRepository),
+    ToolIngestionConfig("gitleaks", GitleaksAdapter, GitleaksRepository),
 ]
 
 

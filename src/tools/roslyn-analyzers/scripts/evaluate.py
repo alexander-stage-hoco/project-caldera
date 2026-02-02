@@ -417,28 +417,45 @@ def run_evaluation(
     scorecard_json = generate_scorecard_json(report)
     if output_path:
         out_dir = Path(output_path).parent if Path(output_path).suffix else Path(output_path)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        checks_path = out_dir / "checks.json"
-        scorecard_json_path = out_dir / "scorecard.json"
-        scorecard_md_path = out_dir / "scorecard.md"
-        with open(checks_path, "w") as f:
-            json.dump(report.to_dict(), f, indent=2)
-        with open(scorecard_json_path, "w") as f:
-            json.dump(scorecard_json, f, indent=2)
-        scorecard_md_path.write_text(generate_scorecard_md(scorecard_json))
-        if console:
-            console.print(f"[green]Scorecard saved to {scorecard_md_path}[/green]")
-        elif not json_only:
-            print(f"Scorecard saved to {scorecard_md_path}")
     else:
-        scorecard_path = Path(__file__).parent.parent / "evaluation" / "scorecard.json"
-        scorecard_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(scorecard_path, "w") as f:
-            json.dump(scorecard_json, f, indent=2)
-        if console:
-            console.print(f"[green]Scorecard saved to {scorecard_path}[/green]")
-        elif not json_only:
-            print(f"Scorecard saved to {scorecard_path}")
+        out_dir = Path(__file__).parent.parent / "evaluation" / "results"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Output uniform evaluation_report.json for compliance
+    evaluation_report_path = out_dir / "evaluation_report.json"
+    evaluation_report = {
+        "timestamp": report.timestamp,
+        "tool": "roslyn-analyzers",
+        "decision": report.decision,
+        "score": round(report.summary["overall_score"], 4),
+        "checks": [
+            {
+                "name": c["check_id"],
+                "status": "PASS" if c["passed"] else "FAIL",
+                "message": c["message"],
+            }
+            for c in report.checks
+        ],
+        "summary": {
+            "total": report.summary["total_checks"],
+            "passed": report.summary["passed"],
+            "failed": report.summary["failed"],
+        },
+    }
+    with open(evaluation_report_path, "w") as f:
+        json.dump(evaluation_report, f, indent=2)
+
+    scorecard_json_path = out_dir / "scorecard.json"
+    scorecard_md_path = out_dir / "scorecard.md"
+    with open(scorecard_json_path, "w") as f:
+        json.dump(scorecard_json, f, indent=2)
+    scorecard_md_path.write_text(generate_scorecard_md(scorecard_json))
+    if console:
+        console.print(f"[green]Evaluation report saved to {evaluation_report_path}[/green]")
+        console.print(f"[green]Scorecard saved to {scorecard_md_path}[/green]")
+    elif not json_only:
+        print(f"Evaluation report saved to {evaluation_report_path}")
+        print(f"Scorecard saved to {scorecard_md_path}")
 
     return report
 

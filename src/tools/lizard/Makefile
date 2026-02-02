@@ -121,7 +121,7 @@ evaluate: $(VENV_READY)
 		--branch $(BRANCH) \
 		$(COMMIT_ARG) \
 		--no-color
-	@$(PYTHON) scripts/evaluate.py \
+	@$(PYTHON_VENV) -m scripts.evaluate \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \
 		--ground-truth evaluation/ground-truth \
 		--output $(EVAL_OUTPUT_DIR)/evaluation_report.json \
@@ -132,46 +132,46 @@ evaluate: $(VENV_READY)
 	@echo "Scorecard saved to $(EVAL_OUTPUT_DIR)/scorecard.md"
 
 evaluate-json: $(VENV_READY)
-	@$(PYTHON) scripts/evaluate.py \
+	@$(PYTHON_VENV) -m scripts.evaluate \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \
 		--ground-truth evaluation/ground-truth \
 		--json
 
 evaluate-quick: $(VENV_READY)
 	@echo "Running quick evaluation (no performance checks)..."
-	@$(PYTHON) scripts/evaluate.py \
+	@$(PYTHON_VENV) -m scripts.evaluate \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \
 		--ground-truth evaluation/ground-truth
 
 evaluate-llm: $(VENV_READY)
 	@echo "Running LLM evaluation (4 judges)..."
-	@$(PYTHON) -m evaluation.llm.orchestrator \
+	@$(PYTHON_VENV) -m evaluation.llm.orchestrator \
 		--working-dir . \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
-		--model opus
+		--model $(LLM_MODEL)
 	@mkdir -p evaluation/results
-	@cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json
+	@if [ -w evaluation/results ]; then cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json; fi
 	@echo ""
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"
 
 evaluate-llm-focused: $(VENV_READY)
 	@echo "Running focused LLM evaluation (CCN accuracy only)..."
-	@$(PYTHON) -m evaluation.llm.orchestrator \
+	@$(PYTHON_VENV) -m evaluation.llm.orchestrator \
 		--working-dir . \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation_focused.json \
-		--model opus \
+		--model opus-4.5 \
 		--judges ccn_accuracy
 
 evaluate-combined: $(VENV_READY) evaluate evaluate-llm
 	@echo "Running combined evaluation (programmatic + LLM)..."
-	@$(PYTHON) -m evaluation.llm.orchestrator \
+	@$(PYTHON_VENV) -m evaluation.llm.orchestrator \
 		--working-dir . \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \
 		--programmatic-results $(EVAL_OUTPUT_DIR)/evaluation_report.json \
 		--output $(EVAL_OUTPUT_DIR)/combined_evaluation.json \
-		--model opus
+		--model opus-4.5
 	@echo ""
 	@echo "Combined results saved to $(EVAL_OUTPUT_DIR)/combined_evaluation.json"
 

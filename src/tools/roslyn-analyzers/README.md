@@ -175,7 +175,7 @@ Analysis outputs are in JSON format compatible with DD Analyzer:
 | `make build` | Build synthetic C# project |
 | `make analyze` | Run Roslyn analysis |
 | `make evaluate` | Run programmatic evaluation |
-| `make evaluate-llm` | Run LLM evaluation |
+| `make evaluate-llm` | Run LLM evaluation (Claude CLI, model = opus-4.5) |
 | `make evaluate-combined` | Combined evaluation |
 | `make clean` | Remove generated files |
 
@@ -185,7 +185,7 @@ Analysis outputs are in JSON format compatible with DD Analyzer:
 
 All checks passing across security, design, resource management, dead code, and performance.
 
-### LLM Evaluation (Claude Sonnet): 4.45/5.0 STRONG_PASS
+### LLM Evaluation (Claude Opus 4.5): 4.45/5.0 STRONG_PASS
 
 | Judge | Weight | Score | Confidence |
 |-------|--------|-------|------------|

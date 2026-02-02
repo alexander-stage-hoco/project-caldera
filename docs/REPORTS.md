@@ -43,32 +43,33 @@ Key fields:
 
 1. Ensure marts are built:
    - `make dbt-run`
-2. Run via the report runner (recommended):
-   - `.venv/bin/python src/explorer/report_runner.py repo-health --run-pk 1`
-   - `.venv/bin/python src/explorer/report_runner.py hotspots --run-pk 1 --limit 10`
+2. Run via the insights CLI (recommended). This repo does not ship a separate
+   explorer CLI; the insights component is the supported reporting entrypoint:
+   - `cd src/insights && .venv/bin/python -m insights generate 1 --db /tmp/caldera_sot.duckdb --format html -o output/report.html`
+   - `cd src/insights && .venv/bin/python -m insights generate 1 --db /tmp/caldera_sot.duckdb --format md -o output/report.md`
 
-You can also resolve the latest run by repo id:
-- `.venv/bin/python src/explorer/report_runner.py repo-health --repo-id demo-repo`
-- `.venv/bin/python src/explorer/report_runner.py hotspots --repo-id demo-repo --run-id run-2026-01-24 --limit 10`
-
-Make targets are available:
-- `make report-health RUN_PK=1`
-- `make report-hotspots RUN_PK=1 REPORT_LIMIT=10`
-- `make report-health-latest REPO_ID=demo-repo`
-- `make report-hotspots-latest REPO_ID=demo-repo REPORT_LIMIT=10`
-- `make report-runs`
-- `make dbt-test-reports`
+Make targets are available in `src/insights/`:
+- `make generate RUN_PK=1`
+- `make generate-md RUN_PK=1`
+- `make test-e2e` (seed test database, run dbt, generate report)
 
 ## Tests
 
-Report analyses are covered by DuckDB-based unit-style tests under
-`src/sot-engine/tests/test_report_*.py`.
+Report analyses are covered by DuckDB-based unit-style tests under:
+- `src/sot-engine/tests/test_report_*.py`
+- `src/insights/tests/` (unit and E2E tests)
 
-Latest run resolution uses `lz_tool_runs.created_at` (fallback to `lz_tool_runs.timestamp`) and
-then selects the run with the most files when multiple tool runs share the same repo/run.
+## Insights Component
 
-Markdown output:
-- `.venv/bin/python src/explorer/report_runner.py repo-health --run-pk 1 --format md`
-- `make report-health RUN_PK=1 REPORT_FORMAT=md`
+The `src/insights/` component generates consolidated HTML/Markdown reports with multiple sections:
+- Repository Health Overview
+- File Hotspots
+- Directory Analysis
+- Vulnerabilities
+- Cross-Tool Insights
+- Language Coverage
+- Distribution Insights
+- Roslyn Violations
+- IaC Misconfigurations
 
-Repeat for `report_hotspot_directories.sql` (add `--vars '{"run_pk": 1, "limit": 10}'` if needed).
+See `src/insights/README.md` for full documentation.

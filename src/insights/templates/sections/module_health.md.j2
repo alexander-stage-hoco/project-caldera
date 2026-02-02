@@ -1,0 +1,76 @@
+## Module Health Scoring
+
+{% if not has_data %}
+*No health score data available for this run.*
+{% else %}
+
+### Health Overview
+
+| Metric | Value |
+|--------|-------|
+| Average Score | {{ summary.avg_health_score }} / 100 |
+| Min Score | {{ summary.min_health_score }} |
+| Max Score | {{ summary.max_health_score }} |
+| Passing (A/B) | {{ summary.pct_passing }}% |
+| Failing (F) | {{ summary.pct_failing }}% |
+| At Risk (2+ factors) | {{ summary.risk_factor_count }} |
+
+### Grade Distribution
+
+| Grade | Count | Description |
+|-------|-------|-------------|
+| A | {{ grade_distribution.A }} | >= 90 |
+| B | {{ grade_distribution.B }} | >= 80 |
+| C | {{ grade_distribution.C }} | >= 70 |
+| D | {{ grade_distribution.D }} | >= 60 |
+| F | {{ grade_distribution.F }} | < 60 |
+
+{% if healthy_directories %}
+### Healthiest Modules (Top 10)
+
+Directories with the best health scores:
+
+| Directory | Metric | Score | Grade | Files | Gini | CV |
+|-----------|--------|-------|-------|-------|------|-----|
+{% for dir in healthy_directories %}
+| {{ dir.directory_path }} | {{ dir.metric }} | {{ dir.health_score }} | {{ dir.grade }} | {{ dir.file_count }} | {{ dir.gini }} | {{ dir.cv }} |
+{% endfor %}
+{% endif %}
+
+{% if unhealthy_directories %}
+### Unhealthiest Modules (Bottom 10)
+
+Directories needing attention:
+
+| Directory | Metric | Score | Grade | Gini | Top 10% | Risk Factors |
+|-----------|--------|-------|-------|------|---------|--------------|
+{% for dir in unhealthy_directories %}
+| {{ dir.directory_path }} | {{ dir.metric }} | {{ dir.health_score }} | {{ dir.grade }} | {{ dir.gini }} | {{ dir.top_10_pct }}% | {{ dir.risk_factors or 'N/A' }} |
+{% endfor %}
+{% endif %}
+
+{% if has_risk_factors %}
+### Risk Factor Analysis
+
+Directories with multiple risk factors (2+):
+
+| Directory | Metric | Risk Count | Risk Factors |
+|-----------|--------|------------|--------------|
+{% for dir in risk_breakdown[:20] %}
+| {{ dir.directory_path }} | {{ dir.metric }} | {{ dir.risk_factor_count }} | {{ dir.risk_factors_list }} |
+{% endfor %}
+{% endif %}
+
+### Health Score Methodology
+
+Health scores (0-100) are calculated using five weighted components:
+
+| Component | Weight | Description |
+|-----------|--------|-------------|
+| Inequality | 25% | Lower Gini coefficient is healthier |
+| Variability | 15% | Lower coefficient of variation (CV) is healthier |
+| Distribution Shape | 15% | Lower skewness is healthier (more symmetric) |
+| Concentration | 25% | Lower top 10% share is healthier |
+| Outliers | 20% | Lower P99/avg ratio is healthier |
+
+{% endif %}

@@ -2,6 +2,16 @@
 
 You are evaluating the **accuracy of cyclomatic complexity (CCN)** values reported by Lizard, a static analysis tool for function-level complexity measurement.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
 ## Evaluation Dimension
 **CCN Accuracy (35% weight)**: Does the reported CCN correctly reflect the branching structure of each function?
 
@@ -30,6 +40,7 @@ Expected CCN ranges:
 
 ## Scoring Rubric
 
+### For Synthetic Repos (strict ground truth evaluation):
 | Score | Criteria |
 |-------|----------|
 | 5 | All sampled CCN values match ground truth exactly, consistent across all languages |
@@ -37,6 +48,15 @@ Expected CCN ranges:
 | 3 | 70%+ within ±1 of expected, some outliers (±2-3), main function types accurate |
 | 2 | Significant errors (>30% off by ±2 or more), inconsistent handling of constructs |
 | 1 | CCN values are systematically wrong, missing decision points, unreliable |
+
+### For Real-World Repos (when synthetic_baseline shows validated tool):
+| Score | Criteria |
+|-------|----------|
+| 5 | Output schema compliant, CCN values are internally consistent and reasonable |
+| 4 | Minor schema issues but CCN values are internally consistent |
+| 3 | Schema issues OR questionable CCN consistency |
+| 2 | Multiple schema issues AND inconsistent CCN values |
+| 1 | Broken output, missing required fields |
 
 ## Sub-Dimensions
 

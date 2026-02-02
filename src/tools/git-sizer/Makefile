@@ -9,30 +9,28 @@
 #   make test         - Run all tests
 #   make clean        - Remove generated files
 
+SHELL := /bin/bash
+.DEFAULT_GOAL := help
+
 .PHONY: all setup analyze analyze-synthetic evaluate evaluate-llm test test-quick clean clean-all help
+
+# Include shared configuration (provides VENV, RUN_ID, REPO_ID, OUTPUT_DIR, etc.)
+include ../Makefile.common
 
 # =============================================================================
 # Configuration
 # =============================================================================
 
-VENV ?= .venv
-PYTHON ?= $(VENV)/bin/python
-PIP ?= $(VENV)/bin/pip
 GIT_SIZER := bin/git-sizer
 
-# Required Caldera variables
+# Tool-specific defaults
 REPO_PATH ?= eval-repos/synthetic/healthy
 REPO_NAME ?= healthy
-OUTPUT_DIR ?= output/$(RUN_ID)
-RUN_ID ?= $(shell python3 -c "import uuid; print(str(uuid.uuid4()))")
-REPO_ID ?= $(shell python3 -c "import uuid; print(str(uuid.uuid4()))")
-BRANCH ?= main
 COMMIT ?= $(shell git -C $(REPO_PATH) rev-parse HEAD 2>/dev/null || echo "0000000000000000000000000000000000000000")
 
 # Evaluation directories
-EVAL_OUTPUT_DIR ?= evaluation/results
 GROUND_TRUTH_DIR ?= evaluation/ground-truth
-LLM_MODEL ?= sonnet
+LLM_TIMEOUT ?= 300
 
 # Platform detection for binary download
 UNAME_S := $(shell uname -s)
@@ -83,22 +81,15 @@ help:
 all: setup analyze-synthetic evaluate
 	@echo ""
 	@echo "Pipeline complete! Check:"
-	@echo "  - output/"
+	@echo "  - outputs/"
 	@echo "  - evaluation/results/"
 
 # =============================================================================
 # Setup
 # =============================================================================
 
-setup: $(VENV)/bin/activate $(GIT_SIZER) init-synthetic-repos
+setup: $(VENV_READY) $(GIT_SIZER) init-synthetic-repos
 	@echo "Setup complete!"
-
-$(VENV)/bin/activate: requirements.txt
-	@echo "Creating Python virtual environment..."
-	@python3 -m venv $(VENV)
-	@$(PIP) install --upgrade pip -q
-	@$(PIP) install -r requirements.txt -q
-	@touch $(VENV)/bin/activate
 
 $(GIT_SIZER):
 	@echo "Downloading git-sizer..."
@@ -117,7 +108,7 @@ init-synthetic-repos:
 # Analysis
 # =============================================================================
 
-analyze: $(VENV)/bin/activate $(GIT_SIZER)
+analyze: $(VENV_READY) $(GIT_SIZER)
 	@echo "Running repository analysis..."
 	@echo "  REPO_PATH: $(REPO_PATH)"
 	@echo "  RUN_ID:    $(RUN_ID)"
@@ -125,7 +116,7 @@ analyze: $(VENV)/bin/activate $(GIT_SIZER)
 	@echo "  BRANCH:    $(BRANCH)"
 	@echo "  COMMIT:    $(COMMIT)"
 	@mkdir -p $(OUTPUT_DIR)
-	@$(PYTHON) -m scripts.analyze \
+	@$(PYTHON_VENV) -m scripts.analyze \
 		--repo-path $(REPO_PATH) \
 		--repo-name $(REPO_NAME) \
 		--output-dir $(OUTPUT_DIR) \
@@ -136,7 +127,7 @@ analyze: $(VENV)/bin/activate $(GIT_SIZER)
 		--exit-zero
 
 # Analyze all synthetic repos
-analyze-synthetic: $(VENV)/bin/activate $(GIT_SIZER)
+analyze-synthetic: $(VENV_READY) $(GIT_SIZER)
 	@echo "Analyzing all synthetic repositories..."
 	@mkdir -p evaluation/results
 	@for repo in eval-repos/synthetic/*/; do \
@@ -146,7 +137,7 @@ analyze-synthetic: $(VENV)/bin/activate $(GIT_SIZER)
 			repoid=$$(python3 -c "import uuid; print(str(uuid.uuid4()))"); \
 			commit=$$(git -C $$repo rev-parse HEAD 2>/dev/null || echo "0000000000000000000000000000000000000000"); \
 			echo "  Analyzing $$name..."; \
-			$(PYTHON) -m scripts.analyze \
+			$(PYTHON_VENV) -m scripts.analyze \
 				--repo-path $$repo \
 				--repo-name $$name \
 				--output-dir evaluation/results/$$name \
@@ -163,56 +154,43 @@ analyze-synthetic: $(VENV)/bin/activate $(GIT_SIZER)
 # Evaluation
 # =============================================================================
 
-evaluate: $(VENV)/bin/activate
+evaluate: $(VENV_READY)
 	@echo "Running programmatic evaluation..."
 	@mkdir -p $(EVAL_OUTPUT_DIR)
-	@$(PYTHON) -m scripts.evaluate \
+	@$(PYTHON_VENV) -m scripts.evaluate \
 		--results-dir $(OUTPUT_DIR) \
 		--ground-truth-dir $(GROUND_TRUTH_DIR) \
 		--output $(EVAL_OUTPUT_DIR)/evaluation_report.json
 	@echo ""
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/evaluation_report.json"
 
-evaluate-llm: $(VENV)/bin/activate
+evaluate-llm: $(VENV_READY)
 	@echo "Running LLM evaluation..."
-	@mkdir -p evaluation/llm/results
-	@$(PYTHON) -m evaluation.llm.orchestrator \
-		evaluation/results/healthy \
-		--output evaluation/llm/results/llm_evaluation.json \
-		--model $(LLM_MODEL)
+	@mkdir -p $(EVAL_OUTPUT_DIR)
+	@$(PYTHON_VENV) -m evaluation.llm.orchestrator \
+		$(OUTPUT_DIR) \
+		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
+		--model $(LLM_MODEL) \
+		--timeout $(LLM_TIMEOUT)
 	@mkdir -p evaluation/results
-	@cp evaluation/llm/results/llm_evaluation.json evaluation/results/llm_evaluation.json
+	@cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json
 	@echo ""
-	@echo "Results saved to evaluation/llm/results/llm_evaluation.json"
+	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"
 
 # =============================================================================
 # Testing
 # =============================================================================
 
-test: $(VENV)/bin/activate
-	@echo "Running all tests..."
-	@$(PYTHON) -m pytest tests/ -v --tb=short
-	@echo "All tests complete!"
+test: _common-test  ## Run all tests
 
-test-quick: $(VENV)/bin/activate
-	@echo "Running quick tests..."
-	@$(PYTHON) -m pytest tests/ -v --tb=short -x
-	@echo "Quick tests complete!"
+test-quick: _common-test-quick  ## Run quick tests (stop on first failure)
 
 # =============================================================================
 # Cleanup
 # =============================================================================
 
-clean:
-	@echo "Cleaning generated files..."
-	@rm -rf output/
-	@rm -rf evaluation/results/
-	@rm -rf .pytest_cache
-	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	@echo "Clean complete!"
+clean: _common-clean  ## Clean build artifacts
+	@rm -rf bin/git-sizer.zip
 
-clean-all: clean
-	@echo "Removing venv and binary..."
-	@rm -rf $(VENV)
+clean-all: _common-clean-all  ## Clean all including venv
 	@rm -rf bin/
-	@echo "Full clean complete!"

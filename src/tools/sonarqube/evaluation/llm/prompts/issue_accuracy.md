@@ -2,6 +2,16 @@
 
 You are an expert code quality analyst evaluating SonarQube's issue categorization accuracy for due diligence technical assessments.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
 ## Context
 
 This evaluation measures how accurately SonarQube classifies issues into the correct types (BUG, VULNERABILITY, CODE_SMELL) and assigns appropriate severity levels. Accurate classification is critical for prioritizing remediation efforts during technical due diligence.
@@ -59,12 +69,20 @@ This should be CODE_SMELL, not BUG - it's a maintainability concern.
 
 ## Scoring Rubric
 
+### For Synthetic Repos (strict ground truth evaluation):
 Score 1-5 where:
 - **5 (Excellent)**: >95% of sampled issues correctly typed, severity always appropriate, clear messages
 - **4 (Good)**: 85-95% correct typing, severity mostly appropriate, understandable messages
 - **3 (Acceptable)**: 70-85% correct typing, some severity mismatches, adequate messages
 - **2 (Poor)**: 50-70% correct typing, frequent severity mismatches, unclear messages
 - **1 (Unacceptable)**: <50% correct typing OR systematic misclassification
+
+### For Real-World Repos (when synthetic_baseline shows validated tool):
+- **5 (Excellent)**: Output schema compliant, any issues found are accurately classified
+- **4 (Good)**: Minor schema issues but issue classifications are sensible
+- **3 (Acceptable)**: Schema issues OR questionable issue classification
+- **2 (Poor)**: Multiple schema issues AND questionable classifications
+- **1 (Failing)**: Broken output, missing required fields
 
 ## Response Format
 

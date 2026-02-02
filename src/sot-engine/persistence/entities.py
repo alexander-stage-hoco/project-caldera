@@ -273,6 +273,39 @@ class SemgrepSmell:
 
 
 @dataclass(frozen=True)
+class GitleaksSecret:
+    """Individual secret finding from gitleaks analysis."""
+    run_pk: int
+    file_id: str
+    directory_id: str
+    relative_path: str
+    rule_id: str
+    secret_type: Optional[str]
+    severity: Optional[str]
+    line_number: Optional[int]
+    commit_hash: Optional[str]
+    commit_author: Optional[str]
+    commit_date: Optional[str]
+    fingerprint: Optional[str]
+    in_current_head: Optional[bool]
+    entropy: Optional[float]
+    description: Optional[str]
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.relative_path, "relative_path")
+        _validate_required_string(self.rule_id, "rule_id")
+        if self.line_number is not None and self.line_number < 0:
+            raise ValueError("line_number must be >= 0")
+        if self.entropy is not None and (self.entropy < 0 or self.entropy > 8):
+            raise ValueError("entropy must be between 0 and 8")
+        if self.severity is not None:
+            valid_severities = {"CRITICAL", "HIGH", "MEDIUM", "LOW"}
+            if self.severity not in valid_severities:
+                raise ValueError(f"severity must be one of {valid_severities}")
+
+
+@dataclass(frozen=True)
 class RoslynViolation:
     """Individual violation instance from roslyn-analyzers analysis."""
     run_pk: int

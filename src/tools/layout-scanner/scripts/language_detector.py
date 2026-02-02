@@ -164,6 +164,7 @@ EXTENSION_MAP = {
     ".xsl": "XML",
     ".xslt": "XML",
     ".xsd": "XML",
+    ".xaml": "XAML",  # WPF/UWP/Avalonia markup
     # MSBuild project files
     ".csproj": "MSBuild",
     ".fsproj": "MSBuild",

@@ -350,6 +350,7 @@ def build_caldera_envelope(
     analysis: RepositoryAnalysis,
     run_id: str,
     repo_id: str,
+    repo_name: str,
     branch: str,
     commit: str,
 ) -> dict:
@@ -373,6 +374,7 @@ def build_caldera_envelope(
             "tool_version": analysis.git_sizer_version,
             "run_id": run_id,
             "repo_id": repo_id,
+            "repo_name": repo_name,
             "branch": branch,
             "commit": commit,
             "timestamp": timestamp,
@@ -381,6 +383,7 @@ def build_caldera_envelope(
         "data": {
             "tool": TOOL_NAME,
             "tool_version": analysis.git_sizer_version,
+            "repo_name": repo_name,
             "health_grade": analysis.health_grade,
             "duration_ms": analysis.duration_ms,
             "metrics": analysis.metrics.to_dict(),
@@ -446,67 +449,75 @@ def main() -> None:
         print(f"Error: Repository path does not exist: {repo_path}", file=sys.stderr)
         sys.exit(1)
 
-    if not (repo_path / ".git").exists():
-        print(f"Error: Not a git repository: {repo_path}", file=sys.stderr)
-        sys.exit(1)
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    repo_name = args.repo_name or repo_path.name
-
-    # Get commit SHA if not provided
-    commit = args.commit
-    if not commit:
+    def _resolve_commit(path: Path) -> str:
+        if args.commit:
+            return args.commit
         try:
             result = subprocess.run(
                 ["git", "rev-parse", "HEAD"],
                 capture_output=True,
                 text=True,
-                cwd=str(repo_path),
+                cwd=str(path),
             )
-            commit = result.stdout.strip()
+            value = result.stdout.strip()
+            return value if len(value) == 40 else "0" * 40
         except Exception:
-            commit = "0" * 40  # Fallback
+            return "0" * 40
 
-    # Validate commit format
-    if len(commit) != 40:
-        print(f"Error: commit must be a 40-character SHA, got: {commit}", file=sys.stderr)
-        sys.exit(1)
+    def _analyze_one(path: Path, name: str, primary: bool) -> tuple[RepositoryAnalysis, Path]:
+        commit_value = _resolve_commit(path)
+        if len(commit_value) != 40:
+            raise ValueError(f"commit must be a 40-character SHA, got: {commit_value}")
+        print(f"Analyzing: {path}")
+        analysis = analyze_repository(path)
+        output = build_caldera_envelope(
+            analysis=analysis,
+            run_id=args.run_id,
+            repo_id=args.repo_id,
+            repo_name=name,
+            branch=args.branch,
+            commit=commit_value,
+        )
+        target_dir = output_dir / name
+        target_dir.mkdir(parents=True, exist_ok=True)
+        output_path = target_dir / "output.json"
+        output_path.write_text(json.dumps(output, indent=2, default=str))
+        print(f"Output: {output_path}")
+        return analysis, output_path
 
-    print(f"Analyzing: {repo_path}")
+    if (repo_path / ".git").exists():
+        repo_name = args.repo_name or repo_path.name
+        analysis, _ = _analyze_one(repo_path, repo_name, primary=True)
+        primary_path = output_dir / "output.json"
+        if primary_path.parent != output_dir:
+            primary_path.parent.mkdir(parents=True, exist_ok=True)
+        primary_path.write_text((output_dir / repo_name / "output.json").read_text())
+        exit_code = 0 if analysis.health_grade[0] in "ABC" else 1
+    else:
+        subrepos = [
+            p for p in repo_path.iterdir()
+            if p.is_dir() and (p / ".git").exists()
+        ]
+        if not subrepos:
+            print(f"Error: Not a git repository: {repo_path}", file=sys.stderr)
+            sys.exit(1)
+        print(f"Found {len(subrepos)} git repositories under {repo_path}")
+        first_analysis = None
+        for idx, subrepo in enumerate(sorted(subrepos)):
+            name = subrepo.name
+            analysis, output_path = _analyze_one(subrepo, name, primary=(idx == 0))
+            first_analysis = first_analysis or analysis
+            if idx == 0:
+                primary_path = output_dir / "output.json"
+                primary_path.write_text(output_path.read_text())
+        exit_code = 0 if (first_analysis and first_analysis.health_grade[0] in "ABC") else 1
 
-    # Run analysis
-    try:
-        analysis = analyze_repository(repo_path)
-    except Exception as e:
-        print(f"Error analyzing repository: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    # Build Caldera envelope
-    output = build_caldera_envelope(
-        analysis=analysis,
-        run_id=args.run_id,
-        repo_id=args.repo_id,
-        branch=args.branch,
-        commit=commit,
-    )
-
-    print(f"Health grade: {analysis.health_grade}")
-    print(f"Violations: {len(analysis.violations)}")
-    print(f"Blob count: {analysis.metrics.blob_count:,}")
-    print(f"Commit count: {analysis.metrics.commit_count:,}")
-    print(f"Duration: {analysis.duration_ms}ms")
-
-    # Write output
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / "output.json"
-
-    output_path.write_text(json.dumps(output, indent=2, default=str))
-    print(f"Output: {output_path}")
-
-    # Exit code based on health grade (unless --exit-zero)
     if args.exit_zero:
         sys.exit(0)
-    sys.exit(0 if analysis.health_grade[0] in "ABC" else 1)
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

@@ -1,36 +1,35 @@
-# Size Accuracy Judge Prompt
+# Size Accuracy Judge
 
-## Role
-You are an evaluation expert assessing the accuracy of git-sizer's blob, tree, and commit size measurements.
+You are evaluating the **size accuracy** of git-sizer's repository health analysis.
 
-## Context
-git-sizer analyzes Git repositories to measure various size-related metrics:
-- Blob sizes (files stored in Git)
-- Tree sizes (directory structures)
-- Commit sizes (commit metadata and diffs)
+## Evaluation Context
 
-## Evaluation Criteria
+{{ interpretation_guidance }}
 
-### Sub-Dimension: Blob Accuracy (40%)
-Evaluate whether blob size measurements are accurate:
-- `max_blob_size` correctly identifies the largest file
-- `blob_total_size` accurately reflects total object store
-- `blob_count` matches expected file counts
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
 
-### Sub-Dimension: Tree Accuracy (30%)
-Evaluate whether tree structure measurements are accurate:
-- `max_tree_entries` correctly identifies widest directory
-- `tree_count` reflects actual tree objects
-- Tree depth measurements align with expectations
+### Evaluation Mode
+{{ evaluation_mode }}
 
-### Sub-Dimension: Commit Accuracy (30%)
-Evaluate whether commit measurements are accurate:
-- `commit_count` matches expected history depth
-- `max_commit_size` identifies largest commits
-- History depth metrics are reasonable
+## Evaluation Dimension
+**Size Accuracy (35% weight)**: Are blob/tree/commit size measurements correct?
+
+## Background
+git-sizer analyzes Git repositories to measure:
+- Blob sizes (file content sizes in Git object store)
+- Tree entry counts (files per directory)
+- Commit counts and history depth
+- Path depths and lengths
+
+Accurate measurements are critical for:
+- Identifying LFS candidates (large blobs)
+- Detecting monorepo anti-patterns (wide trees)
+- Understanding repository complexity (deep history)
 
 ## Scoring Rubric
 
+### For Synthetic Repos (strict ground truth evaluation):
 | Score | Criteria |
 |-------|----------|
 | 5 | All measurements within 5% of expected values |
@@ -39,15 +38,61 @@ Evaluate whether commit measurements are accurate:
 | 2 | Several measurements significantly off |
 | 1 | Measurements unreliable or missing |
 
-## Input Format
-You will receive:
-1. The git-sizer analysis output (JSON)
-2. Ground truth expectations for the repository
-3. Repository characteristics
+### For Real-World Repos (when synthetic_baseline shows validated tool):
+| Score | Criteria |
+|-------|----------|
+| 5 | Output schema compliant, measurements present and consistent |
+| 4 | Minor schema issues but measurements are internally consistent |
+| 3 | Schema issues OR questionable measurement consistency |
+| 2 | Multiple schema issues AND inconsistent measurements |
+| 1 | Broken output, missing required fields |
 
-## Output Format
-Provide:
-1. Overall score (1-5)
-2. Sub-dimension scores
-3. Specific findings with evidence
-4. Confidence level (high/medium/low)
+## Sub-Dimensions
+1. **Blob Accuracy (40%)**: Blob sizes correctly measured
+2. **Tree Accuracy (30%)**: Tree entry counts correct
+3. **Commit Accuracy (30%)**: Commit counts and depth correct
+
+## Evidence to Evaluate
+
+### Repository Metrics
+```json
+{{ repo_metrics }}
+```
+
+### Accuracy Test Results
+```json
+{{ accuracy_results }}
+```
+
+### Summary
+- Tests passed: {{ passed_tests }}/{{ total_tests }}
+- Pass rate: {{ pass_rate }}%
+
+### Expected Values
+```json
+{{ expected_values }}
+```
+
+## Evaluation Questions
+1. Are blob sizes accurately measured for both small and large files?
+2. Do tree entry counts reflect actual directory contents?
+3. Are commit counts accurate for both shallow and deep histories?
+4. Is path depth calculation correct for nested structures?
+
+## Required Output Format
+Respond with ONLY a JSON object (no markdown code fences, no explanation):
+```json
+{
+  "dimension": "size_accuracy",
+  "score": <1-5>,
+  "confidence": <0.0-1.0>,
+  "reasoning": "detailed explanation of size accuracy assessment",
+  "evidence_cited": ["specific measurements examined"],
+  "recommendations": ["improvements for accuracy"],
+  "sub_scores": {
+    "blob_accuracy": <1-5>,
+    "tree_accuracy": <1-5>,
+    "commit_accuracy": <1-5>
+  }
+}
+```

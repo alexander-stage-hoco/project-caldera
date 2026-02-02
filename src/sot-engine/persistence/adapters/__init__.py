@@ -1,4 +1,6 @@
 from .base_adapter import BaseAdapter
+from .git_sizer_adapter import GitSizerAdapter
+from .gitleaks_adapter import GitleaksAdapter
 from .layout_adapter import LayoutAdapter
 from .lizard_adapter import LizardAdapter
 from .roslyn_adapter import RoslynAdapter
@@ -9,6 +11,8 @@ from .trivy_adapter import TrivyAdapter
 
 __all__ = [
     "BaseAdapter",
+    "GitSizerAdapter",
+    "GitleaksAdapter",
     "LayoutAdapter",
     "LizardAdapter",
     "RoslynAdapter",

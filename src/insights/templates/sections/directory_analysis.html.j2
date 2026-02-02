@@ -1,0 +1,106 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Directory Analysis</h2>
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Directories Analyzed</div>
+            <div class="value">{{ tree_stats.total_dirs | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Max Directory Depth</div>
+            <div class="value">{{ tree_stats.max_depth }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Avg Directory Depth</div>
+            <div class="value">{{ tree_stats.avg_depth | format_number }}</div>
+        </div>
+    </div>
+
+    {% if has_hotspots %}
+    <div class="subsection">
+        <h3>Top Directories by Complexity</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th class="number">Files</th>
+                    <th class="number">Total CCN</th>
+                    <th class="number">Avg CCN</th>
+                    <th class="number">Max CCN</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in hotspots[:12] %}
+                <tr>
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path(50) }}</td>
+                    <td class="number">{{ dir.file_count | format_number }}</td>
+                    <td class="number">{{ dir.total_ccn | format_number }}</td>
+                    <td class="number">{{ dir.avg_ccn | format_number }}</td>
+                    <td class="number">{{ dir.max_ccn | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_largest %}
+    <div class="subsection">
+        <h3>Top Directories by Size</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th class="number">Files</th>
+                    <th class="number">Total Lines</th>
+                    <th class="number">Code Lines</th>
+                    <th class="number">Comments</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in largest[:12] %}
+                <tr>
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path(50) }}</td>
+                    <td class="number">{{ dir.file_count | format_number }}</td>
+                    <td class="number">{{ dir.total_lines | format_number }}</td>
+                    <td class="number">{{ dir.total_code | format_number }}</td>
+                    <td class="number">{{ dir.total_comments | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_smelliest %}
+    <div class="subsection">
+        <h3>Top Directories by Code Smells</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th class="number">Smell Count</th>
+                    <th class="number">Files Affected</th>
+                    <th class="number">Unique Rules</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in smelliest[:12] %}
+                <tr>
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path(50) }}</td>
+                    <td class="number">{{ dir.smell_count | format_number }}</td>
+                    <td class="number">{{ dir.files_with_smells | format_number }}</td>
+                    <td class="number">{{ dir.unique_rules | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if not has_hotspots and not has_largest %}
+    <div class="empty-state">
+        <p>No directory data available for this run.</p>
+    </div>
+    {% endif %}
+</section>

@@ -97,16 +97,20 @@ evaluate: setup
 
 # Run LLM evaluation (4 judges)
 evaluate-llm: setup
-	$(PYTHON_VENV) -m evaluation.llm.orchestrator --working-dir $(CURDIR) --model $(LLM_MODEL)
+	$(PYTHON_VENV) -m evaluation.llm.orchestrator \
+		--working-dir $(CURDIR) \
+		--analysis $(OUTPUT_DIR)/output.json \
+		--model $(LLM_MODEL) \
+		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json
 	@mkdir -p evaluation/results
-	@cp evaluation/llm/results/llm_evaluation.json evaluation/results/llm_evaluation.json
+	@if [ "$(EVAL_OUTPUT_DIR)" != "evaluation/results" ] && [ -w evaluation/results ]; then cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json; fi
 
 # Run both programmatic and LLM evaluation
 evaluate-full: evaluate evaluate-llm
 	@echo ""
 	@echo "Full evaluation complete. Results in:"
-	@echo "  - $(EVAL_OUTPUT_DIR)/evaluation_results.json (programmatic)"
-	@echo "  - evaluation/llm/results/llm_evaluation.json (LLM)"
+	@echo "  - $(EVAL_OUTPUT_DIR)/evaluation_report.json (programmatic)"
+	@echo "  - $(EVAL_OUTPUT_DIR)/llm_evaluation.json (LLM)"
 
 # =============================================================================
 # Testing

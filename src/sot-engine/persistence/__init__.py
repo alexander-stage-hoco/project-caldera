@@ -1,4 +1,7 @@
 from .entities import (
+    GitSizerLfsCandidate,
+    GitSizerMetric,
+    GitSizerViolation,
     LayoutDirectory,
     LayoutFile,
     LizardFileMetric,
@@ -10,15 +13,19 @@ from .entities import (
     TrivyVulnerability,
 )
 from .repositories import (
+    GitSizerRepository,
     LayoutRepository,
     LizardRepository,
     SccRepository,
     ToolRunRepository,
     TrivyRepository,
 )
-from .adapters import LizardAdapter, SccAdapter, TrivyAdapter
+from .adapters import GitSizerAdapter, LizardAdapter, SccAdapter, TrivyAdapter
 
 __all__ = [
+    "GitSizerLfsCandidate",
+    "GitSizerMetric",
+    "GitSizerViolation",
     "LayoutDirectory",
     "LayoutFile",
     "LizardFileMetric",
@@ -28,11 +35,13 @@ __all__ = [
     "TrivyIacMisconfig",
     "TrivyTarget",
     "TrivyVulnerability",
+    "GitSizerRepository",
     "LayoutRepository",
     "LizardRepository",
     "SccRepository",
     "ToolRunRepository",
     "TrivyRepository",
+    "GitSizerAdapter",
     "LizardAdapter",
     "SccAdapter",
     "TrivyAdapter",

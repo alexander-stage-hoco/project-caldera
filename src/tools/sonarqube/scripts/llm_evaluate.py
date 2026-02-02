@@ -318,8 +318,8 @@ def main():
     )
     parser.add_argument(
         "--model", "-m",
-        default="opus",
-        choices=["opus", "sonnet", "haiku"],
+        default="opus-4.5",
+        choices=["opus", "opus-4.5", "sonnet", "haiku"],
         help="Claude model to use (default: opus)",
     )
     parser.add_argument(

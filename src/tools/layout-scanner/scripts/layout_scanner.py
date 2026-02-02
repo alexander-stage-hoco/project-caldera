@@ -27,7 +27,7 @@ from .classifier import (
 from .config_loader import ScannerConfig, load_config
 from .hierarchy_builder import DirectoryMetrics, HierarchyInfo, build_hierarchy
 from .ignore_filter import load_ignore_filter
-from .output_writer import build_output, write_output
+from .output_writer import build_output, write_output, detect_ecosystems
 from .rule_loader import RuleSet, find_rules_file, load_default_rules, load_rules, merge_rules
 from .tree_walker import WalkResult, walk_repository
 
@@ -135,6 +135,9 @@ def scan_repository(
         content_result = content_enrich(repo_path, list(walk_result.files.keys()))
         content_metadata = content_result.file_metadata
 
+    # Ecosystem detection - detect package ecosystems from file paths
+    ecosystem_result = detect_ecosystems(list(walk_result.files.keys()))
+
     # Calculate scan duration
     end_time = time.perf_counter()
     scan_duration_ms = int((end_time - start_time) * 1000)
@@ -152,6 +155,7 @@ def scan_repository(
         scan_duration_ms=scan_duration_ms,
         git_metadata=git_metadata,
         content_metadata=content_metadata,
+        ecosystem_result=ecosystem_result,
     )
 
     return output, scan_duration_ms

@@ -8,7 +8,7 @@ The shared evaluation framework provides:
 
 - **JudgeResult**: A standardized dataclass for evaluation results
 - **BaseJudge**: An abstract base class for building LLM judges
-- **Dual invocation modes**: Anthropic SDK (preferred) or Claude CLI (fallback)
+- **Dual invocation modes**: Claude CLI by default; Anthropic SDK only when `USE_ANTHROPIC_SDK=1`
 - **Dual evaluation modes**: LLM-based or heuristic-only evaluation
 - **Evidence collection patterns**: Standardized methods for loading analysis results and ground truth
 
@@ -220,7 +220,7 @@ def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
 | `extract_summary(analysis)` | Extract summary dict (handles both formats) |
 | `build_prompt(evidence)` | Build complete prompt with evidence |
 | `parse_response(response)` | Parse LLM response into JudgeResult |
-| `invoke_claude(prompt)` | Invoke Claude (SDK preferred, CLI fallback) |
+| `invoke_claude(prompt)` | Invoke Claude (CLI default, SDK optional) |
 | `evaluate()` | Run the full evaluation pipeline |
 | `get_prompt(data)` | Legacy interface (deprecated, use build_prompt) |
 
@@ -228,7 +228,7 @@ def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
 
 ```python
 judge = MyJudge(
-    model="sonnet",           # Model name or API ID
+    model="opus-4.5",         # Model name or API ID
     timeout=120,              # Timeout in seconds for LLM invocation
     working_dir=Path.cwd(),   # Working directory
     output_dir=None,          # Directory containing analysis output files
@@ -245,6 +245,7 @@ The `model` parameter accepts short names that map to API model IDs:
 |------------|--------------|
 | `sonnet` | `claude-sonnet-4-20250514` |
 | `opus` | `claude-opus-4-20250514` |
+| `opus-4.5` | `claude-opus-4-5-20250514` |
 | `haiku` | `claude-haiku-4-20250514` |
 
 You can also pass the full API model ID directly.
@@ -368,32 +369,28 @@ class VulnerabilityAccuracyJudge(BaseJudge):
 
 The framework supports two methods for invoking Claude:
 
-### Anthropic SDK (Preferred)
+### Claude CLI (Default)
 
-When the `anthropic` package is installed and `ANTHROPIC_API_KEY` is set:
-
-```python
-# Automatic SDK usage
-judge = MyJudge(model="sonnet")
-result = judge.evaluate()  # Uses SDK internally
-```
-
-The SDK method (`_invoke_via_sdk`) is preferred because:
-- Direct API access with better error handling
-- No subprocess overhead
-- Cleaner authentication via environment variable
-
-### Claude CLI (Fallback)
-
-If SDK is unavailable, falls back to Claude Code CLI:
+All judges use Claude Code CLI by default. Prompts are passed by file to avoid
+ARG_MAX issues:
 
 ```bash
-claude -p "<prompt>" --model sonnet --output-format text --allowedTools "" --max-turns 5
+claude --print @prompt_file --model opus-4.5 --output-format text --allowedTools Read,Glob,Grep --max-turns 5
 ```
 
-The CLI method (`_invoke_via_cli`) is used when:
-- `anthropic` package is not installed
-- `ANTHROPIC_API_KEY` environment variable is not set
+### Anthropic SDK (Optional)
+
+The SDK is only used when explicitly enabled:
+
+```bash
+export USE_ANTHROPIC_SDK=1
+export ANTHROPIC_API_KEY=...
+```
+
+```python
+judge = MyJudge(model="opus-4.5")
+result = judge.evaluate()  # Uses SDK internally when enabled
+```
 
 ### Checking CLI Availability
 
@@ -563,7 +560,7 @@ JUDGES = [
 def run_evaluation(
     output_dir: Path,
     ground_truth_dir: Path,
-    model: str = "sonnet",
+    model: str = "opus-4.5",
     use_llm: bool = True,
 ) -> dict:
     results = []
@@ -592,7 +589,7 @@ def run_evaluation(
 
 ```bash
 # With LLM evaluation
-python scripts/llm_evaluate.py --model sonnet
+python scripts/llm_evaluate.py --model opus-4.5
 
 # Heuristic only (fast, no LLM)
 python scripts/llm_evaluate.py --heuristic

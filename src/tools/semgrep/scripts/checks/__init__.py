@@ -153,10 +153,15 @@ def load_analysis(analysis_path: str | Path) -> dict:
     """Load analysis JSON file."""
     with open(analysis_path) as f:
         data = json.load(f)
-    if isinstance(data, dict) and isinstance(data.get("results"), dict):
-        results = dict(data["results"])
-        results["_root"] = data
-        return results
+    if isinstance(data, dict):
+        if isinstance(data.get("data"), dict) and isinstance(data.get("metadata"), dict):
+            results = dict(data["data"])
+            results["_root"] = data
+            return results
+        if isinstance(data.get("results"), dict):
+            results = dict(data["results"])
+            results["_root"] = data
+            return results
     return data
 
 

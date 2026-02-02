@@ -8,7 +8,7 @@ Usage:
     python scripts/llm_evaluate.py \
         --analysis output/runs/roslyn_analysis.json \
         --output output/runs/llm_evaluation.json \
-        --model opus
+        --model opus-4.5
 """
 
 import sys

@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "scenario": "private-keys",
+  "description": "Repository with RSA and SSH private keys",
+  "generated_at": "2026-01-23T19:00:00Z",
+  "repo_path": "eval-repos/synthetic/private-keys",
+  "expected": {
+    "total_secrets": 2,
+    "unique_secrets": 2,
+    "secrets_in_head": 2,
+    "secrets_in_history": 0,
+    "files_with_secrets": 2,
+    "commits_with_secrets": 1,
+    "rule_ids": [
+      "private-key"
+    ],
+    "files_with_secrets_list": [
+      "config/server_key.pem",
+      "deploy/id_rsa"
+    ],
+    "secrets_by_rule": {
+      "private-key": 2
+    },
+    "secrets_by_severity": {
+      "HIGH": 2
+    },
+    "findings": [
+      {
+        "file_path": "config/server_key.pem",
+        "rule_id": "private-key",
+        "line_number": 1,
+        "expected_severity": "HIGH"
+      },
+      {
+        "file_path": "deploy/id_rsa",
+        "rule_id": "private-key",
+        "line_number": 1,
+        "expected_severity": "HIGH"
+      }
+    ],
+    "repository": "private-keys",
+    "thresholds": {
+      "max_scan_time_ms": 5000,
+      "max_ms_per_commit": 1000,
+      "max_ms_per_finding": 500,
+      "max_findings_for_test": 100
+    }
+  }
+}

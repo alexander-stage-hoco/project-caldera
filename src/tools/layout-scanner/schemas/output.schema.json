@@ -455,6 +455,44 @@
               "description": "Total size in bytes",
               "minimum": 0,
               "type": "integer"
+            },
+            "detected_ecosystems": {
+              "description": "Count of dependency files per detected ecosystem",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "type": "object"
+            },
+            "dependency_files": {
+              "description": "Summary of dependency files found",
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "by_type": {
+                  "type": "object",
+                  "properties": {
+                    "manifest": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "lockfile": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            },
+            "incomplete_ecosystems": {
+              "description": "Ecosystems with manifests but no lockfiles (when lockfile expected)",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           "required": [

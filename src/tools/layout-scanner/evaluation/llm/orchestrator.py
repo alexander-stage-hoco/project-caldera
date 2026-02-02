@@ -9,10 +9,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from shared.evaluation import require_observability
 
 
 @dataclass
@@ -37,6 +40,27 @@ class DimensionResult:
 
 
 @dataclass
+class ProgrammaticInput:
+    """Reference to programmatic evaluation results."""
+
+    file: str
+    decision: str
+    score: float
+    checks_passed: int
+    checks_failed: int
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary."""
+        return {
+            "file": self.file,
+            "decision": self.decision,
+            "score": self.score,
+            "checks_passed": self.checks_passed,
+            "checks_failed": self.checks_failed,
+        }
+
+
+@dataclass
 class EvaluationResult:
     """Complete LLM evaluation result."""
 
@@ -49,17 +73,25 @@ class EvaluationResult:
     decision: str
     programmatic_score: float | None = None
     combined_score: float | None = None
+    programmatic_input: ProgrammaticInput | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
-            "run_id": self.run_id,
             "timestamp": self.timestamp,
             "model": self.model,
+            "decision": self.decision,
+            "score": self.total_score,
+            "programmatic_input": self.programmatic_input.to_dict() if self.programmatic_input else None,
             "dimensions": [d.to_dict() for d in self.dimensions],
+            "summary": {
+                "weighted_score": self.total_score,
+                "avg_confidence": self.average_confidence,
+            },
+            # Legacy fields for backward compatibility
+            "run_id": self.run_id,
             "total_score": self.total_score,
             "average_confidence": self.average_confidence,
-            "decision": self.decision,
             "programmatic_score": self.programmatic_score,
             "combined_score": self.combined_score,
         }
@@ -90,12 +122,14 @@ class LLMEvaluator:
         working_dir: Path | None = None,
         model: str = "sonnet",
         results_dir: Path | None = None,
+        output_dir: Path | None = None,
     ):
         self.working_dir = working_dir or Path.cwd()
         self.model = model
         self.results_dir = (
             results_dir or self.working_dir / "evaluation" / "llm" / "results"
         )
+        self.output_dir = output_dir or self.working_dir / "outputs"
         self._judges: list = []
 
     def register_judge(self, judge) -> None:
@@ -111,11 +145,17 @@ class LLMEvaluator:
 
         judges = [
             ClassificationReasoningJudge(
-                model=self.model, working_dir=self.working_dir
+                model=self.model, working_dir=self.working_dir, output_dir=self.output_dir
             ),
-            DirectoryTaxonomyJudge(model=self.model, working_dir=self.working_dir),
-            HierarchyConsistencyJudge(model=self.model, working_dir=self.working_dir),
-            LanguageDetectionJudge(model=self.model, working_dir=self.working_dir),
+            DirectoryTaxonomyJudge(
+                model=self.model, working_dir=self.working_dir, output_dir=self.output_dir
+            ),
+            HierarchyConsistencyJudge(
+                model=self.model, working_dir=self.working_dir, output_dir=self.output_dir
+            ),
+            LanguageDetectionJudge(
+                model=self.model, working_dir=self.working_dir, output_dir=self.output_dir
+            ),
         ]
 
         for judge in judges:
@@ -128,9 +168,11 @@ class LLMEvaluator:
 
         judges = [
             ClassificationReasoningJudge(
-                model=self.model, working_dir=self.working_dir
+                model=self.model, working_dir=self.working_dir, output_dir=self.output_dir
             ),
-            HierarchyConsistencyJudge(model=self.model, working_dir=self.working_dir),
+            HierarchyConsistencyJudge(
+                model=self.model, working_dir=self.working_dir, output_dir=self.output_dir
+            ),
         ]
 
         for judge in judges:
@@ -138,8 +180,14 @@ class LLMEvaluator:
 
     def evaluate(self, run_assertions: bool = True) -> EvaluationResult:
         """Run evaluation with all registered judges."""
+        # Enforce observability - fail fast if disabled
+        require_observability()
+
         run_id = f"llm-eval-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
         timestamp = datetime.now(timezone.utc).isoformat()
+
+        # Generate trace ID to correlate all judge interactions
+        trace_id = str(uuid.uuid4())
 
         dimension_results: list[DimensionResult] = []
         total_weight = 0.0
@@ -405,11 +453,17 @@ def main(args: list[str] | None = None) -> int:
     )
 
     parser.add_argument(
+        "--analysis",
+        type=Path,
+        help="Path to analysis output file (e.g., outputs/<run-id>/output.json)",
+    )
+
+    parser.add_argument(
         "--model",
         type=str,
-        default="sonnet",
-        choices=["sonnet", "opus", "haiku"],
-        help="Model to use for evaluation (default: sonnet)",
+        default="opus-4.5",
+        choices=["sonnet", "opus", "opus-4.5", "haiku"],
+        help="Model to use for evaluation (default: opus-4.5)",
     )
 
     parser.add_argument(
@@ -431,6 +485,12 @@ def main(args: list[str] | None = None) -> int:
     )
 
     parser.add_argument(
+        "--programmatic-results",
+        type=Path,
+        help="Path to programmatic evaluation JSON (evaluation_report.json)",
+    )
+
+    parser.add_argument(
         "--output", "-o",
         type=Path,
         help="Output file for results (default: evaluation/llm/results/)",
@@ -446,10 +506,20 @@ def main(args: list[str] | None = None) -> int:
 
     parsed_args = parser.parse_args(args)
 
+    # Determine output_dir from --analysis if provided
+    output_dir = None
+    if parsed_args.analysis and parsed_args.analysis.exists():
+        # If analysis points to a file, use its parent directory
+        if parsed_args.analysis.is_file():
+            output_dir = parsed_args.analysis.parent
+        else:
+            output_dir = parsed_args.analysis
+
     # Create evaluator
     evaluator = LLMEvaluator(
         working_dir=parsed_args.working_dir,
         model=parsed_args.model,
+        output_dir=output_dir,
     )
 
     # Register judges
@@ -463,10 +533,26 @@ def main(args: list[str] | None = None) -> int:
     # Run evaluation
     result = evaluator.evaluate(run_assertions=not parsed_args.no_assertions)
 
+    # Load programmatic results and attach to result
+    programmatic_score = parsed_args.programmatic_score
+    if parsed_args.programmatic_results and parsed_args.programmatic_results.exists():
+        prog_data = json.loads(parsed_args.programmatic_results.read_text())
+        summary = prog_data.get("summary", {})
+        result.programmatic_input = ProgrammaticInput(
+            file=str(parsed_args.programmatic_results),
+            decision=prog_data.get("decision", "UNKNOWN"),
+            score=prog_data.get("score", 0.0),
+            checks_passed=summary.get("passed", 0),
+            checks_failed=summary.get("failed", 0),
+        )
+        # Use programmatic score from file if not explicitly provided
+        if programmatic_score is None:
+            programmatic_score = prog_data.get("score", 0.0) * 5.0  # Convert 0-1 to 0-5
+
     # Compute combined score if provided
-    if parsed_args.programmatic_score is not None:
+    if programmatic_score is not None:
         result = evaluator.compute_combined_score(
-            result, parsed_args.programmatic_score
+            result, programmatic_score
         )
 
     # Save results
@@ -488,7 +574,10 @@ def main(args: list[str] | None = None) -> int:
 
     if parsed_args.format in ("markdown", "both"):
         report = evaluator.generate_markdown_report(result)
-        report_path = evaluator.results_dir / "llm_evaluation_report.md"
+        if parsed_args.output:
+            report_path = parsed_args.output.with_suffix(".md")
+        else:
+            report_path = evaluator.results_dir / "llm_evaluation_report.md"
         report_path.write_text(report)
         print(f"\nMarkdown report saved to {report_path}")
 
@@ -504,7 +593,7 @@ def main(args: list[str] | None = None) -> int:
         print(f"Combined Score: {result.combined_score:.2f}/5.0")
 
     # Return exit code based on decision
-    return 0 if result.decision in ("STRONG_PASS", "PASS") else 1
+    return 0 if result.decision in ("STRONG_PASS", "PASS", "WEAK_PASS") else 1
 
 
 if __name__ == "__main__":

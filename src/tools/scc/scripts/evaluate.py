@@ -380,11 +380,38 @@ def main():
     results_dir = _resolve_results_dir(base_path)
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save check results as JSON
-    check_results_path = results_dir / "checks.json"
+    # Save check results as JSON (uniform evaluation_report.json format)
+    check_results_path = results_dir / "evaluation_report.json"
+
+    # Build flat checks list for uniform schema
+    flat_checks = []
+    total_passed = 0
+    total_failed = 0
+    for d in dimensions:
+        for c in d.checks:
+            flat_checks.append({
+                "name": c.check_id,
+                "status": "PASS" if c.passed else "FAIL",
+                "message": c.message,
+            })
+            if c.passed:
+                total_passed += 1
+            else:
+                total_failed += 1
+
     check_data = {
-        "run_id": run_id,
         "timestamp": timestamp,
+        "tool": "scc",
+        "decision": decision,
+        "score": total_score / 5.0,  # Normalize to 0-1 scale
+        "checks": flat_checks,
+        "summary": {
+            "total": total_passed + total_failed,
+            "passed": total_passed,
+            "failed": total_failed,
+        },
+        # Keep detailed dimensions for reference
+        "run_id": run_id,
         "dimensions": [
             {
                 "dimension": d.dimension,

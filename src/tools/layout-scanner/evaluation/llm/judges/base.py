@@ -1,120 +1,74 @@
-"""Base judge class for LLM-as-a-Judge evaluation."""
+"""Base judge class for LLM-as-a-Judge evaluation of layout scanner outputs.
+
+This module re-exports the shared BaseJudge and JudgeResult classes,
+and provides layout-scanner-specific extensions.
+"""
 
 from __future__ import annotations
 
 import json
-import subprocess
-import tempfile
-from abc import ABC, abstractmethod
-from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+# Import from shared module - eliminates duplicate code
+from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult
 
-@dataclass
-class JudgeResult:
-    """Result from an LLM judge evaluation."""
-
-    dimension: str
-    score: int  # 1-5
-    confidence: float  # 0.0-1.0
-    reasoning: str
-    evidence_cited: list[str] = field(default_factory=list)
-    recommendations: list[str] = field(default_factory=list)
-    sub_scores: dict[str, int] = field(default_factory=dict)
-    raw_response: str = ""
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        return asdict(self)
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> JudgeResult:
-        """Create from dictionary."""
-        return cls(
-            dimension=data.get("dimension", "unknown"),
-            score=data.get("score", 0),
-            confidence=data.get("confidence", 0.0),
-            reasoning=data.get("reasoning", ""),
-            evidence_cited=data.get("evidence_cited", []),
-            recommendations=data.get("recommendations", []),
-            sub_scores=data.get("sub_scores", {}),
-            raw_response=data.get("raw_response", ""),
-        )
+# Re-export JudgeResult for backwards compatibility
+__all__ = ["BaseJudge", "JudgeResult"]
 
 
-class BaseJudge(ABC):
-    """Base class for LLM judges.
+class BaseJudge(SharedBaseJudge):
+    """Layout-scanner-specific base judge for file classification evaluation.
 
-    Each judge evaluates a specific dimension of the layout scanner output quality.
-    Judges invoke Claude Code in headless mode with specialized prompts.
+    Extends the shared BaseJudge with layout-scanner-specific functionality:
+    - Output file loading
+    - Ground truth file loading
+    - File sampling for large repositories
     """
 
     def __init__(
         self,
-        model: str = "sonnet",
+        model: str = "opus-4.5",
         timeout: int = 120,
         working_dir: Path | None = None,
+        output_dir: Path | None = None,
+        trace_id: str | None = None,
+        enable_observability: bool = True,
+        evaluation_mode: str | None = None,
     ):
-        self.model = model
-        self.timeout = timeout
-        self.working_dir = working_dir or Path.cwd()
-        self._prompt_template: str | None = None
+        """Initialize the layout scanner judge.
 
-    @property
-    @abstractmethod
-    def dimension_name(self) -> str:
-        """Name of the evaluation dimension."""
-        ...
-
-    @property
-    @abstractmethod
-    def weight(self) -> float:
-        """Weight of this dimension in the overall score (0.0-1.0)."""
-        ...
+        Args:
+            model: Model name ("sonnet", "opus", "haiku") or full API ID
+            timeout: Timeout in seconds for LLM invocation
+            working_dir: Working directory for the tool
+            output_dir: Directory containing analysis output files
+            trace_id: Correlation ID for linking all judges in one evaluation run
+            enable_observability: Whether to log LLM interactions (default True)
+            evaluation_mode: Evaluation mode ("synthetic", "real_world", or None for auto-detect)
+        """
+        working_dir = working_dir or Path(__file__).parent.parent.parent.parent
+        super().__init__(
+            model=model,
+            timeout=timeout,
+            working_dir=working_dir,
+            output_dir=output_dir or working_dir / "outputs",
+            ground_truth_dir=working_dir / "evaluation" / "ground-truth",
+            trace_id=trace_id,
+            enable_observability=enable_observability,
+            evaluation_mode=evaluation_mode,
+        )
 
     @property
     def prompt_file(self) -> Path:
         """Path to the prompt template file."""
         return Path(__file__).parent.parent / "prompts" / f"{self.dimension_name}.md"
 
-    def load_prompt_template(self) -> str:
-        """Load the prompt template from file."""
-        if self._prompt_template is None:
-            if self.prompt_file.exists():
-                self._prompt_template = self.prompt_file.read_text()
-            else:
-                self._prompt_template = self.get_default_prompt()
-        return self._prompt_template
-
-    @abstractmethod
-    def get_default_prompt(self) -> str:
-        """Return the default prompt template if file doesn't exist."""
-        ...
-
-    @abstractmethod
-    def collect_evidence(self) -> dict[str, Any]:
-        """Collect evidence files and data for evaluation."""
-        ...
-
-    def build_prompt(self, evidence: dict[str, Any]) -> str:
-        """Build the complete prompt with evidence."""
-        template = self.load_prompt_template()
-
-        # Replace placeholders in template
-        prompt = template
-        for key, value in evidence.items():
-            placeholder = f"{{{{ {key} }}}}"
-            if isinstance(value, (dict, list)):
-                value_str = json.dumps(value, indent=2)
-            else:
-                value_str = str(value)
-            prompt = prompt.replace(placeholder, value_str)
-
-        return prompt
-
     def parse_response(self, response: str) -> JudgeResult:
-        """Parse the LLM response into a structured result."""
+        """Parse the LLM response into a structured result.
+
+        Overrides parent to add score bounds validation.
+        """
         try:
             # Try to extract JSON from the response
             json_start = response.find("{")
@@ -124,6 +78,8 @@ class BaseJudge(ABC):
                 data = json.loads(json_str)
                 result = JudgeResult.from_dict(data)
                 result.dimension = self.dimension_name
+                if result.score < 1 or result.score > 5:
+                    result.score = 3
                 result.raw_response = response
                 return result
         except json.JSONDecodeError:
@@ -144,82 +100,68 @@ class BaseJudge(ABC):
             raw_response=response,
         )
 
-    def invoke_claude(self, prompt: str) -> str:
-        """Invoke Claude Code in headless mode."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as f:
-            f.write(prompt)
-            prompt_file = f.name
+    def build_prompt(self, evidence: dict[str, Any]) -> str:
+        """Build the complete prompt with evidence.
 
-        try:
-            cmd = [
-                "claude",
-                "-p",
-                f"@{prompt_file}",
-                "--model",
-                self.model,
-                "--output-format",
-                "text",
-                "--allowedTools",
-                "Read,Glob,Grep",
-                "--max-turns",
-                "20",
-            ]
+        Overrides parent to support per-key placeholder replacement.
+        """
+        template = self.load_prompt_template()
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=self.timeout,
-                cwd=str(self.working_dir),
+        # Replace placeholders in template
+        prompt = template
+        for key, value in evidence.items():
+            placeholder = f"{{{{ {key} }}}}"
+            if isinstance(value, (dict, list)):
+                value_str = json.dumps(value, indent=2)
+            else:
+                value_str = str(value)
+            prompt = prompt.replace(placeholder, value_str)
+
+        if "{{" in prompt or "}}" in prompt:
+            raise ValueError("Unresolved prompt placeholders detected")
+        if "Respond with ONLY a JSON object" not in prompt:
+            prompt = (
+                prompt
+                + "\n\nRespond with ONLY a JSON object. Do not use markdown fences or extra text."
             )
 
-            if result.returncode != 0:
-                return f"Error: {result.stderr}"
-
-            return result.stdout
-
-        finally:
-            Path(prompt_file).unlink(missing_ok=True)
-
-    def evaluate(self) -> JudgeResult:
-        """Run the full evaluation pipeline."""
-        # Collect evidence
-        evidence = self.collect_evidence()
-
-        # Build prompt
-        prompt = self.build_prompt(evidence)
-
-        # Invoke Claude
-        response = self.invoke_claude(prompt)
-
-        # Parse response
-        result = self.parse_response(response)
-
-        return result
-
-    def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
-        """Run ground truth assertions before LLM evaluation.
-
-        Returns:
-            Tuple of (all_passed, list of failure messages)
-        """
-        # Default: no assertions, always pass
-        return True, []
+        return prompt
 
     def _load_output_files(self) -> list[dict[str, Any]]:
-        """Load all scanner output files from the output directory."""
-        output_dir = self.working_dir / "output" / "runs"
+        """Load all scanner output files from the output directory.
+
+        Searches for output.json files in:
+        1. Direct files in output_dir (e.g., outputs/*.json)
+        2. Subdirectories (e.g., outputs/<run-id>/output.json)
+        """
         outputs = []
 
-        if not output_dir.exists():
+        if not self.output_dir.exists():
             return outputs
 
-        for path in output_dir.glob("*.json"):
+        # First try direct JSON files in output_dir
+        for path in self.output_dir.glob("*.json"):
             try:
                 with open(path) as f:
-                    outputs.append(json.load(f))
+                    data = json.load(f)
+                    # Handle envelope format
+                    if "data" in data and "files" in data.get("data", {}):
+                        outputs.append(data["data"])
+                    elif "files" in data:
+                        outputs.append(data)
+            except (json.JSONDecodeError, OSError):
+                continue
+
+        # Then try output.json in subdirectories (outputs/<run-id>/output.json)
+        for path in self.output_dir.glob("*/output.json"):
+            try:
+                with open(path) as f:
+                    data = json.load(f)
+                    # Handle envelope format
+                    if "data" in data and "files" in data.get("data", {}):
+                        outputs.append(data["data"])
+                    elif "files" in data:
+                        outputs.append(data)
             except (json.JSONDecodeError, OSError):
                 continue
 

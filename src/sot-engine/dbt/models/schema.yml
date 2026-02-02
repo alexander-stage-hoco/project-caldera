@@ -21,6 +21,7 @@ sources:
       - name: lz_git_sizer_metrics
       - name: lz_git_sizer_violations
       - name: lz_git_sizer_lfs_candidates
+      - name: lz_gitleaks_secrets
 
 models:
   - name: stg_lz_tool_runs
@@ -690,7 +691,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['A', 'A+', 'B', 'B+', 'C', 'C+', 'D', 'D+', 'F']
+              arguments:
+                values: ['A', 'A+', 'B', 'B+', 'C', 'C+', 'D', 'D+', 'F']
 
   - name: stg_lz_git_sizer_violations
     description: Threshold violations detected by git-sizer
@@ -705,7 +707,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: [1, 2, 3, 4]
+              arguments:
+                values: [1, 2, 3, 4]
 
   - name: stg_lz_git_sizer_lfs_candidates
     description: Files recommended for Git LFS migration
@@ -716,3 +719,20 @@ models:
       - name: file_path
         tests:
           - not_null
+
+  - name: repo_health_summary
+    description: Repository health combining git-sizer with file metrics
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - unique
+      - name: collection_run_id
+        tests:
+          - not_null
+      - name: health_grade
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['A', 'A+', 'B', 'B+', 'C', 'C+', 'D', 'D+', 'F']

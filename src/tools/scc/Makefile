@@ -13,6 +13,9 @@
 # Include shared configuration (provides VENV, RUN_ID, REPO_ID, OUTPUT_DIR, etc.)
 include ../Makefile.common
 
+# LLM timeout (seconds) for compliance runs
+LLM_TIMEOUT ?= 300
+
 # Tool-specific configuration
 TOOL_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 PROJECT_ROOT := $(abspath $(TOOL_ROOT)/../../..)
@@ -118,8 +121,11 @@ evaluate: $(VENV_READY) $(SCC_BIN)
 
 evaluate-llm: $(VENV_READY)
 	@echo "Running LLM-as-a-Judge evaluation..."
-	@$(PYTHON_VENV) scripts/llm_evaluate.py --mode full
-	@echo "Results saved to evaluation/results/"
+	@mkdir -p $(EVAL_OUTPUT_DIR)
+	@LLM_TIMEOUT=$(LLM_TIMEOUT) $(PYTHON_VENV) scripts/llm_evaluate.py --mode full --model $(LLM_MODEL) --output $(EVAL_OUTPUT_DIR)/llm_evaluation.json
+	@mkdir -p evaluation/results
+	@cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json
+	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"
 
 # =============================================================================
 # Testing

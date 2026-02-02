@@ -1,19 +1,18 @@
 """LLM-based error analysis for failing checks."""
 
 import json
-import os
 from typing import Optional, Dict, Any, List
 from pathlib import Path
 
 from scripts.checks import CheckResult
 
 
-# Check if anthropic is available
+# Check if observable provider is available
 try:
-    import anthropic
-    ANTHROPIC_AVAILABLE = True
+    from insights.evaluation.llm.providers import get_observable_provider
+    PROVIDER_AVAILABLE = True
 except ImportError:
-    ANTHROPIC_AVAILABLE = False
+    PROVIDER_AVAILABLE = False
 
 
 ERROR_ANALYSIS_PROMPT = """You are analyzing a failing evaluation check for a code analysis tool (scc).
@@ -38,16 +37,15 @@ Be concise and actionable.
 """
 
 
-def get_client() -> Optional[Any]:
-    """Get Anthropic client if available."""
-    if not ANTHROPIC_AVAILABLE:
+def get_provider() -> Optional[Any]:
+    """Get observable LLM provider if available."""
+    if not PROVIDER_AVAILABLE:
         return None
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
+    try:
+        return get_observable_provider("anthropic", trace_id=None)
+    except (ValueError, ImportError):
         return None
-
-    return anthropic.Anthropic(api_key=api_key)
 
 
 def analyze_failure(check: CheckResult, model: str = "claude-3-haiku-20240307") -> Dict[str, Any]:
@@ -55,11 +53,11 @@ def analyze_failure(check: CheckResult, model: str = "claude-3-haiku-20240307") 
     if check.passed:
         return {"analysis": "Check passed, no analysis needed", "llm_available": False}
 
-    client = get_client()
+    provider = get_provider()
 
-    if not client:
+    if not provider:
         return {
-            "analysis": "LLM analysis skipped (no API key or anthropic not installed)",
+            "analysis": "LLM analysis skipped (provider not available)",
             "root_cause": "Unknown",
             "impact": "Unknown",
             "remediation": "Manual investigation required",
@@ -76,13 +74,13 @@ def analyze_failure(check: CheckResult, model: str = "claude-3-haiku-20240307") 
     )
 
     try:
-        response = client.messages.create(
+        response = provider.complete(
+            prompt=prompt,
             model=model,
             max_tokens=500,
-            messages=[{"role": "user", "content": prompt}]
         )
 
-        content = response.content[0].text
+        content = response.content
 
         return {
             "analysis": content,

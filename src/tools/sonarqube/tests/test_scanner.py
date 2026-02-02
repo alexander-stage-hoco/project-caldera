@@ -21,6 +21,7 @@ from scripts.scanner import (
     create_scanner_config,
     _is_busy_error,
     _is_connection_error,
+    run_scanner_dotnet_docker,
 )
 
 
@@ -117,6 +118,35 @@ class TestGenerateSonarProperties:
         props = generate_sonar_properties(config)
 
         assert props["sonar.projectName"] == "My Project Name"
+
+
+def test_dotnet_docker_removes_sonar_properties(monkeypatch, tmp_path: Path):
+    captured = {}
+
+    def fake_run(cmd, capture_output=True, text=True, timeout=None, cwd=None):
+        captured["cmd"] = cmd
+        class Result:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+        return Result()
+
+    monkeypatch.setattr("scripts.scanner.subprocess.run", fake_run)
+    monkeypatch.setattr("scripts.scanner._get_container_ip", lambda *_: None)
+
+    config = ScannerConfig(
+        sonarqube_url="http://localhost:9000",
+        project_key="synthetic",
+        token=None,
+        use_docker=True,
+    )
+
+    run_scanner_dotnet_docker(tmp_path, config)
+    cmd_str = " ".join(captured.get("cmd", []))
+    assert "find /tmp/src -name sonar-project.properties -delete" in cmd_str
+    assert "LANG=C.UTF-8" in cmd_str
+    assert "LC_ALL=C.UTF-8" in cmd_str
+    assert "JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8" in cmd_str
 
     def test_includes_exclusions(self):
         """Test exclusions are formatted correctly."""

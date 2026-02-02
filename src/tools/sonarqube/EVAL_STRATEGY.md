@@ -424,7 +424,7 @@ make evaluate VERBOSE=1
 make evaluate-llm
 
 # Specific model
-make evaluate-llm MODEL=sonnet
+make evaluate-llm MODEL=opus-4.5
 
 # Combined evaluation
 make evaluate-all

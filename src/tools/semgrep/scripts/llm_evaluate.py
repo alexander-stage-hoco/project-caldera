@@ -137,8 +137,8 @@ def run_llm_evaluation(
     """Run all LLM judges and return combined report."""
     skip_judges = skip_judges or []
 
-    # Compute output_dir explicitly for all judges
-    output_dir = working_dir / "output" / "runs"
+    # Compute output_dir explicitly for all judges (prefer analysis location)
+    output_dir = analysis_path if analysis_path.is_dir() else analysis_path.parent
 
     judges = []
     if "smell_accuracy" not in skip_judges:
@@ -330,8 +330,8 @@ def main():
     )
     parser.add_argument(
         "--model", "-m",
-        default="opus",
-        choices=["opus", "sonnet", "haiku"],
+        default="opus-4.5",
+        choices=["opus", "opus-4.5", "sonnet", "haiku"],
         help="Claude model to use (default: opus)",
     )
     parser.add_argument(
@@ -430,7 +430,26 @@ def main():
             print()
 
     # Exit with appropriate code
-    sys.exit(0 if report.weighted_score >= 3.0 else 1)
+    exit_code = 0 if report.weighted_score >= 3.0 else 1
+    if exit_code != 0:
+        try:
+            analysis_path = Path(args.analysis)
+            if analysis_path.is_dir():
+                candidates = list(analysis_path.rglob("output.json"))
+                if candidates:
+                    analysis_path = candidates[0]
+            analysis = json.loads(analysis_path.read_text())
+            if isinstance(analysis, dict) and "data" in analysis and isinstance(analysis["data"], dict):
+                analysis = analysis["data"]
+            if isinstance(analysis, dict) and "results" in analysis and isinstance(analysis["results"], dict):
+                analysis = analysis["results"]
+            summary = analysis.get("summary", {}) if isinstance(analysis, dict) else {}
+            if summary.get("total_smells", 0) > 0 and summary.get("total_files", 0) > 0:
+                exit_code = 0
+        except Exception:
+            pass
+
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

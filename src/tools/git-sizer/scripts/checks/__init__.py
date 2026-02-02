@@ -181,6 +181,17 @@ def load_all_results(results_dir: str | Path) -> dict:
     results_path = Path(results_dir)
     repositories = []
 
+    root_output = results_path / "output.json"
+    if root_output.exists():
+        with open(root_output) as f:
+            data = json.load(f)
+            if "data" in data:
+                repo_data = data["data"].copy()
+                repo_name = data.get("metadata", {}).get("repo_name") or repo_data.get("repo_name") or "primary"
+                repo_data["repository"] = repo_name
+                repo_data["metadata"] = data.get("metadata", {})
+                repositories.append(repo_data)
+
     for repo_dir in results_path.iterdir():
         if repo_dir.is_dir():
             output_path = repo_dir / "output.json"

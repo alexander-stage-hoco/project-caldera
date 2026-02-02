@@ -58,13 +58,35 @@ Respond with JSON:
         vulns = [i for i in issues if i.get("type") == "VULNERABILITY"][:10]
         smells = [i for i in issues if i.get("type") == "CODE_SMELL"][:10]
 
-        return {
+        evidence = {
             "total_issues": len(issues),
             "sampled_bugs": bugs,
             "sampled_vulnerabilities": vulns,
             "sampled_code_smells": smells,
             "rollups": data.get("issues", {}).get("rollups", {}),
+            "evaluation_mode": self.evaluation_mode,
         }
+
+        # Inject synthetic baseline context for real-world evaluation
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context:
+                evidence["synthetic_baseline"] = synthetic_context
+                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                    synthetic_context
+                )
+            else:
+                evidence["synthetic_baseline"] = "No synthetic baseline available"
+                evidence["interpretation_guidance"] = (
+                    "Evaluate based on ground truth comparison only"
+                )
+        else:
+            evidence["synthetic_baseline"] = (
+                "N/A - synthetic mode uses direct ground truth comparison"
+            )
+            evidence["interpretation_guidance"] = "Strict ground truth evaluation"
+
+        return evidence
 
     def evaluate(self) -> JudgeResult:
         """Evaluate issue categorization accuracy."""

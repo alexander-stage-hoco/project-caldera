@@ -12,6 +12,13 @@ from pathlib import Path
 import click
 import structlog
 
+# Import ecosystem detection from common module
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+from common.ecosystem_detector import (
+    detect_ecosystems_from_directory,
+    format_ecosystem_completeness,
+)
+
 logger = structlog.get_logger(__name__)
 
 
@@ -106,12 +113,50 @@ def run_trivy_scan(repo_path: Path, timeout: int) -> dict:
             output_file.unlink()
 
 
-def transform_trivy_output(raw_output: dict, config: AnalysisConfig) -> dict:
+def discover_scannable_files(repo_path: Path) -> dict:
+    """Pre-scan to discover dependency files and check ecosystem completeness.
+
+    This function walks the repository before running trivy to identify
+    all dependency files (manifests and lockfiles) and report on ecosystem
+    completeness. This helps users understand why trivy might miss vulnerabilities.
+
+    Args:
+        repo_path: Path to repository to scan
+
+    Returns:
+        Dictionary with ecosystem_completeness data and warnings
+    """
+    logger.info("Discovering dependency files", repo_path=str(repo_path))
+
+    # Run ecosystem detection
+    result = detect_ecosystems_from_directory(repo_path)
+    completeness = format_ecosystem_completeness(result)
+
+    # Log warnings for incomplete ecosystems
+    for warning in completeness.get("warnings", []):
+        logger.warning(warning)
+
+    logger.info(
+        "Ecosystem discovery complete",
+        ecosystems_found=len(completeness.get("ecosystems", {})),
+        dependency_files=len(completeness.get("dependency_files", [])),
+        incomplete_ecosystems=len(result.incomplete_ecosystems),
+    )
+
+    return completeness
+
+
+def transform_trivy_output(
+    raw_output: dict,
+    config: AnalysisConfig,
+    ecosystem_completeness: dict | None = None,
+) -> dict:
     """Transform raw trivy JSON to envelope format.
 
     Args:
         raw_output: Raw trivy JSON output
         config: Analysis configuration
+        ecosystem_completeness: Optional ecosystem completeness data from pre-scan
 
     Returns:
         Transformed envelope-format output
@@ -217,34 +262,42 @@ def transform_trivy_output(raw_output: dict, config: AnalysisConfig) -> dict:
             })
 
     # Build envelope
+    data = {
+        "tool": "trivy",
+        "tool_version": tool_version,
+        "scan_type": "fs",
+        "targets": targets,
+        "vulnerabilities": vulnerabilities,
+        "iac_misconfigurations": {
+            "count": len(misconfigurations),
+            "misconfigurations": misconfigurations,
+        },
+        "findings_summary": {
+            "total_vulnerabilities": len(vulnerabilities),
+            "total_misconfigurations": len(misconfigurations),
+            "by_severity": severity_counts,
+            "fixable_count": fixable_count,
+        },
+    }
+
+    # Add ecosystem completeness data if available
+    if ecosystem_completeness:
+        data["ecosystem_completeness"] = ecosystem_completeness
+
     envelope = {
+        "id": config.repo_name,  # Used for ground truth matching
         "metadata": {
             "tool_name": "trivy",
             "tool_version": tool_version,
             "run_id": config.run_id,
             "repo_id": config.repo_id,
+            "repo_name": config.repo_name,
             "branch": config.branch,
             "commit": config.commit,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "schema_version": "1.0.0",
         },
-        "data": {
-            "tool": "trivy",
-            "tool_version": tool_version,
-            "scan_type": "fs",
-            "targets": targets,
-            "vulnerabilities": vulnerabilities,
-            "iac_misconfigurations": {
-                "count": len(misconfigurations),
-                "misconfigurations": misconfigurations,
-            },
-            "findings_summary": {
-                "total_vulnerabilities": len(vulnerabilities),
-                "total_misconfigurations": len(misconfigurations),
-                "by_severity": severity_counts,
-                "fixable_count": fixable_count,
-            },
-        },
+        "data": data,
     }
 
     return envelope
@@ -265,14 +318,17 @@ def run_analysis(config: AnalysisConfig) -> dict:
         repo_name=config.repo_name,
     )
 
+    # Pre-scan: discover dependency files and check ecosystem completeness
+    ecosystem_completeness = discover_scannable_files(config.repo_path)
+
     # Run trivy scan
     raw_output = run_trivy_scan(config.repo_path, config.timeout)
 
     # Transform to envelope format
-    result = transform_trivy_output(raw_output, config)
+    result = transform_trivy_output(raw_output, config, ecosystem_completeness)
 
     # Write output
-    output_path = config.output_dir / f"{config.repo_name}.json"
+    output_path = config.output_dir / "output.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(result, indent=2))
 
@@ -376,7 +432,7 @@ def main(
 
     try:
         result = run_analysis(config)
-        click.echo(f"Analysis complete: {output_dir / repo_name}.json")
+        click.echo(f"Analysis complete: {output_dir / 'output.json'}")
         click.echo(
             f"Vulnerabilities: {result['data']['findings_summary']['total_vulnerabilities']}"
         )

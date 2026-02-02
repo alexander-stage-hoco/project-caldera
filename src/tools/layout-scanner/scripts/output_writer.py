@@ -5,6 +5,7 @@ Serializes scan results to JSON format matching the defined schema.
 """
 
 import json
+import sys
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,6 +19,14 @@ from .statistics import (
     compute_file_size_stats,
 )
 from .tree_walker import DirectoryInfo, FileInfo, WalkResult
+
+# Import ecosystem detection from common module
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+from common.ecosystem_detector import (
+    EcosystemDetectionResult,
+    detect_ecosystems,
+    get_ecosystem_summary,
+)
 
 
 SCHEMA_VERSION = "1.0.0"
@@ -126,6 +135,7 @@ def format_statistics(
     scan_duration_ms: int,
     hierarchy: Optional[HierarchyInfo] = None,
     dir_metrics: Optional[Dict[str, DirectoryMetrics]] = None,
+    ecosystem_result: Optional[EcosystemDetectionResult] = None,
 ) -> Dict[str, Any]:
     """Format the statistics section for JSON output.
 
@@ -136,6 +146,7 @@ def format_statistics(
         scan_duration_ms: Scan duration in milliseconds.
         hierarchy: Optional hierarchy info for depth statistics.
         dir_metrics: Optional directory metrics for files-per-directory stats.
+        ecosystem_result: Optional ecosystem detection result.
 
     Returns:
         Statistics dictionary for JSON output.
@@ -195,6 +206,25 @@ def format_statistics(
         size_stats = compute_file_size_stats(file_sizes)
         stats["size_per_file_stats"] = size_stats.to_dict()
 
+    # Add ecosystem detection statistics
+    if ecosystem_result:
+        stats["detected_ecosystems"] = get_ecosystem_summary(ecosystem_result)
+        stats["dependency_files"] = {
+            "total": len(ecosystem_result.dependency_files),
+            "by_type": {
+                "manifest": sum(
+                    1 for df in ecosystem_result.dependency_files
+                    if df.file_type == "manifest"
+                ),
+                "lockfile": sum(
+                    1 for df in ecosystem_result.dependency_files
+                    if df.file_type == "lockfile"
+                ),
+            },
+        }
+        if ecosystem_result.incomplete_ecosystems:
+            stats["incomplete_ecosystems"] = ecosystem_result.incomplete_ecosystems
+
     return stats
 
 
@@ -210,6 +240,7 @@ def build_output(
     scan_duration_ms: int,
     git_metadata: Optional[Dict[str, Any]] = None,
     content_metadata: Optional[Dict[str, Any]] = None,
+    ecosystem_result: Optional[EcosystemDetectionResult] = None,
 ) -> Dict[str, Any]:
     """
     Build the complete output structure.
@@ -226,6 +257,7 @@ def build_output(
         scan_duration_ms: Scan duration in milliseconds
         git_metadata: Optional dict mapping file paths to GitFileMetadata
         content_metadata: Optional dict mapping file paths to ContentFileMetadata
+        ecosystem_result: Optional ecosystem detection result
 
     Returns:
         Complete output dictionary ready for JSON serialization
@@ -283,6 +315,7 @@ def build_output(
             scan_duration_ms,
             hierarchy=hierarchy,
             dir_metrics=dir_metrics,
+            ecosystem_result=ecosystem_result,
         ),
         "files": files,
         "directories": directories,

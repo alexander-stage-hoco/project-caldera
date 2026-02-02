@@ -1,0 +1,55 @@
+## IaC Misconfigurations
+
+{% if not has_misconfigs %}
+*No Infrastructure-as-Code misconfigurations found. This project may not contain IaC files, or all configurations pass security checks.*
+{% else %}
+
+**Risk Level:** {{ risk_level | title }}
+
+### Summary
+
+- **Total Misconfigurations:** {{ total_count }}
+- **Critical:** {{ critical_count }}
+- **High:** {{ high_count }}
+
+{% if summary %}
+### By Severity
+
+| Severity | Count | Affected Files |
+|----------|-------|----------------|
+{% for s in summary %}
+| {{ s.severity }} | {{ s.count }} | {{ s.affected_files }} |
+{% endfor %}
+{% endif %}
+
+{% if by_type %}
+### By IaC Type
+
+| Type | Count | Critical | High |
+|------|-------|----------|------|
+{% for t in by_type %}
+| {{ t.iac_type | title }} | {{ t.count }} | {{ t.critical_count }} | {{ t.high_count }} |
+{% endfor %}
+{% endif %}
+
+{% if top_misconfigs %}
+### Top Misconfigurations
+
+| ID | Severity | Type | Title |
+|----|----------|------|-------|
+{% for m in top_misconfigs[:15] %}
+| `{{ m.misconfig_id }}` | {{ m.severity }} | {{ m.iac_type }} | {{ m.title }} |
+{% endfor %}
+{% endif %}
+
+{% if affected_files %}
+### Affected Files
+
+| File | Type | Total | Critical | High |
+|------|------|-------|----------|------|
+{% for f in affected_files[:10] %}
+| {{ f.file_path }} | {{ f.iac_type }} | {{ f.misconfig_count }} | {{ f.critical_count }} | {{ f.high_count }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

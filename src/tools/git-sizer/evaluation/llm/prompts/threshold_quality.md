@@ -1,63 +1,89 @@
-# Threshold Quality Judge Prompt
+# Threshold Quality Judge
 
-## Role
-You are an evaluation expert assessing the quality of git-sizer's threshold-based violation detection.
+You are evaluating the **threshold quality** of git-sizer's violation detection.
 
-## Context
-git-sizer detects threshold violations across four severity levels:
-- Level 1: Acceptable concern
-- Level 2: Somewhat concerning
-- Level 3: Very concerning
-- Level 4: Alarm bells
+## Evaluation Dimension
+**Threshold Quality (25% weight)**: Do threshold levels accurately identify problematic repositories?
 
-## Evaluation Criteria
+## Background
+git-sizer uses threshold levels to indicate severity:
+- `*` - Acceptable (minor concern)
+- `**` - Somewhat concerning
+- `***` - Very concerning
+- `!!!!` - Alarm bells
 
-### Sub-Dimension: True Positive Rate (40%)
-Evaluate whether violations are correctly detected:
-- Known issues are flagged appropriately
-- Severity levels match the actual concern
-- No obvious violations are missed
-
-### Sub-Dimension: False Positive Rate (30%)
-Evaluate whether false alarms are minimized:
-- Healthy repositories have zero/minimal violations
-- Normal patterns are not flagged incorrectly
-- Threshold levels are appropriately calibrated
-
-### Sub-Dimension: Severity Appropriateness (30%)
-Evaluate whether severity assignments are appropriate:
-- Level escalation follows logical progression
-- Thresholds are reasonable for typical repositories
-- Edge cases are handled sensibly
-
-## Threshold Reference
-
-| Metric | Level 1 | Level 2 | Level 3 | Level 4 |
-|--------|---------|---------|---------|---------|
-| max_blob_size | 1 MiB | 10 MiB | 50 MiB | 100 MiB |
-| max_tree_entries | 1,000 | 5,000 | 10,000 | 50,000 |
-| max_path_depth | 15 | 20 | 25 | 30 |
+Good thresholds should:
+- Not trigger on healthy repositories (low false positives)
+- Correctly flag problematic repositories (high true positives)
+- Use appropriate severity levels (not over/under-alarming)
+- Result in meaningful health grades (A-F)
 
 ## Scoring Rubric
-
 | Score | Criteria |
 |-------|----------|
-| 5 | Perfect detection with appropriate severity, no false positives |
-| 4 | Accurate detection, minor severity calibration issues |
-| 3 | Generally good detection, some false positives or missed issues |
-| 2 | Multiple detection problems or severity mismatches |
-| 1 | Unreliable violation detection |
+| 5 | Perfect threshold accuracy, no false positives/negatives |
+| 4 | Excellent thresholds, rare edge case misses |
+| 3 | Good thresholds, some calibration issues |
+| 2 | Thresholds too aggressive or too lenient |
+| 1 | Thresholds unreliable, many misclassifications |
 
-## Input Format
-You will receive:
-1. The git-sizer analysis output (JSON)
-2. Ground truth violations expected
-3. Repository characteristics
+## Sub-Dimensions
+1. **True Positive Rate (40%)**: Problematic repos correctly flagged
+2. **False Positive Rate (30%)**: Healthy repos not incorrectly flagged
+3. **Severity Calibration (30%)**: Levels match actual severity
 
-## Output Format
-Provide:
-1. Overall score (1-5)
-2. Sub-dimension scores
-3. True positive, false positive, false negative counts
-4. Severity assessment findings
-5. Confidence level (high/medium/low)
+## Evidence to Evaluate
+
+### Violation Summary
+```json
+{{ violation_summary }}
+```
+
+### Grade Distribution
+```json
+{{ grade_distribution }}
+```
+
+### Expected Outcomes
+```json
+{{ expected_outcomes }}
+```
+
+### Quality Test Results
+```json
+{{ quality_results }}
+```
+
+### Summary
+- Tests passed: {{ passed_tests }}/{{ total_tests }}
+- Pass rate: {{ pass_rate }}%
+- Total violations: {{ total_violations }}
+
+### Violation Level Distribution
+```json
+{{ level_distribution }}
+```
+
+## Evaluation Questions
+1. Do healthy repositories correctly have no (or minimal) violations?
+2. Are problematic repositories correctly flagged with violations?
+3. Are severity levels appropriate for the issues detected?
+4. Do health grades accurately reflect repository health?
+
+## Required Output Format
+Respond with ONLY a JSON object (no markdown code fences, no explanation):
+```json
+{
+  "dimension": "threshold_quality",
+  "score": <1-5>,
+  "confidence": <0.0-1.0>,
+  "reasoning": "detailed explanation of threshold quality assessment",
+  "evidence_cited": ["specific threshold behaviors examined"],
+  "recommendations": ["threshold calibration improvements"],
+  "sub_scores": {
+    "true_positive_rate": <1-5>,
+    "false_positive_rate": <1-5>,
+    "severity_calibration": <1-5>
+  }
+}
+```

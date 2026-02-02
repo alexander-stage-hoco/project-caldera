@@ -2,6 +2,16 @@
 
 You are evaluating the Layout Scanner's file classification reasoning quality.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
 ## Evaluation Dimension: Classification Reasoning (Weight: 30%)
 
 This dimension assesses how well the layout scanner classifies files and explains its reasoning.
@@ -73,6 +83,7 @@ This dimension assesses how well the layout scanner classifies files and explain
 
 ## Scoring Rubric
 
+### For Synthetic Repos (strict ground truth evaluation):
 | Score | Criteria |
 |-------|----------|
 | 5 | All classifications correct (>98%), reasons are specific and cite signals, confidence well-calibrated |
@@ -80,6 +91,15 @@ This dimension assesses how well the layout scanner classifies files and explain
 | 3 | 85%+ classifications correct, some generic reasons, confidence mostly appropriate |
 | 2 | 70-85% classifications correct, many generic reasons, confidence poorly calibrated |
 | 1 | <70% correct, reasons missing or meaningless, confidence unreliable |
+
+### For Real-World Repos (when synthetic_baseline shows validated tool):
+| Score | Criteria |
+|-------|----------|
+| 5 | Output schema compliant, classifications are consistent and sensible |
+| 4 | Minor schema issues but classifications are internally consistent |
+| 3 | Schema issues OR questionable classification logic |
+| 2 | Multiple schema issues AND inconsistent classifications |
+| 1 | Broken output, missing required fields |
 
 ---
 

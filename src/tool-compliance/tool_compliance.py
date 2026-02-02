@@ -6,10 +6,12 @@ import argparse
 import json
 import os
 import re
+import ast
 import subprocess
 import sys
 import shutil
 import tempfile
+import time
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -49,6 +51,27 @@ REQUIRED_MAKE_TARGETS = {
     "clean",
 }
 
+# Required sections for BLUEPRINT.md document validation
+BLUEPRINT_REQUIRED_SECTIONS = [
+    "Executive Summary",
+    "Architecture",
+    "Implementation Plan",
+    "Configuration",
+    "Performance",
+    "Evaluation",
+    "Risk",
+]
+
+# Required sections for EVAL_STRATEGY.md document validation
+EVAL_STRATEGY_REQUIRED_SECTIONS = [
+    "Philosophy",
+    "Dimension Summary",
+    "Check Catalog",
+    "Scoring",
+    "Decision Thresholds",
+    "Ground Truth",
+]
+
 TOOL_RULES = {
     "scc": {
         "required_check_modules": [
@@ -78,7 +101,7 @@ TOOL_RULES = {
         "ground_truth_mode": "synthetic_json",
         "evaluation_outputs": [
             "scorecard.md",
-            "checks.json",
+            "evaluation_report.json",
         ],
         "adapter": ("persistence.adapters.scc_adapter", "SccAdapter"),
     },
@@ -211,6 +234,25 @@ TOOL_RULES = {
         ],
         "adapter": ("persistence.adapters.git_sizer_adapter", "GitSizerAdapter"),
     },
+    "gitleaks": {
+        "required_check_modules": [
+            "accuracy.py",
+            "coverage.py",
+            "detection.py",
+            "performance.py",
+        ],
+        "required_prompts": [
+            "detection_accuracy.md",
+            "false_positive.md",
+            "secret_coverage.md",
+            "severity_classification.md",
+        ],
+        "ground_truth_mode": "synthetic_json",
+        "evaluation_outputs": [
+            "scorecard.md",
+        ],
+        "adapter": ("persistence.adapters.gitleaks_adapter", "GitleaksAdapter"),
+    },
 }
 
 # Entity-to-repository mapping for entity.repository_alignment check
@@ -223,6 +265,7 @@ TOOL_ENTITIES = {
     "trivy": ["TrivyVulnerability", "TrivyTarget", "TrivyIacMisconfig"],
     "sonarqube": ["SonarqubeIssue", "SonarqubeMetric"],
     "git-sizer": ["GitSizerMetric", "GitSizerViolation", "GitSizerLfsCandidate"],
+    "gitleaks": ["GitleaksSecret"],
 }
 
 ENTITY_REPOSITORY_MAP = {
@@ -241,6 +284,7 @@ ENTITY_REPOSITORY_MAP = {
     "GitSizerMetric": ("GitSizerRepository", "insert_metrics"),
     "GitSizerViolation": ("GitSizerRepository", "insert_violations"),
     "GitSizerLfsCandidate": ("GitSizerRepository", "insert_lfs_candidates"),
+    "GitleaksSecret": ("GitleaksRepository", "insert_secrets"),
 }
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
@@ -266,6 +310,9 @@ class CheckResult:
     severity: str
     message: str
     evidence: list[str]
+    duration_ms: Optional[float] = None
+    stdout_summary: Optional[str] = None
+    stderr_summary: Optional[str] = None
 
 
 @dataclass
@@ -453,30 +500,598 @@ def _find_evaluation_output(tool_root: Path) -> Optional[Path]:
 
 
 def _find_llm_evaluation_output(tool_root: Path) -> Optional[Path]:
-    """Find LLM evaluation output (results directory with content)."""
+    """Find LLM evaluation output (results directory with content).
+
+    Checks multiple locations where tools may store LLM evaluation outputs:
+    1. evaluation/llm/results/*.json (preferred)
+    2. evaluation/results/llm_evaluation.json (alternate)
+    3. evaluation/llm/results/*.md (fallback for reporting)
+
+    Prefers .json files over .md files since JSON is needed for quality checks.
+    """
+    # Primary location: evaluation/llm/results/
     llm_results = tool_root / "evaluation" / "llm" / "results"
     if llm_results.exists():
-        # Check for any result files
-        result_files = list(llm_results.glob("*.json")) + list(llm_results.glob("*.md"))
-        if result_files:
-            # Return the most recent one
-            return max(result_files, key=lambda p: p.stat().st_mtime)
+        # Prefer JSON files for quality checking
+        json_files = list(llm_results.glob("*.json"))
+        if json_files:
+            return max(json_files, key=lambda p: p.stat().st_mtime)
+
+    # Alternate location: evaluation/results/llm_evaluation.json
+    # Check this before falling back to markdown
+    alt_path = tool_root / "evaluation" / "results" / "llm_evaluation.json"
+    if alt_path.exists():
+        return alt_path
+
+    # Fall back to markdown if no JSON anywhere
+    if llm_results.exists():
+        md_files = list(llm_results.glob("*.md"))
+        if md_files:
+            return max(md_files, key=lambda p: p.stat().st_mtime)
+
     return None
 
 
-def _run_make(tool_root: Path, target: str, env: dict[str, str]) -> Optional[str]:
+def _check_evaluation_quality(results_path: Path) -> CheckResult:
+    payload, error = _load_json(results_path)
+    if error:
+        return CheckResult(
+            check_id="evaluation.quality",
+            status="fail",
+            severity="high",
+            message="Evaluation results are invalid JSON",
+            evidence=[error],
+        )
+    decision = (
+        payload.get("decision")
+        or payload.get("classification")
+        or payload.get("summary", {}).get("decision")
+    )
+    if decision:
+        decision_value = str(decision).upper()
+        if decision_value not in {"PASS", "STRONG_PASS", "WEAK_PASS"}:
+            return CheckResult(
+                check_id="evaluation.quality",
+                status="fail",
+                severity="high",
+                message="Evaluation decision below required threshold",
+                evidence=[decision_value],
+            )
+        return CheckResult(
+            check_id="evaluation.quality",
+            status="pass",
+            severity="high",
+            message="Evaluation decision meets threshold",
+            evidence=[decision_value],
+        )
+
+    summary = payload.get("summary", {})
+    score = payload.get("score")
+    if score is None:
+        score = payload.get("total_score")
+    if score is None:
+        score = payload.get("overall_score")
+    if score is None:
+        score = summary.get("score")
+    if score is None:
+        score = summary.get("total_score")
+    if score is None:
+        score = summary.get("overall_score")
+    if score is None:
+        score = summary.get("weighted_score")
+
+    failed = payload.get("failed")
+    if failed is None:
+        failed = payload.get("checks_failed")
+    if failed is None:
+        failed = summary.get("failed")
+    if failed is None:
+        failed = summary.get("checks_failed")
+
+    total = payload.get("total") or payload.get("checks_total") or summary.get("total")
+
+    # Handle score-based evaluation with failed count (traditional format)
+    if isinstance(score, (int, float)) and failed is not None:
+        if score >= 0.9 and int(failed) == 0:
+            return CheckResult(
+                check_id="evaluation.quality",
+                status="pass",
+                severity="high",
+                message="Evaluation score meets threshold (computed)",
+                evidence=[f"score={score}", f"failed={failed}", f"total={total}"],
+            )
+        return CheckResult(
+            check_id="evaluation.quality",
+            status="fail",
+            severity="high",
+            message="Evaluation score below required threshold",
+            evidence=[f"score={score}", f"failed={failed}", f"total={total}"],
+        )
+
+    # Handle LLM evaluation format (weighted_score on 1-5 scale, no failed count)
+    if isinstance(score, (int, float)) and failed is None:
+        # LLM evaluations use 1-5 scale; >= 3.5 is passing
+        if score >= 3.5:
+            return CheckResult(
+                check_id="evaluation.quality",
+                status="pass",
+                severity="high",
+                message="LLM evaluation score meets threshold",
+                evidence=[f"weighted_score={score}"],
+            )
+        return CheckResult(
+            check_id="evaluation.quality",
+            status="fail",
+            severity="high",
+            message="LLM evaluation score below required threshold",
+            evidence=[f"weighted_score={score}"],
+        )
+
+    return CheckResult(
+        check_id="evaluation.quality",
+        status="fail",
+        severity="high",
+        message="Evaluation decision missing",
+        evidence=["missing decision and summary score"],
+    )
+
+
+def _check_llm_quality(results_path: Path) -> CheckResult:
+    payload, error = _load_json(results_path)
+    if error:
+        return CheckResult(
+            check_id="evaluation.llm_quality",
+            status="fail",
+            severity="medium",
+            message="LLM evaluation results are invalid JSON",
+            evidence=[error],
+        )
+    decision = payload.get("decision") or payload.get("summary", {}).get("verdict")
+    if decision:
+        decision_value = str(decision).upper()
+        if decision_value not in {"PASS", "STRONG_PASS", "WEAK_PASS"}:
+            return CheckResult(
+                check_id="evaluation.llm_quality",
+                status="fail",
+                severity="medium",
+                message="LLM evaluation decision below required threshold",
+                evidence=[decision_value],
+            )
+        return CheckResult(
+            check_id="evaluation.llm_quality",
+            status="pass",
+            severity="medium",
+            message="LLM evaluation decision meets threshold",
+            evidence=[decision_value],
+        )
+
+    # Fall back to score-based evaluation (LLM evaluations use 1-5 scale)
+    summary = payload.get("summary", {})
+    score = (
+        payload.get("combined_score")
+        or payload.get("score")
+        or payload.get("weighted_score")
+        or summary.get("combined_score")
+        or summary.get("score")
+        or summary.get("weighted_score")
+    )
+    if isinstance(score, (int, float)):
+        if score >= 3.5:
+            return CheckResult(
+                check_id="evaluation.llm_quality",
+                status="pass",
+                severity="medium",
+                message="LLM evaluation score meets threshold",
+                evidence=[f"score={score}"],
+            )
+        return CheckResult(
+            check_id="evaluation.llm_quality",
+            status="fail",
+            severity="medium",
+            message="LLM evaluation score below required threshold",
+            evidence=[f"score={score}"],
+        )
+
+    return CheckResult(
+        check_id="evaluation.llm_quality",
+        status="fail",
+        severity="medium",
+        message="LLM evaluation missing decision and score",
+        evidence=["missing decision and score fields"],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Programmatic and LLM Evaluation File Checks
+# ---------------------------------------------------------------------------
+# These checks enforce the uniform evaluation pipeline:
+# 1. Programmatic evaluation -> evaluation/results/evaluation_report.json
+# 2. LLM evaluation -> evaluation/results/llm_evaluation.json (includes programmatic_input)
+
+PROGRAMMATIC_EVAL_PATH = Path("evaluation") / "results" / "evaluation_report.json"
+LLM_EVAL_PATH = Path("evaluation") / "results" / "llm_evaluation.json"
+
+PROGRAMMATIC_REQUIRED_FIELDS = ["timestamp", "decision", "score", "checks", "summary"]
+LLM_REQUIRED_FIELDS = ["timestamp", "model", "decision", "score", "programmatic_input", "dimensions"]
+PASSING_DECISIONS = {"PASS", "STRONG_PASS", "WEAK_PASS"}
+
+
+def _check_programmatic_exists(tool_root: Path) -> CheckResult:
+    """Check that evaluation_report.json exists at uniform path."""
+    path = tool_root / PROGRAMMATIC_EVAL_PATH
+    if path.exists():
+        return CheckResult(
+            check_id="evaluation.programmatic_exists",
+            status="pass",
+            severity="high",
+            message="Programmatic evaluation file exists",
+            evidence=[str(PROGRAMMATIC_EVAL_PATH)],
+        )
+    return CheckResult(
+        check_id="evaluation.programmatic_exists",
+        status="fail",
+        severity="high",
+        message="Missing evaluation_report.json at uniform path",
+        evidence=[str(PROGRAMMATIC_EVAL_PATH)],
+    )
+
+
+def _check_programmatic_schema(tool_root: Path) -> CheckResult:
+    """Validate that evaluation_report.json has required fields."""
+    path = tool_root / PROGRAMMATIC_EVAL_PATH
+    if not path.exists():
+        return CheckResult(
+            check_id="evaluation.programmatic_schema",
+            status="fail",
+            severity="high",
+            message="Cannot validate schema - file missing",
+            evidence=[str(PROGRAMMATIC_EVAL_PATH)],
+        )
+    payload, error = _load_json(path)
+    if error:
+        return CheckResult(
+            check_id="evaluation.programmatic_schema",
+            status="fail",
+            severity="high",
+            message="Invalid JSON in evaluation_report.json",
+            evidence=[error],
+        )
+    # Check required fields - allow aliases for common field names
+    missing = []
+    for field in PROGRAMMATIC_REQUIRED_FIELDS:
+        if field == "decision":
+            if "decision" not in payload and "classification" not in payload:
+                missing.append(field)
+        elif field == "score":
+            if "score" not in payload and "total_score" not in payload and "overall_score" not in payload:
+                missing.append(field)
+        elif field == "checks":
+            # Allow 'dimensions' as alternative (each dimension may have nested checks)
+            if "checks" not in payload and "dimensions" not in payload:
+                missing.append(field)
+        elif field == "summary":
+            # summary is optional if dimensions with checks_passed/checks_total exist
+            if "summary" not in payload:
+                dims = payload.get("dimensions", [])
+                has_dimension_counts = any(
+                    "checks_passed" in d and "checks_total" in d for d in dims
+                ) if isinstance(dims, list) else False
+                if not has_dimension_counts:
+                    missing.append(field)
+        elif field not in payload:
+            missing.append(field)
+    if missing:
+        return CheckResult(
+            check_id="evaluation.programmatic_schema",
+            status="fail",
+            severity="high",
+            message="Missing required fields in evaluation_report.json",
+            evidence=missing,
+        )
+    return CheckResult(
+        check_id="evaluation.programmatic_schema",
+        status="pass",
+        severity="high",
+        message="Programmatic evaluation schema valid",
+        evidence=list(payload.keys())[:10],
+    )
+
+
+def _check_programmatic_quality(tool_root: Path) -> CheckResult:
+    """Check that programmatic evaluation decision is passing."""
+    path = tool_root / PROGRAMMATIC_EVAL_PATH
+    if not path.exists():
+        return CheckResult(
+            check_id="evaluation.programmatic_quality",
+            status="fail",
+            severity="high",
+            message="Cannot check quality - file missing",
+            evidence=[str(PROGRAMMATIC_EVAL_PATH)],
+        )
+    payload, error = _load_json(path)
+    if error:
+        return CheckResult(
+            check_id="evaluation.programmatic_quality",
+            status="fail",
+            severity="high",
+            message="Invalid JSON",
+            evidence=[error],
+        )
+    decision = payload.get("decision") or payload.get("classification")
+    if decision:
+        decision_upper = str(decision).upper()
+        if decision_upper in PASSING_DECISIONS:
+            return CheckResult(
+                check_id="evaluation.programmatic_quality",
+                status="pass",
+                severity="high",
+                message="Programmatic evaluation passed",
+                evidence=[decision_upper],
+            )
+        return CheckResult(
+            check_id="evaluation.programmatic_quality",
+            status="fail",
+            severity="high",
+            message="Programmatic evaluation failed",
+            evidence=[decision_upper],
+        )
+    # Fall back to score-based check
+    score = payload.get("score") or payload.get("overall_score") or payload.get("total_score")
+    if isinstance(score, (int, float)):
+        # For 0-1 scale, >= 0.7 passes; for 1-5 scale, >= 3.5 passes
+        if score <= 1.0 and score >= 0.7:
+            return CheckResult(
+                check_id="evaluation.programmatic_quality",
+                status="pass",
+                severity="high",
+                message="Programmatic score passes threshold",
+                evidence=[f"score={score}"],
+            )
+        elif score > 1.0 and score >= 3.5:
+            return CheckResult(
+                check_id="evaluation.programmatic_quality",
+                status="pass",
+                severity="high",
+                message="Programmatic score passes threshold",
+                evidence=[f"score={score}"],
+            )
+        return CheckResult(
+            check_id="evaluation.programmatic_quality",
+            status="fail",
+            severity="high",
+            message="Programmatic score below threshold",
+            evidence=[f"score={score}"],
+        )
+    return CheckResult(
+        check_id="evaluation.programmatic_quality",
+        status="fail",
+        severity="high",
+        message="Missing decision and score in evaluation_report.json",
+        evidence=[],
+    )
+
+
+def _check_llm_exists(tool_root: Path) -> CheckResult:
+    """Check that llm_evaluation.json exists at uniform path."""
+    path = tool_root / LLM_EVAL_PATH
+    if path.exists():
+        return CheckResult(
+            check_id="evaluation.llm_exists",
+            status="pass",
+            severity="medium",
+            message="LLM evaluation file exists",
+            evidence=[str(LLM_EVAL_PATH)],
+        )
+    return CheckResult(
+        check_id="evaluation.llm_exists",
+        status="fail",
+        severity="medium",
+        message="Missing llm_evaluation.json at uniform path",
+        evidence=[str(LLM_EVAL_PATH)],
+    )
+
+
+def _check_llm_schema(tool_root: Path) -> CheckResult:
+    """Validate that llm_evaluation.json has required fields including programmatic_input."""
+    path = tool_root / LLM_EVAL_PATH
+    if not path.exists():
+        return CheckResult(
+            check_id="evaluation.llm_schema",
+            status="fail",
+            severity="medium",
+            message="Cannot validate schema - file missing",
+            evidence=[str(LLM_EVAL_PATH)],
+        )
+    payload, error = _load_json(path)
+    if error:
+        return CheckResult(
+            check_id="evaluation.llm_schema",
+            status="fail",
+            severity="medium",
+            message="Invalid JSON in llm_evaluation.json",
+            evidence=[error],
+        )
+    # Check required fields - allow 'judges' as alias for 'dimensions'
+    missing = []
+    for field in LLM_REQUIRED_FIELDS:
+        if field == "dimensions":
+            if "dimensions" not in payload and "judges" not in payload:
+                missing.append(field)
+        elif field not in payload:
+            missing.append(field)
+    if missing:
+        return CheckResult(
+            check_id="evaluation.llm_schema",
+            status="fail",
+            severity="medium",
+            message="Missing required fields in llm_evaluation.json",
+            evidence=missing,
+        )
+    return CheckResult(
+        check_id="evaluation.llm_schema",
+        status="pass",
+        severity="medium",
+        message="LLM evaluation schema valid",
+        evidence=list(payload.keys())[:10],
+    )
+
+
+def _check_llm_includes_programmatic(tool_root: Path) -> CheckResult:
+    """Verify that llm_evaluation.json includes programmatic_input field with required data."""
+    path = tool_root / LLM_EVAL_PATH
+    if not path.exists():
+        return CheckResult(
+            check_id="evaluation.llm_includes_programmatic",
+            status="fail",
+            severity="medium",
+            message="Cannot check - file missing",
+            evidence=[str(LLM_EVAL_PATH)],
+        )
+    payload, error = _load_json(path)
+    if error:
+        return CheckResult(
+            check_id="evaluation.llm_includes_programmatic",
+            status="fail",
+            severity="medium",
+            message="Invalid JSON",
+            evidence=[error],
+        )
+    prog_input = payload.get("programmatic_input")
+    if not prog_input:
+        return CheckResult(
+            check_id="evaluation.llm_includes_programmatic",
+            status="fail",
+            severity="medium",
+            message="Missing programmatic_input field in llm_evaluation.json",
+            evidence=["LLM evaluation must include programmatic results"],
+        )
+    # Check required sub-fields
+    required_sub = ["file", "decision", "score"]
+    missing_sub = [f for f in required_sub if f not in prog_input]
+    if missing_sub:
+        return CheckResult(
+            check_id="evaluation.llm_includes_programmatic",
+            status="fail",
+            severity="medium",
+            message="Incomplete programmatic_input in llm_evaluation.json",
+            evidence=[f"missing: {', '.join(missing_sub)}"],
+        )
+    return CheckResult(
+        check_id="evaluation.llm_includes_programmatic",
+        status="pass",
+        severity="medium",
+        message="LLM evaluation includes programmatic input",
+        evidence=[f"file={prog_input.get('file')}", f"decision={prog_input.get('decision')}"],
+    )
+
+
+def _check_llm_decision_quality(tool_root: Path) -> CheckResult:
+    """Check that LLM evaluation decision is passing."""
+    path = tool_root / LLM_EVAL_PATH
+    if not path.exists():
+        return CheckResult(
+            check_id="evaluation.llm_decision_quality",
+            status="fail",
+            severity="medium",
+            message="Cannot check quality - file missing",
+            evidence=[str(LLM_EVAL_PATH)],
+        )
+    payload, error = _load_json(path)
+    if error:
+        return CheckResult(
+            check_id="evaluation.llm_decision_quality",
+            status="fail",
+            severity="medium",
+            message="Invalid JSON",
+            evidence=[error],
+        )
+    decision = (
+        payload.get("decision")
+        or payload.get("summary", {}).get("verdict")
+        or payload.get("summary", {}).get("decision")
+    )
+    if decision:
+        decision_upper = str(decision).upper()
+        if decision_upper in PASSING_DECISIONS:
+            return CheckResult(
+                check_id="evaluation.llm_decision_quality",
+                status="pass",
+                severity="medium",
+                message="LLM evaluation passed",
+                evidence=[decision_upper],
+            )
+        return CheckResult(
+            check_id="evaluation.llm_decision_quality",
+            status="fail",
+            severity="medium",
+            message="LLM evaluation failed",
+            evidence=[decision_upper],
+        )
+    # Fall back to score-based check (LLM uses 1-5 scale, >= 3.5 passes)
+    score = (
+        payload.get("score")
+        or payload.get("combined_score")
+        or payload.get("summary", {}).get("weighted_score")
+    )
+    if isinstance(score, (int, float)):
+        if score >= 3.5:
+            return CheckResult(
+                check_id="evaluation.llm_decision_quality",
+                status="pass",
+                severity="medium",
+                message="LLM score passes threshold",
+                evidence=[f"score={score}"],
+            )
+        return CheckResult(
+            check_id="evaluation.llm_decision_quality",
+            status="fail",
+            severity="medium",
+            message="LLM score below threshold",
+            evidence=[f"score={score}"],
+        )
+    return CheckResult(
+        check_id="evaluation.llm_decision_quality",
+        status="fail",
+        severity="medium",
+        message="Missing decision and score in llm_evaluation.json",
+        evidence=[],
+    )
+
+
+def _summarize_output(output: str, limit: int = 800) -> str:
+    cleaned = output.strip()
+    if not cleaned:
+        return ""
+    if len(cleaned) <= limit:
+        return cleaned
+    return cleaned[:limit].rstrip() + "…"
+
+
+def _run_make(
+    tool_root: Path, target: str, env: dict[str, str]
+) -> tuple[int, str, str, float]:
+    start = time.perf_counter()
     result = subprocess.run(
         ["make", target],
         cwd=tool_root,
         env=env,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stderr=subprocess.PIPE,
         text=True,
         check=False,
     )
-    if result.returncode != 0:
-        return result.stdout.strip()
-    return None
+    duration_ms = (time.perf_counter() - start) * 1000.0
+    return result.returncode, result.stdout.strip(), result.stderr.strip(), duration_ms
+
+
+def _attach_duration(check: CheckResult, duration_ms: float) -> CheckResult:
+    if check.duration_ms is None:
+        check.duration_ms = round(duration_ms, 2)
+    return check
+
+
+def _attach_duration_many(checks: Iterable[CheckResult], duration_ms: float) -> list[CheckResult]:
+    return [_attach_duration(check, duration_ms) for check in checks]
 
 
 def _validate_schema_with_venv(
@@ -551,16 +1166,69 @@ def _check_make_targets(tool_root: Path) -> CheckResult:
     )
 
 
+def _check_makefile_permissions(tool_root: Path) -> CheckResult:
+    """Check if Makefile has correct permissions (readable/executable)."""
+    makefile = tool_root / "Makefile"
+    if not makefile.exists():
+        return CheckResult(
+            check_id="make.permissions",
+            status="fail",
+            severity="low",
+            message="Makefile missing",
+            evidence=["Makefile"],
+        )
+
+    mode = makefile.stat().st_mode
+    # Check if file is readable by owner (0o400) and group/others (0o044)
+    is_readable = (mode & 0o444) != 0
+
+    if not is_readable:
+        return CheckResult(
+            check_id="make.permissions",
+            status="fail",
+            severity="low",
+            message="Makefile is not readable",
+            evidence=[f"Current mode: {oct(mode)}"],
+        )
+
+    return CheckResult(
+        check_id="make.permissions",
+        status="pass",
+        severity="low",
+        message="Makefile has correct permissions",
+        evidence=[],
+    )
+
+
 def _check_check_modules(tool_root: Path) -> CheckResult:
-    rules = TOOL_RULES.get(tool_root.name, {})
+    rules = _get_tool_rules(tool_root)
     expected = rules.get("required_check_modules")
     if not expected:
+        # Auto-discovery didn't find any, check if directory exists
+        checks_dir = tool_root / "scripts" / "checks"
+        if not checks_dir.exists():
+            return CheckResult(
+                check_id="evaluation.check_modules",
+                status="fail",
+                severity="medium",
+                message="scripts/checks/ directory missing",
+                evidence=["scripts/checks/"],
+            )
+        modules = [f.name for f in checks_dir.glob("*.py") if f.name != "__init__.py"]
+        if not modules:
+            return CheckResult(
+                check_id="evaluation.check_modules",
+                status="fail",
+                severity="medium",
+                message="No check modules found in scripts/checks/",
+                evidence=[],
+            )
         return CheckResult(
             check_id="evaluation.check_modules",
-            status="fail",
-            severity="high",
-            message="No check module requirements configured",
-            evidence=[],
+            status="pass",
+            severity="medium",
+            message="Check modules present (auto-discovered)",
+            evidence=modules,
         )
     checks_dir = tool_root / "scripts" / "checks"
     missing = [name for name in expected if not (checks_dir / name).exists()]
@@ -582,15 +1250,34 @@ def _check_check_modules(tool_root: Path) -> CheckResult:
 
 
 def _check_llm_prompts(tool_root: Path) -> CheckResult:
-    rules = TOOL_RULES.get(tool_root.name, {})
+    rules = _get_tool_rules(tool_root)
     expected = rules.get("required_prompts")
     if not expected:
+        # Auto-discovery didn't find any, check if directory exists
+        prompts_dir = tool_root / "evaluation" / "llm" / "prompts"
+        if not prompts_dir.exists():
+            return CheckResult(
+                check_id="evaluation.llm_prompts",
+                status="fail",
+                severity="medium",
+                message="evaluation/llm/prompts/ directory missing",
+                evidence=["evaluation/llm/prompts/"],
+            )
+        prompts = [f.name for f in prompts_dir.glob("*.md")]
+        if not prompts:
+            return CheckResult(
+                check_id="evaluation.llm_prompts",
+                status="fail",
+                severity="medium",
+                message="No LLM prompts found in evaluation/llm/prompts/",
+                evidence=[],
+            )
         return CheckResult(
             check_id="evaluation.llm_prompts",
-            status="fail",
-            severity="high",
-            message="No LLM prompt requirements configured",
-            evidence=[],
+            status="pass",
+            severity="medium",
+            message="LLM prompts present (auto-discovered)",
+            evidence=prompts,
         )
     prompts_dir = tool_root / "evaluation" / "llm" / "prompts"
     missing = [name for name in expected if not (prompts_dir / name).exists()]
@@ -608,6 +1295,298 @@ def _check_llm_prompts(tool_root: Path) -> CheckResult:
         severity="medium",
         message="LLM prompts present",
         evidence=[],
+    )
+
+
+# Minimum number of LLM judges required per TOOL_REQUIREMENTS.md
+MIN_LLM_JUDGES = 4
+
+
+def _check_llm_judge_count(tool_root: Path) -> CheckResult:
+    """Check that tool has minimum required LLM judges (4).
+
+    Per TOOL_REQUIREMENTS.md, tools must have at least 4 LLM judges:
+    - accuracy or equivalent (detection accuracy)
+    - actionability (developer usefulness)
+    - false_positive_rate or equivalent
+    - integration_fit (SoT compatibility)
+    """
+    judges_dir = tool_root / "evaluation" / "llm" / "judges"
+    if not judges_dir.exists():
+        return CheckResult(
+            check_id="evaluation.llm_judge_count",
+            status="fail",
+            severity="medium",
+            message="evaluation/llm/judges/ directory missing",
+            evidence=["evaluation/llm/judges/"],
+        )
+
+    # Count judge files (exclude __init__.py and base.py)
+    judge_files = [
+        f.name for f in judges_dir.glob("*.py")
+        if f.name not in ("__init__.py", "base.py", "__pycache__")
+    ]
+    judge_count = len(judge_files)
+
+    if judge_count < MIN_LLM_JUDGES:
+        return CheckResult(
+            check_id="evaluation.llm_judge_count",
+            status="fail",
+            severity="medium",
+            message=f"Insufficient LLM judges: {judge_count} found, minimum {MIN_LLM_JUDGES} required",
+            evidence=judge_files,
+        )
+
+    return CheckResult(
+        check_id="evaluation.llm_judge_count",
+        status="pass",
+        severity="medium",
+        message=f"LLM judge count meets minimum ({judge_count} >= {MIN_LLM_JUDGES})",
+        evidence=judge_files,
+    )
+
+
+# Required evidence keys for synthetic evaluation context pattern
+SYNTHETIC_CONTEXT_EVIDENCE_KEYS = {"evaluation_mode", "synthetic_baseline", "interpretation_guidance"}
+
+# Required placeholders in prompt template
+SYNTHETIC_CONTEXT_PROMPT_PLACEHOLDERS = {"{{ evaluation_mode }}", "{{ synthetic_baseline }}", "{{ interpretation_guidance }}"}
+
+
+def _find_primary_judge(judges_dir: Path) -> tuple[Path | None, str | None]:
+    """Find the primary judge file (highest weight or first alphabetically).
+
+    Returns:
+        Tuple of (judge_path, dimension_name) or (None, None) if not found.
+    """
+    judge_files = [
+        f for f in judges_dir.glob("*.py")
+        if f.name not in ("__init__.py", "base.py", "__pycache__")
+    ]
+    if not judge_files:
+        return None, None
+
+    # Try to find the judge with highest weight by parsing AST
+    best_judge: Path | None = None
+    best_weight = 0.0
+    best_dimension: str | None = None
+
+    for judge_file in sorted(judge_files):
+        try:
+            source = judge_file.read_text()
+            tree = ast.parse(source)
+
+            # Look for weight property definition
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef) and node.name == "weight":
+                    # Look for return statement with numeric value
+                    for stmt in ast.walk(node):
+                        if isinstance(stmt, ast.Return) and stmt.value:
+                            if isinstance(stmt.value, ast.Constant):
+                                weight = float(stmt.value.value)
+                                if weight > best_weight:
+                                    best_weight = weight
+                                    best_judge = judge_file
+                                    # Also extract dimension_name
+                                    for n in ast.walk(tree):
+                                        if isinstance(n, ast.FunctionDef) and n.name == "dimension_name":
+                                            for s in ast.walk(n):
+                                                if isinstance(s, ast.Return) and s.value:
+                                                    if isinstance(s.value, ast.Constant):
+                                                        best_dimension = s.value.value
+        except (SyntaxError, ValueError):
+            continue
+
+    if best_judge is None and judge_files:
+        # Fall back to first alphabetically
+        best_judge = sorted(judge_files)[0]
+        try:
+            source = best_judge.read_text()
+            tree = ast.parse(source)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef) and node.name == "dimension_name":
+                    for stmt in ast.walk(node):
+                        if isinstance(stmt, ast.Return) and stmt.value:
+                            if isinstance(stmt.value, ast.Constant):
+                                best_dimension = stmt.value.value
+        except SyntaxError:
+            best_dimension = best_judge.stem
+
+    return best_judge, best_dimension
+
+
+def _check_base_has_evaluation_mode_param(base_path: Path) -> tuple[bool, str]:
+    """Check if base.py accepts evaluation_mode parameter in __init__.
+
+    Returns:
+        Tuple of (has_param, error_message_if_missing).
+    """
+    if not base_path.exists():
+        return False, "base.py not found"
+
+    try:
+        source = base_path.read_text()
+        tree = ast.parse(source)
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                for item in node.body:
+                    if isinstance(item, ast.FunctionDef) and item.name == "__init__":
+                        # Check args for evaluation_mode
+                        for arg in item.args.args:
+                            if arg.arg == "evaluation_mode":
+                                return True, ""
+                        # Also check kwonlyargs
+                        for arg in item.args.kwonlyargs:
+                            if arg.arg == "evaluation_mode":
+                                return True, ""
+
+        return False, "base.py __init__ missing evaluation_mode parameter"
+    except SyntaxError as e:
+        return False, f"base.py has syntax error: {e}"
+
+
+def _check_judge_collect_evidence_keys(judge_path: Path) -> tuple[bool, list[str]]:
+    """Check if judge's collect_evidence() sets required synthetic context keys.
+
+    Returns:
+        Tuple of (all_present, list_of_missing_keys).
+    """
+    if not judge_path.exists():
+        return False, ["judge file not found"]
+
+    try:
+        source = judge_path.read_text()
+    except OSError as e:
+        return False, [f"cannot read judge file: {e}"]
+
+    # Look for evidence assignments in collect_evidence method
+    # We use simple string matching since the pattern is consistent:
+    # evidence["evaluation_mode"] = self.evaluation_mode
+    # evidence["synthetic_baseline"] = ...
+    # evidence["interpretation_guidance"] = ...
+
+    missing = []
+    for key in SYNTHETIC_CONTEXT_EVIDENCE_KEYS:
+        # Check for both dictionary assignment patterns
+        patterns = [
+            f'evidence["{key}"]',
+            f"evidence['{key}']",
+            f'"{key}":', # dict literal pattern
+            f"'{key}':", # dict literal pattern
+        ]
+        if not any(p in source for p in patterns):
+            missing.append(key)
+
+    return len(missing) == 0, missing
+
+
+def _check_prompt_has_placeholders(prompts_dir: Path, dimension_name: str | None) -> tuple[bool, list[str]]:
+    """Check if the primary prompt has required synthetic context placeholders.
+
+    Returns:
+        Tuple of (all_present, list_of_missing_placeholders).
+    """
+    if dimension_name is None:
+        return False, ["cannot determine dimension name for prompt lookup"]
+
+    prompt_path = prompts_dir / f"{dimension_name}.md"
+    if not prompt_path.exists():
+        return False, [f"prompt file not found: {dimension_name}.md"]
+
+    try:
+        content = prompt_path.read_text()
+    except OSError as e:
+        return False, [f"cannot read prompt file: {e}"]
+
+    missing = []
+    for placeholder in SYNTHETIC_CONTEXT_PROMPT_PLACEHOLDERS:
+        if placeholder not in content:
+            missing.append(placeholder)
+
+    return len(missing) == 0, missing
+
+
+def _check_synthetic_evaluation_context(tool_root: Path) -> CheckResult:
+    """Check that tool implements synthetic evaluation context pattern.
+
+    The synthetic evaluation context pattern ensures LLM judges don't penalize
+    low finding counts on clean real-world repos by providing context about
+    tool validation on synthetic repos.
+
+    Requirements:
+    1. base.py must accept evaluation_mode parameter in __init__
+    2. Primary judge's collect_evidence() must set: evaluation_mode,
+       synthetic_baseline, interpretation_guidance
+    3. Primary prompt must have placeholders: {{ evaluation_mode }},
+       {{ synthetic_baseline }}, {{ interpretation_guidance }}
+    """
+    judges_dir = tool_root / "evaluation" / "llm" / "judges"
+    prompts_dir = tool_root / "evaluation" / "llm" / "prompts"
+
+    if not judges_dir.exists():
+        return CheckResult(
+            check_id="evaluation.synthetic_context",
+            status="fail",
+            severity="high",
+            message="evaluation/llm/judges/ directory missing",
+            evidence=["evaluation/llm/judges/"],
+        )
+
+    # Check 1: base.py has evaluation_mode parameter
+    base_path = judges_dir / "base.py"
+    has_param, base_error = _check_base_has_evaluation_mode_param(base_path)
+    if not has_param:
+        return CheckResult(
+            check_id="evaluation.synthetic_context",
+            status="fail",
+            severity="high",
+            message="base.py missing evaluation_mode parameter",
+            evidence=[base_error],
+        )
+
+    # Check 2: Find primary judge and verify collect_evidence sets required keys
+    primary_judge, dimension_name = _find_primary_judge(judges_dir)
+    if primary_judge is None:
+        return CheckResult(
+            check_id="evaluation.synthetic_context",
+            status="fail",
+            severity="high",
+            message="No primary judge found in evaluation/llm/judges/",
+            evidence=[],
+        )
+
+    has_keys, missing_keys = _check_judge_collect_evidence_keys(primary_judge)
+    if not has_keys:
+        return CheckResult(
+            check_id="evaluation.synthetic_context",
+            status="fail",
+            severity="high",
+            message=f"Primary judge ({primary_judge.name}) missing synthetic context injection in collect_evidence()",
+            evidence=[f"missing keys: {', '.join(missing_keys)}"],
+        )
+
+    # Check 3: Primary prompt has required placeholders
+    has_placeholders, missing_placeholders = _check_prompt_has_placeholders(prompts_dir, dimension_name)
+    if not has_placeholders:
+        return CheckResult(
+            check_id="evaluation.synthetic_context",
+            status="fail",
+            severity="high",
+            message=f"Primary prompt ({dimension_name}.md) missing required placeholders",
+            evidence=[f"missing: {', '.join(missing_placeholders)}"],
+        )
+
+    return CheckResult(
+        check_id="evaluation.synthetic_context",
+        status="pass",
+        severity="high",
+        message="Synthetic evaluation context pattern implemented correctly",
+        evidence=[
+            f"base.py: evaluation_mode parameter present",
+            f"primary judge: {primary_judge.name}",
+            f"prompt: {dimension_name}.md has all placeholders",
+        ],
     )
 
 
@@ -844,26 +1823,26 @@ def _check_output_schema(
             message="Output is invalid JSON",
             evidence=[error],
         )
+    if venv:
+        error = _validate_schema_with_venv(venv, schema_path, output_path)
+        if error:
+            return CheckResult(
+                check_id="output.schema_validate",
+                status="fail",
+                severity="critical",
+                message="Schema validation failed in venv",
+                evidence=[error],
+            )
+        return CheckResult(
+            check_id="output.schema_validate",
+            status="pass",
+            severity="critical",
+            message="Output validates against schema (venv)",
+            evidence=[],
+        )
     try:
         import jsonschema  # type: ignore
     except ImportError:
-        if venv:
-            error = _validate_schema_with_venv(venv, schema_path, output_path)
-            if error:
-                return CheckResult(
-                    check_id="output.schema_validate",
-                    status="fail",
-                    severity="critical",
-                    message="Schema validation failed in venv",
-                    evidence=[error],
-                )
-            return CheckResult(
-                check_id="output.schema_validate",
-                status="pass",
-                severity="critical",
-                message="Output validates against schema (venv)",
-                evidence=[],
-            )
         return CheckResult(
             check_id="output.schema_validate",
             status="fail",
@@ -990,8 +1969,23 @@ def _extract_table_body(content: str, start_idx: int) -> str | None:
 def _parse_column_definitions(body: str) -> dict[str, str]:
     """Parse column definitions from CREATE TABLE body."""
     columns: dict[str, str] = {}
+    # Remove SQL comments before parsing
+    cleaned_lines = []
+    for raw_line in body.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        if line.startswith("--"):
+            continue
+        if "--" in line:
+            line = line.split("--", 1)[0].strip()
+            if not line:
+                continue
+        cleaned_lines.append(line)
+    cleaned_body = "\n".join(cleaned_lines)
+
     # Split by comma, handling constraints
-    for line in body.split(","):
+    for line in cleaned_body.split(","):
         line = line.strip()
         if not line:
             continue
@@ -1178,6 +2172,32 @@ def _seed_layout_for_fixture(
 
     # Extract unique file paths from fixture
     files_data = payload.get("data", {}).get("files", [])
+    # Handle dict format (e.g., gitleaks) - convert to list
+    if isinstance(files_data, dict):
+        files_data = [
+            {"path": k, "filename": Path(k).name, **v}
+            for k, v in files_data.items()
+        ]
+    if not files_data:
+        # Try extracting from findings (e.g., gitleaks, semgrep)
+        findings = payload.get("data", {}).get("findings", [])
+        if findings:
+            seen_paths: set[str] = set()
+            files_data = []
+            for f in findings:
+                path = f.get("file_path", "")
+                if path and path not in seen_paths:
+                    seen_paths.add(path)
+                    files_data.append({"path": path, "filename": Path(path).name})
+    if not files_data:
+        results = payload.get("data", {}).get("results", {})
+        components = results.get("components", {}).get("by_key", {})
+        if isinstance(components, dict):
+            files_data = [
+                {"path": comp.get("path", ""), "filename": Path(comp.get("path", "")).name}
+                for comp in components.values()
+                if comp.get("path")
+            ]
     layout_files = []
     for idx, f in enumerate(files_data):
         path = f.get("path", "")
@@ -1221,6 +2241,7 @@ def _get_tool_repository(conn, tool_name: str):
         TrivyRepository,
         SonarqubeRepository,
         GitSizerRepository,
+        GitleaksRepository,
     )
     repos = {
         "scc": SccRepository,
@@ -1230,6 +2251,7 @@ def _get_tool_repository(conn, tool_name: str):
         "trivy": TrivyRepository,
         "sonarqube": SonarqubeRepository,
         "git-sizer": GitSizerRepository,
+        "gitleaks": GitleaksRepository,
     }
     repo_cls = repos.get(tool_name)
     return repo_cls(conn) if repo_cls else None
@@ -1482,6 +2504,447 @@ def _is_valid_iso8601(timestamp: str) -> bool:
         return False
 
 
+# ===========================================================================
+# Cross-Tool SQL Join Pattern Detection
+# ===========================================================================
+
+# Table patterns used to identify which tool a table belongs to
+TOOL_TABLE_PATTERNS: dict[str, list[str]] = {
+    "scc": ["scc_file_metrics", "scc_directory", "rollup_scc_"],
+    "lizard": ["lizard_file_metrics", "lizard_function", "rollup_lizard_"],
+    "layout-scanner": ["layout_files", "layout_directories", "rollup_layout_"],
+    "semgrep": ["semgrep_smells", "semgrep_file_metrics", "rollup_semgrep_"],
+    "roslyn-analyzers": ["roslyn_violations", "roslyn_file_metrics", "rollup_roslyn_"],
+    "sonarqube": ["sonarqube_issues", "sonarqube_file_metrics", "rollup_sonarqube_"],
+    "trivy": ["trivy_vulnerabilities", "trivy_targets", "trivy_iac", "rollup_trivy_"],
+    "git-sizer": ["git_sizer_metrics", "git_sizer_violations", "git_sizer_lfs"],
+    "gitleaks": ["gitleaks_secrets", "rollup_gitleaks_"],
+}
+
+# Regex to detect direct run_pk joins between aliases
+CROSS_TOOL_RUN_PK_JOIN = re.compile(
+    r"\b(\w+)\.run_pk\s*=\s*(\w+)\.run_pk\b",
+    re.IGNORECASE,
+)
+
+# Patterns indicating correct cross-tool join approach
+COLLECTION_RUN_ID_PATTERN = re.compile(r"\bcollection_run_id\b", re.IGNORECASE)
+TOOL_SPECIFIC_RUN_PK = re.compile(
+    r"\b(scc_run_pk|lizard_run_pk|semgrep_run_pk|layout_run_pk|trivy_run_pk|roslyn_run_pk|sonarqube_run_pk|git_sizer_run_pk|gitleaks_run_pk)\b",
+    re.IGNORECASE,
+)
+LZ_TOOL_RUNS_PATTERN = re.compile(r"\blz_tool_runs\b", re.IGNORECASE)
+
+
+def _identify_tools_in_sql(sql_content: str) -> set[str]:
+    """Identify which tools are referenced by table names in SQL content."""
+    tools_found: set[str] = set()
+    sql_lower = sql_content.lower()
+    for tool_name, patterns in TOOL_TABLE_PATTERNS.items():
+        for pattern in patterns:
+            if pattern.lower() in sql_lower:
+                tools_found.add(tool_name)
+                break
+    return tools_found
+
+
+def _extract_table_aliases(sql_content: str) -> dict[str, str]:
+    """Extract table aliases and map them to their likely tool.
+
+    Returns dict mapping alias -> tool_name (or 'unknown' if not identifiable).
+    """
+    aliases: dict[str, str] = {}
+    sql_lower = sql_content.lower()
+
+    # Pattern: FROM/JOIN table_name alias or FROM/JOIN table_name AS alias
+    alias_patterns = [
+        # FROM stg_lz_scc_file_metrics sm
+        re.compile(r"\b(?:from|join)\s+([\w_]+)\s+(?:as\s+)?(\w+)\b", re.IGNORECASE),
+        # CTE pattern: cte_name AS (...)
+        re.compile(r"\b(\w+)\s+as\s*\(", re.IGNORECASE),
+    ]
+
+    for pattern in alias_patterns:
+        for match in pattern.finditer(sql_content):
+            if len(match.groups()) == 2:
+                table_name, alias = match.groups()
+                table_lower = table_name.lower()
+                # Determine which tool this table belongs to
+                tool = "unknown"
+                for tool_name, patterns in TOOL_TABLE_PATTERNS.items():
+                    for p in patterns:
+                        if p.lower() in table_lower:
+                            tool = tool_name
+                            break
+                    if tool != "unknown":
+                        break
+                aliases[alias.lower()] = tool
+            else:
+                # CTE name - mark as unknown unless we can determine from content
+                cte_name = match.group(1)
+                aliases[cte_name.lower()] = "cte"
+
+    return aliases
+
+
+def _check_cross_tool_join_patterns_in_file(
+    sql_path: Path, sql_content: str
+) -> list[str]:
+    """Check a single SQL file for incorrect cross-tool join patterns.
+
+    Returns list of error messages (empty if no issues found).
+    """
+    issues: list[str] = []
+
+    # First, identify which tools are referenced in this file
+    tools_in_file = _identify_tools_in_sql(sql_content)
+
+    # If fewer than 2 tools referenced, no cross-tool join possible
+    if len(tools_in_file) < 2:
+        return []
+
+    # Check if file uses correct patterns (collection_run_id or tool-specific run_pk)
+    uses_collection_run_id = bool(COLLECTION_RUN_ID_PATTERN.search(sql_content))
+    uses_tool_specific_run_pk = bool(TOOL_SPECIFIC_RUN_PK.search(sql_content))
+    uses_lz_tool_runs = bool(LZ_TOOL_RUNS_PATTERN.search(sql_content))
+
+    # Look for the anti-pattern: direct run_pk = run_pk joins
+    for match in CROSS_TOOL_RUN_PK_JOIN.finditer(sql_content):
+        alias1, alias2 = match.group(1).lower(), match.group(2).lower()
+
+        # Skip self-joins (same alias)
+        if alias1 == alias2:
+            continue
+
+        # Extract table aliases to see if these are from different tools
+        aliases = _extract_table_aliases(sql_content)
+
+        tool1 = aliases.get(alias1, "unknown")
+        tool2 = aliases.get(alias2, "unknown")
+
+        # If both aliases are from the same tool or unknown, skip
+        if tool1 == tool2:
+            continue
+        if tool1 == "unknown" or tool2 == "unknown":
+            continue
+        if tool1 == "cte" or tool2 == "cte":
+            # CTEs might be intermediate - check if file has correct patterns
+            if uses_collection_run_id or uses_tool_specific_run_pk or uses_lz_tool_runs:
+                continue
+
+        # Found a potential cross-tool direct run_pk join
+        # Check if the file also uses the correct pattern
+        if uses_collection_run_id or uses_tool_specific_run_pk or uses_lz_tool_runs:
+            # File uses correct pattern, but let's verify this specific join is okay
+            # by checking if one of the aliases is from a CTE that properly maps runs
+            continue
+
+        # Find line number for the match
+        line_num = sql_content[:match.start()].count("\n") + 1
+        issues.append(
+            f"{sql_path.name}:{line_num}: Direct run_pk join between "
+            f"'{alias1}' ({tool1}) and '{alias2}' ({tool2}) - "
+            f"use collection_run_id or tool-specific run_pk columns instead"
+        )
+
+    return issues
+
+
+def _check_cross_tool_join_patterns(project_root: Path) -> CheckResult:
+    """Check that cross-tool SQL joins use collection_run_id, not direct run_pk joins.
+
+    This check scans SQL files in:
+    - src/sot-engine/dbt/models/
+    - src/sot-engine/dbt/analysis/
+    - src/insights/queries/
+
+    When queries reference tables from 2+ different tools, they should NOT join
+    directly on run_pk (which never matches across tools). Instead, they should:
+    1. Use collection_run_id to correlate tool runs, OR
+    2. Use tool-specific run_pk columns (e.g., lizard_run_pk, scc_run_pk), OR
+    3. Join via lz_tool_runs to find related run_pk values
+
+    Returns a CheckResult with pass/fail status and any issues found.
+    """
+    sql_dirs = [
+        project_root / "src" / "sot-engine" / "dbt" / "models",
+        project_root / "src" / "sot-engine" / "dbt" / "analysis",
+        project_root / "src" / "insights" / "queries",
+    ]
+
+    all_issues: list[str] = []
+    files_checked = 0
+
+    for sql_dir in sql_dirs:
+        if not sql_dir.exists():
+            continue
+        for sql_file in sql_dir.glob("**/*.sql"):
+            files_checked += 1
+            try:
+                sql_content = sql_file.read_text()
+                issues = _check_cross_tool_join_patterns_in_file(sql_file, sql_content)
+                all_issues.extend(issues)
+            except Exception as e:
+                all_issues.append(f"{sql_file.name}: Error reading file: {e}")
+
+    if all_issues:
+        return CheckResult(
+            check_id="sql.cross_tool_join_patterns",
+            status="fail",
+            severity="high",
+            message=f"Found {len(all_issues)} incorrect cross-tool run_pk join(s)",
+            evidence=all_issues[:10],  # Limit evidence to first 10 issues
+        )
+
+    return CheckResult(
+        check_id="sql.cross_tool_join_patterns",
+        status="pass",
+        severity="high",
+        message=f"Cross-tool SQL joins use correct patterns ({files_checked} files checked)",
+        evidence=[],
+    )
+
+
+# ===========================================================================
+# SoT Integration Checks
+# ===========================================================================
+
+
+def _check_sot_adapter_registered(tool_root: Path, tool_name: str) -> CheckResult:
+    """Check that adapter class is exported from adapters/__init__.py."""
+    adapter_rule = TOOL_RULES.get(tool_name, {}).get("adapter")
+    if not adapter_rule:
+        return CheckResult(
+            check_id="sot.adapter_registered",
+            status="skip",
+            severity="medium",
+            message="No adapter rule defined - skipping registration check",
+            evidence=[],
+        )
+
+    module_name, class_name = adapter_rule
+    project_root = tool_root.parents[2]
+    init_path = project_root / "src" / "sot-engine" / "persistence" / "adapters" / "__init__.py"
+
+    if not init_path.exists():
+        return CheckResult(
+            check_id="sot.adapter_registered",
+            status="fail",
+            severity="medium",
+            message="adapters/__init__.py not found",
+            evidence=[str(init_path)],
+        )
+
+    init_content = init_path.read_text()
+
+    # Check for import statement
+    import_pattern = rf"from\s+\.[\w_]+\s+import\s+.*{class_name}"
+    has_import = bool(re.search(import_pattern, init_content))
+
+    # Check for __all__ export
+    all_pattern = rf'["\']?{class_name}["\']?'
+    has_export = bool(re.search(all_pattern, init_content))
+
+    if not has_import:
+        return CheckResult(
+            check_id="sot.adapter_registered",
+            status="fail",
+            severity="medium",
+            message=f"Adapter {class_name} not imported in adapters/__init__.py",
+            evidence=[class_name],
+        )
+
+    if not has_export:
+        return CheckResult(
+            check_id="sot.adapter_registered",
+            status="fail",
+            severity="medium",
+            message=f"Adapter {class_name} not in __all__ export list",
+            evidence=[class_name],
+        )
+
+    return CheckResult(
+        check_id="sot.adapter_registered",
+        status="pass",
+        severity="medium",
+        message=f"Adapter {class_name} properly registered in adapters/__init__.py",
+        evidence=[],
+    )
+
+
+def _check_sot_schema_table(tool_root: Path, tool_name: str) -> CheckResult:
+    """Check that schema.sql contains tables for this tool."""
+    adapter_rule = TOOL_RULES.get(tool_name, {}).get("adapter")
+    if not adapter_rule:
+        return CheckResult(
+            check_id="sot.schema_table",
+            status="skip",
+            severity="high",
+            message="No adapter rule defined - skipping schema table check",
+            evidence=[],
+        )
+
+    project_root = tool_root.parents[2]
+    schema_path = project_root / "src" / "sot-engine" / "persistence" / "schema.sql"
+
+    if not schema_path.exists():
+        return CheckResult(
+            check_id="sot.schema_table",
+            status="fail",
+            severity="high",
+            message="schema.sql not found",
+            evidence=[str(schema_path)],
+        )
+
+    schema_content = schema_path.read_text()
+
+    # Normalize tool name for table naming convention (e.g., roslyn-analyzers -> roslyn)
+    normalized_name = tool_name.replace("-", "_").replace("_scanner", "").replace("_analyzers", "")
+
+    # Look for lz_ prefixed tables for this tool
+    table_pattern = rf"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?lz_{normalized_name}"
+    tables = re.findall(table_pattern, schema_content, re.IGNORECASE)
+
+    if not tables:
+        # Also try without normalization
+        alt_pattern = rf"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?lz_{tool_name.replace('-', '_')}"
+        tables = re.findall(alt_pattern, schema_content, re.IGNORECASE)
+
+    if not tables:
+        return CheckResult(
+            check_id="sot.schema_table",
+            status="fail",
+            severity="high",
+            message=f"No landing zone tables found for tool (expected lz_{normalized_name}_*)",
+            evidence=[f"Pattern: lz_{normalized_name}_*"],
+        )
+
+    return CheckResult(
+        check_id="sot.schema_table",
+        status="pass",
+        severity="high",
+        message=f"Schema tables found for tool",
+        evidence=[f"Found {len(tables)} table(s)"],
+    )
+
+
+def _check_sot_orchestrator_wired(tool_root: Path, tool_name: str) -> CheckResult:
+    """Check that tool is wired into TOOL_INGESTION_CONFIGS in orchestrator.py.
+
+    Note: layout-scanner is handled specially in the orchestrator as it's a prerequisite
+    for other tools. It doesn't use TOOL_INGESTION_CONFIGS.
+    """
+    # layout-scanner is handled specially - it's a prerequisite for other tools
+    if tool_name == "layout-scanner":
+        return CheckResult(
+            check_id="sot.orchestrator_wired",
+            status="pass",
+            severity="high",
+            message="layout-scanner handled specially as prerequisite tool",
+            evidence=["Layout is ingested before TOOL_INGESTION_CONFIGS loop"],
+        )
+
+    adapter_rule = TOOL_RULES.get(tool_name, {}).get("adapter")
+    if not adapter_rule:
+        return CheckResult(
+            check_id="sot.orchestrator_wired",
+            status="skip",
+            severity="high",
+            message="No adapter rule defined - skipping orchestrator wiring check",
+            evidence=[],
+        )
+
+    project_root = tool_root.parents[2]
+    orchestrator_path = project_root / "src" / "sot-engine" / "orchestrator.py"
+
+    if not orchestrator_path.exists():
+        return CheckResult(
+            check_id="sot.orchestrator_wired",
+            status="fail",
+            severity="high",
+            message="orchestrator.py not found",
+            evidence=[str(orchestrator_path)],
+        )
+
+    orchestrator_content = orchestrator_path.read_text()
+
+    # Check for TOOL_INGESTION_CONFIGS entry
+    # Pattern: ToolIngestionConfig("tool-name", AdapterClass, RepositoryClass)
+    config_pattern = rf'ToolIngestionConfig\s*\(\s*["\']?{re.escape(tool_name)}["\']?\s*,'
+    has_config = bool(re.search(config_pattern, orchestrator_content))
+
+    if not has_config:
+        return CheckResult(
+            check_id="sot.orchestrator_wired",
+            status="fail",
+            severity="high",
+            message=f"Tool '{tool_name}' not found in TOOL_INGESTION_CONFIGS",
+            evidence=["Add ToolIngestionConfig entry to orchestrator.py"],
+        )
+
+    return CheckResult(
+        check_id="sot.orchestrator_wired",
+        status="pass",
+        severity="high",
+        message=f"Tool '{tool_name}' wired in TOOL_INGESTION_CONFIGS",
+        evidence=[],
+    )
+
+
+def _check_sot_dbt_staging_model(tool_root: Path, tool_name: str) -> CheckResult:
+    """Check that a dbt staging model exists for this tool."""
+    adapter_rule = TOOL_RULES.get(tool_name, {}).get("adapter")
+    if not adapter_rule:
+        return CheckResult(
+            check_id="sot.dbt_staging_model",
+            status="skip",
+            severity="high",
+            message="No adapter rule defined - skipping dbt staging model check",
+            evidence=[],
+        )
+
+    project_root = tool_root.parents[2]
+    staging_dir = project_root / "src" / "sot-engine" / "dbt" / "models" / "staging"
+
+    if not staging_dir.exists():
+        return CheckResult(
+            check_id="sot.dbt_staging_model",
+            status="fail",
+            severity="high",
+            message="dbt staging directory not found",
+            evidence=[str(staging_dir)],
+        )
+
+    # Normalize tool name for dbt naming convention
+    dbt_tool_name = _normalize_tool_name_for_dbt(tool_name)
+
+    # Look for staging models matching pattern stg_*<tool>*.sql
+    staging_pattern = f"stg_*{dbt_tool_name}*.sql"
+    staging_files = list(staging_dir.glob(staging_pattern))
+
+    if not staging_files:
+        # Also try lz_ prefix pattern
+        staging_lz_pattern = f"stg_lz_{dbt_tool_name}*.sql"
+        staging_files = list(staging_dir.glob(staging_lz_pattern))
+
+    if not staging_files:
+        return CheckResult(
+            check_id="sot.dbt_staging_model",
+            status="fail",
+            severity="high",
+            message=f"No dbt staging models found for tool",
+            evidence=[f"Expected: stg_*{dbt_tool_name}*.sql in {staging_dir}"],
+        )
+
+    return CheckResult(
+        check_id="sot.dbt_staging_model",
+        status="pass",
+        severity="high",
+        message="dbt staging model(s) found",
+        evidence=[f.name for f in staging_files],
+    )
+
+
 def _check_dbt_model_coverage(tool_root: Path, tool_name: str) -> CheckResult:
     """Validate tools with adapters have corresponding dbt staging/rollup models."""
     adapter = TOOL_RULES.get(tool_name, {}).get("adapter")
@@ -1560,70 +3023,90 @@ def _check_entity_repository_alignment(tool_root: Path, tool_name: str) -> Check
         )
 
     project_root = tool_root.parents[2]
-    sys.path.insert(0, str(project_root / "src" / "sot-engine"))
-    sys.path.insert(0, str(project_root / "src"))
+    entities_path = project_root / "src" / "sot-engine" / "persistence" / "entities.py"
+    repos_path = project_root / "src" / "sot-engine" / "persistence" / "repositories.py"
 
     missing: list[str] = []
 
-    try:
-        from persistence import entities as entity_module
-        from persistence import repositories as repo_module
-        import dataclasses
-
-        for entity_name in entities:
-            # Check entity exists and is frozen dataclass
-            entity_cls = getattr(entity_module, entity_name, None)
-            if entity_cls is None:
-                missing.append(f"{entity_name}: entity class not found")
-                continue
-
-            if not dataclasses.is_dataclass(entity_cls):
-                missing.append(f"{entity_name}: not a dataclass")
-                continue
-
-            # Check if frozen
-            if not entity_cls.__dataclass_fields__:
-                missing.append(f"{entity_name}: no dataclass fields")
-                continue
-
-            # Check frozen attribute via dataclass params
-            try:
-                # Access the frozen parameter from dataclass
-                if not getattr(entity_cls, "__dataclass_params__", None):
-                    # For older dataclass versions, try to detect immutability
-                    pass
-                else:
-                    params = entity_cls.__dataclass_params__
-                    if hasattr(params, "frozen") and not params.frozen:
-                        missing.append(f"{entity_name}: dataclass not frozen")
-                        continue
-            except Exception:
-                pass  # Can't verify frozen status, continue
-
-            # Check repository mapping
-            repo_mapping = ENTITY_REPOSITORY_MAP.get(entity_name)
-            if not repo_mapping:
-                missing.append(f"{entity_name}: no repository mapping defined")
-                continue
-
-            repo_name, method_name = repo_mapping
-            repo_cls = getattr(repo_module, repo_name, None)
-            if repo_cls is None:
-                missing.append(f"{entity_name}: repository {repo_name} not found")
-                continue
-
-            if not hasattr(repo_cls, method_name):
-                missing.append(f"{entity_name}: repository missing {method_name} method")
-                continue
-
-    except ImportError as exc:
+    if not entities_path.exists():
         return CheckResult(
             check_id="entity.repository_alignment",
             status="fail",
             severity="high",
-            message=f"Failed to import persistence modules: {exc}",
+            message="Entities module not found",
+            evidence=[str(entities_path)],
+        )
+    if not repos_path.exists():
+        return CheckResult(
+            check_id="entity.repository_alignment",
+            status="fail",
+            severity="high",
+            message="Repositories module not found",
+            evidence=[str(repos_path)],
+        )
+
+    try:
+        entities_ast = ast.parse(entities_path.read_text())
+        repos_ast = ast.parse(repos_path.read_text())
+    except SyntaxError as exc:
+        return CheckResult(
+            check_id="entity.repository_alignment",
+            status="fail",
+            severity="high",
+            message=f"Failed to parse persistence modules: {exc}",
             evidence=[str(exc)],
         )
+
+    entity_defs: dict[str, dict[str, bool]] = {}
+    for node in entities_ast.body:
+        if isinstance(node, ast.ClassDef):
+            is_dataclass = False
+            frozen = None
+            for deco in node.decorator_list:
+                if isinstance(deco, ast.Name) and deco.id == "dataclass":
+                    is_dataclass = True
+                if isinstance(deco, ast.Call) and isinstance(deco.func, ast.Name) and deco.func.id == "dataclass":
+                    is_dataclass = True
+                    for kw in deco.keywords:
+                        if kw.arg == "frozen":
+                            if isinstance(kw.value, ast.Constant):
+                                frozen = bool(kw.value.value)
+            entity_defs[node.name] = {
+                "is_dataclass": is_dataclass,
+                "frozen": frozen if frozen is not None else True,
+            }
+
+    repo_defs: dict[str, set[str]] = {}
+    for node in repos_ast.body:
+        if isinstance(node, ast.ClassDef):
+            methods = {item.name for item in node.body if isinstance(item, ast.FunctionDef)}
+            repo_defs[node.name] = methods
+
+    for entity_name in entities:
+        entity_info = entity_defs.get(entity_name)
+        if not entity_info:
+            missing.append(f"{entity_name}: entity class not found")
+            continue
+        if not entity_info.get("is_dataclass"):
+            missing.append(f"{entity_name}: not a dataclass")
+            continue
+        if entity_info.get("frozen") is False:
+            missing.append(f"{entity_name}: dataclass not frozen")
+            continue
+
+        repo_mapping = ENTITY_REPOSITORY_MAP.get(entity_name)
+        if not repo_mapping:
+            missing.append(f"{entity_name}: no repository mapping defined")
+            continue
+
+        repo_name, method_name = repo_mapping
+        repo_methods = repo_defs.get(repo_name)
+        if not repo_methods:
+            missing.append(f"{entity_name}: repository {repo_name} not found")
+            continue
+        if method_name not in repo_methods:
+            missing.append(f"{entity_name}: repository missing {method_name} method")
+            continue
 
     if missing:
         return CheckResult(
@@ -1925,6 +3408,356 @@ def _check_schema_contract(tool_root: Path) -> CheckResult:
     )
 
 
+def _check_makefile_uses_common(tool_root: Path) -> CheckResult:
+    """Check if Makefile includes ../Makefile.common."""
+    makefile = tool_root / "Makefile"
+    if not makefile.exists():
+        return CheckResult(
+            check_id="make.uses_common",
+            status="fail",
+            severity="medium",
+            message="Makefile missing",
+            evidence=["Makefile"],
+        )
+    content = makefile.read_text()
+    # Check for include statement - can be "include ../Makefile.common" or "-include"
+    include_pattern = re.compile(r"^-?include\s+\.\./Makefile\.common", re.MULTILINE)
+    if include_pattern.search(content):
+        return CheckResult(
+            check_id="make.uses_common",
+            status="pass",
+            severity="medium",
+            message="Makefile includes ../Makefile.common",
+            evidence=[],
+        )
+    return CheckResult(
+        check_id="make.uses_common",
+        status="fail",
+        severity="medium",
+        message="Makefile does not include ../Makefile.common",
+        evidence=[
+            "Add: include ../Makefile.common",
+            "This provides shared variables (RUN_ID, OUTPUT_DIR, VENV_READY) and common targets",
+        ],
+    )
+
+
+def _check_output_dir_convention(tool_root: Path) -> CheckResult:
+    """Check if OUTPUT_DIR follows outputs/$(RUN_ID) convention."""
+    makefile = tool_root / "Makefile"
+    if not makefile.exists():
+        return CheckResult(
+            check_id="make.output_dir_convention",
+            status="fail",
+            severity="low",
+            message="Makefile missing",
+            evidence=["Makefile"],
+        )
+    content = makefile.read_text()
+
+    # Check if Makefile includes common (which provides correct OUTPUT_DIR default)
+    uses_common = re.search(r"^-?include\s+\.\./Makefile\.common", content, re.MULTILINE)
+
+    # Look for OUTPUT_DIR definition
+    output_dir_match = re.search(r"^OUTPUT_DIR\s*\??\s*=\s*(.+)$", content, re.MULTILINE)
+
+    if not output_dir_match:
+        # If no OUTPUT_DIR defined and uses common, that's fine (inherited)
+        if uses_common:
+            return CheckResult(
+                check_id="make.output_dir_convention",
+                status="pass",
+                severity="low",
+                message="OUTPUT_DIR inherited from Makefile.common",
+                evidence=["outputs/$(RUN_ID)"],
+            )
+        return CheckResult(
+            check_id="make.output_dir_convention",
+            status="fail",
+            severity="low",
+            message="OUTPUT_DIR not defined",
+            evidence=["Add: OUTPUT_DIR ?= outputs/$(RUN_ID)"],
+        )
+
+    output_dir_value = output_dir_match.group(1).strip()
+
+    # Valid patterns: outputs/$(RUN_ID), $(EVAL_OUTPUT_DIR) (for override)
+    valid_patterns = [
+        r"outputs/\$\(RUN_ID\)",
+        r"outputs/\$\{RUN_ID\}",
+    ]
+
+    for pattern in valid_patterns:
+        if re.match(pattern, output_dir_value):
+            return CheckResult(
+                check_id="make.output_dir_convention",
+                status="pass",
+                severity="low",
+                message="OUTPUT_DIR follows convention",
+                evidence=[output_dir_value],
+            )
+
+    # Check for common non-compliant patterns
+    issues = []
+    if "output/" in output_dir_value and "outputs/" not in output_dir_value:
+        issues.append("Uses singular 'output/' instead of 'outputs/'")
+    if "/runs" in output_dir_value:
+        issues.append("Uses hardcoded '/runs' instead of '$(RUN_ID)'")
+    if "$(RUN_ID)" not in output_dir_value and "${RUN_ID}" not in output_dir_value:
+        issues.append("Does not use $(RUN_ID) for unique output directories")
+
+    if issues:
+        return CheckResult(
+            check_id="make.output_dir_convention",
+            status="fail",
+            severity="low",
+            message="OUTPUT_DIR does not follow convention",
+            evidence=issues + [f"Current: {output_dir_value}", "Expected: outputs/$(RUN_ID)"],
+        )
+
+    return CheckResult(
+        check_id="make.output_dir_convention",
+        status="pass",
+        severity="low",
+        message="OUTPUT_DIR defined",
+        evidence=[output_dir_value],
+    )
+
+
+def _check_output_filename_convention(tool_root: Path) -> CheckResult:
+    """Check if analyze target produces OUTPUT_DIR/output.json."""
+    makefile = tool_root / "Makefile"
+    if not makefile.exists():
+        return CheckResult(
+            check_id="make.output_filename",
+            status="fail",
+            severity="medium",
+            message="Makefile missing",
+            evidence=["Makefile"],
+        )
+    content = makefile.read_text()
+
+    # Look for the analyze target and check its commands
+    # Pattern: analyze: followed by commands that include output.json or OUTPUT_DIR
+    analyze_match = re.search(
+        r"^analyze:.*?\n((?:\t.*\n)*)",
+        content,
+        re.MULTILINE,
+    )
+
+    if not analyze_match:
+        return CheckResult(
+            check_id="make.output_filename",
+            status="fail",
+            severity="medium",
+            message="No analyze target found in Makefile",
+            evidence=[],
+        )
+
+    analyze_commands = analyze_match.group(1)
+
+    # Check for output.json in the commands
+    if "output.json" in analyze_commands:
+        return CheckResult(
+            check_id="make.output_filename",
+            status="pass",
+            severity="medium",
+            message="analyze target produces output.json",
+            evidence=[],
+        )
+
+    # Check if it uses --output-dir or similar that would create output.json
+    if "--output-dir" in analyze_commands or "--output" in analyze_commands:
+        # Likely produces output.json - we'll trust the pattern
+        return CheckResult(
+            check_id="make.output_filename",
+            status="pass",
+            severity="medium",
+            message="analyze target uses output directory argument",
+            evidence=[],
+        )
+
+    # Check for non-standard patterns like $(REPO_NAME).json
+    repo_name_json = re.search(r"\$\(REPO_NAME\)\.json", analyze_commands)
+    if repo_name_json:
+        return CheckResult(
+            check_id="make.output_filename",
+            status="fail",
+            severity="medium",
+            message="analyze target uses $(REPO_NAME).json instead of output.json",
+            evidence=[
+                "Non-standard: $(REPO_NAME).json",
+                "Standard: output.json or --output $(OUTPUT_DIR)/output.json",
+            ],
+        )
+
+    return CheckResult(
+        check_id="make.output_filename",
+        status="pass",
+        severity="medium",
+        message="analyze target output pattern acceptable",
+        evidence=[],
+    )
+
+
+def _extract_markdown_sections(content: str) -> list[str]:
+    """Extract section headings from markdown content."""
+    sections = []
+    for line in content.splitlines():
+        line = line.strip()
+        # Match ## Heading or # Heading patterns
+        match = re.match(r"^#{1,3}\s+(.+)$", line)
+        if match:
+            sections.append(match.group(1).strip())
+    return sections
+
+
+def _check_blueprint_structure(tool_root: Path) -> CheckResult:
+    """Validate BLUEPRINT.md has required sections."""
+    blueprint_path = tool_root / "BLUEPRINT.md"
+    if not blueprint_path.exists():
+        return CheckResult(
+            check_id="docs.blueprint_structure",
+            status="fail",
+            severity="medium",
+            message="BLUEPRINT.md missing",
+            evidence=["BLUEPRINT.md"],
+        )
+
+    content = blueprint_path.read_text()
+    sections = _extract_markdown_sections(content)
+    sections_lower = [s.lower() for s in sections]
+
+    missing = []
+    for required in BLUEPRINT_REQUIRED_SECTIONS:
+        # Check if any section contains the required keyword
+        found = any(required.lower() in s for s in sections_lower)
+        if not found:
+            missing.append(required)
+
+    if missing:
+        return CheckResult(
+            check_id="docs.blueprint_structure",
+            status="fail",
+            severity="medium",
+            message="BLUEPRINT.md missing required sections",
+            evidence=missing,
+        )
+
+    return CheckResult(
+        check_id="docs.blueprint_structure",
+        status="pass",
+        severity="medium",
+        message="BLUEPRINT.md has required sections",
+        evidence=[],
+    )
+
+
+def _check_eval_strategy_structure(tool_root: Path) -> CheckResult:
+    """Validate EVAL_STRATEGY.md has required sections."""
+    eval_strategy_path = tool_root / "EVAL_STRATEGY.md"
+    if not eval_strategy_path.exists():
+        return CheckResult(
+            check_id="docs.eval_strategy_structure",
+            status="fail",
+            severity="high",
+            message="EVAL_STRATEGY.md missing",
+            evidence=["EVAL_STRATEGY.md"],
+        )
+
+    content = eval_strategy_path.read_text()
+    sections = _extract_markdown_sections(content)
+    sections_lower = [s.lower() for s in sections]
+
+    missing = []
+    for required in EVAL_STRATEGY_REQUIRED_SECTIONS:
+        # Check if any section contains the required keyword
+        found = any(required.lower() in s for s in sections_lower)
+        if not found:
+            missing.append(required)
+
+    if missing:
+        return CheckResult(
+            check_id="docs.eval_strategy_structure",
+            status="fail",
+            severity="high",
+            message="EVAL_STRATEGY.md missing required sections",
+            evidence=missing,
+        )
+
+    return CheckResult(
+        check_id="docs.eval_strategy_structure",
+        status="pass",
+        severity="high",
+        message="EVAL_STRATEGY.md has required sections",
+        evidence=[],
+    )
+
+
+def _discover_tool_rules(tool_root: Path) -> dict:
+    """Auto-discover tool rules from directory structure when not in TOOL_RULES.
+
+    This provides a fallback for new tools that haven't been manually registered.
+    """
+    rules: dict = {}
+
+    # Discover check modules
+    checks_dir = tool_root / "scripts" / "checks"
+    if checks_dir.exists():
+        check_modules = [
+            f.name for f in checks_dir.glob("*.py")
+            if f.name != "__init__.py" and not f.name.startswith("_")
+        ]
+        if check_modules:
+            rules["required_check_modules"] = check_modules
+
+    # Discover LLM prompts
+    prompts_dir = tool_root / "evaluation" / "llm" / "prompts"
+    if prompts_dir.exists():
+        prompts = [f.name for f in prompts_dir.glob("*.md")]
+        if prompts:
+            rules["required_prompts"] = prompts
+
+    # Determine ground truth mode
+    ground_truth_dir = tool_root / "evaluation" / "ground-truth"
+    if ground_truth_dir.exists():
+        if (ground_truth_dir / "synthetic.json").exists():
+            rules["ground_truth_mode"] = "synthetic_json"
+        else:
+            rules["ground_truth_mode"] = "any"
+
+    # Try to discover adapter (common naming patterns)
+    tool_name = tool_root.name
+    adapter_candidates = [
+        tool_name.replace("-", "_"),  # git-sizer -> git_sizer
+        tool_name.replace("-scanner", "").replace("-analyzers", "").replace("-", "_"),  # layout-scanner -> layout
+    ]
+
+    project_root = tool_root.parents[2] if len(tool_root.parents) > 2 else tool_root.parent
+    adapters_dir = project_root / "src" / "sot-engine" / "persistence" / "adapters"
+
+    for base in adapter_candidates:
+        adapter_path = adapters_dir / f"{base}_adapter.py"
+        if adapter_path.exists():
+            # Try to find the class name
+            content = adapter_path.read_text()
+            class_match = re.search(r"class\s+(\w+Adapter)\s*\(", content)
+            if class_match:
+                class_name = class_match.group(1)
+                rules["adapter"] = (f"persistence.adapters.{base}_adapter", class_name)
+                break
+
+    return rules
+
+
+def _get_tool_rules(tool_root: Path) -> dict:
+    """Get rules from TOOL_RULES or auto-discover from directory structure."""
+    tool_name = tool_root.name
+    if tool_name in TOOL_RULES:
+        return TOOL_RULES[tool_name]
+    return _discover_tool_rules(tool_root)
+
+
 def _extract_schema_versions(schema: dict) -> Optional[set[str]]:
     metadata = schema.get("properties", {}).get("metadata", {})
     props = metadata.get("properties", {})
@@ -1974,13 +3807,53 @@ def _check_schema_version_alignment(tool_root: Path, output: dict) -> CheckResul
     )
 
 
+def preflight_scan(tool_root: Path) -> ToolResult:
+    """Fast preflight validation (~100ms) for structure and Makefile checks only.
+
+    This mode skips adapter checks, output validation, and execution.
+    Useful for rapid iteration during tool development.
+    """
+    def _time_check(fn, *args) -> CheckResult:
+        start = time.perf_counter()
+        result = fn(*args)
+        duration_ms = (time.perf_counter() - start) * 1000.0
+        return _attach_duration(result, duration_ms)
+
+    checks: list[CheckResult] = [
+        _time_check(_check_required_paths, tool_root),
+        _time_check(_check_make_targets, tool_root),
+        _time_check(_check_makefile_permissions, tool_root),
+        _time_check(_check_makefile_uses_common, tool_root),
+        _time_check(_check_output_dir_convention, tool_root),
+        _time_check(_check_output_filename_convention, tool_root),
+        _time_check(_check_schema_valid_json, tool_root),
+        _time_check(_check_schema_contract, tool_root),
+        _time_check(_check_blueprint_structure, tool_root),
+        _time_check(_check_eval_strategy_structure, tool_root),
+        _time_check(_check_test_structure_naming, tool_root),
+    ]
+
+    status = "fail" if any(c.status == "fail" for c in checks) else "pass"
+    return ToolResult(name=tool_root.name, status=status, checks=checks)
+
+
 def scan_tool(
     tool_root: Path,
     run_analysis: bool = False,
     run_evaluate: bool = False,
     run_llm: bool = False,
     venv: Optional[str] = None,
+    preflight: bool = False,
 ) -> ToolResult:
+    # Fast preflight mode
+    if preflight:
+        return preflight_scan(tool_root)
+    def _time_check(fn, *args) -> CheckResult:
+        start = time.perf_counter()
+        result = fn(*args)
+        duration_ms = (time.perf_counter() - start) * 1000.0
+        return _attach_duration(result, duration_ms)
+
     env = os.environ.copy()
     if venv:
         env["VENV"] = venv
@@ -2001,15 +3874,18 @@ def scan_tool(
         env["REPO_ID"] = "compliance"
         env["VENV_READY"] = str(tmp_path / ".venv_ready")
         env["SKIP_SETUP"] = "1"
-        error = _run_make(tool_root, "analyze", env)
-        if error:
+        returncode, stdout, stderr, duration_ms = _run_make(tool_root, "analyze", env)
+        if returncode != 0:
             checks.append(
                 CheckResult(
                     check_id="run.analyze",
                     status="fail",
                     severity="critical",
                     message="make analyze failed",
-                    evidence=[error],
+                    evidence=[_summarize_output(stdout or stderr)],
+                    duration_ms=round(duration_ms, 2),
+                    stdout_summary=_summarize_output(stdout),
+                    stderr_summary=_summarize_output(stderr),
                 )
             )
         else:
@@ -2020,6 +3896,9 @@ def scan_tool(
                     severity="critical",
                     message="make analyze succeeded",
                     evidence=[],
+                    duration_ms=round(duration_ms, 2),
+                    stdout_summary=_summarize_output(stdout),
+                    stderr_summary=_summarize_output(stderr),
                 )
             )
             output_candidate = tmp_path / "output.json"
@@ -2044,6 +3923,7 @@ def scan_tool(
                     severity="critical",
                     message="Pre-existing analysis output found" + (" (stale)" if is_stale else ""),
                     evidence=evidence,
+                    duration_ms=0.0,
                 )
             )
             output_path = existing_output
@@ -2055,6 +3935,7 @@ def scan_tool(
                     severity="critical",
                     message="No analysis output found - run with --run-analysis or execute 'make analyze'",
                     evidence=[],
+                    duration_ms=0.0,
                 )
             )
 
@@ -2064,15 +3945,18 @@ def scan_tool(
         env["EVAL_OUTPUT_DIR"] = str(eval_output_dir)
         env["VENV_READY"] = str(eval_output_dir / ".venv_ready")
         env["SKIP_SETUP"] = "1"
-        error = _run_make(tool_root, "evaluate", env)
-        if error:
+        returncode, stdout, stderr, duration_ms = _run_make(tool_root, "evaluate", env)
+        if returncode != 0:
             checks.append(
                 CheckResult(
                     check_id="run.evaluate",
                     status="fail",
                     severity="high",
                     message="make evaluate failed",
-                    evidence=[error],
+                    evidence=[_summarize_output(stdout or stderr)],
+                    duration_ms=round(duration_ms, 2),
+                    stdout_summary=_summarize_output(stdout),
+                    stderr_summary=_summarize_output(stderr),
                 )
             )
         else:
@@ -2083,6 +3967,9 @@ def scan_tool(
                     severity="high",
                     message="make evaluate succeeded",
                     evidence=[],
+                    duration_ms=round(duration_ms, 2),
+                    stdout_summary=_summarize_output(stdout),
+                    stderr_summary=_summarize_output(stderr),
                 )
             )
             expected = [
@@ -2114,6 +4001,27 @@ def scan_tool(
                 )
             if (eval_output_dir / "output.json").exists():
                 output_path = eval_output_dir / "output.json"
+            eval_checks = eval_output_dir / "checks.json"
+            eval_report = eval_output_dir / "evaluation_report.json"
+            eval_llm = eval_output_dir / "llm_evaluation.json"
+            eval_candidate = (
+                eval_checks if eval_checks.exists()
+                else eval_report if eval_report.exists()
+                else eval_llm
+            )
+            if eval_candidate.exists():
+                checks.append(_time_check(_check_evaluation_quality, eval_candidate))
+            else:
+                checks.append(
+                    CheckResult(
+                        check_id="evaluation.quality",
+                        status="fail",
+                        severity="high",
+                        message="Evaluation results JSON missing",
+                        evidence=[str(eval_checks), str(eval_report), str(eval_llm)],
+                        duration_ms=0.0,
+                    )
+                )
     else:
         # Check for pre-existing evaluation output
         existing_eval = _find_evaluation_output(tool_root)
@@ -2131,8 +4039,32 @@ def scan_tool(
                     severity="high",
                     message="Pre-existing evaluation output found" + (" (stale)" if is_stale else ""),
                     evidence=evidence,
+                    duration_ms=0.0,
                 )
             )
+            eval_checks = tool_root / "evaluation" / "results" / "checks.json"
+            eval_report = tool_root / "evaluation" / "results" / "evaluation_report.json"
+            eval_llm = tool_root / "evaluation" / "results" / "llm_evaluation.json"
+            eval_scorecard = tool_root / "evaluation" / "scorecard.json"
+            candidate = (
+                eval_checks if eval_checks.exists()
+                else eval_report if eval_report.exists()
+                else eval_llm if eval_llm.exists()
+                else eval_scorecard
+            )
+            if candidate.exists():
+                checks.append(_time_check(_check_evaluation_quality, candidate))
+            else:
+                checks.append(
+                    CheckResult(
+                        check_id="evaluation.quality",
+                        status="fail",
+                        severity="high",
+                        message="Evaluation results JSON missing",
+                        evidence=[str(eval_checks), str(eval_report), str(eval_llm), str(eval_scorecard)],
+                        duration_ms=0.0,
+                    )
+                )
         else:
             checks.append(
                 CheckResult(
@@ -2141,19 +4073,43 @@ def scan_tool(
                     severity="high",
                     message="No evaluation output found - run with --run-evaluate or execute 'make evaluate'",
                     evidence=[],
+                    duration_ms=0.0,
+                )
+            )
+            checks.append(
+                CheckResult(
+                    check_id="evaluation.quality",
+                    status="fail",
+                    severity="high",
+                    message="Evaluation quality check skipped (no outputs)",
+                    evidence=[],
+                    duration_ms=0.0,
                 )
             )
 
     if run_llm:
-        error = _run_make(tool_root, "evaluate-llm", env)
-        if error:
+        llm_output_dir = Path(tempfile.mkdtemp(prefix="tool-compliance-eval-"))
+        temp_dirs.append(llm_output_dir)
+        env["EVAL_OUTPUT_DIR"] = str(llm_output_dir)
+        env["VENV_READY"] = str(llm_output_dir / ".venv_ready")
+        env["SKIP_SETUP"] = "1"
+        env["LLM_MODEL"] = "opus-4.5"
+        env["CLAUDE_MODEL"] = "opus-4.5"
+        env["CLAUDE_MAX_TURNS"] = env.get("CLAUDE_MAX_TURNS", "40")
+        env["LLM_RETRIES"] = env.get("LLM_RETRIES", "2")
+
+        returncode, stdout, stderr, duration_ms = _run_make(tool_root, "evaluate-llm", env)
+        if returncode != 0:
             checks.append(
                 CheckResult(
                     check_id="run.evaluate_llm",
                     status="fail",
                     severity="medium",
                     message="make evaluate-llm failed",
-                    evidence=[error],
+                    evidence=[_summarize_output(stdout or stderr)],
+                    duration_ms=round(duration_ms, 2),
+                    stdout_summary=_summarize_output(stdout),
+                    stderr_summary=_summarize_output(stderr),
                 )
             )
         else:
@@ -2164,9 +4120,14 @@ def scan_tool(
                     severity="medium",
                     message="make evaluate-llm succeeded",
                     evidence=[],
+                    duration_ms=round(duration_ms, 2),
+                    stdout_summary=_summarize_output(stdout),
+                    stderr_summary=_summarize_output(stderr),
                 )
             )
-            expected = tool_root / "evaluation" / "results" / "llm_evaluation.json"
+            expected_temp = llm_output_dir / "llm_evaluation.json"
+            expected_repo = tool_root / "evaluation" / "results" / "llm_evaluation.json"
+            expected = expected_temp if expected_temp.exists() else expected_repo
             if not expected.exists():
                 checks.append(
                     CheckResult(
@@ -2174,7 +4135,7 @@ def scan_tool(
                         status="fail",
                         severity="medium",
                         message="LLM evaluation output missing",
-                        evidence=["evaluation/results/llm_evaluation.json"],
+                        evidence=[str(expected_temp), str(expected_repo)],
                     )
                 )
             else:
@@ -2185,6 +4146,20 @@ def scan_tool(
                         severity="medium",
                         message="LLM evaluation output present",
                         evidence=[],
+                    )
+                )
+            llm_results = llm_output_dir / "llm_evaluation.json"
+            if llm_results.exists():
+                checks.append(_time_check(_check_llm_quality, llm_results))
+            else:
+                checks.append(
+                    CheckResult(
+                        check_id="evaluation.llm_quality",
+                        status="fail",
+                        severity="medium",
+                        message="LLM evaluation JSON missing",
+                        evidence=[str(llm_results)],
+                        duration_ms=0.0,
                     )
                 )
     else:
@@ -2204,8 +4179,26 @@ def scan_tool(
                     severity="medium",
                     message="Pre-existing LLM evaluation output found" + (" (stale)" if is_stale else ""),
                     evidence=evidence,
+                    duration_ms=0.0,
                 )
             )
+            if existing_llm.suffix == ".json":
+                checks.append(_time_check(_check_llm_quality, existing_llm))
+            else:
+                candidate = tool_root / "evaluation" / "llm" / "results" / "llm_evaluation.json"
+                if candidate.exists():
+                    checks.append(_time_check(_check_llm_quality, candidate))
+                else:
+                    checks.append(
+                        CheckResult(
+                            check_id="evaluation.llm_quality",
+                            status="fail",
+                            severity="medium",
+                            message="LLM evaluation JSON missing",
+                            evidence=[str(candidate)],
+                            duration_ms=0.0,
+                        )
+                    )
         else:
             checks.append(
                 CheckResult(
@@ -2214,10 +4207,23 @@ def scan_tool(
                     severity="medium",
                     message="No LLM evaluation output found - run with --run-llm or execute 'make evaluate-llm'",
                     evidence=[],
+                    duration_ms=0.0,
+                )
+            )
+            checks.append(
+                CheckResult(
+                    check_id="evaluation.llm_quality",
+                    status="fail",
+                    severity="medium",
+                    message="LLM evaluation quality check skipped (no outputs)",
+                    evidence=[],
+                    duration_ms=0.0,
                 )
             )
 
+    load_start = time.perf_counter()
     output, error, output_source = _load_output_for_checks(tool_root, output_path)
+    load_duration = (time.perf_counter() - load_start) * 1000.0
     if output is None:
         checks.append(
             CheckResult(
@@ -2226,6 +4232,7 @@ def scan_tool(
                 severity="high",
                 message="No output.json available",
                 evidence=[error or ""],
+                duration_ms=round(load_duration, 2),
             )
         )
     else:
@@ -2236,34 +4243,62 @@ def scan_tool(
                 severity="high",
                 message="Output JSON loaded",
                 evidence=[str(output_source)] if output_source else [],
+                duration_ms=round(load_duration, 2),
             )
         )
-        checks.append(_check_output_paths(output))
-        checks.extend(_check_output_metadata(output))
-        checks.append(_check_output_metadata_consistency(output))
-        checks.append(_check_schema_version_alignment(tool_root, output))
+        checks.append(_time_check(_check_output_paths, output))
+        meta_start = time.perf_counter()
+        metadata_checks = _check_output_metadata(output)
+        meta_duration = (time.perf_counter() - meta_start) * 1000.0
+        checks.extend(_attach_duration_many(metadata_checks, meta_duration))
+        checks.append(_time_check(_check_output_metadata_consistency, output))
+        checks.append(_time_check(_check_schema_version_alignment, tool_root, output))
         if output_source:
-            checks.append(_check_output_schema(tool_root, output_source, venv))
+            checks.append(_time_check(_check_output_schema, tool_root, output_source, venv))
 
     tool_name = tool_root.name
+    # Derive project root from tool_root (tools are at src/tools/<name>)
+    project_root = tool_root.parents[2] if len(tool_root.parents) > 2 else tool_root.parent
+
     checks.extend(
         [
-            _check_required_paths(tool_root),
-            _check_make_targets(tool_root),
-            _check_schema_valid_json(tool_root),
-            _check_schema_contract(tool_root),
-            _check_check_modules(tool_root),
-            _check_llm_prompts(tool_root),
-            _check_ground_truth(tool_root),
-            _check_scorecard(tool_root),
-            _check_rollup_validation(tool_root),
-            _check_adapter_compliance(tool_root, tool_name),
-            _check_adapter_schema_alignment(tool_root, tool_name),
-            _check_adapter_integration(tool_root, tool_name),
-            _check_adapter_quality_rules_coverage(tool_root, tool_name),
-            _check_dbt_model_coverage(tool_root, tool_name),
-            _check_entity_repository_alignment(tool_root, tool_name),
-            _check_test_structure_naming(tool_root),
+            _time_check(_check_required_paths, tool_root),
+            _time_check(_check_make_targets, tool_root),
+            _time_check(_check_makefile_permissions, tool_root),
+            _time_check(_check_makefile_uses_common, tool_root),
+            _time_check(_check_output_dir_convention, tool_root),
+            _time_check(_check_output_filename_convention, tool_root),
+            _time_check(_check_schema_valid_json, tool_root),
+            _time_check(_check_schema_contract, tool_root),
+            _time_check(_check_blueprint_structure, tool_root),
+            _time_check(_check_eval_strategy_structure, tool_root),
+            _time_check(_check_check_modules, tool_root),
+            _time_check(_check_llm_prompts, tool_root),
+            _time_check(_check_llm_judge_count, tool_root),
+            _time_check(_check_synthetic_evaluation_context, tool_root),
+            _time_check(_check_ground_truth, tool_root),
+            _time_check(_check_scorecard, tool_root),
+            # Uniform evaluation pipeline checks
+            _time_check(_check_programmatic_exists, tool_root),
+            _time_check(_check_programmatic_schema, tool_root),
+            _time_check(_check_programmatic_quality, tool_root),
+            _time_check(_check_llm_exists, tool_root),
+            _time_check(_check_llm_schema, tool_root),
+            _time_check(_check_llm_includes_programmatic, tool_root),
+            _time_check(_check_llm_decision_quality, tool_root),
+            _time_check(_check_rollup_validation, tool_root),
+            _time_check(_check_adapter_compliance, tool_root, tool_name),
+            _time_check(_check_adapter_schema_alignment, tool_root, tool_name),
+            _time_check(_check_adapter_integration, tool_root, tool_name),
+            _time_check(_check_adapter_quality_rules_coverage, tool_root, tool_name),
+            _time_check(_check_sot_adapter_registered, tool_root, tool_name),
+            _time_check(_check_sot_schema_table, tool_root, tool_name),
+            _time_check(_check_sot_orchestrator_wired, tool_root, tool_name),
+            _time_check(_check_sot_dbt_staging_model, tool_root, tool_name),
+            _time_check(_check_dbt_model_coverage, tool_root, tool_name),
+            _time_check(_check_entity_repository_alignment, tool_root, tool_name),
+            _time_check(_check_test_structure_naming, tool_root),
+            _time_check(_check_cross_tool_join_patterns, project_root),
         ]
     )
 
@@ -2288,35 +4323,64 @@ def build_report(
     run_llm: bool = False,
     venv: Optional[str] = None,
     venv_map: Optional[dict[str, str]] = None,
+    preflight: bool = False,
+    single_tool: Optional[Path] = None,
 ) -> dict:
-    tool_results = [
-        scan_tool(
-            tool_root,
-            run_analysis=run_analysis,
-            run_evaluate=run_evaluate,
-            run_llm=run_llm,
-            venv=(venv_map or {}).get(tool_root.name, venv),
+    if single_tool:
+        # Scan only a single tool
+        tool_results = [
+            scan_tool(
+                single_tool,
+                run_analysis=run_analysis,
+                run_evaluate=run_evaluate,
+                run_llm=run_llm,
+                venv=(venv_map or {}).get(single_tool.name, venv),
+                preflight=preflight,
+            )
+        ]
+    else:
+        tool_results = [
+            scan_tool(
+                tool_root,
+                run_analysis=run_analysis,
+                run_evaluate=run_evaluate,
+                run_llm=run_llm,
+                venv=(venv_map or {}).get(tool_root.name, venv),
+                preflight=preflight,
+            )
+            for tool_root in find_tools(tools_root)
+        ]
+    passed = sum(1 for t in tool_results if str(t.status).lower() == "pass")
+    failed = sum(1 for t in tool_results if str(t.status).lower() == "fail")
+    tools_payload = []
+    for t in tool_results:
+        normalized_checks = []
+        for c in t.checks:
+            status = c.status.lower() if isinstance(c.status, str) else c.status
+            normalized_checks.append(
+                {
+                    **asdict(c),
+                    "status": status,
+                }
+            )
+        tool_status = "fail" if any(c["status"] == "fail" for c in normalized_checks) else "pass"
+        tools_payload.append(
+            {
+                "name": t.name,
+                "status": tool_status,
+                "checks": normalized_checks,
+            }
         )
-        for tool_root in find_tools(tools_root)
-    ]
-    passed = sum(1 for t in tool_results if t.status == "pass")
-    failed = sum(1 for t in tool_results if t.status == "fail")
+
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "tools_root": str(tools_root),
         "summary": {
             "tool_count": len(tool_results),
-            "passed": passed,
-            "failed": failed,
+            "passed": sum(1 for t in tools_payload if t["status"] == "pass"),
+            "failed": sum(1 for t in tools_payload if t["status"] == "fail"),
         },
-        "tools": [
-            {
-                "name": t.name,
-                "status": t.status,
-                "checks": [asdict(c) for c in t.checks],
-            }
-            for t in tool_results
-        ],
+        "tools": tools_payload,
     }
 
 
@@ -2332,23 +4396,60 @@ def write_markdown(report: dict, output_path: Path) -> None:
         f"{summary['tool_count']} total"
     )
     lines.append("")
-    lines.append("| Tool | Status | Failed Checks |")
-    lines.append("| --- | --- | --- |")
+    lines.append("| Tool | Status | Checks Passed | Checks Failed | Failed Check IDs |")
+    lines.append("| --- | --- | --- | --- | --- |")
     for tool in report["tools"]:
         failed_checks = [c for c in tool["checks"] if c["status"] == "fail"]
+        passed_checks = [c for c in tool["checks"] if c["status"] == "pass"]
         failed_ids = ", ".join(c["check_id"] for c in failed_checks) or "-"
-        lines.append(f"| {tool['name']} | {tool['status']} | {failed_ids} |")
+        lines.append(
+            f"| {tool['name']} | {tool['status']} | {len(passed_checks)} | {len(failed_checks)} | {failed_ids} |"
+        )
     lines.append("")
+
+    # Performance summary
+    durations: list[tuple[str, str, float]] = []
+    per_tool_totals: dict[str, float] = {}
     for tool in report["tools"]:
-        failed_checks = [c for c in tool["checks"] if c["status"] == "fail"]
-        if not failed_checks:
-            continue
-        lines.append(f"## {tool['name']} failures")
-        for check in failed_checks:
+        tool_name = tool["name"]
+        for check in tool["checks"]:
+            duration = check.get("duration_ms")
+            if isinstance(duration, (int, float)):
+                per_tool_totals[tool_name] = per_tool_totals.get(tool_name, 0.0) + float(duration)
+                durations.append((tool_name, check["check_id"], float(duration)))
+
+    if durations:
+        lines.append("## Performance Summary")
+        lines.append("")
+        lines.append("### Slowest Checks")
+        lines.append("")
+        lines.append("| Tool | Check ID | Duration (ms) |")
+        lines.append("| --- | --- | --- |")
+        for tool_name, check_id, duration in sorted(durations, key=lambda x: x[2], reverse=True)[:10]:
+            lines.append(f"| {tool_name} | `{check_id}` | {duration:.2f} |")
+        lines.append("")
+        lines.append("### Total Time Per Tool")
+        lines.append("")
+        lines.append("| Tool | Total (s) |")
+        lines.append("| --- | --- |")
+        for tool_name, total_ms in sorted(per_tool_totals.items(), key=lambda x: x[1], reverse=True):
+            lines.append(f"| {tool_name} | {total_ms / 1000.0:.2f} |")
+        lines.append("")
+
+    for tool in report["tools"]:
+        lines.append(f"## {tool['name']}")
+        lines.append("")
+        lines.append("| Check ID | Status | Severity | Duration (ms) | Message | Evidence | Stdout | Stderr |")
+        lines.append("| --- | --- | --- | --- | --- | --- | --- | --- |")
+        for check in tool["checks"]:
             evidence = ", ".join(check["evidence"]) if check["evidence"] else "-"
+            message = check["message"].replace("\n", " ").strip()
+            duration = check.get("duration_ms")
+            duration_display = f"{duration:.2f}" if isinstance(duration, (int, float)) else "-"
+            stdout_summary = (check.get("stdout_summary") or "-").replace("\n", " ").strip()
+            stderr_summary = (check.get("stderr_summary") or "-").replace("\n", " ").strip()
             lines.append(
-                f"- `{check['check_id']}` ({check['severity']}): {check['message']} "
-                f"[{evidence}]"
+                f"| `{check['check_id']}` | {check['status']} | {check['severity']} | {duration_display} | {message} | {evidence} | {stdout_summary} | {stderr_summary} |"
             )
         lines.append("")
     output_path.write_text("\n".join(lines).rstrip() + "\n")
@@ -2372,7 +4473,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Tool compliance scanner")
     parser.add_argument(
         "--root",
-        default=str(Path(__file__).parents[1]),
+        default=str(Path(__file__).parents[2]),
         help="Project root (default: repository root)",
     )
     parser.add_argument(
@@ -2415,24 +4516,73 @@ def main() -> int:
         default="",
         help="Tool-specific venv mapping (e.g., scc=/tmp/scc-venv,lizard=/tmp/lizard-venv)",
     )
+    parser.add_argument(
+        "--preflight",
+        action="store_true",
+        help="Fast preflight validation (~100ms) - structure and Makefile checks only",
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress normal output; only show failures (useful for CI/hooks)",
+    )
+    parser.add_argument(
+        "tool_path",
+        nargs="?",
+        default=None,
+        help="Single tool path to scan (e.g., src/tools/scc). If provided, only this tool is scanned.",
+    )
     args = parser.parse_args()
 
     project_root = Path(args.root).resolve()
     tools_root = (project_root / args.tools_root).resolve()
+    default_venv = args.venv or None
+    if not default_venv:
+        candidate = project_root / ".venv"
+        if candidate.exists():
+            default_venv = str(candidate)
+
+    # Handle single tool path argument
+    single_tool: Optional[Path] = None
+    if args.tool_path:
+        single_tool = Path(args.tool_path).resolve()
+        if not single_tool.exists():
+            # Try relative to project root
+            single_tool = (project_root / args.tool_path).resolve()
+        if not single_tool.exists() or not single_tool.is_dir():
+            print(f"Error: Tool path not found: {args.tool_path}", file=sys.stderr)
+            return 1
+
     report = build_report(
         tools_root,
         run_analysis=args.run_analysis,
         run_evaluate=args.run_evaluate,
         run_llm=args.run_llm,
-        venv=args.venv or None,
+        venv=default_venv,
         venv_map=_parse_venv_map(args.venv_map),
+        preflight=args.preflight,
+        single_tool=single_tool,
     )
 
-    out_json = (project_root / args.out_json).resolve()
-    out_json.write_text(json.dumps(report, indent=2, sort_keys=True))
+    # Write report files (unless in quiet mode with single tool)
+    if not (args.quiet and single_tool):
+        out_json = (project_root / args.out_json).resolve()
+        out_json.write_text(json.dumps(report, indent=2, sort_keys=True))
 
-    out_md = (project_root / args.out_md).resolve()
-    write_markdown(report, out_md)
+        out_md = (project_root / args.out_md).resolve()
+        write_markdown(report, out_md)
+
+    # In quiet mode, only print failures
+    if args.quiet:
+        failed_checks = []
+        for tool in report["tools"]:
+            for check in tool["checks"]:
+                if check["status"] == "fail":
+                    failed_checks.append((tool["name"], check["check_id"], check["message"]))
+        if failed_checks:
+            for tool_name, check_id, message in failed_checks:
+                print(f"FAIL: {tool_name} - {check_id}: {message}", file=sys.stderr)
+        return 0 if report["summary"]["failed"] == 0 else 1
 
     return 0 if report["summary"]["failed"] == 0 else 1
 

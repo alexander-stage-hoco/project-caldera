@@ -86,13 +86,35 @@ class CCNAccuracyJudge(BaseJudge):
             func_count = file_info.get("function_count", 0)
             by_language[lang] = by_language.get(lang, 0) + func_count
 
-        return {
+        evidence = {
             "sample_functions": samples[:20],
             "ground_truth_sample": gt_comparison[:25],
             "total_functions": analysis.get("summary", {}).get("total_functions", 0),
             "ccn_distribution": analysis.get("summary", {}).get("ccn_distribution", {}),
             "by_language": by_language,
+            "evaluation_mode": self.evaluation_mode,
         }
+
+        # Inject synthetic baseline context for real-world evaluation
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context:
+                evidence["synthetic_baseline"] = synthetic_context
+                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                    synthetic_context
+                )
+            else:
+                evidence["synthetic_baseline"] = "No synthetic baseline available"
+                evidence["interpretation_guidance"] = (
+                    "Evaluate based on ground truth comparison only"
+                )
+        else:
+            evidence["synthetic_baseline"] = (
+                "N/A - synthetic mode uses direct ground truth comparison"
+            )
+            evidence["interpretation_guidance"] = "Strict ground truth evaluation"
+
+        return evidence
 
     def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
         """Validate CCN values are within expected ranges."""

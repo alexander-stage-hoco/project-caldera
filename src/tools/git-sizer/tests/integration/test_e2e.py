@@ -108,6 +108,8 @@ class TestEndToEnd:
         # Check output file exists
         output_file = output_dir / "output.json"
         assert output_file.exists(), f"Output file not created. stderr: {result.stderr}"
+        repo_output = output_dir / temp_repo.name / "output.json"
+        assert repo_output.exists(), "Per-repo output.json missing"
 
         # Load and validate output
         with open(output_file) as f:
@@ -122,6 +124,7 @@ class TestEndToEnd:
         assert metadata["tool_name"] == "git-sizer"
         assert metadata["run_id"] == "550e8400-e29b-41d4-a716-446655440000"
         assert metadata["repo_id"] == "660e8400-e29b-41d4-a716-446655440001"
+        assert metadata["repo_name"] == temp_repo.name
         assert metadata["branch"] == "main"
         assert metadata["commit"] == commit_sha
         assert metadata["schema_version"] == "1.0.0"

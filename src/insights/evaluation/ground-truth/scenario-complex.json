@@ -1,0 +1,60 @@
+{
+  "scenario": "complex",
+  "description": "Large repository with high complexity and multiple issues",
+  "expected_data": {
+    "repo_health": {
+      "total_files": 1250,
+      "total_loc": 180000,
+      "total_code": 150000,
+      "total_comment": 15000,
+      "avg_ccn": 8.2,
+      "max_ccn": 85,
+      "health_grade": "D"
+    },
+    "vulnerabilities": {
+      "total_count": 45,
+      "critical_count": 3,
+      "high_count": 12,
+      "summary": [
+        {"severity": "CRITICAL", "count": 3},
+        {"severity": "HIGH", "count": 12},
+        {"severity": "MEDIUM", "count": 18},
+        {"severity": "LOW", "count": 12}
+      ]
+    },
+    "file_hotspots": {
+      "complexity_hotspot_count": 35,
+      "has_compound_hotspots": true,
+      "compound_hotspot_count": 8
+    },
+    "directory_analysis": {
+      "hotspot_directories": 12,
+      "max_depth": 8
+    },
+    "cross_tool": {
+      "complex_smelly_count": 15,
+      "complex_vulnerable_count": 5
+    },
+    "languages": [
+      {"language": "C#", "file_count": 600, "loc": 120000},
+      {"language": "TypeScript", "file_count": 400, "loc": 45000},
+      {"language": "SQL", "file_count": 100, "loc": 8000},
+      {"language": "YAML", "file_count": 80, "loc": 4000}
+    ]
+  },
+  "expected_sections": [
+    "repo_health",
+    "file_hotspots",
+    "directory_analysis",
+    "vulnerabilities",
+    "cross_tool",
+    "language_coverage"
+  ],
+  "validation_rules": {
+    "accuracy_tolerance": 0.02,
+    "require_all_sections": true,
+    "require_severity_breakdown": true,
+    "require_compound_hotspots": true,
+    "require_cross_tool": true
+  }
+}

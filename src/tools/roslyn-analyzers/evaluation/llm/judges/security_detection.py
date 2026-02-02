@@ -36,6 +36,22 @@ class SecurityDetectionJudge(BaseJudge):
 
 You are evaluating the security vulnerability detection capabilities of Roslyn Analyzers.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
+**Important**: When evaluation_mode is "real_world":
+- Low security finding counts are NOT automatically failures
+- Judge output quality: schema compliance, rule categorization, severity mapping
+- Judge detection quality: Are the security issues that WERE detected accurate and properly classified?
+- Consider: A tool that finds 0 security issues in a secure codebase deserves a high score
+
 ## Evidence to Review
 
 ### Security Summary
@@ -52,32 +68,53 @@ You are evaluating the security vulnerability detection capabilities of Roslyn A
 
 ## Evaluation Criteria
 
-### Score 5 (Excellent)
+### For Synthetic Repos (with ground truth):
+
+#### Score 5 (Excellent)
 - Detects all expected SQL injection patterns (CA2100, CA3001, CA3002)
 - Identifies weak cryptography usage (CA5350, CA5351, CA5xxx)
 - Catches unsafe deserialization (CA2300-CA2315)
 - Zero false negatives on security-critical files
 - Coverage >95% of security ground truth
 
-### Score 4 (Good)
+#### Score 4 (Good)
 - Detects most SQL injection patterns
 - Identifies common cryptography issues
 - Catches most deserialization problems
 - Coverage 85-95% of security ground truth
 
-### Score 3 (Acceptable)
+#### Score 3 (Acceptable)
 - Detects common security issues
 - Some missed patterns
 - Coverage 70-85% of security ground truth
 
-### Score 2 (Poor)
+#### Score 2 (Poor)
 - Misses many security issues
 - Incomplete pattern coverage
 - Coverage 50-70% of security ground truth
 
-### Score 1 (Unacceptable)
+#### Score 1 (Unacceptable)
 - Fails to detect critical vulnerabilities
 - Coverage <50% of security ground truth
+
+### For Real-World Repos (when synthetic_baseline shows validated tool):
+
+#### Score 5 (Excellent)
+- Output schema compliant, any findings accurately classified, complete metadata
+
+#### Score 4 (Good)
+- Minor schema issues but findings accurate, good rule categorization
+
+#### Score 3 (Acceptable)
+- Schema issues OR questionable security classification
+
+#### Score 2 (Poor)
+- Multiple schema issues AND questionable classifications
+
+#### Score 1 (Failing)
+- Broken output, missing required fields, obvious false positives
+
+**Key principle**: Do NOT penalize for low finding counts on real-world repos when the tool is validated (synthetic_score >= 0.9).
 
 ## Response Format
 
@@ -100,8 +137,13 @@ Respond with JSON:
 """
 
     def collect_evidence(self) -> dict[str, Any]:
-        """Collect security-related evidence from all analysis outputs."""
-        evidence = {
+        """Collect security-related evidence from all analysis outputs.
+
+        For real-world evaluation mode, also injects synthetic evaluation
+        context to help the LLM understand tool baseline capability.
+        """
+        evidence: dict[str, Any] = {
+            "evaluation_mode": self.evaluation_mode,
             "security_summary": {
                 "sql_injection": {"detected": 0, "rules": []},
                 "cryptography": {"detected": 0, "rules": []},
@@ -195,6 +237,25 @@ Respond with JSON:
                     "deserialization": evidence["security_summary"]["deserialization"]["detected"],
                 },
             }
+
+        # Inject synthetic baseline context for real-world evaluation
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context:
+                evidence["synthetic_baseline"] = synthetic_context
+                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                    synthetic_context
+                )
+            else:
+                evidence["synthetic_baseline"] = "No synthetic baseline available"
+                evidence["interpretation_guidance"] = (
+                    "Evaluate based on ground truth comparison only"
+                )
+        else:
+            evidence["synthetic_baseline"] = (
+                "N/A - synthetic mode uses direct ground truth comparison"
+            )
+            evidence["interpretation_guidance"] = "Strict ground truth evaluation"
 
         return evidence
 

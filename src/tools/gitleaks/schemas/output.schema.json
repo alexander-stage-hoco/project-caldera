@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-caldera/schemas/gitleaks/output.schema.json",
+  "title": "Gitleaks Secret Analysis Output",
+  "description": "Caldera-compliant output schema for gitleaks secret detection analysis",
+  "type": "object",
+  "required": ["metadata", "data"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Standard Caldera envelope metadata",
+      "required": [
+        "tool_name",
+        "tool_version",
+        "run_id",
+        "repo_id",
+        "branch",
+        "commit",
+        "timestamp",
+        "schema_version"
+      ],
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "const": "gitleaks",
+          "description": "Tool identifier"
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Version of gitleaks used for the scan"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique run identifier"
+        },
+        "repo_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Repository identifier"
+        },
+        "branch": {
+          "type": "string",
+          "description": "Git branch analyzed"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$",
+          "description": "Full 40-character git commit SHA"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when the analysis was generated"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "description": "Schema version"
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "description": "Tool-specific analysis data",
+      "required": ["tool", "tool_version", "total_secrets", "findings"],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "const": "gitleaks",
+          "description": "Tool identifier"
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Version of gitleaks used for the scan"
+        },
+        "total_secrets": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of secrets found"
+        },
+        "unique_secrets": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of unique secrets (by fingerprint)"
+        },
+        "secrets_in_head": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of secrets present in current HEAD"
+        },
+        "secrets_in_history": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of secrets only in git history"
+        },
+        "files_with_secrets": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of files containing secrets"
+        },
+        "commits_with_secrets": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of commits containing secrets"
+        },
+        "secrets_by_rule": {
+          "type": "object",
+          "description": "Count of secrets by rule ID",
+          "additionalProperties": { "type": "integer" }
+        },
+        "secrets_by_severity": {
+          "type": "object",
+          "description": "Count of secrets by severity level",
+          "properties": {
+            "CRITICAL": { "type": "integer" },
+            "HIGH": { "type": "integer" },
+            "MEDIUM": { "type": "integer" },
+            "LOW": { "type": "integer" }
+          },
+          "additionalProperties": { "type": "integer" }
+        },
+        "findings": {
+          "type": "array",
+          "description": "Detailed secret findings",
+          "items": {
+            "type": "object",
+            "required": ["file_path", "rule_id", "severity"],
+            "properties": {
+              "file_path": {
+                "type": "string",
+                "description": "Repo-relative file path"
+              },
+              "line_number": { "type": "integer", "minimum": 0 },
+              "rule_id": { "type": "string" },
+              "secret_type": { "type": "string" },
+              "description": { "type": "string" },
+              "secret_preview": {
+                "type": "string",
+                "description": "Masked/truncated secret for safe display"
+              },
+              "entropy": { "type": "number" },
+              "commit_hash": { "type": "string" },
+              "commit_author": { "type": "string" },
+              "commit_date": { "type": "string" },
+              "fingerprint": { "type": "string" },
+              "in_current_head": { "type": "boolean" },
+              "severity": {
+                "type": "string",
+                "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+                "description": "Calculated severity based on rule type and context"
+              }
+            }
+          }
+        },
+        "files": {
+          "type": "object",
+          "description": "Per-file secret summaries",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "file_path": { "type": "string" },
+              "secret_count": { "type": "integer", "minimum": 0 },
+              "rule_ids": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "earliest_commit": { "type": "string" },
+              "latest_commit": { "type": "string" }
+            }
+          }
+        },
+        "directories": {
+          "type": "object",
+          "description": "Directory-level secret metrics (rollups)",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "direct_secret_count": { "type": "integer", "minimum": 0 },
+              "recursive_secret_count": { "type": "integer", "minimum": 0 },
+              "direct_file_count": { "type": "integer", "minimum": 0 },
+              "recursive_file_count": { "type": "integer", "minimum": 0 },
+              "rule_id_counts": {
+                "type": "object",
+                "additionalProperties": { "type": "integer" }
+              }
+            }
+          }
+        },
+        "scan_time_ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Scan duration in milliseconds"
+        }
+      }
+    }
+  }
+}

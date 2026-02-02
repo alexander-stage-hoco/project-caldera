@@ -1,0 +1,36 @@
+## Cross-Tool Insights
+
+{% if has_insights %}
+| Metric | Value |
+|--------|------:|
+| Total Compound Risks | {{ risk_summary.total_risks | format_number }} |
+| Complex + Smelly | {{ risk_summary.complex_smelly_count | format_number }} |
+| Complex + Vulnerable | {{ risk_summary.complex_vulnerable_count | format_number }} |
+
+{% if has_complex_smelly %}
+### High Complexity + Code Smells
+
+Files with both high cyclomatic complexity (CCN >= 10) and multiple code smells (>= 3).
+
+| File | Complexity | LOC | Smells | Language |
+|------|-----------:|----:|-------:|----------|
+{% for file in complex_and_smelly[:12] %}
+| {{ file.relative_path }} | {{ file.complexity | format_number }} | {{ file.loc | format_number }} | {{ file.smell_count | format_number }} | {{ file.language or 'Unknown' }} |
+{% endfor %}
+{% endif %}
+
+{% if has_complex_vulnerable %}
+### High Complexity in Vulnerable Areas
+
+Complex files (CCN >= 15) located in directories with known vulnerabilities.
+
+| File | Complexity | LOC | Directory Vulns | Language |
+|------|-----------:|----:|----------------:|----------|
+{% for file in complex_and_vulnerable[:12] %}
+| {{ file.relative_path }} | {{ file.complexity | format_number }} | {{ file.loc | format_number }} | {{ file.vulnerability_count | format_number }} | {{ file.language or 'Unknown' }} |
+{% endfor %}
+{% endif %}
+
+{% else %}
+*No cross-tool compound risks identified in this run.*
+{% endif %}

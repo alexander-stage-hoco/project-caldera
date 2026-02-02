@@ -401,6 +401,32 @@ make evaluate-full
 
 ---
 
+## Risk Assessment
+
+### Risk Matrix
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Large repo memory exhaustion | Low | Medium | Implement streaming output for million-file repos |
+| Incorrect language detection | Low | Low | go-enry fallback for ambiguous files |
+| Symlink cycles | Very Low | Low | Cycle detection in tree_walker |
+| .gitignore parsing errors | Very Low | Low | Graceful fallback to include file |
+| Unicode path handling | Low | Low | UTF-8 normalization throughout |
+
+### Security Considerations
+
+1. **Path Traversal**: All paths validated as repo-relative; no absolute paths in output
+2. **Symlink Safety**: External symlinks excluded by default
+3. **File Content**: Only metadata extracted; no file content in base scan
+
+### Operational Risks
+
+- **Performance**: Sub-second for typical repos; larger repos may need --incremental mode (future)
+- **Disk Space**: Output JSON typically <1% of repo size
+- **Memory**: Linear growth with file count; ~100KB per 1000 files
+
+---
+
 ## References
 
 - [Design Document](../../docs/core/LAYOUT_SCANNER_DESIGN.md)

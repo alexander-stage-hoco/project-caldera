@@ -36,8 +36,67 @@ def load_output(path: Path) -> Dict[str, Any]:
     """Load scanner output from JSON file."""
     with open(path) as f:
         payload = json.load(f)
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except json.JSONDecodeError:
+            return {}
     if isinstance(payload, dict) and "metadata" in payload and "data" in payload:
-        return payload["data"]
+        data = payload["data"]
+        if isinstance(data, str):
+            try:
+                parsed = json.loads(data)
+                return parsed if isinstance(parsed, dict) else {}
+            except json.JSONDecodeError:
+                return {}
+        payload = data if isinstance(data, dict) else {}
+
+    if not isinstance(payload, dict):
+        return {}
+
+    # Normalize files/directories if they are lists
+    files = payload.get("files")
+    if isinstance(files, list):
+        normalized = {}
+        for item in files:
+            if isinstance(item, dict):
+                key = item.get("path") or item.get("name") or str(len(normalized))
+                normalized[key] = item
+            elif isinstance(item, str):
+                normalized[item] = {"path": item, "name": Path(item).name}
+        payload["files"] = normalized
+    elif isinstance(files, dict):
+        normalized = {}
+        for key, item in files.items():
+            if isinstance(item, dict):
+                normalized[key] = item
+            elif isinstance(item, str):
+                normalized[key] = {"path": item, "name": Path(item).name}
+        payload["files"] = normalized
+    elif files is not None:
+        payload["files"] = {}
+
+    directories = payload.get("directories")
+    if isinstance(directories, list):
+        normalized = {}
+        for item in directories:
+            if isinstance(item, dict):
+                key = item.get("path") or item.get("name") or str(len(normalized))
+                normalized[key] = item
+            elif isinstance(item, str):
+                normalized[item] = {"path": item, "name": Path(item).name}
+        payload["directories"] = normalized
+    elif isinstance(directories, dict):
+        normalized = {}
+        for key, item in directories.items():
+            if isinstance(item, dict):
+                normalized[key] = item
+            elif isinstance(item, str):
+                normalized[key] = {"path": item, "name": Path(item).name}
+        payload["directories"] = normalized
+    elif directories is not None:
+        payload["directories"] = {}
+
     return payload
 
 
@@ -126,6 +185,8 @@ def evaluate_output(
     Returns evaluation result dict.
     """
     output = load_output(output_path)
+    if not isinstance(output, dict):
+        output = {}
 
     # Load ground truth if available
     repo_name = output.get("repository", output_path.stem)
@@ -219,14 +280,9 @@ def evaluate_all(
 
     # Save results
     results_dir.mkdir(parents=True, exist_ok=True)
-    results_path = results_dir / "evaluation_results.json"
+    results_path = results_dir / "evaluation_report.json"
 
     with open(results_path, "w") as f:
-        json.dump(summary, f, indent=2)
-
-    # Compliance artifacts
-    checks_path = results_dir / "checks.json"
-    with open(checks_path, "w") as f:
         json.dump(summary, f, indent=2)
 
     scorecard_lines = [

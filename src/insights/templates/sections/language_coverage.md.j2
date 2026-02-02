@@ -1,0 +1,41 @@
+## Language Coverage
+
+{% if has_languages %}
+| Metric | Value |
+|--------|-------|
+| Primary Language | {{ primary_language }} |
+| Total Languages | {{ language_count | format_number }} |
+| Total Files | {{ total_files | format_number }} |
+| Total Lines of Code | {{ total_loc | format_number }} |
+
+### Language Distribution
+
+| Language | Files | % Files | Lines of Code | % LOC | Avg Complexity |
+|----------|------:|--------:|--------------:|------:|---------------:|
+{% for lang in languages[:20] %}
+| {{ lang.language }} | {{ lang.file_count | format_number }} | {{ lang.file_percent | format_percent }} | {{ lang.loc | format_number }} | {{ lang.loc_percent | format_percent }} | {{ lang.avg_complexity | format_number if lang.avg_complexity else 'N/A' }} |
+{% endfor %}
+
+{% if categories.compiled %}
+### Compiled Languages
+
+| Language | Files | Lines of Code |
+|----------|------:|--------------:|
+{% for lang in categories.compiled %}
+| {{ lang.language }} | {{ lang.file_count | format_number }} | {{ lang.loc | format_number }} |
+{% endfor %}
+{% endif %}
+
+{% if categories.scripted %}
+### Scripting Languages
+
+| Language | Files | Lines of Code |
+|----------|------:|--------------:|
+{% for lang in categories.scripted %}
+| {{ lang.language }} | {{ lang.file_count | format_number }} | {{ lang.loc | format_number }} |
+{% endfor %}
+{% endif %}
+
+{% else %}
+*No language data available for this run.*
+{% endif %}

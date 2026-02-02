@@ -133,7 +133,7 @@ Semgrep completes the Layer 1 toolchain:
 | B6_MESSAGE_CHAINS | 30 | Method chaining violations |
 | E7_ASYNC_WITHOUT_AWAIT | 22 | Async methods without await |
 
-### LLM Evaluation (4 Judges)
+### LLM Evaluation (4 Judges, Claude CLI model = opus-4.5)
 
 | Judge | Score | Confidence | Weight |
 |-------|-------|------------|--------|

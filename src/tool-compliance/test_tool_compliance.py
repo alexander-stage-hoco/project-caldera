@@ -20,6 +20,7 @@ from tool_compliance import (
     _check_dbt_model_coverage,
     _check_entity_repository_alignment,
     _check_output_metadata_consistency,
+    _check_synthetic_evaluation_context,
     _check_test_structure_naming,
     _normalize_tool_name_for_dbt,
     _parse_rollup_names_from_eval_strategy,
@@ -299,7 +300,7 @@ def test_scan_tool_evaluate_uses_temp_dir(tmp_path: Path, monkeypatch) -> None:
         "# Evaluation Strategy\n\n## Rollup Validation\n\nRollups:\n- direct\n- recursive\n\nTests:\n- src/sot-engine/dbt/tests/test_rollup_scc_direct_vs_recursive.sql\n"
     )
 
-    def fake_run_make(tool_path: Path, target: str, env: dict[str, str]) -> str | None:
+    def fake_run_make(tool_path: Path, target: str, env: dict[str, str]) -> tuple[int, str, str, float]:
         if target == "evaluate":
             out_dir = Path(env["EVAL_OUTPUT_DIR"])
             out_dir.mkdir(parents=True, exist_ok=True)
@@ -319,7 +320,7 @@ def test_scan_tool_evaluate_uses_temp_dir(tmp_path: Path, monkeypatch) -> None:
             (out_dir / "output.json").write_text(json.dumps(output))
             (out_dir / "scorecard.md").write_text("Scorecard\n")
             (out_dir / "checks.json").write_text("{}")
-        return None
+        return (0, "", "", 100.0)
 
     def fake_schema_check(_tool_root: Path, _output_path: Path, _venv: str | None) -> CheckResult:
         return CheckResult(
@@ -715,3 +716,640 @@ def test_collect_path_values_nested() -> None:
     assert "/private/tmp/myrepo" in paths
     assert "file1.py" in paths
     assert "file2.py" in paths
+
+
+# ===========================================================================
+# Tests for SoT Integration Checks
+# ===========================================================================
+
+from tool_compliance import (
+    _check_sot_adapter_registered,
+    _check_sot_schema_table,
+    _check_sot_orchestrator_wired,
+    _check_sot_dbt_staging_model,
+    _check_llm_judge_count,
+    _check_makefile_permissions,
+    MIN_LLM_JUDGES,
+)
+
+
+def test_sot_adapter_registered_passes_for_scc() -> None:
+    """Test SoT adapter registration check passes for scc."""
+    tool_root = Path(__file__).resolve().parents[1] / "tools" / "scc"
+    if not tool_root.exists():
+        return  # Skip if tool directory doesn't exist
+    result = _check_sot_adapter_registered(tool_root, "scc")
+    assert result.check_id == "sot.adapter_registered"
+    assert result.status == "pass"
+
+
+def test_sot_adapter_registered_skips_unknown() -> None:
+    """Test SoT adapter registration check skips for unknown tools."""
+    tool_root = Path(__file__).resolve().parents[1] / "tools" / "unknown"
+    result = _check_sot_adapter_registered(tool_root, "unknown")
+    assert result.check_id == "sot.adapter_registered"
+    assert result.status == "skip"
+
+
+def test_sot_schema_table_passes_for_scc() -> None:
+    """Test SoT schema table check passes for scc."""
+    tool_root = Path(__file__).resolve().parents[1] / "tools" / "scc"
+    if not tool_root.exists():
+        return  # Skip if tool directory doesn't exist
+    result = _check_sot_schema_table(tool_root, "scc")
+    assert result.check_id == "sot.schema_table"
+    assert result.status == "pass"
+
+
+def test_sot_schema_table_skips_unknown() -> None:
+    """Test SoT schema table check skips for unknown tools."""
+    tool_root = Path(__file__).resolve().parents[1] / "tools" / "unknown"
+    result = _check_sot_schema_table(tool_root, "unknown")
+    assert result.check_id == "sot.schema_table"
+    assert result.status == "skip"
+
+
+def test_sot_orchestrator_wired_passes_for_scc() -> None:
+    """Test SoT orchestrator wiring check passes for scc."""
+    tool_root = Path(__file__).resolve().parents[1] / "tools" / "scc"
+    if not tool_root.exists():
+        return  # Skip if tool directory doesn't exist
+    result = _check_sot_orchestrator_wired(tool_root, "scc")
+    assert result.check_id == "sot.orchestrator_wired"
+    assert result.status == "pass"
+
+
+def test_sot_orchestrator_wired_special_for_layout_scanner() -> None:
+    """Test SoT orchestrator check handles layout-scanner specially."""
+    tool_root = Path(__file__).resolve().parents[1] / "tools" / "layout-scanner"
+    result = _check_sot_orchestrator_wired(tool_root, "layout-scanner")
+    assert result.check_id == "sot.orchestrator_wired"
+    assert result.status == "pass"
+    assert "prerequisite" in result.message.lower()
+
+
+def test_sot_orchestrator_wired_skips_unknown() -> None:
+    """Test SoT orchestrator wiring check skips for unknown tools."""
+    tool_root = Path(__file__).resolve().parents[1] / "tools" / "unknown"
+    result = _check_sot_orchestrator_wired(tool_root, "unknown")
+    assert result.check_id == "sot.orchestrator_wired"
+    assert result.status == "skip"
+
+
+def test_sot_dbt_staging_model_passes_for_scc() -> None:
+    """Test SoT dbt staging model check passes for scc."""
+    tool_root = Path(__file__).resolve().parents[1] / "tools" / "scc"
+    if not tool_root.exists():
+        return  # Skip if tool directory doesn't exist
+    result = _check_sot_dbt_staging_model(tool_root, "scc")
+    assert result.check_id == "sot.dbt_staging_model"
+    assert result.status == "pass"
+
+
+def test_sot_dbt_staging_model_skips_unknown() -> None:
+    """Test SoT dbt staging model check skips for unknown tools."""
+    tool_root = Path(__file__).resolve().parents[1] / "tools" / "unknown"
+    result = _check_sot_dbt_staging_model(tool_root, "unknown")
+    assert result.check_id == "sot.dbt_staging_model"
+    assert result.status == "skip"
+
+
+# ===========================================================================
+# Tests for LLM Judge Count Check
+# ===========================================================================
+
+def test_llm_judge_count_passes_with_enough_judges(tmp_path: Path) -> None:
+    """Test LLM judge count passes when >= 4 judges present."""
+    tool_root = tmp_path / "demo"
+    judges_dir = tool_root / "evaluation" / "llm" / "judges"
+    judges_dir.mkdir(parents=True)
+
+    # Create 4 judge files
+    for name in ["accuracy.py", "actionability.py", "false_positive.py", "integration_fit.py"]:
+        (judges_dir / name).write_text("# judge\n")
+
+    result = _check_llm_judge_count(tool_root)
+    assert result.check_id == "evaluation.llm_judge_count"
+    assert result.status == "pass"
+
+
+def test_llm_judge_count_fails_with_too_few_judges(tmp_path: Path) -> None:
+    """Test LLM judge count fails when < 4 judges present."""
+    tool_root = tmp_path / "demo"
+    judges_dir = tool_root / "evaluation" / "llm" / "judges"
+    judges_dir.mkdir(parents=True)
+
+    # Create only 2 judge files
+    for name in ["accuracy.py", "actionability.py"]:
+        (judges_dir / name).write_text("# judge\n")
+
+    result = _check_llm_judge_count(tool_root)
+    assert result.check_id == "evaluation.llm_judge_count"
+    assert result.status == "fail"
+    assert "2 found" in result.message
+
+
+def test_llm_judge_count_excludes_base_and_init(tmp_path: Path) -> None:
+    """Test LLM judge count excludes base.py and __init__.py."""
+    tool_root = tmp_path / "demo"
+    judges_dir = tool_root / "evaluation" / "llm" / "judges"
+    judges_dir.mkdir(parents=True)
+
+    # Create judge files including base.py and __init__.py
+    for name in ["accuracy.py", "actionability.py", "base.py", "__init__.py"]:
+        (judges_dir / name).write_text("# judge\n")
+
+    result = _check_llm_judge_count(tool_root)
+    assert result.check_id == "evaluation.llm_judge_count"
+    assert result.status == "fail"
+    # Should only count accuracy.py and actionability.py (2), not base.py and __init__.py
+    assert "2 found" in result.message
+
+
+def test_llm_judge_count_fails_missing_directory(tmp_path: Path) -> None:
+    """Test LLM judge count fails when judges directory is missing."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+
+    result = _check_llm_judge_count(tool_root)
+    assert result.check_id == "evaluation.llm_judge_count"
+    assert result.status == "fail"
+    assert "missing" in result.message.lower()
+
+
+def test_llm_judge_count_for_real_tools() -> None:
+    """Test LLM judge count check runs for existing tools.
+
+    Note: This test verifies the check runs correctly, not that all tools pass.
+    Some tools may be in the process of adding required judges.
+    """
+    tools_root = Path(__file__).resolve().parents[1] / "tools"
+    results = {}
+    for tool_dir in tools_root.iterdir():
+        if not tool_dir.is_dir() or not (tool_dir / "Makefile").exists():
+            continue
+        result = _check_llm_judge_count(tool_dir)
+        assert result.check_id == "evaluation.llm_judge_count"
+        results[tool_dir.name] = result.status
+
+    # At least some tools should pass
+    passing = [name for name, status in results.items() if status == "pass"]
+    assert len(passing) > 0, "At least some tools should have >= 4 LLM judges"
+
+
+# ===========================================================================
+# Tests for Makefile Permissions Check
+# ===========================================================================
+
+def test_makefile_permissions_passes_readable(tmp_path: Path) -> None:
+    """Test Makefile permissions check passes for readable file."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+    makefile = tool_root / "Makefile"
+    makefile.write_text("setup:\n\techo setup\n")
+    makefile.chmod(0o644)
+
+    result = _check_makefile_permissions(tool_root)
+    assert result.check_id == "make.permissions"
+    assert result.status == "pass"
+
+
+def test_makefile_permissions_fails_missing(tmp_path: Path) -> None:
+    """Test Makefile permissions check fails for missing file."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+
+    result = _check_makefile_permissions(tool_root)
+    assert result.check_id == "make.permissions"
+    assert result.status == "fail"
+
+
+# ===========================================================================
+# Tests for Cross-Tool SQL Join Pattern Check
+# ===========================================================================
+
+from tool_compliance import (
+    _check_cross_tool_join_patterns,
+    _check_cross_tool_join_patterns_in_file,
+    _identify_tools_in_sql,
+    _extract_table_aliases,
+    TOOL_TABLE_PATTERNS,
+)
+
+
+def test_identify_tools_in_sql_single_tool() -> None:
+    """Test identifying a single tool from SQL content."""
+    sql = "SELECT * FROM stg_lz_scc_file_metrics WHERE run_pk = 1"
+    tools = _identify_tools_in_sql(sql)
+    assert tools == {"scc"}
+
+
+def test_identify_tools_in_sql_multiple_tools() -> None:
+    """Test identifying multiple tools from SQL content."""
+    sql = """
+    SELECT *
+    FROM stg_lz_scc_file_metrics scc
+    JOIN stg_lz_lizard_file_metrics lz ON scc.file_id = lz.file_id
+    """
+    tools = _identify_tools_in_sql(sql)
+    assert "scc" in tools
+    assert "lizard" in tools
+
+
+def test_identify_tools_in_sql_rollup_tables() -> None:
+    """Test identifying tools from rollup table references."""
+    sql = """
+    SELECT * FROM rollup_scc_directory_recursive_distributions
+    JOIN rollup_lizard_directory_recursive_distributions ON 1=1
+    """
+    tools = _identify_tools_in_sql(sql)
+    assert "scc" in tools
+    assert "lizard" in tools
+
+
+def test_extract_table_aliases() -> None:
+    """Test extracting table aliases and mapping to tools."""
+    sql = """
+    FROM stg_lz_scc_file_metrics sm
+    JOIN stg_lz_lizard_file_metrics lm ON sm.file_id = lm.file_id
+    """
+    aliases = _extract_table_aliases(sql)
+    assert aliases.get("sm") == "scc"
+    assert aliases.get("lm") == "lizard"
+
+
+def test_cross_tool_join_patterns_passes_correct_pattern(tmp_path: Path) -> None:
+    """Test that correct cross-tool join patterns pass."""
+    # Create a SQL file that uses collection_run_id correctly
+    sql_content = """
+    WITH tool_runs AS (
+        SELECT tool_name, run_pk, collection_run_id
+        FROM lz_tool_runs
+        WHERE collection_run_id = (SELECT collection_run_id FROM lz_tool_runs WHERE run_pk = {{ run_pk }})
+    ),
+    scc_map AS (
+        SELECT run_pk as scc_run_pk FROM tool_runs WHERE tool_name = 'scc'
+    ),
+    lizard_map AS (
+        SELECT run_pk as lizard_run_pk FROM tool_runs WHERE tool_name = 'lizard'
+    )
+    SELECT *
+    FROM stg_lz_scc_file_metrics scc
+    JOIN stg_lz_lizard_file_metrics lz
+        ON lz.run_pk = (SELECT lizard_run_pk FROM lizard_map)
+        AND lz.file_id = scc.file_id
+    WHERE scc.run_pk = (SELECT scc_run_pk FROM scc_map)
+    """
+    sql_file = tmp_path / "correct_join.sql"
+    sql_file.write_text(sql_content)
+
+    issues = _check_cross_tool_join_patterns_in_file(sql_file, sql_content)
+    assert issues == []
+
+
+def test_cross_tool_join_patterns_passes_tool_specific_run_pk(tmp_path: Path) -> None:
+    """Test that tool-specific run_pk columns pass."""
+    sql_content = """
+    SELECT *
+    FROM unified_file_metrics ufm
+    JOIN rollup_trivy_directory_counts_recursive rv
+        ON rv.run_pk = ufm.trivy_run_pk
+    WHERE ufm.scc_run_pk = 123
+      AND ufm.lizard_run_pk = 124
+    """
+    sql_file = tmp_path / "tool_specific.sql"
+    sql_file.write_text(sql_content)
+
+    issues = _check_cross_tool_join_patterns_in_file(sql_file, sql_content)
+    assert issues == []
+
+
+def test_cross_tool_join_patterns_passes_single_tool() -> None:
+    """Test that single-tool queries don't trigger false positives."""
+    sql_content = """
+    SELECT *
+    FROM stg_lz_scc_file_metrics scc
+    JOIN stg_lz_scc_directory_metrics d ON scc.run_pk = d.run_pk
+    """
+    issues = _check_cross_tool_join_patterns_in_file(Path("single_tool.sql"), sql_content)
+    assert issues == []
+
+
+def test_cross_tool_join_patterns_check_runs_on_project(tmp_path: Path) -> None:
+    """Test that the check runs successfully on the actual project."""
+    project_root = Path(__file__).resolve().parents[2]
+    result = _check_cross_tool_join_patterns(project_root)
+    assert result.check_id == "sql.cross_tool_join_patterns"
+    # The check should pass on the actual project (all files use correct patterns)
+    assert result.status == "pass", f"Check failed with evidence: {result.evidence}"
+
+
+def test_cross_tool_join_patterns_detects_anti_pattern(tmp_path: Path) -> None:
+    """Test that direct run_pk joins between different tools are detected."""
+    # Create directory structure
+    dbt_dir = tmp_path / "src" / "sot-engine" / "dbt" / "models"
+    dbt_dir.mkdir(parents=True)
+
+    # Create a SQL file with the anti-pattern (incorrect cross-tool join)
+    # Note: This is a synthetic example - real files should use correct patterns
+    sql_content = """
+    -- BAD: This directly joins run_pk across different tools (will never match)
+    SELECT *
+    FROM stg_lz_scc_file_metrics scc
+    JOIN stg_lz_lizard_file_metrics lz ON scc.run_pk = lz.run_pk
+    WHERE scc.file_id = lz.file_id
+    """
+    sql_file = dbt_dir / "bad_join.sql"
+    sql_file.write_text(sql_content)
+
+    result = _check_cross_tool_join_patterns(tmp_path)
+    assert result.check_id == "sql.cross_tool_join_patterns"
+    assert result.status == "fail"
+    assert len(result.evidence) > 0
+    assert "bad_join.sql" in result.evidence[0]
+
+
+def test_cross_tool_join_patterns_no_sql_files(tmp_path: Path) -> None:
+    """Test that check passes gracefully when no SQL files exist."""
+    result = _check_cross_tool_join_patterns(tmp_path)
+    assert result.check_id == "sql.cross_tool_join_patterns"
+    assert result.status == "pass"
+    assert "0 files checked" in result.message
+
+
+# =============================================================================
+# Tests for evaluation.synthetic_context check
+# =============================================================================
+
+
+def test_synthetic_context_passes_for_gitleaks() -> None:
+    """Test synthetic context check passes for gitleaks which implements the pattern."""
+    tool_root = Path(__file__).resolve().parents[1] / "tools" / "gitleaks"
+    if not tool_root.exists():
+        return  # Skip if tool directory doesn't exist
+    result = _check_synthetic_evaluation_context(tool_root)
+    assert result.check_id == "evaluation.synthetic_context"
+    assert result.status == "pass", f"Expected pass but got: {result.message} - {result.evidence}"
+
+
+def test_synthetic_context_fails_missing_judges_dir(tmp_path: Path) -> None:
+    """Test synthetic context check fails when judges directory is missing."""
+    tool_root = tmp_path / "demo-tool"
+    tool_root.mkdir()
+    # Create evaluation dir but no judges dir
+    eval_dir = tool_root / "evaluation" / "llm"
+    eval_dir.mkdir(parents=True)
+
+    result = _check_synthetic_evaluation_context(tool_root)
+    assert result.check_id == "evaluation.synthetic_context"
+    assert result.status == "fail"
+    assert "directory missing" in result.message
+
+
+def test_synthetic_context_fails_missing_base_evaluation_mode(tmp_path: Path) -> None:
+    """Test synthetic context check fails when base.py lacks evaluation_mode parameter."""
+    tool_root = tmp_path / "demo-tool"
+    judges_dir = tool_root / "evaluation" / "llm" / "judges"
+    judges_dir.mkdir(parents=True)
+
+    # Create base.py WITHOUT evaluation_mode parameter
+    base_py = judges_dir / "base.py"
+    base_py.write_text('''
+from __future__ import annotations
+
+class BaseJudge:
+    """Base judge class without evaluation_mode."""
+
+    def __init__(
+        self,
+        model: str = "opus",
+        timeout: int = 120,
+    ):
+        self.model = model
+        self.timeout = timeout
+
+    @property
+    def dimension_name(self) -> str:
+        return "base"
+
+    @property
+    def weight(self) -> float:
+        return 1.0
+''')
+
+    result = _check_synthetic_evaluation_context(tool_root)
+    assert result.check_id == "evaluation.synthetic_context"
+    assert result.status == "fail"
+    assert "evaluation_mode parameter" in result.message
+
+
+def test_synthetic_context_fails_missing_evidence_keys(tmp_path: Path) -> None:
+    """Test synthetic context check fails when judge doesn't set required evidence keys."""
+    tool_root = tmp_path / "demo-tool"
+    judges_dir = tool_root / "evaluation" / "llm" / "judges"
+    prompts_dir = tool_root / "evaluation" / "llm" / "prompts"
+    judges_dir.mkdir(parents=True)
+    prompts_dir.mkdir(parents=True)
+
+    # Create base.py WITH evaluation_mode parameter
+    base_py = judges_dir / "base.py"
+    base_py.write_text('''
+from __future__ import annotations
+
+class BaseJudge:
+    def __init__(
+        self,
+        model: str = "opus",
+        evaluation_mode: str | None = None,
+    ):
+        self.model = model
+        self.evaluation_mode = evaluation_mode
+
+    @property
+    def dimension_name(self) -> str:
+        return "base"
+
+    @property
+    def weight(self) -> float:
+        return 0.5
+''')
+
+    # Create a judge that does NOT set required evidence keys
+    judge_py = judges_dir / "accuracy.py"
+    judge_py.write_text('''
+from __future__ import annotations
+from .base import BaseJudge
+
+class AccuracyJudge(BaseJudge):
+    @property
+    def dimension_name(self) -> str:
+        return "accuracy"
+
+    @property
+    def weight(self) -> float:
+        return 0.35
+
+    def collect_evidence(self):
+        # Missing: evaluation_mode, synthetic_baseline, interpretation_guidance
+        return {
+            "some_data": "value",
+        }
+''')
+
+    result = _check_synthetic_evaluation_context(tool_root)
+    assert result.check_id == "evaluation.synthetic_context"
+    assert result.status == "fail"
+    assert "missing" in result.message.lower()
+
+
+def test_synthetic_context_fails_missing_prompt_placeholders(tmp_path: Path) -> None:
+    """Test synthetic context check fails when prompt lacks required placeholders."""
+    tool_root = tmp_path / "demo-tool"
+    judges_dir = tool_root / "evaluation" / "llm" / "judges"
+    prompts_dir = tool_root / "evaluation" / "llm" / "prompts"
+    judges_dir.mkdir(parents=True)
+    prompts_dir.mkdir(parents=True)
+
+    # Create base.py WITH evaluation_mode parameter
+    base_py = judges_dir / "base.py"
+    base_py.write_text('''
+from __future__ import annotations
+
+class BaseJudge:
+    def __init__(
+        self,
+        model: str = "opus",
+        evaluation_mode: str | None = None,
+    ):
+        self.model = model
+        self.evaluation_mode = evaluation_mode
+
+    @property
+    def dimension_name(self) -> str:
+        return "base"
+''')
+
+    # Create a judge that sets all required evidence keys
+    judge_py = judges_dir / "accuracy.py"
+    judge_py.write_text('''
+from __future__ import annotations
+from .base import BaseJudge
+
+class AccuracyJudge(BaseJudge):
+    @property
+    def dimension_name(self) -> str:
+        return "accuracy"
+
+    @property
+    def weight(self) -> float:
+        return 0.35
+
+    def collect_evidence(self):
+        evidence = {
+            "evaluation_mode": self.evaluation_mode,
+            "synthetic_baseline": "test baseline",
+            "interpretation_guidance": "test guidance",
+        }
+        return evidence
+''')
+
+    # Create prompt WITHOUT required placeholders
+    prompt_md = prompts_dir / "accuracy.md"
+    prompt_md.write_text('''# Accuracy Evaluation
+
+Evaluate the accuracy of the analysis.
+
+## Evidence
+
+{{ evidence }}
+
+## Scoring
+
+Score 1-5 based on accuracy.
+''')
+
+    result = _check_synthetic_evaluation_context(tool_root)
+    assert result.check_id == "evaluation.synthetic_context"
+    assert result.status == "fail"
+    assert "placeholder" in result.message.lower()
+
+
+def test_synthetic_context_passes_complete_implementation(tmp_path: Path) -> None:
+    """Test synthetic context check passes when all requirements are met."""
+    tool_root = tmp_path / "demo-tool"
+    judges_dir = tool_root / "evaluation" / "llm" / "judges"
+    prompts_dir = tool_root / "evaluation" / "llm" / "prompts"
+    judges_dir.mkdir(parents=True)
+    prompts_dir.mkdir(parents=True)
+
+    # Create base.py WITH evaluation_mode parameter
+    base_py = judges_dir / "base.py"
+    base_py.write_text('''
+from __future__ import annotations
+
+class BaseJudge:
+    def __init__(
+        self,
+        model: str = "opus",
+        evaluation_mode: str | None = None,
+    ):
+        self.model = model
+        self.evaluation_mode = evaluation_mode
+
+    @property
+    def dimension_name(self) -> str:
+        return "base"
+''')
+
+    # Create a judge that sets all required evidence keys
+    judge_py = judges_dir / "accuracy.py"
+    judge_py.write_text('''
+from __future__ import annotations
+from .base import BaseJudge
+
+class AccuracyJudge(BaseJudge):
+    @property
+    def dimension_name(self) -> str:
+        return "accuracy"
+
+    @property
+    def weight(self) -> float:
+        return 0.35
+
+    def collect_evidence(self):
+        evidence = {
+            "evaluation_mode": self.evaluation_mode,
+            "synthetic_baseline": "test baseline",
+            "interpretation_guidance": "test guidance",
+            "other_data": "value",
+        }
+        return evidence
+''')
+
+    # Create prompt WITH all required placeholders
+    prompt_md = prompts_dir / "accuracy.md"
+    prompt_md.write_text('''# Accuracy Evaluation
+
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Baseline
+{{ synthetic_baseline }}
+
+### Mode
+{{ evaluation_mode }}
+
+## Evidence
+
+{{ evidence }}
+
+## Scoring
+
+Score 1-5 based on accuracy.
+''')
+
+    result = _check_synthetic_evaluation_context(tool_root)
+    assert result.check_id == "evaluation.synthetic_context"
+    assert result.status == "pass"
+    assert "correctly" in result.message.lower()

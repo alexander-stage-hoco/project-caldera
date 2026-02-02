@@ -454,7 +454,7 @@ python scripts/evaluate.py
 
 # Results saved to:
 # - evaluation/results/scorecard.md
-# - evaluation/results/checks.json
+# - evaluation/results/evaluation_report.json
 ```
 
 ### Evaluation Outputs
@@ -465,7 +465,7 @@ Evaluation artifacts are written to a fixed location and overwrite the previous 
 evaluation/results/
 ├── output.json            # Envelope output for evaluation runs
 ├── raw_scc_output.json    # Raw scc output (evaluation)
-├── checks.json            # Programmatic checks (JSON)
+├── evaluation_report.json            # Programmatic checks (JSON)
 ├── scorecard.md           # Programmatic scorecard
 └── llm_evaluation.json    # LLM judge results (if run)
 ```
@@ -475,7 +475,7 @@ evaluation/results/
 | File | Description |
 |------|-------------|
 | `evaluation/results/scorecard.md` | Human-readable evaluation report |
-| `evaluation/results/checks.json` | Detailed check results with evidence |
+| `evaluation/results/evaluation_report.json` | Detailed check results with evidence |
 | `evaluation/results/output.json` | Envelope output used in evaluation |
 
 ---

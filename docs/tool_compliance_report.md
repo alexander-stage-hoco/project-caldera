@@ -1,53 +1,48 @@
 # Tool Compliance Report
 
-Generated: `2026-01-30T21:03:01.702417+00:00`
+Generated: `2026-02-02T18:16:43.438971+00:00`
 
-Summary: 0 passed, 8 failed, 8 total
+Summary: 1 passed, 0 failed, 1 total
 
-| Tool | Status | Failed Checks |
+| Tool | Status | Checks Passed | Checks Failed | Failed Check IDs |
+| --- | --- | --- | --- | --- |
+| gitleaks | pass | 11 | 0 | - |
+
+## Performance Summary
+
+### Slowest Checks
+
+| Tool | Check ID | Duration (ms) |
 | --- | --- | --- |
-| git-sizer | fail | run.analyze, run.evaluate_llm, output.load, evaluation.ground_truth, evaluation.rollup_validation, dbt.model_coverage, entity.repository_alignment |
-| layout-scanner | fail | output.schema_validate, entity.repository_alignment |
-| lizard | fail | output.schema_validate, entity.repository_alignment |
-| roslyn-analyzers | fail | output.schema_validate, entity.repository_alignment |
-| scc | fail | output.schema_validate, entity.repository_alignment |
-| semgrep | fail | output.schema_validate, entity.repository_alignment |
-| sonarqube | fail | output.schema_validate, entity.repository_alignment |
-| trivy | fail | output.schema_validate, entity.repository_alignment |
+| gitleaks | `test.structure_naming` | 1.05 |
+| gitleaks | `docs.blueprint_structure` | 0.85 |
+| gitleaks | `docs.eval_strategy_structure` | 0.78 |
+| gitleaks | `make.targets` | 0.62 |
+| gitleaks | `schema.draft` | 0.43 |
+| gitleaks | `structure.paths` | 0.42 |
+| gitleaks | `make.uses_common` | 0.19 |
+| gitleaks | `make.output_dir_convention` | 0.14 |
+| gitleaks | `make.output_filename` | 0.14 |
+| gitleaks | `schema.contract` | 0.08 |
 
-## git-sizer failures
-- `run.analyze` (critical): No analysis output found - run with --run-analysis or execute 'make analyze' [-]
-- `run.evaluate_llm` (medium): No LLM evaluation output found - run with --run-llm or execute 'make evaluate-llm' [-]
-- `output.load` (high): No output.json available [No output.json found]
-- `evaluation.ground_truth` (high): Missing per-language ground truth [bloated.json, healthy.json]
-- `evaluation.rollup_validation` (high): Rollup Validation section incomplete [Missing test paths: *Note**: git-sizer provides **repository-level** metrics, not file-level metrics. Therefore:, No directory rollup validation is applicable, Metrics are single values per repository run, No distribution analysis needed]
-- `dbt.model_coverage` (high): Missing dbt model coverage [No staging models matching stg_*git-sizer*.sql, Missing rollup model for repo_level_metrics (no directory rollups - git-sizer is repository-level only)]
-- `entity.repository_alignment` (high): Failed to import persistence modules: No module named 'duckdb' [No module named 'duckdb']
+### Total Time Per Tool
 
-## layout-scanner failures
-- `output.schema_validate` (critical): jsonschema not installed for validation [-]
-- `entity.repository_alignment` (high): Failed to import persistence modules: No module named 'duckdb' [No module named 'duckdb']
+| Tool | Total (s) |
+| --- | --- |
+| gitleaks | 0.00 |
 
-## lizard failures
-- `output.schema_validate` (critical): jsonschema not installed for validation [-]
-- `entity.repository_alignment` (high): Failed to import persistence modules: No module named 'duckdb' [No module named 'duckdb']
+## gitleaks
 
-## roslyn-analyzers failures
-- `output.schema_validate` (critical): jsonschema not installed for validation [-]
-- `entity.repository_alignment` (high): Failed to import persistence modules: No module named 'duckdb' [No module named 'duckdb']
-
-## scc failures
-- `output.schema_validate` (critical): jsonschema not installed for validation [-]
-- `entity.repository_alignment` (high): Failed to import persistence modules: No module named 'duckdb' [No module named 'duckdb']
-
-## semgrep failures
-- `output.schema_validate` (critical): jsonschema not installed for validation [-]
-- `entity.repository_alignment` (high): Failed to import persistence modules: No module named 'duckdb' [No module named 'duckdb']
-
-## sonarqube failures
-- `output.schema_validate` (critical): jsonschema not installed for validation [-]
-- `entity.repository_alignment` (high): Failed to import persistence modules: No module named 'duckdb' [No module named 'duckdb']
-
-## trivy failures
-- `output.schema_validate` (critical): jsonschema not installed for validation [-]
-- `entity.repository_alignment` (high): Failed to import persistence modules: No module named 'duckdb' [No module named 'duckdb']
+| Check ID | Status | Severity | Duration (ms) | Message | Evidence | Stdout | Stderr |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `structure.paths` | pass | high | 0.42 | All required paths present | - | - | - |
+| `make.targets` | pass | high | 0.62 | Makefile targets present | - | - | - |
+| `make.permissions` | pass | low | 0.04 | Makefile has correct permissions | - | - | - |
+| `make.uses_common` | pass | medium | 0.19 | Makefile includes ../Makefile.common | - | - | - |
+| `make.output_dir_convention` | pass | low | 0.14 | OUTPUT_DIR inherited from Makefile.common | outputs/$(RUN_ID) | - | - |
+| `make.output_filename` | pass | medium | 0.14 | analyze target uses output directory argument | - | - | - |
+| `schema.draft` | pass | medium | 0.43 | Schema draft is 2020-12 | - | - | - |
+| `schema.contract` | pass | high | 0.08 | Schema requires metadata and data fields | - | - | - |
+| `docs.blueprint_structure` | pass | medium | 0.85 | BLUEPRINT.md has required sections | - | - | - |
+| `docs.eval_strategy_structure` | pass | high | 0.78 | EVAL_STRATEGY.md has required sections | - | - | - |
+| `test.structure_naming` | pass | medium | 1.05 | Test structure and naming conventions followed | - | - | - |

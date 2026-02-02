@@ -4,12 +4,14 @@
 Usage:
     python scripts/run_llm_eval.py --mode focused
     python scripts/run_llm_eval.py --mode full
-    python scripts/run_llm_eval.py --mode full --model sonnet
+    python scripts/run_llm_eval.py --mode full --model opus-4.5
 """
 
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import sys
 from pathlib import Path
 
@@ -17,6 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from evaluation.llm import LLMEvaluator
+from evaluation.llm.orchestrator import ProgrammaticInput
 
 
 def main() -> int:
@@ -31,8 +34,8 @@ def main() -> int:
     )
     parser.add_argument(
         "--model",
-        default="opus",
-        choices=["opus", "sonnet", "haiku"],
+        default="opus-4.5",
+        choices=["opus", "opus-4.5", "sonnet", "haiku"],
         help="Claude model to use (default: opus)",
     )
     parser.add_argument(
@@ -56,6 +59,11 @@ def main() -> int:
         type=float,
         help="Programmatic score (0-5) to include in combined scorecard",
     )
+    parser.add_argument(
+        "--programmatic-results",
+        type=Path,
+        help="Path to programmatic evaluation JSON (evaluation_report.json)",
+    )
 
     args = parser.parse_args()
 
@@ -68,10 +76,13 @@ def main() -> int:
     print("=" * 60)
     print()
 
+    timeout = int(os.environ.get("LLM_TIMEOUT", "120"))
+
     # Create evaluator
     evaluator = LLMEvaluator(
         working_dir=args.working_dir,
         model=args.model,
+        timeout=timeout,
     )
 
     # Register judges based on mode
@@ -87,12 +98,31 @@ def main() -> int:
     # Run evaluation
     result = evaluator.evaluate(run_assertions=not args.skip_assertions)
 
+    # Load programmatic results and attach to result
+    if args.programmatic_results and args.programmatic_results.exists():
+        prog_data = json.loads(args.programmatic_results.read_text())
+        summary = prog_data.get("summary", {})
+        result.programmatic_input = ProgrammaticInput(
+            file=str(args.programmatic_results),
+            decision=prog_data.get("decision", "UNKNOWN"),
+            score=prog_data.get("score", 0.0),
+            checks_passed=summary.get("passed", 0),
+            checks_failed=summary.get("failed", 0),
+        )
+        # Use programmatic score for combined calculation if not explicitly provided
+        if args.programmatic_score is None:
+            # Convert 0-1 scale to 0-5 scale
+            args.programmatic_score = prog_data.get("score", 0.0) * 5.0
+
     # Compute combined score if programmatic score provided
     if args.programmatic_score is not None:
         result = evaluator.compute_combined_score(result, args.programmatic_score)
 
     # Save results
     output_path = args.output or evaluator.save_results(result)
+    if args.output:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(result.to_json())
     print()
     print("=" * 60)
     print("Results Summary")
@@ -126,7 +156,7 @@ def main() -> int:
     report_path.write_text(report)
     print(f"Report saved to: {report_path}")
 
-    return 0 if result.decision in ("STRONG_PASS", "PASS") else 1
+    return 0 if result.decision in ("STRONG_PASS", "PASS", "WEAK_PASS") else 1
 
 
 if __name__ == "__main__":

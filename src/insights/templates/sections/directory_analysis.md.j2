@@ -1,0 +1,41 @@
+## Directory Analysis
+
+| Metric | Value |
+|--------|------:|
+| Directories Analyzed | {{ tree_stats.total_dirs | format_number }} |
+| Max Directory Depth | {{ tree_stats.max_depth }} |
+| Avg Directory Depth | {{ tree_stats.avg_depth | format_number }} |
+
+{% if has_hotspots %}
+### Top Directories by Complexity
+
+| Directory | Files | Total CCN | Avg CCN | Max CCN |
+|-----------|------:|----------:|--------:|--------:|
+{% for dir in hotspots[:12] %}
+| {{ dir.directory_path }} | {{ dir.file_count | format_number }} | {{ dir.total_ccn | format_number }} | {{ dir.avg_ccn | format_number }} | {{ dir.max_ccn | format_number }} |
+{% endfor %}
+
+{% endif %}
+{% if has_largest %}
+### Top Directories by Size
+
+| Directory | Files | Total Lines | Code Lines | Comments |
+|-----------|------:|------------:|-----------:|---------:|
+{% for dir in largest[:12] %}
+| {{ dir.directory_path }} | {{ dir.file_count | format_number }} | {{ dir.total_lines | format_number }} | {{ dir.total_code | format_number }} | {{ dir.total_comments | format_number }} |
+{% endfor %}
+
+{% endif %}
+{% if has_smelliest %}
+### Top Directories by Code Smells
+
+| Directory | Smell Count | Files Affected | Unique Rules |
+|-----------|------------:|---------------:|-------------:|
+{% for dir in smelliest[:12] %}
+| {{ dir.directory_path }} | {{ dir.smell_count | format_number }} | {{ dir.files_with_smells | format_number }} | {{ dir.unique_rules | format_number }} |
+{% endfor %}
+
+{% endif %}
+{% if not has_hotspots and not has_largest %}
+*No directory data available for this run.*
+{% endif %}
