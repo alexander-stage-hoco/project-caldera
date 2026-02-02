@@ -274,6 +274,7 @@ def ingest_outputs(
     semgrep_output: Optional[Path] = None,
     sonarqube_output: Optional[Path] = None,
     trivy_output: Optional[Path] = None,
+    gitleaks_output: Optional[Path] = None,
     schema_path: Path = None,
     logger: Optional[OrchestratorLogger] = None,
 ) -> None:
@@ -297,6 +298,7 @@ def ingest_outputs(
         "semgrep": semgrep_output,
         "sonarqube": sonarqube_output,
         "trivy": trivy_output,
+        "gitleaks": gitleaks_output,
     }
 
     # Ingest each tool using its configuration
@@ -381,6 +383,7 @@ def main() -> int:
     parser.add_argument("--semgrep-output", type=str)
     parser.add_argument("--sonarqube-output", type=str)
     parser.add_argument("--trivy-output", type=str)
+    parser.add_argument("--gitleaks-output", type=str)
     parser.add_argument("--run-tools", action="store_true")
     parser.add_argument("--run-dbt", action="store_true")
     parser.add_argument("--replace", action="store_true")
@@ -406,6 +409,7 @@ def main() -> int:
     semgrep_output = Path(args.semgrep_output) if args.semgrep_output else None
     sonarqube_output = Path(args.sonarqube_output) if args.sonarqube_output else None
     trivy_output = Path(args.trivy_output) if args.trivy_output else None
+    gitleaks_output = Path(args.gitleaks_output) if args.gitleaks_output else None
 
     try:
         logger.info(f"Log file: {logger.log_path}")
@@ -431,7 +435,7 @@ def main() -> int:
 
         if args.run_tools:
             start = time.perf_counter()
-            logger.info("Step 1/3: Run tools (layout, scc, lizard, roslyn-analyzers, semgrep, sonarqube, trivy)")
+            logger.info("Step 1/3: Run tools (layout, scc, lizard, roslyn-analyzers, semgrep, sonarqube, trivy, gitleaks)")
             skip_tools = {
                 name.strip()
                 for name in (args.skip_tools.split(",") if args.skip_tools else [])
@@ -455,6 +459,7 @@ def main() -> int:
             semgrep_output = outputs.get("semgrep", semgrep_output)
             sonarqube_output = outputs.get("sonarqube", sonarqube_output)
             trivy_output = outputs.get("trivy", trivy_output)
+            gitleaks_output = outputs.get("gitleaks", gitleaks_output)
             logger.info(f"Completed tools in {_format_duration(time.perf_counter() - start)}")
             for name, path in outputs.items():
                 logger.info(f"{name} output: {path}")
@@ -476,6 +481,7 @@ def main() -> int:
             semgrep_output,
             sonarqube_output,
             trivy_output,
+            gitleaks_output,
             schema_path,
             logger,
         )
