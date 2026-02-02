@@ -9,7 +9,7 @@ with smells as (
         relative_path,
         severity,
         dd_category
-    from {{ source('lz', 'lz_semgrep_smells') }}
+    from {{ ref('stg_lz_semgrep_smells') }}
 ),
 file_metrics as (
     select

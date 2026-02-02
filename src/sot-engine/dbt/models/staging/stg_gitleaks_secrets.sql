@@ -15,7 +15,7 @@ with secrets as (
         in_current_head,
         entropy,
         fingerprint
-    from {{ source('lz', 'lz_gitleaks_secrets') }}
+    from {{ ref('stg_lz_gitleaks_secrets') }}
 ),
 file_metrics as (
     select

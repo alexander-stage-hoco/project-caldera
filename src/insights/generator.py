@@ -26,6 +26,7 @@ from .sections.roslyn_violations import RoslynViolationsSection
 from .sections.iac_misconfigs import IacMisconfigsSection
 from .sections.code_inequality import CodeInequalitySection
 from .sections.module_health import ModuleHealthSection
+from .sections.secrets import SecretsSection
 
 
 class InsightsGenerator:
@@ -38,6 +39,7 @@ class InsightsGenerator:
         "file_hotspots": FileHotspotsSection,
         "directory_analysis": DirectoryAnalysisSection,
         "vulnerabilities": VulnerabilitiesSection,
+        "secrets": SecretsSection,
         "cross_tool": CrossToolSection,
         "language_coverage": LanguageCoverageSection,
         "distribution_insights": DistributionInsightsSection,
@@ -324,6 +326,8 @@ class InsightsGenerator:
             "rollup_trivy_directory_counts_recursive",
             "stg_roslyn_file_metrics",
             "stg_trivy_iac_misconfigs",
+            "stg_lz_gitleaks_secrets",
+            "stg_gitleaks_secrets",
         ]
 
         results = {
