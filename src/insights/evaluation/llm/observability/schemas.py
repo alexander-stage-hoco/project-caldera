@@ -33,7 +33,7 @@ class LLMInteraction:
     duration_ms: int
 
     # Source
-    provider_name: str  # "claude_code", "anthropic", "openai"
+    provider_name: str  # "claude_code", "anthropic"
     judge_name: str | None  # "clarity", "actionability", "accuracy", or None for raw calls
     model: str  # "claude-opus-4-5-20251101"
 

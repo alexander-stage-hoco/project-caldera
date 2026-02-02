@@ -82,6 +82,28 @@ def test_report_health_snapshot_joins_lizard_run() -> None:
     )
     conn.execute(
         """
+        create table repo_health_summary (
+            run_pk integer,
+            health_grade varchar,
+            violation_count integer,
+            max_violation_level integer,
+            lfs_candidate_count integer,
+            commit_count integer,
+            blob_count integer,
+            blob_total_size bigint,
+            max_blob_size bigint,
+            tree_count integer,
+            max_tree_entries integer,
+            max_path_depth integer,
+            max_path_length integer,
+            reference_count integer,
+            branch_count integer,
+            tag_count integer
+        )
+        """
+    )
+    conn.execute(
+        """
         insert into unified_run_summary values
             (10, 'collection-1', 'repo-1', 'run-1', 2, 20, 10, 5, 5, 9, 1.5, 3, 42.0)
         """

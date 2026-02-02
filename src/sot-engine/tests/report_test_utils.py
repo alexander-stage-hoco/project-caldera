@@ -8,6 +8,7 @@ def render_report_sql(sql_text: str, run_pk: int, limit_rows: int = 10) -> str:
     rendered = rendered.replace("{{ ref('rollup_lizard_directory_recursive_distributions') }}", "rollup_lizard_directory_recursive_distributions")
     rendered = rendered.replace("{{ ref('rollup_roslyn_directory_recursive_distributions') }}", "rollup_roslyn_directory_recursive_distributions")
     rendered = rendered.replace("{{ ref('unified_run_summary') }}", "unified_run_summary")
+    rendered = rendered.replace("{{ ref('repo_health_summary') }}", "repo_health_summary")
     rendered = rendered.replace("{{ source('lz', 'lz_layout_directories') }}", "lz_layout_directories")
     rendered = rendered.replace("{{ source('lz', 'lz_tool_runs') }}", "lz_tool_runs")
     rendered = rendered.replace("{{ source('lz', 'lz_collection_runs') }}", "lz_collection_runs")

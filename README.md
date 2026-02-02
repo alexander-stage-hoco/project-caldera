@@ -16,7 +16,7 @@ src/sot-engine/       # SoT engine (dbt + persistence)
 Current tools in scope:
 - `scc`: size/LOC analysis
 - `lizard`: function-level complexity analysis
-- `semgrep`: code smell detection (87 DD-mapped rules) *(adapter ready, orchestrator pending)*
+- `semgrep`: code smell detection (87 DD-mapped rules)
 
 Each tool is self-contained under `src/tools/<tool>/` with its own Makefile, schemas, eval repos, and tests.
 
