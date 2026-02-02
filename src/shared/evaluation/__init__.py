@@ -9,10 +9,21 @@ from .observability_check import (
     get_observability_summary,
     get_recent_interactions,
 )
+from .orchestrator import (
+    DimensionResult,
+    ProgrammaticInput,
+    EvaluationResult,
+    LLMEvaluatorBase,
+)
 
 __all__ = [
     "BaseJudge",
     "JudgeResult",
+    # Orchestrator components
+    "DimensionResult",
+    "ProgrammaticInput",
+    "EvaluationResult",
+    "LLMEvaluatorBase",
     # Observability enforcement
     "ObservabilityDisabledError",
     "is_observability_enabled",

@@ -3,8 +3,6 @@ LLM provider abstraction for evaluation judges.
 
 Supports multiple LLM backends:
 - Claude Code Headless (default, Opus 4.5)
-- OpenAI API (gpt-4o, gpt-4-turbo)
-- Codex Headless
 - Anthropic API direct
 """
 
@@ -72,21 +70,17 @@ def get_provider(name: str, **kwargs: Any) -> LLMProvider:
     Get an LLM provider by name.
 
     Args:
-        name: Provider name ('claude_code', 'openai', 'codex', 'anthropic').
+        name: Provider name ('claude_code', 'anthropic').
         **kwargs: Provider-specific configuration.
 
     Returns:
         Configured LLMProvider instance.
     """
     from .claude_code import ClaudeCodeHeadlessProvider
-    from .openai import OpenAIProvider
-    from .codex import CodexHeadlessProvider
     from .anthropic import AnthropicAPIProvider
 
     providers = {
         "claude_code": ClaudeCodeHeadlessProvider,
-        "openai": OpenAIProvider,
-        "codex": CodexHeadlessProvider,
         "anthropic": AnthropicAPIProvider,
     }
 
@@ -111,7 +105,7 @@ def get_observable_provider(name: str, trace_id: str | None = None, **kwargs: An
     Combines get_provider with ObservableProvider wrapping.
 
     Args:
-        name: Provider name ('claude_code', 'openai', 'codex', 'anthropic').
+        name: Provider name ('claude_code', 'anthropic').
         trace_id: Optional trace ID for observability.
         **kwargs: Provider-specific configuration.
 
