@@ -1,0 +1,162 @@
+{
+  "metadata": {
+    "tool_name": "symbol-scanner",
+    "tool_version": "1.0.0",
+    "run_id": "33333333-3333-3333-3333-333333333333",
+    "repo_id": "44444444-4444-4444-4444-444444444444",
+    "branch": "main",
+    "commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "timestamp": "2026-02-03T10:00:00+00:00",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "symbol-scanner",
+    "tool_version": "1.0.0",
+    "symbols": [
+      {
+        "path": "src/main.py",
+        "symbol_name": "main",
+        "symbol_type": "function",
+        "line_start": 10,
+        "line_end": 25,
+        "is_exported": true,
+        "parameters": 0,
+        "parent_symbol": null,
+        "docstring": "Main entry point for the application."
+      },
+      {
+        "path": "src/main.py",
+        "symbol_name": "parse_args",
+        "symbol_type": "function",
+        "line_start": 5,
+        "line_end": 8,
+        "is_exported": true,
+        "parameters": 1,
+        "parent_symbol": null,
+        "docstring": null
+      },
+      {
+        "path": "src/utils/helpers.py",
+        "symbol_name": "Helper",
+        "symbol_type": "class",
+        "line_start": 5,
+        "line_end": 30,
+        "is_exported": true,
+        "parameters": null,
+        "parent_symbol": null,
+        "docstring": "Helper class for utility operations."
+      },
+      {
+        "path": "src/utils/helpers.py",
+        "symbol_name": "process",
+        "symbol_type": "method",
+        "line_start": 10,
+        "line_end": 20,
+        "is_exported": true,
+        "parameters": 2,
+        "parent_symbol": "Helper",
+        "docstring": "Process the input data."
+      },
+      {
+        "path": "src/utils/helpers.py",
+        "symbol_name": "_internal_helper",
+        "symbol_type": "function",
+        "line_start": 32,
+        "line_end": 40,
+        "is_exported": false,
+        "parameters": 1,
+        "parent_symbol": null,
+        "docstring": null
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "src/main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "parse_args",
+        "callee_file": "src/main.py",
+        "line_number": 12,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "src/main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "Helper",
+        "callee_file": "src/utils/helpers.py",
+        "line_number": 15,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "src/main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "process",
+        "callee_file": "src/utils/helpers.py",
+        "line_number": 18,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "src/utils/helpers.py",
+        "caller_symbol": "process",
+        "callee_symbol": "_internal_helper",
+        "callee_file": "src/utils/helpers.py",
+        "line_number": 15,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "src/main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 20,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [
+      {
+        "file": "src/main.py",
+        "imported_path": "argparse",
+        "imported_symbols": null,
+        "import_type": "static",
+        "line_number": 1
+      },
+      {
+        "file": "src/main.py",
+        "imported_path": "src.utils.helpers",
+        "imported_symbols": "Helper",
+        "import_type": "static",
+        "line_number": 2
+      },
+      {
+        "file": "src/utils/helpers.py",
+        "imported_path": "typing",
+        "imported_symbols": "Any, Dict",
+        "import_type": "static",
+        "line_number": 1
+      },
+      {
+        "file": "src/utils/helpers.py",
+        "imported_path": "os",
+        "imported_symbols": null,
+        "import_type": "static",
+        "line_number": 2
+      }
+    ],
+    "summary": {
+      "total_files": 2,
+      "total_symbols": 5,
+      "total_calls": 5,
+      "total_imports": 4,
+      "symbols_by_type": {
+        "function": 3,
+        "class": 1,
+        "method": 1
+      },
+      "calls_by_type": {
+        "direct": 5
+      },
+      "imports_by_type": {
+        "static": 4
+      }
+    }
+  }
+}
