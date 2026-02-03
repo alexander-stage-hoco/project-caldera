@@ -1,0 +1,1 @@
+# Symbol Scanner tests package

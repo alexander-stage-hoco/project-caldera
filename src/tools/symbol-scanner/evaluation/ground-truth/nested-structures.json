@@ -1,0 +1,418 @@
+{
+  "metadata": {
+    "repo": "nested-structures",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "category": "edge-cases",
+    "description": "Tests deeply nested code structures including nested classes, closures, and lambdas",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "nested.py",
+        "symbol_name": "Outer",
+        "symbol_type": "class",
+        "line_start": 7,
+        "is_exported": true
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 12,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "Inner",
+        "symbol_type": "class",
+        "line_start": 16,
+        "is_exported": true
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 21,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "display",
+        "symbol_type": "method",
+        "line_start": 25,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "DeepNested",
+        "symbol_type": "class",
+        "line_start": 29,
+        "is_exported": true
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 32,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "process",
+        "symbol_type": "method",
+        "line_start": 36,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "create_inner",
+        "symbol_type": "method",
+        "line_start": 40,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "outer_function",
+        "symbol_type": "function",
+        "line_start": 46,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "inner_multiply",
+        "symbol_type": "function",
+        "line_start": 49,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "counter_factory",
+        "symbol_type": "function",
+        "line_start": 56,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "increment",
+        "symbol_type": "function",
+        "line_start": 60,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "decrement",
+        "symbol_type": "function",
+        "line_start": 66,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "deeply_nested",
+        "symbol_type": "function",
+        "line_start": 75,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "level1",
+        "symbol_type": "function",
+        "line_start": 78,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "level2",
+        "symbol_type": "function",
+        "line_start": 82,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "level3",
+        "symbol_type": "function",
+        "line_start": 86,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "Processor",
+        "symbol_type": "class",
+        "line_start": 109,
+        "is_exported": true
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 112,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "process_with_callback",
+        "symbol_type": "method",
+        "line_start": 116,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "apply_and_validate",
+        "symbol_type": "method",
+        "line_start": 119,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "create_transformer",
+        "symbol_type": "method",
+        "line_start": 126,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "transform",
+        "symbol_type": "method",
+        "line_start": 130,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "create_validator",
+        "symbol_type": "function",
+        "line_start": 138,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "validate",
+        "symbol_type": "function",
+        "line_start": 143,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "check_range",
+        "symbol_type": "function",
+        "line_start": 146,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "get_message",
+        "symbol_type": "function",
+        "line_start": 150,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "create_handler",
+        "symbol_type": "function",
+        "line_start": 162,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "DynamicHandler",
+        "symbol_type": "class",
+        "line_start": 165,
+        "is_exported": true
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 168,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "register",
+        "symbol_type": "method",
+        "line_start": 172,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "call",
+        "symbol_type": "method",
+        "line_start": 176,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "make_counter_class",
+        "symbol_type": "function",
+        "line_start": 184,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "Counter",
+        "symbol_type": "class",
+        "line_start": 188,
+        "is_exported": true
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "increment",
+        "symbol_type": "method",
+        "line_start": 191,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "nested.py",
+        "symbol_name": "get_count",
+        "symbol_type": "method",
+        "line_start": 197,
+        "is_exported": true,
+        "parameters": 0
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "f",
+        "callee_file": null,
+        "line_number": 104,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "create_inner",
+        "callee_symbol": "Inner",
+        "callee_file": "nested.py",
+        "line_number": 42,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "f",
+        "callee_file": null,
+        "line_number": 104,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "f",
+        "callee_file": null,
+        "line_number": 105,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "g",
+        "callee_file": null,
+        "line_number": 105,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "apply_and_validate",
+        "callee_symbol": "callback",
+        "callee_file": null,
+        "line_number": 121,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "process_with_callback",
+        "callee_symbol": "apply_and_validate",
+        "callee_file": "nested.py",
+        "line_number": 124,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "get_message",
+        "callee_symbol": "check_range",
+        "callee_file": "nested.py",
+        "line_number": 152,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "check_range",
+        "callee_file": "nested.py",
+        "line_number": 156,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "get_message",
+        "callee_file": "nested.py",
+        "line_number": 156,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "nested.py",
+        "caller_symbol": "process",
+        "callee_symbol": "items",
+        "callee_file": null,
+        "line_number": 38,
+        "call_type": "dynamic"
+      }
+    ],
+    "imports": [
+      {
+        "file": "nested.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "Callable"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 37,
+      "total_calls": 11,
+      "total_imports": 1
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "Nested classes should still be extracted as 'class' type",
+      "Nested functions (closures) should be type='function'",
+      "Lambda expressions assigned to variables are NOT symbols (they're anonymous)",
+      "Classes defined inside functions should still be extracted",
+      "Methods in nested classes should be extracted"
+    ]
+  }
+}

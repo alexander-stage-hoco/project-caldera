@@ -1,0 +1,236 @@
+{
+  "metadata": {
+    "repo": "encoding-edge-cases",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "category": "error",
+    "description": "Tests UTF-8 encoding, non-ASCII identifiers, emoji in strings",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "calculate_area",
+        "symbol_type": "function",
+        "line_start": 8,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "compute_delta",
+        "symbol_type": "function",
+        "line_start": 14,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "greet_chinese",
+        "symbol_type": "function",
+        "line_start": 21,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "get_status_emoji",
+        "symbol_type": "function",
+        "line_start": 27,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "format_japanese",
+        "symbol_type": "function",
+        "line_start": 38,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "UnicodeProcessor",
+        "symbol_type": "class",
+        "line_start": 44,
+        "is_exported": true
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 47,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "process",
+        "symbol_type": "method",
+        "line_start": 52,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "get_byte_length",
+        "symbol_type": "method",
+        "line_start": 57,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "handle_special_chars",
+        "symbol_type": "function",
+        "line_start": 63,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "format_arabic",
+        "symbol_type": "function",
+        "line_start": 75,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "normalize_text",
+        "symbol_type": "function",
+        "line_start": 81,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "clean_text",
+        "symbol_type": "function",
+        "line_start": 88,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "format_chemical",
+        "symbol_type": "function",
+        "line_start": 97,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "get_notes",
+        "symbol_type": "function",
+        "line_start": 103,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "draw_box",
+        "symbol_type": "function",
+        "line_start": 109,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "unicode_code.py",
+        "symbol_name": "get_escape_examples",
+        "symbol_type": "function",
+        "line_start": 119,
+        "is_exported": true,
+        "parameters": 0
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "unicode_code.py",
+        "caller_symbol": "get_status_emoji",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "line_number": 34,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "unicode_code.py",
+        "caller_symbol": "normalize_text",
+        "callee_symbol": "normalize",
+        "callee_file": null,
+        "line_number": 84,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "unicode_code.py",
+        "caller_symbol": "draw_box",
+        "callee_symbol": "join",
+        "callee_file": null,
+        "line_number": 115,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "unicode_code.py",
+        "caller_symbol": "process",
+        "callee_symbol": "strip",
+        "callee_file": null,
+        "line_number": 55,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "unicode_code.py",
+        "caller_symbol": "get_byte_length",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 59,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "unicode_code.py",
+        "caller_symbol": "clean_text",
+        "callee_symbol": "replace",
+        "callee_file": null,
+        "line_number": 92,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "unicode_code.py",
+        "caller_symbol": "get_byte_length",
+        "callee_symbol": "encode",
+        "callee_file": null,
+        "line_number": 59,
+        "call_type": "dynamic"
+      }
+    ],
+    "imports": [
+      {
+        "file": "unicode_code.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 4,
+        "imported_symbols": "Any"
+      },
+      {
+        "file": "unicode_code.py",
+        "imported_path": "unicodedata",
+        "import_type": "static",
+        "line_number": 83
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 17,
+      "total_calls": 7,
+      "total_imports": 2
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "UTF-8 encoding declaration should be handled",
+      "Non-ASCII characters in strings should not break extraction",
+      "Unicode escape sequences should be handled",
+      "Zero-width characters in source should not affect extraction"
+    ]
+  }
+}

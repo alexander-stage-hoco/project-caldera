@@ -1,0 +1,260 @@
+{
+  "metadata": {
+    "repo": "dynamic-code-generation",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "purpose": "Test dynamic code patterns: exec(), eval(), dynamic imports",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "main.py",
+        "symbol_name": "create_function_with_exec",
+        "symbol_type": "function",
+        "line_start": 9,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "compute_with_eval",
+        "symbol_type": "function",
+        "line_start": 20,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "DynamicLoader",
+        "symbol_type": "class",
+        "line_start": 30,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 33,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "get_module",
+        "symbol_type": "method",
+        "line_start": 37,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "call_function",
+        "symbol_type": "method",
+        "line_start": 43,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_private_helper",
+        "symbol_type": "function",
+        "line_start": 50,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "generate_class_dynamically",
+        "symbol_type": "function",
+        "line_start": 55,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "__init__",
+        "symbol_type": "function",
+        "line_start": 57,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "get_value",
+        "symbol_type": "function",
+        "line_start": 60,
+        "is_exported": true,
+        "parameters": 1
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "create_function_with_exec",
+        "callee_symbol": "exec",
+        "callee_file": null,
+        "line_number": 16,
+        "call_type": "direct",
+        "is_dynamic_code_execution": true
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "compute_with_eval",
+        "callee_symbol": "eval",
+        "callee_file": null,
+        "line_number": 27,
+        "call_type": "direct",
+        "is_dynamic_code_execution": true
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "generate_class_dynamically",
+        "callee_symbol": "type",
+        "callee_file": null,
+        "line_number": 63,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "create_function_with_exec",
+        "callee_file": "main.py",
+        "line_number": 71,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 72,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "compute_with_eval",
+        "callee_file": "main.py",
+        "line_number": 75,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 76,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "generate_class_dynamically",
+        "callee_file": "main.py",
+        "line_number": 79,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "MyClass",
+        "callee_file": null,
+        "line_number": 80,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 81,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "call_function",
+        "callee_symbol": "get_module",
+        "callee_file": "main.py",
+        "line_number": 45,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "call_function",
+        "callee_symbol": "getattr",
+        "callee_file": null,
+        "line_number": 46,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "call_function",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 47,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "greet",
+        "callee_file": null,
+        "line_number": 72,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "get_module",
+        "callee_symbol": "import_module",
+        "callee_file": null,
+        "line_number": 40,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "get_value",
+        "callee_file": "main.py",
+        "line_number": 81,
+        "call_type": "dynamic"
+      }
+    ],
+    "imports": [
+      {
+        "file": "main.py",
+        "imported_path": "__future__",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "annotations"
+      },
+      {
+        "file": "main.py",
+        "imported_path": "importlib",
+        "import_type": "static",
+        "line_number": 5
+      },
+      {
+        "file": "main.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 6,
+        "imported_symbols": "TYPE_CHECKING"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 10,
+      "total_calls": 16,
+      "total_imports": 3
+    }
+  },
+  "notes": {
+    "challenges": [
+      "exec() creates functions not visible to static analysis",
+      "eval() calls are hard to trace",
+      "importlib.import_module is a dynamic import pattern",
+      "type() creates classes dynamically"
+    ]
+  }
+}

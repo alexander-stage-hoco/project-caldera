@@ -1,0 +1,385 @@
+{
+  "metadata": {
+    "repo": "modern-syntax",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "category": "edge-cases",
+    "description": "Tests Python 3.10+ features including match statements, walrus operator, union types",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "modern.py",
+        "symbol_name": "process_command",
+        "symbol_type": "function",
+        "line_start": 9,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "categorize_number",
+        "symbol_type": "function",
+        "line_start": 25,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "Point",
+        "symbol_type": "class",
+        "line_start": 44,
+        "is_exported": true
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "Circle",
+        "symbol_type": "class",
+        "line_start": 52,
+        "is_exported": true
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "Rectangle",
+        "symbol_type": "class",
+        "line_start": 60,
+        "is_exported": true
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "describe_shape",
+        "symbol_type": "function",
+        "line_start": 68,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "process_sequence",
+        "symbol_type": "function",
+        "line_start": 88,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "find_first_long_word",
+        "symbol_type": "function",
+        "line_start": 104,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "process_with_walrus",
+        "symbol_type": "function",
+        "line_start": 113,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "positional_only",
+        "symbol_type": "function",
+        "line_start": 119,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "mixed_parameters",
+        "symbol_type": "function",
+        "line_start": 124,
+        "is_exported": true,
+        "parameters": 3
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "process_value",
+        "symbol_type": "function",
+        "line_start": 130,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "get_item",
+        "symbol_type": "function",
+        "line_start": 137,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "Status",
+        "symbol_type": "class",
+        "line_start": 149,
+        "is_exported": true
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "handle_status",
+        "symbol_type": "function",
+        "line_start": 158,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "multiply_matrix",
+        "symbol_type": "function",
+        "line_start": 176,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "validate_all",
+        "symbol_type": "function",
+        "line_start": 182,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "Builder",
+        "symbol_type": "class",
+        "line_start": 195,
+        "is_exported": true
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 198,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "add",
+        "symbol_type": "method",
+        "line_start": 202,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "modern.py",
+        "symbol_name": "build",
+        "symbol_type": "method",
+        "line_start": 207,
+        "is_exported": true,
+        "parameters": 0
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "process_value",
+        "callee_symbol": "str",
+        "callee_file": null,
+        "line_number": 134,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "validate_all",
+        "callee_symbol": "enumerate",
+        "callee_file": null,
+        "line_number": 185,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "multiply_matrix",
+        "callee_symbol": "sum",
+        "callee_file": null,
+        "line_number": 178,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "validate_all",
+        "callee_symbol": "ExceptionGroup",
+        "callee_file": null,
+        "line_number": 191,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "add",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 204,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "build",
+        "callee_symbol": "join",
+        "callee_file": null,
+        "line_number": 209,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "find_first_long_word",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 108,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "get_item",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "line_number": 143,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "validate_all",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 187,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "validate_all",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 189,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "find_first_long_word",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 107,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "get_item",
+        "callee_symbol": "str",
+        "callee_file": null,
+        "line_number": 143,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "validate_all",
+        "callee_symbol": "ValueError",
+        "callee_file": null,
+        "line_number": 187,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "validate_all",
+        "callee_symbol": "ValueError",
+        "callee_file": null,
+        "line_number": 189,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "process_command",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 17,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "process_sequence",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 98,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "get_item",
+        "callee_symbol": "isinstance",
+        "callee_file": null,
+        "line_number": 141,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "get_item",
+        "callee_symbol": "int",
+        "callee_file": null,
+        "line_number": 141,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "multiply_matrix",
+        "callee_symbol": "range",
+        "callee_file": null,
+        "line_number": 178,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "get_item",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 141,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "modern.py",
+        "caller_symbol": "multiply_matrix",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 178,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [
+      {
+        "file": "modern.py",
+        "imported_path": "dataclasses",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "dataclass"
+      },
+      {
+        "file": "modern.py",
+        "imported_path": "enum",
+        "import_type": "static",
+        "line_number": 4,
+        "imported_symbols": "Enum"
+      },
+      {
+        "file": "modern.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 5,
+        "imported_symbols": "Any"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 21,
+      "total_calls": 21,
+      "total_imports": 3
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "Match statements don't create new symbols",
+      "Type aliases (type X = ...) are not function/class symbols",
+      "Walrus operator creates local variables, not symbols",
+      "Positional-only parameters still count toward parameter count",
+      "Dataclasses decorated with @dataclass are still classes"
+    ]
+  }
+}

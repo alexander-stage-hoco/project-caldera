@@ -1,0 +1,864 @@
+{
+  "metadata": {
+    "repo": "web-framework-patterns",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "category": "real-world",
+    "description": "Tests Flask/FastAPI style routes, decorators, middleware patterns",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "app.py",
+        "symbol_name": "Request",
+        "symbol_type": "class",
+        "line_start": 14,
+        "is_exported": true
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "get_header",
+        "symbol_type": "method",
+        "line_start": 23,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "Response",
+        "symbol_type": "class",
+        "line_start": 29,
+        "is_exported": true
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "json",
+        "symbol_type": "method",
+        "line_start": 37,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "error",
+        "symbol_type": "method",
+        "line_start": 42,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "Router",
+        "symbol_type": "class",
+        "line_start": 52,
+        "is_exported": true
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 55,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "route",
+        "symbol_type": "method",
+        "line_start": 60,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "decorator",
+        "symbol_type": "method",
+        "line_start": 64,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "get",
+        "symbol_type": "method",
+        "line_start": 73,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "post",
+        "symbol_type": "method",
+        "line_start": 77,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "put",
+        "symbol_type": "method",
+        "line_start": 81,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "delete",
+        "symbol_type": "method",
+        "line_start": 85,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "use",
+        "symbol_type": "method",
+        "line_start": 89,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "handle",
+        "symbol_type": "method",
+        "line_start": 93,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "logging_middleware",
+        "symbol_type": "function",
+        "line_start": 116,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "wrapper",
+        "symbol_type": "function",
+        "line_start": 119,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "auth_middleware",
+        "symbol_type": "function",
+        "line_start": 127,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "wrapper",
+        "symbol_type": "function",
+        "line_start": 130,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "cors_middleware",
+        "symbol_type": "function",
+        "line_start": 138,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "wrapper",
+        "symbol_type": "function",
+        "line_start": 141,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "rate_limit_middleware",
+        "symbol_type": "function",
+        "line_start": 150,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "middleware",
+        "symbol_type": "function",
+        "line_start": 154,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "wrapper",
+        "symbol_type": "function",
+        "line_start": 156,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "Container",
+        "symbol_type": "class",
+        "line_start": 172,
+        "is_exported": true
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 175,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "register",
+        "symbol_type": "method",
+        "line_start": 180,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "register_factory",
+        "symbol_type": "method",
+        "line_start": 184,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "get",
+        "symbol_type": "method",
+        "line_start": 188,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "inject",
+        "symbol_type": "function",
+        "line_start": 199,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "decorator",
+        "symbol_type": "function",
+        "line_start": 201,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "wrapper",
+        "symbol_type": "function",
+        "line_start": 203,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "index",
+        "symbol_type": "function",
+        "line_start": 219,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "list_users",
+        "symbol_type": "function",
+        "line_start": 225,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "get_user",
+        "symbol_type": "function",
+        "line_start": 232,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "create_user",
+        "symbol_type": "function",
+        "line_start": 238,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "update_user",
+        "symbol_type": "function",
+        "line_start": 246,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "delete_user",
+        "symbol_type": "function",
+        "line_start": 252,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "UserService",
+        "symbol_type": "class",
+        "line_start": 262,
+        "is_exported": true
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 265,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "get_all",
+        "symbol_type": "method",
+        "line_start": 269,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "get_by_id",
+        "symbol_type": "method",
+        "line_start": 273,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "create",
+        "symbol_type": "method",
+        "line_start": 277,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "update",
+        "symbol_type": "method",
+        "line_start": 281,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "app.py",
+        "symbol_name": "delete",
+        "symbol_type": "method",
+        "line_start": 289,
+        "is_exported": true,
+        "parameters": 1
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "Router",
+        "callee_file": "app.py",
+        "line_number": 215,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "get",
+        "callee_file": "app.py",
+        "line_number": 218,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "get",
+        "callee_file": "app.py",
+        "line_number": 224,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "get",
+        "callee_file": "app.py",
+        "line_number": 231,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "post",
+        "callee_file": "app.py",
+        "line_number": 237,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "put",
+        "callee_file": "app.py",
+        "line_number": 245,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "delete",
+        "callee_file": "app.py",
+        "line_number": 251,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "logging_middleware",
+        "callee_symbol": "wraps",
+        "callee_file": null,
+        "line_number": 118,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "auth_middleware",
+        "callee_symbol": "wraps",
+        "callee_file": null,
+        "line_number": 129,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "cors_middleware",
+        "callee_symbol": "wraps",
+        "callee_file": null,
+        "line_number": 140,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "index",
+        "callee_symbol": "json",
+        "callee_file": "app.py",
+        "line_number": 221,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "list_users",
+        "callee_symbol": "json",
+        "callee_file": "app.py",
+        "line_number": 228,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "get_user",
+        "callee_symbol": "json",
+        "callee_file": "app.py",
+        "line_number": 234,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "create_user",
+        "callee_symbol": "json",
+        "callee_file": "app.py",
+        "line_number": 242,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "update_user",
+        "callee_symbol": "json",
+        "callee_file": "app.py",
+        "line_number": 248,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "delete_user",
+        "callee_symbol": "json",
+        "callee_file": "app.py",
+        "line_number": 254,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "get_header",
+        "callee_symbol": "get",
+        "callee_file": "app.py",
+        "line_number": 25,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "json",
+        "callee_symbol": "cls",
+        "callee_file": null,
+        "line_number": 39,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "error",
+        "callee_symbol": "cls",
+        "callee_file": null,
+        "line_number": 44,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "get",
+        "callee_symbol": "route",
+        "callee_file": "app.py",
+        "line_number": 75,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "post",
+        "callee_symbol": "route",
+        "callee_file": "app.py",
+        "line_number": 79,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "put",
+        "callee_symbol": "route",
+        "callee_file": "app.py",
+        "line_number": 83,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "delete",
+        "callee_symbol": "route",
+        "callee_file": "app.py",
+        "line_number": 87,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "use",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 91,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "handle",
+        "callee_symbol": "get",
+        "callee_file": "app.py",
+        "line_number": 95,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "handle",
+        "callee_symbol": "get",
+        "callee_file": "app.py",
+        "line_number": 99,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "handle",
+        "callee_symbol": "reversed",
+        "callee_file": null,
+        "line_number": 105,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "handle",
+        "callee_symbol": "final_handler",
+        "callee_file": null,
+        "line_number": 108,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 120,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "handler",
+        "callee_file": null,
+        "line_number": 121,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 122,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "get_header",
+        "callee_file": "app.py",
+        "line_number": 131,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "handler",
+        "callee_file": null,
+        "line_number": 134,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "handler",
+        "callee_file": null,
+        "line_number": 142,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "middleware",
+        "callee_symbol": "wraps",
+        "callee_file": null,
+        "line_number": 155,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "get",
+        "callee_symbol": "KeyError",
+        "callee_file": null,
+        "line_number": 196,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "decorator",
+        "callee_symbol": "wraps",
+        "callee_file": null,
+        "line_number": 202,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "create_user",
+        "callee_symbol": "error",
+        "callee_file": "app.py",
+        "line_number": 241,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "get_all",
+        "callee_symbol": "find_all",
+        "callee_file": null,
+        "line_number": 271,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "get_by_id",
+        "callee_symbol": "find_by_id",
+        "callee_file": null,
+        "line_number": 275,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "create",
+        "callee_symbol": "save",
+        "callee_file": null,
+        "line_number": 279,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "update",
+        "callee_symbol": "find_by_id",
+        "callee_file": null,
+        "line_number": 283,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "update",
+        "callee_symbol": "update",
+        "callee_file": "app.py",
+        "line_number": 286,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "update",
+        "callee_symbol": "save",
+        "callee_file": null,
+        "line_number": 287,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "delete",
+        "callee_symbol": "delete",
+        "callee_file": "app.py",
+        "line_number": 291,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "handle",
+        "callee_symbol": "error",
+        "callee_file": "app.py",
+        "line_number": 97,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "handle",
+        "callee_symbol": "error",
+        "callee_file": "app.py",
+        "line_number": 101,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "handle",
+        "callee_symbol": "mw",
+        "callee_file": null,
+        "line_number": 106,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "error",
+        "callee_file": "app.py",
+        "line_number": 133,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "get_header",
+        "callee_file": "app.py",
+        "line_number": 157,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "get",
+        "callee_file": "app.py",
+        "line_number": 158,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "handler",
+        "callee_file": null,
+        "line_number": 162,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 205,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "create_user",
+        "callee_symbol": "get",
+        "callee_file": "app.py",
+        "line_number": 242,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "startswith",
+        "callee_file": null,
+        "line_number": 132,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "error",
+        "callee_file": "app.py",
+        "line_number": 160,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "app.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "get",
+        "callee_file": "app.py",
+        "line_number": 204,
+        "call_type": "dynamic"
+      }
+    ],
+    "imports": [
+      {
+        "file": "app.py",
+        "imported_path": "dataclasses",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "dataclass"
+      },
+      {
+        "file": "app.py",
+        "imported_path": "functools",
+        "import_type": "static",
+        "line_number": 4,
+        "imported_symbols": "wraps"
+      },
+      {
+        "file": "app.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 5,
+        "imported_symbols": "Any,Callable"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 45,
+      "total_calls": 57,
+      "total_imports": 3
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "Decorated route handlers are still functions",
+      "Nested wrapper functions in decorators should be extracted",
+      "@classmethod decorated methods are still methods",
+      "Decorator factory functions should be extracted"
+    ]
+  }
+}

@@ -1,0 +1,873 @@
+{
+  "metadata": {
+    "repo": "metaprogramming",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "category": "real-world",
+    "description": "Tests __init_subclass__, __class_getitem__, descriptors, metaclasses",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "meta.py",
+        "symbol_name": "Descriptor",
+        "symbol_type": "class",
+        "line_start": 14,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__set_name__",
+        "symbol_type": "method",
+        "line_start": 17,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__get__",
+        "symbol_type": "method",
+        "line_start": 22,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__set__",
+        "symbol_type": "method",
+        "line_start": 28,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "TypedDescriptor",
+        "symbol_type": "class",
+        "line_start": 33,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 36,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__set_name__",
+        "symbol_type": "method",
+        "line_start": 42,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__get__",
+        "symbol_type": "method",
+        "line_start": 47,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__set__",
+        "symbol_type": "method",
+        "line_start": 53,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "CachedProperty",
+        "symbol_type": "class",
+        "line_start": 60,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 63,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__set_name__",
+        "symbol_type": "method",
+        "line_start": 68,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__get__",
+        "symbol_type": "method",
+        "line_start": 72,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "SingletonMeta",
+        "symbol_type": "class",
+        "line_start": 86,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__call__",
+        "symbol_type": "method",
+        "line_start": 91,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "RegistryMeta",
+        "symbol_type": "class",
+        "line_start": 98,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__new__",
+        "symbol_type": "method",
+        "line_start": 103,
+        "is_exported": false,
+        "parameters": 4
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "get_class",
+        "symbol_type": "method",
+        "line_start": 110,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "ValidatingMeta",
+        "symbol_type": "class",
+        "line_start": 115,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__new__",
+        "symbol_type": "method",
+        "line_start": 118,
+        "is_exported": false,
+        "parameters": 4
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "Plugin",
+        "symbol_type": "class",
+        "line_start": 133,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__init_subclass__",
+        "symbol_type": "method",
+        "line_start": 138,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "get_plugin",
+        "symbol_type": "method",
+        "line_start": 145,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "list_plugins",
+        "symbol_type": "method",
+        "line_start": 150,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "Validator",
+        "symbol_type": "class",
+        "line_start": 155,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__init_subclass__",
+        "symbol_type": "method",
+        "line_start": 160,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 165,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "validate_all",
+        "symbol_type": "method",
+        "line_start": 170,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "Container",
+        "symbol_type": "class",
+        "line_start": 185,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__class_getitem__",
+        "symbol_type": "method",
+        "line_start": 190,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 202,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "add",
+        "symbol_type": "method",
+        "line_start": 207,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "create_class",
+        "symbol_type": "function",
+        "line_start": 219,
+        "is_exported": true,
+        "parameters": 3
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "create_dataclass_like",
+        "symbol_type": "function",
+        "line_start": 224,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__init__",
+        "symbol_type": "function",
+        "line_start": 227,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__repr__",
+        "symbol_type": "function",
+        "line_start": 234,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "add_method",
+        "symbol_type": "function",
+        "line_start": 246,
+        "is_exported": true,
+        "parameters": 3
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "wrap_class",
+        "symbol_type": "function",
+        "line_start": 251,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "new_init",
+        "symbol_type": "function",
+        "line_start": 255,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "make_property",
+        "symbol_type": "function",
+        "line_start": 268,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "getter",
+        "symbol_type": "function",
+        "line_start": 271,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "setter",
+        "symbol_type": "function",
+        "line_start": 274,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "make_read_only_property",
+        "symbol_type": "function",
+        "line_start": 280,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "getter",
+        "symbol_type": "function",
+        "line_start": 283,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "DatabaseSingleton",
+        "symbol_type": "class",
+        "line_start": 294,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 297,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "connect",
+        "symbol_type": "method",
+        "line_start": 302,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "JSONPlugin",
+        "symbol_type": "class",
+        "line_start": 307,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "serialize",
+        "symbol_type": "method",
+        "line_start": 310,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "XMLPlugin",
+        "symbol_type": "class",
+        "line_start": 316,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "serialize",
+        "symbol_type": "method",
+        "line_start": 319,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "Person",
+        "symbol_type": "class",
+        "line_start": 324,
+        "is_exported": true
+      },
+      {
+        "path": "meta.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 330,
+        "is_exported": false,
+        "parameters": 2
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "TypeVar",
+        "callee_file": null,
+        "line_number": 6,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "create_class",
+        "callee_symbol": "type",
+        "callee_file": null,
+        "line_number": 221,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "create_dataclass_like",
+        "callee_symbol": "type",
+        "callee_file": null,
+        "line_number": 243,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "add_method",
+        "callee_symbol": "setattr",
+        "callee_file": null,
+        "line_number": 248,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "make_property",
+        "callee_symbol": "property",
+        "callee_file": null,
+        "line_number": 277,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "make_read_only_property",
+        "callee_symbol": "property",
+        "callee_file": null,
+        "line_number": 286,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "TypedDescriptor",
+        "callee_file": "meta.py",
+        "line_number": 327,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "TypedDescriptor",
+        "callee_file": "meta.py",
+        "line_number": 328,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__get__",
+        "callee_symbol": "getattr",
+        "callee_file": null,
+        "line_number": 26,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__set__",
+        "callee_symbol": "setattr",
+        "callee_file": null,
+        "line_number": 30,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__get__",
+        "callee_symbol": "getattr",
+        "callee_file": null,
+        "line_number": 51,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__set__",
+        "callee_symbol": "setattr",
+        "callee_file": null,
+        "line_number": 57,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__new__",
+        "callee_symbol": "__new__",
+        "callee_file": "meta.py",
+        "line_number": 105,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "get_class",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "line_number": 112,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__new__",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "line_number": 121,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__new__",
+        "callee_symbol": "__new__",
+        "callee_file": "meta.py",
+        "line_number": 125,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__init_subclass__",
+        "callee_symbol": "__init_subclass__",
+        "callee_file": "meta.py",
+        "line_number": 140,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "get_plugin",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "line_number": 147,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "list_plugins",
+        "callee_symbol": "list",
+        "callee_file": null,
+        "line_number": 152,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__init_subclass__",
+        "callee_symbol": "__init_subclass__",
+        "callee_file": "meta.py",
+        "line_number": 162,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__init_subclass__",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 163,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "add",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 211,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "items",
+        "callee_file": null,
+        "line_number": 228,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__repr__",
+        "callee_symbol": "join",
+        "callee_file": null,
+        "line_number": 235,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "new_init",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 256,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "new_init",
+        "callee_symbol": "original_init",
+        "callee_file": null,
+        "line_number": 257,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "getter",
+        "callee_symbol": "getattr",
+        "callee_file": null,
+        "line_number": 272,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "setter",
+        "callee_symbol": "setattr",
+        "callee_file": null,
+        "line_number": 275,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "getter",
+        "callee_symbol": "getattr",
+        "callee_file": null,
+        "line_number": 284,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "serialize",
+        "callee_symbol": "dumps",
+        "callee_file": null,
+        "line_number": 313,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__set__",
+        "callee_symbol": "isinstance",
+        "callee_file": null,
+        "line_number": 55,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__set__",
+        "callee_symbol": "TypeError",
+        "callee_file": null,
+        "line_number": 56,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__get__",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 77,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__call__",
+        "callee_symbol": "__call__",
+        "callee_file": "meta.py",
+        "line_number": 94,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "list_plugins",
+        "callee_symbol": "keys",
+        "callee_file": null,
+        "line_number": 152,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "validate_all",
+        "callee_symbol": "validator_cls",
+        "callee_file": null,
+        "line_number": 174,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__class_getitem__",
+        "callee_symbol": "type",
+        "callee_file": null,
+        "line_number": 194,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "add",
+        "callee_symbol": "isinstance",
+        "callee_file": null,
+        "line_number": 209,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "add",
+        "callee_symbol": "TypeError",
+        "callee_file": null,
+        "line_number": 210,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "line_number": 229,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "setattr",
+        "callee_file": null,
+        "line_number": 232,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__new__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 105,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__new__",
+        "callee_symbol": "TypeError",
+        "callee_file": null,
+        "line_number": 124,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__new__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 125,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__init_subclass__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 140,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__init_subclass__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 162,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "validate_all",
+        "callee_symbol": "validate",
+        "callee_file": "meta.py",
+        "line_number": 175,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "validate_all",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 176,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "TypeError",
+        "callee_file": null,
+        "line_number": 231,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__call__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 94,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "isinstance",
+        "callee_file": null,
+        "line_number": 230,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "meta.py",
+        "caller_symbol": "__repr__",
+        "callee_symbol": "getattr",
+        "callee_file": null,
+        "line_number": 235,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [
+      {
+        "file": "meta.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "Any,Callable,TypeVar,Generic"
+      },
+      {
+        "file": "meta.py",
+        "imported_path": "json",
+        "import_type": "static",
+        "line_number": 312
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 53,
+      "total_calls": 52,
+      "total_imports": 2
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "Metaclasses are type='class'",
+      "Descriptor methods (__get__, __set__) are methods",
+      "__init_subclass__ is a method",
+      "__class_getitem__ is a method",
+      "Nested functions inside factory functions should be extracted"
+    ]
+  }
+}

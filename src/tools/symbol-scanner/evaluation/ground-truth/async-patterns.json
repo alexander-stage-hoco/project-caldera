@@ -1,0 +1,945 @@
+{
+  "metadata": {
+    "repo": "async-patterns",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "category": "real-world",
+    "description": "Tests async def, await, async with, async for patterns",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "async_code.py",
+        "symbol_name": "simple_async",
+        "symbol_type": "function",
+        "line_start": 12,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "async_with_params",
+        "symbol_type": "function",
+        "line_start": 18,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "fetch_data",
+        "symbol_type": "function",
+        "line_start": 24,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "process_items",
+        "symbol_type": "function",
+        "line_start": 30,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "async_range",
+        "symbol_type": "function",
+        "line_start": 44,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "async_file_lines",
+        "symbol_type": "function",
+        "line_start": 51,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "paginated_fetch",
+        "symbol_type": "function",
+        "line_start": 59,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "AsyncResource",
+        "symbol_type": "class",
+        "line_start": 72,
+        "is_exported": true
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 75,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "__aenter__",
+        "symbol_type": "method",
+        "line_start": 80,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "__aexit__",
+        "symbol_type": "method",
+        "line_start": 86,
+        "is_exported": false,
+        "parameters": 3
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "read",
+        "symbol_type": "method",
+        "line_start": 91,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "AsyncConnection",
+        "symbol_type": "class",
+        "line_start": 98,
+        "is_exported": true
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 101,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "connect",
+        "symbol_type": "method",
+        "line_start": 107,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "disconnect",
+        "symbol_type": "method",
+        "line_start": 112,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "execute",
+        "symbol_type": "method",
+        "line_start": 117,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "begin_transaction",
+        "symbol_type": "method",
+        "line_start": 124,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "commit",
+        "symbol_type": "method",
+        "line_start": 128,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "rollback",
+        "symbol_type": "method",
+        "line_start": 132,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "AsyncCounter",
+        "symbol_type": "class",
+        "line_start": 142,
+        "is_exported": true
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 145,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "__aiter__",
+        "symbol_type": "method",
+        "line_start": 150,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "__anext__",
+        "symbol_type": "method",
+        "line_start": 154,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "gather_results",
+        "symbol_type": "function",
+        "line_start": 169,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "run_with_timeout",
+        "symbol_type": "function",
+        "line_start": 175,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "run_first_completed",
+        "symbol_type": "function",
+        "line_start": 180,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "producer_consumer",
+        "symbol_type": "function",
+        "line_start": 188,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "producer",
+        "symbol_type": "function",
+        "line_start": 193,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "consumer",
+        "symbol_type": "function",
+        "line_start": 200,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "AsyncEventEmitter",
+        "symbol_type": "class",
+        "line_start": 218,
+        "is_exported": true
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 221,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "on",
+        "symbol_type": "method",
+        "line_start": 225,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "emit",
+        "symbol_type": "method",
+        "line_start": 231,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "retry_async",
+        "symbol_type": "function",
+        "line_start": 241,
+        "is_exported": true,
+        "parameters": 3
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "debounce_async",
+        "symbol_type": "function",
+        "line_start": 258,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "async_code.py",
+        "symbol_name": "debounced",
+        "symbol_type": "function",
+        "line_start": 265,
+        "is_exported": true,
+        "parameters": 0
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "simple_async",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 14,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "async_with_params",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 20,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "fetch_data",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 26,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "async_range",
+        "callee_symbol": "range",
+        "callee_file": null,
+        "line_number": 46,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "paginated_fetch",
+        "callee_symbol": "range",
+        "callee_file": null,
+        "line_number": 61,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "gather_results",
+        "callee_symbol": "gather",
+        "callee_file": null,
+        "line_number": 172,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "run_with_timeout",
+        "callee_symbol": "wait_for",
+        "callee_file": null,
+        "line_number": 177,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "run_first_completed",
+        "callee_symbol": "wait",
+        "callee_file": null,
+        "line_number": 182,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "run_first_completed",
+        "callee_symbol": "result",
+        "callee_file": null,
+        "line_number": 185,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer_consumer",
+        "callee_symbol": "Queue",
+        "callee_file": null,
+        "line_number": 190,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer_consumer",
+        "callee_symbol": "gather",
+        "callee_file": null,
+        "line_number": 209,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "retry_async",
+        "callee_symbol": "range",
+        "callee_file": null,
+        "line_number": 248,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "simple_async",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 14,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "async_with_params",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 20,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "fetch_data",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 26,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "process_items",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 34,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "process_items",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 35,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "async_range",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 47,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "async_file_lines",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 55,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "paginated_fetch",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 62,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "paginated_fetch",
+        "callee_symbol": "list",
+        "callee_file": null,
+        "line_number": 63,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "__aenter__",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 82,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "__aexit__",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 88,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "connect",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 109,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "disconnect",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 114,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "execute",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 121,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "__anext__",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 158,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "gather_results",
+        "callee_symbol": "async_with_params",
+        "callee_file": "async_code.py",
+        "line_number": 171,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "gather_results",
+        "callee_symbol": "gather",
+        "callee_file": null,
+        "line_number": 172,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "run_with_timeout",
+        "callee_symbol": "wait_for",
+        "callee_file": null,
+        "line_number": 177,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "run_first_completed",
+        "callee_symbol": "wait",
+        "callee_file": null,
+        "line_number": 182,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "run_first_completed",
+        "callee_symbol": "cancel",
+        "callee_file": null,
+        "line_number": 184,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer",
+        "callee_symbol": "range",
+        "callee_file": null,
+        "line_number": 195,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer",
+        "callee_symbol": "put",
+        "callee_file": null,
+        "line_number": 198,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer_consumer",
+        "callee_symbol": "gather",
+        "callee_file": null,
+        "line_number": 209,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "on",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 229,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "debounced",
+        "callee_symbol": "create_task",
+        "callee_file": null,
+        "line_number": 269,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "process_items",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 34,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "process_items",
+        "callee_symbol": "upper",
+        "callee_file": null,
+        "line_number": 35,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "async_range",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 47,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "async_file_lines",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 55,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "paginated_fetch",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 62,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "paginated_fetch",
+        "callee_symbol": "range",
+        "callee_file": null,
+        "line_number": 63,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "__aenter__",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 82,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "__aexit__",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 88,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "read",
+        "callee_symbol": "RuntimeError",
+        "callee_file": null,
+        "line_number": 94,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "connect",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 109,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "disconnect",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 114,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "execute",
+        "callee_symbol": "RuntimeError",
+        "callee_file": null,
+        "line_number": 120,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "execute",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 121,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "__anext__",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 158,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "run_first_completed",
+        "callee_symbol": "pop",
+        "callee_file": null,
+        "line_number": 185,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer",
+        "callee_symbol": "put",
+        "callee_file": null,
+        "line_number": 196,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 197,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer",
+        "callee_symbol": "put",
+        "callee_file": null,
+        "line_number": 198,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "consumer",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "line_number": 203,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "consumer",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 206,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "consumer",
+        "callee_symbol": "task_done",
+        "callee_file": null,
+        "line_number": 207,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer_consumer",
+        "callee_symbol": "producer",
+        "callee_file": "async_code.py",
+        "line_number": 209,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer_consumer",
+        "callee_symbol": "consumer",
+        "callee_file": "async_code.py",
+        "line_number": 209,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "retry_async",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 250,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "debounced",
+        "callee_symbol": "cancel",
+        "callee_file": null,
+        "line_number": 268,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "debounced",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 269,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "debounced",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 272,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "paginated_fetch",
+        "callee_symbol": "min",
+        "callee_file": null,
+        "line_number": 63,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer",
+        "callee_symbol": "put",
+        "callee_file": null,
+        "line_number": 196,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "producer",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 197,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "consumer",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "line_number": 203,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "emit",
+        "callee_symbol": "iscoroutinefunction",
+        "callee_file": null,
+        "line_number": 235,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "retry_async",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 250,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "debounced",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 272,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "emit",
+        "callee_symbol": "handler",
+        "callee_file": null,
+        "line_number": 236,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "emit",
+        "callee_symbol": "handler",
+        "callee_file": null,
+        "line_number": 238,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "retry_async",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 254,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "emit",
+        "callee_symbol": "handler",
+        "callee_file": null,
+        "line_number": 236,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "async_code.py",
+        "caller_symbol": "retry_async",
+        "callee_symbol": "sleep",
+        "callee_file": null,
+        "line_number": 254,
+        "call_type": "dynamic"
+      }
+    ],
+    "imports": [
+      {
+        "file": "async_code.py",
+        "imported_path": "asyncio",
+        "import_type": "static",
+        "line_number": 3
+      },
+      {
+        "file": "async_code.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 4,
+        "imported_symbols": "AsyncGenerator,AsyncIterator,Callable,Any"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 37,
+      "total_calls": 76,
+      "total_imports": 2
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "async def functions are still type='function'",
+      "async methods are still type='method'",
+      "__aenter__, __aexit__, __aiter__, __anext__ are async dunder methods",
+      "Nested async functions should be extracted"
+    ]
+  }
+}

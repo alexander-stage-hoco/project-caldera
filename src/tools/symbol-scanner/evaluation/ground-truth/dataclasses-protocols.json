@@ -1,0 +1,502 @@
+{
+  "metadata": {
+    "repo": "dataclasses-protocols",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "category": "real-world",
+    "description": "Tests @dataclass, Protocol, TypedDict, NamedTuple patterns",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "models.py",
+        "symbol_name": "Comparable",
+        "symbol_type": "class",
+        "line_start": 13,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "__lt__",
+        "symbol_type": "method",
+        "line_start": 16,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "__eq__",
+        "symbol_type": "method",
+        "line_start": 20,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "Hashable",
+        "symbol_type": "class",
+        "line_start": 25,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "__hash__",
+        "symbol_type": "method",
+        "line_start": 28,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "Serializable",
+        "symbol_type": "class",
+        "line_start": 33,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "to_json",
+        "symbol_type": "method",
+        "line_start": 36,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "from_json",
+        "symbol_type": "method",
+        "line_start": 41,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "Repository",
+        "symbol_type": "class",
+        "line_start": 46,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "add",
+        "symbol_type": "method",
+        "line_start": 49,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "get",
+        "symbol_type": "method",
+        "line_start": 53,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "delete",
+        "symbol_type": "method",
+        "line_start": 57,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "Point",
+        "symbol_type": "class",
+        "line_start": 68,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "distance_from_origin",
+        "symbol_type": "method",
+        "line_start": 74,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "ImmutablePoint",
+        "symbol_type": "class",
+        "line_start": 80,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "translate",
+        "symbol_type": "method",
+        "line_start": 86,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "Person",
+        "symbol_type": "class",
+        "line_start": 92,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "__post_init__",
+        "symbol_type": "method",
+        "line_start": 100,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "add_tag",
+        "symbol_type": "method",
+        "line_start": 105,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "SortablePerson",
+        "symbol_type": "class",
+        "line_start": 112,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "__post_init__",
+        "symbol_type": "method",
+        "line_start": 119,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "Config",
+        "symbol_type": "class",
+        "line_start": 125,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "to_dict",
+        "symbol_type": "method",
+        "line_start": 136,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "with_debug",
+        "symbol_type": "method",
+        "line_start": 140,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "Address",
+        "symbol_type": "class",
+        "line_start": 146,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "Company",
+        "symbol_type": "class",
+        "line_start": 156,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "add_employee",
+        "symbol_type": "method",
+        "line_start": 163,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "get_employee_count",
+        "symbol_type": "method",
+        "line_start": 167,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "UserDict",
+        "symbol_type": "class",
+        "line_start": 177,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "UserDictOptional",
+        "symbol_type": "class",
+        "line_start": 185,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "NestedDict",
+        "symbol_type": "class",
+        "line_start": 195,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "Coordinate",
+        "symbol_type": "class",
+        "line_start": 207,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "magnitude",
+        "symbol_type": "method",
+        "line_start": 214,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "HTTPResponse",
+        "symbol_type": "class",
+        "line_start": 219,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "is_success",
+        "symbol_type": "method",
+        "line_start": 226,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "DatabaseRecord",
+        "symbol_type": "class",
+        "line_start": 231,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "process_comparable",
+        "symbol_type": "function",
+        "line_start": 245,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "validate_serializable",
+        "symbol_type": "function",
+        "line_start": 250,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "create_user_dict",
+        "symbol_type": "function",
+        "line_start": 259,
+        "is_exported": true,
+        "parameters": 3
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "transform_coordinate",
+        "symbol_type": "function",
+        "line_start": 264,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "merge_configs",
+        "symbol_type": "function",
+        "line_start": 269,
+        "is_exported": true,
+        "parameters": 2
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "dataclass",
+        "callee_file": null,
+        "line_number": 79,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "dataclass",
+        "callee_file": null,
+        "line_number": 111,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "field",
+        "callee_file": null,
+        "line_number": 98,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "field",
+        "callee_file": null,
+        "line_number": 115,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "field",
+        "callee_file": null,
+        "line_number": 161,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "process_comparable",
+        "callee_symbol": "sorted",
+        "callee_file": null,
+        "line_number": 247,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "transform_coordinate",
+        "callee_symbol": "Coordinate",
+        "callee_file": "models.py",
+        "line_number": 266,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "merge_configs",
+        "callee_symbol": "Config",
+        "callee_file": "models.py",
+        "line_number": 271,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "translate",
+        "callee_symbol": "ImmutablePoint",
+        "callee_file": "models.py",
+        "line_number": 88,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "__post_init__",
+        "callee_symbol": "lower",
+        "callee_file": null,
+        "line_number": 121,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "to_dict",
+        "callee_symbol": "asdict",
+        "callee_file": null,
+        "line_number": 138,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "with_debug",
+        "callee_symbol": "replace",
+        "callee_file": null,
+        "line_number": 142,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "add_employee",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 165,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "get_employee_count",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 169,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "validate_serializable",
+        "callee_symbol": "to_json",
+        "callee_file": "models.py",
+        "line_number": 253,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "validate_serializable",
+        "callee_symbol": "bool",
+        "callee_file": null,
+        "line_number": 254,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "__post_init__",
+        "callee_symbol": "ValueError",
+        "callee_file": null,
+        "line_number": 103,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "add_tag",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 108,
+        "call_type": "dynamic"
+      }
+    ],
+    "imports": [
+      {
+        "file": "models.py",
+        "imported_path": "dataclasses",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "dataclass,field,asdict,replace"
+      },
+      {
+        "file": "models.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 4,
+        "imported_symbols": "Protocol,TypedDict,NamedTuple,runtime_checkable,Any,ClassVar"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 41,
+      "total_calls": 18,
+      "total_imports": 2
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "@dataclass decorated classes are still type='class'",
+      "Protocol methods are still type='method'",
+      "TypedDict classes don't have __init__ to extract",
+      "NamedTuple classes can have methods",
+      "__post_init__ is a method, not magic"
+    ]
+  }
+}

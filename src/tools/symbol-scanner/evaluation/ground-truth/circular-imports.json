@@ -1,0 +1,305 @@
+{
+  "metadata": {
+    "repo": "circular-imports",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "purpose": "Test circular import patterns with TYPE_CHECKING guards",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "module_a.py",
+        "symbol_name": "ClassA",
+        "symbol_type": "class",
+        "line_start": 13,
+        "is_exported": true
+      },
+      {
+        "path": "module_a.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 16,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "module_a.py",
+        "symbol_name": "get_name",
+        "symbol_type": "method",
+        "line_start": 20,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "module_a.py",
+        "symbol_name": "call_b",
+        "symbol_type": "method",
+        "line_start": 24,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "module_a.py",
+        "symbol_name": "use_helper",
+        "symbol_type": "method",
+        "line_start": 29,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "module_a.py",
+        "symbol_name": "create_a",
+        "symbol_type": "function",
+        "line_start": 34,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "main",
+        "symbol_type": "function",
+        "line_start": 9,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "module_b.py",
+        "symbol_name": "ClassB",
+        "symbol_type": "class",
+        "line_start": 13,
+        "is_exported": true
+      },
+      {
+        "path": "module_b.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 16,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "module_b.py",
+        "symbol_name": "get_value",
+        "symbol_type": "method",
+        "line_start": 20,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "module_b.py",
+        "symbol_name": "process",
+        "symbol_type": "method",
+        "line_start": 24,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "module_b.py",
+        "symbol_name": "create_and_link_a",
+        "symbol_type": "method",
+        "line_start": 28,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "module_b.py",
+        "symbol_name": "helper_b",
+        "symbol_type": "function",
+        "line_start": 35,
+        "is_exported": true,
+        "parameters": 1
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "module_a.py",
+        "caller_symbol": "create_a",
+        "callee_symbol": "ClassA",
+        "callee_file": "module_a.py",
+        "line_number": 36,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "module_a.py",
+        "caller_symbol": "call_b",
+        "callee_symbol": "process",
+        "callee_file": null,
+        "line_number": 27,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "module_a.py",
+        "caller_symbol": "use_helper",
+        "callee_symbol": "helper_b",
+        "callee_file": "module_b.py",
+        "line_number": 31,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "create_a",
+        "callee_file": "module_a.py",
+        "line_number": 11,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "ClassB",
+        "callee_file": "module_b.py",
+        "line_number": 12,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "call_b",
+        "callee_file": null,
+        "line_number": 15,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "use_helper",
+        "callee_file": null,
+        "line_number": 16,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "create_and_link_a",
+        "callee_file": null,
+        "line_number": 17,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 19,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "main",
+        "callee_file": "main.py",
+        "line_number": 23,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "get_name",
+        "callee_file": null,
+        "line_number": 19,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "module_b.py",
+        "caller_symbol": "create_and_link_a",
+        "callee_symbol": "create_a",
+        "callee_file": "module_a.py",
+        "line_number": 30,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [
+      {
+        "file": "module_a.py",
+        "imported_path": "__future__",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "annotations"
+      },
+      {
+        "file": "module_a.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 5,
+        "imported_symbols": "TYPE_CHECKING"
+      },
+      {
+        "file": "module_a.py",
+        "imported_path": "module_b",
+        "import_type": "static",
+        "line_number": 10,
+        "imported_symbols": "helper_b"
+      },
+      {
+        "file": "module_a.py",
+        "imported_path": "module_b",
+        "import_type": "type_checking",
+        "line_number": 8,
+        "imported_symbols": "ClassB"
+      },
+      {
+        "file": "main.py",
+        "imported_path": "__future__",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "annotations"
+      },
+      {
+        "file": "main.py",
+        "imported_path": "module_a",
+        "import_type": "static",
+        "line_number": 5,
+        "imported_symbols": "ClassA,create_a"
+      },
+      {
+        "file": "main.py",
+        "imported_path": "module_b",
+        "import_type": "static",
+        "line_number": 6,
+        "imported_symbols": "ClassB"
+      },
+      {
+        "file": "module_b.py",
+        "imported_path": "__future__",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "annotations"
+      },
+      {
+        "file": "module_b.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 5,
+        "imported_symbols": "TYPE_CHECKING"
+      },
+      {
+        "file": "module_b.py",
+        "imported_path": "module_a",
+        "import_type": "static",
+        "line_number": 10,
+        "imported_symbols": "create_a"
+      },
+      {
+        "file": "module_b.py",
+        "imported_path": "module_a",
+        "import_type": "type_checking",
+        "line_number": 8,
+        "imported_symbols": "ClassA"
+      }
+    ],
+    "summary": {
+      "total_files": 3,
+      "total_symbols": 13,
+      "total_calls": 12,
+      "total_imports": 11
+    }
+  },
+  "notes": {
+    "challenges": [
+      "Circular imports between module_a and module_b",
+      "TYPE_CHECKING guards hide some imports at runtime",
+      "Cross-module method calls through class instances"
+    ]
+  }
+}

@@ -1,0 +1,295 @@
+{
+  "metadata": {
+    "repo": "type-checking-imports",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "purpose": "Test TYPE_CHECKING conditional imports and typing constructs",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "main.py",
+        "symbol_name": "DataProcessor",
+        "symbol_type": "class",
+        "line_start": 17,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "process",
+        "symbol_type": "method",
+        "line_start": 20,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "get_path",
+        "symbol_type": "method",
+        "line_start": 24,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Repository",
+        "symbol_type": "class",
+        "line_start": 29,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 32,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "add",
+        "symbol_type": "method",
+        "line_start": 36,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "get_all",
+        "symbol_type": "method",
+        "line_start": 42,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "register_callback",
+        "symbol_type": "method",
+        "line_start": 46,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "iterate",
+        "symbol_type": "method",
+        "line_start": 50,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "process_with_any",
+        "symbol_type": "function",
+        "line_start": 55,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "load_from_path",
+        "symbol_type": "function",
+        "line_start": 62,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_InternalHelper",
+        "symbol_type": "class",
+        "line_start": 67,
+        "is_exported": false
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_transform",
+        "symbol_type": "method",
+        "line_start": 71,
+        "is_exported": false,
+        "parameters": 1
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "TypeVar",
+        "callee_file": null,
+        "line_number": 13,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "TypeVar",
+        "callee_file": null,
+        "line_number": 14,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "process_with_any",
+        "callee_symbol": "isinstance",
+        "callee_file": null,
+        "line_number": 57,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "load_from_path",
+        "callee_symbol": "read_text",
+        "callee_file": null,
+        "line_number": 64,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "Repository",
+        "callee_file": "main.py",
+        "line_number": 76,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "add",
+        "callee_file": "main.py",
+        "line_number": 77,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 78,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "add",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 38,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "get_all",
+        "callee_symbol": "copy",
+        "callee_file": null,
+        "line_number": 44,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "register_callback",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 48,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "iterate",
+        "callee_symbol": "iter",
+        "callee_file": null,
+        "line_number": 52,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "_transform",
+        "callee_symbol": "upper",
+        "callee_file": null,
+        "line_number": 72,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "get_all",
+        "callee_file": "main.py",
+        "line_number": 78,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "add",
+        "callee_symbol": "callback",
+        "callee_file": null,
+        "line_number": 40,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "process_with_any",
+        "callee_symbol": "process_with_any",
+        "callee_file": "main.py",
+        "line_number": 58,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "process_with_any",
+        "callee_symbol": "items",
+        "callee_file": null,
+        "line_number": 58,
+        "call_type": "dynamic"
+      }
+    ],
+    "imports": [
+      {
+        "file": "main.py",
+        "imported_path": "__future__",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "annotations"
+      },
+      {
+        "file": "main.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 5,
+        "imported_symbols": "TYPE_CHECKING,Protocol,TypeVar,Generic"
+      },
+      {
+        "file": "main.py",
+        "imported_path": "collections.abc",
+        "import_type": "type_checking",
+        "line_number": 8,
+        "imported_symbols": "Callable,Iterator"
+      },
+      {
+        "file": "main.py",
+        "imported_path": "pathlib",
+        "import_type": "type_checking",
+        "line_number": 9,
+        "imported_symbols": "Path"
+      },
+      {
+        "file": "main.py",
+        "imported_path": "typing",
+        "import_type": "type_checking",
+        "line_number": 10,
+        "imported_symbols": "Any"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 13,
+      "total_calls": 16,
+      "total_imports": 5
+    }
+  },
+  "notes": {
+    "challenges": [
+      "TYPE_CHECKING conditional imports are not runtime imports",
+      "Protocol classes have abstract method stubs",
+      "Generic type variables (T, T_co) as module-level symbols",
+      "Private class with static method"
+    ]
+  }
+}

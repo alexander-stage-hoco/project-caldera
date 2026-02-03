@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "repo": "partial-syntax-errors",
+    "created": "2026-02-03",
+    "version": "1.2-calibrated",
+    "calibrated_date": "2026-02-03",
+    "category": "error",
+    "description": "Tests error recovery with mix of valid and invalid Python"
+  },
+  "expected": {
+    "symbols": [
+      {"path": "mixed_validity.py", "symbol_name": "valid_function_one", "symbol_type": "function", "line_start": 4, "is_exported": true, "parameters": 1},
+      {"path": "mixed_validity.py", "symbol_name": "valid_function_two", "symbol_type": "function", "line_start": 10, "is_exported": true, "parameters": 2},
+      {"path": "mixed_validity.py", "symbol_name": "ValidClass", "symbol_type": "class", "line_start": 16, "is_exported": true},
+      {"path": "mixed_validity.py", "symbol_name": "__init__", "symbol_type": "method", "line_start": 19, "is_exported": false, "parameters": 1},
+      {"path": "mixed_validity.py", "symbol_name": "greet", "symbol_type": "method", "line_start": 23, "is_exported": true, "parameters": 0},
+      {"path": "mixed_validity.py", "symbol_name": "valid_after_error", "symbol_type": "function", "line_start": 34, "is_exported": true, "parameters": 1},
+      {"path": "mixed_validity.py", "symbol_name": "final_valid_function", "symbol_type": "function", "line_start": 64, "is_exported": true, "parameters": 1},
+      {"path": "mixed_validity.py", "symbol_name": "outer_valid", "symbol_type": "function", "line_start": 70, "is_exported": true, "parameters": 0},
+      {"path": "mixed_validity.py", "symbol_name": "inner_valid", "symbol_type": "function", "line_start": 72, "is_exported": true, "parameters": 0}
+    ],
+    "calls": [
+      {"caller_file": "mixed_validity.py", "caller_symbol": "final_valid_function", "callee_symbol": "len", "line_number": 66, "call_type": "direct"},
+      {"caller_file": "mixed_validity.py", "caller_symbol": "outer_valid", "callee_symbol": "inner_valid", "line_number": 75, "call_type": "direct"}
+    ],
+    "imports": [],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 9,
+      "total_calls": 2,
+      "total_imports": 0
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "AST extractor will fail entirely on this file due to syntax errors",
+      "Tree-sitter should recover and extract valid symbols around errors",
+      "Valid symbols before first error should be extracted",
+      "Valid symbols after errors should be extracted (tree-sitter only)",
+      "Broken functions should NOT be extracted"
+    ],
+    "expected_behavior": {
+      "ast": "Should report syntax error and extract 0 symbols",
+      "treesitter": "Should extract 9 valid symbols despite errors"
+    },
+    "excluded_symbols": {
+      "reason": "Tree-sitter error recovery limitations - these symbols fall inside ERROR nodes created by preceding syntax errors and are structurally unrecoverable",
+      "symbols": [
+        {"symbol": "AnotherValidClass", "line": 45, "cause": "Inside ERROR node from unclosed parenthesis on line 40"},
+        {"symbol": "method_one", "line": 48, "cause": "Inside ERROR node (child of AnotherValidClass)"},
+        {"symbol": "method_two", "line": 52, "cause": "Inside ERROR node (child of AnotherValidClass)"},
+        {"symbol": "very_last_function", "line": 83, "cause": "Inside ERROR node from unclosed bracket on line 79"}
+      ]
+    }
+  }
+}

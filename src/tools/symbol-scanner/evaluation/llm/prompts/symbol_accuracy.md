@@ -1,0 +1,94 @@
+# Symbol Accuracy Judge
+
+You are evaluating the **symbol extraction accuracy** of symbol-scanner for code analysis.
+
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
+## Evaluation Dimension
+
+**Symbol Extraction (30% weight)**: How accurately does symbol-scanner extract function, class, and method definitions?
+
+## Scoring Rubric
+
+### For Synthetic Repos (strict ground truth evaluation):
+
+| Score | Criteria |
+|-------|----------|
+| 5 | Exceeds expectations: All symbols captured, types correct, line numbers exact |
+| 4 | Meets requirements: Core symbols captured with minor omissions |
+| 3 | Minimum acceptable: Most symbols captured, some type misclassifications |
+| 2 | Significant gaps: Missing important symbols or incorrect types |
+| 1 | Fails requirements: Incomplete or incorrect extraction |
+
+### For Real-World Repos (when synthetic_baseline shows validated tool):
+
+| Score | Criteria |
+|-------|----------|
+| 5 | Output schema compliant, symbols consistent with source structure |
+| 4 | Minor gaps but symbols match visible code structure |
+| 3 | Schema issues OR questionable symbol classifications |
+| 2 | Multiple issues AND inconsistent data |
+| 1 | Broken output, missing required fields |
+
+## Evidence to Evaluate
+
+### Extracted Symbols
+```json
+{{ symbols }}
+```
+
+### Symbol Counts by Type
+```json
+{{ symbols_by_type }}
+```
+
+### Source Code Samples
+```json
+{{ source_samples }}
+```
+
+### Total Symbols Count
+{{ symbols_count }}
+
+## Evaluation Questions
+
+1. Are all visible function definitions extracted?
+2. Are all class definitions extracted?
+3. Are all methods within classes extracted?
+4. Are symbol types correctly classified (function vs class vs method)?
+5. Are line numbers accurate (start and end)?
+6. Is export status (public vs private) correct?
+
+## Required Output Format
+
+Respond with a JSON object with a **BINARY PASS/FAIL decision**:
+
+```json
+{
+  "dimension": "symbol_accuracy",
+  "decision": "PASS",
+  "confidence": 0.92,
+  "reasoning": "<detailed explanation of why this passes or fails>",
+  "issues": [
+    {"severity": "LOW", "type": "line_mismatch", "symbol": "foo", "description": "Line number off by 1"}
+  ],
+  "recommendations": ["<improvement suggestions>"]
+}
+```
+
+### Decision Rules
+- **PASS**: All critical symbols extracted correctly. Minor issues (off-by-one lines, optional fields) are acceptable.
+- **FAIL**: Missing important symbols, incorrect types, or systematic extraction errors.
+
+### Issue Severities
+- **HIGH**: Missing exported symbol, wrong symbol type, completely wrong line
+- **MEDIUM**: Missing private symbol, export status incorrect
+- **LOW**: Minor line number deviation (+/- 2), optional field missing

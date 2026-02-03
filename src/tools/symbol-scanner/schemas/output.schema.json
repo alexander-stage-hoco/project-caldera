@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Symbol Scanner Tool Output Envelope",
+  "description": "Envelope schema for symbol-scanner extraction output",
+  "type": "object",
+  "required": ["metadata", "data"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": [
+        "tool_name",
+        "tool_version",
+        "run_id",
+        "repo_id",
+        "branch",
+        "commit",
+        "timestamp",
+        "schema_version"
+      ],
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "const": "symbol-scanner"
+        },
+        "tool_version": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "repo_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schema_version": {
+          "type": "string",
+          "const": "1.0.0"
+        }
+      }
+    },
+    "data": {
+      "$ref": "#/$defs/symbolScannerData"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/errorEntry"
+      }
+    }
+  },
+  "$defs": {
+    "symbolScannerData": {
+      "type": "object",
+      "required": ["tool", "tool_version", "symbols", "calls", "imports", "summary"],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "const": "symbol-scanner"
+        },
+        "tool_version": {
+          "type": "string"
+        },
+        "symbols": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/symbolEntry"
+          }
+        },
+        "calls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/callEntry"
+          }
+        },
+        "imports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/importEntry"
+          }
+        },
+        "summary": {
+          "$ref": "#/$defs/summaryEntry"
+        }
+      }
+    },
+    "symbolEntry": {
+      "type": "object",
+      "description": "A function, class, or method definition",
+      "required": ["path", "symbol_name", "symbol_type", "line_start", "line_end", "is_exported"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "File path relative to repository root",
+          "pattern": "^[^/].*",
+          "not": {
+            "pattern": "(^\\./|\\.\\.|^[A-Za-z]:|/$|\\\\)"
+          }
+        },
+        "symbol_name": {
+          "type": "string",
+          "description": "Function/class/method name",
+          "minLength": 1
+        },
+        "symbol_type": {
+          "type": "string",
+          "enum": ["function", "class", "method", "variable"],
+          "description": "Type of symbol"
+        },
+        "line_start": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Starting line number"
+        },
+        "line_end": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Ending line number"
+        },
+        "is_exported": {
+          "type": "boolean",
+          "description": "Whether symbol is public (no leading underscore)"
+        },
+        "parameters": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Number of parameters (for functions/methods)"
+        },
+        "parent_symbol": {
+          "type": ["string", "null"],
+          "description": "Containing class name (for methods)"
+        },
+        "docstring": {
+          "type": ["string", "null"],
+          "description": "Documentation string if present"
+        }
+      }
+    },
+    "callEntry": {
+      "type": "object",
+      "description": "A function or method call",
+      "required": ["caller_file", "caller_symbol", "callee_symbol", "line_number", "call_type"],
+      "properties": {
+        "caller_file": {
+          "type": "string",
+          "description": "File containing the call",
+          "pattern": "^[^/].*"
+        },
+        "caller_symbol": {
+          "type": "string",
+          "description": "Function/method containing the call"
+        },
+        "callee_symbol": {
+          "type": "string",
+          "description": "Function/method being called"
+        },
+        "callee_file": {
+          "type": ["string", "null"],
+          "description": "Resolved file path or null if external/unresolved"
+        },
+        "line_number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Line number of the call"
+        },
+        "call_type": {
+          "type": "string",
+          "enum": ["direct", "dynamic", "async"],
+          "description": "Type of call"
+        },
+        "is_dynamic_code_execution": {
+          "type": "boolean",
+          "description": "True if call is eval(), exec(), or compile()"
+        },
+        "callee_object": {
+          "type": ["string", "null"],
+          "description": "Object/module name for attribute calls (e.g., 'json' for json.loads())"
+        }
+      }
+    },
+    "importEntry": {
+      "type": "object",
+      "description": "An import statement",
+      "required": ["file", "imported_path", "import_type", "line_number"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "File containing the import",
+          "pattern": "^[^/].*"
+        },
+        "imported_path": {
+          "type": "string",
+          "description": "Module path being imported"
+        },
+        "imported_symbols": {
+          "type": ["string", "null"],
+          "description": "Comma-separated symbols or null for module import"
+        },
+        "import_type": {
+          "type": "string",
+          "enum": ["static", "dynamic", "type_checking", "side_effect"],
+          "description": "Type of import"
+        },
+        "line_number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Line number of the import"
+        }
+      }
+    },
+    "summaryEntry": {
+      "type": "object",
+      "description": "Summary statistics",
+      "required": ["total_files", "total_symbols", "total_calls", "total_imports"],
+      "properties": {
+        "total_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_symbols": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_imports": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "symbols_by_type": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "calls_by_type": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "imports_by_type": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "errorEntry": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "recoverable": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

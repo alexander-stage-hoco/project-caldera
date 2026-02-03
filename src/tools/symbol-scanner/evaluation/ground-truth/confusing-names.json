@@ -1,0 +1,462 @@
+{
+  "metadata": {
+    "repo": "confusing-names",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "purpose": "Test edge case names: keyword-like, unicode, underscore patterns",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "main.py",
+        "symbol_name": "def_",
+        "symbol_type": "function",
+        "line_start": 8,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "class_",
+        "symbol_type": "function",
+        "line_start": 13,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "import_",
+        "symbol_type": "function",
+        "line_start": 18,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "return_",
+        "symbol_type": "function",
+        "line_start": 23,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "__custom__",
+        "symbol_type": "function",
+        "line_start": 29,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "___triple_underscore",
+        "symbol_type": "function",
+        "line_start": 34,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "calculate_area",
+        "symbol_type": "function",
+        "line_start": 40,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Data",
+        "symbol_type": "class",
+        "line_start": 45,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 48,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "process",
+        "symbol_type": "method",
+        "line_start": 51,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "a",
+        "symbol_type": "function",
+        "line_start": 58,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_",
+        "symbol_type": "function",
+        "line_start": 63,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "__",
+        "symbol_type": "function",
+        "line_start": 68,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "func123",
+        "symbol_type": "function",
+        "line_start": 74,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_123private",
+        "symbol_type": "function",
+        "line_start": 79,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Class2",
+        "symbol_type": "class",
+        "line_start": 84,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "method_1",
+        "symbol_type": "method",
+        "line_start": 87,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "method_2",
+        "symbol_type": "method",
+        "line_start": 91,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "processprocess",
+        "symbol_type": "function",
+        "line_start": 97,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "ALLCAPS",
+        "symbol_type": "function",
+        "line_start": 102,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "list",
+        "symbol_type": "function",
+        "line_start": 108,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "dict",
+        "symbol_type": "function",
+        "line_start": 113,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_single_underscore",
+        "symbol_type": "function",
+        "line_start": 119,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "__double_underscore",
+        "symbol_type": "function",
+        "line_start": 124,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_PrivateClass",
+        "symbol_type": "class",
+        "line_start": 129,
+        "is_exported": false
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "public_method",
+        "symbol_type": "method",
+        "line_start": 132,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_private_method",
+        "symbol_type": "method",
+        "line_start": 136,
+        "is_exported": false,
+        "parameters": 0
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 143,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 144,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 145,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 146,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 147,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 148,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 149,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 150,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 151,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 152,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 153,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 154,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 155,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "def_",
+        "callee_file": "main.py",
+        "line_number": 143,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "class_",
+        "callee_file": "main.py",
+        "line_number": 144,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "import_",
+        "callee_file": "main.py",
+        "line_number": 145,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "return_",
+        "callee_file": "main.py",
+        "line_number": 146,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "__custom__",
+        "callee_file": "main.py",
+        "line_number": 147,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "a",
+        "callee_file": "main.py",
+        "line_number": 148,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "_",
+        "callee_file": "main.py",
+        "line_number": 149,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "__",
+        "callee_file": "main.py",
+        "line_number": 150,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "func123",
+        "callee_file": "main.py",
+        "line_number": 151,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "_123private",
+        "callee_file": "main.py",
+        "line_number": 152,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "ALLCAPS",
+        "callee_file": "main.py",
+        "line_number": 153,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "list",
+        "callee_file": "main.py",
+        "line_number": 154,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "dict",
+        "callee_file": "main.py",
+        "line_number": 155,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [
+      {
+        "file": "main.py",
+        "imported_path": "__future__",
+        "import_type": "static",
+        "line_number": 4,
+        "imported_symbols": "annotations"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 27,
+      "total_calls": 26,
+      "total_imports": 1
+    }
+  },
+  "notes": {
+    "challenges": [
+      "Names that look like Python keywords (def_, class_, import_, return_)",
+      "Dunder-style names that aren't special methods (__custom__)",
+      "Triple underscore prefix",
+      "Single character names (a, _, __)",
+      "Names with numbers (func123, _123private, Class2)",
+      "Names shadowing builtins (list, dict)",
+      "Private class with mixed public/private methods"
+    ]
+  }
+}

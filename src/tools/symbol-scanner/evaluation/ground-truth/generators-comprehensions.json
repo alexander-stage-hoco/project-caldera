@@ -1,0 +1,302 @@
+{
+  "metadata": {
+    "repo": "generators-comprehensions",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "category": "edge-cases",
+    "description": "Tests generator and comprehension extraction",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "generators.py",
+        "symbol_name": "count_up",
+        "symbol_type": "function",
+        "line_start": 7,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "accumulator",
+        "symbol_type": "function",
+        "line_start": 16,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "flatten",
+        "symbol_type": "function",
+        "line_start": 28,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "safe_divide",
+        "symbol_type": "function",
+        "line_start": 35,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "fibonacci",
+        "symbol_type": "function",
+        "line_start": 45,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "DataProcessor",
+        "symbol_type": "class",
+        "line_start": 54,
+        "is_exported": true
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 57,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "process_items",
+        "symbol_type": "method",
+        "line_start": 61,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "filter_positive",
+        "symbol_type": "method",
+        "line_start": 66,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "square_list",
+        "symbol_type": "function",
+        "line_start": 74,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "filter_even",
+        "symbol_type": "function",
+        "line_start": 79,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "nested_comprehension",
+        "symbol_type": "function",
+        "line_start": 84,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "conditional_comprehension",
+        "symbol_type": "function",
+        "line_start": 89,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "create_lookup",
+        "symbol_type": "function",
+        "line_start": 95,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "invert_dict",
+        "symbol_type": "function",
+        "line_start": 100,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "unique_lengths",
+        "symbol_type": "function",
+        "line_start": 106,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "sum_squares",
+        "symbol_type": "function",
+        "line_start": 112,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "any_positive",
+        "symbol_type": "function",
+        "line_start": 117,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "first_match",
+        "symbol_type": "function",
+        "line_start": 122,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "matrix_transpose",
+        "symbol_type": "function",
+        "line_start": 128,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "filter_and_transform",
+        "symbol_type": "function",
+        "line_start": 136,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "generators.py",
+        "symbol_name": "processed_chunks",
+        "symbol_type": "function",
+        "line_start": 142,
+        "is_exported": true,
+        "parameters": 2
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "sum_squares",
+        "callee_symbol": "sum",
+        "callee_file": null,
+        "line_number": 114,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "any_positive",
+        "callee_symbol": "any",
+        "callee_file": null,
+        "line_number": 119,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "first_match",
+        "callee_symbol": "next",
+        "callee_file": null,
+        "line_number": 124,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "processed_chunks",
+        "callee_symbol": "range",
+        "callee_file": null,
+        "line_number": 144,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "create_lookup",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 97,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "unique_lengths",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 108,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "processed_chunks",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 144,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "invert_dict",
+        "callee_symbol": "items",
+        "callee_file": null,
+        "line_number": 102,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "matrix_transpose",
+        "callee_symbol": "range",
+        "callee_file": null,
+        "line_number": 132,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "first_match",
+        "callee_symbol": "startswith",
+        "callee_file": null,
+        "line_number": 124,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "generators.py",
+        "caller_symbol": "matrix_transpose",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 132,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [
+      {
+        "file": "generators.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "Generator,Iterator,Iterable"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 22,
+      "total_calls": 11,
+      "total_imports": 1
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "Generator functions should be type='function' not a special type",
+      "Comprehensions are expressions, not callable symbols",
+      "yield/yield from statements don't create new symbols",
+      "Walrus operator doesn't create a new symbol"
+    ]
+  }
+}

@@ -1,0 +1,356 @@
+{
+  "metadata": {
+    "repo": "deep-nesting-stress",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "purpose": "Test 10+ levels of nested classes and functions",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "main.py",
+        "symbol_name": "Level1",
+        "symbol_type": "class",
+        "line_start": 6,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Level2",
+        "symbol_type": "class",
+        "line_start": 9,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Level3",
+        "symbol_type": "class",
+        "line_start": 12,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Level4",
+        "symbol_type": "class",
+        "line_start": 15,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Level5",
+        "symbol_type": "class",
+        "line_start": 18,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Level6",
+        "symbol_type": "class",
+        "line_start": 21,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Level7",
+        "symbol_type": "class",
+        "line_start": 24,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Level8",
+        "symbol_type": "class",
+        "line_start": 27,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Level9",
+        "symbol_type": "class",
+        "line_start": 30,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "Level10",
+        "symbol_type": "class",
+        "line_start": 33,
+        "is_exported": true
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "deepest_method",
+        "symbol_type": "method",
+        "line_start": 36,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "level9_method",
+        "symbol_type": "method",
+        "line_start": 40,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "level8_method",
+        "symbol_type": "method",
+        "line_start": 44,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "level7_method",
+        "symbol_type": "method",
+        "line_start": 48,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "level6_method",
+        "symbol_type": "method",
+        "line_start": 52,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "level5_method",
+        "symbol_type": "method",
+        "line_start": 56,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "level4_method",
+        "symbol_type": "method",
+        "line_start": 60,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "level3_method",
+        "symbol_type": "method",
+        "line_start": 64,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "level2_method",
+        "symbol_type": "method",
+        "line_start": 68,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "level1_method",
+        "symbol_type": "method",
+        "line_start": 72,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "outer_function",
+        "symbol_type": "function",
+        "line_start": 77,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "nested_1",
+        "symbol_type": "function",
+        "line_start": 80,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "nested_2",
+        "symbol_type": "function",
+        "line_start": 83,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "nested_3",
+        "symbol_type": "function",
+        "line_start": 86,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "nested_4",
+        "symbol_type": "function",
+        "line_start": 89,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "nested_5",
+        "symbol_type": "function",
+        "line_start": 92,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_private_deeply_nested",
+        "symbol_type": "function",
+        "line_start": 107,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_inner",
+        "symbol_type": "function",
+        "line_start": 110,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "_deeper",
+        "symbol_type": "function",
+        "line_start": 111,
+        "is_exported": false,
+        "parameters": 0
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "outer_function",
+        "callee_symbol": "nested_1",
+        "callee_file": "main.py",
+        "line_number": 104,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "_private_deeply_nested",
+        "callee_symbol": "_inner",
+        "callee_file": "main.py",
+        "line_number": 115,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "Level10",
+        "callee_file": "main.py",
+        "line_number": 120,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 121,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 124,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "nested_1",
+        "callee_symbol": "nested_2",
+        "callee_file": "main.py",
+        "line_number": 102,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "_inner",
+        "callee_symbol": "_deeper",
+        "callee_file": "main.py",
+        "line_number": 113,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "deepest_method",
+        "callee_file": "main.py",
+        "line_number": 121,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "outer_function",
+        "callee_file": "main.py",
+        "line_number": 124,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "nested_2",
+        "callee_symbol": "nested_3",
+        "callee_file": "main.py",
+        "line_number": 100,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "nested_3",
+        "callee_symbol": "nested_4",
+        "callee_file": "main.py",
+        "line_number": 98,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "nested_4",
+        "callee_symbol": "nested_5",
+        "callee_file": "main.py",
+        "line_number": 96,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [
+      {
+        "file": "main.py",
+        "imported_path": "__future__",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "annotations"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 29,
+      "total_calls": 12,
+      "total_imports": 1
+    }
+  },
+  "notes": {
+    "challenges": [
+      "10 levels of nested class definitions",
+      "5 levels of nested function definitions",
+      "Methods at every level of class nesting",
+      "Private nested functions with _ prefix"
+    ]
+  }
+}

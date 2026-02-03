@@ -1,0 +1,192 @@
+{
+  "metadata": {
+    "repo": "unresolved-externals",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "api_client.py",
+        "symbol_name": "fetch_data",
+        "symbol_type": "function",
+        "line_start": 9,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "api_client.py",
+        "symbol_name": "get_timestamp",
+        "symbol_type": "function",
+        "line_start": 16,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "api_client.py",
+        "symbol_name": "parse_json",
+        "symbol_type": "function",
+        "line_start": 21,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "api_client.py",
+        "symbol_name": "serialize",
+        "symbol_type": "function",
+        "line_start": 26,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "api_client.py",
+        "symbol_name": "ApiClient",
+        "symbol_type": "class",
+        "line_start": 31,
+        "is_exported": true
+      },
+      {
+        "path": "api_client.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 34,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "api_client.py",
+        "symbol_name": "get",
+        "symbol_type": "method",
+        "line_start": 39,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "api_client.py",
+        "symbol_name": "process_response",
+        "symbol_type": "method",
+        "line_start": 44,
+        "is_exported": true,
+        "parameters": 1
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "api_client.py",
+        "caller_symbol": "get_timestamp",
+        "callee_symbol": "isoformat",
+        "callee_file": null,
+        "line_number": 18,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "api_client.py",
+        "caller_symbol": "parse_json",
+        "callee_symbol": "loads",
+        "callee_file": null,
+        "line_number": 23,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "api_client.py",
+        "caller_symbol": "serialize",
+        "callee_symbol": "dumps",
+        "callee_file": null,
+        "line_number": 28,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "api_client.py",
+        "caller_symbol": "fetch_data",
+        "callee_symbol": "urlopen",
+        "callee_file": null,
+        "line_number": 11,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "api_client.py",
+        "caller_symbol": "fetch_data",
+        "callee_symbol": "read",
+        "callee_file": null,
+        "line_number": 12,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "api_client.py",
+        "caller_symbol": "fetch_data",
+        "callee_symbol": "loads",
+        "callee_file": null,
+        "line_number": 13,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "api_client.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "get_timestamp",
+        "callee_file": "api_client.py",
+        "line_number": 37,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "api_client.py",
+        "caller_symbol": "get",
+        "callee_symbol": "fetch_data",
+        "callee_file": "api_client.py",
+        "line_number": 42,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "api_client.py",
+        "caller_symbol": "process_response",
+        "callee_symbol": "serialize",
+        "callee_file": "api_client.py",
+        "line_number": 46,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "api_client.py",
+        "caller_symbol": "get_timestamp",
+        "callee_symbol": "now",
+        "callee_file": null,
+        "line_number": 18,
+        "call_type": "dynamic"
+      }
+    ],
+    "imports": [
+      {
+        "file": "api_client.py",
+        "imported_path": "json",
+        "import_type": "static",
+        "line_number": 3
+      },
+      {
+        "file": "api_client.py",
+        "imported_path": "urllib.request",
+        "import_type": "static",
+        "line_number": 4
+      },
+      {
+        "file": "api_client.py",
+        "imported_path": "datetime",
+        "import_type": "static",
+        "line_number": 5,
+        "imported_symbols": "datetime"
+      },
+      {
+        "file": "api_client.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 6,
+        "imported_symbols": "Any"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 8,
+      "total_calls": 10,
+      "total_imports": 4
+    }
+  },
+  "notes": {}
+}

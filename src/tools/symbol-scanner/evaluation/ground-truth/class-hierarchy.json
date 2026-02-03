@@ -1,0 +1,187 @@
+{
+  "metadata": {
+    "repo": "class-hierarchy",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "models.py",
+        "symbol_name": "BaseModel",
+        "symbol_type": "class",
+        "line_start": 6,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 9,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 14,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "display",
+        "symbol_type": "method",
+        "line_start": 18,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "User",
+        "symbol_type": "class",
+        "line_start": 23,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 26,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 31,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "send_notification",
+        "symbol_type": "method",
+        "line_start": 35,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "Admin",
+        "symbol_type": "class",
+        "line_start": 40,
+        "is_exported": true
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 43,
+        "is_exported": false,
+        "parameters": 3
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "has_permission",
+        "symbol_type": "method",
+        "line_start": 48,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models.py",
+        "symbol_name": "create_user",
+        "symbol_type": "function",
+        "line_start": 53,
+        "is_exported": true,
+        "parameters": 2
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "create_user",
+        "callee_symbol": "User",
+        "callee_file": "models.py",
+        "line_number": 55,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "create_user",
+        "callee_symbol": "validate",
+        "callee_file": "models.py",
+        "line_number": 56,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "create_user",
+        "callee_symbol": "ValueError",
+        "callee_file": null,
+        "line_number": 58,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "models.py",
+        "line_number": 28,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "send_notification",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 37,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "models.py",
+        "line_number": 45,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 28,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 45,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [
+      {
+        "file": "models.py",
+        "imported_path": "abc",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "ABC,abstractmethod"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 12,
+      "total_calls": 8,
+      "total_imports": 1
+    }
+  },
+  "notes": {}
+}

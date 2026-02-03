@@ -1,0 +1,102 @@
+{
+  "metadata": {
+    "repo": "simple-functions",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "main.py",
+        "symbol_name": "greet",
+        "symbol_type": "function",
+        "line_start": 4,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "process",
+        "symbol_type": "function",
+        "line_start": 9,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "main.py",
+        "symbol_name": "main",
+        "symbol_type": "function",
+        "line_start": 17,
+        "is_exported": true,
+        "parameters": 0
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "process",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 11,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "greet",
+        "callee_file": "main.py",
+        "line_number": 19,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 20,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "process",
+        "callee_file": "main.py",
+        "line_number": 21,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "main",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 22,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "main",
+        "callee_file": "main.py",
+        "line_number": 26,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "main.py",
+        "caller_symbol": "process",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 13,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 3,
+      "total_calls": 7,
+      "total_imports": 0
+    }
+  },
+  "notes": {}
+}

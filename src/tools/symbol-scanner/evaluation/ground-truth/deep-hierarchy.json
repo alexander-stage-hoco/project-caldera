@@ -1,0 +1,1346 @@
+{
+  "metadata": {
+    "repo": "deep-hierarchy",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "category": "scale",
+    "description": "Tests 5+ level class hierarchy, mixins, multiple inheritance, ABC",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "Identifiable",
+        "symbol_type": "class",
+        "line_start": 12,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_id",
+        "symbol_type": "method",
+        "line_start": 15,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "Validatable",
+        "symbol_type": "class",
+        "line_start": 20,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 23,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "Serializable",
+        "symbol_type": "class",
+        "line_start": 28,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "to_dict",
+        "symbol_type": "method",
+        "line_start": 31,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "BaseEntity",
+        "symbol_type": "class",
+        "line_start": 41,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_id",
+        "symbol_type": "method",
+        "line_start": 45,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 50,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__repr__",
+        "symbol_type": "method",
+        "line_start": 54,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "Loggable",
+        "symbol_type": "class",
+        "line_start": 59,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_log_prefix",
+        "symbol_type": "method",
+        "line_start": 63,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "log",
+        "symbol_type": "method",
+        "line_start": 67,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "Cacheable",
+        "symbol_type": "class",
+        "line_start": 72,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_cache_key",
+        "symbol_type": "method",
+        "line_start": 78,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "cache_get",
+        "symbol_type": "method",
+        "line_start": 82,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "cache_set",
+        "symbol_type": "method",
+        "line_start": 86,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "cache_clear",
+        "symbol_type": "method",
+        "line_start": 90,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "NamedEntity",
+        "symbol_type": "class",
+        "line_start": 101,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 104,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_id",
+        "symbol_type": "method",
+        "line_start": 109,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 113,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_log_prefix",
+        "symbol_type": "method",
+        "line_start": 117,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "TimestampedEntity",
+        "symbol_type": "class",
+        "line_start": 122,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 125,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "touch",
+        "symbol_type": "method",
+        "line_start": 131,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 136,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "VersionedEntity",
+        "symbol_type": "class",
+        "line_start": 146,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 149,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_cache_key",
+        "symbol_type": "method",
+        "line_start": 154,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "increment_version",
+        "symbol_type": "method",
+        "line_start": 158,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 164,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "AuditedEntity",
+        "symbol_type": "class",
+        "line_start": 169,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 172,
+        "is_exported": false,
+        "parameters": 3
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "record_change",
+        "symbol_type": "method",
+        "line_start": 179,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_audit_history",
+        "symbol_type": "method",
+        "line_start": 185,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 189,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "TaggableMixin",
+        "symbol_type": "class",
+        "line_start": 199,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init_tags__",
+        "symbol_type": "method",
+        "line_start": 204,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "add_tag",
+        "symbol_type": "method",
+        "line_start": 209,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "remove_tag",
+        "symbol_type": "method",
+        "line_start": 215,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "has_tag",
+        "symbol_type": "method",
+        "line_start": 221,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "SearchableMixin",
+        "symbol_type": "class",
+        "line_start": 227,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_searchable_text",
+        "symbol_type": "method",
+        "line_start": 230,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "matches",
+        "symbol_type": "method",
+        "line_start": 241,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "NotifiableMixin",
+        "symbol_type": "class",
+        "line_start": 246,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init_subscribers__",
+        "symbol_type": "method",
+        "line_start": 251,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "subscribe",
+        "symbol_type": "method",
+        "line_start": 256,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "unsubscribe",
+        "symbol_type": "method",
+        "line_start": 262,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "notify",
+        "symbol_type": "method",
+        "line_start": 268,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "Document",
+        "symbol_type": "class",
+        "line_start": 279,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 282,
+        "is_exported": false,
+        "parameters": 4
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "update_content",
+        "symbol_type": "method",
+        "line_start": 289,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "to_dict",
+        "symbol_type": "method",
+        "line_start": 294,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 304,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "Task",
+        "symbol_type": "class",
+        "line_start": 309,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 312,
+        "is_exported": false,
+        "parameters": 4
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "assign_to",
+        "symbol_type": "method",
+        "line_start": 320,
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "complete",
+        "symbol_type": "method",
+        "line_start": 326,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 332,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "Project",
+        "symbol_type": "class",
+        "line_start": 337,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 340,
+        "is_exported": false,
+        "parameters": 3
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "add_document",
+        "symbol_type": "method",
+        "line_start": 349,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "add_task",
+        "symbol_type": "method",
+        "line_start": 354,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_completion_rate",
+        "symbol_type": "method",
+        "line_start": 359,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "line_start": 366,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "DiamondBase",
+        "symbol_type": "class",
+        "line_start": 376,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 379,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_value",
+        "symbol_type": "method",
+        "line_start": 383,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "DiamondLeft",
+        "symbol_type": "class",
+        "line_start": 388,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 391,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_left",
+        "symbol_type": "method",
+        "line_start": 396,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "DiamondRight",
+        "symbol_type": "class",
+        "line_start": 401,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 404,
+        "is_exported": false,
+        "parameters": 2
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_right",
+        "symbol_type": "method",
+        "line_start": 409,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "DiamondBottom",
+        "symbol_type": "class",
+        "line_start": 414,
+        "is_exported": true
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 417,
+        "is_exported": false,
+        "parameters": 4
+      },
+      {
+        "path": "hierarchy.py",
+        "symbol_name": "get_all",
+        "symbol_type": "method",
+        "line_start": 423,
+        "is_exported": true,
+        "parameters": 0
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "log",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 69,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "cache_get",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "line_number": 84,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "bool",
+        "callee_file": null,
+        "line_number": 115,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "hierarchy.py",
+        "line_number": 127,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "touch",
+        "callee_symbol": "isoformat",
+        "callee_file": null,
+        "line_number": 134,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "hierarchy.py",
+        "line_number": 151,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "increment_version",
+        "callee_symbol": "cache_clear",
+        "callee_file": "hierarchy.py",
+        "line_number": 160,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "increment_version",
+        "callee_symbol": "touch",
+        "callee_file": "hierarchy.py",
+        "line_number": 162,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "hierarchy.py",
+        "line_number": 174,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "record_change",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 182,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "record_change",
+        "callee_symbol": "increment_version",
+        "callee_file": "hierarchy.py",
+        "line_number": 183,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_audit_history",
+        "callee_symbol": "copy",
+        "callee_file": null,
+        "line_number": 187,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "add_tag",
+        "callee_symbol": "__init_tags__",
+        "callee_file": "hierarchy.py",
+        "line_number": 211,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "remove_tag",
+        "callee_symbol": "__init_tags__",
+        "callee_file": "hierarchy.py",
+        "line_number": 217,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "has_tag",
+        "callee_symbol": "__init_tags__",
+        "callee_file": "hierarchy.py",
+        "line_number": 223,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_searchable_text",
+        "callee_symbol": "hasattr",
+        "callee_file": null,
+        "line_number": 233,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_searchable_text",
+        "callee_symbol": "hasattr",
+        "callee_file": null,
+        "line_number": 235,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_searchable_text",
+        "callee_symbol": "hasattr",
+        "callee_file": null,
+        "line_number": 237,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_searchable_text",
+        "callee_symbol": "lower",
+        "callee_file": null,
+        "line_number": 239,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "subscribe",
+        "callee_symbol": "__init_subscribers__",
+        "callee_file": "hierarchy.py",
+        "line_number": 258,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "unsubscribe",
+        "callee_symbol": "__init_subscribers__",
+        "callee_file": "hierarchy.py",
+        "line_number": 264,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "notify",
+        "callee_symbol": "__init_subscribers__",
+        "callee_file": "hierarchy.py",
+        "line_number": 270,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "hierarchy.py",
+        "line_number": 284,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "update_content",
+        "callee_symbol": "record_change",
+        "callee_file": "hierarchy.py",
+        "line_number": 292,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "hierarchy.py",
+        "line_number": 314,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "assign_to",
+        "callee_symbol": "record_change",
+        "callee_file": "hierarchy.py",
+        "line_number": 323,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "assign_to",
+        "callee_symbol": "notify",
+        "callee_file": "hierarchy.py",
+        "line_number": 324,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "complete",
+        "callee_symbol": "record_change",
+        "callee_file": "hierarchy.py",
+        "line_number": 329,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "complete",
+        "callee_symbol": "notify",
+        "callee_file": "hierarchy.py",
+        "line_number": 330,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "hierarchy.py",
+        "line_number": 342,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "add_document",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 351,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "add_document",
+        "callee_symbol": "notify",
+        "callee_file": "hierarchy.py",
+        "line_number": 352,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "add_task",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 356,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "add_task",
+        "callee_symbol": "notify",
+        "callee_file": "hierarchy.py",
+        "line_number": 357,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_completion_rate",
+        "callee_symbol": "sum",
+        "callee_file": null,
+        "line_number": 363,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "validate",
+        "callee_file": "hierarchy.py",
+        "line_number": 368,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "hierarchy.py",
+        "line_number": 393,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "hierarchy.py",
+        "line_number": 406,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "hierarchy.py",
+        "line_number": 419,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "__init__",
+        "callee_file": "hierarchy.py",
+        "line_number": 420,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "cache_get",
+        "callee_symbol": "get_cache_key",
+        "callee_file": "hierarchy.py",
+        "line_number": 84,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "cache_set",
+        "callee_symbol": "get_cache_key",
+        "callee_file": "hierarchy.py",
+        "line_number": 88,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "cache_clear",
+        "callee_symbol": "get_cache_key",
+        "callee_file": "hierarchy.py",
+        "line_number": 92,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "validate",
+        "callee_file": "hierarchy.py",
+        "line_number": 138,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "bool",
+        "callee_file": null,
+        "line_number": 138,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "validate",
+        "callee_file": "hierarchy.py",
+        "line_number": 166,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "validate",
+        "callee_file": "hierarchy.py",
+        "line_number": 191,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "bool",
+        "callee_file": null,
+        "line_number": 191,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init_tags__",
+        "callee_symbol": "hasattr",
+        "callee_file": null,
+        "line_number": 206,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "add_tag",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 213,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "remove_tag",
+        "callee_symbol": "remove",
+        "callee_file": null,
+        "line_number": 219,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_searchable_text",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 234,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_searchable_text",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 236,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_searchable_text",
+        "callee_symbol": "extend",
+        "callee_file": null,
+        "line_number": 238,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "matches",
+        "callee_symbol": "lower",
+        "callee_file": null,
+        "line_number": 243,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "matches",
+        "callee_symbol": "get_searchable_text",
+        "callee_file": "hierarchy.py",
+        "line_number": 243,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init_subscribers__",
+        "callee_symbol": "hasattr",
+        "callee_file": null,
+        "line_number": 253,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "subscribe",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 260,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "unsubscribe",
+        "callee_symbol": "remove",
+        "callee_file": null,
+        "line_number": 266,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "to_dict",
+        "callee_symbol": "get_id",
+        "callee_file": "hierarchy.py",
+        "line_number": 297,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "validate",
+        "callee_file": "hierarchy.py",
+        "line_number": 306,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "validate",
+        "callee_file": "hierarchy.py",
+        "line_number": 334,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_completion_rate",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 364,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_all",
+        "callee_symbol": "get_value",
+        "callee_file": "hierarchy.py",
+        "line_number": 426,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_all",
+        "callee_symbol": "get_left",
+        "callee_file": "hierarchy.py",
+        "line_number": 427,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_all",
+        "callee_symbol": "get_right",
+        "callee_file": "hierarchy.py",
+        "line_number": 428,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__repr__",
+        "callee_symbol": "get_id",
+        "callee_file": "hierarchy.py",
+        "line_number": 56,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "cache_clear",
+        "callee_symbol": "get_cache_key",
+        "callee_file": "hierarchy.py",
+        "line_number": 93,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 127,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "touch",
+        "callee_symbol": "now",
+        "callee_file": null,
+        "line_number": 134,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 151,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 174,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "get_searchable_text",
+        "callee_symbol": "join",
+        "callee_file": null,
+        "line_number": 239,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 284,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "len",
+        "callee_file": null,
+        "line_number": 306,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 314,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 342,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 368,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 393,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 406,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "log",
+        "callee_symbol": "get_log_prefix",
+        "callee_file": "hierarchy.py",
+        "line_number": 69,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 138,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 166,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 191,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 306,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "hierarchy.py",
+        "caller_symbol": "validate",
+        "callee_symbol": "super",
+        "callee_file": null,
+        "line_number": 334,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [
+      {
+        "file": "hierarchy.py",
+        "imported_path": "abc",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "ABC,abstractmethod"
+      },
+      {
+        "file": "hierarchy.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 4,
+        "imported_symbols": "Any,Protocol"
+      },
+      {
+        "file": "hierarchy.py",
+        "imported_path": "datetime",
+        "import_type": "static",
+        "line_number": 133,
+        "imported_symbols": "datetime"
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 78,
+      "total_calls": 86,
+      "total_imports": 3
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "Multiple inheritance should extract all classes correctly",
+      "Mixin classes are still type='class'",
+      "Diamond inheritance pattern should work",
+      "Abstract methods are still type='method'",
+      "Protocol classes are still type='class'"
+    ]
+  }
+}

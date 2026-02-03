@@ -1,0 +1,434 @@
+{
+  "metadata": {
+    "repo": "decorators-advanced",
+    "created": "2026-02-03",
+    "version": "1.1-calibrated",
+    "category": "edge-cases",
+    "description": "Tests decorator extraction including stacked and parameterized decorators",
+    "calibrated_date": "2026-02-03"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "decorators.py",
+        "symbol_name": "simple_decorator",
+        "symbol_type": "function",
+        "line_start": 10,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "wrapper",
+        "symbol_type": "function",
+        "line_start": 13,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "repeat",
+        "symbol_type": "function",
+        "line_start": 22,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "decorator",
+        "symbol_type": "function",
+        "line_start": 24,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "wrapper",
+        "symbol_type": "function",
+        "line_start": 26,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "add_prefix",
+        "symbol_type": "function",
+        "line_start": 36,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "decorator",
+        "symbol_type": "function",
+        "line_start": 38,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "wrapper",
+        "symbol_type": "function",
+        "line_start": 40,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "Service",
+        "symbol_type": "class",
+        "line_start": 48,
+        "is_exported": true
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 53,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "create_id",
+        "symbol_type": "method",
+        "line_start": 58,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "from_config",
+        "symbol_type": "method",
+        "line_start": 64,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "display_name",
+        "symbol_type": "method",
+        "line_start": 69,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "status",
+        "symbol_type": "method",
+        "line_start": 74,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "process",
+        "symbol_type": "method",
+        "line_start": 79,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "fetch",
+        "symbol_type": "method",
+        "line_start": 84,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "log_message",
+        "symbol_type": "function",
+        "line_start": 92,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "process_item",
+        "symbol_type": "function",
+        "line_start": 101,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "greet",
+        "symbol_type": "function",
+        "line_start": 108,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "context_decorator",
+        "symbol_type": "class",
+        "line_start": 114,
+        "is_exported": true
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "__init__",
+        "symbol_type": "method",
+        "line_start": 117,
+        "is_exported": false,
+        "parameters": 1
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "__call__",
+        "symbol_type": "method",
+        "line_start": 122,
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "decorators.py",
+        "symbol_name": "risky_operation",
+        "symbol_type": "function",
+        "line_start": 132,
+        "is_exported": true,
+        "parameters": 1
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "TypeVar",
+        "callee_file": null,
+        "line_number": 6,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "add_prefix",
+        "callee_file": "decorators.py",
+        "line_number": 91,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "repeat",
+        "callee_file": "decorators.py",
+        "line_number": 99,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "add_prefix",
+        "callee_file": "decorators.py",
+        "line_number": 100,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "simple_decorator",
+        "callee_symbol": "wraps",
+        "callee_file": null,
+        "line_number": 12,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "<module>",
+        "callee_symbol": "repeat",
+        "callee_file": "decorators.py",
+        "line_number": 83,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "process_item",
+        "callee_symbol": "strip",
+        "callee_file": null,
+        "line_number": 103,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 14,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 15,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 16,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "decorator",
+        "callee_symbol": "wraps",
+        "callee_file": null,
+        "line_number": 25,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "decorator",
+        "callee_symbol": "wraps",
+        "callee_file": null,
+        "line_number": 39,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "create_id",
+        "callee_symbol": "str",
+        "callee_file": null,
+        "line_number": 61,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "from_config",
+        "callee_symbol": "cls",
+        "callee_file": null,
+        "line_number": 66,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "process",
+        "callee_symbol": "upper",
+        "callee_file": null,
+        "line_number": 81,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "__call__",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 124,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "range",
+        "callee_file": null,
+        "line_number": 28,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 41,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "create_id",
+        "callee_symbol": "uuid4",
+        "callee_file": null,
+        "line_number": 61,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "from_config",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "line_number": 66,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "__init__",
+        "callee_symbol": "wraps",
+        "callee_file": null,
+        "line_number": 120,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "__call__",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 126,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "__call__",
+        "callee_symbol": "print",
+        "callee_file": null,
+        "line_number": 128,
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "append",
+        "callee_file": null,
+        "line_number": 29,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "decorators.py",
+        "caller_symbol": "wrapper",
+        "callee_symbol": "func",
+        "callee_file": null,
+        "line_number": 29,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [
+      {
+        "file": "decorators.py",
+        "imported_path": "functools",
+        "import_type": "static",
+        "line_number": 3,
+        "imported_symbols": "wraps"
+      },
+      {
+        "file": "decorators.py",
+        "imported_path": "typing",
+        "import_type": "static",
+        "line_number": 4,
+        "imported_symbols": "Callable,TypeVar"
+      },
+      {
+        "file": "decorators.py",
+        "imported_path": "uuid",
+        "import_type": "static",
+        "line_number": 60
+      }
+    ],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 23,
+      "total_calls": 25,
+      "total_imports": 3
+    }
+  },
+  "notes": {
+    "edge_cases": [
+      "Stacked decorators should extract the inner function, not the decorator wrappers",
+      "@property methods should be type='method' not 'function'",
+      "@staticmethod and @classmethod are still methods",
+      "Nested wrapper functions inside decorators should be extracted"
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+# Symbol Scanner scripts package
