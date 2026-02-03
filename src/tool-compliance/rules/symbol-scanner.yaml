@@ -1,0 +1,40 @@
+# Tool compliance rules for symbol-scanner
+required_check_modules:
+  - symbol_accuracy.py
+  - call_accuracy.py
+  - import_accuracy.py
+  - integration.py
+
+required_prompts:
+  - symbol_accuracy.md
+  - call_relationship.md
+  - import_completeness.md
+  - integration.md
+
+ground_truth_mode: per_repo
+
+evaluation_outputs:
+  - scorecard.md
+  - evaluation_report.json
+
+adapter:
+  module: persistence.adapters.symbol_scanner_adapter
+  class: SymbolScannerAdapter
+
+entities:
+  - CodeSymbol
+  - SymbolCall
+  - FileImport
+
+landing_zone_tables:
+  - lz_code_symbols
+  - lz_symbol_calls
+  - lz_file_imports
+
+quality_rules:
+  - paths
+  - required_fields
+  - line_ranges
+  - symbol_types
+  - call_types
+  - import_types
