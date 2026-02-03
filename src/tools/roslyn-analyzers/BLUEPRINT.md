@@ -214,7 +214,7 @@ Evaluate built-in Roslyn Analyzers for comprehensive .NET code quality assessmen
 |----------|---------|-------------|
 | `REPO_PATH` | `eval-repos/synthetic` | .NET project to analyze |
 | `OUTPUT_DIR` | `outputs/$(RUN_ID)` | Output directory |
-| `SARIF_DIR` | `obj/sarif` | SARIF output location |
+| `SARIF_DIR` | `sarif` | SARIF output location |
 
 ### .NET Build Options
 

@@ -70,7 +70,7 @@ This plan addresses five architectural corrections:
 - **Acceptance:**
   - No build artifacts remain tracked.
   - Synthetic repos contain source-only fixtures.
- - **Status:** In progress (tracked artifacts removed; ignore rules added)
+ - **Status:** Done
 
 ## Testing/Validation
 - Run tool compliance after Phase 1.
