@@ -17,6 +17,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
 | Understand technical specs | [docs/REFERENCE.md](docs/REFERENCE.md) |
 | Set up LLM judges | [docs/EVALUATION.md](docs/EVALUATION.md) |
 | Run reports | [docs/REPORTS.md](docs/REPORTS.md) |
+| Technical due diligence methodology | [docs/DECISION_FRAMEWORK.md](docs/DECISION_FRAMEWORK.md) |
 
 ## Architecture
 
@@ -183,6 +184,7 @@ class SccFileMetric:
 | `docs/REFERENCE.md` | Technical specifications (envelope, paths, patterns) |
 | `docs/EVALUATION.md` | LLM judge infrastructure and observability |
 | `docs/REPORTS.md` | dbt analyses and reports |
+| `docs/DECISION_FRAMEWORK.md` | Technical due diligence methodology (evidence, lenses, claims, axes) |
 | `docs/templates/BLUEPRINT.md.template` | Architecture document template |
 | `docs/templates/EVAL_STRATEGY.md.template` | Evaluation strategy template |
 
