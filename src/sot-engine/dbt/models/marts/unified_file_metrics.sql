@@ -13,6 +13,11 @@ semgrep_runs as (
     from {{ source('lz', 'lz_tool_runs') }}
     where tool_name = 'semgrep'
 ),
+symbol_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'symbol-scanner'
+),
 layout_runs as (
     select run_pk, collection_run_id
     from {{ source('lz', 'lz_tool_runs') }}
@@ -23,24 +28,30 @@ scc_map as (
         sr.run_pk as tool_run_pk,
         sr.collection_run_id,
         lr.run_pk as layout_run_pk,
-        sg.run_pk as semgrep_run_pk
+        sg.run_pk as semgrep_run_pk,
+        sym.run_pk as symbol_run_pk
     from scc_runs sr
     join layout_runs lr
         on lr.collection_run_id = sr.collection_run_id
     left join semgrep_runs sg
         on sg.collection_run_id = sr.collection_run_id
+    left join symbol_runs sym
+        on sym.collection_run_id = sr.collection_run_id
 ),
 lizard_map as (
     select
         lr.run_pk as tool_run_pk,
         lr.collection_run_id,
         lrn.run_pk as layout_run_pk,
-        sg.run_pk as semgrep_run_pk
+        sg.run_pk as semgrep_run_pk,
+        sym.run_pk as symbol_run_pk
     from lizard_runs lr
     join layout_runs lrn
         on lrn.collection_run_id = lr.collection_run_id
     left join semgrep_runs sg
         on sg.collection_run_id = lr.collection_run_id
+    left join symbol_runs sym
+        on sym.collection_run_id = lr.collection_run_id
 ),
 scc_files as (
     select
@@ -48,6 +59,7 @@ scc_files as (
         rm.collection_run_id,
         rm.layout_run_pk,
         rm.semgrep_run_pk,
+        rm.symbol_run_pk,
         sm.file_id,
         sm.lines_total,
         sm.code_lines,
@@ -64,6 +76,7 @@ lizard_files as (
         rm.collection_run_id,
         rm.layout_run_pk,
         rm.semgrep_run_pk,
+        rm.symbol_run_pk,
         lm.file_id,
         lm.nloc,
         lm.total_ccn as lizard_total_ccn,
@@ -73,6 +86,29 @@ lizard_files as (
     join lizard_map rm
         on rm.tool_run_pk = lm.run_pk
 ),
+symbol_files as (
+    select
+        sm.run_pk,
+        sm.file_id,
+        sm.symbol_count,
+        sm.function_count,
+        sm.class_count
+    from {{ ref('stg_symbols_file_metrics') }} sm
+),
+call_files as (
+    select
+        cm.run_pk,
+        cm.file_id,
+        cm.call_count
+    from {{ ref('stg_symbol_calls_file_metrics') }} cm
+),
+import_files as (
+    select
+        im.run_pk,
+        im.file_id,
+        im.import_count
+    from {{ ref('stg_file_imports_file_metrics') }} im
+),
 combined as (
     select
         coalesce(scc.run_pk, lizard.run_pk) as run_pk,
@@ -80,6 +116,7 @@ combined as (
         scc.run_pk as scc_run_pk,
         lizard.run_pk as lizard_run_pk,
         coalesce(scc.semgrep_run_pk, lizard.semgrep_run_pk) as semgrep_run_pk,
+        coalesce(scc.symbol_run_pk, lizard.symbol_run_pk) as symbol_run_pk,
         coalesce(scc.layout_run_pk, lizard.layout_run_pk) as layout_run_pk,
         coalesce(scc.file_id, lizard.file_id) as file_id,
         scc.lines_total,
@@ -107,6 +144,7 @@ select
     combined.scc_run_pk,
     combined.lizard_run_pk,
     combined.semgrep_run_pk,
+    combined.symbol_run_pk as symbol_run_pk,
     combined.layout_run_pk,
     combined.file_id,
     lf.relative_path,
@@ -120,8 +158,26 @@ select
     combined.lizard_total_ccn as complexity_total_ccn,
     combined.avg_ccn as complexity_avg,
     combined.max_ccn as complexity_max,
-    combined.sources
+    sf.symbol_count,
+    sf.function_count,
+    sf.class_count,
+    cf.call_count,
+    imf.import_count,
+    concat_ws(
+        ',',
+        combined.sources,
+        case when sf.run_pk is not null then 'symbol-scanner' end
+    ) as sources
 from combined
 join {{ source('lz', 'lz_layout_files') }} lf
     on lf.run_pk = combined.layout_run_pk
    and lf.file_id = combined.file_id
+left join symbol_files sf
+    on sf.run_pk = combined.symbol_run_pk
+   and sf.file_id = combined.file_id
+left join call_files cf
+    on cf.run_pk = combined.symbol_run_pk
+   and cf.file_id = combined.file_id
+left join import_files imf
+    on imf.run_pk = combined.symbol_run_pk
+   and imf.file_id = combined.file_id

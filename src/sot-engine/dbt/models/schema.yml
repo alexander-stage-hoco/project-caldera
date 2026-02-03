@@ -22,6 +22,9 @@ sources:
       - name: lz_git_sizer_violations
       - name: lz_git_sizer_lfs_candidates
       - name: lz_gitleaks_secrets
+      - name: lz_code_symbols
+      - name: lz_symbol_calls
+      - name: lz_file_imports
 
 models:
   - name: stg_lz_tool_runs
@@ -299,6 +302,7 @@ models:
           - not_null
 
   - name: unified_file_metrics
+    description: "Unified file-level metrics combining scc, lizard, and symbol-scanner"
     columns:
       - name: run_pk
         tests:
@@ -312,6 +316,18 @@ models:
       - name: loc_total
         tests:
           - not_null
+      - name: symbol_run_pk
+        description: "Symbol-scanner tool run primary key (null if not available)"
+      - name: symbol_count
+        description: "Number of symbols defined in file"
+      - name: function_count
+        description: "Number of functions defined in file"
+      - name: class_count
+        description: "Number of classes defined in file"
+      - name: call_count
+        description: "Number of outgoing function calls"
+      - name: import_count
+        description: "Number of file imports"
 
   - name: unified_run_summary
     columns:
@@ -736,3 +752,524 @@ models:
           - accepted_values:
               arguments:
                 values: ['A', 'A+', 'B', 'B+', 'C', 'C+', 'D', 'D+', 'F']
+
+  - name: stg_lz_code_symbols
+    description: "Staged code symbols from symbol-scanner"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: symbol_name
+        tests:
+          - not_null
+      - name: symbol_type
+        tests:
+          - not_null
+
+  - name: stg_lz_symbol_calls
+    description: "Staged symbol call relationships from symbol-scanner"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: caller_file_id
+        tests:
+          - not_null
+      - name: callee_symbol
+        tests:
+          - not_null
+
+  - name: stg_lz_file_imports
+    description: "Staged file imports from symbol-scanner"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: imported_path
+        tests:
+          - not_null
+
+  - name: stg_symbols_file_metrics
+    description: "File-level aggregation of code symbols for distribution calculations"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: symbol_count
+        tests:
+          - not_null
+
+  - name: stg_symbol_calls_file_metrics
+    description: "File-level aggregation of symbol calls for distribution calculations"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: call_count
+        tests:
+          - not_null
+
+  - name: stg_file_imports_file_metrics
+    description: "File-level aggregation of imports for distribution calculations"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: import_count
+        tests:
+          - not_null
+
+  - name: rollup_symbols_directory_direct_distributions
+    description: "Distribution statistics for symbol metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - symbol_count
+                  - function_count
+                  - class_count
+                  - exported_count
+                  - avg_parameters
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_symbols_directory_recursive_distributions
+    description: "Distribution statistics for symbol metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - symbol_count
+                  - function_count
+                  - class_count
+                  - exported_count
+                  - avg_parameters
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_symbol_calls_directory_direct_distributions
+    description: "Distribution statistics for symbol call metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - call_count
+                  - distinct_callees
+                  - distinct_callee_files
+                  - direct_call_count
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_symbol_calls_directory_recursive_distributions
+    description: "Distribution statistics for symbol call metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - call_count
+                  - distinct_callees
+                  - distinct_callee_files
+                  - direct_call_count
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_file_imports_directory_direct_distributions
+    description: "Distribution statistics for file import metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - import_count
+                  - unique_imports
+                  - static_import_count
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_file_imports_directory_recursive_distributions
+    description: "Distribution statistics for file import metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - import_count
+                  - unique_imports
+                  - static_import_count
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_symbols_directory_counts_direct
+    description: "Symbol counts per directory (direct scope - files in directory only)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: symbol_count
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: function_count
+        tests:
+          - not_null
+      - name: class_count
+        tests:
+          - not_null
+      - name: method_count
+        tests:
+          - not_null
+      - name: exported_count
+        tests:
+          - not_null
+
+  - name: rollup_symbols_directory_counts_recursive
+    description: "Symbol counts per directory (recursive scope - includes subtree)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: symbol_count
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: function_count
+        tests:
+          - not_null
+      - name: class_count
+        tests:
+          - not_null
+      - name: method_count
+        tests:
+          - not_null
+      - name: exported_count
+        tests:
+          - not_null
+
+  - name: rollup_symbol_calls_directory_counts_direct
+    description: "Symbol call counts per directory (direct scope - files in directory only)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_call_count
+        tests:
+          - not_null
+      - name: total_distinct_callees
+        tests:
+          - not_null
+      - name: total_distinct_callee_files
+        tests:
+          - not_null
+      - name: total_direct_call_count
+        tests:
+          - not_null
+      - name: total_dynamic_call_count
+        tests:
+          - not_null
+      - name: total_async_call_count
+        tests:
+          - not_null
+
+  - name: rollup_symbol_calls_directory_counts_recursive
+    description: "Symbol call counts per directory (recursive scope - includes subtree)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_call_count
+        tests:
+          - not_null
+      - name: total_distinct_callees
+        tests:
+          - not_null
+      - name: total_distinct_callee_files
+        tests:
+          - not_null
+      - name: total_direct_call_count
+        tests:
+          - not_null
+      - name: total_dynamic_call_count
+        tests:
+          - not_null
+      - name: total_async_call_count
+        tests:
+          - not_null
+
+  - name: rollup_file_imports_directory_counts_direct
+    description: "File import counts per directory (direct scope - files in directory only)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_import_count
+        tests:
+          - not_null
+      - name: total_unique_imports
+        tests:
+          - not_null
+      - name: total_static_import_count
+        tests:
+          - not_null
+      - name: total_dynamic_import_count
+        tests:
+          - not_null
+      - name: total_side_effect_import_count
+        tests:
+          - not_null
+
+  - name: rollup_file_imports_directory_counts_recursive
+    description: "File import counts per directory (recursive scope - includes subtree)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_import_count
+        tests:
+          - not_null
+      - name: total_unique_imports
+        tests:
+          - not_null
+      - name: total_static_import_count
+        tests:
+          - not_null
+      - name: total_dynamic_import_count
+        tests:
+          - not_null
+      - name: total_side_effect_import_count
+        tests:
+          - not_null
+
+  - name: rollup_coupling_directory_metrics_direct
+    description: "Coupling metrics per directory (direct - fan-in/fan-out for files in directory only)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: outgoing_calls
+        tests:
+          - not_null
+      - name: distinct_callees
+        tests:
+          - not_null
+      - name: fan_out
+        tests:
+          - not_null
+      - name: fan_in
+        tests:
+          - not_null
+      - name: direct_calls
+        tests:
+          - not_null
+      - name: dynamic_calls
+        tests:
+          - not_null
+      - name: async_calls
+        tests:
+          - not_null
+      - name: instability
+        tests:
+          - not_null
+
+  - name: rollup_coupling_directory_metrics_recursive
+    description: "Coupling metrics per directory (recursive - includes all files in subtree)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: outgoing_calls
+        tests:
+          - not_null
+      - name: distinct_callees
+        tests:
+          - not_null
+      - name: fan_out
+        tests:
+          - not_null
+      - name: fan_in
+        tests:
+          - not_null
+      - name: direct_calls
+        tests:
+          - not_null
+      - name: dynamic_calls
+        tests:
+          - not_null
+      - name: async_calls
+        tests:
+          - not_null
+      - name: instability
+        tests:
+          - not_null
