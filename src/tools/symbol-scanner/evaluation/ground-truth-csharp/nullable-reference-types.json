@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "repo": "nullable-reference-types",
+    "created": "2026-02-04",
+    "version": "1.0",
+    "notes": "C# 8.0+ nullable reference types"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "NullableTypes.cs",
+        "symbol_name": "NullableExample",
+        "symbol_type": "class",
+        "line_start": 4,
+        "is_exported": true
+      },
+      {
+        "path": "NullableTypes.cs",
+        "symbol_name": "_name",
+        "symbol_type": "field",
+        "line_start": 6,
+        "is_exported": false
+      },
+      {
+        "path": "NullableTypes.cs",
+        "symbol_name": "NullableProp",
+        "symbol_type": "property",
+        "line_start": 7,
+        "is_exported": true
+      },
+      {
+        "path": "NullableTypes.cs",
+        "symbol_name": "NonNullable",
+        "symbol_type": "property",
+        "line_start": 8,
+        "is_exported": true
+      },
+      {
+        "path": "NullableTypes.cs",
+        "symbol_name": "GetOrDefault",
+        "symbol_type": "method",
+        "line_start": 10,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "NullableTypes.cs",
+        "symbol_name": "ParseNumber",
+        "symbol_type": "method",
+        "line_start": 11,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "NullableTypes.cs",
+        "symbol_name": "NullableContainer",
+        "symbol_type": "class",
+        "line_start": 15,
+        "is_exported": true
+      },
+      {
+        "path": "NullableTypes.cs",
+        "symbol_name": "Value",
+        "symbol_type": "property",
+        "line_start": 17,
+        "is_exported": true
+      },
+      {
+        "path": "NullableTypes.cs",
+        "symbol_name": "HasValue",
+        "symbol_type": "property",
+        "line_start": 18,
+        "is_exported": true
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "NullableTypes.cs",
+        "caller_symbol": "ParseNumber",
+        "callee_symbol": "TryParse",
+        "callee_file": null,
+        "line_number": 12,
+        "call_type": "dynamic"
+      }
+    ],
+    "imports": [],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 9,
+      "total_calls": 1,
+      "total_imports": 0
+    }
+  },
+  "notes": {}
+}

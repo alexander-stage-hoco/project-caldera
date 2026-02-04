@@ -1,0 +1,67 @@
+{
+  "schema_version": "2.0",
+  "description": "Auto-seeded ground truth from tshock-roslyn-1770194300",
+  "seeded_at": "2026-02-04T08:57:34.260623+00:00",
+  "seeded_from": {
+    "run_id": "tshock-roslyn-1770194300",
+    "commit": "c2eb3d69a276580b67cf9d1eb5d3038976a9992e",
+    "timestamp": "2026-02-04T08:38:25.218531+00:00"
+  },
+  "verification_status": "verified",
+  "verification": {
+    "method": "cross_extractor_validation",
+    "methodology": "Validated through C# extractor parity tests comparing tree-sitter, Roslyn, and hybrid extractors",
+    "cross_validated_with": ["tree-sitter", "roslyn", "hybrid"],
+    "verification_notes": "All 3 extractors produce identical symbol counts (2815). Roslyn detects 32 async calls vs tree-sitter classifying them as direct/dynamic."
+  },
+  "summary_expectations": {
+    "total_files": 107,
+    "total_symbols": 2815,
+    "total_calls": 9853,
+    "total_imports": 632
+  },
+  "symbol_expectations": {
+    "by_type": {
+      "class": 258,
+      "property": 624,
+      "method": 1159,
+      "field": 749,
+      "event": 25
+    },
+    "total": 2815
+  },
+  "call_expectations": {
+    "by_type": {
+      "dynamic": 6185,
+      "direct": 3636,
+      "async": 32
+    },
+    "total": 9853
+  },
+  "import_expectations": {
+    "by_type": {
+      "static": 629,
+      "global": 2,
+      "extern": 1
+    },
+    "total": 632
+  },
+  "resolution_expectations": {
+    "total_resolved": 1108,
+    "total_unresolved": 8745,
+    "resolved_same_file": 1108,
+    "resolved_cross_file": 0
+  },
+  "top_files_by_symbols": {
+    "TShockAPI/GetDataHandlers.cs": 476,
+    "TShockAPI/TSPlayer.cs": 190,
+    "TShockAPI/Permissions.cs": 155,
+    "TShockAPI/Configuration/TShockConfig.cs": 147,
+    "TShockAPI/Commands.cs": 139,
+    "TShockAPI/TShock.cs": 87,
+    "TShockAPI/Hooks/PlayerHooks.cs": 80,
+    "TShockAPI/Rest/RestManager.cs": 73,
+    "TShockAPI/Utils.cs": 66,
+    "TShockAPI/DB/BanManager.cs": 62
+  }
+}

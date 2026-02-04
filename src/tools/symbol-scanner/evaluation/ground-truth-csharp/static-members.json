@@ -1,0 +1,119 @@
+{
+  "metadata": {
+    "repo": "static-members",
+    "created": "2026-02-04",
+    "version": "1.0",
+    "notes": "Static classes, const/readonly fields, static properties, static constructor"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "MathConstants",
+        "symbol_type": "class",
+        "line_start": 3,
+        "is_exported": true
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "Pi",
+        "symbol_type": "field",
+        "line_start": 5,
+        "is_exported": true
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "E",
+        "symbol_type": "field",
+        "line_start": 6,
+        "is_exported": true
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "MaxIterations",
+        "symbol_type": "property",
+        "line_start": 7,
+        "is_exported": true
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "MathConstants",
+        "symbol_type": "method",
+        "line_start": 9,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "Square",
+        "symbol_type": "method",
+        "line_start": 11,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "Cube",
+        "symbol_type": "method",
+        "line_start": 12,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "Counter",
+        "symbol_type": "class",
+        "line_start": 15,
+        "is_exported": true
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "_count",
+        "symbol_type": "field",
+        "line_start": 17,
+        "is_exported": false
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "Count",
+        "symbol_type": "property",
+        "line_start": 18,
+        "is_exported": true
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "Counter",
+        "symbol_type": "method",
+        "line_start": 20,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "StaticMembers.cs",
+        "symbol_name": "Reset",
+        "symbol_type": "method",
+        "line_start": 21,
+        "is_exported": true,
+        "parameters": 0
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "StaticMembers.cs",
+        "caller_symbol": "Cube",
+        "callee_symbol": "Square",
+        "callee_file": "StaticMembers.cs",
+        "line_number": 12,
+        "call_type": "direct"
+      }
+    ],
+    "imports": [],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 12,
+      "total_calls": 1,
+      "total_imports": 0
+    }
+  },
+  "notes": {}
+}

@@ -69,26 +69,27 @@ You are evaluating the **import extraction accuracy** of symbol-scanner for code
 
 ## Required Output Format
 
-Respond with a JSON object with a **BINARY PASS/FAIL decision**:
+Respond with a JSON object with a numeric score and supporting details:
 
 ```json
 {
   "dimension": "import_completeness",
-  "decision": "PASS",
+  "score": 4,
   "confidence": 0.95,
-  "reasoning": "<detailed explanation of why this passes or fails>",
-  "issues": [
-    {"severity": "LOW", "type": "missing_symbol", "import": "typing", "description": "Imported symbol 'Optional' not listed"}
-  ],
-  "recommendations": ["<improvement suggestions>"]
+  "reasoning": "<detailed explanation of score>",
+  "evidence_cited": ["<key evidence points supporting the score>"],
+  "recommendations": ["<improvement suggestions>"],
+  "sub_scores": {
+    "import_capture": 5,
+    "path_accuracy": 4,
+    "symbol_listing": 4
+  }
 }
 ```
 
-### Decision Rules
-- **PASS**: All import statements captured with correct paths. Minor issues with imported symbols list are acceptable.
-- **FAIL**: Missing import statements, incorrect paths, or systematic errors.
-
-### Issue Severities
-- **HIGH**: Missing import statement entirely, wrong import path
-- **MEDIUM**: Wrong import type classification, missing TYPE_CHECKING import
-- **LOW**: Incomplete imported_symbols list, minor line number deviation
+### Score Guidelines
+- **5**: All imports captured with correct paths, symbols, and line numbers
+- **4**: Core imports captured with minor issues (incomplete symbol lists, slight line deviations)
+- **3**: Most imports captured, some path issues or type misclassifications
+- **2**: Missing important imports or incorrect paths
+- **1**: Incomplete extraction, systematic errors, or broken output

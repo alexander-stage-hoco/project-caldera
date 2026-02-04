@@ -81,26 +81,27 @@ You are evaluating the **integration quality** of symbol-scanner for code analys
 
 ## Required Output Format
 
-Respond with a JSON object with a **BINARY PASS/FAIL decision**:
+Respond with a JSON object with a numeric score and supporting details:
 
 ```json
 {
   "dimension": "integration",
-  "decision": "PASS",
+  "score": 4,
   "confidence": 0.90,
-  "reasoning": "<detailed explanation of why this passes or fails>",
-  "issues": [
-    {"severity": "LOW", "type": "count_mismatch", "field": "total_symbols", "description": "Summary says 10, actual count is 11"}
-  ],
-  "recommendations": ["<improvement suggestions>"]
+  "reasoning": "<detailed explanation of score>",
+  "evidence_cited": ["<key evidence points supporting the score>"],
+  "recommendations": ["<improvement suggestions>"],
+  "sub_scores": {
+    "summary_accuracy": 5,
+    "metadata_completeness": 4,
+    "path_normalization": 5
+  }
 }
 ```
 
-### Decision Rules
-- **PASS**: Data is internally consistent, metadata complete, all paths properly normalized.
-- **FAIL**: Summary/data count mismatches, missing required metadata, or absolute paths present.
-
-### Issue Severities
-- **HIGH**: Absolute paths in output, missing required metadata fields, major count discrepancies
-- **MEDIUM**: Minor count mismatches, optional metadata missing
-- **LOW**: Formatting inconsistencies, extra metadata fields
+### Score Guidelines
+- **5**: Perfect coherence, accurate summaries, complete metadata, all paths normalized
+- **4**: Coherent data with minor issues (slight count discrepancies, optional metadata missing)
+- **3**: Mostly coherent, some inconsistencies or minor path issues
+- **2**: Multiple coherence or consistency issues
+- **1**: Broken output structure, major mismatches, or absolute paths present

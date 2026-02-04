@@ -69,26 +69,27 @@ You are evaluating the **symbol extraction accuracy** of symbol-scanner for code
 
 ## Required Output Format
 
-Respond with a JSON object with a **BINARY PASS/FAIL decision**:
+Respond with a JSON object with a numeric score and supporting details:
 
 ```json
 {
   "dimension": "symbol_accuracy",
-  "decision": "PASS",
+  "score": 4,
   "confidence": 0.92,
-  "reasoning": "<detailed explanation of why this passes or fails>",
-  "issues": [
-    {"severity": "LOW", "type": "line_mismatch", "symbol": "foo", "description": "Line number off by 1"}
-  ],
-  "recommendations": ["<improvement suggestions>"]
+  "reasoning": "<detailed explanation of score>",
+  "evidence_cited": ["<key evidence points supporting the score>"],
+  "recommendations": ["<improvement suggestions>"],
+  "sub_scores": {
+    "function_extraction": 5,
+    "class_extraction": 4,
+    "line_accuracy": 4
+  }
 }
 ```
 
-### Decision Rules
-- **PASS**: All critical symbols extracted correctly. Minor issues (off-by-one lines, optional fields) are acceptable.
-- **FAIL**: Missing important symbols, incorrect types, or systematic extraction errors.
-
-### Issue Severities
-- **HIGH**: Missing exported symbol, wrong symbol type, completely wrong line
-- **MEDIUM**: Missing private symbol, export status incorrect
-- **LOW**: Minor line number deviation (+/- 2), optional field missing
+### Score Guidelines
+- **5**: All symbols captured correctly with exact line numbers and proper type classification
+- **4**: Core symbols captured with minor issues (off-by-one lines, optional fields missing)
+- **3**: Most symbols captured, some type misclassifications or moderate line errors
+- **2**: Missing important symbols or incorrect types
+- **1**: Incomplete extraction, systematic errors, or broken output

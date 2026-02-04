@@ -16,7 +16,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from common.path_normalization import normalize_file_path
 
-from extractors import PythonExtractor, TreeSitterExtractor
+from extractors import (
+    PythonExtractor,
+    TreeSitterExtractor,
+    CSharpTreeSitterExtractor,
+    CSharpRoslynExtractor,
+    CSharpHybridExtractor,
+)
 
 TOOL_NAME = "symbol-scanner"
 TOOL_VERSION = "0.1.0"
@@ -172,7 +178,7 @@ def build_output_envelope(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Extract symbols, calls, and imports from Python source code"
+        description="Extract symbols, calls, and imports from source code (Python and C#)"
     )
     parser.add_argument(
         "--repo-path",
@@ -215,12 +221,25 @@ def main() -> None:
         help="Skip call resolution (Phase 1 behavior)",
     )
     parser.add_argument(
+        "--language",
+        choices=["python", "csharp"],
+        default="python",
+        help="Language to analyze: python (default) or csharp",
+    )
+    parser.add_argument(
         "--strategy",
-        choices=["ast", "treesitter"],
+        choices=["ast", "treesitter", "roslyn", "hybrid"],
         default="ast",
-        help="Extraction strategy: ast (default, uses Python AST module) or treesitter",
+        help="Extraction strategy. Python: ast (default), treesitter. C#: treesitter, roslyn, hybrid (default for csharp)",
     )
     args = parser.parse_args()
+
+    # Validate strategy for language
+    if args.language == "python" and args.strategy in ("roslyn", "hybrid"):
+        parser.error(f"Strategy '{args.strategy}' is not available for Python. Use 'ast' or 'treesitter'.")
+    if args.language == "csharp" and args.strategy == "ast":
+        # Default to hybrid for C# if ast was specified (the default)
+        args.strategy = "hybrid"
 
     repo_path = Path(args.repo_path)
     if not repo_path.exists():
@@ -252,11 +271,19 @@ def main() -> None:
     print(f"Repository: {repo_path.resolve()}")
     print()
 
-    # Create extractor based on strategy
-    if args.strategy == "treesitter":
-        extractor = TreeSitterExtractor()
-    else:
-        extractor = PythonExtractor()
+    # Create extractor based on language and strategy
+    if args.language == "python":
+        if args.strategy == "treesitter":
+            extractor = TreeSitterExtractor()
+        else:
+            extractor = PythonExtractor()
+    elif args.language == "csharp":
+        if args.strategy == "treesitter":
+            extractor = CSharpTreeSitterExtractor()
+        elif args.strategy == "roslyn":
+            extractor = CSharpRoslynExtractor()
+        else:  # hybrid (default for C#)
+            extractor = CSharpHybridExtractor()
     resolve_calls = not args.no_resolve_calls
     result = extractor.extract_directory(
         repo_path.resolve(),
@@ -297,6 +324,13 @@ def main() -> None:
     print(f"  - Classes: {summary['symbols_by_type'].get('class', 0)}")
     print(f"  - Methods: {summary['symbols_by_type'].get('method', 0)}")
     print(f"  - Variables: {summary['symbols_by_type'].get('variable', 0)}")
+    # C#-specific symbol types
+    if summary['symbols_by_type'].get('property', 0) > 0:
+        print(f"  - Properties: {summary['symbols_by_type'].get('property', 0)}")
+    if summary['symbols_by_type'].get('field', 0) > 0:
+        print(f"  - Fields: {summary['symbols_by_type'].get('field', 0)}")
+    if summary['symbols_by_type'].get('event', 0) > 0:
+        print(f"  - Events: {summary['symbols_by_type'].get('event', 0)}")
     print(f"Calls found: {summary['total_calls']}")
     print(f"  - Direct: {summary['calls_by_type'].get('direct', 0)}")
     print(f"  - Dynamic: {summary['calls_by_type'].get('dynamic', 0)}")

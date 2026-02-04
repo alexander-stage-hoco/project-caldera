@@ -1,0 +1,143 @@
+{
+  "metadata": {
+    "repo": "nested-types",
+    "created": "2026-02-04",
+    "version": "1.0",
+    "notes": "Nested classes, interfaces, structs, enums"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "Container",
+        "symbol_type": "class",
+        "line_start": 3,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "PublicNested",
+        "symbol_type": "class",
+        "line_start": 5,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "Value",
+        "symbol_type": "property",
+        "line_start": 5,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "PrivateNested",
+        "symbol_type": "class",
+        "line_start": 6,
+        "is_exported": false
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "Name",
+        "symbol_type": "property",
+        "line_start": 6,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "ProtectedNested",
+        "symbol_type": "class",
+        "line_start": 7,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "Process",
+        "symbol_type": "method",
+        "line_start": 7,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "INestedInterface",
+        "symbol_type": "class",
+        "line_start": 9,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "Execute",
+        "symbol_type": "method",
+        "line_start": 9,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "NestedStruct",
+        "symbol_type": "class",
+        "line_start": 10,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "X",
+        "symbol_type": "field",
+        "line_start": 10,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "Y",
+        "symbol_type": "field",
+        "line_start": 10,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "NestedEnum",
+        "symbol_type": "class",
+        "line_start": 11,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "Level1",
+        "symbol_type": "class",
+        "line_start": 13,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "Level2",
+        "symbol_type": "class",
+        "line_start": 15,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "Level3",
+        "symbol_type": "class",
+        "line_start": 17,
+        "is_exported": true
+      },
+      {
+        "path": "NestedTypes.cs",
+        "symbol_name": "Deep",
+        "symbol_type": "method",
+        "line_start": 17,
+        "is_exported": true,
+        "parameters": 0
+      }
+    ],
+    "calls": [],
+    "imports": [],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 17,
+      "total_calls": 0,
+      "total_imports": 0
+    }
+  },
+  "notes": {}
+}

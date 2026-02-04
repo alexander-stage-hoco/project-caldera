@@ -2,13 +2,13 @@
 
 ## Executive Summary
 
-Symbol Scanner extracts function/class definitions, call relationships, and imports from source code. This enables coupling analysis, blast radius computation, and dependency mapping for Python codebases.
+Symbol Scanner extracts function/class definitions, call relationships, and imports from source code. This enables coupling analysis, blast radius computation, and dependency mapping for Python and C# codebases.
 
 **Key Capabilities:**
-- Extract symbols (functions, classes, methods)
+- Extract symbols (functions, classes, methods, properties, fields, events)
 - Track function/method calls
 - Map import relationships
-- Support for Python (Phase 1)
+- Support for Python and C#
 
 ## Overview
 
@@ -132,15 +132,25 @@ rollup_coupling_directory_metrics_direct
 
 ## Implementation Plan
 
-### Phase 1 ✅ Complete
+### Phase 1 ✅ Python + C# Complete
 - Python symbol extraction using stdlib `ast`
-- Basic call tracking
-- Import extraction
+- C# symbol extraction using tree-sitter and Roslyn
+- Basic call tracking for both languages
+- Import extraction (Python) and using directive extraction (C#)
 
-### Phase 2 ✅ Complete
+### Phase 2 ✅ Call Resolution Complete
 - Resolve `callee_file` for local imports via CallResolver
 - Build import graph for cross-file calls
 - Resolution statistics tracking
+
+### C# Extractor Architecture
+
+Three extractor strategies for C#:
+- **tree-sitter**: Fast AST-based extraction, ~ms per file
+- **roslyn**: Semantic analysis via .NET 8 tool, slower but more accurate
+- **hybrid** (default): Combines tree-sitter syntax with Roslyn semantics
+
+Validated on TShock (107 files, 2,815 symbols, 9,853 calls).
 
 ### Future Enhancements
 
@@ -148,11 +158,7 @@ rollup_coupling_directory_metrics_direct
 - Add tree-sitter parser
 - Support modern JS features
 
-#### Phase 4: C# Support
-- Extend roslyn-analyzers
-- Leverage existing Roslyn infrastructure
-
-#### Phase 5: Java/Go
+#### Phase 4: Java/Go
 - Additional tree-sitter grammars
 - Language-specific semantics
 

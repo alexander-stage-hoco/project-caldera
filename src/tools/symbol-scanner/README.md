@@ -1,6 +1,6 @@
 # Symbol Scanner
 
-Python symbol extraction tool for Project Caldera. Extracts function/class definitions, call relationships, and imports from Python source code using the stdlib `ast` module.
+Symbol extraction tool for Project Caldera. Extracts function/class definitions, call relationships, and imports from source code. Supports Python (via stdlib `ast` module) and C# (via tree-sitter and Roslyn).
 
 ## Purpose
 
@@ -85,15 +85,22 @@ Each import entry contains:
 
 ## Supported Languages
 
-**Phase 1 (Current):** Python only
+**Python** (Phase 1 - Complete)
 - Uses stdlib `ast` module for parsing
 - No external dependencies for parsing
+
+**C#** (Phase 1 - Complete)
+- Three extractor strategies available:
+  - **tree-sitter**: Fast AST-based extraction via tree-sitter-c-sharp
+  - **roslyn**: Semantic analysis via external Roslyn tool (requires .NET 8)
+  - **hybrid** (default): Combines tree-sitter syntax with Roslyn semantics
+- Validated on TShock (107 files, 2,815 symbols, 9,853 calls)
+- Supports: classes, methods, properties, fields, events, delegates
 
 **Future Phases:**
 - Phase 2: Enhanced call resolution
 - Phase 3: JavaScript/TypeScript (tree-sitter)
-- Phase 4: C# (Roslyn extension)
-- Phase 5: Java/Go
+- Phase 4: Java/Go
 
 ## Evaluation
 
@@ -116,11 +123,15 @@ symbol-scanner/
 │   ├── evaluate.py             # Programmatic evaluation
 │   └── extractors/
 │       ├── base.py             # Abstract base extractor
-│       └── python_extractor.py # Python AST implementation
+│       ├── python_extractor.py # Python AST implementation
+│       ├── csharp_treesitter_extractor.py  # C# tree-sitter
+│       ├── csharp_roslyn_extractor.py      # C# Roslyn bridge
+│       └── csharp_hybrid_extractor.py      # C# hybrid strategy
+├── roslyn-tool/                # .NET 8 Roslyn analyzer (external)
 ├── schemas/
 │   └── output.schema.json      # JSON schema for validation
 ├── evaluation/
-│   ├── ground-truth/           # Expected outputs
+│   ├── ground-truth/           # Expected outputs (Python + C#)
 │   └── llm/                    # LLM judge infrastructure
 ├── tests/
 │   ├── unit/                   # Unit tests

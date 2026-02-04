@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "repo": "records",
+    "created": "2026-02-04",
+    "version": "1.0",
+    "notes": "C# 9.0+ records and record structs"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "Records.cs",
+        "symbol_name": "Person",
+        "symbol_type": "class",
+        "line_start": 3,
+        "is_exported": true
+      },
+      {
+        "path": "Records.cs",
+        "symbol_name": "Employee",
+        "symbol_type": "class",
+        "line_start": 5,
+        "is_exported": true
+      },
+      {
+        "path": "Records.cs",
+        "symbol_name": "FullName",
+        "symbol_type": "property",
+        "line_start": 7,
+        "is_exported": true
+      },
+      {
+        "path": "Records.cs",
+        "symbol_name": "Years",
+        "symbol_type": "property",
+        "line_start": 8,
+        "is_exported": true
+      },
+      {
+        "path": "Records.cs",
+        "symbol_name": "Display",
+        "symbol_type": "method",
+        "line_start": 9,
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "Records.cs",
+        "symbol_name": "Point",
+        "symbol_type": "class",
+        "line_start": 12,
+        "is_exported": true
+      },
+      {
+        "path": "Records.cs",
+        "symbol_name": "Distance",
+        "symbol_type": "property",
+        "line_start": 14,
+        "is_exported": true
+      },
+      {
+        "path": "Records.cs",
+        "symbol_name": "Animal",
+        "symbol_type": "class",
+        "line_start": 17,
+        "is_exported": true
+      },
+      {
+        "path": "Records.cs",
+        "symbol_name": "Dog",
+        "symbol_type": "class",
+        "line_start": 18,
+        "is_exported": true
+      },
+      {
+        "path": "Records.cs",
+        "symbol_name": "Cat",
+        "symbol_type": "class",
+        "line_start": 19,
+        "is_exported": true
+      }
+    ],
+    "calls": [
+      {
+        "caller_file": "Records.cs",
+        "caller_symbol": "Point",
+        "callee_symbol": "Sqrt",
+        "callee_file": null,
+        "line_number": 14,
+        "call_type": "dynamic"
+      }
+    ],
+    "imports": [],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 10,
+      "total_calls": 1,
+      "total_imports": 0
+    }
+  },
+  "notes": {}
+}

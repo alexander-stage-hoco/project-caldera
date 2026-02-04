@@ -77,26 +77,27 @@ You are evaluating the **call extraction accuracy** of symbol-scanner for code a
 
 ## Required Output Format
 
-Respond with a JSON object with a **BINARY PASS/FAIL decision**:
+Respond with a JSON object with a numeric score and supporting details:
 
 ```json
 {
   "dimension": "call_relationship",
-  "decision": "PASS",
+  "score": 4,
   "confidence": 0.88,
-  "reasoning": "<detailed explanation of why this passes or fails>",
-  "issues": [
-    {"severity": "MEDIUM", "type": "missing_call", "call": "main->helper", "description": "Cross-file call not captured"}
-  ],
-  "recommendations": ["<improvement suggestions>"]
+  "reasoning": "<detailed explanation of score>",
+  "evidence_cited": ["<key evidence points supporting the score>"],
+  "recommendations": ["<improvement suggestions>"],
+  "sub_scores": {
+    "direct_calls": 5,
+    "cross_file_calls": 4,
+    "line_accuracy": 4
+  }
 }
 ```
 
-### Decision Rules
-- **PASS**: All critical calls extracted correctly with accurate caller/callee relationships.
-- **FAIL**: Missing important calls, incorrect caller/callee pairs, or systematic errors.
-
-### Issue Severities
-- **HIGH**: Missing cross-file call, completely wrong caller/callee pair
-- **MEDIUM**: Missing internal call, incorrect call type classification
-- **LOW**: Minor line number deviation, missing dynamic call (expected limitation)
+### Score Guidelines
+- **5**: All calls captured with correct caller/callee pairs and accurate line numbers
+- **4**: Core calls captured with minor issues (missing some dynamic calls, slight line deviations)
+- **3**: Most calls captured, some incorrect pairings or moderate line errors
+- **2**: Missing important calls or incorrect caller/callee relationships
+- **1**: Incomplete extraction, systematic errors, or broken output

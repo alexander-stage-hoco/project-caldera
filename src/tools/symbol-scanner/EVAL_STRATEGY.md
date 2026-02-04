@@ -2,7 +2,7 @@
 
 ## Philosophy
 
-Symbol Scanner evaluation prioritizes **extraction completeness** over false-positive avoidance. The tool should capture all visible symbols, calls, and imports in Python source code, accepting some noise from dynamic patterns rather than missing legitimate code elements.
+Symbol Scanner evaluation prioritizes **extraction completeness** over false-positive avoidance. The tool should capture all visible symbols, calls, and imports in Python and C# source code, accepting some noise from dynamic patterns rather than missing legitimate code elements.
 
 **Guiding Principles:**
 1. **Completeness first**: Better to extract extra symbols than miss real ones
@@ -213,6 +213,8 @@ Ground truth files define expected outputs for synthetic test repositories.
 
 ### Test Repos
 
+#### Python Test Repos
+
 | Repo | Purpose | Focus |
 |------|---------|-------|
 | simple-functions | Basic extraction | Function defs, simple calls |
@@ -220,6 +222,14 @@ Ground truth files define expected outputs for synthetic test repositories.
 | import-patterns | Import variations | Static, relative, star imports |
 | cross-module-calls | Multi-file | Cross-file function calls |
 | unresolved-externals | External deps | Stdlib, third-party calls |
+
+#### C# Test Repos
+
+| Repo | Purpose | Focus |
+|------|---------|-------|
+| csharp-tshock | Real-world validation | TShock server mod (107 files, 2,815 symbols) |
+
+C# evaluation validates all 3 extractors (tree-sitter, roslyn, hybrid) produce consistent results.
 
 ## Evaluation Pipeline
 
@@ -294,5 +304,6 @@ The symbol-scanner staging models provide data used in:
 ### Invariants
 
 1. **Non-negative counts**: All symbol/call/import counts must be >= 0
-2. **Valid symbol types**: Symbol types must be one of: function, class, method, variable
-3. **Valid call types**: Call types must be one of: direct, dynamic, async
+2. **Valid symbol types**: Symbol types must be one of: function, class, method, variable, property, field, event
+3. **Valid call types**: Call types must be one of: direct, dynamic, async, delegate, event
+4. **Valid import types**: Import types must be one of: static, dynamic, type_checking, side_effect, global, extern

@@ -152,12 +152,14 @@ def load_ground_truth(ground_truth_dir: Path, repo_name: str | None = None) -> d
 # ============================================================================
 
 
-def run_extractor(strategy: str, repo_path: Path) -> dict:
+def run_extractor(strategy: str, repo_path: Path, language: str = "python") -> dict:
     """Run an extractor on a repository and return results.
 
     Args:
-        strategy: Extractor strategy ("ast", "treesitter", or "hybrid")
+        strategy: Extractor strategy (python: "ast", "treesitter", "hybrid";
+                  csharp: "treesitter", "roslyn", "hybrid")
         repo_path: Path to the repository
+        language: Language to extract ("python" or "csharp")
 
     Returns:
         Extraction result as dict
@@ -166,20 +168,36 @@ def run_extractor(strategy: str, repo_path: Path) -> dict:
     sys.path.insert(0, str(Path(__file__).parent.parent))
     from scripts.extractors.base import ExtractionResult
 
-    if strategy == "ast":
-        from scripts.extractors.python_extractor import PythonExtractor
+    if language == "csharp":
+        if strategy == "treesitter":
+            from scripts.extractors.csharp_treesitter_extractor import CSharpTreeSitterExtractor
 
-        extractor = PythonExtractor()
-    elif strategy == "treesitter":
-        from scripts.extractors.treesitter_extractor import TreeSitterExtractor
+            extractor = CSharpTreeSitterExtractor()
+        elif strategy == "roslyn":
+            from scripts.extractors.csharp_roslyn_extractor import CSharpRoslynExtractor
 
-        extractor = TreeSitterExtractor()
-    elif strategy == "hybrid":
-        from scripts.extractors.hybrid_extractor import HybridExtractor
+            extractor = CSharpRoslynExtractor()
+        elif strategy == "hybrid":
+            from scripts.extractors.csharp_hybrid_extractor import CSharpHybridExtractor
 
-        extractor = HybridExtractor()
-    else:
-        raise ValueError(f"Unknown strategy: {strategy}")
+            extractor = CSharpHybridExtractor()
+        else:
+            raise ValueError(f"Unknown C# strategy: {strategy}. Use: treesitter, roslyn, hybrid")
+    else:  # python
+        if strategy == "ast":
+            from scripts.extractors.python_extractor import PythonExtractor
+
+            extractor = PythonExtractor()
+        elif strategy == "treesitter":
+            from scripts.extractors.treesitter_extractor import TreeSitterExtractor
+
+            extractor = TreeSitterExtractor()
+        elif strategy == "hybrid":
+            from scripts.extractors.hybrid_extractor import HybridExtractor
+
+            extractor = HybridExtractor()
+        else:
+            raise ValueError(f"Unknown Python strategy: {strategy}. Use: ast, treesitter, hybrid")
 
     result = extractor.extract_directory(repo_path)
     return _extraction_result_to_dict(result)
@@ -631,6 +649,7 @@ def evaluate_repo(
     repo_name: str,
     repo_path: Path,
     ground_truth: dict,
+    language: str = "python",
 ) -> EvaluationResult:
     """Evaluate a single repository.
 
@@ -639,6 +658,7 @@ def evaluate_repo(
         repo_name: Name of the repository
         repo_path: Path to the repository
         ground_truth: Ground truth data for the repo
+        language: Language to extract ("python" or "csharp")
 
     Returns:
         EvaluationResult with metrics and details
@@ -646,7 +666,7 @@ def evaluate_repo(
     result = EvaluationResult(repo_name=repo_name, strategy=strategy)
 
     try:
-        actual = run_extractor(strategy, repo_path)
+        actual = run_extractor(strategy, repo_path, language)
     except Exception as e:
         result.errors.append(f"Extraction failed: {e}")
         return result
@@ -1251,6 +1271,7 @@ def evaluate_from_analysis(
     ground_truth_dir: Path,
     repos_dir: Path,
     verbose: bool = False,
+    language: str = "python",
 ) -> tuple[list[EvaluationResult], dict]:
     """Evaluate analysis output against all ground truth files.
 
@@ -1263,6 +1284,7 @@ def evaluate_from_analysis(
         ground_truth_dir: Path to ground truth directory
         repos_dir: Path to synthetic repos directory
         verbose: Whether to print verbose output
+        language: Language to extract ("python" or "csharp")
 
     Returns:
         Tuple of (list of EvaluationResult, metadata dict)
@@ -1282,7 +1304,7 @@ def evaluate_from_analysis(
             print(f"Warning: Repository {repo_name} not found at {repo_path}", file=sys.stderr)
             continue
 
-        result = evaluate_repo(strategy, repo_name, repo_path, gt_data)
+        result = evaluate_repo(strategy, repo_name, repo_path, gt_data, language)
         results.append(result)
 
         if verbose:
@@ -1293,6 +1315,7 @@ def evaluate_from_analysis(
         "strategy": strategy,
         "ground_truth_dir": str(ground_truth_dir),
         "repos_dir": str(repos_dir),
+        "language": language,
     }
 
     return results, metadata
@@ -1529,7 +1552,22 @@ def main() -> None:
         action="store_true",
         help="Skip regression check against baseline",
     )
+    parser.add_argument(
+        "--language",
+        choices=["python", "csharp"],
+        default="python",
+        help="Language to evaluate: python (default) or csharp",
+    )
     args = parser.parse_args()
+
+    # Update default paths based on language
+    default_gt_path = Path(__file__).parent.parent / "evaluation" / "ground-truth"
+    default_repos_path = Path(__file__).parent.parent / "eval-repos" / "synthetic"
+    if args.language == "csharp":
+        if args.ground_truth == default_gt_path:
+            args.ground_truth = Path(__file__).parent.parent / "evaluation" / "ground-truth-csharp"
+        if args.repos_dir == default_repos_path:
+            args.repos_dir = Path(__file__).parent.parent / "eval-repos" / "synthetic-csharp"
 
     # Analysis mode: evaluate against all ground truth and generate report
     if args.analysis:
@@ -1543,6 +1581,7 @@ def main() -> None:
             ground_truth_dir=args.ground_truth,
             repos_dir=args.repos_dir,
             verbose=args.verbose,
+            language=args.language,
         )
 
         if not results:
@@ -1626,10 +1665,10 @@ def main() -> None:
                 print(f"Warning: Repository {repo_name} not found at {repo_path}", file=sys.stderr)
                 continue
 
-            ast_result = evaluate_repo("ast", repo_name, repo_path, gt_data)
+            ast_result = evaluate_repo("ast", repo_name, repo_path, gt_data, args.language)
             ast_results.append(ast_result)
 
-            ts_result = evaluate_repo("treesitter", repo_name, repo_path, gt_data)
+            ts_result = evaluate_repo("treesitter", repo_name, repo_path, gt_data, args.language)
             ts_results.append(ts_result)
 
         if args.json:
@@ -1651,7 +1690,7 @@ def main() -> None:
                 print(f"Warning: Repository {repo_name} not found at {repo_path}", file=sys.stderr)
                 continue
 
-            result = evaluate_repo(args.strategy, repo_name, repo_path, gt_data)
+            result = evaluate_repo(args.strategy, repo_name, repo_path, gt_data, args.language)
             results.append(result)
 
         if args.json:
@@ -1674,7 +1713,7 @@ def main() -> None:
             print(f"Repository not found: {repo_path}", file=sys.stderr)
             sys.exit(1)
 
-        result = evaluate_repo(args.strategy, args.repo, repo_path, ground_truth[args.repo])
+        result = evaluate_repo(args.strategy, args.repo, repo_path, ground_truth[args.repo], args.language)
 
         if args.json:
             print(json.dumps(result_to_json(result), indent=2))

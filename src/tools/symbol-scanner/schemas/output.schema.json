@@ -115,7 +115,7 @@
         },
         "symbol_type": {
           "type": "string",
-          "enum": ["function", "class", "method", "variable"],
+          "enum": ["function", "class", "method", "variable", "property", "field", "event"],
           "description": "Type of symbol"
         },
         "line_start": {
@@ -176,7 +176,7 @@
         },
         "call_type": {
           "type": "string",
-          "enum": ["direct", "dynamic", "async"],
+          "enum": ["direct", "dynamic", "async", "delegate", "event", "constructor"],
           "description": "Type of call"
         },
         "is_dynamic_code_execution": {
@@ -209,7 +209,7 @@
         },
         "import_type": {
           "type": "string",
-          "enum": ["static", "dynamic", "type_checking", "side_effect"],
+          "enum": ["static", "dynamic", "type_checking", "side_effect", "global", "extern", "using_static"],
           "description": "Type of import"
         },
         "line_number": {

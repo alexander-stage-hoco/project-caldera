@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "repo": "pattern-matching",
+    "created": "2026-02-04",
+    "version": "1.0",
+    "notes": "Switch expressions and pattern matching"
+  },
+  "expected": {
+    "symbols": [
+      {
+        "path": "PatternMatching.cs",
+        "symbol_name": "Matcher",
+        "symbol_type": "class",
+        "line_start": 3,
+        "is_exported": true
+      },
+      {
+        "path": "PatternMatching.cs",
+        "symbol_name": "Describe",
+        "symbol_type": "method",
+        "line_start": 5,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "PatternMatching.cs",
+        "symbol_name": "Classify",
+        "symbol_type": "method",
+        "line_start": 13,
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "PatternMatching.cs",
+        "symbol_name": "Order",
+        "symbol_type": "class",
+        "line_start": 21,
+        "is_exported": true
+      },
+      {
+        "path": "PatternMatching.cs",
+        "symbol_name": "Weight",
+        "symbol_type": "property",
+        "line_start": 23,
+        "is_exported": true
+      },
+      {
+        "path": "PatternMatching.cs",
+        "symbol_name": "IsPriority",
+        "symbol_type": "property",
+        "line_start": 24,
+        "is_exported": true
+      }
+    ],
+    "calls": [],
+    "imports": [],
+    "summary": {
+      "total_files": 1,
+      "total_symbols": 6,
+      "total_calls": 0,
+      "total_imports": 0
+    }
+  },
+  "notes": {}
+}
