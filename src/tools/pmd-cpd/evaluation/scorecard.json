@@ -1,0 +1,244 @@
+{
+  "tool": "pmd-cpd",
+  "version": "1.0.0",
+  "generated_at": "2026-02-04T15:03:44.582611",
+  "description": "Evaluation scorecard for PMD CPD duplication analysis",
+  "summary": {
+    "total_checks": 28,
+    "passed": 16,
+    "failed": 12,
+    "score": 0.5482,
+    "score_percent": 54.82,
+    "normalized_score": 2.74,
+    "decision": "FAIL"
+  },
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "Accuracy",
+      "weight": 0.25,
+      "total_checks": 8,
+      "passed": 5,
+      "failed": 3,
+      "score": 2.72,
+      "weighted_score": 0.68,
+      "checks": [
+        {
+          "check_id": "AC-1",
+          "name": "Heavy duplication detection",
+          "passed": false,
+          "message": "Detected 0/7 heavy duplication files"
+        },
+        {
+          "check_id": "AC-2",
+          "name": "Clone count accuracy",
+          "passed": true,
+          "message": "28/35 files have clone counts in expected range"
+        },
+        {
+          "check_id": "AC-3",
+          "name": "Duplication percentage accuracy",
+          "passed": false,
+          "message": "11/20 files have duplication % in expected range"
+        },
+        {
+          "check_id": "AC-4",
+          "name": "No false positives in clean files",
+          "passed": true,
+          "message": "5/5 clean files correctly identified (no false positives)"
+        },
+        {
+          "check_id": "AC-5",
+          "name": "Cross-file clone detection",
+          "passed": false,
+          "message": "Detected 0/7 cross-file duplication pairs"
+        },
+        {
+          "check_id": "AC-6",
+          "name": "Semantic identifier detection",
+          "passed": true,
+          "message": "Semantic mode not enabled (--ignore-identifiers not used)"
+        },
+        {
+          "check_id": "AC-7",
+          "name": "Semantic literal detection",
+          "passed": true,
+          "message": "Semantic mode not enabled (--ignore-literals not used)"
+        },
+        {
+          "check_id": "AC-8",
+          "name": "Clone line accuracy",
+          "passed": true,
+          "message": "No clones detected to verify"
+        }
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Coverage",
+      "weight": 0.25,
+      "total_checks": 8,
+      "passed": 0,
+      "failed": 8,
+      "score": 0.0,
+      "weighted_score": 0.0,
+      "checks": [
+        {
+          "check_id": "CV-1",
+          "name": "Python file coverage",
+          "passed": false,
+          "message": "Analyzed 0/7 python files from ground truth"
+        },
+        {
+          "check_id": "CV-2",
+          "name": "JavaScript file coverage",
+          "passed": false,
+          "message": "Analyzed 0/7 javascript files from ground truth"
+        },
+        {
+          "check_id": "CV-3",
+          "name": "TypeScript file coverage",
+          "passed": false,
+          "message": "Analyzed 0/7 typescript files from ground truth"
+        },
+        {
+          "check_id": "CV-4",
+          "name": "C# file coverage",
+          "passed": false,
+          "message": "Analyzed 0/7 csharp files from ground truth"
+        },
+        {
+          "check_id": "CV-5",
+          "name": "Java file coverage",
+          "passed": false,
+          "message": "Analyzed 0/7 java files from ground truth"
+        },
+        {
+          "check_id": "CV-6",
+          "name": "Go file coverage",
+          "passed": false,
+          "message": "Analyzed 0/7 go files from ground truth"
+        },
+        {
+          "check_id": "CV-7",
+          "name": "Rust file coverage",
+          "passed": false,
+          "message": "Analyzed 0/7 rust files from ground truth"
+        },
+        {
+          "check_id": "CV-8",
+          "name": "Multi-language detection",
+          "passed": false,
+          "message": "Detected 0/7 expected languages"
+        }
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Edge Cases",
+      "weight": 0.25,
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.25,
+      "checks": [
+        {
+          "check_id": "EC-1",
+          "name": "Empty file handling",
+          "passed": true,
+          "message": "Empty files handled gracefully"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "Single-line file handling",
+          "passed": true,
+          "message": "Single-line files handled correctly"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "Large file handling",
+          "passed": true,
+          "message": "Analysis completed in 0.0s, 0 large files processed"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "Unicode content handling",
+          "passed": true,
+          "message": "Unicode content handled correctly"
+        },
+        {
+          "check_id": "EC-5",
+          "name": "Mixed line endings handling",
+          "passed": true,
+          "message": "Line endings handled correctly"
+        },
+        {
+          "check_id": "EC-6",
+          "name": "Deeply nested code handling",
+          "passed": true,
+          "message": "Nested code structures analyzed (0 clones found)"
+        },
+        {
+          "check_id": "EC-7",
+          "name": "Special character paths handling",
+          "passed": true,
+          "message": "File paths handled correctly (0 files processed)"
+        },
+        {
+          "check_id": "EC-8",
+          "name": "Zero duplication handling",
+          "passed": true,
+          "message": "Overall duplication: 0.0% (0 clones)"
+        }
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "Performance",
+      "weight": 0.25,
+      "total_checks": 4,
+      "passed": 3,
+      "failed": 1,
+      "score": 3.75,
+      "weighted_score": 0.94,
+      "checks": [
+        {
+          "check_id": "PF-1",
+          "name": "Execution time",
+          "passed": true,
+          "message": "Excellent: Analysis completed in 0.0s"
+        },
+        {
+          "check_id": "PF-2",
+          "name": "File throughput",
+          "passed": true,
+          "message": "No files to measure throughput"
+        },
+        {
+          "check_id": "PF-3",
+          "name": "Memory efficiency",
+          "passed": true,
+          "message": "No files analyzed"
+        },
+        {
+          "check_id": "PF-4",
+          "name": "Incremental analysis support",
+          "passed": false,
+          "message": "Missing metadata for incremental: repo_path, timestamp, version"
+        }
+      ]
+    }
+  ],
+  "critical_failures": [],
+  "thresholds": {
+    "STRONG_PASS": ">= 4.0 (80%+)",
+    "PASS": ">= 3.5 (70%+)",
+    "WEAK_PASS": ">= 3.0 (60%+)",
+    "FAIL": "< 3.0 (below 60%)"
+  },
+  "metadata": {
+    "analysis_path": "/var/folders/zr/c7zp4x316wvg0rsvdnq_dcm40000gn/T/tool-compliance-8h0pp9u4/output.json",
+    "ground_truth_dir": "evaluation/ground-truth"
+  }
+}

@@ -27,6 +27,9 @@ sources:
       - name: lz_file_imports
       - name: lz_scancode_file_licenses
       - name: lz_scancode_summary
+      - name: lz_pmd_cpd_file_metrics
+      - name: lz_pmd_cpd_duplications
+      - name: lz_pmd_cpd_occurrences
 
 models:
   - name: stg_lz_tool_runs
@@ -1351,5 +1354,186 @@ models:
         tests:
           - not_null
       - name: has_unknown
+        tests:
+          - not_null
+
+  - name: stg_lz_pmd_cpd_file_metrics
+    description: "Staged PMD-CPD file metrics from duplication analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: total_lines
+        tests:
+          - not_null
+      - name: duplicate_lines
+        tests:
+          - not_null
+      - name: duplicate_blocks
+        tests:
+          - not_null
+      - name: duplication_percentage
+        tests:
+          - not_null
+
+  - name: rollup_pmd_cpd_directory_counts_direct
+    description: "PMD-CPD duplication counts per directory (direct scope - files in directory only)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_lines
+        tests:
+          - not_null
+      - name: total_duplicate_lines
+        tests:
+          - not_null
+      - name: total_duplicate_blocks
+        tests:
+          - not_null
+      - name: avg_duplication_percentage
+        tests:
+          - not_null
+
+  - name: rollup_pmd_cpd_directory_counts_recursive
+    description: "PMD-CPD duplication counts per directory (recursive scope - includes subtree)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_lines
+        tests:
+          - not_null
+      - name: total_duplicate_lines
+        tests:
+          - not_null
+      - name: total_duplicate_blocks
+        tests:
+          - not_null
+      - name: avg_duplication_percentage
+        tests:
+          - not_null
+
+  - name: stg_lz_pmd_cpd_duplications
+    description: "Staged PMD-CPD duplication clones"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: clone_id
+        tests:
+          - not_null
+      - name: lines
+        tests:
+          - not_null
+      - name: tokens
+        tests:
+          - not_null
+      - name: occurrence_count
+        tests:
+          - not_null
+      - name: is_cross_file
+        tests:
+          - not_null
+
+  - name: stg_lz_pmd_cpd_occurrences
+    description: "Staged PMD-CPD clone occurrences"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: clone_id
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: line_start
+        tests:
+          - not_null
+      - name: line_end
+        tests:
+          - not_null
+
+  - name: rollup_pmd_cpd_directory_direct_distributions
+    description: "Distribution statistics for PMD-CPD metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - duplicate_lines
+                  - duplicate_blocks
+                  - duplication_percentage
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_pmd_cpd_directory_recursive_distributions
+    description: "Distribution statistics for PMD-CPD metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - duplicate_lines
+                  - duplicate_blocks
+                  - duplication_percentage
+      - name: value_count
         tests:
           - not_null
