@@ -179,6 +179,7 @@ class TestBuildCalderaEnvelope:
             analysis=analysis,
             run_id="550e8400-e29b-41d4-a716-446655440000",
             repo_id="660e8400-e29b-41d4-a716-446655440001",
+            repo_name="test-repo",
             branch="main",
             commit="a" * 40,
         )
@@ -226,6 +227,7 @@ class TestBuildCalderaEnvelope:
             analysis=analysis,
             run_id="test-run",
             repo_id="test-repo",
+            repo_name="test-repo",
             branch="main",
             commit="b" * 40,
         )
@@ -252,6 +254,7 @@ class TestBuildCalderaEnvelope:
             analysis=analysis,
             run_id="test",
             repo_id="test",
+            repo_name="test-repo",
             branch="main",
             commit="c" * 40,
         )

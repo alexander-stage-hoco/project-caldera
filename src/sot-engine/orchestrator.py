@@ -17,7 +17,7 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, RoslynAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, TrivyAdapter
+from persistence.adapters import GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
 from persistence.repositories import (
@@ -27,10 +27,13 @@ from persistence.repositories import (
     GitleaksRepository,
     LayoutRepository,
     LizardRepository,
+    PmdCpdRepository,
     RoslynRepository,
+    ScancodeRepository,
     SccRepository,
     SemgrepRepository,
     SonarqubeRepository,
+    SymbolScannerRepository,
     ToolRunRepository,
     TrivyRepository,
 )
@@ -181,6 +184,9 @@ TOOL_CONFIGS = [
     ),
     ToolConfig("trivy", "src/tools/trivy"),
     ToolConfig("gitleaks", "src/tools/gitleaks"),
+    ToolConfig("symbol-scanner", "src/tools/symbol-scanner"),
+    ToolConfig("scancode", "src/tools/scancode"),
+    ToolConfig("pmd-cpd", "src/tools/pmd-cpd"),
 ]
 
 
@@ -256,6 +262,9 @@ TOOL_INGESTION_CONFIGS = [
     ToolIngestionConfig("trivy", TrivyAdapter, TrivyRepository, validate_metadata=False),
     ToolIngestionConfig("git-sizer", GitSizerAdapter, GitSizerRepository),
     ToolIngestionConfig("gitleaks", GitleaksAdapter, GitleaksRepository),
+    ToolIngestionConfig("symbol-scanner", SymbolScannerAdapter, SymbolScannerRepository),
+    ToolIngestionConfig("scancode", ScancodeAdapter, ScancodeRepository),
+    ToolIngestionConfig("pmd-cpd", PmdCpdAdapter, PmdCpdRepository),
 ]
 
 
@@ -275,6 +284,9 @@ def ingest_outputs(
     sonarqube_output: Optional[Path] = None,
     trivy_output: Optional[Path] = None,
     gitleaks_output: Optional[Path] = None,
+    symbol_scanner_output: Optional[Path] = None,
+    scancode_output: Optional[Path] = None,
+    pmd_cpd_output: Optional[Path] = None,
     schema_path: Path = None,
     logger: Optional[OrchestratorLogger] = None,
 ) -> None:
@@ -299,6 +311,9 @@ def ingest_outputs(
         "sonarqube": sonarqube_output,
         "trivy": trivy_output,
         "gitleaks": gitleaks_output,
+        "symbol-scanner": symbol_scanner_output,
+        "scancode": scancode_output,
+        "pmd-cpd": pmd_cpd_output,
     }
 
     # Ingest each tool using its configuration
@@ -384,6 +399,9 @@ def main() -> int:
     parser.add_argument("--sonarqube-output", type=str)
     parser.add_argument("--trivy-output", type=str)
     parser.add_argument("--gitleaks-output", type=str)
+    parser.add_argument("--symbol-scanner-output", type=str)
+    parser.add_argument("--scancode-output", type=str)
+    parser.add_argument("--pmd-cpd-output", type=str)
     parser.add_argument("--run-tools", action="store_true")
     parser.add_argument("--run-dbt", action="store_true")
     parser.add_argument("--replace", action="store_true")
@@ -410,6 +428,9 @@ def main() -> int:
     sonarqube_output = Path(args.sonarqube_output) if args.sonarqube_output else None
     trivy_output = Path(args.trivy_output) if args.trivy_output else None
     gitleaks_output = Path(args.gitleaks_output) if args.gitleaks_output else None
+    symbol_scanner_output = Path(args.symbol_scanner_output) if args.symbol_scanner_output else None
+    scancode_output = Path(args.scancode_output) if args.scancode_output else None
+    pmd_cpd_output = Path(args.pmd_cpd_output) if args.pmd_cpd_output else None
 
     try:
         logger.info(f"Log file: {logger.log_path}")
@@ -460,6 +481,9 @@ def main() -> int:
             sonarqube_output = outputs.get("sonarqube", sonarqube_output)
             trivy_output = outputs.get("trivy", trivy_output)
             gitleaks_output = outputs.get("gitleaks", gitleaks_output)
+            symbol_scanner_output = outputs.get("symbol-scanner", symbol_scanner_output)
+            scancode_output = outputs.get("scancode", scancode_output)
+            pmd_cpd_output = outputs.get("pmd-cpd", pmd_cpd_output)
             logger.info(f"Completed tools in {_format_duration(time.perf_counter() - start)}")
             for name, path in outputs.items():
                 logger.info(f"{name} output: {path}")
@@ -482,6 +506,9 @@ def main() -> int:
             sonarqube_output,
             trivy_output,
             gitleaks_output,
+            symbol_scanner_output,
+            scancode_output,
+            pmd_cpd_output,
             schema_path,
             logger,
         )

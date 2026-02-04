@@ -5,7 +5,9 @@ from typing import Any, Callable, Iterable, Sequence, TypeVar
 import duckdb
 
 from .entities import (
+    CodeSymbol,
     CollectionRun,
+    FileImport,
     GitSizerLfsCandidate,
     GitSizerMetric,
     GitSizerViolation,
@@ -14,11 +16,17 @@ from .entities import (
     LayoutFile,
     LizardFileMetric,
     LizardFunctionMetric,
+    PmdCpdDuplication,
+    PmdCpdFileMetric,
+    PmdCpdOccurrence,
     RoslynViolation,
+    ScancodeFileLicense,
+    ScancodeSummary,
     SccFileMetric,
     SemgrepSmell,
     SonarqubeIssue,
     SonarqubeMetric,
+    SymbolCall,
     ToolRun,
     TrivyIacMisconfig,
     TrivyTarget,
@@ -501,26 +509,25 @@ class GitSizerRepository(BaseRepository):
         "run_pk", "file_path",
     )
 
-    def insert_metrics(self, metric: GitSizerMetric) -> None:
+    def insert_metrics(self, rows: Iterable[GitSizerMetric]) -> None:
         """Insert repository-level metrics."""
-        self._conn.execute(
-            f"""
-            INSERT INTO lz_git_sizer_metrics ({', '.join(self._METRIC_COLUMNS)})
-            VALUES ({', '.join(['?'] * len(self._METRIC_COLUMNS))})
-            """,
-            [
-                metric.run_pk, metric.repo_id, metric.health_grade, metric.duration_ms,
-                metric.commit_count, metric.commit_total_size, metric.max_commit_size,
-                metric.max_history_depth, metric.max_parent_count,
-                metric.tree_count, metric.tree_total_size, metric.tree_total_entries,
-                metric.max_tree_entries,
-                metric.blob_count, metric.blob_total_size, metric.max_blob_size,
-                metric.tag_count, metric.max_tag_depth,
-                metric.reference_count, metric.branch_count,
-                metric.max_path_depth, metric.max_path_length,
-                metric.expanded_tree_count, metric.expanded_blob_count,
-                metric.expanded_blob_size,
-            ],
+        self._insert_bulk(
+            "lz_git_sizer_metrics",
+            self._METRIC_COLUMNS,
+            rows,
+            lambda m: (
+                m.run_pk, m.repo_id, m.health_grade, m.duration_ms,
+                m.commit_count, m.commit_total_size, m.max_commit_size,
+                m.max_history_depth, m.max_parent_count,
+                m.tree_count, m.tree_total_size, m.tree_total_entries,
+                m.max_tree_entries,
+                m.blob_count, m.blob_total_size, m.max_blob_size,
+                m.tag_count, m.max_tag_depth,
+                m.reference_count, m.branch_count,
+                m.max_path_depth, m.max_path_length,
+                m.expanded_tree_count, m.expanded_blob_count,
+                m.expanded_blob_size,
+            ),
         )
 
     def insert_violations(self, rows: Iterable[GitSizerViolation]) -> None:
@@ -541,4 +548,151 @@ class GitSizerRepository(BaseRepository):
             self._LFS_COLUMNS,
             rows,
             lambda r: (r.run_pk, r.file_path),
+        )
+
+
+class SymbolScannerRepository(BaseRepository):
+    """Repository for symbol-scanner analysis data."""
+
+    _SYMBOL_COLUMNS = (
+        "run_pk", "file_id", "directory_id", "relative_path", "symbol_name",
+        "symbol_type", "line_start", "line_end", "is_exported", "parameters",
+        "parent_symbol", "docstring",
+    )
+    _CALL_COLUMNS = (
+        "run_pk", "caller_file_id", "caller_directory_id", "caller_file_path",
+        "caller_symbol", "callee_symbol", "callee_file_id", "callee_file_path",
+        "line_number", "call_type",
+    )
+    _IMPORT_COLUMNS = (
+        "run_pk", "file_id", "directory_id", "relative_path", "imported_path",
+        "imported_symbols", "import_type", "line_number",
+    )
+
+    def insert_symbols(self, rows: Iterable[CodeSymbol]) -> None:
+        """Insert code symbol records."""
+        self._insert_bulk(
+            "lz_code_symbols",
+            self._SYMBOL_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.file_id, r.directory_id, r.relative_path, r.symbol_name,
+                r.symbol_type, r.line_start, r.line_end, r.is_exported, r.parameters,
+                r.parent_symbol, r.docstring,
+            ),
+        )
+
+    def insert_calls(self, rows: Iterable[SymbolCall]) -> None:
+        """Insert symbol call records."""
+        self._insert_bulk(
+            "lz_symbol_calls",
+            self._CALL_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.caller_file_id, r.caller_directory_id, r.caller_file_path,
+                r.caller_symbol, r.callee_symbol, r.callee_file_id, r.callee_file_path,
+                r.line_number, r.call_type,
+            ),
+        )
+
+    def insert_imports(self, rows: Iterable[FileImport]) -> None:
+        """Insert file import records."""
+        self._insert_bulk(
+            "lz_file_imports",
+            self._IMPORT_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.file_id, r.directory_id, r.relative_path, r.imported_path,
+                r.imported_symbols, r.import_type, r.line_number,
+            ),
+        )
+
+
+class ScancodeRepository(BaseRepository):
+    """Repository for scancode license analysis data."""
+
+    _LICENSE_COLUMNS = (
+        "run_pk", "file_id", "directory_id", "relative_path", "spdx_id",
+        "category", "confidence", "match_type", "line_number",
+    )
+    _SUMMARY_COLUMNS = (
+        "run_pk", "total_files_scanned", "files_with_licenses", "overall_risk",
+        "has_permissive", "has_weak_copyleft", "has_copyleft", "has_unknown",
+    )
+
+    def insert_file_licenses(self, rows: Iterable[ScancodeFileLicense]) -> None:
+        """Insert file license records."""
+        self._insert_bulk(
+            "lz_scancode_file_licenses",
+            self._LICENSE_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.file_id, r.directory_id, r.relative_path, r.spdx_id,
+                r.category, r.confidence, r.match_type, r.line_number,
+            ),
+        )
+
+    def insert_summary(self, rows: Iterable[ScancodeSummary]) -> None:
+        """Insert summary record."""
+        self._insert_bulk(
+            "lz_scancode_summary",
+            self._SUMMARY_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.total_files_scanned, r.files_with_licenses, r.overall_risk,
+                r.has_permissive, r.has_weak_copyleft, r.has_copyleft, r.has_unknown,
+            ),
+        )
+
+
+class PmdCpdRepository(BaseRepository):
+    """Repository for pmd-cpd duplication analysis data."""
+
+    _FILE_COLUMNS = (
+        "run_pk", "file_id", "directory_id", "relative_path", "language",
+        "total_lines", "duplicate_lines", "duplicate_blocks", "duplication_percentage",
+    )
+    _DUPLICATION_COLUMNS = (
+        "run_pk", "clone_id", "lines", "tokens", "occurrence_count",
+        "is_cross_file", "code_fragment",
+    )
+    _OCCURRENCE_COLUMNS = (
+        "run_pk", "clone_id", "file_id", "directory_id", "relative_path",
+        "line_start", "line_end", "column_start", "column_end",
+    )
+
+    def insert_file_metrics(self, rows: Iterable[PmdCpdFileMetric]) -> None:
+        """Insert per-file duplication metrics."""
+        self._insert_bulk(
+            "lz_pmd_cpd_file_metrics",
+            self._FILE_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.file_id, r.directory_id, r.relative_path, r.language,
+                r.total_lines, r.duplicate_lines, r.duplicate_blocks, r.duplication_percentage,
+            ),
+        )
+
+    def insert_duplications(self, rows: Iterable[PmdCpdDuplication]) -> None:
+        """Insert clone group records."""
+        self._insert_bulk(
+            "lz_pmd_cpd_duplications",
+            self._DUPLICATION_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.clone_id, r.lines, r.tokens, r.occurrence_count,
+                r.is_cross_file, r.code_fragment,
+            ),
+        )
+
+    def insert_occurrences(self, rows: Iterable[PmdCpdOccurrence]) -> None:
+        """Insert individual clone locations."""
+        self._insert_bulk(
+            "lz_pmd_cpd_occurrences",
+            self._OCCURRENCE_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.clone_id, r.file_id, r.directory_id, r.relative_path,
+                r.line_start, r.line_end, r.column_start, r.column_end,
+            ),
         )

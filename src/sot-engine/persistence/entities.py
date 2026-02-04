@@ -581,3 +581,208 @@ class GitSizerLfsCandidate:
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
         _validate_relative_path(self.file_path, "file_path")
+
+
+# =============================================================================
+# symbol-scanner Entities
+# =============================================================================
+
+@dataclass(frozen=True)
+class CodeSymbol:
+    """Function, class, or method definition from symbol-scanner analysis."""
+    run_pk: int
+    file_id: str
+    directory_id: str
+    relative_path: str
+    symbol_name: str
+    symbol_type: str  # function, class, method, variable
+    line_start: int | None
+    line_end: int | None
+    is_exported: bool
+    parameters: int | None
+    parent_symbol: str | None
+    docstring: str | None
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.relative_path, "relative_path")
+        _validate_required_string(self.symbol_name, "symbol_name")
+        if self.symbol_type not in ("function", "class", "method", "variable"):
+            raise ValueError(f"symbol_type must be function, class, method, or variable, got {self.symbol_type}")
+        _validate_line_range(self.line_start, self.line_end)
+        if self.parameters is not None and self.parameters < 0:
+            raise ValueError("parameters must be >= 0")
+
+
+@dataclass(frozen=True)
+class SymbolCall:
+    """Function or method call relationship from symbol-scanner analysis."""
+    run_pk: int
+    caller_file_id: str
+    caller_directory_id: str
+    caller_file_path: str
+    caller_symbol: str
+    callee_symbol: str
+    callee_file_id: str | None  # NULL if external/unresolved
+    callee_file_path: str | None
+    line_number: int | None
+    call_type: str | None  # direct, dynamic, async
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.caller_file_path, "caller_file_path")
+        _validate_required_string(self.caller_symbol, "caller_symbol")
+        _validate_required_string(self.callee_symbol, "callee_symbol")
+        if self.callee_file_path is not None:
+            _validate_relative_path(self.callee_file_path, "callee_file_path")
+        if self.line_number is not None and self.line_number < 1:
+            raise ValueError("line_number must be >= 1")
+        if self.call_type is not None and self.call_type not in ("direct", "dynamic", "async"):
+            raise ValueError(f"call_type must be direct, dynamic, or async, got {self.call_type}")
+
+
+@dataclass(frozen=True)
+class FileImport:
+    """Import statement from symbol-scanner analysis."""
+    run_pk: int
+    file_id: str
+    directory_id: str
+    relative_path: str
+    imported_path: str
+    imported_symbols: str | None  # comma-separated or NULL for module import
+    import_type: str | None  # static, dynamic, side_effect
+    line_number: int | None
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.relative_path, "relative_path")
+        _validate_required_string(self.imported_path, "imported_path")
+        if self.line_number is not None and self.line_number < 1:
+            raise ValueError("line_number must be >= 1")
+        if self.import_type is not None and self.import_type not in ("static", "dynamic", "side_effect"):
+            raise ValueError(f"import_type must be static, dynamic, or side_effect, got {self.import_type}")
+
+
+# =============================================================================
+# scancode Entities
+# =============================================================================
+
+@dataclass(frozen=True)
+class ScancodeFileLicense:
+    """Individual license finding from scancode analysis."""
+    run_pk: int
+    file_id: str
+    directory_id: str
+    relative_path: str
+    spdx_id: str
+    category: str  # permissive, weak-copyleft, copyleft, unknown
+    confidence: float
+    match_type: str  # file, header, spdx
+    line_number: int | None
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.relative_path, "relative_path")
+        _validate_required_string(self.spdx_id, "spdx_id")
+        if self.category not in ("permissive", "weak-copyleft", "copyleft", "unknown"):
+            raise ValueError(f"category must be permissive, weak-copyleft, copyleft, or unknown, got {self.category}")
+        if self.confidence < 0 or self.confidence > 1:
+            raise ValueError("confidence must be between 0 and 1")
+        if self.match_type not in ("file", "header", "spdx"):
+            raise ValueError(f"match_type must be file, header, or spdx, got {self.match_type}")
+        if self.line_number is not None and self.line_number < 1:
+            raise ValueError("line_number must be >= 1")
+
+
+@dataclass(frozen=True)
+class ScancodeSummary:
+    """Repository-level license summary from scancode analysis."""
+    run_pk: int
+    total_files_scanned: int
+    files_with_licenses: int
+    overall_risk: str  # low, medium, high, critical, unknown
+    has_permissive: bool
+    has_weak_copyleft: bool
+    has_copyleft: bool
+    has_unknown: bool
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_fields_non_negative({
+            "total_files_scanned": self.total_files_scanned,
+            "files_with_licenses": self.files_with_licenses,
+        })
+        if self.overall_risk not in ("low", "medium", "high", "critical", "unknown"):
+            raise ValueError(f"overall_risk must be low, medium, high, critical, or unknown, got {self.overall_risk}")
+
+
+# =============================================================================
+# pmd-cpd Entities
+# =============================================================================
+
+@dataclass(frozen=True)
+class PmdCpdFileMetric:
+    """Per-file duplication metrics from pmd-cpd analysis."""
+    run_pk: int
+    file_id: str
+    directory_id: str
+    relative_path: str
+    language: str | None
+    total_lines: int
+    duplicate_lines: int
+    duplicate_blocks: int
+    duplication_percentage: float
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.relative_path, "relative_path")
+        _validate_fields_non_negative({
+            "total_lines": self.total_lines,
+            "duplicate_lines": self.duplicate_lines,
+            "duplicate_blocks": self.duplicate_blocks,
+        })
+        if self.duplication_percentage < 0 or self.duplication_percentage > 100:
+            raise ValueError("duplication_percentage must be between 0 and 100")
+
+
+@dataclass(frozen=True)
+class PmdCpdDuplication:
+    """Clone group record from pmd-cpd analysis."""
+    run_pk: int
+    clone_id: str
+    lines: int
+    tokens: int
+    occurrence_count: int
+    is_cross_file: bool
+    code_fragment: str | None
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_required_string(self.clone_id, "clone_id")
+        _validate_fields_non_negative({
+            "lines": self.lines,
+            "tokens": self.tokens,
+            "occurrence_count": self.occurrence_count,
+        })
+        if self.occurrence_count < 2:
+            raise ValueError("occurrence_count must be >= 2 for a valid duplication")
+
+
+@dataclass(frozen=True)
+class PmdCpdOccurrence:
+    """Individual clone location from pmd-cpd analysis."""
+    run_pk: int
+    clone_id: str
+    file_id: str
+    directory_id: str
+    relative_path: str
+    line_start: int
+    line_end: int
+    column_start: int | None
+    column_end: int | None
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_required_string(self.clone_id, "clone_id")
+        _validate_relative_path(self.relative_path, "relative_path")
+        _validate_line_range(self.line_start, self.line_end)

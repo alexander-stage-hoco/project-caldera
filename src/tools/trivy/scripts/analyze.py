@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Main orchestrator for Trivy vulnerability analysis."""
 
+from __future__ import annotations
+
+import argparse
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -9,7 +13,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-import click
 import structlog
 
 # Import ecosystem detection from common module
@@ -342,69 +345,105 @@ def run_analysis(config: AnalysisConfig) -> dict:
     return result
 
 
-@click.command()
-@click.option(
-    "--repo-path",
-    type=click.Path(exists=True, file_okay=False, path_type=Path),
-    required=True,
-    help="Path to repository to analyze",
-)
-@click.option(
-    "--repo-name",
-    required=True,
-    help="Repository name for output file",
-)
-@click.option(
-    "--output-dir",
-    type=click.Path(path_type=Path),
-    required=True,
-    help="Output directory",
-)
-@click.option(
-    "--run-id",
-    required=True,
-    help="Unique run identifier",
-)
-@click.option(
-    "--repo-id",
-    required=True,
-    help="Repository identifier",
-)
-@click.option(
-    "--branch",
-    default="main",
-    help="Git branch name",
-)
-@click.option(
-    "--commit",
-    required=True,
-    help="Git commit SHA",
-)
-@click.option(
-    "--timeout",
-    default=600,
-    help="Scan timeout in seconds",
-)
-@click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-    help="Enable verbose logging",
-)
-def main(
-    repo_path: Path,
-    repo_name: str,
-    output_dir: Path,
-    run_id: str,
-    repo_id: str,
-    branch: str,
-    commit: str,
-    timeout: int,
-    verbose: bool,
-):
+def _git_run(repo_path: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
+    """Run a git command in the target repository."""
+    return subprocess.run(
+        ["git", "-C", str(repo_path), *args],
+        capture_output=True,
+        text=True,
+    )
+
+
+def _git_head(repo_path: Path) -> str | None:
+    """Return HEAD commit for repo_path if available."""
+    result = _git_run(repo_path, ["rev-parse", "HEAD"])
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def _commit_exists(repo_path: Path, commit: str) -> bool:
+    """Check whether a commit exists in the given repo."""
+    result = _git_run(repo_path, ["cat-file", "-e", f"{commit}^{{commit}}"])
+    return result.returncode == 0
+
+
+def _fallback_commit_hash() -> str:
+    """Return the standard fallback commit hash for non-git repositories."""
+    return "0" * 40
+
+
+def _resolve_commit(repo_path: Path, commit_arg: str) -> str:
+    """Resolve a valid commit SHA for the target repo."""
+    if commit_arg:
+        if _commit_exists(repo_path, commit_arg):
+            return commit_arg
+        raise ValueError(f"Commit not found in repo: {commit_arg}")
+
+    head = _git_head(repo_path)
+    if head:
+        return head
+    return _fallback_commit_hash()
+
+
+def main() -> None:
     """Run Trivy vulnerability analysis on a repository."""
+    parser = argparse.ArgumentParser(
+        description="Analyze vulnerabilities using Trivy"
+    )
+    parser.add_argument(
+        "--repo-path",
+        default=os.environ.get("REPO_PATH"),
+        help="Path to repository to analyze",
+    )
+    parser.add_argument(
+        "--repo-name",
+        default=os.environ.get("REPO_NAME", ""),
+        help="Repository name for output file",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=os.environ.get("OUTPUT_DIR"),
+        help="Output directory (default: outputs/<run-id>)",
+    )
+    parser.add_argument(
+        "--run-id",
+        default=os.environ.get("RUN_ID", ""),
+        help="Unique run identifier (required)",
+    )
+    parser.add_argument(
+        "--repo-id",
+        default=os.environ.get("REPO_ID", ""),
+        help="Repository identifier (required)",
+    )
+    parser.add_argument(
+        "--branch",
+        default=os.environ.get("BRANCH", "main"),
+        help="Git branch name",
+    )
+    parser.add_argument(
+        "--commit",
+        default=os.environ.get("COMMIT", ""),
+        help="Git commit SHA (default: repo HEAD)",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=600,
+        help="Scan timeout in seconds (default: 600)",
+    )
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Enable verbose logging",
+    )
+    parser.add_argument(
+        "--no-color",
+        action="store_true",
+        help="Disable colored output",
+    )
+    args = parser.parse_args()
+
     # Configure logging
-    log_level = "DEBUG" if verbose else "INFO"
+    log_level = "DEBUG" if args.verbose else "INFO"
     structlog.configure(
         processors=[
             structlog.stdlib.add_log_level,
@@ -419,29 +458,61 @@ def main(
         logger_factory=structlog.PrintLoggerFactory(),
     )
 
+    # Validate required arguments
+    if not args.repo_path:
+        print("Error: --repo-path is required", file=sys.stderr)
+        sys.exit(1)
+
+    repo_path = Path(args.repo_path)
+    if not repo_path.exists():
+        print(f"Error: Repository path does not exist: {repo_path}", file=sys.stderr)
+        sys.exit(1)
+
+    repo_name = args.repo_name or repo_path.resolve().name
+
+    if not args.run_id:
+        print("Error: --run-id is required", file=sys.stderr)
+        sys.exit(1)
+    if not args.repo_id:
+        print("Error: --repo-id is required", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        commit = _resolve_commit(repo_path.resolve(), args.commit)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    output_dir = (
+        Path(args.output_dir)
+        if args.output_dir
+        else Path("outputs") / args.run_id
+    )
+
     config = AnalysisConfig(
         repo_path=repo_path,
         repo_name=repo_name,
         output_dir=output_dir,
-        run_id=run_id,
-        repo_id=repo_id,
-        branch=branch,
+        run_id=args.run_id,
+        repo_id=args.repo_id,
+        branch=args.branch,
         commit=commit,
-        timeout=timeout,
+        timeout=args.timeout,
     )
 
     try:
         result = run_analysis(config)
-        click.echo(f"Analysis complete: {output_dir / 'output.json'}")
-        click.echo(
+        print(f"Analysis complete: {output_dir / 'output.json'}")
+        print(
             f"Vulnerabilities: {result['data']['findings_summary']['total_vulnerabilities']}"
         )
-        click.echo(
+        print(
             f"Misconfigurations: {result['data']['findings_summary']['total_misconfigurations']}"
         )
     except Exception as e:
         logger.error("Analysis failed", error=str(e))
-        raise click.ClickException(str(e))
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

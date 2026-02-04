@@ -242,3 +242,50 @@ def get_entity_repository_map() -> dict[str, tuple[str, str]]:
 def get_quality_rule_patterns() -> dict[str, list[str]]:
     """Get QUALITY_RULE_PATTERNS from config."""
     return get_common_config().get("quality_rule_patterns", {})
+
+
+def get_data_completeness_rules(tool_name: str | None = None) -> dict[str, Any]:
+    """Get DATA_COMPLETENESS_RULES from config, with optional tool-specific overrides.
+
+    Args:
+        tool_name: If provided, apply tool-specific overrides from
+                   required_data_fields_overrides section.
+
+    Returns:
+        Data completeness rules dict with any tool-specific overrides applied.
+    """
+    rules = get_common_config().get("data_completeness_rules", {}).copy()
+
+    # Apply tool-specific overrides if present
+    if tool_name:
+        overrides = rules.get("required_data_fields_overrides", {}).get(tool_name, {})
+        if overrides:
+            # Deep copy required_data_fields before modifying
+            required_fields = dict(rules.get("required_data_fields", {}))
+            required_fields.update(overrides)
+            rules["required_data_fields"] = required_fields
+
+    return rules
+
+
+def get_path_consistency_rules() -> dict[str, Any]:
+    """Get PATH_CONSISTENCY_RULES from config."""
+    return get_common_config().get("path_consistency_rules", {})
+
+
+def get_test_coverage_rules() -> dict[str, Any]:
+    """Get TEST_COVERAGE_RULES from config.
+
+    Returns:
+        Dict with keys:
+        - threshold: int (default 80)
+        - source_dirs: list[str] (default ["scripts"])
+        - omit_patterns: list[str] (patterns to exclude from coverage)
+    """
+    rules = get_common_config().get("test_coverage_rules", {})
+    # Apply defaults
+    return {
+        "threshold": rules.get("threshold", 80),
+        "source_dirs": rules.get("source_dirs", ["scripts"]),
+        "omit_patterns": rules.get("omit_patterns", []),
+    }

@@ -127,11 +127,11 @@ class IntegrationFitJudge(BaseJudge):
 
         return {
             "schema_check": schema_check,
-            "caldera_mapping": caldera_mapping,
+            "dd_mapping": caldera_mapping,
             "performance": performance,
             "output_format": output_format,
             "total_repositories": repo_count,
-            "existing_caldera_tools": [
+            "existing_dd_tools": [
                 "scc (file-level LOC)",
                 "lizard (function-level CCN)",
                 "semgrep (code smells)",

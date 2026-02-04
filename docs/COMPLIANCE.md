@@ -18,7 +18,7 @@ python src/tool-compliance/tool_compliance.py src/tools/<tool-name> --preflight
 
 # Full scan with execution
 python src/tool-compliance/tool_compliance.py --root . \
-  --run-analysis --run-evaluate --run-llm
+  --run-analysis --run-evaluate --run-llm --run-coverage
 
 # Output reports
 python src/tool-compliance/tool_compliance.py --root . \
@@ -318,6 +318,59 @@ from datetime import datetime, timezone
 timestamp = datetime.now(timezone.utc).isoformat()
 ```
 
+#### output.data_completeness (high)
+
+**Validates:** Data completeness including count/list consistency, required fields, and aggregate validation.
+
+**What it checks:**
+1. Count fields match their corresponding list lengths (e.g., `file_count` equals `len(files)`)
+2. Required fields in data items are present and non-null (e.g., files must have `path`)
+3. Aggregate values are consistent (e.g., `recursive_count >= direct_count` for rollups)
+
+**Common failures:**
+- `file_count=10` but `files` array has only 5 items
+- Files in output missing required `path` field
+- Findings missing required `file_path` or `message` fields
+- Rollup counts violate invariant (recursive < direct)
+
+**Fix action:**
+```python
+# Ensure count matches list length
+output["data"]["file_count"] = len(output["data"]["files"])
+
+# Ensure all required fields are present
+for file_entry in files:
+    assert "path" in file_entry and file_entry["path"] is not None
+```
+
+#### output.path_consistency (medium)
+
+**Validates:** Path consistency across output sections including repo-relative format and cross-references.
+
+**What it checks:**
+1. All paths are repo-relative (no absolute paths starting with `/` or `C:\`)
+2. Path separators are consistent (POSIX-style `/` not Windows `\`)
+3. File references in findings/issues exist in files list (when applicable)
+
+**Common failures:**
+- Absolute paths like `/private/tmp/repo/src/main.py` instead of `src/main.py`
+- Mixed path separators: `src/main.py` and `tests\test_main.py`
+- Findings reference file paths not present in files list
+
+**Fix action:**
+```python
+from common.path_normalization import normalize_file_path
+
+# Normalize all paths to repo-relative
+for file_entry in files:
+    file_entry["path"] = normalize_file_path(raw_path, repo_root)
+
+# Ensure findings only reference known files
+known_paths = {f["path"] for f in files}
+for finding in findings:
+    assert finding["file_path"] in known_paths, f"Unknown file: {finding['file_path']}"
+```
+
 ---
 
 ## Gate C: Evaluation Coverage
@@ -536,6 +589,7 @@ cp docs/templates/EVAL_STRATEGY.md.template src/tools/<tool>/EVAL_STRATEGY.md
 - Integration tests in `tests/integration/`
 - Test files follow `test_*.py` naming
 - `make test` succeeds
+- Test coverage >= 80%
 
 ### Checks & Fix Actions
 
@@ -551,6 +605,75 @@ cp docs/templates/EVAL_STRATEGY.md.template src/tools/<tool>/EVAL_STRATEGY.md
 mkdir -p tests/unit tests/integration
 mv tests/unit/accuracy_test.py tests/unit/test_accuracy.py
 ```
+
+#### test.coverage_threshold (high)
+
+**Validates:** Test coverage meets minimum 80% threshold.
+
+**What it checks:**
+1. pytest-cov is in requirements.txt
+2. Tests pass (if running with `--run-coverage`)
+3. Overall code coverage >= 80%
+
+**Report format handling:**
+- Checks for `coverage.json` (preferred format for automated checking)
+- Falls back to detecting `htmlcov/index.html` (warns if only HTML found)
+- Returns skip status if neither report exists
+
+**Modes:**
+- Default: Checks for existing `coverage.json` file
+- With `--run-coverage`: Runs pytest with coverage and validates (5-minute timeout)
+
+**Skip status conditions:**
+- No coverage report found → returns skip (not fail)
+- Message: "No coverage report found - run with --run-coverage"
+
+**Common failures:**
+- pytest-cov not in requirements.txt
+- Tests failing
+- Coverage below 80%
+- No coverage.json found (run with --run-coverage)
+- Only htmlcov exists without coverage.json
+
+**Prerequisites:**
+- `tests/` directory must exist (checked by test.structure_naming)
+- `requirements.txt` must exist (checked by structure.paths)
+
+**Fix action:**
+```bash
+# Add pytest-cov to requirements.txt
+echo "pytest-cov>=4.0.0" >> requirements.txt
+
+# Run coverage to see current state and generate coverage.json
+pytest tests/ --cov=scripts --cov-report=term --cov-report=json \
+  --cov-omit="scripts/checks/*,scripts/evaluate.py,**/conftest.py"
+
+# Add tests to increase coverage
+# Focus on untested functions in scripts/
+```
+
+**Configuration:**
+Coverage rules are configured in `src/tool-compliance/rules/common.yaml`:
+```yaml
+test_coverage_rules:
+  threshold: 80
+  source_dirs:
+    - scripts
+  omit_patterns:
+    - "scripts/checks/*"
+    - "scripts/evaluate.py"
+    - "**/conftest.py"
+```
+
+| Config Key | Default | Description |
+|------------|---------|-------------|
+| `threshold` | 80 | Minimum coverage percentage |
+| `source_dirs` | `["scripts"]` | Directories to measure coverage on |
+| `omit_patterns` | See above | Patterns excluded from coverage |
+
+**Timeout behavior:**
+- Test execution has a 5-minute (300 second) timeout
+- Returns fail if tests exceed timeout
 
 #### run.analyze (critical)
 
@@ -699,15 +822,15 @@ TOOL_INGESTION_CONFIGS = [
 
 ---
 
-## Complete Check Reference (42 Checks)
+## Complete Check Reference (45 Checks)
 
 ### Quick Reference by Severity
 
 | Severity | Checks |
 |----------|--------|
 | **critical** | output.schema_validate, run.analyze |
-| **high** | structure.paths, make.targets, schema.contract, schema.version_alignment, output.load, output.paths, output.required_fields, evaluation.ground_truth, evaluation.rollup_validation, evaluation.synthetic_context, docs.eval_strategy_structure, adapter.compliance, adapter.schema_alignment, adapter.integration, sot.schema_table, sot.orchestrator_wired, sot.dbt_staging_model, dbt.model_coverage, entity.repository_alignment, run.evaluate |
-| **medium** | schema.valid_json, schema.draft, output.schema_version, output.metadata_consistency, make.uses_common, make.output_filename, docs.blueprint_structure, evaluation.check_modules, evaluation.llm_prompts, evaluation.llm_judge_count, adapter.quality_rules_coverage, sot.adapter_registered, test.structure_naming, run.evaluate_llm |
+| **high** | structure.paths, make.targets, schema.contract, schema.version_alignment, output.load, output.paths, output.required_fields, output.data_completeness, evaluation.ground_truth, evaluation.rollup_validation, evaluation.synthetic_context, docs.eval_strategy_structure, adapter.compliance, adapter.schema_alignment, adapter.integration, sot.schema_table, sot.orchestrator_wired, sot.dbt_staging_model, dbt.model_coverage, entity.repository_alignment, run.evaluate, test.coverage_threshold |
+| **medium** | schema.valid_json, schema.draft, output.schema_version, output.metadata_consistency, output.path_consistency, make.uses_common, make.output_filename, docs.blueprint_structure, evaluation.check_modules, evaluation.llm_prompts, evaluation.llm_judge_count, adapter.quality_rules_coverage, sot.adapter_registered, test.structure_naming, run.evaluate_llm |
 | **low** | make.output_dir_convention, make.permissions, output.tool_name_match, evaluation.scorecard |
 
 ### All Checks by Category
@@ -734,6 +857,8 @@ TOOL_INGESTION_CONFIGS = [
 | output.tool_name_match | low | metadata.tool_name matches data.tool |
 | output.schema_validate | critical | Output validates against schema |
 | output.metadata_consistency | medium | Commit 40-hex, timestamp ISO8601 |
+| output.data_completeness | high | Count/list consistency, required fields, aggregates |
+| output.path_consistency | medium | Cross-section path consistency, reference validation |
 | **Documents** | | |
 | docs.blueprint_structure | medium | BLUEPRINT.md has required sections |
 | docs.eval_strategy_structure | high | EVAL_STRATEGY.md has required sections |
@@ -760,6 +885,7 @@ TOOL_INGESTION_CONFIGS = [
 | entity.repository_alignment | high | Frozen entities, insert methods |
 | **Testing** | | |
 | test.structure_naming | medium | test_*.py naming convention |
+| test.coverage_threshold | high | Test coverage >= 80% threshold |
 | **Run Checks** | | |
 | run.analyze | critical | make analyze succeeds |
 | run.evaluate | high | make evaluate succeeds |
@@ -819,6 +945,63 @@ To add custom requirements, edit `src/tool-compliance/tool_compliance.py`.
 
 ---
 
+## Troubleshooting New Validation Checks
+
+### output.data_completeness failures
+
+**"file_count=X but files has Y items"**
+- The count field doesn't match the actual list length
+- Fix: Ensure you set `file_count = len(files)` before serializing
+
+**"missing required field: path"**
+- File entries in the data are missing the `path` field
+- Fix: All file entries must have a `path` key with a non-null value
+
+**"Rollup invariant violated: recursive_count < direct_count"**
+- Directory aggregation counts are inconsistent
+- Fix: Verify your aggregation logic - recursive counts must include all descendants
+
+### output.path_consistency failures
+
+**"Found X non-repo-relative paths"**
+- Absolute paths are present in the output
+- Fix: Use `normalize_file_path()` from `common/path_normalization.py`
+
+**"Mixed path separators"**
+- Both `/` and `\` separators are used
+- Fix: Normalize all paths to use POSIX `/` separators
+
+**"file_path 'X' not found in files list"**
+- Findings reference files not in the files array
+- Fix: Ensure all file references are consistent across sections
+
+### test.coverage_threshold failures
+
+**"pytest-cov not in requirements.txt"**
+- Add `pytest-cov>=4.0.0` to requirements.txt
+- Run `make setup` to reinstall dependencies
+
+**"No coverage report found"**
+- Run compliance scanner with `--run-coverage` flag to execute tests
+- Or run `pytest tests/ --cov=scripts --cov-report=json` manually
+
+**"Test coverage X% < 80% threshold"**
+- Run `pytest --cov=scripts --cov-report=term-missing` to see uncovered lines
+- Add tests for uncovered functions in scripts/
+- Focus on high-value code paths first
+
+**"Only htmlcov found"**
+- Run `pytest --cov=scripts --cov-report=json` to generate coverage.json
+- The JSON format is required for automated checking
+- You can generate both formats: `--cov-report=json --cov-report=html`
+
+**"Tests timed out after 300 seconds"**
+- Tests are taking too long to execute
+- Consider splitting into smaller test files
+- Check for slow test fixtures or external dependencies
+
+---
+
 ## Fixing Multiple Failures
 
 When you have many failures, fix in this order:
@@ -828,14 +1011,61 @@ When you have many failures, fix in this order:
 4. **Document checks** - Copy from templates
 5. **Evaluation checks** - Create check modules, prompts
 6. **Adapter checks** - Implement SoT integration
-7. **Output checks** - Fix analyze.py
+7. **Output checks** - Fix analyze.py (including data completeness and path consistency)
+
+---
+
+## Staged Compliance During Migration
+
+When migrating a tool from Vulcan or building incrementally, certain compliance checks are expected to fail until their corresponding phase is complete.
+
+### Compliance Phases
+
+| Phase | Should Pass | Expected to Fail |
+|-------|-------------|------------------|
+| **1-2: Structure/Output** | structure.*, make.*, schema.*, output.*, docs.* | adapter.*, sot.*, dbt.*, entity.* |
+| **3: Evaluation** | evaluation.check_modules, evaluation.llm_*, evaluation.ground_truth | run.evaluate, run.evaluate_llm (until outputs exist) |
+| **4: Testing** | test.structure_naming | test.coverage_threshold (until 80% reached) |
+| **5: SoT Integration** | adapter.*, sot.*, entity.* | dbt.model_coverage |
+| **6: dbt Models** | dbt.model_coverage | - |
+
+### Pre-SoT Tools
+
+Tools not yet integrated into the SoT pipeline will fail these checks (expected):
+- `adapter.*` - No adapter defined in rules file
+- `sot.*` - Not registered in orchestrator
+- `dbt.model_coverage` - No dbt models yet
+- `entity.repository_alignment` - Entities not in common.yaml
+
+**Document these failures** in the tool's BLUEPRINT.md until integration is complete.
+
+### Generating Evaluation Outputs
+
+Some checks require running evaluation first:
+
+```bash
+# Generate programmatic evaluation outputs
+cd src/tools/<tool> && make evaluate
+
+# Generate LLM evaluation outputs
+cd src/tools/<tool> && make evaluate-llm
+```
+
+### Tool Rules File
+
+Each tool should have a rules file at `src/tool-compliance/rules/<tool>.yaml` defining:
+- Required check modules and prompts
+- Ground truth mode
+- Adapter registration (when ready for SoT)
+
+Tools without a rules file use defaults from `common.yaml` but will fail adapter-specific checks.
 
 ---
 
 ## References
 
 - [REFERENCE.md](./REFERENCE.md) - Technical specifications (envelope, paths, patterns)
-- [TOOL_GUIDE.md](./TOOL_GUIDE.md) - Creating and migrating tools
+- [TOOL_INTEGRATION_CHECKLIST.md](./TOOL_INTEGRATION_CHECKLIST.md) - Creating and integrating tools
 - [EVALUATION.md](./EVALUATION.md) - LLM judge infrastructure
 - [templates/BLUEPRINT.md.template](./templates/BLUEPRINT.md.template) - Architecture template
 - [templates/EVAL_STRATEGY.md.template](./templates/EVAL_STRATEGY.md.template) - Evaluation template

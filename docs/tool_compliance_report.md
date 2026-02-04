@@ -1,12 +1,12 @@
 # Tool Compliance Report
 
-Generated: `2026-02-02T18:44:15.760972+00:00`
+Generated: `2026-02-04T12:59:39.078369+00:00`
 
-Summary: 1 passed, 0 failed, 1 total
+Summary: 0 passed, 1 failed, 1 total
 
 | Tool | Status | Checks Passed | Checks Failed | Failed Check IDs |
 | --- | --- | --- | --- | --- |
-| roslyn-analyzers | pass | 49 | 0 | - |
+| pmd-cpd | fail | 33 | 18 | run.evaluate, evaluation.quality, run.evaluate_llm, evaluation.llm_quality, structure.paths, evaluation.synthetic_context, evaluation.scorecard, evaluation.programmatic_exists, evaluation.programmatic_schema, evaluation.programmatic_quality, evaluation.llm_exists, evaluation.llm_schema, evaluation.llm_includes_programmatic, evaluation.llm_decision_quality, evaluation.rollup_validation, adapter.integration, sot.dbt_staging_model, dbt.model_coverage |
 
 ## Performance Summary
 
@@ -14,73 +14,76 @@ Summary: 1 passed, 0 failed, 1 total
 
 | Tool | Check ID | Duration (ms) |
 | --- | --- | --- |
-| roslyn-analyzers | `output.schema_validate` | 176.13 |
-| roslyn-analyzers | `adapter.compliance` | 149.67 |
-| roslyn-analyzers | `adapter.integration` | 61.97 |
-| roslyn-analyzers | `output.paths` | 17.63 |
-| roslyn-analyzers | `sql.cross_tool_join_patterns` | 10.88 |
-| roslyn-analyzers | `evaluation.synthetic_context` | 10.60 |
-| roslyn-analyzers | `entity.repository_alignment` | 4.07 |
-| roslyn-analyzers | `output.load` | 2.10 |
-| roslyn-analyzers | `adapter.schema_alignment` | 1.06 |
-| roslyn-analyzers | `docs.eval_strategy_structure` | 0.81 |
+| pmd-cpd | `output.schema_validate` | 104.28 |
+| pmd-cpd | `adapter.compliance` | 77.89 |
+| pmd-cpd | `sql.cross_tool_join_patterns` | 12.73 |
+| pmd-cpd | `entity.repository_alignment` | 5.40 |
+| pmd-cpd | `evaluation.synthetic_context` | 2.39 |
+| pmd-cpd | `adapter.schema_alignment` | 1.51 |
+| pmd-cpd | `output.paths` | 1.34 |
+| pmd-cpd | `dbt.model_coverage` | 0.77 |
+| pmd-cpd | `docs.eval_strategy_structure` | 0.30 |
+| pmd-cpd | `evaluation.rollup_validation` | 0.29 |
 
 ### Total Time Per Tool
 
 | Tool | Total (s) |
 | --- | --- |
-| roslyn-analyzers | 0.44 |
+| pmd-cpd | 0.21 |
 
-## roslyn-analyzers
+## pmd-cpd
 
 | Check ID | Status | Severity | Duration (ms) | Message | Evidence | Stdout | Stderr |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `run.analyze` | pass | critical | 0.00 | Pre-existing analysis output found | /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/outputs/20260202_192645/output.json | - | - |
-| `run.evaluate` | pass | high | 0.00 | Pre-existing evaluation output found | /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/evaluation/scorecard.md | - | - |
-| `evaluation.quality` | pass | high | 0.31 | Evaluation decision meets threshold | STRONG_PASS | - | - |
-| `run.evaluate_llm` | pass | medium | 0.00 | Pre-existing LLM evaluation output found | /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/evaluation/llm/results/llm_evaluation.json | - | - |
-| `evaluation.llm_quality` | pass | medium | 0.39 | LLM evaluation decision meets threshold | PASS | - | - |
-| `output.load` | pass | high | 2.10 | Output JSON loaded | /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/outputs/20260202_192645/output.json | - | - |
-| `output.paths` | pass | high | 17.63 | Path values are repo-relative | - | - | - |
-| `output.required_fields` | pass | high | 0.01 | Required metadata fields present | - | - | - |
-| `output.schema_version` | pass | medium | 0.01 | Schema version is semver | 1.0.0 | - | - |
-| `output.tool_name_match` | pass | low | 0.01 | Tool name matches data.tool | roslyn-analyzers, roslyn-analyzers | - | - |
-| `output.metadata_consistency` | pass | medium | 0.05 | Metadata formats are consistent | - | - | - |
-| `schema.version_alignment` | pass | medium | 0.38 | Output schema_version matches schema constraint | 1.0.0 | - | - |
-| `output.schema_validate` | pass | critical | 176.13 | Output validates against schema (venv) | - | - | - |
-| `structure.paths` | pass | high | 0.20 | All required paths present | - | - | - |
-| `make.targets` | pass | high | 0.40 | Makefile targets present | - | - | - |
-| `make.permissions` | pass | low | 0.03 | Makefile has correct permissions | - | - | - |
+| `run.analyze` | pass | critical | 0.00 | Pre-existing analysis output found | /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/pmd-cpd/outputs/E435CB8A-BEE1-45B5-B12F-929ED68B35E9/output.json | - | - |
+| `run.evaluate` | fail | high | 0.00 | No evaluation output found - run with --run-evaluate or execute 'make evaluate' | - | - | - |
+| `evaluation.quality` | fail | high | 0.00 | Evaluation quality check skipped (no outputs) | - | - | - |
+| `run.evaluate_llm` | fail | medium | 0.00 | No LLM evaluation output found - run with --run-llm or execute 'make evaluate-llm' | - | - | - |
+| `evaluation.llm_quality` | fail | medium | 0.00 | LLM evaluation quality check skipped (no outputs) | - | - | - |
+| `output.load` | pass | high | 0.23 | Output JSON loaded | /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/pmd-cpd/outputs/E435CB8A-BEE1-45B5-B12F-929ED68B35E9/output.json | - | - |
+| `output.paths` | pass | high | 1.34 | Path values are repo-relative | - | - | - |
+| `output.data_completeness` | pass | high | 0.02 | Data completeness validated | - | - | - |
+| `output.path_consistency` | pass | medium | 0.05 | Path consistency validated | Checked 49 paths across 1 sections | - | - |
+| `output.required_fields` | pass | high | 0.00 | Required metadata fields present | - | - | - |
+| `output.schema_version` | pass | medium | 0.00 | Schema version is semver | 1.0.0 | - | - |
+| `output.tool_name_match` | pass | low | 0.00 | Tool name matches data.tool | pmd-cpd, pmd-cpd | - | - |
+| `output.metadata_consistency` | pass | medium | 0.03 | Metadata formats are consistent | - | - | - |
+| `schema.version_alignment` | pass | medium | 0.08 | Output schema_version matches schema constraint | 1.0.0 | - | - |
+| `output.schema_validate` | pass | critical | 104.28 | Output validates against schema (venv) | - | - | - |
+| `structure.paths` | fail | high | 0.23 | Missing required paths | eval-repos/real, evaluation/scorecard.md | - | - |
+| `make.targets` | pass | high | 0.13 | Makefile targets present | - | - | - |
+| `make.permissions` | pass | low | 0.01 | Makefile has correct permissions | - | - | - |
 | `make.uses_common` | pass | medium | 0.18 | Makefile includes ../Makefile.common | - | - | - |
-| `make.output_dir_convention` | pass | low | 0.14 | OUTPUT_DIR inherited from Makefile.common | outputs/$(RUN_ID) | - | - |
+| `make.output_dir_convention` | pass | low | 0.13 | OUTPUT_DIR inherited from Makefile.common | outputs/$(RUN_ID) | - | - |
 | `make.output_filename` | pass | medium | 0.10 | analyze target uses output directory argument | - | - | - |
 | `schema.draft` | pass | medium | 0.09 | Schema draft is 2020-12 | - | - | - |
-| `schema.contract` | pass | high | 0.07 | Schema requires metadata and data fields | - | - | - |
-| `docs.blueprint_structure` | pass | medium | 0.43 | BLUEPRINT.md has required sections | - | - | - |
-| `docs.eval_strategy_structure` | pass | high | 0.81 | EVAL_STRATEGY.md has required sections | - | - | - |
-| `evaluation.check_modules` | pass | medium | 0.08 | Check modules present | - | - | - |
+| `schema.contract` | pass | high | 0.06 | Schema requires metadata and data fields | - | - | - |
+| `docs.blueprint_structure` | pass | medium | 0.28 | BLUEPRINT.md has required sections | - | - | - |
+| `docs.eval_strategy_structure` | pass | high | 0.30 | EVAL_STRATEGY.md has required sections | - | - | - |
+| `evaluation.check_modules` | pass | medium | 0.04 | Check modules present | - | - | - |
 | `evaluation.llm_prompts` | pass | medium | 0.04 | LLM prompts present | - | - | - |
-| `evaluation.llm_judge_count` | pass | medium | 0.19 | LLM judge count meets minimum (5 >= 4) | overall_quality.py, integration_fit.py, resource_management.py, security_detection.py, design_analysis.py | - | - |
-| `evaluation.synthetic_context` | pass | high | 10.60 | Synthetic evaluation context pattern implemented correctly | base.py: evaluation_mode parameter present, primary judge: security_detection.py, prompt: security_detection.md has all placeholders | - | - |
-| `evaluation.ground_truth` | pass | high | 0.12 | Ground truth files present | clean-code.json, resource-management.json, dead-code.json, csharp.json, security-issues.json, design-violations.json | - | - |
-| `evaluation.scorecard` | pass | low | 0.02 | Scorecard present | - | - | - |
-| `evaluation.programmatic_exists` | pass | high | 0.02 | Programmatic evaluation file exists | evaluation/results/evaluation_report.json | - | - |
-| `evaluation.programmatic_schema` | pass | high | 0.10 | Programmatic evaluation schema valid | evaluation_id, timestamp, analysis_file, decision, score, summary, category_scores, checks, decision_reason | - | - |
-| `evaluation.programmatic_quality` | pass | high | 0.08 | Programmatic evaluation passed | STRONG_PASS | - | - |
-| `evaluation.llm_exists` | pass | medium | 0.02 | LLM evaluation file exists | evaluation/results/llm_evaluation.json | - | - |
-| `evaluation.llm_schema` | pass | medium | 0.24 | LLM evaluation schema valid | timestamp, model, decision, score, programmatic_input, dimensions, summary, run_id, total_score, average_confidence | - | - |
-| `evaluation.llm_includes_programmatic` | pass | medium | 0.07 | LLM evaluation includes programmatic input | file=evaluation/results/evaluation_report.json, decision=STRONG_PASS | - | - |
-| `evaluation.llm_decision_quality` | pass | medium | 0.06 | LLM evaluation passed | PASS | - | - |
-| `evaluation.rollup_validation` | pass | high | 0.34 | Rollup Validation declared with valid tests | src/sot-engine/dbt/tests/test_rollup_roslyn_direct_vs_recursive.sql | - | - |
-| `adapter.compliance` | pass | info | 149.67 | Adapter exposes schema, LZ contract, and validation hooks | - | - | - |
-| `adapter.schema_alignment` | pass | high | 1.06 | TABLE_DDL matches schema.sql | - | - | - |
-| `adapter.integration` | pass | high | 61.97 | Adapter successfully persisted fixture data | Fixture: roslyn_output.json | - | - |
-| `adapter.quality_rules_coverage` | pass | info | 0.53 | All 3 quality rules have implementation coverage | paths, line_numbers, required_fields | - | - |
-| `sot.adapter_registered` | pass | medium | 0.16 | Adapter RoslynAdapter properly registered in adapters/__init__.py | - | - | - |
-| `sot.schema_table` | pass | high | 0.15 | Schema tables found for tool | Found 1 table(s) | - | - |
-| `sot.orchestrator_wired` | pass | high | 0.10 | Tool 'roslyn-analyzers' wired in TOOL_INGESTION_CONFIGS | - | - | - |
-| `sot.dbt_staging_model` | pass | high | 0.15 | dbt staging model(s) found | stg_roslyn_file_metrics.sql | - | - |
-| `dbt.model_coverage` | pass | high | 0.50 | dbt models present for tool | stg_roslyn_file_metrics.sql | - | - |
-| `entity.repository_alignment` | pass | high | 4.07 | All entities have aligned repositories | RoslynViolation | - | - |
-| `test.structure_naming` | pass | medium | 0.64 | Test structure and naming conventions followed | - | - | - |
-| `sql.cross_tool_join_patterns` | pass | high | 10.88 | Cross-tool SQL joins use correct patterns (97 files checked) | - | - | - |
+| `evaluation.llm_judge_count` | pass | medium | 0.14 | LLM judge count meets minimum (4 >= 4) | duplication_accuracy.py, actionability.py, semantic_detection.py, cross_file_detection.py | - | - |
+| `evaluation.synthetic_context` | fail | high | 2.39 | Primary judge (duplication_accuracy.py) missing synthetic context injection in collect_evidence() | missing keys: synthetic_baseline, interpretation_guidance, evaluation_mode | - | - |
+| `evaluation.ground_truth` | pass | high | 0.15 | Ground truth covers synthetic repos | - | - | - |
+| `evaluation.scorecard` | fail | medium | 0.01 | Scorecard missing | evaluation/scorecard.md | - | - |
+| `evaluation.programmatic_exists` | fail | high | 0.02 | Missing evaluation_report.json at uniform path | evaluation/results/evaluation_report.json | - | - |
+| `evaluation.programmatic_schema` | fail | high | 0.01 | Cannot validate schema - file missing | evaluation/results/evaluation_report.json | - | - |
+| `evaluation.programmatic_quality` | fail | high | 0.01 | Cannot check quality - file missing | evaluation/results/evaluation_report.json | - | - |
+| `evaluation.llm_exists` | fail | medium | 0.01 | Missing llm_evaluation.json at uniform path | evaluation/results/llm_evaluation.json | - | - |
+| `evaluation.llm_schema` | fail | medium | 0.01 | Cannot validate schema - file missing | evaluation/results/llm_evaluation.json | - | - |
+| `evaluation.llm_includes_programmatic` | fail | medium | 0.01 | Cannot check - file missing | evaluation/results/llm_evaluation.json | - | - |
+| `evaluation.llm_decision_quality` | fail | medium | 0.01 | Cannot check quality - file missing | evaluation/results/llm_evaluation.json | - | - |
+| `evaluation.rollup_validation` | fail | high | 0.29 | Rollup Validation section incomplete | Missing test paths: src/sot-engine/dbt/tests/test_rollup_pmd_cpd_direct_vs_recursive.sql | - | - |
+| `adapter.compliance` | pass | info | 77.89 | Adapter exposes schema, LZ contract, and validation hooks | - | - | - |
+| `adapter.schema_alignment` | pass | high | 1.51 | TABLE_DDL matches schema.sql | - | - | - |
+| `adapter.integration` | fail | high | 0.07 | No fixture file found for integration test | /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/sot-engine/persistence/fixtures/pmd_cpd_output.json, /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/sot-engine/persistence/fixtures/pmd-cpd_output.json, /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/sot-engine/persistence/fixtures/pmd-cpd_output.json, /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/pmd-cpd/evaluation/ground-truth/synthetic.json | - | - |
+| `adapter.quality_rules_coverage` | pass | info | 0.24 | All 3 quality rules have implementation coverage | paths, line_numbers, required_fields | - | - |
+| `sot.adapter_registered` | pass | medium | 0.13 | Adapter PmdCpdAdapter properly registered in adapters/__init__.py | - | - | - |
+| `sot.schema_table` | pass | high | 0.19 | Schema tables found for tool | Found 3 table(s) | - | - |
+| `sot.orchestrator_wired` | pass | high | 0.10 | Tool 'pmd-cpd' wired in TOOL_INGESTION_CONFIGS | - | - | - |
+| `sot.dbt_staging_model` | fail | high | 0.21 | No dbt staging models found for tool | Expected: stg_*pmd_cpd*.sql in /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/sot-engine/dbt/models/staging | - | - |
+| `dbt.model_coverage` | fail | high | 0.77 | Missing dbt model coverage | No staging models matching stg_*pmd_cpd*.sql, Missing rollup model for directory_direct_counts (duplicate metrics for files directly in directory), Missing rollup model for directory_recursive_counts (duplicate metrics for all files in subtree) | - | - |
+| `entity.repository_alignment` | pass | high | 5.40 | All entities have aligned repositories | PmdCpdFileMetric, PmdCpdDuplication, PmdCpdOccurrence | - | - |
+| `test.structure_naming` | pass | medium | 0.29 | Test structure and naming conventions followed | - | - | - |
+| `sql.cross_tool_join_patterns` | pass | high | 12.73 | Cross-tool SQL joins use correct patterns (130 files checked) | - | - | - |
+| `test.coverage_threshold` | skip | high | 0.07 | No coverage report found - run with --run-coverage | coverage.json not found | - | - |

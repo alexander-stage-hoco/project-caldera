@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from click.testing import CliRunner
 
 from analyze import AnalysisConfig, main, run_analysis, transform_trivy_output
 
@@ -140,52 +141,74 @@ class TestTransformTrivyOutput:
 class TestAnalyzeCLI:
     """Tests for the analyze CLI main function."""
 
-    def test_cli_requires_repo_path(self):
+    def test_cli_requires_repo_path(self, tmp_path: Path):
         """Test CLI requires --repo-path argument."""
-        runner = CliRunner()
-        result = runner.invoke(main, [])
+        result = subprocess.run(
+            [sys.executable, "-m", "analyze"],
+            cwd=str(Path(__file__).parent.parent.parent / "scripts"),
+            capture_output=True,
+            text=True,
+        )
 
-        assert result.exit_code != 0
-        assert "Missing option" in result.output or "required" in result.output.lower()
+        assert result.returncode != 0
+        assert "required" in result.stderr.lower() or "--repo-path" in result.stderr
 
     def test_cli_help(self):
         """Test CLI --help shows usage."""
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
+        result = subprocess.run(
+            [sys.executable, "-m", "analyze", "--help"],
+            cwd=str(Path(__file__).parent.parent.parent / "scripts"),
+            capture_output=True,
+            text=True,
+        )
 
-        assert result.exit_code == 0
-        assert "--repo-path" in result.output
-        assert "--output-dir" in result.output
-        assert "--run-id" in result.output
+        assert result.returncode == 0
+        assert "--repo-path" in result.stdout
+        assert "--output-dir" in result.stdout
+        assert "--run-id" in result.stdout
 
     @patch("analyze.run_trivy_scan")
     @patch("analyze.get_trivy_version")
-    def test_cli_success(
-        self, mock_version: MagicMock, mock_scan: MagicMock, tmp_path: Path
+    @patch("analyze.discover_scannable_files")
+    def test_main_success_mocked(
+        self,
+        mock_discover: MagicMock,
+        mock_version: MagicMock,
+        mock_scan: MagicMock,
+        tmp_path: Path,
+        monkeypatch,
     ):
-        """Test successful CLI execution."""
+        """Test successful main() execution with mocked trivy."""
         mock_version.return_value = "0.58.0"
         mock_scan.return_value = {"Results": []}
+        mock_discover.return_value = {}
 
         repo_path = tmp_path / "repo"
         repo_path.mkdir()
         output_dir = tmp_path / "output"
 
-        runner = CliRunner()
-        result = runner.invoke(
-            main,
-            [
-                "--repo-path", str(repo_path),
-                "--repo-name", "test-repo",
-                "--output-dir", str(output_dir),
-                "--run-id", "test-run-id",
-                "--repo-id", "test-repo-id",
-                "--commit", "abc123",
-            ],
-        )
+        # Simulate command line arguments
+        test_args = [
+            "analyze",
+            "--repo-path", str(repo_path),
+            "--repo-name", "test-repo",
+            "--output-dir", str(output_dir),
+            "--run-id", "test-run-id",
+            "--repo-id", "test-repo-id",
+            "--commit", "0" * 40,
+        ]
+        monkeypatch.setattr(sys, "argv", test_args)
 
-        assert result.exit_code == 0, f"CLI failed: {result.output}"
-        assert "Analysis complete" in result.output
+        # Call main - it will exit with sys.exit on success or failure
+        # For testing, we catch SystemExit
+        try:
+            main()
+        except SystemExit as e:
+            assert e.code == 0 or e.code is None, f"main() exited with code {e.code}"
+
+        # Verify output file was created
+        output_file = output_dir / "output.json"
+        assert output_file.exists()
 
 
 class TestRunAnalysis:
@@ -193,12 +216,18 @@ class TestRunAnalysis:
 
     @patch("analyze.run_trivy_scan")
     @patch("analyze.get_trivy_version")
+    @patch("analyze.discover_scannable_files")
     def test_run_analysis_writes_output(
-        self, mock_version: MagicMock, mock_scan: MagicMock, tmp_path: Path
+        self,
+        mock_discover: MagicMock,
+        mock_version: MagicMock,
+        mock_scan: MagicMock,
+        tmp_path: Path,
     ):
         """Test run_analysis writes output file."""
         mock_version.return_value = "0.58.0"
         mock_scan.return_value = {"Results": []}
+        mock_discover.return_value = {}
 
         config = AnalysisConfig(
             repo_path=tmp_path,

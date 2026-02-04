@@ -1,0 +1,2067 @@
+{
+  "$schema": "http://json.schemastore.org/sarif-1.0.0",
+  "version": "1.0.0",
+  "runs": [
+    {
+      "tool": {
+        "name": "Microsoft (R) Visual C# Compiler",
+        "version": "5.0.0.0",
+        "fileVersion": "5.0.0-2.25569.105 (fad253f5)",
+        "semanticVersion": "5.0.0",
+        "language": "en-DE"
+      },
+      "results": [
+        {
+          "ruleId": "CS8603",
+          "level": "warning",
+          "message": "Possible null reference return.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 20,
+                  "startColumn": 20,
+                  "endLine": 20,
+                  "endColumn": 24
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "Possible null reference argument for parameter 'value' in 'void NullArgumentExamples.ProcessNonNullable(string value)'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 15,
+                  "startColumn": 32,
+                  "endLine": 15,
+                  "endColumn": 41
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8603",
+          "level": "warning",
+          "message": "Possible null reference return.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 20,
+                  "endLine": 26,
+                  "endColumn": 25
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Non-nullable property 'SecretKey' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 55,
+                  "startColumn": 16,
+                  "endLine": 55,
+                  "endColumn": 29
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 52,
+                  "startColumn": 23,
+                  "endLine": 52,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Non-nullable field 'ConnectionString' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 35,
+                  "startColumn": 23,
+                  "endLine": 35,
+                  "endColumn": 39
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 35,
+                  "startColumn": 23,
+                  "endLine": 35,
+                  "endColumn": 39
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Non-nullable field 'Database' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 36,
+                  "startColumn": 23,
+                  "endLine": 36,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 36,
+                  "startColumn": 23,
+                  "endLine": 36,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Non-nullable field 'Server' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 37,
+                  "startColumn": 23,
+                  "endLine": 37,
+                  "endColumn": 29
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 37,
+                  "startColumn": 23,
+                  "endLine": 37,
+                  "endColumn": 29
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8602",
+          "level": "warning",
+          "message": "Dereference of a possibly null reference.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 15,
+                  "startColumn": 26,
+                  "endLine": 15,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8602",
+          "level": "warning",
+          "message": "Dereference of a possibly null reference.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 22,
+                  "startColumn": 27,
+                  "endLine": 22,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8600",
+          "level": "warning",
+          "message": "Converting null literal or possible null value to non-nullable type.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 22,
+                  "startColumn": 27,
+                  "endLine": 22,
+                  "endColumn": 41
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "Possible null reference argument for parameter 'first' in 'string NullArgumentExamples.CombineStrings(string first, string second, string third)'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 28,
+                  "endLine": 26,
+                  "endColumn": 29
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "Possible null reference argument for parameter 'second' in 'string NullArgumentExamples.CombineStrings(string first, string second, string third)'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 31,
+                  "endLine": 26,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "Possible null reference argument for parameter 'third' in 'string NullArgumentExamples.CombineStrings(string first, string second, string third)'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 34,
+                  "endLine": 26,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8602",
+          "level": "warning",
+          "message": "Dereference of a possibly null reference.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 32,
+                  "startColumn": 28,
+                  "endLine": 32,
+                  "endColumn": 33
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8602",
+          "level": "warning",
+          "message": "Dereference of a possibly null reference.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 39,
+                  "startColumn": 28,
+                  "endLine": 39,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Non-nullable field 'Name' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 16,
+                  "endLine": 26,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 23,
+                  "endLine": 12,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Non-nullable property 'Email' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 16,
+                  "endLine": 26,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 15,
+                  "startColumn": 23,
+                  "endLine": 15,
+                  "endColumn": 28
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Non-nullable property 'Address' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 16,
+                  "endLine": 26,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 18,
+                  "startColumn": 23,
+                  "endLine": 18,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8602",
+          "level": "warning",
+          "message": "Dereference of a possibly null reference.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 46,
+                  "startColumn": 28,
+                  "endLine": 46,
+                  "endColumn": 33
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "Possible null reference argument for parameter 'item' in 'void List<string>.Add(string item)'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 37,
+                  "startColumn": 22,
+                  "endLine": 37,
+                  "endColumn": 26
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8602",
+          "level": "warning",
+          "message": "Dereference of a possibly null reference.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 53,
+                  "startColumn": 27,
+                  "endLine": 53,
+                  "endColumn": 36
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8600",
+          "level": "warning",
+          "message": "Converting null literal or possible null value to non-nullable type.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 51,
+                  "startColumn": 27,
+                  "endLine": 51,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8600",
+          "level": "warning",
+          "message": "Converting null literal or possible null value to non-nullable type.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 58,
+                  "startColumn": 34,
+                  "endLine": 58,
+                  "endColumn": 42
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8600",
+          "level": "warning",
+          "message": "Converting null literal or possible null value to non-nullable type.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 66,
+                  "startColumn": 40,
+                  "endLine": 66,
+                  "endColumn": 49
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8603",
+          "level": "warning",
+          "message": "Possible null reference return.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 32,
+                  "startColumn": 20,
+                  "endLine": 32,
+                  "endColumn": 58
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8603",
+          "level": "warning",
+          "message": "Possible null reference return.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 42,
+                  "startColumn": 20,
+                  "endLine": 42,
+                  "endColumn": 24
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1051",
+          "level": "warning",
+          "message": "Do not declare visible instance fields",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 23,
+                  "endLine": 12,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1051",
+          "level": "warning",
+          "message": "Do not declare visible instance fields",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 35,
+                  "startColumn": 23,
+                  "endLine": 35,
+                  "endColumn": 39
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1051",
+          "level": "warning",
+          "message": "Do not declare visible instance fields",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 36,
+                  "startColumn": 23,
+                  "endLine": 36,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1051",
+          "level": "warning",
+          "message": "Do not declare visible instance fields",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 37,
+                  "startColumn": 23,
+                  "endLine": 37,
+                  "endColumn": 29
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1051",
+          "level": "warning",
+          "message": "Do not declare visible instance fields",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 40,
+                  "startColumn": 24,
+                  "endLine": 40,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1051",
+          "level": "warning",
+          "message": "Do not declare visible instance fields",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 43,
+                  "startColumn": 20,
+                  "endLine": 43,
+                  "endColumn": 24
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'GetNameSafe' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 79,
+                  "startColumn": 24,
+                  "endLine": 79,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'GetName' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 14,
+                  "startColumn": 23,
+                  "endLine": 14,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'GetValueSafe' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 89,
+                  "startColumn": 23,
+                  "endLine": 89,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'GetValue' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 24,
+                  "startColumn": 23,
+                  "endLine": 24,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'void NullArgumentExamples.ProcessNonNullable(string value)', validate parameter 'value' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 20,
+                  "startColumn": 31,
+                  "endLine": 20,
+                  "endColumn": 36
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'ProcessNonNullable' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 18,
+                  "startColumn": 21,
+                  "endLine": 18,
+                  "endColumn": 39
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1311",
+          "level": "warning",
+          "message": "Specify a culture or use an invariant version to avoid implicit dependency on current culture",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 95,
+                  "startColumn": 40,
+                  "endLine": 95,
+                  "endColumn": 47
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'void MissingArgumentValidation.ProcessData(string[] data)', validate parameter 'data' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 47,
+                  "startColumn": 34,
+                  "endLine": 47,
+                  "endColumn": 38
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1304",
+          "level": "warning",
+          "message": "The behavior of 'string.ToUpper()' could vary based on the current user's locale settings. Replace this call in 'SafeDereferenceExamples.SafePatternMatching(object)' with a call to 'string.ToUpper(CultureInfo)'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 95,
+                  "startColumn": 35,
+                  "endLine": 95,
+                  "endColumn": 49
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'ProcessData' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 44,
+                  "startColumn": 21,
+                  "endLine": 44,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'void NullDereferenceExamples.UnsafeMethodCall(object? obj)', validate parameter 'obj' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 22,
+                  "startColumn": 27,
+                  "endLine": 22,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'UnsafeMethodCall' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 19,
+                  "startColumn": 21,
+                  "endLine": 19,
+                  "endColumn": 37
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'SafeNullConditional' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 83,
+                  "startColumn": 21,
+                  "endLine": 83,
+                  "endColumn": 40
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'SafePatternMatching' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 90,
+                  "startColumn": 21,
+                  "endLine": 90,
+                  "endColumn": 40
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'void MissingArgumentValidation.CopyData(byte[] source, byte[] destination)', validate parameter 'source' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 57,
+                  "startColumn": 45,
+                  "endLine": 57,
+                  "endColumn": 51
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1024",
+          "level": "warning",
+          "message": "Use properties where appropriate",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 24,
+                  "endLine": 26,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'GetValue' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 24,
+                  "endLine": 26,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'CopyData' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 54,
+                  "startColumn": 21,
+                  "endLine": 54,
+                  "endColumn": 29
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'void NullDereferenceExamples.UnsafeDereference(string? input)', validate parameter 'input' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 15,
+                  "startColumn": 26,
+                  "endLine": 15,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'void MissingArgumentValidation.UseObject(IDisposable resource)', validate parameter 'resource' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 64,
+                  "startColumn": 13,
+                  "endLine": 64,
+                  "endColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'UnsafeDereference' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 21,
+                  "endLine": 12,
+                  "endColumn": 38
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'UseObject' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 61,
+                  "startColumn": 21,
+                  "endLine": 61,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'SafeNullCheck' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 73,
+                  "startColumn": 21,
+                  "endLine": 73,
+                  "endColumn": 34
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1311",
+          "level": "warning",
+          "message": "Specify a culture or use an invariant version to avoid implicit dependency on current culture",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 32,
+                  "startColumn": 34,
+                  "endLine": 32,
+                  "endColumn": 41
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1304",
+          "level": "warning",
+          "message": "The behavior of 'string.ToUpper()' could vary based on the current user's locale settings. Replace this call in 'NullDereferenceExamples.ChainedDereference()' with a call to 'string.ToUpper(CultureInfo)'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 32,
+                  "startColumn": 28,
+                  "endLine": 32,
+                  "endColumn": 43
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'CombineStrings' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 29,
+                  "startColumn": 23,
+                  "endLine": 29,
+                  "endColumn": 37
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'int MissingArgumentValidation.CountItems(ICollection<string> items)', validate parameter 'items' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 71,
+                  "startColumn": 20,
+                  "endLine": 71,
+                  "endColumn": 25
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'CountItems' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 68,
+                  "startColumn": 20,
+                  "endLine": 68,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1002",
+          "level": "warning",
+          "message": "Change 'List<string>' in 'NullArgumentExamples.AddToList(List<string>, string)' to use 'Collection<T>', 'ReadOnlyCollection<T>' or 'KeyedCollection<K,V>'",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 35,
+                  "startColumn": 44,
+                  "endLine": 35,
+                  "endColumn": 48
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'void NullDereferenceExamples.CollectionAccess(Dictionary<string, string>? dict)', validate parameter 'dict' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 39,
+                  "startColumn": 28,
+                  "endLine": 39,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'void NullDereferenceExamples.ArrayAccess(string[]? items)', validate parameter 'items' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 46,
+                  "startColumn": 28,
+                  "endLine": 46,
+                  "endColumn": 33
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'void NullArgumentExamples.AddToList(List<string> list, string? item)', validate parameter 'list' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 37,
+                  "startColumn": 13,
+                  "endLine": 37,
+                  "endColumn": 17
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'ArrayAccess' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 43,
+                  "startColumn": 21,
+                  "endLine": 43,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'CollectionAccess' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 36,
+                  "startColumn": 21,
+                  "endLine": 36,
+                  "endColumn": 37
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'AddToList' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 35,
+                  "startColumn": 21,
+                  "endLine": 35,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'void NullDereferenceExamples.PropertyChain(Container? container)', validate parameter 'container' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 53,
+                  "startColumn": 27,
+                  "endLine": 53,
+                  "endColumn": 36
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'PropertyChain' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullDereference.cs",
+                "region": {
+                  "startLine": 50,
+                  "startColumn": 21,
+                  "endLine": 50,
+                  "endColumn": 34
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA5394",
+          "level": "warning",
+          "message": "Random is an insecure random number generator. Use cryptographically secure random number generators when randomness is required for security.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 43,
+                  "endLine": 70,
+                  "endColumn": 69
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1002",
+          "level": "warning",
+          "message": "Change 'List<string>' in 'NullReturnExamples.FindItem(List<string>, string)' to use 'Collection<T>', 'ReadOnlyCollection<T>' or 'KeyedCollection<K,V>'",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 30,
+                  "startColumn": 45,
+                  "endLine": 30,
+                  "endColumn": 50
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'ConvertNullLiteral' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 49,
+                  "startColumn": 21,
+                  "endLine": 49,
+                  "endColumn": 39
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1002",
+          "level": "warning",
+          "message": "Change 'List<string>' in 'SafeReturnExamples.FindItemSafe(List<string>, string)' to use 'Collection<T>', 'ReadOnlyCollection<T>' or 'KeyedCollection<K,V>'",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 95,
+                  "startColumn": 50,
+                  "endLine": 95,
+                  "endColumn": 55
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'ProcessData' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 81,
+                  "startColumn": 21,
+                  "endLine": 81,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'FindItem' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 30,
+                  "startColumn": 23,
+                  "endLine": 30,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'FindItemSafe' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 95,
+                  "startColumn": 24,
+                  "endLine": 95,
+                  "endColumn": 36
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1062",
+          "level": "warning",
+          "message": "In externally visible method 'string NullReturnExamples.GetFromDictionary(Dictionary<string, string> dict, string key)', validate parameter 'dict' is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 38,
+                  "startColumn": 17,
+                  "endLine": 38,
+                  "endColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'ProcessWithDefault' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 105,
+                  "startColumn": 21,
+                  "endLine": 105,
+                  "endColumn": 39
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'GetFromDictionary' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 36,
+                  "startColumn": 23,
+                  "endLine": 36,
+                  "endColumn": 40
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'ConvertNullable' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 56,
+                  "startColumn": 21,
+                  "endLine": 56,
+                  "endColumn": 36
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'ProcessNonNullable' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullArguments.cs",
+                "region": {
+                  "startLine": 99,
+                  "startColumn": 22,
+                  "endLine": 99,
+                  "endColumn": 40
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1822",
+          "level": "warning",
+          "message": "Member 'GetMaybeNull' does not access instance data and can be marked as static",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/NullReturns.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 25,
+                  "endLine": 70,
+                  "endColumn": 37
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1724",
+          "level": "warning",
+          "message": "The type name Configuration conflicts in whole or in part with the namespace name 'System.Configuration' defined in the .NET Framework. Rename the type to eliminate the conflict.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/eval-repos/synthetic/null-safety/UninitializedMembers.cs",
+                "region": {
+                  "startLine": 46,
+                  "startColumn": 18,
+                  "endLine": 46,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        }
+      ],
+      "rules": {
+        "CA1002": {
+          "id": "CA1002",
+          "shortDescription": "Do not expose generic lists",
+          "fullDescription": "System.Collections.Generic.List<T> is a generic collection that's designed for performance and not inheritance. List<T> does not contain virtual members that make it easier to change the behavior of an inherited class.",
+          "defaultLevel": "warning",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1002",
+          "properties": {
+            "category": "Design",
+            "isEnabledByDefault": false,
+            "tags": [
+              "PortedFromFxCop",
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CA1024": {
+          "id": "CA1024",
+          "shortDescription": "Use properties where appropriate",
+          "fullDescription": "A public or protected method has a name that starts with \"\"Get\"\", takes no parameters, and returns a value that is not an array. The method might be a good candidate to become a property.",
+          "defaultLevel": "warning",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1024",
+          "properties": {
+            "category": "Design",
+            "isEnabledByDefault": false,
+            "tags": [
+              "PortedFromFxCop",
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CA1051": {
+          "id": "CA1051",
+          "shortDescription": "Do not declare visible instance fields",
+          "fullDescription": "The primary use of a field should be as an implementation detail. Fields should be private or internal and should be exposed by using properties.",
+          "defaultLevel": "note",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1051",
+          "properties": {
+            "category": "Design",
+            "isEnabledByDefault": true,
+            "tags": [
+              "PortedFromFxCop",
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CA1062": {
+          "id": "CA1062",
+          "shortDescription": "Validate arguments of public methods",
+          "fullDescription": "An externally visible method dereferences one of its reference arguments without verifying whether that argument is 'null' ('Nothing' in Visual Basic). All reference arguments that are passed to externally visible methods should be checked against 'null'. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'. If the method is designed to be called only by known assemblies, you should make the method internal.",
+          "defaultLevel": "warning",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1062",
+          "properties": {
+            "category": "Design",
+            "isEnabledByDefault": false,
+            "tags": [
+              "PortedFromFxCop",
+              "Dataflow",
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CA1304": {
+          "id": "CA1304",
+          "shortDescription": "Specify CultureInfo",
+          "fullDescription": "A method or constructor calls a member that has an overload that accepts a System.Globalization.CultureInfo parameter, and the method or constructor does not call the overload that takes the CultureInfo parameter. When a CultureInfo or System.IFormatProvider object is not supplied, the default value that is supplied by the overloaded member might not have the effect that you want in all locales. If the result will be displayed to the user, specify 'CultureInfo.CurrentCulture' as the 'CultureInfo' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture'.",
+          "defaultLevel": "note",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1304",
+          "properties": {
+            "category": "Globalization",
+            "isEnabledByDefault": true,
+            "tags": [
+              "PortedFromFxCop",
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CA1311": {
+          "id": "CA1311",
+          "shortDescription": "Specify a culture or use an invariant version",
+          "fullDescription": "Specify culture to help avoid accidental implicit dependency on current culture. Using an invariant version yields consistent results regardless of the culture of an application.",
+          "defaultLevel": "note",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1311",
+          "properties": {
+            "category": "Globalization",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CA1724": {
+          "id": "CA1724",
+          "shortDescription": "Type names should not match namespaces",
+          "fullDescription": "Type names should not match the names of namespaces that are defined in the .NET Framework class library. Violating this rule can reduce the usability of the library.",
+          "defaultLevel": "warning",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1724",
+          "properties": {
+            "category": "Naming",
+            "isEnabledByDefault": false,
+            "tags": [
+              "PortedFromFxCop",
+              "Telemetry",
+              "EnabledRuleInAggressiveMode",
+              "CompilationEnd"
+            ]
+          }
+        },
+        "CA1822": {
+          "id": "CA1822",
+          "shortDescription": "Mark members as static",
+          "fullDescription": "Members that do not access instance data or call instance methods can be marked as static. After you mark the methods as static, the compiler will emit nonvirtual call sites to these members. This can give you a measurable performance gain for performance-sensitive code.",
+          "defaultLevel": "note",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1822",
+          "properties": {
+            "category": "Performance",
+            "isEnabledByDefault": true,
+            "tags": [
+              "PortedFromFxCop",
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CA5394": {
+          "id": "CA5394",
+          "shortDescription": "Do not use insecure randomness",
+          "fullDescription": "Using a cryptographically weak pseudo-random number generator may allow an attacker to predict what security-sensitive value will be generated. Use a cryptographically strong random number generator if an unpredictable value is required, or ensure that weak pseudo-random numbers aren't used in a security-sensitive manner.",
+          "defaultLevel": "warning",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca5394",
+          "properties": {
+            "category": "Security",
+            "isEnabledByDefault": false,
+            "tags": [
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CS8600": {
+          "id": "CS8600",
+          "shortDescription": "Converting null literal or possible null value to non-nullable type.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8600)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8602": {
+          "id": "CS8602",
+          "shortDescription": "Dereference of a possibly null reference.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8602)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8603": {
+          "id": "CS8603",
+          "shortDescription": "Possible null reference return.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8603)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8604": {
+          "id": "CS8604",
+          "shortDescription": "Possible null reference argument.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8604)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8618": {
+          "id": "CS8618",
+          "shortDescription": "Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8618)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -6,10 +6,11 @@ evaluation of Trivy analysis outputs.
 
 from __future__ import annotations
 
+import argparse
 import json
+import os
+import sys
 from pathlib import Path
-
-import click
 
 from shared.evaluation import (
     LLMEvaluatorBase,
@@ -88,14 +89,64 @@ class LLMEvaluator(LLMEvaluatorBase):
         return output_file
 
 
-@click.command()
-@click.option("--analysis", type=click.Path(exists=True, path_type=Path), required=True)
-@click.option("--output", type=click.Path(path_type=Path), required=True)
-@click.option("--model", default="opus-4.5", help="LLM model to use")
-@click.option("--programmatic-results", type=click.Path(exists=True, path_type=Path), help="Path to programmatic evaluation JSON")
-@click.option("--focused", is_flag=True, help="Use focused judges for quick evaluation")
-def main(analysis: Path, output: Path, model: str, programmatic_results: Path | None, focused: bool):
+def main() -> None:
     """Run LLM evaluation on Trivy analysis output."""
+    parser = argparse.ArgumentParser(
+        description="Run LLM evaluation on Trivy analysis output."
+    )
+    parser.add_argument(
+        "--analysis",
+        default=os.environ.get("ANALYSIS_PATH"),
+        help="Path to Trivy analysis output JSON (required)",
+    )
+    parser.add_argument(
+        "--output",
+        default=os.environ.get("OUTPUT_PATH"),
+        help="Path to write evaluation results (required)",
+    )
+    parser.add_argument(
+        "--model",
+        default=os.environ.get("LLM_MODEL", "opus-4.5"),
+        help="LLM model to use (default: opus-4.5)",
+    )
+    parser.add_argument(
+        "--programmatic-results",
+        default=os.environ.get("PROGRAMMATIC_RESULTS_PATH"),
+        help="Path to programmatic evaluation JSON",
+    )
+    parser.add_argument(
+        "--focused",
+        action="store_true",
+        help="Use focused judges for quick evaluation",
+    )
+    args = parser.parse_args()
+
+    # Validate required arguments
+    if not args.analysis:
+        print("Error: --analysis is required", file=sys.stderr)
+        sys.exit(1)
+    if not args.output:
+        print("Error: --output is required", file=sys.stderr)
+        sys.exit(1)
+
+    # Convert to Path objects and validate
+    analysis = Path(args.analysis)
+    if not analysis.exists():
+        print(f"Error: Analysis file does not exist: {analysis}", file=sys.stderr)
+        sys.exit(1)
+
+    output = Path(args.output)
+    model = args.model
+
+    programmatic_results: Path | None = None
+    if args.programmatic_results:
+        programmatic_results = Path(args.programmatic_results)
+        if not programmatic_results.exists():
+            print(f"Error: Programmatic results file does not exist: {programmatic_results}", file=sys.stderr)
+            sys.exit(1)
+
+    focused = args.focused
+
     # Determine working directory from analysis path
     working_dir = analysis.parent.parent.parent  # outputs/<run-id>/output.json -> tool root
 
@@ -140,7 +191,7 @@ def main(analysis: Path, output: Path, model: str, programmatic_results: Path | 
     # Save results
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(result.to_json())
-    click.echo(f"LLM evaluation complete: {output}")
+    print(f"LLM evaluation complete: {output}")
 
 
 if __name__ == "__main__":

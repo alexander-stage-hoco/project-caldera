@@ -21,6 +21,7 @@ from scripts.scanner import (
     create_scanner_config,
     _is_busy_error,
     _is_connection_error,
+    _detect_target_framework,
     run_scanner_dotnet_docker,
 )
 
@@ -67,6 +68,127 @@ class TestScannerConfig:
         assert config.docker_network is None
         assert config.timeout == 300
         assert config.retry_attempts == 2
+
+    def test_dotnet_sdk_version_default(self):
+        """Test default .NET SDK version."""
+        config = ScannerConfig()
+        assert config.dotnet_sdk_version == "8.0"
+
+    def test_dotnet_sdk_version_custom(self):
+        """Test custom .NET SDK version."""
+        config = ScannerConfig(dotnet_sdk_version="10.0")
+        assert config.dotnet_sdk_version == "10.0"
+
+
+class TestDetectTargetFramework:
+    """Tests for _detect_target_framework function."""
+
+    def test_detects_from_global_json(self, tmp_path):
+        """Test detection from global.json SDK version."""
+        global_json = tmp_path / "global.json"
+        global_json.write_text('{"sdk": {"version": "10.0.100"}}')
+
+        version = _detect_target_framework(tmp_path)
+        assert version == "10.0"
+
+    def test_detects_from_global_json_preview(self, tmp_path):
+        """Test detection from global.json with preview SDK."""
+        global_json = tmp_path / "global.json"
+        global_json.write_text('{"sdk": {"version": "9.0.200-preview.1"}}')
+
+        version = _detect_target_framework(tmp_path)
+        assert version == "9.0"
+
+    def test_detects_from_csproj_net10(self, tmp_path):
+        """Test detection from .csproj targeting .NET 10."""
+        csproj = tmp_path / "MyApp.csproj"
+        csproj.write_text("""<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+</Project>""")
+
+        version = _detect_target_framework(tmp_path)
+        assert version == "10.0"
+
+    def test_detects_from_csproj_net8(self, tmp_path):
+        """Test detection from .csproj targeting .NET 8."""
+        csproj = tmp_path / "MyApp.csproj"
+        csproj.write_text("""<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+</Project>""")
+
+        version = _detect_target_framework(tmp_path)
+        assert version == "8.0"
+
+    def test_returns_highest_version_from_multiple_csproj(self, tmp_path):
+        """Test highest version is returned when multiple .csproj exist."""
+        (tmp_path / "App1.csproj").write_text("""<Project>
+  <PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup>
+</Project>""")
+        (tmp_path / "App2.csproj").write_text("""<Project>
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+</Project>""")
+        (tmp_path / "App3.csproj").write_text("""<Project>
+  <PropertyGroup><TargetFramework>net9.0</TargetFramework></PropertyGroup>
+</Project>""")
+
+        version = _detect_target_framework(tmp_path)
+        assert version == "10.0"
+
+    def test_global_json_takes_precedence(self, tmp_path):
+        """Test global.json SDK version takes precedence over .csproj."""
+        (tmp_path / "global.json").write_text('{"sdk": {"version": "9.0.100"}}')
+        (tmp_path / "App.csproj").write_text("""<Project>
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+</Project>""")
+
+        version = _detect_target_framework(tmp_path)
+        assert version == "9.0"
+
+    def test_ignores_bin_obj_directories(self, tmp_path):
+        """Test .csproj in bin/obj directories are ignored."""
+        bin_dir = tmp_path / "bin"
+        bin_dir.mkdir()
+        (bin_dir / "Cached.csproj").write_text("""<Project>
+  <PropertyGroup><TargetFramework>net99.0</TargetFramework></PropertyGroup>
+</Project>""")
+
+        (tmp_path / "App.csproj").write_text("""<Project>
+  <PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup>
+</Project>""")
+
+        version = _detect_target_framework(tmp_path)
+        assert version == "8.0"
+
+    def test_returns_none_when_no_dotnet_files(self, tmp_path):
+        """Test None is returned when no .NET files exist."""
+        (tmp_path / "main.py").touch()
+
+        version = _detect_target_framework(tmp_path)
+        assert version is None
+
+    def test_handles_malformed_global_json(self, tmp_path):
+        """Test graceful handling of malformed global.json."""
+        (tmp_path / "global.json").write_text("not valid json")
+        (tmp_path / "App.csproj").write_text("""<Project>
+  <PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup>
+</Project>""")
+
+        version = _detect_target_framework(tmp_path)
+        assert version == "8.0"
+
+    def test_handles_global_json_without_sdk(self, tmp_path):
+        """Test global.json without sdk section falls back to .csproj."""
+        (tmp_path / "global.json").write_text('{"msbuild-sdks": {}}')
+        (tmp_path / "App.csproj").write_text("""<Project>
+  <PropertyGroup><TargetFramework>net9.0</TargetFramework></PropertyGroup>
+</Project>""")
+
+        version = _detect_target_framework(tmp_path)
+        assert version == "9.0"
 
 
 class TestGenerateSonarProperties:
@@ -147,6 +269,62 @@ def test_dotnet_docker_removes_sonar_properties(monkeypatch, tmp_path: Path):
     assert "LANG=C.UTF-8" in cmd_str
     assert "LC_ALL=C.UTF-8" in cmd_str
     assert "JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8" in cmd_str
+
+
+def test_dotnet_docker_uses_configured_sdk_version(monkeypatch, tmp_path: Path):
+    """Test that run_scanner_dotnet_docker uses the configured SDK version."""
+    captured = {}
+
+    def fake_run(cmd, capture_output=True, text=True, timeout=None, cwd=None):
+        captured["cmd"] = cmd
+        class Result:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+        return Result()
+
+    monkeypatch.setattr("scripts.scanner.subprocess.run", fake_run)
+    monkeypatch.setattr("scripts.scanner._get_container_ip", lambda *_: None)
+
+    config = ScannerConfig(
+        sonarqube_url="http://localhost:9000",
+        project_key="synthetic",
+        token=None,
+        use_docker=True,
+        dotnet_sdk_version="10.0",
+    )
+
+    run_scanner_dotnet_docker(tmp_path, config)
+    cmd_str = " ".join(captured.get("cmd", []))
+    assert "mcr.microsoft.com/dotnet/sdk:10.0" in cmd_str
+
+
+def test_dotnet_docker_uses_default_sdk_version(monkeypatch, tmp_path: Path):
+    """Test that run_scanner_dotnet_docker uses default SDK version."""
+    captured = {}
+
+    def fake_run(cmd, capture_output=True, text=True, timeout=None, cwd=None):
+        captured["cmd"] = cmd
+        class Result:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+        return Result()
+
+    monkeypatch.setattr("scripts.scanner.subprocess.run", fake_run)
+    monkeypatch.setattr("scripts.scanner._get_container_ip", lambda *_: None)
+
+    config = ScannerConfig(
+        sonarqube_url="http://localhost:9000",
+        project_key="synthetic",
+        token=None,
+        use_docker=True,
+        # Using default dotnet_sdk_version
+    )
+
+    run_scanner_dotnet_docker(tmp_path, config)
+    cmd_str = " ".join(captured.get("cmd", []))
+    assert "mcr.microsoft.com/dotnet/sdk:8.0" in cmd_str
 
     def test_includes_exclusions(self):
         """Test exclusions are formatted correctly."""
@@ -435,6 +613,59 @@ class TestCreateScannerConfig:
 
         # Should have Java-specific properties
         assert "sonar.java.source" in config.extra_properties
+
+    def test_detects_dotnet_sdk_version_from_csproj(self, tmp_path):
+        """Test .NET SDK version is detected from .csproj."""
+        (tmp_path / "App.cs").touch()
+        (tmp_path / "App.csproj").write_text("""<Project>
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+</Project>""")
+
+        config = create_scanner_config(
+            project_key="dotnet-project",
+            repo_path=tmp_path,
+        )
+
+        assert config.dotnet_sdk_version == "10.0"
+
+    def test_dotnet_sdk_version_env_override(self, tmp_path, monkeypatch):
+        """Test DOTNET_SDK_VERSION environment variable takes precedence."""
+        monkeypatch.setenv("DOTNET_SDK_VERSION", "9.0")
+
+        (tmp_path / "App.cs").touch()
+        (tmp_path / "App.csproj").write_text("""<Project>
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+</Project>""")
+
+        config = create_scanner_config(
+            project_key="dotnet-project",
+            repo_path=tmp_path,
+        )
+
+        assert config.dotnet_sdk_version == "9.0"
+
+    def test_dotnet_sdk_version_default_for_non_csharp(self, tmp_path):
+        """Test default SDK version for non-C# projects."""
+        (tmp_path / "main.py").touch()
+
+        config = create_scanner_config(
+            project_key="python-project",
+            repo_path=tmp_path,
+        )
+
+        assert config.dotnet_sdk_version == "8.0"
+
+    def test_dotnet_sdk_version_default_when_not_detected(self, tmp_path):
+        """Test default SDK version when detection fails."""
+        (tmp_path / "App.cs").touch()
+        # No .csproj or global.json
+
+        config = create_scanner_config(
+            project_key="dotnet-project",
+            repo_path=tmp_path,
+        )
+
+        assert config.dotnet_sdk_version == "8.0"
 
 
 class TestRunScannerDocker:

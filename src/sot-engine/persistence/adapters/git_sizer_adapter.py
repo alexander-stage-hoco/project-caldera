@@ -206,7 +206,7 @@ class GitSizerAdapter(BaseAdapter):
             expanded_blob_count=metrics_data.get("expanded_blob_count", 0),
             expanded_blob_size=metrics_data.get("expanded_blob_size", 0),
         )
-        self._git_sizer_repo.insert_metrics(metric)
+        self._git_sizer_repo.insert_metrics([metric])
 
         # Persist violations
         violations = [

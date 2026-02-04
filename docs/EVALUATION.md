@@ -636,7 +636,7 @@ python scripts/check_observability_compliance.py --verbose
 
 ## References
 
-- [TOOL_GUIDE.md](./TOOL_GUIDE.md) - Tool creation and migration
+- [TOOL_INTEGRATION_CHECKLIST.md](./TOOL_INTEGRATION_CHECKLIST.md) - Tool creation and integration
 - [COMPLIANCE.md](./COMPLIANCE.md) - Compliance requirements
 - `src/shared/evaluation/` - Shared module source
 - `src/shared/README.md` - Module overview

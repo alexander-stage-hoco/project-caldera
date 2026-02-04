@@ -46,3 +46,10 @@ evaluation/results/
 # OS
 .DS_Store
 Thumbs.db
+
+# .NET build artifacts
+bin/
+obj/
+*.dll
+*.pdb
+*.exe

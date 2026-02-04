@@ -311,3 +311,126 @@ CREATE TABLE lz_git_sizer_lfs_candidates (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (run_pk, file_path)
 );
+
+-- =============================================================================
+-- symbol-scanner: Code symbol extraction
+-- =============================================================================
+
+CREATE TABLE lz_code_symbols (
+    run_pk BIGINT NOT NULL,
+    file_id VARCHAR NOT NULL,
+    directory_id VARCHAR NOT NULL,
+    relative_path VARCHAR NOT NULL,
+    symbol_name VARCHAR NOT NULL,
+    symbol_type VARCHAR NOT NULL,
+    line_start INTEGER,
+    line_end INTEGER,
+    is_exported BOOLEAN DEFAULT FALSE,
+    parameters INTEGER,
+    parent_symbol VARCHAR,
+    docstring TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, file_id, symbol_name, line_start)
+);
+
+CREATE TABLE lz_symbol_calls (
+    run_pk BIGINT NOT NULL,
+    caller_file_id VARCHAR NOT NULL,
+    caller_directory_id VARCHAR NOT NULL,
+    caller_file_path VARCHAR NOT NULL,
+    caller_symbol VARCHAR NOT NULL,
+    callee_symbol VARCHAR NOT NULL,
+    callee_file_id VARCHAR,
+    callee_file_path VARCHAR,
+    line_number INTEGER,
+    call_type VARCHAR,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, caller_file_id, caller_symbol, callee_symbol, line_number)
+);
+
+CREATE TABLE lz_file_imports (
+    run_pk BIGINT NOT NULL,
+    file_id VARCHAR NOT NULL,
+    directory_id VARCHAR NOT NULL,
+    relative_path VARCHAR NOT NULL,
+    imported_path VARCHAR NOT NULL,
+    imported_symbols VARCHAR,
+    import_type VARCHAR,
+    line_number INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, file_id, imported_path, line_number)
+);
+
+-- =============================================================================
+-- scancode: License analysis
+-- =============================================================================
+
+CREATE TABLE lz_scancode_file_licenses (
+    run_pk BIGINT NOT NULL,
+    file_id VARCHAR NOT NULL,
+    directory_id VARCHAR NOT NULL,
+    relative_path VARCHAR NOT NULL,
+    spdx_id VARCHAR NOT NULL,
+    category VARCHAR NOT NULL,
+    confidence DOUBLE NOT NULL,
+    match_type VARCHAR NOT NULL,
+    line_number INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, file_id, spdx_id, line_number)
+);
+
+CREATE TABLE lz_scancode_summary (
+    run_pk BIGINT NOT NULL PRIMARY KEY,
+    total_files_scanned INTEGER NOT NULL,
+    files_with_licenses INTEGER NOT NULL,
+    overall_risk VARCHAR NOT NULL,
+    has_permissive BOOLEAN NOT NULL,
+    has_weak_copyleft BOOLEAN NOT NULL,
+    has_copyleft BOOLEAN NOT NULL,
+    has_unknown BOOLEAN NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================================================
+-- pmd-cpd: Code duplication detection
+-- =============================================================================
+
+CREATE TABLE lz_pmd_cpd_file_metrics (
+    run_pk BIGINT NOT NULL,
+    file_id VARCHAR NOT NULL,
+    directory_id VARCHAR NOT NULL,
+    relative_path VARCHAR NOT NULL,
+    language VARCHAR,
+    total_lines INTEGER NOT NULL,
+    duplicate_lines INTEGER NOT NULL,
+    duplicate_blocks INTEGER NOT NULL,
+    duplication_percentage DOUBLE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, file_id)
+);
+
+CREATE TABLE lz_pmd_cpd_duplications (
+    run_pk BIGINT NOT NULL,
+    clone_id VARCHAR NOT NULL,
+    lines INTEGER NOT NULL,
+    tokens INTEGER NOT NULL,
+    occurrence_count INTEGER NOT NULL,
+    is_cross_file BOOLEAN NOT NULL,
+    code_fragment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, clone_id)
+);
+
+CREATE TABLE lz_pmd_cpd_occurrences (
+    run_pk BIGINT NOT NULL,
+    clone_id VARCHAR NOT NULL,
+    file_id VARCHAR NOT NULL,
+    directory_id VARCHAR NOT NULL,
+    relative_path VARCHAR NOT NULL,
+    line_start INTEGER NOT NULL,
+    line_end INTEGER NOT NULL,
+    column_start INTEGER,
+    column_end INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, clone_id, file_id, line_start)
+);

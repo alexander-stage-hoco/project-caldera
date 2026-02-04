@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Evaluation runner for Trivy analysis outputs."""
 
+from __future__ import annotations
+
+import argparse
 import json
+import os
+import sys
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-import click
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -373,39 +377,51 @@ def evaluate_repository(
     }
 
 
-@click.command()
-@click.option(
-    "--input",
-    "input_path",
-    type=click.Path(exists=True, path_type=Path),
-    help="Single input file to evaluate",
-)
-@click.option(
-    "--ground-truth",
-    "gt_path",
-    type=click.Path(path_type=Path),
-    help="Ground truth file",
-)
-@click.option(
-    "--output",
-    "output_path",
-    type=click.Path(path_type=Path),
-    required=True,
-    help="Output directory or file",
-)
-@click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-    help="Enable verbose output",
-)
-def main(
-    input_path: Path | None,
-    gt_path: Path | None,
-    output_path: Path,
-    verbose: bool,
-):
+def main() -> None:
     """Run evaluation on Trivy analysis outputs."""
+    parser = argparse.ArgumentParser(
+        description="Run evaluation on Trivy analysis outputs."
+    )
+    parser.add_argument(
+        "--input",
+        dest="input_path",
+        default=os.environ.get("INPUT_PATH"),
+        help="Single input file to evaluate",
+    )
+    parser.add_argument(
+        "--ground-truth",
+        dest="gt_path",
+        default=os.environ.get("GROUND_TRUTH_PATH"),
+        help="Ground truth file",
+    )
+    parser.add_argument(
+        "--output",
+        dest="output_path",
+        default=os.environ.get("OUTPUT_PATH"),
+        help="Output directory or file (required)",
+    )
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Enable verbose output",
+    )
+    args = parser.parse_args()
+
+    # Validate required arguments
+    if not args.output_path:
+        print("Error: --output is required", file=sys.stderr)
+        sys.exit(1)
+
+    # Convert to Path objects
+    input_path = Path(args.input_path) if args.input_path else None
+    gt_path = Path(args.gt_path) if args.gt_path else None
+    output_path = Path(args.output_path)
+
+    # Validate input path if provided
+    if input_path and not input_path.exists():
+        print(f"Error: Input file does not exist: {input_path}", file=sys.stderr)
+        sys.exit(1)
+
     structlog.configure(
         processors=[
             structlog.stdlib.add_log_level,
@@ -443,9 +459,9 @@ def main(
         out_file.write_text(json.dumps(evaluation, indent=2))
         
         # Print summary
-        click.echo(f"Evaluation complete: {out_file}")
-        click.echo(f"Pass rate: {scores['overall']['pass_rate']:.1%}")
-        click.echo(f"Passed: {scores['overall']['passed']}/{scores['overall']['total']}")
+        print(f"Evaluation complete: {out_file}")
+        print(f"Pass rate: {scores['overall']['pass_rate']:.1%}")
+        print(f"Passed: {scores['overall']['passed']}/{scores['overall']['total']}")
 
         # Compliance artifacts
         out_dir = out_file.parent
@@ -490,7 +506,7 @@ def main(
         }
         
         (output_path / "summary.json").write_text(json.dumps(summary, indent=2))
-        click.echo(f"Evaluated {len(all_evaluations)} files")
+        print(f"Evaluated {len(all_evaluations)} files")
 
         # Compliance artifacts
         checks_path = output_path / "checks.json"

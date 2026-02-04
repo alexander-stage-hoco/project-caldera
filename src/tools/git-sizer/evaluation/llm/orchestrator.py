@@ -33,10 +33,16 @@ def run_all_judges(
     timeout: int = 120,
     specific_judge: str | None = None,
     programmatic_input: ProgrammaticInput | None = None,
+    working_dir: Path | None = None,
 ) -> dict:
     """Run all judges and return combined results."""
     # Enforce observability - fail fast if disabled
     require_observability()
+
+    # Derive working_dir from this file's location (evaluation/llm/orchestrator.py)
+    # Go up 2 levels to reach the git-sizer tool directory
+    if working_dir is None:
+        working_dir = Path(__file__).parent.parent.parent
 
     # Generate trace ID to correlate all judge interactions
     trace_id = str(uuid.uuid4())
@@ -77,6 +83,7 @@ def run_all_judges(
             model=model,
             timeout=timeout,
             analysis_path=analysis_path,
+            working_dir=working_dir,
         )
 
         # Run ground truth assertions first
@@ -252,12 +259,10 @@ def main():
     # Validate paths
     analysis_path = Path(args.analysis_path)
 
-    # If directory given, look for output.json inside
-    if analysis_path.is_dir():
-        analysis_path = analysis_path / "output.json"
-
+    # If directory given, keep as directory (load_analysis will aggregate subdirectories)
+    # Only check for output.json if it's a file path that doesn't exist
     if not analysis_path.exists():
-        print(f"Error: Analysis file not found: {analysis_path}", file=sys.stderr)
+        print(f"Error: Analysis path not found: {analysis_path}", file=sys.stderr)
         sys.exit(1)
 
     # Load programmatic results if provided

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -34,7 +35,7 @@ class TestEndToEnd:
         # Run analysis
         result = subprocess.run(
             [
-                "python", "scripts/analyze.py",
+                sys.executable, "scripts/analyze.py",
                 "--repo-path", str(repo_path),
                 "--output-dir", str(output_dir),
                 "--run-id", "test-run-1",
@@ -89,7 +90,7 @@ class TestEndToEnd:
         # Run analysis
         result = subprocess.run(
             [
-                "python", "scripts/analyze.py",
+                sys.executable, "scripts/analyze.py",
                 "--repo-path", str(repo_path),
                 "--output-dir", str(output_dir),
                 "--run-id", "test-run-2",
@@ -133,7 +134,7 @@ class TestEndToEnd:
         # Run analysis
         result = subprocess.run(
             [
-                "python", "scripts/analyze.py",
+                sys.executable, "scripts/analyze.py",
                 "--repo-path", str(repo_path),
                 "--output-dir", str(output_dir),
                 "--run-id", "test-run-3",
@@ -173,7 +174,7 @@ class TestEndToEnd:
         # Run analysis
         result = subprocess.run(
             [
-                "python", "scripts/analyze.py",
+                sys.executable, "scripts/analyze.py",
                 "--repo-path", str(repo_path),
                 "--output-dir", str(output_dir),
                 "--run-id", "test-run-4",
@@ -223,7 +224,7 @@ class TestEndToEnd:
         # Run analysis
         subprocess.run(
             [
-                "python", "scripts/analyze.py",
+                sys.executable, "scripts/analyze.py",
                 "--repo-path", str(repo_path),
                 "--output-dir", str(output_dir),
                 "--run-id", "test-run-schema",

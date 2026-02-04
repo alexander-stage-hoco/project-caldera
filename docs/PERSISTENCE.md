@@ -1129,7 +1129,7 @@ class GitSizerAdapter(BaseAdapter):
 
 ## References
 
-- [TOOL_GUIDE.md](./TOOL_GUIDE.md) - Creating and migrating tools
+- [TOOL_INTEGRATION_CHECKLIST.md](./TOOL_INTEGRATION_CHECKLIST.md) - Creating and integrating tools
 - [REFERENCE.md](./REFERENCE.md) - Technical specifications (envelope format, paths)
 - [COMPLIANCE.md](./COMPLIANCE.md) - Compliance requirements and checks
 - [REPORTS.md](./REPORTS.md) - dbt analyses and reports

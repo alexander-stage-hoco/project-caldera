@@ -48,13 +48,14 @@ def test_analyze_directory_with_subrepos(tmp_path: Path, monkeypatch: pytest.Mon
             raw_output={},
         )
 
-    def fake_build_envelope(*, analysis: analyze.RepositoryAnalysis, run_id: str, repo_id: str, branch: str, commit: str) -> dict:
+    def fake_build_envelope(*, analysis: analyze.RepositoryAnalysis, run_id: str, repo_id: str, repo_name: str, branch: str, commit: str) -> dict:
         return {
             "metadata": {
                 "tool_name": "git-sizer",
                 "schema_version": "1.0.0",
                 "run_id": run_id,
                 "repo_id": repo_id,
+                "repo_name": repo_name,
                 "branch": branch,
                 "commit": commit,
             },
@@ -84,7 +85,9 @@ def test_analyze_directory_with_subrepos(tmp_path: Path, monkeypatch: pytest.Mon
     ]
     monkeypatch.setattr(sys, "argv", argv)
 
-    analyze.main()
+    with pytest.raises(SystemExit) as exc_info:
+        analyze.main()
+    assert exc_info.value.code == 0
 
     primary = out_dir / "output.json"
     assert primary.exists()

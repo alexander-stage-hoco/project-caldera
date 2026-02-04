@@ -12,7 +12,12 @@
     "method": "cross_extractor_validation",
     "methodology": "Validated through C# extractor parity tests comparing tree-sitter, Roslyn, and hybrid extractors",
     "cross_validated_with": ["tree-sitter", "roslyn", "hybrid"],
-    "verification_notes": "All 3 extractors produce identical symbol counts (2815). Roslyn detects 32 async calls vs tree-sitter classifying them as direct/dynamic."
+    "verification_notes": "All 3 extractors produce identical symbol counts (2815). Tree-sitter provides finer-grained call/import categorization (constructor, event, using_static).",
+    "last_validated": "2026-02-04",
+    "validation_results": {
+      "symbol_parity": "100%",
+      "performance": "1.6s"
+    }
   },
   "summary_expectations": {
     "total_files": 107,
@@ -51,6 +56,36 @@
     "total_unresolved": 8745,
     "resolved_same_file": 1108,
     "resolved_cross_file": 0
+  },
+  "strategy_expectations": {
+    "treesitter": {
+      "call_expectations": {
+        "by_type": {
+          "direct": 2507,
+          "dynamic": 6487,
+          "constructor": 1092,
+          "event": 9
+        },
+        "total": 10095,
+        "notes": "Tree-sitter separates constructor and event calls; does not detect async pattern"
+      },
+      "import_expectations": {
+        "by_type": {
+          "static": 630,
+          "global": 23,
+          "extern": 1,
+          "using_static": 11
+        },
+        "total": 665,
+        "notes": "Includes obj/Debug/ generated files (GlobalUsings, AssemblyInfo)"
+      },
+      "resolution_expectations": {
+        "total_resolved": 1154,
+        "total_unresolved": 8941,
+        "resolved_same_file": 1154,
+        "resolved_cross_file": 0
+      }
+    }
   },
   "top_files_by_symbols": {
     "TShockAPI/GetDataHandlers.cs": 476,

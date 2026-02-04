@@ -27,6 +27,9 @@ from config import (
     get_tool_entities,
     get_entity_repository_map,
     get_quality_rule_patterns,
+    get_data_completeness_rules,
+    get_path_consistency_rules,
+    get_test_coverage_rules,
     load_tool_rules,
 )
 
@@ -192,6 +195,237 @@ def _is_invalid_path(value: str) -> bool:
     if "\\" in value:
         return True
     return False
+
+
+# ---------------------------------------------------------------------------
+# Data Completeness and Path Consistency Helper Functions
+# ---------------------------------------------------------------------------
+
+
+def _validate_count_list_consistency(
+    data: dict, count_field: str, list_field: str
+) -> list[str]:
+    """Validate that a count field matches the length of its corresponding list.
+
+    Returns a list of issue descriptions (empty if valid).
+    """
+    issues: list[str] = []
+
+    count_value = data.get(count_field)
+    list_value = data.get(list_field)
+
+    # Skip if neither field exists
+    if count_value is None and list_value is None:
+        return issues
+
+    # Check consistency if both exist
+    if count_value is not None and list_value is not None:
+        if isinstance(list_value, list):
+            actual_count = len(list_value)
+            try:
+                expected_count = int(count_value)
+                if expected_count != actual_count:
+                    issues.append(
+                        f"{count_field}={expected_count} but {list_field} has {actual_count} items"
+                    )
+            except (TypeError, ValueError):
+                issues.append(f"{count_field} is not a valid integer: {count_value}")
+
+    # Check for count > 0 but empty list
+    if count_value is not None and list_value is not None:
+        try:
+            expected = int(count_value)
+            if expected > 0 and isinstance(list_value, list) and len(list_value) == 0:
+                issues.append(f"{count_field}={expected} but {list_field} is empty")
+        except (TypeError, ValueError):
+            pass
+
+    return issues
+
+
+def _validate_required_data_fields(
+    items: list[dict], required_fields: list[str], context: str
+) -> list[str]:
+    """Validate that all items have required fields non-null.
+
+    Args:
+        items: List of dictionaries to validate
+        required_fields: Fields that must be present and non-null
+        context: Description for error messages (e.g., "files", "findings")
+
+    Returns a list of issue descriptions.
+    """
+    issues: list[str] = []
+
+    for i, item in enumerate(items):
+        if not isinstance(item, dict):
+            issues.append(f"{context}[{i}] is not a dict")
+            continue
+
+        for field in required_fields:
+            if field not in item:
+                issues.append(f"{context}[{i}] missing required field: {field}")
+            elif item[field] is None:
+                issues.append(f"{context}[{i}].{field} is null")
+
+    return issues
+
+
+def _validate_aggregate_consistency(data: dict) -> list[str]:
+    """Validate aggregate sum consistency (e.g., recursive >= direct for rollups).
+
+    Returns a list of issue descriptions.
+    """
+    issues: list[str] = []
+
+    # Check for rollup invariants: recursive counts should >= direct counts
+    recursive_fields = [k for k in data.keys() if "recursive" in k.lower() and "count" in k.lower()]
+    direct_fields = [k for k in data.keys() if "direct" in k.lower() and "count" in k.lower()]
+
+    for rec_field in recursive_fields:
+        # Try to find matching direct field
+        base_name = rec_field.lower().replace("recursive", "").replace("count", "").strip("_")
+        for dir_field in direct_fields:
+            dir_base = dir_field.lower().replace("direct", "").replace("count", "").strip("_")
+            if base_name == dir_base:
+                try:
+                    rec_val = int(data.get(rec_field, 0))
+                    dir_val = int(data.get(dir_field, 0))
+                    if rec_val < dir_val:
+                        issues.append(
+                            f"Rollup invariant violated: {rec_field}={rec_val} < {dir_field}={dir_val}"
+                        )
+                except (TypeError, ValueError):
+                    pass
+
+    return issues
+
+
+def _extract_all_paths_by_section(output: dict) -> dict[str, list[str]]:
+    """Extract all path values from output, grouped by section.
+
+    Returns a dict mapping section name to list of paths found in that section.
+    """
+    paths_by_section: dict[str, list[str]] = {}
+
+    data = output.get("data", {})
+    if not isinstance(data, dict):
+        return paths_by_section
+
+    # Define sections and their path fields
+    section_path_fields = {
+        "files": ["path", "file_path"],
+        "findings": ["file_path"],
+        "vulnerabilities": ["file_path", "target_path"],
+        "secrets": ["file_path"],
+        "issues": ["file_path", "component"],
+        "violations": ["file_path"],
+        "smells": ["file_path"],
+        "functions": ["file_path"],
+        "symbols": ["file_path"],
+        "directories": ["path"],
+    }
+
+    for section_name, path_fields in section_path_fields.items():
+        section_data = data.get(section_name, [])
+        if not isinstance(section_data, list):
+            continue
+
+        paths: list[str] = []
+        for item in section_data:
+            if not isinstance(item, dict):
+                continue
+            for field in path_fields:
+                value = item.get(field)
+                if isinstance(value, str) and value:
+                    paths.append(value)
+
+        if paths:
+            paths_by_section[section_name] = paths
+
+    return paths_by_section
+
+
+def _find_path_inconsistencies(paths_by_section: dict[str, list[str]]) -> list[str]:
+    """Find inconsistencies across path sections.
+
+    Returns a list of issue descriptions.
+    """
+    issues: list[str] = []
+
+    # Collect all paths
+    all_paths: list[str] = []
+    for paths in paths_by_section.values():
+        all_paths.extend(paths)
+
+    if not all_paths:
+        return issues
+
+    # Check for mixed absolute/relative
+    absolute_paths = [p for p in all_paths if _is_invalid_path(p)]
+    if absolute_paths:
+        issues.append(f"Found {len(absolute_paths)} non-repo-relative paths")
+
+    # Check for path separator inconsistency
+    unix_paths = [p for p in all_paths if "/" in p and "\\" not in p]
+    win_paths = [p for p in all_paths if "\\" in p]
+    if unix_paths and win_paths:
+        issues.append(
+            f"Mixed path separators: {len(unix_paths)} POSIX, {len(win_paths)} Windows"
+        )
+
+    return issues
+
+
+def _validate_path_references(output: dict) -> list[str]:
+    """Validate that file references in findings exist in files list.
+
+    Returns a list of issue descriptions.
+    """
+    issues: list[str] = []
+
+    data = output.get("data", {})
+    if not isinstance(data, dict):
+        return issues
+
+    # Get the set of known file paths
+    files = data.get("files", [])
+    known_paths: set[str] = set()
+    if isinstance(files, list):
+        for f in files:
+            if isinstance(f, dict):
+                path = f.get("path") or f.get("file_path")
+                if path:
+                    known_paths.add(path)
+
+    # If no files list, skip cross-reference check
+    if not known_paths:
+        return issues
+
+    # Check references in other sections
+    sections_to_check = ["findings", "vulnerabilities", "secrets", "issues", "violations", "smells", "functions", "symbols"]
+
+    for section_name in sections_to_check:
+        section_data = data.get(section_name, [])
+        if not isinstance(section_data, list):
+            continue
+
+        for i, item in enumerate(section_data):
+            if not isinstance(item, dict):
+                continue
+
+            file_path = item.get("file_path")
+            if file_path and file_path not in known_paths:
+                # Only report first few to avoid spam
+                if len(issues) < 10:
+                    issues.append(
+                        f"{section_name}[{i}].file_path '{file_path}' not found in files list"
+                    )
+                elif len(issues) == 10:
+                    issues.append("... (more path reference issues omitted)")
+                    break
+
+    return issues
 
 
 def _load_json(path: Path) -> tuple[Optional[dict], Optional[str]]:
@@ -1996,6 +2230,8 @@ def _get_tool_repository(conn, tool_name: str):
         SonarqubeRepository,
         GitSizerRepository,
         GitleaksRepository,
+        SymbolScannerRepository,
+        ScancodeRepository,
     )
     repos = {
         "scc": SccRepository,
@@ -2006,6 +2242,8 @@ def _get_tool_repository(conn, tool_name: str):
         "sonarqube": SonarqubeRepository,
         "git-sizer": GitSizerRepository,
         "gitleaks": GitleaksRepository,
+        "symbol-scanner": SymbolScannerRepository,
+        "scancode": ScancodeRepository,
     }
     repo_cls = repos.get(tool_name)
     return repo_cls(conn) if repo_cls else None
@@ -2976,6 +3214,276 @@ def _check_test_structure_naming(tool_root: Path) -> CheckResult:
     )
 
 
+def _run_coverage_test(
+    tool_root: Path, env: dict[str, str]
+) -> tuple[int, float | None, str, str, float]:
+    """Run pytest with coverage and return results.
+
+    Args:
+        tool_root: Path to the tool directory
+        env: Environment variables to use
+
+    Returns:
+        Tuple of (returncode, coverage_percent, stdout, stderr, duration_ms)
+    """
+    coverage_rules = get_test_coverage_rules()
+    source_dirs = coverage_rules.get("source_dirs", ["scripts"])
+    omit_patterns = coverage_rules.get("omit_patterns", [])
+
+    # Build coverage command arguments
+    cov_args = []
+    for source_dir in source_dirs:
+        cov_args.extend(["--cov", source_dir])
+
+    for pattern in omit_patterns:
+        cov_args.extend(["--cov-config", "/dev/null"])  # Disable .coveragerc
+        break  # Only need to add once
+
+    # Add omit patterns
+    if omit_patterns:
+        omit_str = ",".join(omit_patterns)
+        cov_args.extend(["--cov-report", f"json:coverage.json", "--cov-fail-under=0"])
+    else:
+        cov_args.extend(["--cov-report", "json:coverage.json", "--cov-fail-under=0"])
+
+    # Construct pytest command
+    venv_python = env.get("PYTHON", ".venv/bin/python")
+    if not Path(tool_root / ".venv" / "bin" / "python").exists():
+        # Try project-level venv
+        project_venv = tool_root.parents[2] / ".venv" / "bin" / "python"
+        if project_venv.exists():
+            venv_python = str(project_venv)
+
+    cmd = [
+        venv_python,
+        "-m",
+        "pytest",
+        "tests/",
+        "-v",
+        "--tb=short",
+        "-q",
+    ] + cov_args
+
+    start = time.perf_counter()
+    result = subprocess.run(
+        cmd,
+        cwd=tool_root,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=False,
+        timeout=300,  # 5 minute timeout
+    )
+    duration_ms = (time.perf_counter() - start) * 1000.0
+
+    # Parse coverage.json for percentage
+    coverage_percent: float | None = None
+    coverage_json = tool_root / "coverage.json"
+    if coverage_json.exists():
+        try:
+            coverage_data = json.loads(coverage_json.read_text())
+            totals = coverage_data.get("totals", {})
+            coverage_percent = totals.get("percent_covered")
+        except (json.JSONDecodeError, KeyError):
+            pass
+        finally:
+            # Clean up coverage.json
+            try:
+                coverage_json.unlink()
+            except OSError:
+                pass
+
+    return (
+        result.returncode,
+        coverage_percent,
+        result.stdout.strip(),
+        result.stderr.strip(),
+        duration_ms,
+    )
+
+
+def _check_test_coverage_threshold(
+    tool_root: Path, env: dict[str, str], run_coverage: bool = False
+) -> CheckResult:
+    """Check that test coverage meets minimum threshold (80%).
+
+    Args:
+        tool_root: Path to the tool directory
+        env: Environment variables to use
+        run_coverage: If True, run tests with coverage. If False, check existing coverage.json.
+
+    Returns:
+        CheckResult with coverage validation status
+    """
+    coverage_rules = get_test_coverage_rules()
+    threshold = coverage_rules.get("threshold", 80)
+
+    # Check prerequisites
+    tests_dir = tool_root / "tests"
+    if not tests_dir.exists():
+        return CheckResult(
+            check_id="test.coverage_threshold",
+            status="skip",
+            severity="high",
+            message="tests/ directory missing - coverage check skipped",
+            evidence=["tests/ not found"],
+        )
+
+    requirements_file = tool_root / "requirements.txt"
+    if requirements_file.exists():
+        requirements_content = requirements_file.read_text().lower()
+        if "pytest-cov" not in requirements_content:
+            return CheckResult(
+                check_id="test.coverage_threshold",
+                status="fail",
+                severity="high",
+                message="pytest-cov not in requirements.txt",
+                evidence=["Add pytest-cov>=4.0.0 to requirements.txt"],
+            )
+    else:
+        return CheckResult(
+            check_id="test.coverage_threshold",
+            status="fail",
+            severity="high",
+            message="requirements.txt missing",
+            evidence=["requirements.txt not found"],
+        )
+
+    if not run_coverage:
+        # Check for existing coverage report
+        coverage_json = tool_root / "coverage.json"
+        htmlcov_index = tool_root / "htmlcov" / "index.html"
+
+        if not coverage_json.exists() and not htmlcov_index.exists():
+            return CheckResult(
+                check_id="test.coverage_threshold",
+                status="skip",
+                severity="high",
+                message="No coverage report found - run with --run-coverage",
+                evidence=["coverage.json not found"],
+            )
+
+        if coverage_json.exists():
+            try:
+                coverage_data = json.loads(coverage_json.read_text())
+                totals = coverage_data.get("totals", {})
+                coverage_percent = totals.get("percent_covered")
+                if coverage_percent is None:
+                    return CheckResult(
+                        check_id="test.coverage_threshold",
+                        status="fail",
+                        severity="high",
+                        message="Invalid coverage.json - missing percent_covered",
+                        evidence=["percent_covered field not found in totals"],
+                    )
+
+                if coverage_percent >= threshold:
+                    return CheckResult(
+                        check_id="test.coverage_threshold",
+                        status="pass",
+                        severity="high",
+                        message=f"Test coverage {coverage_percent:.1f}% >= {threshold}% threshold",
+                        evidence=[f"coverage={coverage_percent:.1f}%", f"threshold={threshold}%"],
+                    )
+                else:
+                    return CheckResult(
+                        check_id="test.coverage_threshold",
+                        status="fail",
+                        severity="high",
+                        message=f"Test coverage {coverage_percent:.1f}% < {threshold}% threshold",
+                        evidence=[f"coverage={coverage_percent:.1f}%", f"threshold={threshold}%"],
+                    )
+            except json.JSONDecodeError as e:
+                return CheckResult(
+                    check_id="test.coverage_threshold",
+                    status="fail",
+                    severity="high",
+                    message="Invalid coverage.json - parse error",
+                    evidence=[str(e)],
+                )
+
+        # Fall back to skip if only htmlcov exists (can't parse percentage)
+        return CheckResult(
+            check_id="test.coverage_threshold",
+            status="skip",
+            severity="high",
+            message="Only htmlcov found - run with --run-coverage for accurate check",
+            evidence=["coverage.json not found"],
+        )
+
+    # Run coverage tests
+    try:
+        returncode, coverage_percent, stdout, stderr, duration_ms = _run_coverage_test(
+            tool_root, env
+        )
+    except subprocess.TimeoutExpired:
+        return CheckResult(
+            check_id="test.coverage_threshold",
+            status="fail",
+            severity="high",
+            message="Coverage tests timed out (5 minute limit)",
+            evidence=["pytest timed out"],
+        )
+    except FileNotFoundError as e:
+        return CheckResult(
+            check_id="test.coverage_threshold",
+            status="fail",
+            severity="high",
+            message="Python or pytest not found",
+            evidence=[str(e)],
+        )
+
+    # Check if tests passed
+    if returncode != 0 and coverage_percent is None:
+        return CheckResult(
+            check_id="test.coverage_threshold",
+            status="fail",
+            severity="high",
+            message="Tests failed - cannot determine coverage",
+            evidence=[_summarize_output(stdout or stderr)],
+            duration_ms=round(duration_ms, 2),
+            stdout_summary=_summarize_output(stdout),
+            stderr_summary=_summarize_output(stderr),
+        )
+
+    if coverage_percent is None:
+        return CheckResult(
+            check_id="test.coverage_threshold",
+            status="fail",
+            severity="high",
+            message="Coverage report not generated",
+            evidence=["coverage.json was not created"],
+            duration_ms=round(duration_ms, 2),
+        )
+
+    if coverage_percent >= threshold:
+        return CheckResult(
+            check_id="test.coverage_threshold",
+            status="pass",
+            severity="high",
+            message=f"Test coverage {coverage_percent:.1f}% >= {threshold}% threshold",
+            evidence=[
+                f"coverage={coverage_percent:.1f}%",
+                f"threshold={threshold}%",
+            ],
+            duration_ms=round(duration_ms, 2),
+        )
+
+    return CheckResult(
+        check_id="test.coverage_threshold",
+        status="fail",
+        severity="high",
+        message=f"Test coverage {coverage_percent:.1f}% < {threshold}% threshold",
+        evidence=[
+            f"coverage={coverage_percent:.1f}%",
+            f"threshold={threshold}%",
+            "Increase test coverage to meet threshold",
+        ],
+        duration_ms=round(duration_ms, 2),
+    )
+
+
 def _check_output_metadata(output: dict) -> list[CheckResult]:
     checks: list[CheckResult] = []
     metadata = output.get("metadata", {})
@@ -3064,6 +3572,130 @@ def _check_output_paths(output: dict) -> CheckResult:
         severity="high",
         message="Path values are repo-relative",
         evidence=[],
+    )
+
+
+def _check_data_completeness(output: dict, tool_name: str | None = None) -> CheckResult:
+    """Validate data completeness: count/list consistency, required fields, aggregates.
+
+    This check ensures:
+    1. Count fields match their corresponding list lengths
+    2. Required fields in data items are present and non-null
+    3. Aggregate values are consistent (e.g., recursive >= direct)
+
+    Args:
+        output: The tool output JSON to validate.
+        tool_name: Optional tool name for tool-specific field overrides.
+    """
+    issues: list[str] = []
+
+    data = output.get("data", {})
+    if not isinstance(data, dict):
+        return CheckResult(
+            check_id="output.data_completeness",
+            status="fail",
+            severity="high",
+            message="Data field is not a dictionary",
+            evidence=[f"data type: {type(data).__name__}"],
+        )
+
+    # Load rules from config (with tool-specific overrides if tool_name provided)
+    completeness_rules = get_data_completeness_rules(tool_name)
+    count_list_pairs = completeness_rules.get("count_list_pairs", [])
+    required_data_fields = completeness_rules.get("required_data_fields", {})
+
+    # 1. Validate count/list consistency
+    for pair in count_list_pairs:
+        if isinstance(pair, dict):
+            count_field = pair.get("count_field", "")
+            list_field = pair.get("list_field", "")
+        else:
+            continue
+
+        pair_issues = _validate_count_list_consistency(data, count_field, list_field)
+        issues.extend(pair_issues)
+
+    # 2. Validate required fields in data lists
+    for section_name, required_fields in required_data_fields.items():
+        section_data = data.get(section_name, [])
+        if isinstance(section_data, list) and section_data:
+            if isinstance(required_fields, list):
+                field_issues = _validate_required_data_fields(
+                    section_data, required_fields, section_name
+                )
+                # Limit to first 5 issues per section to avoid spam
+                issues.extend(field_issues[:5])
+                if len(field_issues) > 5:
+                    issues.append(f"... {len(field_issues) - 5} more issues in {section_name}")
+
+    # 3. Validate aggregate consistency
+    aggregate_issues = _validate_aggregate_consistency(data)
+    issues.extend(aggregate_issues)
+
+    if issues:
+        return CheckResult(
+            check_id="output.data_completeness",
+            status="fail",
+            severity="high",
+            message="Data completeness issues detected",
+            evidence=issues[:15],  # Limit evidence to avoid huge reports
+        )
+
+    return CheckResult(
+        check_id="output.data_completeness",
+        status="pass",
+        severity="high",
+        message="Data completeness validated",
+        evidence=[],
+    )
+
+
+def _check_path_consistency(output: dict) -> CheckResult:
+    """Validate path consistency across output sections.
+
+    This check ensures:
+    1. All paths are repo-relative (no absolute paths)
+    2. Path separators are consistent (POSIX-style)
+    3. File references in findings exist in files list (when applicable)
+    """
+    issues: list[str] = []
+
+    # Extract paths by section
+    paths_by_section = _extract_all_paths_by_section(output)
+
+    if not paths_by_section:
+        # No paths to check - this is OK for some tools
+        return CheckResult(
+            check_id="output.path_consistency",
+            status="pass",
+            severity="medium",
+            message="No path fields found to validate",
+            evidence=[],
+        )
+
+    # 1. Check for path inconsistencies (absolute paths, mixed separators)
+    inconsistency_issues = _find_path_inconsistencies(paths_by_section)
+    issues.extend(inconsistency_issues)
+
+    # 2. Validate cross-references (file_path in findings should exist in files)
+    reference_issues = _validate_path_references(output)
+    issues.extend(reference_issues)
+
+    if issues:
+        return CheckResult(
+            check_id="output.path_consistency",
+            status="fail",
+            severity="medium",
+            message="Path consistency issues detected",
+            evidence=issues[:15],
+        )
+
+    return CheckResult(
+        check_id="output.path_consistency",
+        status="pass",
+        severity="medium",
+        message="Path consistency validated",
+        evidence=[f"Checked {sum(len(p) for p in paths_by_section.values())} paths across {len(paths_by_section)} sections"],
     )
 
 
@@ -3596,6 +4228,7 @@ def scan_tool(
     run_analysis: bool = False,
     run_evaluate: bool = False,
     run_llm: bool = False,
+    run_coverage: bool = False,
     venv: Optional[str] = None,
     preflight: bool = False,
 ) -> ToolResult:
@@ -4001,6 +4634,8 @@ def scan_tool(
             )
         )
         checks.append(_time_check(_check_output_paths, output))
+        checks.append(_time_check(_check_data_completeness, output, tool_root.name))
+        checks.append(_time_check(_check_path_consistency, output))
         meta_start = time.perf_counter()
         metadata_checks = _check_output_metadata(output)
         meta_duration = (time.perf_counter() - meta_start) * 1000.0
@@ -4056,6 +4691,9 @@ def scan_tool(
         ]
     )
 
+    # Coverage check (separate due to conditional execution)
+    checks.append(_time_check(_check_test_coverage_threshold, tool_root, env, run_coverage))
+
     status = "fail" if any(c.status == "fail" for c in checks) else "pass"
     for temp_dir in temp_dirs:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -4075,6 +4713,7 @@ def build_report(
     run_analysis: bool = False,
     run_evaluate: bool = False,
     run_llm: bool = False,
+    run_coverage: bool = False,
     venv: Optional[str] = None,
     venv_map: Optional[dict[str, str]] = None,
     preflight: bool = False,
@@ -4088,6 +4727,7 @@ def build_report(
                 run_analysis=run_analysis,
                 run_evaluate=run_evaluate,
                 run_llm=run_llm,
+                run_coverage=run_coverage,
                 venv=(venv_map or {}).get(single_tool.name, venv),
                 preflight=preflight,
             )
@@ -4099,6 +4739,7 @@ def build_report(
                 run_analysis=run_analysis,
                 run_evaluate=run_evaluate,
                 run_llm=run_llm,
+                run_coverage=run_coverage,
                 venv=(venv_map or {}).get(tool_root.name, venv),
                 preflight=preflight,
             )
@@ -4261,6 +4902,11 @@ def main() -> int:
         help="Execute make evaluate-llm and verify LLM outputs",
     )
     parser.add_argument(
+        "--run-coverage",
+        action="store_true",
+        help="Run pytest with coverage and verify >= 80%% threshold",
+    )
+    parser.add_argument(
         "--venv",
         default="",
         help="Virtualenv path to pass to Makefile (optional)",
@@ -4312,6 +4958,7 @@ def main() -> int:
         run_analysis=args.run_analysis,
         run_evaluate=args.run_evaluate,
         run_llm=args.run_llm,
+        run_coverage=args.run_coverage,
         venv=default_venv,
         venv_map=_parse_venv_map(args.venv_map),
         preflight=args.preflight,

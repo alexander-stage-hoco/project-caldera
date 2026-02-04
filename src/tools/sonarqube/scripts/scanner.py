@@ -33,6 +33,7 @@ class ScannerConfig:
     docker_network: str | None = "sonarqube_default"
     timeout: int = 600  # 10 minutes
     retry_attempts: int = 2
+    dotnet_sdk_version: str = "8.0"  # .NET SDK version for Docker builds
 
 
 class ScannerError(Exception):
@@ -205,6 +206,53 @@ def _dotnet_sonarscanner_available() -> bool:
     except OSError:
         return False
     return result.returncode == 0
+
+
+def _detect_target_framework(repo_path: Path) -> str | None:
+    """Detect .NET target framework from .csproj or global.json files.
+
+    Args:
+        repo_path: Path to the repository
+
+    Returns:
+        Detected framework version (e.g., "10.0") or None if not detected
+    """
+    import json
+    import re
+
+    # Check global.json first (explicit SDK version)
+    global_json = repo_path / "global.json"
+    if global_json.exists():
+        try:
+            data = json.loads(global_json.read_text())
+            version = data.get("sdk", {}).get("version", "")
+            if version:
+                # Extract major.minor (e.g., "10.0.100" -> "10.0")
+                match = re.match(r"(\d+\.\d+)", version)
+                if match:
+                    return match.group(1)
+        except (json.JSONDecodeError, KeyError):
+            pass
+
+    # Scan .csproj files for TargetFramework
+    frameworks: set[str] = set()
+    for csproj in repo_path.rglob("*.csproj"):
+        # Skip common non-source directories
+        if any(part in {"bin", "obj", ".git", ".idea", ".vs"} for part in csproj.parts):
+            continue
+        try:
+            content = csproj.read_text()
+            # Match <TargetFramework>net10.0</TargetFramework> or similar
+            matches = re.findall(r"<TargetFramework>net(\d+\.\d+)", content)
+            frameworks.update(matches)
+        except Exception:
+            continue
+
+    if frameworks:
+        # Return highest version found
+        return max(frameworks, key=lambda v: tuple(map(int, v.split("."))))
+
+    return None
 
 
 def _find_dotnet_project(repo_path: Path) -> Path | None:
@@ -413,7 +461,7 @@ def run_scanner_dotnet_docker(
         f"{repo_path.absolute()}:/src",
         "-w",
         "/src",
-        "mcr.microsoft.com/dotnet/sdk:8.0",
+        f"mcr.microsoft.com/dotnet/sdk:{config.dotnet_sdk_version}",
         "bash",
         "-lc",
         script,
@@ -743,6 +791,23 @@ def create_scanner_config(
     Returns:
         ScannerConfig with detected settings
     """
+    # Detect languages first for SDK version detection
+    languages = detect_language(repo_path)
+
+    # Detect .NET SDK version for C# projects
+    dotnet_sdk_version = "8.0"  # Default to LTS
+    if "cs" in languages:
+        # Allow explicit override via environment
+        env_version = os.environ.get("DOTNET_SDK_VERSION")
+        if env_version:
+            dotnet_sdk_version = env_version
+            logger.info("Using .NET SDK version from environment", version=dotnet_sdk_version)
+        else:
+            detected_version = _detect_target_framework(repo_path)
+            if detected_version:
+                dotnet_sdk_version = detected_version
+                logger.info("Detected .NET target framework", version=detected_version)
+
     config = ScannerConfig(
         sonarqube_url=sonarqube_url,
         token=token,
@@ -759,10 +824,10 @@ def create_scanner_config(
             "**/build/**",
             "**/dist/**",
         ],
+        dotnet_sdk_version=dotnet_sdk_version,
     )
 
-    # Detect languages and add specific properties
-    languages = detect_language(repo_path)
+    # Add language-specific properties
     for lang in languages:
         config.extra_properties.update(get_scanner_properties_for_language(lang))
 
@@ -783,5 +848,10 @@ def create_scanner_config(
             project_key=project_key,
         )
 
-    logger.info("Created scanner config", languages=languages, project_key=project_key)
+    logger.info(
+        "Created scanner config",
+        languages=languages,
+        project_key=project_key,
+        dotnet_sdk_version=dotnet_sdk_version,
+    )
     return config

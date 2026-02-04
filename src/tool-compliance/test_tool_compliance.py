@@ -32,6 +32,11 @@ from tool_compliance import (
     _types_match,
     _looks_like_file_path,
     _collect_path_values,
+    _check_data_completeness,
+    _check_path_consistency,
+    _validate_count_list_consistency,
+    _validate_required_data_fields,
+    _extract_all_paths_by_section,
     build_report,
     scan_tool,
 )
@@ -1353,3 +1358,441 @@ Score 1-5 based on accuracy.
     assert result.check_id == "evaluation.synthetic_context"
     assert result.status == "pass"
     assert "correctly" in result.message.lower()
+
+
+# ===========================================================================
+# Tests for Data Completeness Check
+# ===========================================================================
+
+
+def test_check_data_completeness_count_matches_list() -> None:
+    """Test data completeness passes when count matches list length."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {
+            "file_count": 3,
+            "files": [
+                {"path": "file1.py"},
+                {"path": "file2.py"},
+                {"path": "file3.py"},
+            ],
+        },
+    }
+    result = _check_data_completeness(output)
+    assert result.check_id == "output.data_completeness"
+    assert result.status == "pass"
+
+
+def test_check_data_completeness_count_mismatch_fails() -> None:
+    """Test data completeness fails when count doesn't match list length."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {
+            "file_count": 5,  # Says 5, but only 2 files
+            "files": [
+                {"path": "file1.py"},
+                {"path": "file2.py"},
+            ],
+        },
+    }
+    result = _check_data_completeness(output)
+    assert result.check_id == "output.data_completeness"
+    assert result.status == "fail"
+    assert any("file_count=5 but files has 2" in e for e in result.evidence)
+
+
+def test_check_data_completeness_required_fields_present() -> None:
+    """Test data completeness passes when required fields are present."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {
+            "files": [
+                {"path": "file1.py"},
+                {"path": "file2.py"},
+            ],
+        },
+    }
+    result = _check_data_completeness(output)
+    assert result.check_id == "output.data_completeness"
+    assert result.status == "pass"
+
+
+def test_check_data_completeness_required_fields_missing() -> None:
+    """Test data completeness fails when required fields are missing."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {
+            "files": [
+                {"name": "file1.py"},  # Missing 'path' field
+                {"path": "file2.py"},
+            ],
+        },
+    }
+    result = _check_data_completeness(output)
+    assert result.check_id == "output.data_completeness"
+    assert result.status == "fail"
+    assert any("missing required field: path" in e for e in result.evidence)
+
+
+def test_check_data_completeness_empty_data_passes() -> None:
+    """Test data completeness passes with empty data."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {},
+    }
+    result = _check_data_completeness(output)
+    assert result.check_id == "output.data_completeness"
+    assert result.status == "pass"
+
+
+def test_check_data_completeness_non_dict_data_fails() -> None:
+    """Test data completeness fails when data is not a dict."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": "not a dict",
+    }
+    result = _check_data_completeness(output)
+    assert result.check_id == "output.data_completeness"
+    assert result.status == "fail"
+    assert "not a dictionary" in result.message
+
+
+def test_validate_count_list_consistency_helper() -> None:
+    """Test the count/list consistency validation helper."""
+    # Valid case
+    data = {"file_count": 2, "files": [{"a": 1}, {"b": 2}]}
+    issues = _validate_count_list_consistency(data, "file_count", "files")
+    assert issues == []
+
+    # Mismatch case
+    data = {"file_count": 5, "files": [{"a": 1}]}
+    issues = _validate_count_list_consistency(data, "file_count", "files")
+    assert len(issues) == 1
+    assert "5" in issues[0] and "1" in issues[0]
+
+    # Neither field present (OK)
+    data = {"other": "value"}
+    issues = _validate_count_list_consistency(data, "file_count", "files")
+    assert issues == []
+
+
+def test_validate_required_data_fields_helper() -> None:
+    """Test the required data fields validation helper."""
+    # Valid case
+    items = [{"path": "a.py"}, {"path": "b.py"}]
+    issues = _validate_required_data_fields(items, ["path"], "files")
+    assert issues == []
+
+    # Missing field case
+    items = [{"path": "a.py"}, {"name": "b.py"}]
+    issues = _validate_required_data_fields(items, ["path"], "files")
+    assert len(issues) == 1
+    assert "files[1]" in issues[0]
+
+    # Null field case
+    items = [{"path": "a.py"}, {"path": None}]
+    issues = _validate_required_data_fields(items, ["path"], "files")
+    assert len(issues) == 1
+    assert "null" in issues[0].lower()
+
+
+# ===========================================================================
+# Tests for Path Consistency Check
+# ===========================================================================
+
+
+def test_check_path_consistency_all_repo_relative() -> None:
+    """Test path consistency passes when all paths are repo-relative."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {
+            "files": [
+                {"path": "src/main.py"},
+                {"path": "tests/test_main.py"},
+            ],
+            "findings": [
+                {"file_path": "src/main.py", "message": "issue"},
+            ],
+        },
+    }
+    result = _check_path_consistency(output)
+    assert result.check_id == "output.path_consistency"
+    assert result.status == "pass"
+
+
+def test_check_path_consistency_mixed_absolute_fails() -> None:
+    """Test path consistency fails with mixed absolute/relative paths."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {
+            "files": [
+                {"path": "/absolute/path/main.py"},  # Absolute path
+                {"path": "tests/test_main.py"},
+            ],
+        },
+    }
+    result = _check_path_consistency(output)
+    assert result.check_id == "output.path_consistency"
+    assert result.status == "fail"
+    assert any("non-repo-relative" in e for e in result.evidence)
+
+
+def test_check_path_consistency_cross_reference_valid() -> None:
+    """Test path consistency passes when findings reference existing files."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {
+            "files": [
+                {"path": "src/main.py"},
+                {"path": "src/utils.py"},
+            ],
+            "findings": [
+                {"file_path": "src/main.py", "message": "issue1"},
+                {"file_path": "src/utils.py", "message": "issue2"},
+            ],
+        },
+    }
+    result = _check_path_consistency(output)
+    assert result.check_id == "output.path_consistency"
+    assert result.status == "pass"
+
+
+def test_check_path_consistency_cross_reference_invalid() -> None:
+    """Test path consistency reports missing file references."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {
+            "files": [
+                {"path": "src/main.py"},
+            ],
+            "findings": [
+                {"file_path": "src/main.py", "message": "issue1"},
+                {"file_path": "src/missing.py", "message": "issue2"},  # Not in files
+            ],
+        },
+    }
+    result = _check_path_consistency(output)
+    assert result.check_id == "output.path_consistency"
+    assert result.status == "fail"
+    assert any("missing.py" in e and "not found" in e for e in result.evidence)
+
+
+def test_check_path_consistency_no_paths() -> None:
+    """Test path consistency passes when no path fields exist."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {
+            "summary": {"count": 0},
+        },
+    }
+    result = _check_path_consistency(output)
+    assert result.check_id == "output.path_consistency"
+    assert result.status == "pass"
+    assert "No path fields" in result.message
+
+
+def test_extract_all_paths_by_section_helper() -> None:
+    """Test the path extraction helper."""
+    output = {
+        "metadata": {},
+        "data": {
+            "files": [
+                {"path": "a.py"},
+                {"path": "b.py"},
+            ],
+            "findings": [
+                {"file_path": "a.py", "message": "issue"},
+            ],
+        },
+    }
+    paths = _extract_all_paths_by_section(output)
+    assert "files" in paths
+    assert "findings" in paths
+    assert "a.py" in paths["files"]
+    assert "b.py" in paths["files"]
+    assert "a.py" in paths["findings"]
+
+
+def test_check_path_consistency_windows_separators_fail() -> None:
+    """Test path consistency fails with Windows path separators."""
+    output = {
+        "metadata": {"tool_name": "test"},
+        "data": {
+            "files": [
+                {"path": "src\\main.py"},  # Windows separator
+            ],
+        },
+    }
+    result = _check_path_consistency(output)
+    assert result.check_id == "output.path_consistency"
+    assert result.status == "fail"
+
+
+# ===========================================================================
+# Tests for Test Coverage Threshold Check
+# ===========================================================================
+
+from tool_compliance import _check_test_coverage_threshold
+
+
+def test_check_test_coverage_threshold_skips_without_tests(tmp_path: Path) -> None:
+    """Test coverage check skips when no tests directory."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+    (tool_root / "requirements.txt").write_text("pytest-cov>=4.0.0\n")
+
+    env = {}
+    result = _check_test_coverage_threshold(tool_root, env, run_coverage=False)
+    assert result.check_id == "test.coverage_threshold"
+    assert result.status == "skip"
+    assert "tests/ directory missing" in result.message
+
+
+def test_check_test_coverage_threshold_fails_no_pytest_cov(tmp_path: Path) -> None:
+    """Test coverage check fails when pytest-cov not installed."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+    (tool_root / "tests" / "unit").mkdir(parents=True)
+    (tool_root / "requirements.txt").write_text("pytest>=7.0.0\n")
+
+    env = {}
+    result = _check_test_coverage_threshold(tool_root, env, run_coverage=False)
+    assert result.check_id == "test.coverage_threshold"
+    assert result.status == "fail"
+    assert "pytest-cov not in requirements.txt" in result.message
+
+
+def test_check_test_coverage_threshold_skips_no_coverage_report(tmp_path: Path) -> None:
+    """Test coverage check skips when no coverage.json exists (not running)."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+    (tool_root / "tests" / "unit").mkdir(parents=True)
+    (tool_root / "requirements.txt").write_text("pytest-cov>=4.0.0\n")
+
+    env = {}
+    result = _check_test_coverage_threshold(tool_root, env, run_coverage=False)
+    assert result.check_id == "test.coverage_threshold"
+    assert result.status == "skip"
+    assert "No coverage report found" in result.message
+
+
+def test_check_test_coverage_threshold_passes_at_80(tmp_path: Path) -> None:
+    """Test coverage check passes at exactly 80%."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+    (tool_root / "tests" / "unit").mkdir(parents=True)
+    (tool_root / "requirements.txt").write_text("pytest-cov>=4.0.0\n")
+
+    # Create a mock coverage.json with 80% coverage
+    coverage_data = {
+        "meta": {"version": "7.0.0"},
+        "totals": {
+            "covered_lines": 80,
+            "num_statements": 100,
+            "percent_covered": 80.0,
+        },
+        "files": {},
+    }
+    (tool_root / "coverage.json").write_text(json.dumps(coverage_data))
+
+    env = {}
+    result = _check_test_coverage_threshold(tool_root, env, run_coverage=False)
+    assert result.check_id == "test.coverage_threshold"
+    assert result.status == "pass"
+    assert "80.0%" in result.message
+
+
+def test_check_test_coverage_threshold_passes_above_80(tmp_path: Path) -> None:
+    """Test coverage check passes above 80%."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+    (tool_root / "tests" / "unit").mkdir(parents=True)
+    (tool_root / "requirements.txt").write_text("pytest-cov>=4.0.0\n")
+
+    # Create a mock coverage.json with 95% coverage
+    coverage_data = {
+        "meta": {"version": "7.0.0"},
+        "totals": {
+            "covered_lines": 95,
+            "num_statements": 100,
+            "percent_covered": 95.0,
+        },
+        "files": {},
+    }
+    (tool_root / "coverage.json").write_text(json.dumps(coverage_data))
+
+    env = {}
+    result = _check_test_coverage_threshold(tool_root, env, run_coverage=False)
+    assert result.check_id == "test.coverage_threshold"
+    assert result.status == "pass"
+    assert "95.0%" in result.message
+
+
+def test_check_test_coverage_threshold_fails_below_80(tmp_path: Path) -> None:
+    """Test coverage check fails below 80%."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+    (tool_root / "tests" / "unit").mkdir(parents=True)
+    (tool_root / "requirements.txt").write_text("pytest-cov>=4.0.0\n")
+
+    # Create a mock coverage.json with 60% coverage
+    coverage_data = {
+        "meta": {"version": "7.0.0"},
+        "totals": {
+            "covered_lines": 60,
+            "num_statements": 100,
+            "percent_covered": 60.0,
+        },
+        "files": {},
+    }
+    (tool_root / "coverage.json").write_text(json.dumps(coverage_data))
+
+    env = {}
+    result = _check_test_coverage_threshold(tool_root, env, run_coverage=False)
+    assert result.check_id == "test.coverage_threshold"
+    assert result.status == "fail"
+    assert "60.0%" in result.message
+    assert "< 80%" in result.message
+
+
+def test_check_test_coverage_threshold_fails_invalid_coverage_json(tmp_path: Path) -> None:
+    """Test coverage check fails when coverage.json is invalid."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+    (tool_root / "tests" / "unit").mkdir(parents=True)
+    (tool_root / "requirements.txt").write_text("pytest-cov>=4.0.0\n")
+
+    # Create invalid coverage.json
+    (tool_root / "coverage.json").write_text("not valid json")
+
+    env = {}
+    result = _check_test_coverage_threshold(tool_root, env, run_coverage=False)
+    assert result.check_id == "test.coverage_threshold"
+    assert result.status == "fail"
+    assert "parse error" in result.message.lower()
+
+
+def test_check_test_coverage_threshold_fails_missing_percent(tmp_path: Path) -> None:
+    """Test coverage check fails when coverage.json missing percent_covered."""
+    tool_root = tmp_path / "demo"
+    tool_root.mkdir()
+    (tool_root / "tests" / "unit").mkdir(parents=True)
+    (tool_root / "requirements.txt").write_text("pytest-cov>=4.0.0\n")
+
+    # Create coverage.json missing percent_covered
+    coverage_data = {
+        "meta": {"version": "7.0.0"},
+        "totals": {
+            "covered_lines": 80,
+            "num_statements": 100,
+            # missing percent_covered
+        },
+        "files": {},
+    }
+    (tool_root / "coverage.json").write_text(json.dumps(coverage_data))
+
+    env = {}
+    result = _check_test_coverage_threshold(tool_root, env, run_coverage=False)
+    assert result.check_id == "test.coverage_threshold"
+    assert result.status == "fail"
+    assert "missing percent_covered" in result.message

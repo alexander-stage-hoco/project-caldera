@@ -1,0 +1,22 @@
+# Tool compliance rules for pmd-cpd
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - edge_cases.py
+  - performance.py
+
+required_prompts:
+  - actionability.md
+  - cross_file_detection.md
+  - duplication_accuracy.md
+  - semantic_detection.md
+
+ground_truth_mode: per_language
+
+evaluation_outputs:
+  - scorecard.md
+  - evaluation_report.json
+
+adapter:
+  module: persistence.adapters.pmd_cpd_adapter
+  class: PmdCpdAdapter

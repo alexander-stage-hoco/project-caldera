@@ -473,6 +473,104 @@ def seed_git_sizer_ground_truth(data: dict[str, Any], metadata: dict[str, Any]) 
     return ground_truth
 
 
+def seed_symbol_scanner_ground_truth(data: dict[str, Any], metadata: dict[str, Any]) -> dict[str, Any]:
+    """Extract ground truth expectations from symbol-scanner output.
+
+    Args:
+        data: The 'data' section of the tool output
+        metadata: The 'metadata' section of the tool output
+
+    Returns:
+        Ground truth dictionary suitable for symbol-scanner evaluation
+    """
+    ground_truth = {
+        "schema_version": "2.0",
+        "description": f"Auto-seeded ground truth from {metadata.get('run_id', 'unknown')}",
+        "seeded_at": datetime.now(timezone.utc).isoformat(),
+        "seeded_from": {
+            "run_id": metadata.get("run_id"),
+            "commit": metadata.get("commit"),
+            "timestamp": metadata.get("timestamp"),
+        },
+        "verification_status": "pending_review",
+        "verification": {
+            "method": "auto_seeded",
+            "methodology": "Extracted from symbol-scanner output - requires manual verification",
+            "cross_validated_with": [],
+            "verification_notes": "TODO: Manually verify symbol counts and call relationships",
+        },
+    }
+
+    symbols = data.get("symbols", [])
+    calls = data.get("calls", [])
+    imports = data.get("imports", [])
+    summary = data.get("summary", {})
+
+    # Summary expectations
+    ground_truth["summary_expectations"] = {
+        "total_files": summary.get("total_files", 0),
+        "total_symbols": summary.get("total_symbols", len(symbols)),
+        "total_calls": summary.get("total_calls", len(calls)),
+        "total_imports": summary.get("total_imports", len(imports)),
+    }
+
+    # Symbol type distribution
+    symbol_types: Counter[str] = Counter()
+    for symbol in symbols:
+        symbol_type = symbol.get("symbol_type", "unknown")
+        symbol_types[symbol_type] += 1
+
+    ground_truth["symbol_expectations"] = {
+        "by_type": dict(symbol_types),
+        "total": len(symbols),
+    }
+
+    # Call type distribution
+    call_types: Counter[str] = Counter()
+    for call in calls:
+        call_type = call.get("call_type", "unknown")
+        call_types[call_type] += 1
+
+    ground_truth["call_expectations"] = {
+        "by_type": dict(call_types),
+        "total": len(calls),
+    }
+
+    # Import type distribution
+    import_types: Counter[str] = Counter()
+    for imp in imports:
+        import_type = imp.get("import_type", "unknown")
+        import_types[import_type] += 1
+
+    ground_truth["import_expectations"] = {
+        "by_type": dict(import_types),
+        "total": len(imports),
+    }
+
+    # Resolution statistics (if available in summary)
+    resolution = summary.get("resolution", {})
+    if resolution:
+        ground_truth["resolution_expectations"] = {
+            "total_resolved": resolution.get("total_resolved", 0),
+            "total_unresolved": resolution.get("total_unresolved", 0),
+            "resolved_same_file": resolution.get("resolved_same_file", 0),
+            "resolved_cross_file": resolution.get("resolved_cross_file", 0),
+        }
+
+    # Per-file symbol counts (top 10 files by symbol count)
+    file_symbol_counts: Counter[str] = Counter()
+    for symbol in symbols:
+        file_path = symbol.get("path", symbol.get("file_path", "unknown"))
+        file_symbol_counts[file_path] += 1
+
+    top_files = file_symbol_counts.most_common(10)
+    ground_truth["top_files_by_symbols"] = {
+        path: count for path, count in top_files
+    }
+
+    return ground_truth
+
+
 # Tool name to seeding function mapping
 TOOL_SEEDERS = {
     "scc": seed_scc_ground_truth,
@@ -482,6 +580,7 @@ TOOL_SEEDERS = {
     "roslyn-analyzers": seed_roslyn_ground_truth,
     "trivy": seed_trivy_ground_truth,
     "git-sizer": seed_git_sizer_ground_truth,
+    "symbol-scanner": seed_symbol_scanner_ground_truth,
 }
 
 

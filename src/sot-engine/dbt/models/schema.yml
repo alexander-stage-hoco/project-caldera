@@ -25,6 +25,8 @@ sources:
       - name: lz_code_symbols
       - name: lz_symbol_calls
       - name: lz_file_imports
+      - name: lz_scancode_file_licenses
+      - name: lz_scancode_summary
 
 models:
   - name: stg_lz_tool_runs
@@ -1271,5 +1273,83 @@ models:
         tests:
           - not_null
       - name: instability
+        tests:
+          - not_null
+
+  - name: stg_lz_scancode_file_licenses
+    description: "Staged license findings from scancode analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: spdx_id
+        tests:
+          - not_null
+      - name: category
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - permissive
+                  - weak-copyleft
+                  - copyleft
+                  - unknown
+      - name: confidence
+        tests:
+          - not_null
+      - name: match_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - file
+                  - header
+                  - spdx
+
+  - name: stg_lz_scancode_summary
+    description: "Repository-level license summary from scancode analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - unique
+      - name: total_files_scanned
+        tests:
+          - not_null
+      - name: files_with_licenses
+        tests:
+          - not_null
+      - name: overall_risk
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+                  - unknown
+      - name: has_permissive
+        tests:
+          - not_null
+      - name: has_weak_copyleft
+        tests:
+          - not_null
+      - name: has_copyleft
+        tests:
+          - not_null
+      - name: has_unknown
         tests:
           - not_null

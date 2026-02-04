@@ -72,6 +72,17 @@ tool_entities:
     - GitSizerLfsCandidate
   gitleaks:
     - GitleaksSecret
+  symbol-scanner:
+    - CodeSymbol
+    - SymbolCall
+    - FileImport
+  scancode:
+    - ScancodeFileLicense
+    - ScancodeSummary
+  pmd-cpd:
+    - PmdCpdFileMetric
+    - PmdCpdDuplication
+    - PmdCpdOccurrence
 
 entity_repository_map:
   SccFileMetric:
@@ -122,6 +133,30 @@ entity_repository_map:
   GitleaksSecret:
     repository: GitleaksRepository
     method: insert_secrets
+  CodeSymbol:
+    repository: SymbolScannerRepository
+    method: insert_symbols
+  SymbolCall:
+    repository: SymbolScannerRepository
+    method: insert_calls
+  FileImport:
+    repository: SymbolScannerRepository
+    method: insert_imports
+  ScancodeFileLicense:
+    repository: ScancodeRepository
+    method: insert_file_licenses
+  ScancodeSummary:
+    repository: ScancodeRepository
+    method: insert_summary
+  PmdCpdFileMetric:
+    repository: PmdCpdRepository
+    method: insert_file_metrics
+  PmdCpdDuplication:
+    repository: PmdCpdRepository
+    method: insert_duplications
+  PmdCpdOccurrence:
+    repository: PmdCpdRepository
+    method: insert_occurrences
 
 # Patterns for quality rule detection
 quality_rule_patterns:
@@ -148,3 +183,108 @@ quality_rule_patterns:
     - line_start
     - line_end
     - ">= 1"
+
+# Data completeness validation rules
+data_completeness_rules:
+  # Count field to list field mappings for consistency checks
+  count_list_pairs:
+    - count_field: file_count
+      list_field: files
+    - count_field: finding_count
+      list_field: findings
+    - count_field: vulnerability_count
+      list_field: vulnerabilities
+    - count_field: secret_count
+      list_field: secrets
+    - count_field: issue_count
+      list_field: issues
+    - count_field: violation_count
+      list_field: violations
+    - count_field: smell_count
+      list_field: smells
+    - count_field: function_count
+      list_field: functions
+    - count_field: symbol_count
+      list_field: symbols
+    - count_field: total_files
+      list_field: files
+    - count_field: total_findings
+      list_field: findings
+  # Required fields per data type (non-null validation)
+  required_data_fields:
+    files:
+      - path
+    findings:
+      - file_path
+      - message
+    vulnerabilities:
+      - vulnerability_id
+      - severity
+    secrets:
+      - file_path
+      - rule_id
+    issues:
+      - key
+      - severity
+    violations:
+      - file_path
+      - rule_id
+    smells:
+      - file_path
+      - rule_id
+    functions:
+      - name
+      - file_path
+    # Generic symbols (most tools)
+    symbols:
+      - name
+      - file_path
+  # Tool-specific overrides for required_data_fields
+  required_data_fields_overrides:
+    symbol-scanner:
+      symbols:
+        - symbol_name
+        - path
+
+# Path consistency validation rules
+path_consistency_rules:
+  # Cross-reference path sections (source field should match target field)
+  cross_reference_sections:
+    - source: findings[].file_path
+      target: files[].path
+    - source: vulnerabilities[].file_path
+      target: files[].path
+    - source: secrets[].file_path
+      target: files[].path
+    - source: issues[].file_path
+      target: files[].path
+    - source: violations[].file_path
+      target: files[].path
+    - source: smells[].file_path
+      target: files[].path
+    - source: functions[].file_path
+      target: files[].path
+    - source: symbols[].file_path
+      target: files[].path
+  # Fields that must be repo-relative
+  repo_relative_fields:
+    - data.files[].path
+    - data.findings[].file_path
+    - data.vulnerabilities[].file_path
+    - data.secrets[].file_path
+    - data.issues[].file_path
+    - data.violations[].file_path
+    - data.smells[].file_path
+    - data.functions[].file_path
+    - data.symbols[].file_path
+    - data.directories[].path
+
+# Test coverage validation rules
+test_coverage_rules:
+  threshold: 80
+  source_dirs:
+    - scripts
+  omit_patterns:
+    - "scripts/checks/*"
+    - "scripts/evaluate.py"
+    - "**/conftest.py"
