@@ -1280,6 +1280,7 @@ python scripts/seed_ground_truth.py <tool> <output.json>
 | Missing run mapping | Direct `run_pk` join | Use `collection_run_id` mapping |
 | Rollup invariant | `recursive < direct` | `recursive >= direct` always |
 | Missing source | Use table name directly | Define in `schema.yml` sources |
+| Incomplete integration | Infrastructure only | Infrastructure + dbt models + evaluations |
 
 ---
 
@@ -1371,6 +1372,53 @@ Run through this final checklist before considering the tool complete:
 - [ ] EVAL_STRATEGY.md has Rollup Validation section
 - [ ] `python src/tool-compliance/tool_compliance.py src/tools/<tool>` passes
 - [ ] Full pipeline executes successfully
+
+---
+
+## Integration Completeness Levels
+
+Not all tool integrations need to be 100% complete. This table defines completeness levels:
+
+| Level | Description | Use Case |
+|-------|-------------|----------|
+| **Prototype** | Tool runs, produces output | Exploration, feasibility |
+| **Functional** | Passes structural + output checks | Development iteration |
+| **Integrated** | Infrastructure layer complete | Data collection ready |
+| **Complete** | All checks pass | Production ready |
+
+### Prototype (Passes: ~20 checks)
+- Directory structure exists
+- analyze.py runs and produces JSON
+- Output validates against schema
+
+### Functional (Passes: ~30 checks)
+- All Prototype checks
+- Makefile targets work
+- Ground truth files exist
+- LLM judges implemented
+
+### Integrated (Passes: ~40 checks)
+- All Functional checks
+- Entity/Repository/Adapter implemented
+- Schema tables defined
+- Orchestrator wired
+
+### Complete (Passes: 51 checks)
+- All Integrated checks
+- dbt staging models
+- dbt rollup models + test
+- Evaluations run with results
+- Adapter integration test passes
+
+### Example: PMD-CPD (2026-02-04)
+
+**Level:** Integrated (37/51 = 73%)
+
+**What worked:** Full infrastructure layer - the tool can be invoked by the orchestrator and data would flow to landing zone tables.
+
+**What's missing:** Data transformation layer (dbt) and evaluation outputs. Without dbt models, data sits in landing zone but cannot be queried through marts. Without evaluation runs, quality cannot be assessed.
+
+**Impact:** Tool is usable for data collection but not for reporting or analysis.
 
 ---
 
@@ -1469,6 +1517,12 @@ python src/tool-compliance/tool_compliance.py src/tools/<tool>
 - Multi-table output → Create separate LZ tables for each
 - CVSS scores nested → Extract in priority order (nvd, redhat, ghsa)
 - Package vulnerabilities lack line numbers → Use -1 sentinel
+
+#### pmd-cpd (New Tool)
+- Infrastructure (adapter/entity/repository) can be complete while dbt layer is missing
+- Compliance scanner catches this gap via `sot.dbt_staging_model` and `dbt.model_coverage` checks
+- Running `make evaluate` and `make evaluate-llm` is required even if tool works correctly
+- Adapter integration test requires both fixture file AND correct constructor signature
 
 ---
 

@@ -678,8 +678,8 @@ def check_something(data: dict, ground_truth: dict | None) -> CheckResult:
 ## Rollup Validation
 
 Rollups:
-- directory_direct_counts (duplicate metrics for files directly in directory)
-- directory_recursive_counts (duplicate metrics for all files in subtree)
+- directory_counts_direct
+- directory_counts_recursive
 
 Tests:
 - src/sot-engine/dbt/tests/test_rollup_pmd_cpd_direct_vs_recursive.sql

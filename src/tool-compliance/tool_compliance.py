@@ -2232,6 +2232,7 @@ def _get_tool_repository(conn, tool_name: str):
         GitleaksRepository,
         SymbolScannerRepository,
         ScancodeRepository,
+        PmdCpdRepository,
     )
     repos = {
         "scc": SccRepository,
@@ -2244,6 +2245,7 @@ def _get_tool_repository(conn, tool_name: str):
         "gitleaks": GitleaksRepository,
         "symbol-scanner": SymbolScannerRepository,
         "scancode": ScancodeRepository,
+        "pmd-cpd": PmdCpdRepository,
     }
     repo_cls = repos.get(tool_name)
     return repo_cls(conn) if repo_cls else None
