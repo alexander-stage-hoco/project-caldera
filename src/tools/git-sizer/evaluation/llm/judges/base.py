@@ -7,6 +7,7 @@ and provides git-sizer-specific extensions.
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -66,10 +67,16 @@ class BaseJudge(SharedBaseJudge):
         """Load analysis from Caldera envelope format.
 
         Returns a normalized structure compatible with evidence collection.
-        Supports both:
-        - Single repo output: { metadata: {...}, data: {...} }
-        - Multi-repo results: { repositories: [...] }
+        Supports:
+        - Single repo output file: { metadata: {...}, data: {...} }
+        - Multi-repo results file: { repositories: [...] }
+        - Directory with multiple repo subdirectories (auto-aggregates)
         """
+        # Handle directory input - aggregate all repo outputs
+        if self.analysis_path.is_dir():
+            return self._load_from_directory(self.analysis_path)
+
+        # Handle file input
         if not self.analysis_path.exists():
             return {"error": f"Analysis file not found: {self.analysis_path}"}
 
@@ -84,7 +91,7 @@ class BaseJudge(SharedBaseJudge):
                 "timestamp": metadata.get("timestamp", ""),
                 "target_path": metadata.get("repo_id", ""),
                 "repositories": [{
-                    "repository": metadata.get("repo_id", "unknown"),
+                    "repository": metadata.get("repo_name") or metadata.get("repo_id", "unknown"),
                     "health_grade": data.get("health_grade", ""),
                     "metrics": data.get("metrics", {}),
                     "violations": data.get("violations", []),
@@ -99,6 +106,64 @@ class BaseJudge(SharedBaseJudge):
 
         # Already in multi-repo format (from evaluate.py aggregation)
         return raw
+
+    def _load_from_directory(self, results_dir: Path) -> dict[str, Any]:
+        """Aggregate all repo results from a directory structure.
+
+        Looks for:
+        - results_dir/*/output.json (subdirectory repos)
+        - results_dir/output.json (root output, if valid non-placeholder)
+        """
+        repositories = []
+        timestamps = []
+
+        # Scan subdirectories for repo outputs
+        for repo_dir in sorted(results_dir.iterdir()):
+            if not repo_dir.is_dir():
+                continue
+            output_path = repo_dir / "output.json"
+            if output_path.exists():
+                try:
+                    data = json.loads(output_path.read_text())
+                except json.JSONDecodeError:
+                    continue
+                if "data" in data:
+                    repo_data = data["data"].copy()
+                    repo_name = data.get("metadata", {}).get("repo_name") or repo_dir.name
+                    repo_data["repository"] = repo_name
+                    repo_data["metrics"] = repo_data.get("metrics", {})
+                    repositories.append(repo_data)
+                    # Collect timestamp for aggregation
+                    ts = data.get("metadata", {}).get("timestamp")
+                    if ts:
+                        timestamps.append(ts)
+
+        if not repositories:
+            # Fallback: try root output.json if no subdirectory results found
+            root_output = results_dir / "output.json"
+            if root_output.exists():
+                # Re-run load_analysis on the file (not directory)
+                original_path = self.analysis_path
+                self.analysis_path = root_output
+                try:
+                    return self.load_analysis()
+                finally:
+                    self.analysis_path = original_path
+            return {"error": f"No analysis results found in {results_dir}"}
+
+        # Use latest timestamp from aggregated repos, or generate current time if none found
+        latest_timestamp = max(timestamps) if timestamps else datetime.now(timezone.utc).isoformat()
+
+        return {
+            "timestamp": latest_timestamp,
+            "target_path": str(results_dir),
+            "repositories": repositories,
+            "summary": {
+                "total_repositories": len(repositories),
+                "total_duration_ms": sum(r.get("duration_ms", 0) for r in repositories),
+                "total_violations": sum(len(r.get("violations", [])) for r in repositories),
+            },
+        }
 
     def _build_programmatic_summary(self) -> str:
         """Build a short summary of programmatic checks and results."""
