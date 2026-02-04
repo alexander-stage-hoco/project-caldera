@@ -82,7 +82,7 @@
     "calls": [
       {
         "caller_file": "Records.cs",
-        "caller_symbol": "Point",
+        "caller_symbol": "Distance",
         "callee_symbol": "Sqrt",
         "callee_file": null,
         "line_number": 14,

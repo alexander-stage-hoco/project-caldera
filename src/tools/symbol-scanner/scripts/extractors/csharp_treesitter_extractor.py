@@ -325,6 +325,12 @@ class CSharpTreeSitterExtractor(BaseExtractor):
             for child in body_node.children:
                 self._extract_from_tree(child, path, source, result, parent_class, None)
 
+        # Process expression-bodied methods (e.g., public int Square(int x) => x * x;)
+        arrow_clause = self._find_child_by_type(node, "arrow_expression_clause")
+        if arrow_clause:
+            for child in arrow_clause.children:
+                self._extract_from_tree(child, path, source, result, parent_class, None)
+
     def _handle_constructor(
         self,
         node: Node,
@@ -401,6 +407,12 @@ class CSharpTreeSitterExtractor(BaseExtractor):
         accessor_list = self._find_child_by_type(node, "accessor_list")
         if accessor_list:
             for child in accessor_list.children:
+                self._extract_from_tree(child, path, source, result, parent_class, None)
+
+        # Process expression-bodied properties (e.g., public int Value => _value;)
+        arrow_clause = self._find_child_by_type(node, "arrow_expression_clause")
+        if arrow_clause:
+            for child in arrow_clause.children:
                 self._extract_from_tree(child, path, source, result, parent_class, None)
 
     def _handle_field(
@@ -531,6 +543,15 @@ class CSharpTreeSitterExtractor(BaseExtractor):
                     callee_object=callee_object,
                 )
             )
+
+        # Handle chained calls - the function part might be a member access on another invocation
+        # e.g., col.Skip(1).FirstOrDefault() - we need to extract both Skip and FirstOrDefault
+        func = node.children[0] if node.children else None
+        if func and func.type == "member_access_expression":
+            # Check if the object of the member access is itself an invocation
+            for child in func.children:
+                if child.type == "invocation_expression":
+                    self._handle_invocation(child, path, source, result)
 
     def _handle_object_creation(
         self,
@@ -790,13 +811,37 @@ class CSharpTreeSitterExtractor(BaseExtractor):
                 return "this"
             elif child.type == "base_expression":
                 return "base"
+            # Handle string literals (extension methods on strings)
+            elif child.type in (
+                "string_literal",
+                "verbatim_string_literal",
+                "interpolated_string_expression",
+            ):
+                return "<string>"
+            # Handle numeric literals (extension methods on numbers)
+            elif child.type in ("integer_literal", "real_literal"):
+                return "<number>"
+            # Handle type references (e.g., string.IsNullOrEmpty, Math.Sqrt)
+            elif child.type == "predefined_type":
+                return self._get_node_text(child, source)
+            elif child.type == "generic_name":
+                return self._get_node_text(child, source)
+            # Handle invocation expressions (chained calls like col.Skip(1).First())
+            elif child.type == "invocation_expression":
+                return "<call>"
         return None
 
     def _find_enclosing_member(self, node: Node, source: bytes) -> str | None:
         """Find the name of the enclosing method/property/constructor."""
         current = node.parent
         while current:
-            if current.type in ("method_declaration", "constructor_declaration"):
+            if current.type == "method_declaration":
+                # For methods, we need to skip past the return type to find the actual name
+                # Similar logic to _handle_method
+                name_node = self._get_method_name_node(current, source)
+                if name_node:
+                    return self._get_node_text(name_node, source)
+            elif current.type == "constructor_declaration":
                 name_node = self._find_child_by_type(current, "identifier")
                 if name_node:
                     return self._get_node_text(name_node, source)
@@ -897,4 +942,36 @@ class CSharpTreeSitterExtractor(BaseExtractor):
         for child in node.children:
             if child.type == type_name:
                 return child
+        return None
+
+    def _get_method_name_node(self, node: Node, source: bytes) -> Node | None:
+        """Get the method name identifier from a method declaration.
+
+        For generic methods like `T SecondOrDefault<T>(...)`, this correctly
+        identifies the method name (`SecondOrDefault`) rather than the type
+        parameter (`T`).
+        """
+        # Method structure: [modifiers] return_type identifier parameter_list block
+        # Find identifier AFTER return type (not from generic return type like Task<T>)
+        saw_type = False
+
+        for child in node.children:
+            if child.type in (
+                "predefined_type",
+                "generic_name",
+                "qualified_name",
+                "nullable_type",
+                "array_type",
+                "pointer_type",
+                "tuple_type",
+                "ref_type",
+            ):
+                saw_type = True
+            elif child.type == "identifier":
+                if saw_type:
+                    return child
+                saw_type = True  # First identifier could be return type
+            elif child.type == "parameter_list":
+                break
+
         return None
