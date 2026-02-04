@@ -1,11 +1,1091 @@
 {
-  "generated_at": "2026-02-04T14:13:07.745448+00:00",
+  "generated_at": "2026-02-04T18:49:30.057839+00:00",
   "summary": {
-    "failed": 10,
-    "passed": 2,
-    "tool_count": 12
+    "failed": 1,
+    "passed": 13,
+    "tool_count": 14
   },
   "tools": [
+    {
+      "checks": [
+        {
+          "check_id": "run.analyze",
+          "duration_ms": 0.0,
+          "evidence": [
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/6e1a36b0-040d-4943-848f-767b01c548ba/output.json"
+          ],
+          "message": "Pre-existing analysis output found",
+          "severity": "critical",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "run.evaluate",
+          "duration_ms": 0.0,
+          "evidence": [
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/evaluation/scorecard.md"
+          ],
+          "message": "Pre-existing evaluation output found",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.quality",
+          "duration_ms": 0.35,
+          "evidence": [
+            "PASS"
+          ],
+          "message": "Evaluation decision meets threshold",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "run.evaluate_llm",
+          "duration_ms": 0.0,
+          "evidence": [
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/evaluation/llm/results/llm-eval-20260204-160701.json"
+          ],
+          "message": "Pre-existing LLM evaluation output found",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_quality",
+          "duration_ms": 0.24,
+          "evidence": [
+            "WEAK_PASS"
+          ],
+          "message": "LLM evaluation decision meets threshold",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "output.load",
+          "duration_ms": 0.81,
+          "evidence": [
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/6e1a36b0-040d-4943-848f-767b01c548ba/output.json"
+          ],
+          "message": "Output JSON loaded",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "output.paths",
+          "duration_ms": 3.19,
+          "evidence": [],
+          "message": "Path values are repo-relative",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "output.data_completeness",
+          "duration_ms": 0.03,
+          "evidence": [],
+          "message": "Data completeness validated",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "output.path_consistency",
+          "duration_ms": 0.16,
+          "evidence": [
+            "Checked 161 paths across 2 sections"
+          ],
+          "message": "Path consistency validated",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "output.required_fields",
+          "duration_ms": 0.01,
+          "evidence": [],
+          "message": "Required metadata fields present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "output.schema_version",
+          "duration_ms": 0.01,
+          "evidence": [
+            "1.0.0"
+          ],
+          "message": "Schema version is semver",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "output.tool_name_match",
+          "duration_ms": 0.01,
+          "evidence": [
+            "devskim",
+            "devskim"
+          ],
+          "message": "Tool name matches data.tool",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "output.metadata_consistency",
+          "duration_ms": 0.04,
+          "evidence": [],
+          "message": "Metadata formats are consistent",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.version_alignment",
+          "duration_ms": 0.43,
+          "evidence": [
+            "1.0.0"
+          ],
+          "message": "Output schema_version matches schema constraint",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "output.schema_validate",
+          "duration_ms": 152.64,
+          "evidence": [],
+          "message": "Output validates against schema (venv)",
+          "severity": "critical",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "structure.paths",
+          "duration_ms": 0.23,
+          "evidence": [],
+          "message": "All required paths present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.targets",
+          "duration_ms": 0.43,
+          "evidence": [],
+          "message": "Makefile targets present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.permissions",
+          "duration_ms": 0.03,
+          "evidence": [],
+          "message": "Makefile has correct permissions",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.uses_common",
+          "duration_ms": 0.2,
+          "evidence": [],
+          "message": "Makefile includes ../Makefile.common",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_dir_convention",
+          "duration_ms": 0.12,
+          "evidence": [
+            "outputs/$(RUN_ID)"
+          ],
+          "message": "OUTPUT_DIR inherited from Makefile.common",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_filename",
+          "duration_ms": 0.11,
+          "evidence": [],
+          "message": "analyze target output pattern acceptable",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.draft",
+          "duration_ms": 0.11,
+          "evidence": [],
+          "message": "Schema draft is 2020-12",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.contract",
+          "duration_ms": 0.09,
+          "evidence": [],
+          "message": "Schema requires metadata and data fields",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.blueprint_structure",
+          "duration_ms": 0.47,
+          "evidence": [],
+          "message": "BLUEPRINT.md has required sections",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.eval_strategy_structure",
+          "duration_ms": 0.41,
+          "evidence": [],
+          "message": "EVAL_STRATEGY.md has required sections",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.check_modules",
+          "duration_ms": 0.06,
+          "evidence": [],
+          "message": "Check modules present",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_prompts",
+          "duration_ms": 0.02,
+          "evidence": [],
+          "message": "LLM prompts present",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_judge_count",
+          "duration_ms": 0.13,
+          "evidence": [
+            "rule_coverage.py",
+            "severity_calibration.py",
+            "security_focus.py",
+            "detection_accuracy.py"
+          ],
+          "message": "LLM judge count meets minimum (4 >= 4)",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.synthetic_context",
+          "duration_ms": 6.14,
+          "evidence": [
+            "base.py: evaluation_mode parameter present",
+            "primary judge: detection_accuracy.py",
+            "prompt: detection_accuracy.md has all placeholders"
+          ],
+          "message": "Synthetic evaluation context pattern implemented correctly",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.ground_truth",
+          "duration_ms": 0.06,
+          "evidence": [
+            "api-security.json",
+            "csharp.json"
+          ],
+          "message": "Ground truth files present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.scorecard",
+          "duration_ms": 0.01,
+          "evidence": [],
+          "message": "Scorecard present",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.programmatic_exists",
+          "duration_ms": 0.02,
+          "evidence": [
+            "evaluation/results/evaluation_report.json"
+          ],
+          "message": "Programmatic evaluation file exists",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.programmatic_schema",
+          "duration_ms": 0.09,
+          "evidence": [
+            "timestamp",
+            "analysis_path",
+            "ground_truth_dir",
+            "decision",
+            "score",
+            "summary",
+            "checks"
+          ],
+          "message": "Programmatic evaluation schema valid",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.programmatic_quality",
+          "duration_ms": 0.08,
+          "evidence": [
+            "PASS"
+          ],
+          "message": "Programmatic evaluation passed",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_exists",
+          "duration_ms": 0.02,
+          "evidence": [
+            "evaluation/results/llm_evaluation.json"
+          ],
+          "message": "LLM evaluation file exists",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_schema",
+          "duration_ms": 0.2,
+          "evidence": [
+            "run_id",
+            "timestamp",
+            "model",
+            "score",
+            "decision",
+            "dimensions",
+            "total_score",
+            "average_confidence",
+            "combined_score",
+            "programmatic_input"
+          ],
+          "message": "LLM evaluation schema valid",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_includes_programmatic",
+          "duration_ms": 0.05,
+          "evidence": [
+            "file=evaluation/results/evaluation_report.json",
+            "decision=PASS"
+          ],
+          "message": "LLM evaluation includes programmatic input",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_decision_quality",
+          "duration_ms": 0.04,
+          "evidence": [
+            "WEAK_PASS"
+          ],
+          "message": "LLM evaluation passed",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.rollup_validation",
+          "duration_ms": 0.2,
+          "evidence": [
+            "src/sot-engine/dbt/tests/test_rollup_devskim_direct_vs_recursive.sql"
+          ],
+          "message": "Rollup Validation declared with valid tests",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "adapter.compliance",
+          "duration_ms": 127.55,
+          "evidence": [],
+          "message": "Adapter exposes schema, LZ contract, and validation hooks",
+          "severity": "info",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "adapter.schema_alignment",
+          "duration_ms": 1.7,
+          "evidence": [],
+          "message": "TABLE_DDL matches schema.sql",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "adapter.integration",
+          "duration_ms": 46.64,
+          "evidence": [
+            "Fixture: devskim_output.json"
+          ],
+          "message": "Adapter successfully persisted fixture data",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "adapter.quality_rules_coverage",
+          "duration_ms": 0.56,
+          "evidence": [
+            "paths",
+            "line_numbers",
+            "required_fields"
+          ],
+          "message": "All 3 quality rules have implementation coverage",
+          "severity": "info",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "sot.adapter_registered",
+          "duration_ms": 0.31,
+          "evidence": [],
+          "message": "Adapter DevskimAdapter properly registered in adapters/__init__.py",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "sot.schema_table",
+          "duration_ms": 0.22,
+          "evidence": [
+            "Found 1 table(s)"
+          ],
+          "message": "Schema tables found for tool",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "sot.orchestrator_wired",
+          "duration_ms": 0.28,
+          "evidence": [],
+          "message": "Tool 'devskim' wired in TOOL_INGESTION_CONFIGS",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "sot.dbt_staging_model",
+          "duration_ms": 0.18,
+          "evidence": [
+            "stg_lz_devskim_findings.sql",
+            "stg_devskim_file_metrics.sql"
+          ],
+          "message": "dbt staging model(s) found",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "dbt.model_coverage",
+          "duration_ms": 0.49,
+          "evidence": [
+            "stg_lz_devskim_findings.sql",
+            "stg_devskim_file_metrics.sql"
+          ],
+          "message": "dbt models present for tool",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "entity.repository_alignment",
+          "duration_ms": 6.75,
+          "evidence": [
+            "DevskimFinding"
+          ],
+          "message": "All entities have aligned repositories",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.structure_naming",
+          "duration_ms": 0.41,
+          "evidence": [],
+          "message": "Test structure and naming conventions followed",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "sql.cross_tool_join_patterns",
+          "duration_ms": 34.35,
+          "evidence": [],
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.coverage_threshold",
+          "duration_ms": 0.23,
+          "evidence": [
+            "coverage.json not found"
+          ],
+          "message": "No coverage report found - run with --run-coverage",
+          "severity": "high",
+          "status": "skip",
+          "stderr_summary": null,
+          "stdout_summary": null
+        }
+      ],
+      "name": "devskim",
+      "status": "pass"
+    },
+    {
+      "checks": [
+        {
+          "check_id": "run.analyze",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No analysis output found - run with --run-analysis or execute 'make analyze'",
+          "severity": "critical",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "run.evaluate",
+          "duration_ms": 0.0,
+          "evidence": [
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dotcover/evaluation/scorecard.md"
+          ],
+          "message": "Pre-existing evaluation output found",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.quality",
+          "duration_ms": 0.0,
+          "evidence": [
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dotcover/evaluation/results/checks.json",
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dotcover/evaluation/results/evaluation_report.json",
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dotcover/evaluation/results/llm_evaluation.json",
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dotcover/evaluation/scorecard.json"
+          ],
+          "message": "Evaluation results JSON missing",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "run.evaluate_llm",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No LLM evaluation output found - run with --run-llm or execute 'make evaluate-llm'",
+          "severity": "medium",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_quality",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "LLM evaluation quality check skipped (no outputs)",
+          "severity": "medium",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "output.load",
+          "duration_ms": 0.06,
+          "evidence": [
+            "No output.json found"
+          ],
+          "message": "No output.json available",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "structure.paths",
+          "duration_ms": 0.14,
+          "evidence": [],
+          "message": "All required paths present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.targets",
+          "duration_ms": 0.17,
+          "evidence": [],
+          "message": "Makefile targets present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.permissions",
+          "duration_ms": 0.01,
+          "evidence": [],
+          "message": "Makefile has correct permissions",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.uses_common",
+          "duration_ms": 0.03,
+          "evidence": [],
+          "message": "Makefile includes ../Makefile.common",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_dir_convention",
+          "duration_ms": 0.05,
+          "evidence": [
+            "outputs/$(RUN_ID)"
+          ],
+          "message": "OUTPUT_DIR inherited from Makefile.common",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_filename",
+          "duration_ms": 0.04,
+          "evidence": [],
+          "message": "analyze target uses output directory argument",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.draft",
+          "duration_ms": 0.18,
+          "evidence": [],
+          "message": "Schema draft is 2020-12",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.contract",
+          "duration_ms": 0.06,
+          "evidence": [],
+          "message": "Schema requires metadata and data fields",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.blueprint_structure",
+          "duration_ms": 0.18,
+          "evidence": [],
+          "message": "BLUEPRINT.md has required sections",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.eval_strategy_structure",
+          "duration_ms": 0.15,
+          "evidence": [],
+          "message": "EVAL_STRATEGY.md has required sections",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.check_modules",
+          "duration_ms": 0.45,
+          "evidence": [],
+          "message": "Check modules present",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_prompts",
+          "duration_ms": 0.15,
+          "evidence": [],
+          "message": "LLM prompts present",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_judge_count",
+          "duration_ms": 0.04,
+          "evidence": [],
+          "message": "Insufficient LLM judges: 0 found, minimum 4 required",
+          "severity": "medium",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.synthetic_context",
+          "duration_ms": 0.31,
+          "evidence": [
+            "base.py __init__ missing evaluation_mode parameter"
+          ],
+          "message": "base.py missing evaluation_mode parameter",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.ground_truth",
+          "duration_ms": 0.04,
+          "evidence": [
+            "synthetic.json"
+          ],
+          "message": "Ground truth files present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.scorecard",
+          "duration_ms": 0.01,
+          "evidence": [],
+          "message": "Scorecard present",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.programmatic_exists",
+          "duration_ms": 0.01,
+          "evidence": [
+            "evaluation/results/evaluation_report.json"
+          ],
+          "message": "Missing evaluation_report.json at uniform path",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.programmatic_schema",
+          "duration_ms": 0.01,
+          "evidence": [
+            "evaluation/results/evaluation_report.json"
+          ],
+          "message": "Cannot validate schema - file missing",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.programmatic_quality",
+          "duration_ms": 0.01,
+          "evidence": [
+            "evaluation/results/evaluation_report.json"
+          ],
+          "message": "Cannot check quality - file missing",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_exists",
+          "duration_ms": 0.01,
+          "evidence": [
+            "evaluation/results/llm_evaluation.json"
+          ],
+          "message": "Missing llm_evaluation.json at uniform path",
+          "severity": "medium",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_schema",
+          "duration_ms": 0.01,
+          "evidence": [
+            "evaluation/results/llm_evaluation.json"
+          ],
+          "message": "Cannot validate schema - file missing",
+          "severity": "medium",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_includes_programmatic",
+          "duration_ms": 0.01,
+          "evidence": [
+            "evaluation/results/llm_evaluation.json"
+          ],
+          "message": "Cannot check - file missing",
+          "severity": "medium",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.llm_decision_quality",
+          "duration_ms": 0.01,
+          "evidence": [
+            "evaluation/results/llm_evaluation.json"
+          ],
+          "message": "Cannot check quality - file missing",
+          "severity": "medium",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "evaluation.rollup_validation",
+          "duration_ms": 0.11,
+          "evidence": [
+            "src/tools/dotcover/tests/unit/test_analyze.py"
+          ],
+          "message": "Rollup Validation declared with valid tests",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "adapter.compliance",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No adapter compliance rule defined",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "adapter.schema_alignment",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No adapter rule defined",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "adapter.integration",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No adapter rule defined",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "adapter.quality_rules_coverage",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No adapter rule defined",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "sot.adapter_registered",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No adapter rule defined - skipping registration check",
+          "severity": "medium",
+          "status": "skip",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "sot.schema_table",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No adapter rule defined - skipping schema table check",
+          "severity": "high",
+          "status": "skip",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "sot.orchestrator_wired",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No adapter rule defined - skipping orchestrator wiring check",
+          "severity": "high",
+          "status": "skip",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "sot.dbt_staging_model",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No adapter rule defined - skipping dbt staging model check",
+          "severity": "high",
+          "status": "skip",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "dbt.model_coverage",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No adapter defined for this tool",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "entity.repository_alignment",
+          "duration_ms": 0.0,
+          "evidence": [],
+          "message": "No entity mappings defined for this tool",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.structure_naming",
+          "duration_ms": 0.12,
+          "evidence": [],
+          "message": "Test structure and naming conventions followed",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "sql.cross_tool_join_patterns",
+          "duration_ms": 14.02,
+          "evidence": [],
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.coverage_threshold",
+          "duration_ms": 0.22,
+          "evidence": [
+            "Add pytest-cov>=4.0.0 to requirements.txt"
+          ],
+          "message": "pytest-cov not in requirements.txt",
+          "severity": "high",
+          "status": "fail",
+          "stderr_summary": null,
+          "stdout_summary": null
+        }
+      ],
+      "name": "dotcover",
+      "status": "fail"
+    },
     {
       "checks": [
         {
@@ -34,7 +1114,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.42,
+          "duration_ms": 0.27,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -58,7 +1138,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.27,
+          "duration_ms": 0.19,
           "evidence": [
             "WEAK_PASS"
           ],
@@ -70,7 +1150,7 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 0.24,
+          "duration_ms": 0.17,
           "evidence": [
             "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/git-sizer/evaluation/results/output.json"
           ],
@@ -82,7 +1162,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 0.17,
+          "duration_ms": 0.1,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -147,7 +1227,7 @@
         },
         {
           "check_id": "output.metadata_consistency",
-          "duration_ms": 0.04,
+          "duration_ms": 0.01,
           "evidence": [],
           "message": "Metadata formats are consistent",
           "severity": "medium",
@@ -157,7 +1237,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.39,
+          "duration_ms": 0.34,
           "evidence": [
             "1.0.0"
           ],
@@ -169,7 +1249,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 128.63,
+          "duration_ms": 121.15,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -179,7 +1259,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.21,
+          "duration_ms": 0.27,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -189,7 +1269,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.58,
+          "duration_ms": 0.75,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -209,7 +1289,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.25,
+          "duration_ms": 0.11,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -219,7 +1299,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.14,
+          "duration_ms": 0.09,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -231,7 +1311,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.09,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "analyze target uses output directory argument",
           "severity": "medium",
@@ -241,7 +1321,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.09,
+          "duration_ms": 0.1,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -261,7 +1341,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.35,
+          "duration_ms": 0.29,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -271,7 +1351,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.3,
+          "duration_ms": 0.32,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -291,7 +1371,7 @@
         },
         {
           "check_id": "evaluation.llm_prompts",
-          "duration_ms": 0.04,
+          "duration_ms": 0.05,
           "evidence": [],
           "message": "LLM prompts present",
           "severity": "medium",
@@ -301,7 +1381,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.47,
+          "duration_ms": 0.1,
           "evidence": [
             "integration_fit.py",
             "size_accuracy.py",
@@ -316,7 +1396,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 8.29,
+          "duration_ms": 9.28,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: size_accuracy.py",
@@ -330,7 +1410,7 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.26,
+          "duration_ms": 0.2,
           "evidence": [],
           "message": "Ground truth covers synthetic repos",
           "severity": "high",
@@ -362,7 +1442,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.09,
+          "duration_ms": 0.12,
           "evidence": [
             "timestamp",
             "decision",
@@ -380,7 +1460,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.07,
+          "duration_ms": 0.09,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -392,7 +1472,7 @@
         },
         {
           "check_id": "evaluation.llm_exists",
-          "duration_ms": 0.02,
+          "duration_ms": 0.01,
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
@@ -404,7 +1484,7 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.34,
+          "duration_ms": 0.32,
           "evidence": [
             "timestamp",
             "analysis_path",
@@ -425,19 +1505,20 @@
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.08,
+          "duration_ms": 0.12,
           "evidence": [
-            "LLM evaluation must include programmatic results"
+            "file=evaluation/results/evaluation_report.json",
+            "decision=STRONG_PASS"
           ],
-          "message": "Missing programmatic_input field in llm_evaluation.json",
+          "message": "LLM evaluation includes programmatic input",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.06,
+          "duration_ms": 0.08,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -449,7 +1530,7 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.2,
+          "duration_ms": 0.21,
           "evidence": [
             "src/sot-engine/dbt/tests/test_rollup_git_sizer_repo_level_only.sql"
           ],
@@ -461,7 +1542,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 126.8,
+          "duration_ms": 0.04,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -471,7 +1552,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.79,
+          "duration_ms": 2.47,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -481,7 +1562,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 45.32,
+          "duration_ms": 49.14,
           "evidence": [
             "Fixture: git_sizer_output.json"
           ],
@@ -493,7 +1574,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.7,
+          "duration_ms": 0.41,
           "evidence": [
             "health_grade_valid",
             "metrics_non_negative",
@@ -507,7 +1588,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.39,
+          "duration_ms": 0.21,
           "evidence": [],
           "message": "Adapter GitSizerAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -517,7 +1598,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.21,
+          "duration_ms": 0.22,
           "evidence": [
             "Found 3 table(s)"
           ],
@@ -529,7 +1610,7 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.38,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Tool 'git-sizer' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
@@ -539,7 +1620,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.16,
+          "duration_ms": 0.19,
           "evidence": [
             "stg_lz_git_sizer_metrics.sql",
             "stg_lz_git_sizer_violations.sql",
@@ -553,7 +1634,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.16,
+          "duration_ms": 0.18,
           "evidence": [
             "stg_lz_git_sizer_metrics.sql",
             "stg_lz_git_sizer_violations.sql",
@@ -567,7 +1648,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 5.82,
+          "duration_ms": 6.14,
           "evidence": [
             "GitSizerMetric",
             "GitSizerViolation",
@@ -581,7 +1662,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 1.01,
+          "duration_ms": 0.3,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -591,9 +1672,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 36.37,
+          "duration_ms": 13.89,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -601,7 +1682,7 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.31,
+          "duration_ms": 0.26,
           "evidence": [
             "coverage.json not found"
           ],
@@ -613,7 +1694,7 @@
         }
       ],
       "name": "git-sizer",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "checks": [
@@ -643,7 +1724,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.27,
+          "duration_ms": 0.2,
           "evidence": [
             "PASS"
           ],
@@ -667,7 +1748,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.25,
+          "duration_ms": 0.21,
           "evidence": [
             "WEAK_PASS"
           ],
@@ -679,7 +1760,7 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 0.29,
+          "duration_ms": 0.19,
           "evidence": [
             "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/gitleaks/outputs/9ad8b91b-0618-4351-9ed3-9a07fc72bb19/output.json"
           ],
@@ -691,7 +1772,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 0.06,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -711,7 +1792,7 @@
         },
         {
           "check_id": "output.path_consistency",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [],
           "message": "No path fields found to validate",
           "severity": "medium",
@@ -766,7 +1847,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.27,
+          "duration_ms": 0.31,
           "evidence": [
             "1.0.0"
           ],
@@ -778,7 +1859,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 103.71,
+          "duration_ms": 119.79,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -788,7 +1869,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.2,
+          "duration_ms": 0.27,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -798,7 +1879,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 1.05,
+          "duration_ms": 1.08,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -808,7 +1889,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.03,
+          "duration_ms": 0.02,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -818,7 +1899,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.11,
+          "duration_ms": 0.1,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -850,7 +1931,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.09,
+          "duration_ms": 0.1,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -860,7 +1941,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.07,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -870,7 +1951,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.76,
+          "duration_ms": 0.8,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -880,7 +1961,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.83,
+          "duration_ms": 0.76,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -890,7 +1971,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.06,
+          "duration_ms": 0.05,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -900,7 +1981,7 @@
         },
         {
           "check_id": "evaluation.llm_prompts",
-          "duration_ms": 0.05,
+          "duration_ms": 0.04,
           "evidence": [],
           "message": "LLM prompts present",
           "severity": "medium",
@@ -910,7 +1991,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.09,
+          "duration_ms": 0.1,
           "evidence": [
             "false_positive.py",
             "secret_coverage.py",
@@ -925,7 +2006,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 3.77,
+          "duration_ms": 3.47,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: detection_accuracy.py",
@@ -971,7 +2052,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.33,
+          "duration_ms": 0.37,
           "evidence": [
             "timestamp",
             "tool",
@@ -989,7 +2070,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.04,
+          "duration_ms": 0.08,
           "evidence": [
             "PASS"
           ],
@@ -1001,7 +2082,7 @@
         },
         {
           "check_id": "evaluation.llm_exists",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
@@ -1013,7 +2094,7 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.23,
+          "duration_ms": 0.27,
           "evidence": [
             "timestamp",
             "model",
@@ -1031,7 +2112,7 @@
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.04,
+          "duration_ms": 0.05,
           "evidence": [
             "file=evaluation/results/evaluation_report.json",
             "decision=PASS"
@@ -1056,7 +2137,7 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.27,
+          "duration_ms": 0.34,
           "evidence": [
             "src/tools/gitleaks/tests/unit/test_rollup_invariants.py",
             "src/sot-engine/dbt/tests/test_rollup_gitleaks_direct_vs_recursive.sql"
@@ -1069,7 +2150,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 0.04,
+          "duration_ms": 0.05,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -1079,7 +2160,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.38,
+          "duration_ms": 1.73,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -1089,7 +2170,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 40.02,
+          "duration_ms": 52.26,
           "evidence": [
             "Fixture: gitleaks_output.json"
           ],
@@ -1115,7 +2196,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.22,
+          "duration_ms": 0.27,
           "evidence": [],
           "message": "Adapter GitleaksAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -1125,7 +2206,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.19,
+          "duration_ms": 0.24,
           "evidence": [
             "Found 1 table(s)"
           ],
@@ -1137,7 +2218,7 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.11,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "Tool 'gitleaks' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
@@ -1147,7 +2228,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.16,
+          "duration_ms": 0.2,
           "evidence": [
             "stg_gitleaks_secrets.sql",
             "stg_lz_gitleaks_secrets.sql"
@@ -1160,7 +2241,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.43,
+          "duration_ms": 0.53,
           "evidence": [
             "stg_gitleaks_secrets.sql",
             "stg_lz_gitleaks_secrets.sql"
@@ -1173,7 +2254,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 5.66,
+          "duration_ms": 6.64,
           "evidence": [
             "GitleaksSecret"
           ],
@@ -1185,7 +2266,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 0.95,
+          "duration_ms": 0.38,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -1195,9 +2276,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 12.38,
+          "duration_ms": 14.5,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -1205,19 +2286,19 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.26,
+          "duration_ms": 0.33,
           "evidence": [
-            "Add pytest-cov>=4.0.0 to requirements.txt"
+            "coverage.json not found"
           ],
-          "message": "pytest-cov not in requirements.txt",
+          "message": "No coverage report found - run with --run-coverage",
           "severity": "high",
-          "status": "fail",
+          "status": "skip",
           "stderr_summary": null,
           "stdout_summary": null
         }
       ],
       "name": "gitleaks",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "checks": [
@@ -1225,7 +2306,7 @@
           "check_id": "run.analyze",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/layout-scanner/outputs/9ad8b91b-0618-4351-9ed3-9a07fc72bb19/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/layout-scanner/outputs/6e1a36b0-040d-4943-848f-767b01c548ba/output.json"
           ],
           "message": "Pre-existing analysis output found",
           "severity": "critical",
@@ -1247,7 +2328,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.81,
+          "duration_ms": 1.0,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -1271,7 +2352,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.24,
+          "duration_ms": 0.21,
           "evidence": [
             "PASS"
           ],
@@ -1283,9 +2364,9 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 0.56,
+          "duration_ms": 1.77,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/layout-scanner/outputs/9ad8b91b-0618-4351-9ed3-9a07fc72bb19/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/layout-scanner/outputs/6e1a36b0-040d-4943-848f-767b01c548ba/output.json"
           ],
           "message": "Output JSON loaded",
           "severity": "high",
@@ -1295,7 +2376,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 3.37,
+          "duration_ms": 17.0,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -1370,7 +2451,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.5,
+          "duration_ms": 0.6,
           "evidence": [
             "1.0.0"
           ],
@@ -1382,7 +2463,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 140.91,
+          "duration_ms": 309.3,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -1392,7 +2473,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.22,
+          "duration_ms": 0.27,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -1402,7 +2483,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 1.19,
+          "duration_ms": 1.46,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -1412,7 +2493,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.04,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -1422,7 +2503,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.1,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -1432,7 +2513,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.07,
+          "duration_ms": 0.09,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -1444,7 +2525,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.13,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "analyze target output pattern acceptable",
           "severity": "medium",
@@ -1454,7 +2535,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.13,
+          "duration_ms": 0.16,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -1464,7 +2545,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.1,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -1474,7 +2555,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.73,
+          "duration_ms": 0.56,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -1484,7 +2565,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.68,
+          "duration_ms": 0.74,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -1494,7 +2575,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.08,
+          "duration_ms": 0.11,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -1504,7 +2585,7 @@
         },
         {
           "check_id": "evaluation.llm_prompts",
-          "duration_ms": 0.04,
+          "duration_ms": 0.05,
           "evidence": [],
           "message": "LLM prompts present",
           "severity": "medium",
@@ -1514,7 +2595,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.08,
+          "duration_ms": 0.1,
           "evidence": [
             "classification_reasoning.py",
             "hierarchy_consistency.py",
@@ -1529,7 +2610,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 5.96,
+          "duration_ms": 6.1,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: classification_reasoning.py",
@@ -1572,7 +2653,7 @@
         },
         {
           "check_id": "evaluation.programmatic_exists",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [
             "evaluation/results/evaluation_report.json"
           ],
@@ -1584,7 +2665,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.53,
+          "duration_ms": 0.62,
           "evidence": [
             "timestamp",
             "decision",
@@ -1603,7 +2684,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.47,
+          "duration_ms": 0.55,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -1627,7 +2708,7 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.31,
+          "duration_ms": 0.41,
           "evidence": [
             "timestamp",
             "model",
@@ -1648,19 +2729,20 @@
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.05,
+          "duration_ms": 0.08,
           "evidence": [
-            "LLM evaluation must include programmatic results"
+            "file=evaluation/results/evaluation_report.json",
+            "decision=STRONG_PASS"
           ],
-          "message": "Missing programmatic_input field in llm_evaluation.json",
+          "message": "LLM evaluation includes programmatic input",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.04,
+          "duration_ms": 0.06,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -1672,7 +2754,7 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.25,
+          "duration_ms": 0.32,
           "evidence": [
             "src/sot-engine/dbt/tests/test_rollup_layout_direct_vs_recursive.sql"
           ],
@@ -1684,7 +2766,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 0.04,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -1694,7 +2776,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.27,
+          "duration_ms": 1.74,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -1704,7 +2786,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 48.19,
+          "duration_ms": 61.47,
           "evidence": [
             "Fixture: layout_output.json"
           ],
@@ -1716,7 +2798,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.75,
+          "duration_ms": 0.73,
           "evidence": [
             "paths",
             "ranges",
@@ -1730,7 +2812,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.19,
+          "duration_ms": 0.22,
           "evidence": [],
           "message": "Adapter LayoutAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -1740,7 +2822,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.19,
+          "duration_ms": 0.23,
           "evidence": [
             "Found 2 table(s)"
           ],
@@ -1764,7 +2846,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.16,
+          "duration_ms": 0.22,
           "evidence": [
             "stg_lz_layout_files.sql",
             "stg_lz_layout_directories.sql"
@@ -1777,7 +2859,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.49,
+          "duration_ms": 0.59,
           "evidence": [
             "stg_lz_layout_files.sql",
             "stg_lz_layout_directories.sql"
@@ -1790,7 +2872,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 5.1,
+          "duration_ms": 6.55,
           "evidence": [
             "LayoutFile",
             "LayoutDirectory"
@@ -1803,7 +2885,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 1.05,
+          "duration_ms": 0.39,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -1813,9 +2895,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 13.16,
+          "duration_ms": 15.81,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -1823,7 +2905,7 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.43,
+          "duration_ms": 0.36,
           "evidence": [
             "coverage.json not found"
           ],
@@ -1835,7 +2917,7 @@
         }
       ],
       "name": "layout-scanner",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "checks": [
@@ -1865,7 +2947,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.66,
+          "duration_ms": 0.87,
           "evidence": [
             "PASS"
           ],
@@ -1889,19 +2971,19 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.14,
+          "duration_ms": 0.24,
           "evidence": [
-            "FAIL"
+            "STRONG_PASS"
           ],
-          "message": "LLM evaluation decision below required threshold",
+          "message": "LLM evaluation decision meets threshold",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "output.load",
-          "duration_ms": 2.06,
+          "duration_ms": 2.33,
           "evidence": [
             "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/lizard/evaluation/results/output.json"
           ],
@@ -1913,7 +2995,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 10.64,
+          "duration_ms": 12.15,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -1923,7 +3005,7 @@
         },
         {
           "check_id": "output.data_completeness",
-          "duration_ms": 0.03,
+          "duration_ms": 0.04,
           "evidence": [],
           "message": "Data completeness validated",
           "severity": "high",
@@ -1933,7 +3015,7 @@
         },
         {
           "check_id": "output.path_consistency",
-          "duration_ms": 0.09,
+          "duration_ms": 0.12,
           "evidence": [
             "Checked 85 paths across 2 sections"
           ],
@@ -1945,7 +3027,7 @@
         },
         {
           "check_id": "output.required_fields",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [],
           "message": "Required metadata fields present",
           "severity": "high",
@@ -1955,7 +3037,7 @@
         },
         {
           "check_id": "output.schema_version",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [
             "1.0.0"
           ],
@@ -1967,7 +3049,7 @@
         },
         {
           "check_id": "output.tool_name_match",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [
             "lizard",
             "lizard"
@@ -1990,7 +3072,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.42,
+          "duration_ms": 0.64,
           "evidence": [
             "1.0.0"
           ],
@@ -2002,7 +3084,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 159.63,
+          "duration_ms": 167.25,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -2012,7 +3094,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.94,
+          "duration_ms": 0.22,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -2022,7 +3104,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.84,
+          "duration_ms": 0.38,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -2032,7 +3114,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.01,
+          "duration_ms": 0.04,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -2042,7 +3124,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.1,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -2052,7 +3134,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.08,
+          "duration_ms": 0.1,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -2064,7 +3146,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.06,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "analyze target uses output directory argument",
           "severity": "medium",
@@ -2074,7 +3156,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.13,
+          "duration_ms": 0.16,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -2084,7 +3166,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.09,
+          "duration_ms": 0.11,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -2094,7 +3176,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.44,
+          "duration_ms": 0.52,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -2104,7 +3186,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.61,
+          "duration_ms": 0.47,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -2114,7 +3196,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.05,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -2134,7 +3216,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.08,
+          "duration_ms": 0.1,
           "evidence": [
             "hotspot_ranking.py",
             "ccn_accuracy.py",
@@ -2149,7 +3231,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 7.76,
+          "duration_ms": 7.57,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: ccn_accuracy.py",
@@ -2163,7 +3245,7 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.34,
+          "duration_ms": 0.21,
           "evidence": [],
           "message": "Ground truth covers synthetic repos",
           "severity": "high",
@@ -2173,7 +3255,7 @@
         },
         {
           "check_id": "evaluation.scorecard",
-          "duration_ms": 0.02,
+          "duration_ms": 0.01,
           "evidence": [],
           "message": "Scorecard present",
           "severity": "low",
@@ -2183,7 +3265,7 @@
         },
         {
           "check_id": "evaluation.programmatic_exists",
-          "duration_ms": 0.02,
+          "duration_ms": 0.01,
           "evidence": [
             "evaluation/results/evaluation_report.json"
           ],
@@ -2195,7 +3277,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.33,
+          "duration_ms": 0.39,
           "evidence": [
             "timestamp",
             "decision",
@@ -2213,7 +3295,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.3,
+          "duration_ms": 0.31,
           "evidence": [
             "PASS"
           ],
@@ -2225,7 +3307,7 @@
         },
         {
           "check_id": "evaluation.llm_exists",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
@@ -2260,29 +3342,30 @@
           "check_id": "evaluation.llm_includes_programmatic",
           "duration_ms": 0.06,
           "evidence": [
-            "LLM evaluation must include programmatic results"
+            "file=evaluation/results/evaluation_report.json",
+            "decision=PASS"
           ],
-          "message": "Missing programmatic_input field in llm_evaluation.json",
+          "message": "LLM evaluation includes programmatic input",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.05,
+          "duration_ms": 0.06,
           "evidence": [
-            "FAIL"
+            "STRONG_PASS"
           ],
-          "message": "LLM evaluation failed",
+          "message": "LLM evaluation passed",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.32,
+          "duration_ms": 0.3,
           "evidence": [
             "src/sot-engine/dbt/tests/test_rollup_lizard_direct_distribution_ranges.sql",
             "src/sot-engine/dbt/tests/test_rollup_lizard_direct_vs_recursive.sql",
@@ -2306,7 +3389,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.37,
+          "duration_ms": 1.8,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -2316,7 +3399,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 74.8,
+          "duration_ms": 87.98,
           "evidence": [
             "Fixture: lizard_output.json"
           ],
@@ -2328,7 +3411,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.66,
+          "duration_ms": 0.99,
           "evidence": [
             "paths",
             "ranges",
@@ -2342,7 +3425,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.18,
+          "duration_ms": 0.29,
           "evidence": [],
           "message": "Adapter LizardAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -2352,7 +3435,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.19,
+          "duration_ms": 0.24,
           "evidence": [
             "Found 2 table(s)"
           ],
@@ -2364,7 +3447,7 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.1,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "Tool 'lizard' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
@@ -2374,7 +3457,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.16,
+          "duration_ms": 0.2,
           "evidence": [
             "stg_lz_lizard_file_metrics.sql",
             "stg_lz_lizard_function_metrics.sql"
@@ -2387,7 +3470,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.43,
+          "duration_ms": 0.51,
           "evidence": [
             "stg_lz_lizard_file_metrics.sql",
             "stg_lz_lizard_function_metrics.sql"
@@ -2400,7 +3483,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 6.62,
+          "duration_ms": 7.42,
           "evidence": [
             "LizardFileMetric",
             "LizardFunctionMetric"
@@ -2413,7 +3496,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 0.86,
+          "duration_ms": 0.41,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -2423,9 +3506,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 14.1,
+          "duration_ms": 16.97,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -2433,19 +3516,19 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.29,
+          "duration_ms": 0.33,
           "evidence": [
-            "Add pytest-cov>=4.0.0 to requirements.txt"
+            "coverage.json not found"
           ],
-          "message": "pytest-cov not in requirements.txt",
+          "message": "No coverage report found - run with --run-coverage",
           "severity": "high",
-          "status": "fail",
+          "status": "skip",
           "stderr_summary": null,
           "stdout_summary": null
         }
       ],
       "name": "lizard",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "checks": [
@@ -2475,7 +3558,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.64,
+          "duration_ms": 0.5,
           "evidence": [
             "WEAK_PASS"
           ],
@@ -2499,7 +3582,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.26,
+          "duration_ms": 0.17,
           "evidence": [
             "WEAK_PASS"
           ],
@@ -2511,7 +3594,7 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 0.72,
+          "duration_ms": 0.7,
           "evidence": [
             "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/pmd-cpd/outputs/cpd-test-run/output.json"
           ],
@@ -2523,7 +3606,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 1.93,
+          "duration_ms": 1.54,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -2533,7 +3616,7 @@
         },
         {
           "check_id": "output.data_completeness",
-          "duration_ms": 0.03,
+          "duration_ms": 0.02,
           "evidence": [],
           "message": "Data completeness validated",
           "severity": "high",
@@ -2543,7 +3626,7 @@
         },
         {
           "check_id": "output.path_consistency",
-          "duration_ms": 0.17,
+          "duration_ms": 0.06,
           "evidence": [
             "Checked 49 paths across 1 sections"
           ],
@@ -2600,7 +3683,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.34,
+          "duration_ms": 0.4,
           "evidence": [
             "1.0.0"
           ],
@@ -2612,7 +3695,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 134.24,
+          "duration_ms": 134.82,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -2632,7 +3715,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.6,
+          "duration_ms": 0.91,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -2652,7 +3735,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.1,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -2662,7 +3745,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.09,
+          "duration_ms": 0.1,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -2674,7 +3757,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.1,
+          "duration_ms": 0.08,
           "evidence": [],
           "message": "analyze target uses output directory argument",
           "severity": "medium",
@@ -2684,7 +3767,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.13,
+          "duration_ms": 0.11,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -2694,7 +3777,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.09,
+          "duration_ms": 0.08,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -2704,7 +3787,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.54,
+          "duration_ms": 0.5,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -2714,7 +3797,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.78,
+          "duration_ms": 0.75,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -2724,7 +3807,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.05,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -2734,7 +3817,7 @@
         },
         {
           "check_id": "evaluation.llm_prompts",
-          "duration_ms": 0.04,
+          "duration_ms": 0.05,
           "evidence": [],
           "message": "LLM prompts present",
           "severity": "medium",
@@ -2744,7 +3827,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.85,
+          "duration_ms": 0.11,
           "evidence": [
             "duplication_accuracy.py",
             "actionability.py",
@@ -2759,7 +3842,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 4.19,
+          "duration_ms": 4.36,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: duplication_accuracy.py",
@@ -2773,7 +3856,7 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.29,
+          "duration_ms": 0.2,
           "evidence": [],
           "message": "Ground truth covers synthetic repos",
           "severity": "high",
@@ -2793,7 +3876,7 @@
         },
         {
           "check_id": "evaluation.programmatic_exists",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [
             "evaluation/results/evaluation_report.json"
           ],
@@ -2805,7 +3888,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.29,
+          "duration_ms": 0.17,
           "evidence": [
             "timestamp",
             "analysis_path",
@@ -2823,7 +3906,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.22,
+          "duration_ms": 0.15,
           "evidence": [
             "WEAK_PASS"
           ],
@@ -2835,7 +3918,7 @@
         },
         {
           "check_id": "evaluation.llm_exists",
-          "duration_ms": 0.02,
+          "duration_ms": 0.01,
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
@@ -2847,7 +3930,7 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.15,
+          "duration_ms": 0.04,
           "evidence": [
             "timestamp",
             "model",
@@ -2891,7 +3974,7 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.32,
+          "duration_ms": 0.31,
           "evidence": [
             "src/sot-engine/dbt/tests/test_rollup_pmd_cpd_direct_vs_recursive.sql"
           ],
@@ -2913,7 +3996,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.89,
+          "duration_ms": 2.02,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -2923,7 +4006,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 112.96,
+          "duration_ms": 145.65,
           "evidence": [
             "Fixture: pmd_cpd_output.json"
           ],
@@ -2935,7 +4018,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.66,
+          "duration_ms": 1.03,
           "evidence": [
             "paths",
             "line_numbers",
@@ -2949,7 +4032,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.25,
+          "duration_ms": 0.26,
           "evidence": [],
           "message": "Adapter PmdCpdAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -2959,7 +4042,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.21,
+          "duration_ms": 0.26,
           "evidence": [
             "Found 3 table(s)"
           ],
@@ -2971,7 +4054,7 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.12,
+          "duration_ms": 0.14,
           "evidence": [],
           "message": "Tool 'pmd-cpd' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
@@ -2981,7 +4064,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.18,
+          "duration_ms": 0.21,
           "evidence": [
             "stg_lz_pmd_cpd_duplications.sql",
             "stg_lz_pmd_cpd_occurrences.sql",
@@ -2995,7 +4078,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.58,
+          "duration_ms": 0.66,
           "evidence": [
             "stg_lz_pmd_cpd_duplications.sql",
             "stg_lz_pmd_cpd_occurrences.sql",
@@ -3009,7 +4092,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 5.27,
+          "duration_ms": 7.71,
           "evidence": [
             "PmdCpdFileMetric",
             "PmdCpdDuplication",
@@ -3023,7 +4106,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 0.86,
+          "duration_ms": 0.39,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -3033,9 +4116,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 14.12,
+          "duration_ms": 17.72,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -3043,7 +4126,7 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.62,
+          "duration_ms": 0.32,
           "evidence": [
             "coverage.json not found"
           ],
@@ -3063,7 +4146,7 @@
           "check_id": "run.analyze",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/outputs/bdaa107a-6afd-4b4e-ade4-1c76601d2a9f/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/outputs/D5326F5E-3A72-46F3-8EA4-8D47E9EF6861/output.json"
           ],
           "message": "Pre-existing analysis output found",
           "severity": "critical",
@@ -3085,7 +4168,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.32,
+          "duration_ms": 0.43,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -3109,7 +4192,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.29,
+          "duration_ms": 0.22,
           "evidence": [
             "PASS"
           ],
@@ -3121,9 +4204,9 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 4.41,
+          "duration_ms": 1.92,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/outputs/bdaa107a-6afd-4b4e-ade4-1c76601d2a9f/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/roslyn-analyzers/outputs/D5326F5E-3A72-46F3-8EA4-8D47E9EF6861/output.json"
           ],
           "message": "Output JSON loaded",
           "severity": "high",
@@ -3133,7 +4216,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 41.83,
+          "duration_ms": 19.39,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -3143,7 +4226,7 @@
         },
         {
           "check_id": "output.data_completeness",
-          "duration_ms": 0.2,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "Data completeness validated",
           "severity": "high",
@@ -3153,9 +4236,9 @@
         },
         {
           "check_id": "output.path_consistency",
-          "duration_ms": 1.68,
+          "duration_ms": 0.1,
           "evidence": [
-            "Checked 1900 paths across 1 sections"
+            "Checked 71 paths across 1 sections"
           ],
           "message": "Path consistency validated",
           "severity": "medium",
@@ -3210,7 +4293,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.39,
+          "duration_ms": 0.38,
           "evidence": [
             "1.0.0"
           ],
@@ -3222,7 +4305,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 218.57,
+          "duration_ms": 211.4,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -3232,7 +4315,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.23,
+          "duration_ms": 0.5,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -3242,7 +4325,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.47,
+          "duration_ms": 0.58,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -3262,7 +4345,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.1,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -3272,7 +4355,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.09,
+          "duration_ms": 0.1,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -3284,7 +4367,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.06,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "analyze target uses output directory argument",
           "severity": "medium",
@@ -3294,7 +4377,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.09,
+          "duration_ms": 0.32,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -3304,7 +4387,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.07,
+          "duration_ms": 0.43,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -3314,7 +4397,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.48,
+          "duration_ms": 0.99,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -3324,7 +4407,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.71,
+          "duration_ms": 0.88,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -3334,7 +4417,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.06,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -3354,7 +4437,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.09,
+          "duration_ms": 0.12,
           "evidence": [
             "overall_quality.py",
             "integration_fit.py",
@@ -3370,7 +4453,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 10.28,
+          "duration_ms": 20.18,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: security_detection.py",
@@ -3384,7 +4467,7 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.28,
+          "duration_ms": 0.12,
           "evidence": [
             "clean-code.json",
             "resource-management.json",
@@ -3423,7 +4506,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.2,
+          "duration_ms": 0.43,
           "evidence": [
             "evaluation_id",
             "timestamp",
@@ -3443,7 +4526,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.1,
+          "duration_ms": 0.34,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -3455,7 +4538,7 @@
         },
         {
           "check_id": "evaluation.llm_exists",
-          "duration_ms": 0.02,
+          "duration_ms": 0.06,
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
@@ -3467,7 +4550,7 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.18,
+          "duration_ms": 0.34,
           "evidence": [
             "timestamp",
             "model",
@@ -3488,31 +4571,32 @@
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.06,
+          "duration_ms": 0.11,
           "evidence": [
-            "LLM evaluation must include programmatic results"
+            "file=evaluation/results/evaluation_report.json",
+            "decision=STRONG_PASS"
           ],
-          "message": "Missing programmatic_input field in llm_evaluation.json",
+          "message": "LLM evaluation includes programmatic input",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.05,
+          "duration_ms": 0.08,
           "evidence": [
-            "FAIL"
+            "PASS"
           ],
-          "message": "LLM evaluation failed",
+          "message": "LLM evaluation passed",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.31,
+          "duration_ms": 0.45,
           "evidence": [
             "src/sot-engine/dbt/tests/test_rollup_roslyn_direct_vs_recursive.sql"
           ],
@@ -3524,7 +4608,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 0.05,
+          "duration_ms": 0.2,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -3534,7 +4618,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.38,
+          "duration_ms": 2.79,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -3544,7 +4628,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 67.7,
+          "duration_ms": 109.24,
           "evidence": [
             "Fixture: roslyn_output.json"
           ],
@@ -3556,7 +4640,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.56,
+          "duration_ms": 0.54,
           "evidence": [
             "paths",
             "line_numbers",
@@ -3570,7 +4654,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.24,
+          "duration_ms": 0.27,
           "evidence": [],
           "message": "Adapter RoslynAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -3580,7 +4664,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.19,
+          "duration_ms": 0.26,
           "evidence": [
             "Found 1 table(s)"
           ],
@@ -3592,7 +4676,7 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.12,
+          "duration_ms": 0.15,
           "evidence": [],
           "message": "Tool 'roslyn-analyzers' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
@@ -3602,7 +4686,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.17,
+          "duration_ms": 0.2,
           "evidence": [
             "stg_roslyn_file_metrics.sql"
           ],
@@ -3614,7 +4698,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.68,
+          "duration_ms": 0.69,
           "evidence": [
             "stg_roslyn_file_metrics.sql"
           ],
@@ -3626,7 +4710,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 4.84,
+          "duration_ms": 8.41,
           "evidence": [
             "RoslynViolation"
           ],
@@ -3638,7 +4722,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 0.79,
+          "duration_ms": 0.37,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -3648,9 +4732,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 13.27,
+          "duration_ms": 16.19,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -3658,19 +4742,19 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.19,
+          "duration_ms": 0.26,
           "evidence": [
-            "Add pytest-cov>=4.0.0 to requirements.txt"
+            "coverage.json not found"
           ],
-          "message": "pytest-cov not in requirements.txt",
+          "message": "No coverage report found - run with --run-coverage",
           "severity": "high",
-          "status": "fail",
+          "status": "skip",
           "stderr_summary": null,
           "stdout_summary": null
         }
       ],
       "name": "roslyn-analyzers",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "checks": [
@@ -3678,7 +4762,7 @@
           "check_id": "run.analyze",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/scancode/outputs/9BA0669F-E59F-4BC8-9314-D4BF3B24F279/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/scancode/outputs/CC5F6CC7-7C19-4AD7-9C5C-6C92002ADEE9/output.json"
           ],
           "message": "Pre-existing analysis output found",
           "severity": "critical",
@@ -3700,7 +4784,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 1.16,
+          "duration_ms": 1.05,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -3713,28 +4797,32 @@
         {
           "check_id": "run.evaluate_llm",
           "duration_ms": 0.0,
-          "evidence": [],
-          "message": "No LLM evaluation output found - run with --run-llm or execute 'make evaluate-llm'",
+          "evidence": [
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/scancode/evaluation/llm/results/llm-eval-20260204-175827.json"
+          ],
+          "message": "Pre-existing LLM evaluation output found",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.0,
-          "evidence": [],
-          "message": "LLM evaluation quality check skipped (no outputs)",
+          "duration_ms": 0.97,
+          "evidence": [
+            "WEAK_PASS"
+          ],
+          "message": "LLM evaluation decision meets threshold",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "output.load",
-          "duration_ms": 0.34,
+          "duration_ms": 0.52,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/scancode/outputs/9BA0669F-E59F-4BC8-9314-D4BF3B24F279/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/scancode/outputs/CC5F6CC7-7C19-4AD7-9C5C-6C92002ADEE9/output.json"
           ],
           "message": "Output JSON loaded",
           "severity": "high",
@@ -3744,30 +4832,21 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 1.07,
-          "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/scancode/eval-repos/synthetic"
-          ],
-          "message": "Invalid path values detected",
+          "duration_ms": 1.29,
+          "evidence": [],
+          "message": "Path values are repo-relative",
           "severity": "high",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "output.data_completeness",
           "duration_ms": 0.03,
-          "evidence": [
-            "findings[0] missing required field: message",
-            "findings[1] missing required field: message",
-            "findings[2] missing required field: message",
-            "findings[3] missing required field: message",
-            "findings[4] missing required field: message",
-            "... 18 more issues in findings"
-          ],
-          "message": "Data completeness issues detected",
+          "evidence": [],
+          "message": "Data completeness validated",
           "severity": "high",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
@@ -3830,7 +4909,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.37,
+          "duration_ms": 0.42,
           "evidence": [
             "1.0.0"
           ],
@@ -3842,7 +4921,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 116.48,
+          "duration_ms": 153.01,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -3852,7 +4931,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.21,
+          "duration_ms": 0.23,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -3862,7 +4941,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.35,
+          "duration_ms": 0.43,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -3872,7 +4951,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.01,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -3882,7 +4961,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.08,
+          "duration_ms": 0.11,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -3892,7 +4971,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.06,
+          "duration_ms": 0.08,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -3904,7 +4983,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.05,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "analyze target uses output directory argument",
           "severity": "medium",
@@ -3914,7 +4993,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.09,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -3934,7 +5013,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.42,
+          "duration_ms": 0.34,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -3944,7 +5023,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.18,
+          "duration_ms": 0.35,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -3954,7 +5033,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.04,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -3964,7 +5043,7 @@
         },
         {
           "check_id": "evaluation.llm_prompts",
-          "duration_ms": 0.04,
+          "duration_ms": 0.05,
           "evidence": [],
           "message": "LLM prompts present",
           "severity": "medium",
@@ -3974,7 +5053,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.08,
+          "duration_ms": 0.11,
           "evidence": [
             "coverage_judge.py",
             "accuracy_judge.py",
@@ -3989,19 +5068,21 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 1.87,
+          "duration_ms": 4.19,
           "evidence": [
-            "base.py __init__ missing evaluation_mode parameter"
+            "base.py: evaluation_mode parameter present",
+            "primary judge: accuracy_judge.py",
+            "prompt: accuracy.md has all placeholders"
           ],
-          "message": "base.py missing evaluation_mode parameter",
+          "message": "Synthetic evaluation context pattern implemented correctly",
           "severity": "high",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.07,
+          "duration_ms": 0.08,
           "evidence": [
             "multi-license.json",
             "mit-only.json",
@@ -4020,7 +5101,7 @@
         },
         {
           "check_id": "evaluation.scorecard",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [],
           "message": "Scorecard present",
           "severity": "low",
@@ -4030,7 +5111,7 @@
         },
         {
           "check_id": "evaluation.programmatic_exists",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [
             "evaluation/results/evaluation_report.json"
           ],
@@ -4042,7 +5123,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.59,
+          "duration_ms": 0.72,
           "evidence": [
             "timestamp",
             "tool",
@@ -4062,7 +5143,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.52,
+          "duration_ms": 0.6,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -4078,55 +5159,67 @@
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
-          "message": "Missing llm_evaluation.json at uniform path",
+          "message": "LLM evaluation file exists",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.01,
+          "duration_ms": 0.86,
           "evidence": [
-            "evaluation/results/llm_evaluation.json"
+            "run_id",
+            "timestamp",
+            "model",
+            "dimensions",
+            "score",
+            "total_score",
+            "average_confidence",
+            "decision",
+            "programmatic_score",
+            "combined_score"
           ],
-          "message": "Cannot validate schema - file missing",
+          "message": "LLM evaluation schema valid",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.01,
+          "duration_ms": 0.65,
           "evidence": [
-            "evaluation/results/llm_evaluation.json"
+            "file=evaluation/results/evaluation_report.json",
+            "decision=STRONG_PASS"
           ],
-          "message": "Cannot check - file missing",
+          "message": "LLM evaluation includes programmatic input",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.01,
+          "duration_ms": 0.7,
           "evidence": [
-            "evaluation/results/llm_evaluation.json"
+            "WEAK_PASS"
           ],
-          "message": "Cannot check quality - file missing",
+          "message": "LLM evaluation passed",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.06,
-          "evidence": [],
-          "message": "Rollup Validation section not declared",
+          "duration_ms": 0.2,
+          "evidence": [
+            "src/sot-engine/dbt/tests/test_rollup_scancode_repo_level_metrics.sql"
+          ],
+          "message": "Rollup Validation declared with valid tests",
           "severity": "high",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
@@ -4142,7 +5235,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.33,
+          "duration_ms": 1.82,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -4152,7 +5245,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 73.59,
+          "duration_ms": 92.18,
           "evidence": [
             "Fixture: scancode_output.json"
           ],
@@ -4164,7 +5257,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.51,
+          "duration_ms": 0.97,
           "evidence": [
             "paths",
             "confidence",
@@ -4178,7 +5271,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.31,
+          "duration_ms": 0.26,
           "evidence": [],
           "message": "Adapter ScancodeAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -4188,7 +5281,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.22,
+          "duration_ms": 0.23,
           "evidence": [
             "Found 2 table(s)"
           ],
@@ -4200,7 +5293,7 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.12,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "Tool 'scancode' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
@@ -4210,7 +5303,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.22,
+          "duration_ms": 0.21,
           "evidence": [
             "stg_lz_scancode_summary.sql",
             "stg_lz_scancode_file_licenses.sql"
@@ -4223,7 +5316,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.13,
+          "duration_ms": 0.16,
           "evidence": [
             "stg_lz_scancode_summary.sql",
             "stg_lz_scancode_file_licenses.sql"
@@ -4236,7 +5329,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 5.46,
+          "duration_ms": 6.86,
           "evidence": [
             "ScancodeFileLicense",
             "ScancodeSummary"
@@ -4249,7 +5342,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 0.71,
+          "duration_ms": 0.3,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -4259,9 +5352,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 12.77,
+          "duration_ms": 16.97,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -4269,19 +5362,19 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.22,
+          "duration_ms": 0.09,
           "evidence": [
-            "Add pytest-cov>=4.0.0 to requirements.txt"
+            "coverage.json not found"
           ],
-          "message": "pytest-cov not in requirements.txt",
+          "message": "No coverage report found - run with --run-coverage",
           "severity": "high",
-          "status": "fail",
+          "status": "skip",
           "stderr_summary": null,
           "stdout_summary": null
         }
       ],
       "name": "scancode",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "checks": [
@@ -4311,7 +5404,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.5,
+          "duration_ms": 0.68,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -4335,7 +5428,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.4,
+          "duration_ms": 0.26,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -4347,7 +5440,7 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 0.81,
+          "duration_ms": 0.87,
           "evidence": [
             "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/scc/evaluation/results/output.json"
           ],
@@ -4359,7 +5452,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 4.65,
+          "duration_ms": 5.47,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -4379,7 +5472,7 @@
         },
         {
           "check_id": "output.path_consistency",
-          "duration_ms": 0.1,
+          "duration_ms": 0.12,
           "evidence": [
             "Checked 94 paths across 2 sections"
           ],
@@ -4391,7 +5484,7 @@
         },
         {
           "check_id": "output.required_fields",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [],
           "message": "Required metadata fields present",
           "severity": "high",
@@ -4401,7 +5494,7 @@
         },
         {
           "check_id": "output.schema_version",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [
             "1.0.0"
           ],
@@ -4413,7 +5506,7 @@
         },
         {
           "check_id": "output.tool_name_match",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [
             "scc",
             "scc"
@@ -4436,7 +5529,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.44,
+          "duration_ms": 0.58,
           "evidence": [
             "1.0.0"
           ],
@@ -4448,7 +5541,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 124.48,
+          "duration_ms": 150.01,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -4468,7 +5561,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.37,
+          "duration_ms": 1.18,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -4488,7 +5581,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.09,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -4498,7 +5591,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.07,
+          "duration_ms": 0.09,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -4510,7 +5603,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.06,
+          "duration_ms": 0.08,
           "evidence": [],
           "message": "analyze target uses output directory argument",
           "severity": "medium",
@@ -4520,7 +5613,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.11,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -4530,7 +5623,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.08,
+          "duration_ms": 0.1,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -4540,7 +5633,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.65,
+          "duration_ms": 0.6,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -4550,7 +5643,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.5,
+          "duration_ms": 0.75,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -4560,7 +5653,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.1,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -4580,7 +5673,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.37,
+          "duration_ms": 0.12,
           "evidence": [
             "error_messages.py",
             "documentation.py",
@@ -4601,7 +5694,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 9.93,
+          "duration_ms": 11.68,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: directory_analysis.py",
@@ -4615,7 +5708,7 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.04,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "synthetic.json ground truth present",
           "severity": "high",
@@ -4647,7 +5740,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.24,
+          "duration_ms": 0.22,
           "evidence": [
             "run_id",
             "timestamp",
@@ -4663,7 +5756,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.17,
+          "duration_ms": 0.18,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -4675,7 +5768,7 @@
         },
         {
           "check_id": "evaluation.llm_exists",
-          "duration_ms": 0.02,
+          "duration_ms": 0.01,
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
@@ -4687,7 +5780,7 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.25,
+          "duration_ms": 0.27,
           "evidence": [
             "timestamp",
             "model",
@@ -4708,19 +5801,20 @@
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.07,
+          "duration_ms": 0.1,
           "evidence": [
-            "LLM evaluation must include programmatic results"
+            "file=evaluation/results/evaluation_report.json",
+            "decision=STRONG_PASS"
           ],
-          "message": "Missing programmatic_input field in llm_evaluation.json",
+          "message": "LLM evaluation includes programmatic input",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.07,
+          "duration_ms": 0.08,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -4732,7 +5826,7 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.29,
+          "duration_ms": 0.43,
           "evidence": [
             "src/sot-engine/dbt/tests/test_rollup_scc_direct_distribution_ranges.sql",
             "src/sot-engine/dbt/tests/test_rollup_scc_direct_vs_recursive.sql",
@@ -4746,7 +5840,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 0.04,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -4756,7 +5850,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.38,
+          "duration_ms": 1.92,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -4766,7 +5860,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 84.51,
+          "duration_ms": 112.99,
           "evidence": [
             "Fixture: scc_output.json"
           ],
@@ -4778,7 +5872,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.7,
+          "duration_ms": 1.0,
           "evidence": [
             "paths",
             "ranges",
@@ -4793,7 +5887,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.23,
+          "duration_ms": 0.29,
           "evidence": [],
           "message": "Adapter SccAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -4803,7 +5897,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.27,
+          "duration_ms": 0.25,
           "evidence": [
             "Found 1 table(s)"
           ],
@@ -4815,7 +5909,7 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.12,
+          "duration_ms": 0.14,
           "evidence": [],
           "message": "Tool 'scc' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
@@ -4825,7 +5919,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.17,
+          "duration_ms": 0.21,
           "evidence": [
             "stg_lz_scc_file_metrics.sql"
           ],
@@ -4837,7 +5931,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.51,
+          "duration_ms": 0.59,
           "evidence": [
             "stg_lz_scc_file_metrics.sql"
           ],
@@ -4849,7 +5943,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 6.55,
+          "duration_ms": 7.39,
           "evidence": [
             "SccFileMetric"
           ],
@@ -4861,7 +5955,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 3.29,
+          "duration_ms": 0.3,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -4871,9 +5965,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 14.43,
+          "duration_ms": 17.31,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -4881,19 +5975,19 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.29,
+          "duration_ms": 0.11,
           "evidence": [
-            "Add pytest-cov>=4.0.0 to requirements.txt"
+            "coverage.json not found"
           ],
-          "message": "pytest-cov not in requirements.txt",
+          "message": "No coverage report found - run with --run-coverage",
           "severity": "high",
-          "status": "fail",
+          "status": "skip",
           "stderr_summary": null,
           "stdout_summary": null
         }
       ],
       "name": "scc",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "checks": [
@@ -4901,7 +5995,7 @@
           "check_id": "run.analyze",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/semgrep/outputs/9ad8b91b-0618-4351-9ed3-9a07fc72bb19/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/semgrep/outputs/2D245F63-BD0B-4A90-8202-2742FB2E4712/output.json"
           ],
           "message": "Pre-existing analysis output found",
           "severity": "critical",
@@ -4923,9 +6017,9 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.3,
+          "duration_ms": 0.34,
           "evidence": [
-            "PASS"
+            "STRONG_PASS"
           ],
           "message": "Evaluation decision meets threshold",
           "severity": "high",
@@ -4947,7 +6041,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.24,
+          "duration_ms": 0.18,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -4959,9 +6053,9 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 0.6,
+          "duration_ms": 0.72,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/semgrep/outputs/9ad8b91b-0618-4351-9ed3-9a07fc72bb19/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/semgrep/outputs/2D245F63-BD0B-4A90-8202-2742FB2E4712/output.json"
           ],
           "message": "Output JSON loaded",
           "severity": "high",
@@ -4971,7 +6065,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 3.27,
+          "duration_ms": 6.45,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -4981,7 +6075,7 @@
         },
         {
           "check_id": "output.data_completeness",
-          "duration_ms": 0.02,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "Data completeness validated",
           "severity": "high",
@@ -4991,7 +6085,7 @@
         },
         {
           "check_id": "output.path_consistency",
-          "duration_ms": 0.07,
+          "duration_ms": 0.08,
           "evidence": [
             "Checked 65 paths across 2 sections"
           ],
@@ -5048,7 +6142,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.4,
+          "duration_ms": 0.58,
           "evidence": [
             "1.0.0"
           ],
@@ -5060,7 +6154,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 310.5,
+          "duration_ms": 155.14,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -5080,7 +6174,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.42,
+          "duration_ms": 0.16,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -5090,7 +6184,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.03,
+          "duration_ms": 0.02,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -5100,7 +6194,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.14,
+          "duration_ms": 0.09,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -5110,7 +6204,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.09,
+          "duration_ms": 0.11,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -5132,7 +6226,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.14,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -5142,7 +6236,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.1,
+          "duration_ms": 0.08,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -5152,7 +6246,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.5,
+          "duration_ms": 0.6,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -5162,7 +6256,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.89,
+          "duration_ms": 0.66,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -5172,7 +6266,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.1,
+          "duration_ms": 0.11,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -5192,7 +6286,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.39,
+          "duration_ms": 0.12,
           "evidence": [
             "rule_coverage.py",
             "actionability.py",
@@ -5208,7 +6302,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 13.76,
+          "duration_ms": 14.18,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: security_detection.py",
@@ -5222,7 +6316,7 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.28,
+          "duration_ms": 0.1,
           "evidence": [
             "java.json",
             "go.json",
@@ -5240,7 +6334,7 @@
         },
         {
           "check_id": "evaluation.scorecard",
-          "duration_ms": 0.03,
+          "duration_ms": 0.02,
           "evidence": [],
           "message": "Scorecard present",
           "severity": "low",
@@ -5279,9 +6373,9 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.05,
+          "duration_ms": 0.06,
           "evidence": [
-            "PASS"
+            "STRONG_PASS"
           ],
           "message": "Programmatic evaluation passed",
           "severity": "high",
@@ -5303,46 +6397,51 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.31,
+          "duration_ms": 0.32,
           "evidence": [
+            "timestamp",
             "model",
             "decision",
             "score",
-            "programmatic_input"
+            "programmatic_input",
+            "dimensions",
+            "summary",
+            "analysis_path"
           ],
-          "message": "Missing required fields in llm_evaluation.json",
+          "message": "LLM evaluation schema valid",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.08,
+          "duration_ms": 0.07,
           "evidence": [
-            "LLM evaluation must include programmatic results"
+            "file=/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/semgrep/evaluation/results/evaluation_report.json",
+            "decision=STRONG_PASS"
           ],
-          "message": "Missing programmatic_input field in llm_evaluation.json",
+          "message": "LLM evaluation includes programmatic input",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.07,
+          "duration_ms": 0.06,
           "evidence": [
-            "score=1.75"
+            "WEAK_PASS"
           ],
-          "message": "LLM score below threshold",
+          "message": "LLM evaluation passed",
           "severity": "medium",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.33,
+          "duration_ms": 0.32,
           "evidence": [
             "src/sot-engine/dbt/tests/test_rollup_semgrep_direct_vs_recursive.sql"
           ],
@@ -5354,7 +6453,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 0.05,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -5364,7 +6463,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.51,
+          "duration_ms": 1.95,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -5374,7 +6473,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 95.69,
+          "duration_ms": 91.57,
           "evidence": [
             "Fixture: semgrep_output.json"
           ],
@@ -5386,7 +6485,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.37,
+          "duration_ms": 0.4,
           "evidence": [
             "paths",
             "line_numbers",
@@ -5400,7 +6499,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.24,
+          "duration_ms": 0.25,
           "evidence": [],
           "message": "Adapter SemgrepAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -5410,7 +6509,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.19,
+          "duration_ms": 0.25,
           "evidence": [
             "Found 1 table(s)"
           ],
@@ -5422,7 +6521,7 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.11,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "Tool 'semgrep' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
@@ -5432,7 +6531,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.17,
+          "duration_ms": 0.2,
           "evidence": [
             "stg_semgrep_file_metrics.sql",
             "stg_lz_semgrep_smells.sql"
@@ -5445,7 +6544,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.51,
+          "duration_ms": 0.64,
           "evidence": [
             "stg_semgrep_file_metrics.sql",
             "stg_lz_semgrep_smells.sql"
@@ -5458,7 +6557,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 5.08,
+          "duration_ms": 14.82,
           "evidence": [
             "SemgrepSmell"
           ],
@@ -5470,7 +6569,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 1.56,
+          "duration_ms": 0.45,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -5480,9 +6579,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 18.71,
+          "duration_ms": 17.2,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -5490,7 +6589,7 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.81,
+          "duration_ms": 0.23,
           "evidence": [
             "coverage.json not found"
           ],
@@ -5502,7 +6601,7 @@
         }
       ],
       "name": "semgrep",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "checks": [
@@ -5532,7 +6631,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.39,
+          "duration_ms": 0.2,
           "evidence": [
             "PASS"
           ],
@@ -5556,7 +6655,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.45,
+          "duration_ms": 0.18,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -5568,7 +6667,7 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 1.56,
+          "duration_ms": 0.58,
           "evidence": [
             "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/sonarqube/outputs/B16129A2-F8A9-4C9A-A347-365A8569418B/output.json"
           ],
@@ -5580,19 +6679,17 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 3.04,
-          "evidence": [
-            "/"
-          ],
-          "message": "Invalid path values detected",
+          "duration_ms": 3.45,
+          "evidence": [],
+          "message": "Path values are repo-relative",
           "severity": "high",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "output.data_completeness",
-          "duration_ms": 0.02,
+          "duration_ms": 0.01,
           "evidence": [],
           "message": "Data completeness validated",
           "severity": "high",
@@ -5647,7 +6744,7 @@
         },
         {
           "check_id": "output.metadata_consistency",
-          "duration_ms": 0.01,
+          "duration_ms": 0.0,
           "evidence": [],
           "message": "Metadata formats are consistent",
           "severity": "medium",
@@ -5657,7 +6754,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.56,
+          "duration_ms": 0.35,
           "evidence": [
             "1.2.0"
           ],
@@ -5669,7 +6766,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 176.63,
+          "duration_ms": 136.84,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -5679,7 +6776,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.54,
+          "duration_ms": 0.52,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -5689,7 +6786,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 1.41,
+          "duration_ms": 0.61,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -5699,7 +6796,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.09,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -5709,7 +6806,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.25,
+          "duration_ms": 0.16,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -5719,7 +6816,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.29,
+          "duration_ms": 0.13,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -5731,7 +6828,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.23,
+          "duration_ms": 0.09,
           "evidence": [],
           "message": "analyze target produces output.json",
           "severity": "medium",
@@ -5741,7 +6838,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.2,
+          "duration_ms": 0.1,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -5751,7 +6848,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.08,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -5761,7 +6858,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 1.34,
+          "duration_ms": 0.66,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -5771,7 +6868,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.69,
+          "duration_ms": 0.83,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -5781,7 +6878,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.08,
+          "duration_ms": 0.09,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -5801,7 +6898,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.11,
+          "duration_ms": 0.12,
           "evidence": [
             "issue_accuracy.py",
             "integration_fit.py",
@@ -5816,7 +6913,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 12.16,
+          "duration_ms": 8.78,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: issue_accuracy.py",
@@ -5830,7 +6927,7 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.33,
+          "duration_ms": 0.1,
           "evidence": [
             "java-security.json",
             "typescript-duplication.json",
@@ -5856,7 +6953,7 @@
         },
         {
           "check_id": "evaluation.programmatic_exists",
-          "duration_ms": 0.03,
+          "duration_ms": 0.02,
           "evidence": [
             "evaluation/results/evaluation_report.json"
           ],
@@ -5868,7 +6965,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.08,
+          "duration_ms": 0.07,
           "evidence": [
             "timestamp",
             "tool",
@@ -5897,7 +6994,7 @@
         },
         {
           "check_id": "evaluation.llm_exists",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
@@ -5909,7 +7006,7 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.54,
+          "duration_ms": 0.35,
           "evidence": [
             "timestamp",
             "model",
@@ -5928,7 +7025,7 @@
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.29,
+          "duration_ms": 0.09,
           "evidence": [
             "file=evaluation/results/evaluation_report.json",
             "decision=PASS"
@@ -5941,7 +7038,7 @@
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.09,
+          "duration_ms": 0.05,
           "evidence": [
             "PASS"
           ],
@@ -5953,7 +7050,7 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.43,
+          "duration_ms": 0.39,
           "evidence": [
             "src/sot-engine/dbt/tests/test_rollup_sonarqube_direct_vs_recursive.sql"
           ],
@@ -5975,7 +7072,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.48,
+          "duration_ms": 1.95,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -5985,7 +7082,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 202.9,
+          "duration_ms": 161.09,
           "evidence": [
             "Fixture: sonarqube_output.json"
           ],
@@ -5997,7 +7094,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.6,
+          "duration_ms": 0.52,
           "evidence": [
             "paths",
             "line_numbers",
@@ -6011,7 +7108,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.25,
+          "duration_ms": 0.32,
           "evidence": [],
           "message": "Adapter SonarqubeAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -6021,7 +7118,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.2,
+          "duration_ms": 0.28,
           "evidence": [
             "Found 2 table(s)"
           ],
@@ -6033,7 +7130,7 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.12,
+          "duration_ms": 0.14,
           "evidence": [],
           "message": "Tool 'sonarqube' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
@@ -6043,7 +7140,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.18,
+          "duration_ms": 0.21,
           "evidence": [
             "stg_sonarqube_issues.sql",
             "stg_sonarqube_file_metrics.sql"
@@ -6056,7 +7153,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.58,
+          "duration_ms": 0.69,
           "evidence": [
             "stg_sonarqube_issues.sql",
             "stg_sonarqube_file_metrics.sql"
@@ -6069,7 +7166,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 7.56,
+          "duration_ms": 6.76,
           "evidence": [
             "SonarqubeIssue",
             "SonarqubeMetric"
@@ -6082,7 +7179,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 3.58,
+          "duration_ms": 0.28,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -6092,9 +7189,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 16.75,
+          "duration_ms": 16.82,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -6102,19 +7199,19 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.2,
+          "duration_ms": 0.1,
           "evidence": [
-            "Add pytest-cov>=4.0.0 to requirements.txt"
+            "coverage.json not found"
           ],
-          "message": "pytest-cov not in requirements.txt",
+          "message": "No coverage report found - run with --run-coverage",
           "severity": "high",
-          "status": "fail",
+          "status": "skip",
           "stderr_summary": null,
           "stdout_summary": null
         }
       ],
       "name": "sonarqube",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "checks": [
@@ -6144,7 +7241,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.98,
+          "duration_ms": 0.74,
           "evidence": [
             "PASS"
           ],
@@ -6168,7 +7265,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.47,
+          "duration_ms": 0.38,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -6192,7 +7289,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 0.21,
+          "duration_ms": 0.23,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -6202,7 +7299,7 @@
         },
         {
           "check_id": "output.data_completeness",
-          "duration_ms": 0.04,
+          "duration_ms": 0.01,
           "evidence": [],
           "message": "Data completeness validated",
           "severity": "high",
@@ -6222,7 +7319,7 @@
         },
         {
           "check_id": "output.required_fields",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [],
           "message": "Required metadata fields present",
           "severity": "high",
@@ -6232,7 +7329,7 @@
         },
         {
           "check_id": "output.schema_version",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [
             "1.0.0"
           ],
@@ -6244,7 +7341,7 @@
         },
         {
           "check_id": "output.tool_name_match",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [
             "symbol-scanner",
             "symbol-scanner"
@@ -6257,7 +7354,7 @@
         },
         {
           "check_id": "output.metadata_consistency",
-          "duration_ms": 0.01,
+          "duration_ms": 0.0,
           "evidence": [],
           "message": "Metadata formats are consistent",
           "severity": "medium",
@@ -6267,7 +7364,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.4,
+          "duration_ms": 0.36,
           "evidence": [
             "1.0.0"
           ],
@@ -6279,7 +7376,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 174.98,
+          "duration_ms": 125.68,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -6289,7 +7386,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.27,
+          "duration_ms": 0.24,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -6299,7 +7396,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.48,
+          "duration_ms": 1.07,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -6309,7 +7406,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.02,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -6319,7 +7416,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.18,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -6329,7 +7426,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.09,
+          "duration_ms": 0.08,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -6351,7 +7448,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.11,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -6361,7 +7458,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.07,
+          "duration_ms": 0.08,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -6371,7 +7468,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.3,
+          "duration_ms": 0.42,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -6381,7 +7478,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.42,
+          "duration_ms": 0.57,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -6391,7 +7488,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.06,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -6401,7 +7498,7 @@
         },
         {
           "check_id": "evaluation.llm_prompts",
-          "duration_ms": 0.07,
+          "duration_ms": 0.05,
           "evidence": [],
           "message": "LLM prompts present",
           "severity": "medium",
@@ -6411,7 +7508,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.48,
+          "duration_ms": 0.11,
           "evidence": [
             "call_relationship.py",
             "import_completeness.py",
@@ -6426,7 +7523,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 15.72,
+          "duration_ms": 5.75,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: call_relationship.py",
@@ -6440,7 +7537,7 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.12,
+          "duration_ms": 0.13,
           "evidence": [
             "metaprogramming.json",
             "csharp-tshock.json",
@@ -6484,7 +7581,7 @@
         },
         {
           "check_id": "evaluation.programmatic_exists",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [
             "evaluation/results/evaluation_report.json"
           ],
@@ -6496,7 +7593,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.37,
+          "duration_ms": 0.4,
           "evidence": [
             "timestamp",
             "decision",
@@ -6516,7 +7613,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.35,
+          "duration_ms": 0.34,
           "evidence": [
             "PASS"
           ],
@@ -6528,7 +7625,7 @@
         },
         {
           "check_id": "evaluation.llm_exists",
-          "duration_ms": 0.02,
+          "duration_ms": 0.01,
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
@@ -6561,7 +7658,7 @@
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.05,
+          "duration_ms": 0.06,
           "evidence": [
             "file=evaluation/results/evaluation_report.json",
             "decision=PASS"
@@ -6586,7 +7683,7 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.19,
+          "duration_ms": 0.22,
           "evidence": [
             "src/sot-engine/dbt/models/staging/stg_lz_code_symbols.sql"
           ],
@@ -6598,7 +7695,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 0.03,
+          "duration_ms": 0.05,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -6608,7 +7705,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.45,
+          "duration_ms": 1.84,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -6618,7 +7715,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 130.5,
+          "duration_ms": 91.79,
           "evidence": [
             "Fixture: symbol_scanner_output.json"
           ],
@@ -6630,7 +7727,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.81,
+          "duration_ms": 1.02,
           "evidence": [
             "paths",
             "ranges",
@@ -6644,7 +7741,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.26,
+          "duration_ms": 0.25,
           "evidence": [],
           "message": "Adapter SymbolScannerAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -6654,7 +7751,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.2,
+          "duration_ms": 0.23,
           "evidence": [
             "Found 1 table(s)"
           ],
@@ -6676,7 +7773,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.17,
+          "duration_ms": 0.18,
           "evidence": [
             "stg_symbol_calls_file_metrics.sql",
             "stg_symbols_file_metrics.sql",
@@ -6691,7 +7788,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.18,
+          "duration_ms": 0.2,
           "evidence": [
             "stg_symbol_calls_file_metrics.sql",
             "stg_symbols_file_metrics.sql",
@@ -6706,7 +7803,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 9.12,
+          "duration_ms": 6.64,
           "evidence": [
             "CodeSymbol",
             "SymbolCall",
@@ -6720,7 +7817,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 1.49,
+          "duration_ms": 0.32,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -6730,9 +7827,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 17.12,
+          "duration_ms": 14.56,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -6740,7 +7837,7 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.46,
+          "duration_ms": 0.36,
           "evidence": [
             "coverage.json not found"
           ],
@@ -6806,7 +7903,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.33,
+          "duration_ms": 0.2,
           "evidence": [
             "score=4.0"
           ],
@@ -6830,7 +7927,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 1.3,
+          "duration_ms": 1.6,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -6841,17 +7938,10 @@
         {
           "check_id": "output.data_completeness",
           "duration_ms": 0.03,
-          "evidence": [
-            "vulnerabilities[0] missing required field: vulnerability_id",
-            "vulnerabilities[1] missing required field: vulnerability_id",
-            "vulnerabilities[2] missing required field: vulnerability_id",
-            "vulnerabilities[3] missing required field: vulnerability_id",
-            "vulnerabilities[4] missing required field: vulnerability_id",
-            "... 32 more issues in vulnerabilities"
-          ],
-          "message": "Data completeness issues detected",
+          "evidence": [],
+          "message": "Data completeness validated",
           "severity": "high",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
@@ -6912,7 +8002,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.4,
+          "duration_ms": 0.41,
           "evidence": [
             "1.0.0"
           ],
@@ -6924,7 +8014,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 119.8,
+          "duration_ms": 125.02,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -6934,7 +8024,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.2,
+          "duration_ms": 0.24,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -6944,7 +8034,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.58,
+          "duration_ms": 1.08,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -6964,7 +8054,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.11,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -6974,7 +8064,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.07,
+          "duration_ms": 0.09,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -6986,7 +8076,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.05,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "analyze target uses output directory argument",
           "severity": "medium",
@@ -6996,7 +8086,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.11,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -7006,7 +8096,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.08,
+          "duration_ms": 0.09,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -7016,7 +8106,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.59,
+          "duration_ms": 0.44,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -7026,7 +8116,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.36,
+          "duration_ms": 0.37,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -7036,7 +8126,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.08,
+          "duration_ms": 0.1,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -7046,7 +8136,7 @@
         },
         {
           "check_id": "evaluation.llm_prompts",
-          "duration_ms": 0.08,
+          "duration_ms": 0.09,
           "evidence": [],
           "message": "LLM prompts present",
           "severity": "medium",
@@ -7056,7 +8146,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.11,
+          "duration_ms": 0.12,
           "evidence": [
             "freshness_quality.py",
             "vulnerability_detection.py",
@@ -7074,7 +8164,7 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 11.4,
+          "duration_ms": 11.65,
           "evidence": [
             "base.py: evaluation_mode parameter present",
             "primary judge: vulnerability_accuracy.py",
@@ -7088,7 +8178,7 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.23,
+          "duration_ms": 0.12,
           "evidence": [
             "dotnet-outdated.json",
             "js-fullstack.json",
@@ -7133,7 +8223,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.19,
+          "duration_ms": 0.23,
           "evidence": [
             "timestamp",
             "tool",
@@ -7154,7 +8244,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.16,
+          "duration_ms": 0.19,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -7178,7 +8268,7 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.29,
+          "duration_ms": 0.4,
           "evidence": [
             "timestamp",
             "model",
@@ -7199,7 +8289,7 @@
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.07,
+          "duration_ms": 0.11,
           "evidence": [
             "file=evaluation/results/evaluation_report.json",
             "decision=STRONG_PASS"
@@ -7212,7 +8302,7 @@
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.06,
+          "duration_ms": 0.08,
           "evidence": [
             "PASS"
           ],
@@ -7224,7 +8314,7 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.19,
+          "duration_ms": 0.23,
           "evidence": [
             "src/sot-engine/dbt/tests/test_rollup_trivy_direct_vs_recursive.sql"
           ],
@@ -7236,7 +8326,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 0.06,
+          "duration_ms": 0.05,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -7246,7 +8336,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.5,
+          "duration_ms": 1.93,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -7256,7 +8346,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 142.45,
+          "duration_ms": 162.61,
           "evidence": [
             "Fixture: trivy_output.json"
           ],
@@ -7268,7 +8358,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.54,
+          "duration_ms": 1.13,
           "evidence": [
             "paths",
             "line_numbers",
@@ -7282,7 +8372,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.24,
+          "duration_ms": 0.3,
           "evidence": [],
           "message": "Adapter TrivyAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -7292,7 +8382,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.22,
+          "duration_ms": 0.26,
           "evidence": [
             "Found 3 table(s)"
           ],
@@ -7304,7 +8394,7 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.15,
+          "duration_ms": 0.14,
           "evidence": [],
           "message": "Tool 'trivy' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
@@ -7314,7 +8404,7 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.18,
+          "duration_ms": 0.19,
           "evidence": [
             "stg_trivy_iac_misconfigs.sql",
             "stg_trivy_vulnerabilities.sql",
@@ -7329,7 +8419,7 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.49,
+          "duration_ms": 0.48,
           "evidence": [
             "stg_trivy_iac_misconfigs.sql",
             "stg_trivy_vulnerabilities.sql",
@@ -7344,7 +8434,7 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 5.72,
+          "duration_ms": 7.17,
           "evidence": [
             "TrivyVulnerability",
             "TrivyTarget",
@@ -7358,7 +8448,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 0.93,
+          "duration_ms": 0.52,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -7368,9 +8458,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 13.62,
+          "duration_ms": 15.05,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (137 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -7378,7 +8468,7 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.22,
+          "duration_ms": 0.31,
           "evidence": [
             "coverage.json not found"
           ],
@@ -7390,7 +8480,7 @@
         }
       ],
       "name": "trivy",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "tools_root": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools"

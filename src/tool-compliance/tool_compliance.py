@@ -2233,6 +2233,7 @@ def _get_tool_repository(conn, tool_name: str):
         SymbolScannerRepository,
         ScancodeRepository,
         PmdCpdRepository,
+        DevskimRepository,
     )
     repos = {
         "scc": SccRepository,
@@ -2246,6 +2247,7 @@ def _get_tool_repository(conn, tool_name: str):
         "symbol-scanner": SymbolScannerRepository,
         "scancode": ScancodeRepository,
         "pmd-cpd": PmdCpdRepository,
+        "devskim": DevskimRepository,
     }
     repo_cls = repos.get(tool_name)
     return repo_cls(conn) if repo_cls else None

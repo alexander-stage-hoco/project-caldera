@@ -83,6 +83,8 @@ tool_entities:
     - PmdCpdFileMetric
     - PmdCpdDuplication
     - PmdCpdOccurrence
+  devskim:
+    - DevskimFinding
 
 entity_repository_map:
   SccFileMetric:
@@ -157,6 +159,9 @@ entity_repository_map:
   PmdCpdOccurrence:
     repository: PmdCpdRepository
     method: insert_occurrences
+  DevskimFinding:
+    repository: DevskimRepository
+    method: insert_findings
 
 # Patterns for quality rule detection
 quality_rule_patterns:
@@ -245,6 +250,14 @@ data_completeness_rules:
       symbols:
         - symbol_name
         - path
+    trivy:
+      vulnerabilities:
+        - id        # trivy uses 'id' not 'vulnerability_id'
+        - severity
+    scancode:
+      findings:
+        - file_path
+        - spdx_id   # scancode uses spdx_id not message
 
 # Path consistency validation rules
 path_consistency_rules:

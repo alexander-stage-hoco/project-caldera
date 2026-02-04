@@ -168,7 +168,7 @@ def get_component_tree(
                 key=root_dir_key,
                 name="/",
                 qualifier=ComponentQualifier.DIRECTORY,
-                path="/",
+                path="",  # Empty string for root-level component (not absolute "/")
             )
         children.setdefault(root.key, [])
         if root_dir_key not in children[root.key]:
