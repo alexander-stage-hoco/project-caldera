@@ -330,6 +330,34 @@ class RoslynViolation:
         _validate_line_range(self.line_start, self.line_end)
 
 
+@dataclass(frozen=True)
+class DevskimFinding:
+    """Individual security finding from DevSkim analysis."""
+    run_pk: int
+    file_id: str
+    directory_id: str
+    relative_path: str
+    rule_id: str
+    dd_category: Optional[str]
+    severity: Optional[str]
+    line_start: Optional[int]
+    line_end: Optional[int]
+    column_start: Optional[int]
+    column_end: Optional[int]
+    message: Optional[str]
+    code_snippet: Optional[str]
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.relative_path, "relative_path")
+        _validate_required_string(self.rule_id, "rule_id")
+        _validate_line_range(self.line_start, self.line_end)
+        if self.severity is not None:
+            valid_severities = {"CRITICAL", "HIGH", "MEDIUM", "LOW"}
+            if self.severity not in valid_severities:
+                raise ValueError(f"severity must be one of {valid_severities}")
+
+
 
 @dataclass(frozen=True)
 class SonarqubeIssue:

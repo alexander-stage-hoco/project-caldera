@@ -30,6 +30,7 @@ sources:
       - name: lz_pmd_cpd_file_metrics
       - name: lz_pmd_cpd_duplications
       - name: lz_pmd_cpd_occurrences
+      - name: lz_devskim_findings
 
 models:
   - name: stg_lz_tool_runs
@@ -1535,5 +1536,81 @@ models:
                   - duplicate_blocks
                   - duplication_percentage
       - name: value_count
+        tests:
+          - not_null
+
+  - name: stg_lz_devskim_findings
+    description: "Staged DevSkim security findings"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: rule_id
+        tests:
+          - not_null
+
+  - name: stg_devskim_file_metrics
+    description: "File-level aggregation of DevSkim security findings"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: issue_count
+        tests:
+          - not_null
+
+  - name: rollup_devskim_directory_counts_direct
+    description: "DevSkim issue counts per directory (direct scope - files in directory only)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_issue_count
+        tests:
+          - not_null
+
+  - name: rollup_devskim_directory_counts_recursive
+    description: "DevSkim issue counts per directory (recursive scope - includes subtree)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_issue_count
         tests:
           - not_null

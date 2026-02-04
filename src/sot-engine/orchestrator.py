@@ -17,12 +17,13 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
+from persistence.adapters import DevskimAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
 from persistence.repositories import (
     BaseRepository,
     CollectionRunRepository,
+    DevskimRepository,
     GitSizerRepository,
     GitleaksRepository,
     LayoutRepository,
@@ -187,6 +188,7 @@ TOOL_CONFIGS = [
     ToolConfig("symbol-scanner", "src/tools/symbol-scanner"),
     ToolConfig("scancode", "src/tools/scancode"),
     ToolConfig("pmd-cpd", "src/tools/pmd-cpd"),
+    ToolConfig("devskim", "src/tools/devskim"),
 ]
 
 
@@ -265,6 +267,7 @@ TOOL_INGESTION_CONFIGS = [
     ToolIngestionConfig("symbol-scanner", SymbolScannerAdapter, SymbolScannerRepository),
     ToolIngestionConfig("scancode", ScancodeAdapter, ScancodeRepository),
     ToolIngestionConfig("pmd-cpd", PmdCpdAdapter, PmdCpdRepository),
+    ToolIngestionConfig("devskim", DevskimAdapter, DevskimRepository),
 ]
 
 
@@ -287,6 +290,7 @@ def ingest_outputs(
     symbol_scanner_output: Optional[Path] = None,
     scancode_output: Optional[Path] = None,
     pmd_cpd_output: Optional[Path] = None,
+    devskim_output: Optional[Path] = None,
     schema_path: Path = None,
     logger: Optional[OrchestratorLogger] = None,
 ) -> None:
@@ -314,6 +318,7 @@ def ingest_outputs(
         "symbol-scanner": symbol_scanner_output,
         "scancode": scancode_output,
         "pmd-cpd": pmd_cpd_output,
+        "devskim": devskim_output,
     }
 
     # Ingest each tool using its configuration
@@ -402,6 +407,7 @@ def main() -> int:
     parser.add_argument("--symbol-scanner-output", type=str)
     parser.add_argument("--scancode-output", type=str)
     parser.add_argument("--pmd-cpd-output", type=str)
+    parser.add_argument("--devskim-output", type=str)
     parser.add_argument("--run-tools", action="store_true")
     parser.add_argument("--run-dbt", action="store_true")
     parser.add_argument("--replace", action="store_true")
@@ -431,6 +437,7 @@ def main() -> int:
     symbol_scanner_output = Path(args.symbol_scanner_output) if args.symbol_scanner_output else None
     scancode_output = Path(args.scancode_output) if args.scancode_output else None
     pmd_cpd_output = Path(args.pmd_cpd_output) if args.pmd_cpd_output else None
+    devskim_output = Path(args.devskim_output) if args.devskim_output else None
 
     try:
         logger.info(f"Log file: {logger.log_path}")
@@ -484,6 +491,7 @@ def main() -> int:
             symbol_scanner_output = outputs.get("symbol-scanner", symbol_scanner_output)
             scancode_output = outputs.get("scancode", scancode_output)
             pmd_cpd_output = outputs.get("pmd-cpd", pmd_cpd_output)
+            devskim_output = outputs.get("devskim", devskim_output)
             logger.info(f"Completed tools in {_format_duration(time.perf_counter() - start)}")
             for name, path in outputs.items():
                 logger.info(f"{name} output: {path}")
@@ -509,6 +517,7 @@ def main() -> int:
             symbol_scanner_output,
             scancode_output,
             pmd_cpd_output,
+            devskim_output,
             schema_path,
             logger,
         )

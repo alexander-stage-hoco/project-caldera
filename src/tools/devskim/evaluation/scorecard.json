@@ -1,0 +1,280 @@
+{
+  "tool": "devskim",
+  "version": "1.0.0",
+  "generated_at": "2026-02-04T16:02:53.544350+00:00",
+  "description": "Evaluation scorecard for DevSkim security analysis",
+  "summary": {
+    "total_checks": 30,
+    "passed": 21,
+    "failed": 9,
+    "score": 0.6733,
+    "score_percent": 67.33,
+    "normalized_score": 3.37,
+    "decision": "WEAK_PASS"
+  },
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "Accuracy",
+      "weight": 0.16666666666666666,
+      "total_checks": 8,
+      "passed": 5,
+      "failed": 3,
+      "score": 3.12,
+      "weighted_score": 0.52,
+      "checks": [
+        {
+          "check_id": "AC-1",
+          "name": "SQL injection detection",
+          "passed": true,
+          "message": "Skipped: No SQL injection expectations in ground truth"
+        },
+        {
+          "check_id": "AC-2",
+          "name": "Hardcoded secrets detection",
+          "passed": true,
+          "message": "Skipped: No hardcoded secret expectations in ground truth"
+        },
+        {
+          "check_id": "AC-3",
+          "name": "Insecure crypto detection",
+          "passed": false,
+          "message": "Found 0 insecure crypto issues (expected >= 10)"
+        },
+        {
+          "check_id": "AC-4",
+          "name": "Path traversal detection",
+          "passed": true,
+          "message": "Skipped: No path traversal expectations in ground truth"
+        },
+        {
+          "check_id": "AC-5",
+          "name": "XSS detection",
+          "passed": true,
+          "message": "Skipped: No XSS expectations in ground truth"
+        },
+        {
+          "check_id": "AC-6",
+          "name": "Deserialization detection",
+          "passed": false,
+          "message": "Found 0 deserialization issues"
+        },
+        {
+          "check_id": "AC-7",
+          "name": "False positive rate",
+          "passed": true,
+          "message": "No findings to check for false positives"
+        },
+        {
+          "check_id": "AC-8",
+          "name": "Overall precision/recall",
+          "passed": false,
+          "message": "Precision: 1.00, Recall: 0.00, F1: 0.00"
+        }
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Coverage",
+      "weight": 0.16666666666666666,
+      "total_checks": 8,
+      "passed": 5,
+      "failed": 3,
+      "score": 3.12,
+      "weighted_score": 0.52,
+      "checks": [
+        {
+          "check_id": "CV-1",
+          "name": "C# coverage",
+          "passed": false,
+          "message": "0 files, 0 issues, 0 categories"
+        },
+        {
+          "check_id": "CV-2",
+          "name": "Python coverage",
+          "passed": true,
+          "message": "Skipped: python not present in ground truth"
+        },
+        {
+          "check_id": "CV-3",
+          "name": "JavaScript coverage",
+          "passed": true,
+          "message": "Skipped: javascript not present in ground truth"
+        },
+        {
+          "check_id": "CV-4",
+          "name": "Java coverage",
+          "passed": true,
+          "message": "Skipped: java not present in ground truth"
+        },
+        {
+          "check_id": "CV-5",
+          "name": "Go coverage",
+          "passed": true,
+          "message": "Skipped: go not present in ground truth"
+        },
+        {
+          "check_id": "CV-6",
+          "name": "C/C++ coverage",
+          "passed": true,
+          "message": "Skipped: cpp not present in ground truth"
+        },
+        {
+          "check_id": "CV-7",
+          "name": "Multi-language support",
+          "passed": false,
+          "message": "Analyzed 0 of 1 expected languages"
+        },
+        {
+          "check_id": "CV-8",
+          "name": "DD security category coverage",
+          "passed": false,
+          "message": "Covered 0/3 security categories"
+        }
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Edge Cases",
+      "weight": 0.16666666666666666,
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 4.62,
+      "weighted_score": 0.77,
+      "checks": [
+        {
+          "check_id": "EC-1",
+          "name": "Empty files handling",
+          "passed": true,
+          "message": "Found 0 empty files, handled correctly"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "Large files handling",
+          "passed": true,
+          "message": "Analyzed 0 large files (>1000 lines)"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "Mixed content files",
+          "passed": true,
+          "message": "Found 0 files with multiple issue types"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "Nested code handling",
+          "passed": true,
+          "message": "Nested code structures handled"
+        },
+        {
+          "check_id": "EC-5",
+          "name": "Comment handling",
+          "passed": true,
+          "message": "Comments handled correctly"
+        },
+        {
+          "check_id": "EC-6",
+          "name": "String literal handling",
+          "passed": true,
+          "message": "String literals handled correctly"
+        },
+        {
+          "check_id": "EC-7",
+          "name": "Minified code handling",
+          "passed": true,
+          "message": "Minified code handled"
+        },
+        {
+          "check_id": "EC-8",
+          "name": "Non-UTF8 encoding handling",
+          "passed": true,
+          "message": "Encoding variations handled gracefully"
+        }
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "Integration Fit",
+      "weight": 0.16666666666666666,
+      "total_checks": 1,
+      "passed": 1,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.83,
+      "checks": [
+        {
+          "check_id": "IF-1",
+          "name": "Relative file paths",
+          "passed": true,
+          "message": "0/0 files have relative paths"
+        }
+      ]
+    },
+    {
+      "id": "D5",
+      "name": "Output Quality",
+      "weight": 0.16666666666666666,
+      "total_checks": 1,
+      "passed": 0,
+      "failed": 1,
+      "score": 0.0,
+      "weighted_score": 0.0,
+      "checks": [
+        {
+          "check_id": "OQ-1",
+          "name": "Schema validation",
+          "passed": false,
+          "message": "Missing root wrapper for schema validation"
+        }
+      ]
+    },
+    {
+      "id": "D6",
+      "name": "Performance",
+      "weight": 0.16666666666666666,
+      "total_checks": 4,
+      "passed": 2,
+      "failed": 2,
+      "score": 2.25,
+      "weighted_score": 0.38,
+      "checks": [
+        {
+          "check_id": "PF-1",
+          "name": "Analysis duration",
+          "passed": true,
+          "message": "Completed in 0.0s (target: <30s)"
+        },
+        {
+          "check_id": "PF-2",
+          "name": "Files per second throughput",
+          "passed": false,
+          "message": "Throughput: 0.0 files/second"
+        },
+        {
+          "check_id": "PF-3",
+          "name": "Lines per second throughput",
+          "passed": true,
+          "message": "Throughput: 0 lines/second (waived)"
+        },
+        {
+          "check_id": "PF-4",
+          "name": "Result completeness",
+          "passed": false,
+          "message": "Output completeness: 20%"
+        }
+      ]
+    }
+  ],
+  "critical_failures": [],
+  "thresholds": {
+    "STRONG_PASS": ">= 4.0 (80%+)",
+    "PASS": ">= 3.5 (70%+)",
+    "WEAK_PASS": ">= 3.0 (60%+)",
+    "FAIL": "< 3.0 (below 60%)"
+  },
+  "metadata": {
+    "analysis_path": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/3B8C39E0-AF85-4BDB-B0EF-E5FA6BD0B779/output.json",
+    "ground_truth_dir": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/evaluation/ground-truth"
+  }
+}

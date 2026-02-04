@@ -1,0 +1,147 @@
+{
+  "metadata": {
+    "tool_name": "devskim",
+    "tool_version": "1.0.0",
+    "run_id": "99999999-9999-9999-9999-999999999999",
+    "repo_id": "88888888-8888-8888-8888-888888888888",
+    "branch": "main",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-01-26T12:00:00Z",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "devskim",
+    "tool_version": "1.0.0",
+    "analysis_metadata": {
+      "analysis_duration_ms": 500,
+      "rules_used": ["DS126858", "DS425040"]
+    },
+    "summary": {
+      "total_files": 3,
+      "total_directories": 2,
+      "files_with_issues": 2,
+      "total_issues": 3,
+      "total_lines": 150,
+      "issues_by_category": {
+        "insecure_crypto": 2,
+        "insecure_deserialization": 1
+      },
+      "issues_by_severity": {
+        "HIGH": 2,
+        "MEDIUM": 1
+      }
+    },
+    "files": [
+      {
+        "path": "src/crypto.cs",
+        "language": "csharp",
+        "lines": 50,
+        "issue_count": 2,
+        "issue_density": 4.0,
+        "by_category": {
+          "insecure_crypto": 2
+        },
+        "by_severity": {
+          "HIGH": 2
+        },
+        "issues": [
+          {
+            "rule_id": "DS126858",
+            "dd_category": "insecure_crypto",
+            "line_start": 15,
+            "line_end": 15,
+            "severity": "HIGH",
+            "message": "Weak/Broken Hash Algorithm (MD5)"
+          },
+          {
+            "rule_id": "DS126858",
+            "dd_category": "insecure_crypto",
+            "line_start": 28,
+            "line_end": 28,
+            "severity": "HIGH",
+            "message": "Weak/Broken Hash Algorithm (SHA1)"
+          }
+        ]
+      },
+      {
+        "path": "src/serializer.cs",
+        "language": "csharp",
+        "lines": 40,
+        "issue_count": 1,
+        "issue_density": 2.5,
+        "by_category": {
+          "insecure_deserialization": 1
+        },
+        "by_severity": {
+          "MEDIUM": 1
+        },
+        "issues": [
+          {
+            "rule_id": "DS425040",
+            "dd_category": "insecure_deserialization",
+            "line_start": 22,
+            "line_end": 22,
+            "severity": "MEDIUM",
+            "message": "Do not deserialize untrusted data with BinaryFormatter"
+          }
+        ]
+      },
+      {
+        "path": "src/safe.cs",
+        "language": "csharp",
+        "lines": 60,
+        "issue_count": 0,
+        "issue_density": 0.0,
+        "by_category": {},
+        "by_severity": {},
+        "issues": []
+      }
+    ],
+    "directories": [
+      {
+        "path": "src",
+        "name": "src",
+        "depth": 0,
+        "is_leaf": true,
+        "child_count": 0,
+        "subdirectories": [],
+        "direct": {
+          "file_count": 3,
+          "lines_code": 150,
+          "issue_count": 3,
+          "by_category": {
+            "insecure_crypto": 2,
+            "insecure_deserialization": 1
+          },
+          "by_severity": {
+            "HIGH": 2,
+            "MEDIUM": 1
+          },
+          "issue_density": 2.0
+        },
+        "recursive": {
+          "file_count": 3,
+          "lines_code": 150,
+          "issue_count": 3,
+          "by_category": {
+            "insecure_crypto": 2,
+            "insecure_deserialization": 1
+          },
+          "by_severity": {
+            "HIGH": 2,
+            "MEDIUM": 1
+          },
+          "issue_density": 2.0
+        }
+      }
+    ],
+    "by_language": {
+      "csharp": {
+        "files": 3,
+        "lines": 150,
+        "issue_count": 3,
+        "categories_covered": ["insecure_crypto", "insecure_deserialization"]
+      }
+    }
+  }
+}

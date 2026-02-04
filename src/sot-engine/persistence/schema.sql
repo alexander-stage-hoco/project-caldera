@@ -167,6 +167,23 @@ CREATE TABLE lz_roslyn_violations (
     PRIMARY KEY (run_pk, file_id, rule_id, line_start, column_start)
 );
 
+CREATE TABLE lz_devskim_findings (
+    run_pk BIGINT NOT NULL,
+    file_id VARCHAR NOT NULL,
+    directory_id VARCHAR NOT NULL,
+    relative_path VARCHAR NOT NULL,
+    rule_id VARCHAR NOT NULL,
+    dd_category VARCHAR,
+    severity VARCHAR,
+    line_start INTEGER,
+    line_end INTEGER,
+    column_start INTEGER,
+    column_end INTEGER,
+    message TEXT,
+    code_snippet TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, file_id, rule_id, line_start)
+);
 
 CREATE TABLE lz_sonarqube_issues (
     run_pk BIGINT NOT NULL,

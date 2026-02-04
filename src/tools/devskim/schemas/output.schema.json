@@ -1,0 +1,500 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DevSkim Tool Output Envelope",
+  "description": "Envelope schema for DevSkim security analysis output",
+  "type": "object",
+  "required": ["metadata", "data"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["tool_name", "tool_version", "run_id", "repo_id", "branch", "commit", "timestamp", "schema_version"],
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "const": "devskim",
+          "description": "Tool identifier"
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Version of DevSkim used for analysis"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this analysis run"
+        },
+        "repo_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Repository identifier"
+        },
+        "branch": {
+          "type": "string",
+          "description": "Git branch name"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "description": "Git commit SHA"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of when the analysis was generated"
+        },
+        "schema_version": {
+          "type": "string",
+          "const": "1.0.0",
+          "description": "Schema version"
+        }
+      }
+    },
+    "data": {
+      "$ref": "#/$defs/devskimData"
+    },
+    "errors": {
+      "type": "array",
+      "description": "List of errors encountered during analysis",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "recoverable": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "devskimData": {
+      "type": "object",
+      "description": "DevSkim analysis results",
+      "required": ["tool", "tool_version", "summary"],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "const": "devskim",
+          "description": "Tool identifier"
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Version of devskim used for analysis"
+        },
+        "analysis_metadata": {
+          "type": "object",
+          "description": "Additional analysis metadata",
+          "properties": {
+            "analysis_duration_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Analysis duration in milliseconds"
+            },
+            "rules_used": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of DevSkim rule IDs that triggered findings"
+            }
+          }
+        },
+        "summary": {
+          "type": "object",
+          "description": "Summary statistics",
+          "properties": {
+            "total_files": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of files analyzed"
+            },
+            "total_directories": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of directories"
+            },
+            "files_with_issues": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of files containing security issues"
+            },
+            "total_issues": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of security issues found"
+            },
+            "total_lines": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total lines of code analyzed"
+            },
+            "issues_by_category": {
+              "type": "object",
+              "description": "Issue counts by DD security category",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "issues_by_severity": {
+              "type": "object",
+              "description": "Issue counts by severity level",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "directories": {
+          "type": "array",
+          "description": "Per-directory statistics with direct vs recursive rollups",
+          "items": {
+            "$ref": "#/$defs/directoryEntry"
+          }
+        },
+        "files": {
+          "type": "array",
+          "description": "Per-file security findings",
+          "items": {
+            "$ref": "#/$defs/fileEntry"
+          }
+        },
+        "by_language": {
+          "type": "object",
+          "description": "Statistics grouped by programming language",
+          "additionalProperties": {
+            "$ref": "#/$defs/languageStats"
+          }
+        },
+        "statistics": {
+          "type": "object",
+          "description": "Statistical distributions",
+          "properties": {
+            "issue_distribution": {
+              "$ref": "#/$defs/distributionStats"
+            }
+          }
+        }
+      }
+    },
+    "directoryEntry": {
+      "type": "object",
+      "description": "Directory entry with direct and recursive statistics",
+      "required": ["path", "direct", "recursive"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Directory path relative to repository root",
+          "pattern": "^[^/].*",
+          "not": {
+            "pattern": "(^\\./|\\.\\.|^[A-Za-z]:|/$|\\\\)"
+          }
+        },
+        "name": {
+          "type": "string",
+          "description": "Directory name"
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Depth in directory tree"
+        },
+        "is_leaf": {
+          "type": "boolean",
+          "description": "Whether this is a leaf directory"
+        },
+        "child_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of direct child directories"
+        },
+        "subdirectories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of direct child directory paths"
+        },
+        "direct": {
+          "$ref": "#/$defs/directoryStats"
+        },
+        "recursive": {
+          "$ref": "#/$defs/directoryStats"
+        }
+      }
+    },
+    "directoryStats": {
+      "type": "object",
+      "description": "Statistics for a directory (direct or recursive)",
+      "properties": {
+        "file_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lines_code": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "issue_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "by_category": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "by_severity": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "issue_density": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Issues per 100 lines of code"
+        },
+        "issue_distribution": {
+          "$ref": "#/$defs/distributionStats"
+        }
+      }
+    },
+    "fileEntry": {
+      "type": "object",
+      "description": "File-level security findings",
+      "required": ["path", "language", "lines", "issue_count"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "File path relative to repository root",
+          "pattern": "^[^/].*",
+          "not": {
+            "pattern": "(^\\./|\\.\\.|^[A-Za-z]:|/$|\\\\)"
+          }
+        },
+        "language": {
+          "type": "string",
+          "description": "Detected programming language"
+        },
+        "lines": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total lines in file"
+        },
+        "issue_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of security issues in file"
+        },
+        "issue_density": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Issues per 100 lines of code"
+        },
+        "by_category": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "by_severity": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/securityIssue"
+          }
+        }
+      }
+    },
+    "securityIssue": {
+      "type": "object",
+      "description": "Individual security issue",
+      "required": ["rule_id", "dd_category", "line_start", "severity", "message"],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "description": "DevSkim rule ID"
+        },
+        "dd_category": {
+          "type": "string",
+          "description": "DD security category (e.g., sql_injection, hardcoded_secret)"
+        },
+        "line_start": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Starting line number"
+        },
+        "line_end": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Ending line number"
+        },
+        "column_start": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Starting column"
+        },
+        "column_end": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Ending column"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"],
+          "description": "Issue severity"
+        },
+        "message": {
+          "type": "string",
+          "description": "Issue description"
+        },
+        "code_snippet": {
+          "type": "string",
+          "description": "Code snippet containing the issue"
+        }
+      }
+    },
+    "languageStats": {
+      "type": "object",
+      "description": "Statistics for a programming language",
+      "properties": {
+        "files": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of files in this language"
+        },
+        "lines": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total lines in this language"
+        },
+        "issue_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total issues in this language"
+        },
+        "categories_covered": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Security categories with issues in this language"
+        }
+      }
+    },
+    "distributionStats": {
+      "type": ["object", "null"],
+      "description": "Statistical distribution for a metric (22 metrics)",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "mean": {
+          "type": "number"
+        },
+        "median": {
+          "type": "number"
+        },
+        "stddev": {
+          "type": "number",
+          "minimum": 0
+        },
+        "p25": {
+          "type": "number"
+        },
+        "p50": {
+          "type": "number"
+        },
+        "p75": {
+          "type": "number"
+        },
+        "p90": {
+          "type": "number"
+        },
+        "p95": {
+          "type": "number"
+        },
+        "p99": {
+          "type": "number"
+        },
+        "skewness": {
+          "type": "number"
+        },
+        "kurtosis": {
+          "type": "number"
+        },
+        "cv": {
+          "type": "number",
+          "description": "Coefficient of variation"
+        },
+        "iqr": {
+          "type": "number",
+          "description": "Interquartile range"
+        },
+        "gini": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Gini coefficient"
+        },
+        "theil": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Theil entropy index"
+        },
+        "hoover": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Hoover/Robin Hood index"
+        },
+        "palma": {
+          "type": ["number", "null"],
+          "description": "Palma ratio (top 10% / bottom 40%)"
+        },
+        "top_10_pct_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "top_20_pct_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "bottom_50_pct_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}

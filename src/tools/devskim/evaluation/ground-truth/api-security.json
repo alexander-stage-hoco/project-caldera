@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "language": "csharp",
+  "scenario": "api-security",
+  "description": "Ground truth for DevSkim API security vulnerability detection based on actual DevSkim rule capabilities",
+  "generated_at": "2026-01-25T10:00:00Z",
+  "repo_path": "eval-repos/synthetic/api-security",
+  "expected": {
+    "language": "csharp",
+    "version": "1.0",
+    "aggregate_expectations": {
+      "min_total_issues": 2,
+      "max_false_positives": 2,
+      "required_categories": [
+        "hardcoded_credentials",
+        "insecure_deserialization"
+      ]
+    }
+  },
+  "files": {
+    "CorsConfig.cs": {
+      "expected_issues": [],
+      "total_expected": 0,
+      "false_positives_allowed": 1,
+      "notes": "DevSkim does not have CORS-specific rules"
+    },
+    "AuthHeaders.cs": {
+      "expected_issues": [
+        {
+          "category": "hardcoded_credentials",
+          "count": 1,
+          "description": "Hardcoded credential pattern detected"
+        }
+      ],
+      "total_expected": 1,
+      "false_positives_allowed": 1
+    },
+    "InputValidation.cs": {
+      "expected_issues": [
+        {
+          "category": "insecure_deserialization",
+          "count": 1,
+          "description": "Unsafe deserialization with TypeNameHandling"
+        }
+      ],
+      "total_expected": 1,
+      "false_positives_allowed": 1
+    },
+    "ApiEndpoints.cs": {
+      "expected_issues": [],
+      "total_expected": 0,
+      "false_positives_allowed": 1,
+      "notes": "DevSkim does not flag verbose error message patterns"
+    },
+    "SafeApiCode.cs": {
+      "expected_issues": [],
+      "total_expected": 0,
+      "false_positives_allowed": 0,
+      "notes": "This file contains only safe API code patterns"
+    }
+  }
+}

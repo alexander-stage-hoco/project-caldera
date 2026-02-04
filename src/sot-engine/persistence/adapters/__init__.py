@@ -1,4 +1,5 @@
 from .base_adapter import BaseAdapter
+from .devskim_adapter import DevskimAdapter
 from .git_sizer_adapter import GitSizerAdapter
 from .gitleaks_adapter import GitleaksAdapter
 from .layout_adapter import LayoutAdapter
@@ -14,6 +15,7 @@ from .trivy_adapter import TrivyAdapter
 
 __all__ = [
     "BaseAdapter",
+    "DevskimAdapter",
     "GitSizerAdapter",
     "GitleaksAdapter",
     "LayoutAdapter",

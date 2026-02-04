@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "scenario": "csharp",
+  "description": "Ground truth for DevSkim C# security detection",
+  "generated_at": "2026-01-22T12:30:00Z",
+  "repo_path": "eval-repos/synthetic/csharp",
+  "expected": {
+    "language": "csharp",
+    "version": "1.0",
+    "aggregate_expectations": {
+      "min_total_issues": 13,
+      "max_false_positives": 2,
+      "required_categories": [
+        "insecure_crypto",
+        "deserialization",
+        "information_disclosure"
+      ]
+    }
+  },
+  "files": {
+    "SqlInjection.cs": {
+      "expected_issues": [
+        {
+          "category": "information_disclosure",
+          "count": 1,
+          "lines": [
+            11
+          ]
+        },
+        {
+          "rule_id": "DS162092",
+          "count": 1,
+          "description": "Debug code in production"
+        }
+      ],
+      "total_expected": 1,
+      "false_positives_allowed": 0
+    },
+    "HardcodedSecrets.cs": {
+      "expected_issues": [],
+      "total_expected": 0,
+      "false_positives_allowed": 0
+    },
+    "InsecureCrypto.cs": {
+      "expected_issues": [
+        {
+          "category": "insecure_crypto",
+          "count": 10,
+          "lines": [
+            13,
+            15,
+            15,
+            17,
+            24,
+            26,
+            26,
+            28,
+            37,
+            52
+          ]
+        },
+        {
+          "rule_id": "DS126858",
+          "count": 8,
+          "description": "Weak/Broken Hash Algorithm"
+        },
+        {
+          "rule_id": "DS106863",
+          "count": 1,
+          "description": "DES block cipher"
+        },
+        {
+          "rule_id": "DS187371",
+          "count": 1,
+          "description": "Weak cipher mode"
+        }
+      ],
+      "total_expected": 10,
+      "false_positives_allowed": 1
+    },
+    "PathTraversal.cs": {
+      "expected_issues": [],
+      "total_expected": 0,
+      "false_positives_allowed": 0
+    },
+    "XssVulnerability.cs": {
+      "expected_issues": [],
+      "total_expected": 0,
+      "false_positives_allowed": 0
+    },
+    "Deserialization.cs": {
+      "expected_issues": [
+        {
+          "category": "deserialization",
+          "count": 2,
+          "lines": [
+            31,
+            42
+          ]
+        },
+        {
+          "rule_id": "DS425040",
+          "count": 2,
+          "description": "Do not deserialize untrusted data"
+        }
+      ],
+      "total_expected": 2,
+      "false_positives_allowed": 0
+    },
+    "SafeCode.cs": {
+      "expected_issues": [],
+      "total_expected": 0,
+      "false_positives_allowed": 0,
+      "notes": "This file contains only safe code patterns"
+    }
+  }
+}

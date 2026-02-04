@@ -1,0 +1,17 @@
+# Tool compliance rules for devskim
+# Note: Security checks (SQL injection, XSS, etc.) are in accuracy.py
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - edge_cases.py
+  - integration_fit.py
+  - output_quality.py
+  - performance.py
+
+required_prompts:
+  - actionability.md
+  - accuracy.md
+
+adapter:
+  module: persistence.adapters.devskim_adapter
+  class: DevskimAdapter

@@ -7,6 +7,7 @@ import duckdb
 from .entities import (
     CodeSymbol,
     CollectionRun,
+    DevskimFinding,
     FileImport,
     GitSizerLfsCandidate,
     GitSizerMetric,
@@ -395,6 +396,25 @@ class RoslynRepository(BaseRepository):
             ),
         )
 
+
+class DevskimRepository(BaseRepository):
+    _COLUMNS = (
+        "run_pk", "file_id", "directory_id", "relative_path", "rule_id",
+        "dd_category", "severity", "line_start", "line_end",
+        "column_start", "column_end", "message", "code_snippet",
+    )
+
+    def insert_findings(self, rows: Iterable[DevskimFinding]) -> None:
+        self._insert_bulk(
+            "lz_devskim_findings",
+            self._COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.file_id, r.directory_id, r.relative_path, r.rule_id,
+                r.dd_category, r.severity, r.line_start, r.line_end,
+                r.column_start, r.column_end, r.message, r.code_snippet,
+            ),
+        )
 
 
 class SonarqubeRepository(BaseRepository):
