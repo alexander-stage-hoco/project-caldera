@@ -1,0 +1,21 @@
+# Tool compliance rules for scancode (license analyzer)
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - detection.py
+  - performance.py
+
+required_prompts:
+  - accuracy.md
+  - coverage.md
+  - actionability.md
+  - risk_classification.md
+
+ground_truth_mode: any
+
+evaluation_outputs:
+  - scorecard.md
+
+adapter:
+  module: persistence.adapters.scancode_adapter
+  class: ScancodeAdapter

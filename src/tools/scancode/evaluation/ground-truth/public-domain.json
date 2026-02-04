@@ -1,0 +1,30 @@
+{
+  "repository": "public-domain",
+  "description": "Repository with public domain dedication (Unlicense)",
+  "expected": {
+    "total_licenses": 1,
+    "licenses": ["Unlicense"],
+    "license_files_found": 1,
+    "files_with_licenses": 2,
+    "overall_risk": "low",
+    "has_permissive": true,
+    "has_copyleft": false,
+    "has_weak_copyleft": false,
+    "has_unknown": false,
+    "license_counts": {
+      "Unlicense": 2
+    },
+    "total_findings": 2,
+    "spdx_headers_found": 1,
+    "license_file_detections": 1,
+    "expected_findings": [
+      {"file_path": "UNLICENSE", "spdx_id": "Unlicense", "match_type": "file"},
+      {"file_path": "src/main.py", "spdx_id": "Unlicense", "match_type": "spdx"}
+    ]
+  },
+  "thresholds": {
+    "count_tolerance": 0,
+    "max_scan_time_ms": 5000,
+    "min_files_per_second": 1
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "repository": "no-license",
+  "description": "Repository with no license file (all rights reserved by default)",
+  "expected": {
+    "total_licenses": 0,
+    "licenses": [],
+    "license_files_found": 0,
+    "files_with_licenses": 0,
+    "overall_risk": "high",
+    "has_permissive": false,
+    "has_copyleft": false,
+    "has_weak_copyleft": false,
+    "has_unknown": true,
+    "license_counts": {},
+    "total_findings": 0,
+    "spdx_headers_found": 0,
+    "license_file_detections": 0,
+    "expected_findings": []
+  },
+  "thresholds": {
+    "count_tolerance": 0,
+    "max_scan_time_ms": 5000,
+    "min_files_per_second": 1
+  }
+}

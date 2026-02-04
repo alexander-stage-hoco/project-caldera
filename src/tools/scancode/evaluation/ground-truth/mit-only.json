@@ -1,0 +1,30 @@
+{
+  "repository": "mit-only",
+  "description": "Clean repository with MIT license only",
+  "expected": {
+    "total_licenses": 1,
+    "licenses": ["MIT"],
+    "license_files_found": 1,
+    "files_with_licenses": 2,
+    "overall_risk": "low",
+    "has_permissive": true,
+    "has_copyleft": false,
+    "has_weak_copyleft": false,
+    "has_unknown": false,
+    "license_counts": {
+      "MIT": 2
+    },
+    "total_findings": 2,
+    "spdx_headers_found": 1,
+    "license_file_detections": 1,
+    "expected_findings": [
+      {"file_path": "LICENSE", "spdx_id": "MIT", "match_type": "file"},
+      {"file_path": "src/main.py", "spdx_id": "MIT", "match_type": "spdx"}
+    ]
+  },
+  "thresholds": {
+    "count_tolerance": 0,
+    "max_scan_time_ms": 5000,
+    "min_files_per_second": 1
+  }
+}

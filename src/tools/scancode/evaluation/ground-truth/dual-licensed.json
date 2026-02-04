@@ -1,0 +1,32 @@
+{
+  "repository": "dual-licensed",
+  "description": "Repository with dual MIT OR Apache-2.0 license choice",
+  "expected": {
+    "total_licenses": 2,
+    "licenses": ["MIT", "Apache-2.0"],
+    "license_files_found": 2,
+    "files_with_licenses": 3,
+    "overall_risk": "low",
+    "has_permissive": true,
+    "has_copyleft": false,
+    "has_weak_copyleft": false,
+    "has_unknown": false,
+    "license_counts": {
+      "MIT": 2,
+      "Apache-2.0": 1
+    },
+    "total_findings": 3,
+    "spdx_headers_found": 1,
+    "license_file_detections": 2,
+    "expected_findings": [
+      {"file_path": "LICENSE-MIT", "spdx_id": "MIT", "match_type": "file"},
+      {"file_path": "LICENSE-APACHE", "spdx_id": "Apache-2.0", "match_type": "file"},
+      {"file_path": "src/main.py", "spdx_id": "MIT", "match_type": "spdx"}
+    ]
+  },
+  "thresholds": {
+    "count_tolerance": 0,
+    "max_scan_time_ms": 5000,
+    "min_files_per_second": 1
+  }
+}

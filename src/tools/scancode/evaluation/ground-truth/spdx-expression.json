@@ -1,0 +1,30 @@
+{
+  "repository": "spdx-expression",
+  "description": "Repository with SPDX expressions containing WITH clause",
+  "expected": {
+    "total_licenses": 1,
+    "licenses": ["GPL-2.0-only WITH Classpath-exception-2.0"],
+    "license_files_found": 1,
+    "files_with_licenses": 2,
+    "overall_risk": "medium",
+    "has_permissive": false,
+    "has_copyleft": false,
+    "has_weak_copyleft": true,
+    "has_unknown": false,
+    "license_counts": {
+      "GPL-2.0-only WITH Classpath-exception-2.0": 2
+    },
+    "total_findings": 2,
+    "spdx_headers_found": 2,
+    "license_file_detections": 0,
+    "expected_findings": [
+      {"file_path": "LICENSE", "spdx_id": "GPL-2.0-only WITH Classpath-exception-2.0", "match_type": "spdx"},
+      {"file_path": "src/Main.java", "spdx_id": "GPL-2.0-only WITH Classpath-exception-2.0", "match_type": "spdx"}
+    ]
+  },
+  "thresholds": {
+    "count_tolerance": 0,
+    "max_scan_time_ms": 5000,
+    "min_files_per_second": 1
+  }
+}

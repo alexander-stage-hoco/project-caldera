@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "tool_name": "scancode",
+    "tool_version": "1.0.0",
+    "run_id": "11111111-1111-1111-1111-111111111111",
+    "repo_id": "22222222-2222-2222-2222-222222222222",
+    "repo_name": "test-repo",
+    "repo_path": "/tmp/test-repo",
+    "branch": "main",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-01-25T10:00:00+00:00",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "scancode",
+    "tool_version": "1.0.0",
+    "scan_time_ms": 42.5,
+    "total_files_scanned": 3,
+    "files_with_licenses": 2,
+    "license_files_found": 1,
+    "licenses_found": ["MIT", "Apache-2.0"],
+    "license_counts": {
+      "MIT": 1,
+      "Apache-2.0": 1
+    },
+    "has_permissive": true,
+    "has_weak_copyleft": false,
+    "has_copyleft": false,
+    "has_unknown": false,
+    "overall_risk": "low",
+    "risk_reasons": ["Only permissive licenses found"],
+    "findings": [
+      {
+        "file_path": "LICENSE",
+        "spdx_id": "MIT",
+        "category": "permissive",
+        "confidence": 0.95,
+        "match_type": "file",
+        "line_number": 1
+      },
+      {
+        "file_path": "src/main.py",
+        "spdx_id": "Apache-2.0",
+        "category": "permissive",
+        "confidence": 0.9,
+        "match_type": "spdx",
+        "line_number": 2
+      }
+    ],
+    "files": {
+      "LICENSE": {
+        "file_path": "LICENSE",
+        "licenses": ["MIT"],
+        "category": "permissive",
+        "has_spdx_header": false
+      },
+      "src/main.py": {
+        "file_path": "src/main.py",
+        "licenses": ["Apache-2.0"],
+        "category": "permissive",
+        "has_spdx_header": true
+      }
+    },
+    "directories": {
+      "directory_count": 2,
+      "directories": [
+        {
+          "path": ".",
+          "direct": {
+            "file_count": 1,
+            "files_with_licenses": 1,
+            "license_counts": {"MIT": 1},
+            "category_counts": {"permissive": 1},
+            "has_copyleft": false,
+            "has_weak_copyleft": false,
+            "has_permissive": true,
+            "worst_risk": "low"
+          },
+          "recursive": {
+            "file_count": 2,
+            "files_with_licenses": 2,
+            "license_counts": {"MIT": 1, "Apache-2.0": 1},
+            "category_counts": {"permissive": 2},
+            "has_copyleft": false,
+            "has_weak_copyleft": false,
+            "has_permissive": true,
+            "worst_risk": "low"
+          }
+        },
+        {
+          "path": "src",
+          "direct": {
+            "file_count": 1,
+            "files_with_licenses": 1,
+            "license_counts": {"Apache-2.0": 1},
+            "category_counts": {"permissive": 1},
+            "has_copyleft": false,
+            "has_weak_copyleft": false,
+            "has_permissive": true,
+            "worst_risk": "low"
+          },
+          "recursive": {
+            "file_count": 1,
+            "files_with_licenses": 1,
+            "license_counts": {"Apache-2.0": 1},
+            "category_counts": {"permissive": 1},
+            "has_copyleft": false,
+            "has_weak_copyleft": false,
+            "has_permissive": true,
+            "worst_risk": "low"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "repository": "apache-bsd",
+  "description": "Repository with Apache 2.0 and BSD licenses (both permissive)",
+  "expected": {
+    "total_licenses": 2,
+    "licenses": ["Apache-2.0", "BSD-3-Clause"],
+    "license_files_found": 2,
+    "files_with_licenses": 4,
+    "overall_risk": "low",
+    "has_permissive": true,
+    "has_copyleft": false,
+    "has_weak_copyleft": false,
+    "has_unknown": false,
+    "license_counts": {
+      "Apache-2.0": 2,
+      "BSD-3-Clause": 2
+    },
+    "total_findings": 4,
+    "spdx_headers_found": 2,
+    "license_file_detections": 2,
+    "expected_findings": [
+      {"file_path": "LICENSE", "spdx_id": "Apache-2.0", "match_type": "file"},
+      {"file_path": "LICENSE.BSD", "spdx_id": "BSD-3-Clause", "match_type": "file"},
+      {"file_path": "src/main.py", "spdx_id": "Apache-2.0", "match_type": "spdx"},
+      {"file_path": "vendor/third_party.py", "spdx_id": "BSD-3-Clause", "match_type": "spdx"}
+    ]
+  },
+  "thresholds": {
+    "count_tolerance": 0,
+    "max_scan_time_ms": 5000,
+    "min_files_per_second": 1
+  }
+}
