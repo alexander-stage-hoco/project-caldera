@@ -183,6 +183,9 @@ class CSharpTreeSitterExtractor(BaseExtractor):
             "method_declaration",
             "constructor_declaration",
             "property_declaration",
+            # These handle their own nested call extraction
+            "invocation_expression",
+            "object_creation_expression",
         ):
             for child in node.children:
                 self._extract_from_tree(child, path, source, result, parent_class, namespace)
