@@ -102,17 +102,22 @@ def main() -> int:
     if args.programmatic_results and args.programmatic_results.exists():
         prog_data = json.loads(args.programmatic_results.read_text())
         summary = prog_data.get("summary", {})
+        # Support both 'score' and 'total_score' field names
+        prog_score = prog_data.get("score") or prog_data.get("total_score") or 0.0
         result.programmatic_input = ProgrammaticInput(
             file=str(args.programmatic_results),
             decision=prog_data.get("decision", "UNKNOWN"),
-            score=prog_data.get("score", 0.0),
+            score=prog_score,
             checks_passed=summary.get("passed", 0),
             checks_failed=summary.get("failed", 0),
         )
         # Use programmatic score for combined calculation if not explicitly provided
         if args.programmatic_score is None:
-            # Convert 0-1 scale to 0-5 scale
-            args.programmatic_score = prog_data.get("score", 0.0) * 5.0
+            # Score may be on 0-1 or 0-5 scale; normalize to 0-5
+            if prog_score <= 1.0:
+                args.programmatic_score = prog_score * 5.0
+            else:
+                args.programmatic_score = prog_score
 
     # Compute combined score if programmatic score provided
     if args.programmatic_score is not None:
