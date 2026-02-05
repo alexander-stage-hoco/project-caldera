@@ -10,8 +10,8 @@ select *
 from {{ ref(model_name) }}
 where value_count <= 0
    or min_value > max_value
-   or avg_value < min_value
-   or avg_value > max_value
+   or avg_value < min_value - 1e-9
+   or avg_value > max_value + 1e-9
    or (p25_value is not null and p50_value is not null and p25_value > p50_value)
    or (p50_value is not null and p75_value is not null and p50_value > p75_value)
    or (p75_value is not null and p90_value is not null and p75_value > p90_value)

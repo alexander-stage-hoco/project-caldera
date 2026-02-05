@@ -1705,3 +1705,216 @@ models:
       - name: statement_coverage_pct
         tests:
           - not_null
+
+  - name: stg_scancode_file_metrics
+    description: "File-level aggregation of license findings from scancode analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: license_count
+        tests:
+          - not_null
+
+  - name: stg_dotcover_file_metrics
+    description: "File-level aggregation of type coverage from dotCover analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: type_count
+        tests:
+          - not_null
+      - name: statement_coverage_pct
+        tests:
+          - not_null
+
+  - name: rollup_scancode_directory_counts_direct
+    description: "Scancode license counts per directory (direct scope - files in directory only)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_license_count
+        tests:
+          - not_null
+
+  - name: rollup_scancode_directory_counts_recursive
+    description: "Scancode license counts per directory (recursive scope - includes subtree)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_license_count
+        tests:
+          - not_null
+
+  - name: rollup_scancode_directory_direct_distributions
+    description: "Distribution statistics for scancode license metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - license_count
+                  - avg_confidence
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_scancode_directory_recursive_distributions
+    description: "Distribution statistics for scancode license metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - license_count
+                  - avg_confidence
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_dotcover_directory_counts_direct
+    description: "Dotcover coverage counts per directory (direct scope - files in directory only)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_type_count
+        tests:
+          - not_null
+
+  - name: rollup_dotcover_directory_counts_recursive
+    description: "Dotcover coverage counts per directory (recursive scope - includes subtree)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_type_count
+        tests:
+          - not_null
+
+  - name: rollup_dotcover_directory_direct_distributions
+    description: "Distribution statistics for dotcover coverage metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - statement_coverage_pct
+                  - type_count
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_dotcover_directory_recursive_distributions
+    description: "Distribution statistics for dotcover coverage metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - statement_coverage_pct
+                  - type_count
+      - name: value_count
+        tests:
+          - not_null
