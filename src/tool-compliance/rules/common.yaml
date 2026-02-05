@@ -85,6 +85,10 @@ tool_entities:
     - PmdCpdOccurrence
   devskim:
     - DevskimFinding
+  dotcover:
+    - DotcoverAssemblyCoverage
+    - DotcoverTypeCoverage
+    - DotcoverMethodCoverage
 
 entity_repository_map:
   SccFileMetric:
@@ -162,6 +166,15 @@ entity_repository_map:
   DevskimFinding:
     repository: DevskimRepository
     method: insert_findings
+  DotcoverAssemblyCoverage:
+    repository: DotcoverRepository
+    method: insert_assembly_coverage
+  DotcoverTypeCoverage:
+    repository: DotcoverRepository
+    method: insert_type_coverage
+  DotcoverMethodCoverage:
+    repository: DotcoverRepository
+    method: insert_method_coverage
 
 # Patterns for quality rule detection
 quality_rule_patterns:

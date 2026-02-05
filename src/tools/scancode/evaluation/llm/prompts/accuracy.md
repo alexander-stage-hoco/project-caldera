@@ -1,6 +1,14 @@
 You are an expert license compliance reviewer. Evaluate the accuracy of the
 license analysis output compared to ground truth.
 
+Evaluation Mode: {{ evaluation_mode }}
+
+Synthetic Baseline:
+{{ synthetic_baseline }}
+
+Interpretation Guidance:
+{{ interpretation_guidance }}
+
 Score from 1 (poor) to 5 (excellent) based on:
 - Correctness of detected SPDX IDs
 - Correct overall risk classification

@@ -3,9 +3,8 @@ from __future__ import annotations
 import json
 import os
 import subprocess
-from pathlib import Path
-
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -37,6 +36,7 @@ def test_analyze_directory_with_subrepos(tmp_path: Path, monkeypatch: pytest.Mon
     _init_repo(repo_b)
 
     out_dir = tmp_path / "out"
+
     def fake_analyze_repository(_: Path) -> analyze.RepositoryAnalysis:
         return analyze.RepositoryAnalysis(
             git_sizer_version="1.0.0",
@@ -48,22 +48,15 @@ def test_analyze_directory_with_subrepos(tmp_path: Path, monkeypatch: pytest.Mon
             raw_output={},
         )
 
-    def fake_build_envelope(*, analysis: analyze.RepositoryAnalysis, run_id: str, repo_id: str, repo_name: str, branch: str, commit: str) -> dict:
+    def fake_build_analysis_data(*, analysis: analyze.RepositoryAnalysis, repo_name: str) -> dict:
         return {
-            "metadata": {
-                "tool_name": "git-sizer",
-                "schema_version": "1.0.0",
-                "run_id": run_id,
-                "repo_id": repo_id,
-                "repo_name": repo_name,
-                "branch": branch,
-                "commit": commit,
-            },
-            "data": {"analysis": {"health_grade": analysis.health_grade}},
+            "tool": "git-sizer",
+            "repo_name": repo_name,
+            "health_grade": analysis.health_grade,
         }
 
     monkeypatch.setattr(analyze, "analyze_repository", fake_analyze_repository)
-    monkeypatch.setattr(analyze, "build_caldera_envelope", fake_build_envelope)
+    monkeypatch.setattr(analyze, "build_analysis_data", fake_build_analysis_data)
 
     argv = [
         "analyze.py",

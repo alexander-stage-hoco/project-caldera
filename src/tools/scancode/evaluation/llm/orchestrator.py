@@ -45,6 +45,7 @@ class EvaluationResult:
     decision: str
     programmatic_score: float | None = None
     combined_score: float | None = None
+    programmatic_input: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
@@ -53,11 +54,13 @@ class EvaluationResult:
             "timestamp": self.timestamp,
             "model": self.model,
             "dimensions": [d.to_dict() for d in self.dimensions],
+            "score": self.total_score,  # compliance expects 'score' not 'total_score'
             "total_score": self.total_score,
             "average_confidence": self.average_confidence,
             "decision": self.decision,
             "programmatic_score": self.programmatic_score,
             "combined_score": self.combined_score,
+            "programmatic_input": self.programmatic_input or {},
         }
 
     def to_json(self, indent: int = 2) -> str:
@@ -109,10 +112,26 @@ class LLMEvaluator:
         for judge in judges:
             self.register_judge(judge)
 
+    def _load_programmatic_input(self) -> dict[str, Any]:
+        """Load programmatic evaluation results for inclusion in LLM evaluation."""
+        prog_path = self.working_dir / "evaluation" / "results" / "evaluation_report.json"
+        if prog_path.exists():
+            try:
+                data = json.loads(prog_path.read_text())
+                # Add file field for compliance
+                data["file"] = str(prog_path.relative_to(self.working_dir))
+                return data
+            except (json.JSONDecodeError, OSError):
+                pass
+        return {"file": "evaluation/results/evaluation_report.json", "decision": "UNKNOWN", "score": 0.0}
+
     def evaluate(self, run_assertions: bool = True) -> EvaluationResult:
         """Run evaluation with all registered judges."""
         run_id = f"llm-eval-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
         timestamp = datetime.now(timezone.utc).isoformat()
+
+        # Load programmatic evaluation for inclusion
+        programmatic_input = self._load_programmatic_input()
 
         dimension_results: list[DimensionResult] = []
         total_weight = 0.0
@@ -177,6 +196,7 @@ class LLMEvaluator:
             total_score=total_score,
             average_confidence=avg_confidence,
             decision=decision,
+            programmatic_input=programmatic_input,
         )
 
     def compute_combined_score(

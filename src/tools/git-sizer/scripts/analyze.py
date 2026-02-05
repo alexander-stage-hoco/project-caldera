@@ -19,17 +19,22 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
+import re
 import subprocess
 import sys
 import time
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+# Add src directory to path for common imports
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from common.cli_parser import add_common_args, validate_common_args, CommitResolutionConfig
+from common.envelope_formatter import create_envelope
+from common.git_utilities import resolve_commit
+
 from .binary_manager import ensure_binary, get_version as get_binary_version_raw
-import re
 
 
 def get_binary_version() -> str:
@@ -346,51 +351,29 @@ def analyze_repository(repo_path: Path) -> RepositoryAnalysis:
     )
 
 
-def build_caldera_envelope(
+def build_analysis_data(
     analysis: RepositoryAnalysis,
-    run_id: str,
-    repo_id: str,
     repo_name: str,
-    branch: str,
-    commit: str,
 ) -> dict:
-    """Build Caldera envelope format output.
+    """Build the data section for a git-sizer analysis.
 
     Args:
         analysis: The repository analysis results
-        run_id: UUID for the collection run
-        repo_id: UUID for the repository
-        branch: Git branch analyzed
-        commit: 40-character commit SHA
+        repo_name: Name of the repository analyzed
 
     Returns:
-        Caldera envelope dict with metadata and data sections
+        Dictionary with all analysis data for the envelope data section
     """
-    timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-
     return {
-        "metadata": {
-            "tool_name": TOOL_NAME,
-            "tool_version": analysis.git_sizer_version,
-            "run_id": run_id,
-            "repo_id": repo_id,
-            "repo_name": repo_name,
-            "branch": branch,
-            "commit": commit,
-            "timestamp": timestamp,
-            "schema_version": SCHEMA_VERSION,
-        },
-        "data": {
-            "tool": TOOL_NAME,
-            "tool_version": analysis.git_sizer_version,
-            "repo_name": repo_name,
-            "health_grade": analysis.health_grade,
-            "duration_ms": analysis.duration_ms,
-            "metrics": analysis.metrics.to_dict(),
-            "violations": [v.to_dict() for v in analysis.violations],
-            "lfs_candidates": analysis.lfs_candidates,
-            "raw_output": analysis.raw_output,
-        },
+        "tool": TOOL_NAME,
+        "tool_version": analysis.git_sizer_version,
+        "repo_name": repo_name,
+        "health_grade": analysis.health_grade,
+        "duration_ms": analysis.duration_ms,
+        "metrics": analysis.metrics.to_dict(),
+        "violations": [v.to_dict() for v in analysis.violations],
+        "lfs_candidates": analysis.lfs_candidates,
+        "raw_output": analysis.raw_output,
     }
 
 
@@ -398,39 +381,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Analyze Git repository health using git-sizer (Caldera format)"
     )
-    parser.add_argument(
-        "--repo-path",
-        required=True,
-        help="Path to repository to analyze",
-    )
-    parser.add_argument(
-        "--repo-name",
-        help="Repository name (for logging)",
-    )
-    parser.add_argument(
-        "--output-dir",
-        required=True,
-        help="Directory to write output.json",
-    )
-    parser.add_argument(
-        "--run-id",
-        required=True,
-        help="UUID for the collection run",
-    )
-    parser.add_argument(
-        "--repo-id",
-        required=True,
-        help="UUID for the repository",
-    )
-    parser.add_argument(
-        "--branch",
-        default="main",
-        help="Git branch (default: main)",
-    )
-    parser.add_argument(
-        "--commit",
-        help="40-character commit SHA (default: HEAD)",
-    )
+    add_common_args(parser, default_repo_path=None)
     parser.add_argument(
         "--no-color",
         action="store_true",
@@ -444,52 +395,43 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    repo_path = Path(args.repo_path).resolve()
-    if not repo_path.exists():
-        print(f"Error: Repository path does not exist: {repo_path}", file=sys.stderr)
-        sys.exit(1)
-
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    def _resolve_commit(path: Path) -> str:
-        if args.commit:
-            return args.commit
-        try:
-            result = subprocess.run(
-                ["git", "rev-parse", "HEAD"],
-                capture_output=True,
-                text=True,
-                cwd=str(path),
-            )
-            value = result.stdout.strip()
-            return value if len(value) == 40 else "0" * 40
-        except Exception:
-            return "0" * 40
+    # Use lenient commit mode - sub-repos may have different commits
+    common = validate_common_args(
+        args,
+        commit_config=CommitResolutionConfig.lenient(),
+        create_output_dir=True,
+    )
+    repo_path = common.repo_path.resolve()
+    output_dir = common.output_dir
 
     def _analyze_one(path: Path, name: str, primary: bool) -> tuple[RepositoryAnalysis, Path]:
-        commit_value = _resolve_commit(path)
+        # Resolve commit for this specific sub-repo
+        commit_value = resolve_commit(path, args.commit or None)
         if len(commit_value) != 40:
             raise ValueError(f"commit must be a 40-character SHA, got: {commit_value}")
         print(f"Analyzing: {path}")
         analysis = analyze_repository(path)
-        output = build_caldera_envelope(
-            analysis=analysis,
-            run_id=args.run_id,
-            repo_id=args.repo_id,
-            repo_name=name,
-            branch=args.branch,
+        data = build_analysis_data(analysis=analysis, repo_name=name)
+        envelope = create_envelope(
+            data,
+            tool_name=TOOL_NAME,
+            tool_version=analysis.git_sizer_version,
+            run_id=common.run_id,
+            repo_id=common.repo_id,
+            branch=common.branch,
             commit=commit_value,
+            schema_version=SCHEMA_VERSION,
+            extra_metadata={"repo_name": name},
         )
         target_dir = output_dir / name
         target_dir.mkdir(parents=True, exist_ok=True)
         output_path = target_dir / "output.json"
-        output_path.write_text(json.dumps(output, indent=2, default=str))
+        output_path.write_text(json.dumps(envelope, indent=2, default=str))
         print(f"Output: {output_path}")
         return analysis, output_path
 
     if (repo_path / ".git").exists():
-        repo_name = args.repo_name or repo_path.name
+        repo_name = common.repo_name
         analysis, _ = _analyze_one(repo_path, repo_name, primary=True)
         primary_path = output_dir / "output.json"
         if primary_path.parent != output_dir:

@@ -33,6 +33,17 @@ class LicenseAccuracyJudge(BaseJudge):
         return {
             "analysis_results": self.load_all_analysis_results(),
             "ground_truth": self.load_ground_truth(),
+            "evaluation_mode": self.evaluation_mode or "synthetic",
+            "synthetic_baseline": {
+                "expected_licenses": ["MIT", "Apache-2.0", "GPL-3.0", "BSD-3-Clause"],
+                "minimum_accuracy": 0.80,
+                "tolerance": 0.05,
+            },
+            "interpretation_guidance": (
+                "Compare detected licenses against expected licenses. "
+                "Score 5 for perfect match, 4 for >90% accuracy, "
+                "3 for >80%, 2 for >70%, 1 for <70%."
+            ),
         }
 
     def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:

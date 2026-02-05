@@ -10,11 +10,14 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import subprocess
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+# Add shared src to path for imports
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from common.cli_parser import add_common_args, validate_common_args
+from common.envelope_formatter import create_envelope, get_current_timestamp
 
 from .security_analyzer import (
     AnalysisResult,
@@ -27,46 +30,6 @@ from .security_analyzer import (
 # Tool version and schema version
 TOOL_VERSION = "1.0.0"
 SCHEMA_VERSION = "1.0.0"
-
-
-def _git_run(repo_path: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
-    """Run a git command in the target repository."""
-    return subprocess.run(
-        ["git", "-C", str(repo_path), *args],
-        capture_output=True,
-        text=True,
-    )
-
-
-def _git_head(repo_path: Path) -> str | None:
-    """Return HEAD commit for repo_path if available."""
-    result = _git_run(repo_path, ["rev-parse", "HEAD"])
-    return result.stdout.strip() if result.returncode == 0 else None
-
-
-def _commit_exists(repo_path: Path, commit: str) -> bool:
-    """Check whether a commit exists in the given repo."""
-    result = _git_run(repo_path, ["cat-file", "-e", f"{commit}^{{commit}}"])
-    return result.returncode == 0
-
-
-def _fallback_commit_hash(repo_path: Path) -> str:
-    """Return the standard fallback commit hash for non-git repositories."""
-    return "0" * 40
-
-
-def _resolve_commit(repo_path: Path, commit_arg: str | None) -> str:
-    """Resolve a valid commit SHA for the target repo."""
-    if commit_arg:
-        if _commit_exists(repo_path, commit_arg):
-            return commit_arg
-        # Commit specified but not found - use it anyway (orchestrator may have validated)
-        return commit_arg
-
-    head = _git_head(repo_path)
-    if head:
-        return head
-    return _fallback_commit_hash(repo_path)
 
 
 def result_to_data_dict(result: AnalysisResult) -> dict[str, Any]:
@@ -167,58 +130,22 @@ def to_envelope_format(
     devskim_version: str,
 ) -> dict[str, Any]:
     """Convert analysis data to Caldera envelope output format."""
-    return {
-        "metadata": {
-            "tool_name": "devskim",
-            "tool_version": devskim_version,
-            "run_id": run_id,
-            "repo_id": repo_id,
-            "branch": branch,
-            "commit": commit,
-            "timestamp": timestamp,
-            "schema_version": SCHEMA_VERSION,
-        },
-        "data": data,
-    }
+    return create_envelope(
+        data,
+        tool_name="devskim",
+        tool_version=devskim_version,
+        run_id=run_id,
+        repo_id=repo_id,
+        branch=branch,
+        commit=commit,
+        timestamp=timestamp,
+        schema_version=SCHEMA_VERSION,
+    )
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Analyze security issues using DevSkim")
-    parser.add_argument(
-        "--repo-path",
-        default=os.environ.get("REPO_PATH", "eval-repos/synthetic"),
-        help="Path to repository to analyze",
-    )
-    parser.add_argument(
-        "--repo-name",
-        default=os.environ.get("REPO_NAME", ""),
-        help="Repository name for output naming",
-    )
-    parser.add_argument(
-        "--output-dir",
-        default=os.environ.get("OUTPUT_DIR"),
-        help="Directory to write analysis output (default: outputs/<run-id>)",
-    )
-    parser.add_argument(
-        "--run-id",
-        default=os.environ.get("RUN_ID", ""),
-        help="Run identifier (required)",
-    )
-    parser.add_argument(
-        "--repo-id",
-        default=os.environ.get("REPO_ID", ""),
-        help="Repository identifier (required)",
-    )
-    parser.add_argument(
-        "--branch",
-        default=os.environ.get("BRANCH", "main"),
-        help="Branch analyzed",
-    )
-    parser.add_argument(
-        "--commit",
-        default=os.environ.get("COMMIT", ""),
-        help="Commit SHA (auto-detected if not provided)",
-    )
+    add_common_args(parser)
     parser.add_argument(
         "--no-color",
         action="store_true",
@@ -231,40 +158,18 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    repo_path = Path(args.repo_path)
-    if not repo_path.exists():
-        print(f"Error: Repository path does not exist: {repo_path}", file=sys.stderr)
-        sys.exit(1)
-
-    repo_name = args.repo_name or repo_path.resolve().name
-
-    if not args.run_id:
-        print("Error: --run-id is required", file=sys.stderr)
-        sys.exit(1)
-    if not args.repo_id:
-        print("Error: --repo-id is required", file=sys.stderr)
-        sys.exit(1)
-
-    commit = _resolve_commit(repo_path.resolve(), args.commit or None)
-
-    output_dir = (
-        Path(args.output_dir)
-        if args.output_dir
-        else Path("outputs") / args.run_id
-    )
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / "output.json"
+    common = validate_common_args(args)
 
     if args.no_color:
         set_color_enabled(False)
 
     # Set REPO_NAME env var for security_analyzer
-    os.environ["REPO_NAME"] = repo_name
+    os.environ["REPO_NAME"] = common.repo_name
 
-    print(f"Analyzing: {repo_path}")
+    print(f"Analyzing: {common.repo_path}")
 
     # Run security analysis
-    result = analyze_with_devskim(str(repo_path), repo_name, str(repo_path))
+    result = analyze_with_devskim(str(common.repo_path), common.repo_name, str(common.repo_path))
 
     # Get devskim version
     devskim_version = get_devskim_version()
@@ -277,21 +182,21 @@ def main() -> None:
     data = result_to_data_dict(result)
 
     # Convert to envelope format
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = get_current_timestamp()
     output_dict = to_envelope_format(
         data,
-        args.run_id,
-        args.repo_id,
-        args.branch,
-        commit,
+        common.run_id,
+        common.repo_id,
+        common.branch,
+        common.commit,
         timestamp,
         devskim_version,
     )
 
     # Write output
-    output_path.write_text(json.dumps(output_dict, indent=2, ensure_ascii=False))
+    common.output_path.write_text(json.dumps(output_dict, indent=2, ensure_ascii=False))
 
-    print(f"Output: {output_path}")
+    print(f"Output: {common.output_path}")
 
     # Display dashboard unless json-only
     if not args.json_only:

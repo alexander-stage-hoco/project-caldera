@@ -5,16 +5,16 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-import subprocess
 import sys
 from dataclasses import asdict
-from datetime import datetime, timezone
 from pathlib import Path
 
 # Add shared src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from common.path_normalization import normalize_file_path
+from common.git_utilities import is_fallback_commit, resolve_commit
+from common.cli_parser import add_common_args, validate_common_args_raising, CommitResolutionConfig, ValidationError
+from common.envelope_formatter import create_envelope, get_current_timestamp
 
 from extractors import (
     PythonExtractor,
@@ -27,69 +27,6 @@ from extractors import (
 TOOL_NAME = "symbol-scanner"
 TOOL_VERSION = "0.1.0"
 SCHEMA_VERSION = "1.0.0"
-
-
-def _git_run(repo_path: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
-    """Run a git command in the target repository."""
-    return subprocess.run(
-        ["git", "-C", str(repo_path), *args],
-        capture_output=True,
-        text=True,
-    )
-
-
-def _git_head(repo_path: Path) -> str | None:
-    """Return HEAD commit for repo_path if available."""
-    result = _git_run(repo_path, ["rev-parse", "HEAD"])
-    return result.stdout.strip() if result.returncode == 0 else None
-
-
-def _commit_exists(repo_path: Path, commit: str) -> bool:
-    """Check whether a commit exists in the given repo."""
-    result = _git_run(repo_path, ["cat-file", "-e", f"{commit}^{{commit}}"])
-    return result.returncode == 0
-
-
-def _fallback_commit_hash(repo_path: Path) -> str:
-    """Return the standard fallback commit hash for non-git repositories."""
-    return "0" * 40
-
-
-def _is_fallback_commit(commit: str) -> bool:
-    """Check if commit is a fallback value (all zeros or empty)."""
-    return not commit or commit == "0" * 40
-
-
-def _resolve_commit(repo_path: Path, commit_arg: str, fallback_repo: Path | None) -> str:
-    """Resolve a valid commit SHA for the target repo."""
-    # Accept fallback commits directly
-    if _is_fallback_commit(commit_arg):
-        # Try to get actual HEAD first
-        head = _git_head(repo_path)
-        if head:
-            return head
-        if fallback_repo:
-            head = _git_head(fallback_repo)
-            if head:
-                return head
-        # Return the fallback hash
-        return "0" * 40
-
-    if commit_arg:
-        if _commit_exists(repo_path, commit_arg):
-            return commit_arg
-        if fallback_repo and _commit_exists(fallback_repo, commit_arg):
-            return commit_arg
-        raise ValueError(f"Commit not found in repo: {commit_arg}")
-
-    head = _git_head(repo_path)
-    if head:
-        return head
-    if fallback_repo:
-        head = _git_head(fallback_repo)
-        if head:
-            return head
-    return _fallback_commit_hash(repo_path if repo_path.exists() else fallback_repo or repo_path)
 
 
 def build_output_envelope(
@@ -153,68 +90,37 @@ def build_output_envelope(
             import_dict["imported_symbols"] = i.imported_symbols
         imports.append(import_dict)
 
-    return {
-        "metadata": {
-            "tool_name": TOOL_NAME,
-            "tool_version": TOOL_VERSION,
-            "run_id": run_id,
-            "repo_id": repo_id,
-            "branch": branch,
-            "commit": commit,
-            "timestamp": timestamp,
-            "schema_version": SCHEMA_VERSION,
-        },
-        "data": {
-            "tool": TOOL_NAME,
-            "tool_version": TOOL_VERSION,
-            "symbols": symbols,
-            "calls": calls,
-            "imports": imports,
-            "summary": result.summary,
-        },
-        "errors": result.errors if result.errors else [],
+    data = {
+        "tool": TOOL_NAME,
+        "tool_version": TOOL_VERSION,
+        "symbols": symbols,
+        "calls": calls,
+        "imports": imports,
+        "summary": result.summary,
     }
+
+    envelope = create_envelope(
+        data,
+        tool_name=TOOL_NAME,
+        tool_version=TOOL_VERSION,
+        run_id=run_id,
+        repo_id=repo_id,
+        branch=branch,
+        commit=commit,
+        timestamp=timestamp,
+        schema_version=SCHEMA_VERSION,
+    )
+    # Add errors field outside standard envelope if present
+    envelope["errors"] = result.errors if result.errors else []
+
+    return envelope
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Extract symbols, calls, and imports from source code (Python and C#)"
     )
-    parser.add_argument(
-        "--repo-path",
-        default=os.environ.get("REPO_PATH", "eval-repos/synthetic/simple-functions"),
-        help="Path to repository to analyze",
-    )
-    parser.add_argument(
-        "--repo-name",
-        default=os.environ.get("REPO_NAME", ""),
-        help="Repository name for output naming",
-    )
-    parser.add_argument(
-        "--output-dir",
-        default=os.environ.get("OUTPUT_DIR"),
-        help="Directory to write analysis output (default: outputs/<run-id>)",
-    )
-    parser.add_argument(
-        "--run-id",
-        default=os.environ.get("RUN_ID", ""),
-        help="Run identifier (required)",
-    )
-    parser.add_argument(
-        "--repo-id",
-        default=os.environ.get("REPO_ID", ""),
-        help="Repository identifier (required)",
-    )
-    parser.add_argument(
-        "--branch",
-        default=os.environ.get("BRANCH", "main"),
-        help="Branch analyzed",
-    )
-    parser.add_argument(
-        "--commit",
-        default=os.environ.get("COMMIT", ""),
-        help="Commit SHA (default: repo HEAD)",
-    )
+    add_common_args(parser, default_repo_path="eval-repos/synthetic/simple-functions")
     parser.add_argument(
         "--no-resolve-calls",
         action="store_true",
@@ -241,34 +147,18 @@ def main() -> None:
         # Default to hybrid for C# if ast was specified (the default)
         args.strategy = "hybrid"
 
-    repo_path = Path(args.repo_path)
-    if not repo_path.exists():
-        raise FileNotFoundError(f"Repository not found at {repo_path}")
+    # Handle fallback commits specially - try to get real HEAD first
+    if args.commit and is_fallback_commit(args.commit):
+        args.commit = ""  # Let resolve_commit auto-detect HEAD
 
-    repo_name = args.repo_name or repo_path.resolve().name
+    commit_config = CommitResolutionConfig.strict_with_fallback(Path(__file__).parent.parent)
+    common = validate_common_args_raising(args, commit_config=commit_config)
+
     print(f"Symbol Scanner v{TOOL_VERSION}")
     print()
 
-    if not args.run_id:
-        raise ValueError("--run-id is required")
-    if not args.repo_id:
-        raise ValueError("--repo-id is required")
-
-    try:
-        commit = _resolve_commit(repo_path.resolve(), args.commit, Path(__file__).parent.parent)
-    except ValueError as exc:
-        raise ValueError(str(exc)) from exc
-
-    output_dir = (
-        Path(args.output_dir)
-        if args.output_dir
-        else Path("outputs") / args.run_id
-    )
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / "output.json"
-
-    print(f"Analyzing {repo_name}...")
-    print(f"Repository: {repo_path.resolve()}")
+    print(f"Analyzing {common.repo_name}...")
+    print(f"Repository: {common.repo_path.resolve()}")
     print()
 
     # Create extractor based on language and strategy
@@ -285,14 +175,14 @@ def main() -> None:
         else:  # hybrid (default for C#)
             extractor = CSharpHybridExtractor()
     resolve_calls = not args.no_resolve_calls
+    repo_root = common.repo_path.resolve()
     result = extractor.extract_directory(
-        repo_path.resolve(),
-        repo_path.resolve(),
+        repo_root,
+        repo_root,
         resolve_calls=resolve_calls,
     )
 
     # Normalize paths
-    repo_root = repo_path.resolve()
     for symbol in result.symbols:
         symbol.path = normalize_file_path(symbol.path, repo_root)
     for call in result.calls:
@@ -303,18 +193,18 @@ def main() -> None:
         imp.file = normalize_file_path(imp.file, repo_root)
 
     # Build output envelope
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = get_current_timestamp()
     envelope = build_output_envelope(
         result,
-        run_id=args.run_id,
-        repo_id=args.repo_id,
-        branch=args.branch,
-        commit=commit,
+        run_id=common.run_id,
+        repo_id=common.repo_id,
+        branch=common.branch,
+        commit=common.commit,
         timestamp=timestamp,
     )
 
     # Write output
-    output_path.write_text(json.dumps(envelope, indent=2, default=str))
+    common.output_path.write_text(json.dumps(envelope, indent=2, default=str))
 
     # Print summary
     summary = result.summary
@@ -347,7 +237,7 @@ def main() -> None:
     if result.errors:
         print(f"Errors: {len(result.errors)}")
     print()
-    print(f"Output: {output_path}")
+    print(f"Output: {common.output_path}")
 
 
 if __name__ == "__main__":

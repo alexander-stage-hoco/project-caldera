@@ -127,8 +127,10 @@ Respond with JSON:
         all_results = self.load_all_analysis_results()
 
         for repo_name, output in all_results.items():
-            results = output.get("results", output)
-            summary = results.get("summary", {})
+            # Handle both old format (results at top level) and new envelope format (data wrapper)
+            data = output.get("data", output)
+            results = data.get("results", data)
+            summary = results.get("summary", data.get("summary", {}))
             violations_by_rule = summary.get("violations_by_rule", {})
 
             repo_design = {
@@ -217,7 +219,7 @@ Respond with JSON:
         # Check synthetic repo for expected design findings
         if "synthetic" in all_results:
             output = all_results["synthetic"]
-            results = output.get("results", output)
+            results = self.unwrap_output(output)
             summary = results.get("summary", {})
             violations_by_category = summary.get("violations_by_category", {})
 
@@ -232,7 +234,7 @@ Respond with JSON:
 
             # Get total design detections
             total_design = sum(
-                output.get("results", output).get("summary", {}).get("violations_by_category", {}).get("design", 0)
+                self.unwrap_output(output).get("summary", {}).get("violations_by_category", {}).get("design", 0)
                 for output in all_results.values()
             )
 
@@ -246,7 +248,7 @@ Respond with JSON:
             expected_encapsulation = expected_min.get("encapsulation", 0)
             if expected_encapsulation > 0:
                 total_encapsulation = sum(
-                    output.get("results", output).get("summary", {}).get("violations_by_rule", {}).get("CA1051", 0)
+                    self.unwrap_output(output).get("summary", {}).get("violations_by_rule", {}).get("CA1051", 0)
                     for output in all_results.values()
                 )
                 if total_encapsulation < expected_encapsulation:

@@ -9,15 +9,16 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
-import subprocess
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 # Add scripts directory and shared src to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from common.cli_parser import add_common_args, validate_common_args, CommitResolutionConfig
+from common.envelope_formatter import create_envelope
+from common.git_utilities import resolve_commit, is_fallback_commit
 
 from secret_analyzer import analyze_repository, get_gitleaks_version
 
@@ -33,7 +34,10 @@ def _resolve_gitleaks_path(path_arg: str | None) -> Path:
 
 
 def _compute_content_hash(repo_path: Path) -> str:
-    """Compute a deterministic hash for non-git repos."""
+    """Compute a deterministic hash for non-git repos.
+
+    Used as a fallback when analyzing directories that are not git repositories.
+    """
     sha1 = hashlib.sha1()
     for path in sorted(repo_path.rglob("*")):
         if path.is_file() and ".git" not in path.parts:
@@ -46,34 +50,17 @@ def _compute_content_hash(repo_path: Path) -> str:
     return sha1.hexdigest()
 
 
-def _resolve_commit(repo_path: Path, commit_arg: str | None) -> str:
-    """Resolve commit SHA, falling back to content hash."""
-    if commit_arg and len(commit_arg) == 40 and commit_arg != "0" * 40:
-        return commit_arg
-    try:
-        result = subprocess.run(
-            ["git", "-C", str(repo_path), "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        return result.stdout.strip()
-    except subprocess.CalledProcessError:
-        return _compute_content_hash(repo_path)
+def build_analysis_data(analysis, tool_version: str) -> dict:
+    """Build the data section from SecretAnalysis results.
 
+    Args:
+        analysis: SecretAnalysis object from secret_analyzer
+        tool_version: Version of gitleaks
 
-def to_caldera_envelope(
-    analysis,
-    run_id: str,
-    repo_id: str,
-    branch: str,
-    commit: str,
-    tool_version: str,
-    timestamp: str,
-) -> dict:
-    """Convert SecretAnalysis to Caldera envelope format with metadata + data."""
-    # Build the data section with analysis results
-    data = {
+    Returns:
+        Dictionary with all analysis data for the envelope data section
+    """
+    return {
         "tool": TOOL_NAME,
         "tool_version": tool_version,
         "total_secrets": analysis.total_secrets,
@@ -125,60 +112,10 @@ def to_caldera_envelope(
         "scan_time_ms": analysis.scan_time_ms,
     }
 
-    return {
-        "metadata": {
-            "tool_name": TOOL_NAME,
-            "tool_version": tool_version,
-            "run_id": run_id,
-            "repo_id": repo_id,
-            "branch": branch,
-            "commit": commit,
-            "timestamp": timestamp,
-            "schema_version": SCHEMA_VERSION,
-        },
-        "data": data,
-    }
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Analyze secrets using gitleaks")
-    parser.add_argument(
-        "--repo-path",
-        required=True,
-        type=Path,
-        help="Path to repository to analyze",
-    )
-    parser.add_argument(
-        "--repo-name",
-        required=True,
-        help="Repository name for output naming",
-    )
-    parser.add_argument(
-        "--output-dir",
-        required=True,
-        type=Path,
-        help="Directory to write analysis output",
-    )
-    parser.add_argument(
-        "--run-id",
-        required=True,
-        help="Run identifier (UUID)",
-    )
-    parser.add_argument(
-        "--repo-id",
-        required=True,
-        help="Repository identifier (UUID)",
-    )
-    parser.add_argument(
-        "--branch",
-        default="main",
-        help="Branch analyzed",
-    )
-    parser.add_argument(
-        "--commit",
-        default=None,
-        help="Commit SHA (40-character hex)",
-    )
+    add_common_args(parser, default_repo_path=None)
     parser.add_argument(
         "--gitleaks",
         help="Path to gitleaks binary",
@@ -193,12 +130,12 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    repo_path = args.repo_path.resolve()
-    if not repo_path.exists():
-        print(f"Error: Repository path does not exist: {repo_path}", file=sys.stderr)
-        return 1
-
-    repo_name = args.repo_name or repo_path.name
+    # Use lenient commit mode since gitleaks has special content-hash fallback
+    common = validate_common_args(
+        args,
+        commit_config=CommitResolutionConfig.lenient(),
+        create_output_dir=True,
+    )
 
     gitleaks_path = _resolve_gitleaks_path(args.gitleaks)
     if not gitleaks_path.exists():
@@ -206,45 +143,46 @@ def main() -> int:
         print("Run 'make setup' to install gitleaks", file=sys.stderr)
         return 1
 
-    # Resolve commit
-    commit = _resolve_commit(repo_path, args.commit)
+    # Resolve commit - use content hash for non-git repos
+    commit = resolve_commit(common.repo_path, args.commit or None)
+    if is_fallback_commit(commit):
+        # For non-git directories, compute a content-based hash
+        commit = _compute_content_hash(common.repo_path)
 
-    print(f"Analyzing: {repo_path}")
+    print(f"Analyzing: {common.repo_path}")
     print(f"Using gitleaks: {gitleaks_path}")
     print(f"Gitleaks version: {get_gitleaks_version(gitleaks_path)}")
 
     # Run analysis
     analysis = analyze_repository(
         gitleaks_path=gitleaks_path,
-        repo_path=repo_path,
+        repo_path=common.repo_path,
         config_path=Path(args.config) if args.config else None,
         baseline_path=Path(args.baseline) if args.baseline else None,
-        repo_name_override=repo_name,
+        repo_name_override=common.repo_name,
     )
 
     # Get tool version
     tool_version = get_gitleaks_version(gitleaks_path)
-    timestamp = datetime.now(timezone.utc).isoformat()
 
-    # Convert to Caldera envelope format
-    envelope = to_caldera_envelope(
-        analysis,
-        run_id=args.run_id,
-        repo_id=args.repo_id,
-        branch=args.branch,
-        commit=commit,
+    # Build data and create envelope
+    data = build_analysis_data(analysis, tool_version)
+    envelope = create_envelope(
+        data,
+        tool_name=TOOL_NAME,
         tool_version=tool_version,
-        timestamp=timestamp,
+        run_id=common.run_id,
+        repo_id=common.repo_id,
+        branch=common.branch,
+        commit=commit,
+        schema_version=SCHEMA_VERSION,
     )
 
     # Write output
-    output_dir = args.output_dir
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / "output.json"
-    output_path.write_text(json.dumps(envelope, indent=2, default=str))
+    common.output_path.write_text(json.dumps(envelope, indent=2, default=str))
 
     print(f"Secrets found: {analysis.total_secrets}")
-    print(f"Output: {output_path}")
+    print(f"Output: {common.output_path}")
 
     return 0
 

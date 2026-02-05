@@ -125,7 +125,7 @@ Respond with JSON:
         all_results = self.load_all_analysis_results()
 
         for repo_name, output in all_results.items():
-            results = output.get("results", output)
+            results = self.unwrap_output(output)
             summary = results.get("summary", {})
             violations_by_rule = summary.get("violations_by_rule", {})
 
@@ -212,7 +212,7 @@ Respond with JSON:
         # Check synthetic repo for expected resource findings
         if "synthetic" in all_results:
             output = all_results["synthetic"]
-            results = output.get("results", output)
+            results = self.unwrap_output(output)
             summary = results.get("summary", {})
             violations_by_category = summary.get("violations_by_category", {})
 
@@ -227,7 +227,7 @@ Respond with JSON:
 
             # Get total resource detections
             total_resource = sum(
-                output.get("results", output).get("summary", {}).get("violations_by_category", {}).get("resource", 0)
+                self.unwrap_output(output).get("summary", {}).get("violations_by_category", {}).get("resource", 0)
                 for output in all_results.values()
             )
 
@@ -242,7 +242,7 @@ Respond with JSON:
             if expected_idisp > 0:
                 total_idisp = 0
                 for output in all_results.values():
-                    violations_by_rule = output.get("results", output).get("summary", {}).get("violations_by_rule", {})
+                    violations_by_rule = self.unwrap_output(output).get("summary", {}).get("violations_by_rule", {})
                     total_idisp += sum(count for rule, count in violations_by_rule.items() if "IDISP" in rule)
 
                 if total_idisp < expected_idisp:

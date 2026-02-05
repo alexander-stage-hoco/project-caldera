@@ -52,19 +52,31 @@ class BaseJudge(ABC):
         working_dir: Path | None = None,
         analysis_path: Path | None = None,
         output_dir: Path | None = None,
+        evaluation_mode: str | None = None,
     ):
         self.model = model
         self.timeout = timeout
         self.working_dir = working_dir or Path.cwd()
-        self.output_dir = output_dir or self.working_dir / "output" / "runs"
-        self.analysis_path = analysis_path or self.working_dir / "output" / "license_analysis.json"
+        self.output_dir = output_dir or self.working_dir / "outputs"
+        self.analysis_path = analysis_path or self.working_dir / "outputs" / "output.json"
+        self.evaluation_mode = evaluation_mode
         self._prompt_template: str | None = None
 
     def load_all_analysis_results(self) -> dict[str, Any]:
-        """Load all analysis JSON files from output_dir."""
+        """Load all analysis JSON files from output_dir (including subdirectories)."""
         results: dict[str, Any] = {}
 
         if self.output_dir.exists() and self.output_dir.is_dir():
+            # Look for output.json in run subdirectories (outputs/<run-id>/output.json)
+            for json_file in sorted(self.output_dir.glob("*/output.json")):
+                try:
+                    data = json.loads(json_file.read_text())
+                    run_id = json_file.parent.name
+                    results[run_id] = data
+                except json.JSONDecodeError:
+                    continue
+
+            # Also check for direct JSON files
             for json_file in sorted(self.output_dir.glob("*.json")):
                 if json_file.name.startswith("."):
                     continue

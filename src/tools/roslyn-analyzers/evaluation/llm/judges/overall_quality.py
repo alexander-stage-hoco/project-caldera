@@ -141,7 +141,7 @@ Respond with JSON:
         message_samples = []
 
         for repo_name, output in all_results.items():
-            results = output.get("results", output)
+            results = self.unwrap_output(output)
             summary = results.get("summary", {})
 
             # Accumulate totals
@@ -186,7 +186,7 @@ Respond with JSON:
             evidence["false_positive_analysis"]["total_clean_files"] = len(expected_clean)
 
             for repo_name, output in all_results.items():
-                results = output.get("results", output)
+                results = self.unwrap_output(output)
                 files = results.get("files", [])
                 for file_data in files:
                     file_path = file_data.get("path", "")
@@ -228,7 +228,7 @@ Respond with JSON:
             # Check that core categories are present
             all_categories = set()
             for output in all_results.values():
-                results = output.get("results", output)
+                results = self.unwrap_output(output)
                 summary = results.get("summary", {})
                 all_categories.update(summary.get("violations_by_category", {}).keys())
 
@@ -248,7 +248,7 @@ Respond with JSON:
                 total_clean_files = len(expected_clean)
 
                 for output in all_results.values():
-                    results = output.get("results", output)
+                    results = self.unwrap_output(output)
                     files = results.get("files", [])
                     for file_data in files:
                         file_path = file_data.get("path", "")

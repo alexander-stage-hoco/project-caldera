@@ -91,6 +91,25 @@ class BaseJudge(SharedBaseJudge):
             return json.loads(self.evaluation_path.read_text())
         return {}
 
+    @staticmethod
+    def unwrap_output(output: dict[str, Any]) -> dict[str, Any]:
+        """Unwrap output from envelope format to get results/summary.
+
+        Handles both:
+        - Old format: results and summary at top level
+        - New envelope format: data wrapper containing results
+
+        Returns the unwrapped data dict that should contain summary, files, etc.
+        """
+        # Check for envelope format (has 'data' key)
+        if "data" in output:
+            return output["data"]
+        # Check for results wrapper
+        if "results" in output and isinstance(output["results"], dict):
+            return output["results"]
+        # Return as-is
+        return output
+
     def load_all_analysis_results(self) -> dict[str, Any]:
         """Load all analysis JSON files from output_dir.
 

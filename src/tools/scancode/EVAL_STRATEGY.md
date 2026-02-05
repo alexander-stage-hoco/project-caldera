@@ -130,3 +130,19 @@ make analyze REPO_PATH=/path/to/repo
 # Run evaluation
 make evaluate
 ```
+
+---
+
+## Rollup Validation
+
+ScanCode produces repository-level license summaries (no directory-level rollups).
+
+Rollups:
+
+Tests:
+- src/sot-engine/dbt/tests/test_rollup_scancode_repo_level_metrics.sql
+
+| Invariant | Description |
+|-----------|-------------|
+| files_with_licenses >= 0 | Count is non-negative |
+| overall_risk valid | Risk must be low/medium/high/critical/unknown |

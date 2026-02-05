@@ -158,7 +158,7 @@ Respond with JSON:
         combined_violations = []
         for repo_name, output in all_results.items():
             # Handle both flat and nested (results.X) structures
-            results = output.get("results", output)
+            results = self.unwrap_output(output)
 
             # Extract metadata
             metadata = {
@@ -227,7 +227,7 @@ Respond with JSON:
 
         for repo_name, output in all_results.items():
             # Handle both flat and nested (results.X) structures
-            results = output.get("results", output)
+            results = self.unwrap_output(output)
 
             # Check required top-level fields
             if "schema_version" not in output:

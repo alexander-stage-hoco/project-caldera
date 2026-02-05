@@ -166,7 +166,7 @@ Respond with JSON:
         all_results = self.load_all_analysis_results()
 
         for repo_name, output in all_results.items():
-            results = output.get("results", output)
+            results = self.unwrap_output(output)
             summary = results.get("summary", {})
             violations_by_rule = summary.get("violations_by_rule", {})
 
@@ -269,7 +269,7 @@ Respond with JSON:
         # Check synthetic repo for expected security findings
         if "synthetic" in all_results:
             output = all_results["synthetic"]
-            results = output.get("results", output)
+            results = self.unwrap_output(output)
             summary = results.get("summary", {})
             violations_by_category = summary.get("violations_by_category", {})
 
@@ -284,7 +284,7 @@ Respond with JSON:
 
             # Get total security detections
             total_security = sum(
-                output.get("results", output).get("summary", {}).get("violations_by_category", {}).get("security", 0)
+                self.unwrap_output(output).get("summary", {}).get("violations_by_category", {}).get("security", 0)
                 for output in all_results.values()
             )
 
@@ -300,7 +300,7 @@ Respond with JSON:
             expected_clean = clean_gt.get("expected_clean_files", [])
             # Check if any analysis output has violations on clean files
             for repo_name, output in all_results.items():
-                results = output.get("results", output)
+                results = self.unwrap_output(output)
                 files = results.get("files", [])
                 for file_data in files:
                     file_path = file_data.get("path", "")

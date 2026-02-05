@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import subprocess
 import sys
 import tempfile
@@ -21,6 +20,8 @@ from common.ecosystem_detector import (
     detect_ecosystems_from_directory,
     format_ecosystem_completeness,
 )
+from common.cli_parser import add_common_args, validate_common_args, CommitResolutionConfig
+from common.envelope_formatter import create_envelope, get_current_timestamp
 
 logger = structlog.get_logger(__name__)
 
@@ -287,21 +288,18 @@ def transform_trivy_output(
     if ecosystem_completeness:
         data["ecosystem_completeness"] = ecosystem_completeness
 
-    envelope = {
-        "id": config.repo_name,  # Used for ground truth matching
-        "metadata": {
-            "tool_name": "trivy",
-            "tool_version": tool_version,
-            "run_id": config.run_id,
-            "repo_id": config.repo_id,
-            "repo_name": config.repo_name,
-            "branch": config.branch,
-            "commit": config.commit,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "schema_version": "1.0.0",
-        },
-        "data": data,
-    }
+    envelope = create_envelope(
+        data,
+        tool_name="trivy",
+        tool_version=tool_version,
+        run_id=config.run_id,
+        repo_id=config.repo_id,
+        branch=config.branch,
+        commit=config.commit,
+        extra_metadata={"repo_name": config.repo_name},
+    )
+    # Add id field for ground truth matching (outside standard envelope)
+    envelope["id"] = config.repo_name
 
     return envelope
 
@@ -345,43 +343,6 @@ def run_analysis(config: AnalysisConfig) -> dict:
     return result
 
 
-def _git_run(repo_path: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
-    """Run a git command in the target repository."""
-    return subprocess.run(
-        ["git", "-C", str(repo_path), *args],
-        capture_output=True,
-        text=True,
-    )
-
-
-def _git_head(repo_path: Path) -> str | None:
-    """Return HEAD commit for repo_path if available."""
-    result = _git_run(repo_path, ["rev-parse", "HEAD"])
-    return result.stdout.strip() if result.returncode == 0 else None
-
-
-def _commit_exists(repo_path: Path, commit: str) -> bool:
-    """Check whether a commit exists in the given repo."""
-    result = _git_run(repo_path, ["cat-file", "-e", f"{commit}^{{commit}}"])
-    return result.returncode == 0
-
-
-def _fallback_commit_hash() -> str:
-    """Return the standard fallback commit hash for non-git repositories."""
-    return "0" * 40
-
-
-def _resolve_commit(repo_path: Path, commit_arg: str) -> str:
-    """Resolve a valid commit SHA for the target repo."""
-    if commit_arg:
-        if _commit_exists(repo_path, commit_arg):
-            return commit_arg
-        raise ValueError(f"Commit not found in repo: {commit_arg}")
-
-    head = _git_head(repo_path)
-    if head:
-        return head
-    return _fallback_commit_hash()
 
 
 def main() -> None:
@@ -389,41 +350,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Analyze vulnerabilities using Trivy"
     )
-    parser.add_argument(
-        "--repo-path",
-        default=os.environ.get("REPO_PATH"),
-        help="Path to repository to analyze",
-    )
-    parser.add_argument(
-        "--repo-name",
-        default=os.environ.get("REPO_NAME", ""),
-        help="Repository name for output file",
-    )
-    parser.add_argument(
-        "--output-dir",
-        default=os.environ.get("OUTPUT_DIR"),
-        help="Output directory (default: outputs/<run-id>)",
-    )
-    parser.add_argument(
-        "--run-id",
-        default=os.environ.get("RUN_ID", ""),
-        help="Unique run identifier (required)",
-    )
-    parser.add_argument(
-        "--repo-id",
-        default=os.environ.get("REPO_ID", ""),
-        help="Repository identifier (required)",
-    )
-    parser.add_argument(
-        "--branch",
-        default=os.environ.get("BRANCH", "main"),
-        help="Git branch name",
-    )
-    parser.add_argument(
-        "--commit",
-        default=os.environ.get("COMMIT", ""),
-        help="Git commit SHA (default: repo HEAD)",
-    )
+    # Trivy has no default for --repo-path (required)
+    add_common_args(parser, default_repo_path=None)
     parser.add_argument(
         "--timeout",
         type=int,
@@ -458,51 +386,23 @@ def main() -> None:
         logger_factory=structlog.PrintLoggerFactory(),
     )
 
-    # Validate required arguments
-    if not args.repo_path:
-        print("Error: --repo-path is required", file=sys.stderr)
-        sys.exit(1)
-
-    repo_path = Path(args.repo_path)
-    if not repo_path.exists():
-        print(f"Error: Repository path does not exist: {repo_path}", file=sys.stderr)
-        sys.exit(1)
-
-    repo_name = args.repo_name or repo_path.resolve().name
-
-    if not args.run_id:
-        print("Error: --run-id is required", file=sys.stderr)
-        sys.exit(1)
-    if not args.repo_id:
-        print("Error: --repo-id is required", file=sys.stderr)
-        sys.exit(1)
-
-    try:
-        commit = _resolve_commit(repo_path.resolve(), args.commit)
-    except ValueError as exc:
-        print(f"Error: {exc}", file=sys.stderr)
-        sys.exit(1)
-
-    output_dir = (
-        Path(args.output_dir)
-        if args.output_dir
-        else Path("outputs") / args.run_id
-    )
+    commit_config = CommitResolutionConfig.strict_no_fallback()
+    common = validate_common_args(args, commit_config=commit_config)
 
     config = AnalysisConfig(
-        repo_path=repo_path,
-        repo_name=repo_name,
-        output_dir=output_dir,
-        run_id=args.run_id,
-        repo_id=args.repo_id,
-        branch=args.branch,
-        commit=commit,
+        repo_path=common.repo_path,
+        repo_name=common.repo_name,
+        output_dir=common.output_dir,
+        run_id=common.run_id,
+        repo_id=common.repo_id,
+        branch=common.branch,
+        commit=common.commit,
         timeout=args.timeout,
     )
 
     try:
         result = run_analysis(config)
-        print(f"Analysis complete: {output_dir / 'output.json'}")
+        print(f"Analysis complete: {common.output_dir / 'output.json'}")
         print(
             f"Vulnerabilities: {result['data']['findings_summary']['total_vulnerabilities']}"
         )

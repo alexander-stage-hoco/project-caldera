@@ -9,12 +9,12 @@
 
 .PHONY: all setup analyze build-repos evaluate evaluate-llm test test-quick clean clean-all help
 
-# Include shared configuration (provides VENV, RUN_ID, REPO_ID, OUTPUT_DIR, etc.)
-include ../Makefile.common
-
-# Tool-specific configuration
+# Tool-specific configuration (must be before include to get correct path)
 TOOL_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 PROJECT_ROOT := $(abspath $(TOOL_ROOT)/../../..)
+
+# Include shared configuration (provides VENV, RUN_ID, REPO_ID, OUTPUT_DIR, etc.)
+include ../Makefile.common
 
 # Tool-specific defaults
 REPO_PATH ?= eval-repos/synthetic
@@ -96,7 +96,10 @@ evaluate: $(VENV_READY)
 evaluate-llm: $(VENV_READY)
 	@echo "Running LLM-as-a-Judge evaluation..."
 	@mkdir -p $(EVAL_OUTPUT_DIR)
-	@LLM_TIMEOUT=$(LLM_TIMEOUT) $(PYTHON_VENV) scripts/llm_evaluate.py --mode full --model $(LLM_MODEL) --output $(EVAL_OUTPUT_DIR)/llm_evaluation.json
+	@mkdir -p evaluation/llm/results
+	@LLM_TIMEOUT=$(LLM_TIMEOUT) $(PYTHON_VENV) scripts/llm_evaluate.py --model $(LLM_MODEL) --working-dir $(TOOL_ROOT)
+	@# Copy latest result to uniform path for compliance
+	@cp "$$(ls -t evaluation/llm/results/llm-eval-*.json 2>/dev/null | head -1)" $(EVAL_OUTPUT_DIR)/llm_evaluation.json 2>/dev/null || true
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"
 
 # =============================================================================

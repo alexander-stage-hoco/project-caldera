@@ -36,6 +36,12 @@ from .docker_lifecycle import (
 from .scanner import ScannerConfig, run_sonar_scanner, create_scanner_config
 from .export import build_export_data, validate_export
 
+# Add shared src to path for imports
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from common.git_utilities import resolve_commit
+from common.envelope_formatter import create_envelope, get_current_timestamp
+
 logger = structlog.get_logger(__name__)
 
 # Tool and schema version
@@ -64,43 +70,6 @@ class AnalysisConfig:
     commit: str = ""
 
 
-def _git_run(repo_path: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
-    """Run a git command in the target repository."""
-    return subprocess.run(
-        ["git", "-C", str(repo_path), *args],
-        capture_output=True,
-        text=True,
-    )
-
-
-def _git_head(repo_path: Path) -> str | None:
-    """Return HEAD commit for repo_path if available."""
-    result = _git_run(repo_path, ["rev-parse", "HEAD"])
-    return result.stdout.strip() if result.returncode == 0 else None
-
-
-def _commit_exists(repo_path: Path, commit: str) -> bool:
-    """Check whether a commit exists in the given repo."""
-    result = _git_run(repo_path, ["cat-file", "-e", f"{commit}^{{commit}}"])
-    return result.returncode == 0
-
-
-def _fallback_commit_hash(repo_path: Path) -> str:
-    """Return the standard fallback commit hash for non-git repositories."""
-    return "0" * 40
-
-
-def _resolve_commit(repo_path: Path, commit_arg: str | None) -> str:
-    """Resolve a valid commit SHA for the target repo."""
-    if commit_arg:
-        if _commit_exists(repo_path, commit_arg):
-            return commit_arg
-        return commit_arg
-
-    head = _git_head(repo_path)
-    if head:
-        return head
-    return _fallback_commit_hash(repo_path)
 
 
 def setup_signal_handlers(docker_config: DockerConfig) -> None:
@@ -125,19 +94,17 @@ def to_envelope_format(
     tool_version: str,
 ) -> dict:
     """Convert analysis data to Caldera envelope output format."""
-    return {
-        "metadata": {
-            "tool_name": "sonarqube",
-            "tool_version": tool_version,
-            "run_id": run_id,
-            "repo_id": repo_id,
-            "branch": branch,
-            "commit": commit,
-            "timestamp": timestamp,
-            "schema_version": SCHEMA_VERSION,
-        },
-        "data": data,
-    }
+    return create_envelope(
+        data,
+        tool_name="sonarqube",
+        tool_version=tool_version,
+        run_id=run_id,
+        repo_id=repo_id,
+        branch=branch,
+        commit=commit,
+        timestamp=timestamp,
+        schema_version=SCHEMA_VERSION,
+    )
 
 
 def run_analysis(config: AnalysisConfig) -> dict:
@@ -285,10 +252,10 @@ def run_analysis(config: AnalysisConfig) -> dict:
             )
 
             # Resolve commit
-            commit = _resolve_commit(config.repo_path.resolve(), config.commit or None)
+            commit = resolve_commit(config.repo_path.resolve(), config.commit or None, strict=False)
 
             # Wrap in Caldera envelope format
-            timestamp = datetime.now(timezone.utc).isoformat()
+            timestamp = get_current_timestamp()
             envelope = to_envelope_format(
                 data=inner_data,
                 run_id=config.run_id,

@@ -7,8 +7,9 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-# Add scripts to path
+# Add scripts and src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from scripts.analyze import (
     ThresholdViolation,
@@ -17,8 +18,11 @@ from scripts.analyze import (
     format_bytes,
     calculate_threshold_level,
     calculate_health_grade,
-    build_caldera_envelope,
+    build_analysis_data,
+    TOOL_NAME,
+    SCHEMA_VERSION,
 )
+from common.envelope_formatter import create_envelope
 
 
 class TestThresholdViolation:
@@ -159,8 +163,23 @@ class TestCalculateHealthGrade:
         assert calculate_health_grade(v1) == "B+"
 
 
-class TestBuildCalderaEnvelope:
-    """Tests for build_caldera_envelope function."""
+class TestBuildAnalysisData:
+    """Tests for build_analysis_data function and envelope creation."""
+
+    def _create_envelope(self, analysis, run_id, repo_id, repo_name, branch, commit):
+        """Helper to create envelope using build_analysis_data and create_envelope."""
+        data = build_analysis_data(analysis=analysis, repo_name=repo_name)
+        return create_envelope(
+            data,
+            tool_name=TOOL_NAME,
+            tool_version=analysis.git_sizer_version,
+            run_id=run_id,
+            repo_id=repo_id,
+            branch=branch,
+            commit=commit,
+            schema_version=SCHEMA_VERSION,
+            extra_metadata={"repo_name": repo_name},
+        )
 
     def test_envelope_structure(self):
         """Test envelope has correct structure."""
@@ -175,7 +194,7 @@ class TestBuildCalderaEnvelope:
             raw_output={},
         )
 
-        envelope = build_caldera_envelope(
+        envelope = self._create_envelope(
             analysis=analysis,
             run_id="550e8400-e29b-41d4-a716-446655440000",
             repo_id="660e8400-e29b-41d4-a716-446655440001",
@@ -223,7 +242,7 @@ class TestBuildCalderaEnvelope:
             raw_output={},
         )
 
-        envelope = build_caldera_envelope(
+        envelope = self._create_envelope(
             analysis=analysis,
             run_id="test-run",
             repo_id="test-repo",
@@ -250,7 +269,7 @@ class TestBuildCalderaEnvelope:
             raw_output={"some": "data"},
         )
 
-        envelope = build_caldera_envelope(
+        envelope = self._create_envelope(
             analysis=analysis,
             run_id="test",
             repo_id="test",

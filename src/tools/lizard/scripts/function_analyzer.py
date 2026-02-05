@@ -9,7 +9,6 @@ import argparse
 import json
 import os
 import shutil
-import subprocess
 import statistics
 import sys
 from collections import defaultdict
@@ -19,6 +18,11 @@ from pathlib import Path
 from typing import List, Dict, Optional, Any
 
 import lizard
+
+# Add shared src to path for imports
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from common.git_utilities import resolve_commit
+from common.envelope_formatter import create_envelope
 
 
 # =============================================================================
@@ -1165,30 +1169,28 @@ def to_dict(obj):
 def result_to_output(result: AnalysisResult) -> dict:
     """Convert AnalysisResult to JSON-serializable dict (envelope schema)."""
     tool_version = get_lizard_version().replace("lizard ", "")
-    return {
-        "metadata": {
-            "tool_name": "lizard",
-            "tool_version": tool_version,
-            "run_id": result.run_id,
-            "repo_id": result.repo_id,
-            "branch": result.branch,
-            "commit": result.commit,
-            "timestamp": result.timestamp,
-            "schema_version": "1.0.0"
-        },
-        "data": {
-            "tool": "lizard",
-            "tool_version": tool_version,
-            "run_id": result.run_id,
-            "timestamp": result.timestamp,
-            "root_path": result.root_path,
-            "lizard_version": get_lizard_version(),
-            "directories": [to_dict(d) for d in result.directories],
-            "files": [to_dict(f) for f in result.files],
-            "summary": to_dict(result.summary),
-            "by_language": result.by_language,
-        }
+    data = {
+        "tool": "lizard",
+        "tool_version": tool_version,
+        "run_id": result.run_id,
+        "timestamp": result.timestamp,
+        "root_path": result.root_path,
+        "lizard_version": get_lizard_version(),
+        "directories": [to_dict(d) for d in result.directories],
+        "files": [to_dict(f) for f in result.files],
+        "summary": to_dict(result.summary),
+        "by_language": result.by_language,
     }
+    return create_envelope(
+        data,
+        tool_name="lizard",
+        tool_version=tool_version,
+        run_id=result.run_id,
+        repo_id=result.repo_id,
+        branch=result.branch,
+        commit=result.commit,
+        timestamp=result.timestamp,
+    )
 
 
 def create_run_folder(
@@ -1255,51 +1257,6 @@ def discover_repos(base_path: Path) -> List[Path]:
     return repos
 
 
-def _git_run(repo_path: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
-    """Run a git command in the target repository."""
-    return subprocess.run(
-        ["git", "-C", str(repo_path), *args],
-        capture_output=True,
-        text=True,
-    )
-
-
-def _git_head(repo_path: Path) -> str | None:
-    """Return HEAD commit for repo_path if available."""
-    result = _git_run(repo_path, ["rev-parse", "HEAD"])
-    return result.stdout.strip() if result.returncode == 0 else None
-
-
-def _commit_exists(repo_path: Path, commit: str) -> bool:
-    """Check whether a commit exists in the given repo."""
-    result = _git_run(repo_path, ["cat-file", "-e", f"{commit}^{{commit}}"])
-    return result.returncode == 0
-
-
-def _fallback_commit_hash(repo_path: Path) -> str:
-    """Return the standard fallback commit hash for non-git repositories."""
-    return "0" * 40
-
-
-def _resolve_commit(repo_path: Path, commit_arg: str | None, fallback_repo: Path | None) -> str:
-    """Resolve a valid commit SHA for the target repo."""
-    if commit_arg:
-        if _commit_exists(repo_path, commit_arg):
-            return commit_arg
-        if fallback_repo and _commit_exists(fallback_repo, commit_arg):
-            return commit_arg
-        raise ValueError(f"Commit not found in repo: {commit_arg}")
-
-    head = _git_head(repo_path)
-    if head:
-        return head
-    if fallback_repo:
-        head = _git_head(fallback_repo)
-        if head:
-            return head
-    return _fallback_commit_hash(repo_path if repo_path.exists() else fallback_repo or repo_path)
-
-
 def run_interactive(base_path: Path, output_root: Path, commit_override: str | None, fallback_repo: Path):
     """Run interactive multi-repo analysis."""
     repos = discover_repos(base_path)
@@ -1332,7 +1289,12 @@ def run_interactive(base_path: Path, output_root: Path, commit_override: str | N
                 result = analyze_directory(str(repo))
                 print_dashboard(result, width)
                 try:
-                    result.commit = _resolve_commit(repo.resolve(), commit_override, fallback_repo)
+                    result.commit = resolve_commit(
+                        repo.resolve(),
+                        commit_override,
+                        fallback_repo=fallback_repo,
+                        strict=True,
+                    )
                 except ValueError as exc:
                     print(c(f"  ⚠️  {exc}", Colors.YELLOW))
 
@@ -1450,7 +1412,12 @@ def main():
         )
         print_dashboard(result, width)
         try:
-            result.commit = _resolve_commit(target.resolve(), args.commit, script_dir)
+            result.commit = resolve_commit(
+                target.resolve(),
+                args.commit or None,
+                fallback_repo=script_dir,
+                strict=True,
+            )
         except ValueError as exc:
             print(f"Error: {exc}")
             sys.exit(1)

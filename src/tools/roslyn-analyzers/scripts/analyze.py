@@ -12,7 +12,6 @@ This wrapper invokes roslyn_analyzer.py and wraps the output in Caldera's envelo
 import argparse
 import json
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 # Add shared src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from common.path_normalization import normalize_file_path
+from common.envelope_formatter import create_envelope, get_current_timestamp
 
 from roslyn_analyzer import analyze
 
@@ -82,28 +82,27 @@ def wrap_in_envelope(
             "directory": normalized_dir,
         })
 
-    envelope = {
-        "metadata": {
-            "tool_name": TOOL_NAME,
-            "tool_version": results.get("tool_version", TOOL_VERSION),
-            "run_id": run_id,
-            "repo_id": repo_id,
-            "branch": branch,
-            "commit": commit,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "schema_version": SCHEMA_VERSION,
-        },
-        "data": {
-            "tool": TOOL_NAME,
-            "tool_version": results.get("tool_version", TOOL_VERSION),
-            "analysis_duration_ms": results.get("analysis_duration_ms", 0),
-            "summary": results.get("summary", {}),
-            "files": files,
-            "statistics": results.get("statistics", {}),
-            "directory_rollup": directory_rollup,
-        },
+    tool_version = results.get("tool_version", TOOL_VERSION)
+    data = {
+        "tool": TOOL_NAME,
+        "tool_version": tool_version,
+        "analysis_duration_ms": results.get("analysis_duration_ms", 0),
+        "summary": results.get("summary", {}),
+        "files": files,
+        "statistics": results.get("statistics", {}),
+        "directory_rollup": directory_rollup,
     }
-    return envelope
+
+    return create_envelope(
+        data,
+        tool_name=TOOL_NAME,
+        tool_version=tool_version,
+        run_id=run_id,
+        repo_id=repo_id,
+        branch=branch,
+        commit=commit,
+        schema_version=SCHEMA_VERSION,
+    )
 
 
 def _map_severity(dd_severity: str) -> str:
