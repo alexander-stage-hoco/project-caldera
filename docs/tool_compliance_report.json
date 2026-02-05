@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-05T11:21:30.379731+00:00",
+  "generated_at": "2026-02-05T12:56:36.361229+00:00",
   "summary": {
     "failed": 0,
     "passed": 1,
@@ -12,7 +12,7 @@
           "check_id": "run.analyze",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dotcover/outputs/A447B7A4-7009-4E22-849D-A8FA063758E7/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/semgrep/outputs/108C6E80-FC93-4799-B779-688AFC599921/output.json"
           ],
           "message": "Pre-existing analysis output found",
           "severity": "critical",
@@ -24,7 +24,7 @@
           "check_id": "run.evaluate",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dotcover/evaluation/scorecard.md"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/semgrep/evaluation/scorecard.md"
           ],
           "message": "Pre-existing evaluation output found",
           "severity": "high",
@@ -34,9 +34,9 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.08,
+          "duration_ms": 0.06,
           "evidence": [
-            "PASS"
+            "STRONG_PASS"
           ],
           "message": "Evaluation decision meets threshold",
           "severity": "high",
@@ -48,7 +48,7 @@
           "check_id": "run.evaluate_llm",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dotcover/evaluation/results/llm_evaluation.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/semgrep/evaluation/llm/results/llm-eval-20260130-120000.json"
           ],
           "message": "Pre-existing LLM evaluation output found",
           "severity": "medium",
@@ -58,9 +58,9 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.04,
+          "duration_ms": 0.05,
           "evidence": [
-            "PASS"
+            "STRONG_PASS"
           ],
           "message": "LLM evaluation decision meets threshold",
           "severity": "medium",
@@ -70,9 +70,9 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 0.04,
+          "duration_ms": 0.52,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dotcover/outputs/A447B7A4-7009-4E22-849D-A8FA063758E7/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/semgrep/outputs/108C6E80-FC93-4799-B779-688AFC599921/output.json"
           ],
           "message": "Output JSON loaded",
           "severity": "high",
@@ -82,7 +82,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 0.15,
+          "duration_ms": 5.06,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -92,7 +92,7 @@
         },
         {
           "check_id": "output.data_completeness",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [],
           "message": "Data completeness validated",
           "severity": "high",
@@ -102,9 +102,11 @@
         },
         {
           "check_id": "output.path_consistency",
-          "duration_ms": 0.0,
-          "evidence": [],
-          "message": "No path fields found to validate",
+          "duration_ms": 0.06,
+          "evidence": [
+            "Checked 65 paths across 2 sections"
+          ],
+          "message": "Path consistency validated",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -112,7 +114,7 @@
         },
         {
           "check_id": "output.required_fields",
-          "duration_ms": 0.01,
+          "duration_ms": 0.0,
           "evidence": [],
           "message": "Required metadata fields present",
           "severity": "high",
@@ -122,7 +124,7 @@
         },
         {
           "check_id": "output.schema_version",
-          "duration_ms": 0.01,
+          "duration_ms": 0.0,
           "evidence": [
             "1.0.0"
           ],
@@ -134,10 +136,10 @@
         },
         {
           "check_id": "output.tool_name_match",
-          "duration_ms": 0.01,
+          "duration_ms": 0.0,
           "evidence": [
-            "dotcover",
-            "dotcover"
+            "semgrep",
+            "semgrep"
           ],
           "message": "Tool name matches data.tool",
           "severity": "low",
@@ -147,7 +149,7 @@
         },
         {
           "check_id": "output.metadata_consistency",
-          "duration_ms": 0.04,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "Metadata formats are consistent",
           "severity": "medium",
@@ -157,7 +159,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.08,
+          "duration_ms": 0.1,
           "evidence": [
             "1.0.0"
           ],
@@ -169,7 +171,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 114.96,
+          "duration_ms": 116.37,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -179,7 +181,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.22,
+          "duration_ms": 0.21,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -189,7 +191,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.13,
+          "duration_ms": 0.14,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -209,7 +211,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.19,
+          "duration_ms": 0.17,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -219,7 +221,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.11,
+          "duration_ms": 0.14,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -231,9 +233,9 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.08,
+          "duration_ms": 0.12,
           "evidence": [],
-          "message": "analyze target uses output directory argument",
+          "message": "analyze target output pattern acceptable",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -241,7 +243,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.08,
+          "duration_ms": 0.1,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -251,7 +253,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.05,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -261,7 +263,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.13,
+          "duration_ms": 0.35,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -271,7 +273,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.08,
+          "duration_ms": 0.26,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -281,7 +283,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.04,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -301,14 +303,15 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.16,
+          "duration_ms": 0.13,
           "evidence": [
-            "false_positive.py",
+            "rule_coverage.py",
             "actionability.py",
-            "integration.py",
-            "accuracy.py"
+            "security_detection.py",
+            "smell_accuracy.py",
+            "false_positive_rate.py"
           ],
-          "message": "LLM judge count meets minimum (4 >= 4)",
+          "message": "LLM judge count meets minimum (5 >= 4)",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -316,11 +319,11 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 5.51,
+          "duration_ms": 11.24,
           "evidence": [
             "base.py: evaluation_mode parameter present",
-            "primary judge: accuracy.py",
-            "prompt: accuracy.md has all placeholders"
+            "primary judge: security_detection.py",
+            "prompt: security_detection.md has all placeholders"
           ],
           "message": "Synthetic evaluation context pattern implemented correctly",
           "severity": "high",
@@ -330,9 +333,17 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.02,
-          "evidence": [],
-          "message": "synthetic.json ground truth present",
+          "duration_ms": 0.07,
+          "evidence": [
+            "java.json",
+            "go.json",
+            "csharp.json",
+            "rust.json",
+            "javascript.json",
+            "typescript.json",
+            "python.json"
+          ],
+          "message": "Ground truth files present",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -364,15 +375,12 @@
           "check_id": "evaluation.programmatic_schema",
           "duration_ms": 0.05,
           "evidence": [
-            "run_id",
             "timestamp",
             "tool",
-            "version",
             "decision",
             "score",
-            "summary",
-            "dimensions",
-            "total_score"
+            "checks",
+            "summary"
           ],
           "message": "Programmatic evaluation schema valid",
           "severity": "high",
@@ -382,9 +390,9 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.04,
+          "duration_ms": 0.05,
           "evidence": [
-            "PASS"
+            "STRONG_PASS"
           ],
           "message": "Programmatic evaluation passed",
           "severity": "high",
@@ -406,7 +414,7 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.03,
+          "duration_ms": 0.07,
           "evidence": [
             "timestamp",
             "model",
@@ -414,7 +422,8 @@
             "score",
             "programmatic_input",
             "dimensions",
-            "summary"
+            "summary",
+            "analysis_path"
           ],
           "message": "LLM evaluation schema valid",
           "severity": "medium",
@@ -424,10 +433,10 @@
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.03,
+          "duration_ms": 0.06,
           "evidence": [
-            "file=evaluation/results/evaluation_report.json",
-            "decision=PASS"
+            "file=/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/semgrep/evaluation/results/evaluation_report.json",
+            "decision=STRONG_PASS"
           ],
           "message": "LLM evaluation includes programmatic input",
           "severity": "medium",
@@ -437,9 +446,9 @@
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.03,
+          "duration_ms": 0.05,
           "evidence": [
-            "PASS"
+            "WEAK_PASS"
           ],
           "message": "LLM evaluation passed",
           "severity": "medium",
@@ -449,9 +458,9 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.13,
+          "duration_ms": 0.25,
           "evidence": [
-            "src/tools/dotcover/tests/unit/test_analyze.py"
+            "src/sot-engine/dbt/tests/test_rollup_semgrep_direct_vs_recursive.sql"
           ],
           "message": "Rollup Validation declared with valid tests",
           "severity": "high",
@@ -461,7 +470,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 123.2,
+          "duration_ms": 76.47,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -471,7 +480,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.59,
+          "duration_ms": 1.6,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -481,9 +490,9 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 52.68,
+          "duration_ms": 31.78,
           "evidence": [
-            "Fixture: dotcover_output.json"
+            "Fixture: semgrep_output.json"
           ],
           "message": "Adapter successfully persisted fixture data",
           "severity": "high",
@@ -493,10 +502,10 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.4,
+          "duration_ms": 0.34,
           "evidence": [
-            "coverage_bounds",
-            "statement_invariants",
+            "paths",
+            "line_numbers",
             "required_fields"
           ],
           "message": "All 3 quality rules have implementation coverage",
@@ -509,7 +518,7 @@
           "check_id": "sot.adapter_registered",
           "duration_ms": 0.15,
           "evidence": [],
-          "message": "Adapter DotcoverAdapter properly registered in adapters/__init__.py",
+          "message": "Adapter SemgrepAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -517,9 +526,9 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.2,
+          "duration_ms": 0.19,
           "evidence": [
-            "Found 3 table(s)"
+            "Found 1 table(s)"
           ],
           "message": "Schema tables found for tool",
           "severity": "high",
@@ -529,9 +538,9 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.12,
+          "duration_ms": 0.11,
           "evidence": [],
-          "message": "Tool 'dotcover' wired in TOOL_INGESTION_CONFIGS",
+          "message": "Tool 'semgrep' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -539,11 +548,10 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.17,
+          "duration_ms": 0.16,
           "evidence": [
-            "stg_lz_dotcover_type_coverage.sql",
-            "stg_lz_dotcover_method_coverage.sql",
-            "stg_lz_dotcover_assembly_coverage.sql"
+            "stg_semgrep_file_metrics.sql",
+            "stg_lz_semgrep_smells.sql"
           ],
           "message": "dbt staging model(s) found",
           "severity": "high",
@@ -553,11 +561,10 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.14,
+          "duration_ms": 0.5,
           "evidence": [
-            "stg_lz_dotcover_type_coverage.sql",
-            "stg_lz_dotcover_method_coverage.sql",
-            "stg_lz_dotcover_assembly_coverage.sql"
+            "stg_semgrep_file_metrics.sql",
+            "stg_lz_semgrep_smells.sql"
           ],
           "message": "dbt models present for tool",
           "severity": "high",
@@ -567,11 +574,9 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 6.1,
+          "duration_ms": 6.8,
           "evidence": [
-            "DotcoverAssemblyCoverage",
-            "DotcoverTypeCoverage",
-            "DotcoverMethodCoverage"
+            "SemgrepSmell"
           ],
           "message": "All entities have aligned repositories",
           "severity": "high",
@@ -591,9 +596,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 16.61,
+          "duration_ms": 13.44,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (144 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (145 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -601,7 +606,7 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.1,
+          "duration_ms": 0.07,
           "evidence": [
             "coverage.json not found"
           ],
@@ -612,7 +617,7 @@
           "stdout_summary": null
         }
       ],
-      "name": "dotcover",
+      "name": "semgrep",
       "status": "pass"
     }
   ],

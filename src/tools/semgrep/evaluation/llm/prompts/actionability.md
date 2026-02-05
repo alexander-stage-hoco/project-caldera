@@ -2,6 +2,21 @@
 
 You are an expert software engineer evaluating Semgrep's output actionability for developers and due diligence teams.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
+**Important**: When evaluation_mode is "real_world":
+- Low or zero smell counts are NOT automatically failures
+- Judge actionability based on: Are the messages that ARE present clear, actionable, and well-formatted?
+- Consider: A tool that produces 0 smells on a clean codebase but has good message format deserves credit
+
 ## Context
 
 This evaluation assesses whether Semgrep's smell detection output is useful for remediation planning. Results should be clear, prioritizable, and include guidance for fixing issues identified during technical due diligence.

@@ -26,8 +26,41 @@ class HotspotRankingJudge(BaseJudge):
 
     def collect_evidence(self) -> dict[str, Any]:
         """Collect hotspot ranking evidence."""
+        # Handle missing analysis file with default values for all placeholders
         if not self.analysis_path.exists():
-            return {"error": f"Analysis file not found: {self.analysis_path}"}
+            evidence: dict[str, Any] = {
+                "error": f"Analysis file not found: {self.analysis_path}",
+                "top_functions_by_ccn": [],
+                "top_functions_by_nloc": [],
+                "top_functions_by_params": [],
+                "functions_over_10": 0,
+                "functions_over_20": 0,
+                "total_functions": 0,
+                "ccn_distribution": {},
+                "directory_hotspots": [],
+                "max_ccn_overall": 0,
+                "p95_ccn": 0,
+                "evaluation_mode": self.evaluation_mode,
+            }
+            # Inject synthetic context even when analysis is missing
+            if self.evaluation_mode == "real_world":
+                synthetic_context = self.load_synthetic_evaluation_context()
+                if synthetic_context:
+                    evidence["synthetic_baseline"] = synthetic_context
+                    evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                        synthetic_context
+                    )
+                else:
+                    evidence["synthetic_baseline"] = "No synthetic baseline available"
+                    evidence["interpretation_guidance"] = (
+                        "Evaluate based on ground truth comparison only"
+                    )
+            else:
+                evidence["synthetic_baseline"] = (
+                    "N/A - synthetic mode uses direct ground truth comparison"
+                )
+                evidence["interpretation_guidance"] = "Strict ground truth evaluation"
+            return evidence
 
         analysis = self._load_analysis()
 

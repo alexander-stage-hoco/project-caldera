@@ -37,6 +37,21 @@ class IntegrationFitJudge(BaseJudge):
 
 You are evaluating the DD Platform integration compatibility of Roslyn Analyzers static analysis output.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
+**Important**: When evaluation_mode is "real_world":
+- Low violation counts are NOT automatically failures
+- Judge integration quality: schema compliance, rollup data presence, metadata completeness
+- Consider: A tool that produces 0 findings on a clean codebase with complete schema deserves a high score
+
 ## Evidence to Review
 
 ### Metadata
@@ -128,8 +143,13 @@ Respond with JSON:
 """
 
     def collect_evidence(self) -> dict[str, Any]:
-        """Collect integration fit data for evaluation."""
+        """Collect integration fit data for evaluation.
+
+        For real-world evaluation mode, also injects synthetic evaluation
+        context to help the LLM understand tool baseline capability.
+        """
         evidence: dict[str, Any] = {
+            "evaluation_mode": self.evaluation_mode,
             "metadata": {},
             "schema_version": "",
             "output_structure": {},
@@ -212,6 +232,25 @@ Respond with JSON:
                 evidence["rollup_completeness"]["by_file"] = True
 
         evidence["violations_sample"] = combined_violations[:15]
+
+        # Inject synthetic baseline context for real-world evaluation
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context:
+                evidence["synthetic_baseline"] = synthetic_context
+                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                    synthetic_context
+                )
+            else:
+                evidence["synthetic_baseline"] = "No synthetic baseline available"
+                evidence["interpretation_guidance"] = (
+                    "Evaluate based on ground truth comparison only"
+                )
+        else:
+            evidence["synthetic_baseline"] = (
+                "N/A - synthetic mode uses direct ground truth comparison"
+            )
+            evidence["interpretation_guidance"] = "Strict ground truth evaluation"
 
         return evidence
 

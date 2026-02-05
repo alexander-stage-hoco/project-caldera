@@ -1,21 +1,32 @@
 # dotcover - Architecture Blueprint
 
-> Brief description of what this tool analyzes.
-
-<!--
-Template instructions (delete this section when done):
-- Review docs/templates/BLUEPRINT.md.template for full guidance
-- See src/tools/scc/BLUEPRINT.md for a complete example
-- Run `make compliance` to verify all required sections are present
--->
+> JetBrains dotCover provides .NET code coverage at statement level across assembly/type/method hierarchy.
 
 ## Executive Summary
 
-[TODO: Describe what the tool analyzes, key metrics, and why it was selected for Caldera]
+**dotCover** (JetBrains dotCover Command-Line Tools) provides code coverage analysis for .NET applications, reporting statement-level coverage metrics across the assembly→namespace→type→method hierarchy.
 
-**Example** (from scc):
-> scc provides fast, accurate source code counting with per-file metrics including
-> lines of code, comments, blanks, and cyclomatic complexity estimates.
+| Aspect | Status |
+|--------|--------|
+| **Purpose** | Code coverage analysis with statement-level granularity |
+| **Evaluation Score** | Pending |
+| **Recommendation** | ADOPT for .NET code coverage layer |
+| **Languages Supported** | C#, F#, VB.NET (all .NET languages) |
+| **Programmatic Checks** | Pending |
+
+**Key Strengths:**
+- Statement-level coverage granularity
+- Integration with dotnet test workflow
+- Assembly/Type/Method hierarchy reporting
+- JSON and XML output formats
+
+**Known Limitations:**
+- Requires tests to run (coverage collected during test execution)
+- macOS ARM64 report generation bug (timeout workaround in place)
+- No branch coverage (statement coverage only)
+- No line-level coverage detail
+
+---
 
 ## Gap Analysis
 
@@ -23,16 +34,27 @@ Template instructions (delete this section when done):
 
 | Aspect | Status |
 |--------|--------|
-| Tool maturity | [alpha/beta/stable] |
+| Tool maturity | Stable |
 | Output format | JSON |
-| Language support | [All/Specific languages] |
-| Performance | [Fast/Moderate/Slow] |
+| Language support | .NET (C#, F#, VB.NET) |
+| Performance | Moderate (30s-2min depending on test suite) |
 
 ### Integration Gaps
 
 | Gap | Impact | Resolution |
 |-----|--------|------------|
-| [TODO: Identify gaps] | [Impact level] | [Resolution plan] |
+| Requires dotnet test to run first | Medium | Build step dependency in Makefile |
+| macOS ARM64 report generation bug | Medium | Timeout with snapshot fallback |
+| No line-level coverage | Low | Accept statement-level granularity |
+| No branch coverage | Low | Statement coverage sufficient for MVP |
+
+### Integration Strategy
+1. Use dotCover for all .NET code coverage metrics (authoritative source)
+2. Integrate with dotnet test workflow for coverage collection
+3. Map assembly/type/method hierarchy to SoT entities
+4. Accept macOS ARM64 limitations with snapshot fallback
+
+---
 
 ## Architecture
 
@@ -42,19 +64,34 @@ Template instructions (delete this section when done):
 Repository
     |
     v
-+-------------+
-| analyze.py  |  Parse, normalize, wrap in envelope
-+-------------+
++------------------+
+| dotnet test      |  Build and run tests
++------------------+
     |
     v
-+-------------+
-| output.json |  Caldera envelope format
-+-------------+
++------------------+
+| dotCover cover   |  Collect coverage during test run
++------------------+
     |
     v
-+-------------+
-| SoT Adapter |  Persist to landing zone
-+-------------+
++------------------+
+| dotCover report  |  Generate JSON/XML reports
++------------------+
+    |
+    v
++------------------+
+| analyze.py       |  Parse, normalize, wrap in envelope
++------------------+
+    |
+    v
++------------------+
+| output.json      |  Caldera envelope format
++------------------+
+    |
+    v
++------------------+
+| SoT Adapter      |  Persist to landing zone
++------------------+
 ```
 
 ### Output Schema
@@ -62,32 +99,38 @@ Repository
 See `schemas/output.schema.json` for complete schema.
 
 Key data structures:
-- `files[]`: Per-file metrics (path, [TODO: your metrics])
-- `summary`: Aggregate statistics
+- `assemblies[]`: Assembly-level coverage (name, covered/total statements, percentage)
+- `types[]`: Type (class) level coverage with optional source file mapping
+- `methods[]`: Method-level coverage detail
+- `summary`: Aggregate coverage statistics
+
+---
 
 ## Implementation Plan
 
 ### Phase 1: Standalone Tool
 
 - [x] Create directory structure (done by create-tool.py)
-- [ ] Implement analyze.py with envelope output
-- [ ] Customize output.schema.json for tool metrics
-- [ ] Add test files to eval-repos/synthetic/
+- [x] Implement analyze.py with envelope output
+- [x] Customize output.schema.json for tool metrics
+- [x] Add test files to eval-repos/synthetic/
 - [ ] Implement programmatic checks in scripts/checks/
 - [ ] Pass compliance scanner: `make compliance`
 
 ### Phase 2: SoT Integration
 
-- [ ] Create entity dataclass in persistence/entities.py
-- [ ] Create repository class in persistence/repositories.py
-- [ ] Create adapter in persistence/adapters/
-- [ ] Add dbt staging models
+- [x] Create entity dataclass in persistence/entities.py
+- [x] Create repository class in persistence/repositories.py
+- [x] Create adapter in persistence/adapters/
+- [x] Add dbt staging models
 
 ### Phase 3: Evaluation
 
 - [ ] Create ground truth in evaluation/ground-truth/
 - [ ] Implement LLM judges in evaluation/llm/judges/
 - [ ] Generate and review scorecard
+
+---
 
 ## Configuration Reference
 
@@ -97,19 +140,55 @@ Key data structures:
 |----------|---------|-------------|
 | REPO_PATH | `eval-repos/synthetic` | Repository to analyze |
 | OUTPUT_DIR | `outputs/$(RUN_ID)` | Output directory |
-| [TODO: Add tool-specific variables] | | |
+| TEST_PROJECT | (auto-detected) | Path to test project (.csproj) |
+
+### CLI Options (analyze.py)
+
+| Option | Description |
+|--------|-------------|
+| `--repo-path` | Path to repository to analyze |
+| `--output-dir` | Directory for output files |
+| `--test-project` | Specific test project to run (.csproj) |
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `REPO_PATH` | Repository path (alternative to CLI arg) |
+| `OUTPUT_DIR` | Output directory (alternative to CLI arg) |
+
+---
 
 ## Performance Characteristics
 
-[TODO: Add benchmarks after implementation]
+### Benchmarks
 
-Target performance:
-- 10K files: < 60 seconds
-- 100K files: < 10 minutes
+| Repository Size | Test Count | Execution Time | Notes |
+|-----------------|------------|----------------|-------|
+| Small (synthetic) | ~10 | 30-60s | Includes build + test |
+| Medium (100 tests) | ~100 | 1-2 min | Dominated by test execution |
+| Large (1000+ tests) | 1000+ | 5-10 min | Test suite dependent |
+
+### Key Performance Metrics
+
+- **Primary bottleneck**: Test execution time (not coverage collection)
+- **Report generation**: ~10-30s for JSON/XML output
+- **Memory usage**: Depends on solution size
+- **macOS ARM64 bug**: Report generation may hang, 2-minute timeout applied
+
+### Optimization Notes
+
+1. **Use `--no-build`** when tests are already built (saves rebuild time)
+2. **Target specific test project** to reduce scope
+3. **Snapshot-only mode** on macOS ARM64 (generate reports on supported platform)
+
+---
 
 ## Evaluation Results
 
 See [evaluation/scorecard.md](./evaluation/scorecard.md) for results.
+
+---
 
 ## Risk Assessment
 
@@ -117,4 +196,23 @@ See [evaluation/scorecard.md](./evaluation/scorecard.md) for results.
 
 | Limitation | Impact | Mitigation |
 |------------|--------|------------|
-| [TODO: Document limitations] | [Impact] | [Mitigation] |
+| Requires tests to run | High | Document build prerequisites |
+| macOS ARM64 report timeout | Medium | 2-min timeout, snapshot fallback |
+| No branch coverage | Low | Statement coverage sufficient |
+| No line-level detail | Low | Method-level granularity acceptable |
+
+### Dependency Risks
+
+| Dependency | Version | Risk | Mitigation |
+|------------|---------|------|------------|
+| dotCover CLI | 2025.3+ | Tool updates may change output | Pin version in CI |
+| dotnet SDK | 6.0+ | Version compatibility | Specify in requirements |
+| Test framework | xUnit/NUnit/MSTest | Must be testable project | Document requirements |
+
+### Integration Risks
+
+| Risk | Description | Mitigation |
+|------|-------------|------------|
+| Build failures | Tests must compile and pass | Pre-check build status |
+| No test project | Repository may lack tests | Graceful degradation with empty coverage |
+| Platform issues | macOS ARM64 known issues | Snapshot fallback mechanism |

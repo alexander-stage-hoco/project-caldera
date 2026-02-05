@@ -36,6 +36,21 @@ class OverallQualityJudge(BaseJudge):
 
 You are evaluating the overall analysis quality and reliability of Roslyn Analyzers.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
+**Important**: When evaluation_mode is "real_world":
+- Low violation counts are NOT automatically failures
+- Judge output quality: schema compliance, category coverage, message clarity
+- Consider: A tool that finds 0 issues in a high-quality codebase with proper output format deserves a high score
+
 ## Evidence to Review
 
 ### Overall Summary
@@ -108,8 +123,13 @@ Respond with JSON:
 """
 
     def collect_evidence(self) -> dict[str, Any]:
-        """Collect overall quality evidence from all analysis outputs."""
-        evidence = {
+        """Collect overall quality evidence from all analysis outputs.
+
+        For real-world evaluation mode, also injects synthetic evaluation
+        context to help the LLM understand tool baseline capability.
+        """
+        evidence: dict[str, Any] = {
+            "evaluation_mode": self.evaluation_mode,
             "overall_summary": {
                 "total_files_analyzed": 0,
                 "total_violations": 0,
@@ -209,6 +229,25 @@ Respond with JSON:
         # Limit examples
         evidence["false_positive_analysis"]["fp_examples"] = evidence["false_positive_analysis"]["fp_examples"][:5]
         evidence["message_quality"] = message_samples[:10]
+
+        # Inject synthetic baseline context for real-world evaluation
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context:
+                evidence["synthetic_baseline"] = synthetic_context
+                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                    synthetic_context
+                )
+            else:
+                evidence["synthetic_baseline"] = "No synthetic baseline available"
+                evidence["interpretation_guidance"] = (
+                    "Evaluate based on ground truth comparison only"
+                )
+        else:
+            evidence["synthetic_baseline"] = (
+                "N/A - synthetic mode uses direct ground truth comparison"
+            )
+            evidence["interpretation_guidance"] = "Strict ground truth evaluation"
 
         return evidence
 

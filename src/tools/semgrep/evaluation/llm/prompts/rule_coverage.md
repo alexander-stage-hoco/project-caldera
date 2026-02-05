@@ -2,6 +2,21 @@
 
 You are an expert code quality analyst evaluating Semgrep's rule coverage against the DD Platform's smell catalogue.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
+**Important**: When evaluation_mode is "real_world":
+- Low smell counts are NOT automatically failures
+- Judge rule coverage by: Are the rules that ARE present correctly mapping to DD categories?
+- Consider: A tool that covers 70% of categories on a clean codebase with proper output format deserves credit
+
 ## Context
 
 The DD Platform defines a comprehensive smell catalogue with ~60 smell types across 9 categories. This evaluation measures what percentage of the catalogue has corresponding Semgrep rules.

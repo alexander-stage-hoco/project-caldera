@@ -9,7 +9,7 @@ with violations as (
         relative_path,
         severity,
         dd_category
-    from {{ source('lz', 'lz_roslyn_violations') }}
+    from {{ ref('stg_lz_roslyn_violations') }}
 ),
 file_metrics as (
     select

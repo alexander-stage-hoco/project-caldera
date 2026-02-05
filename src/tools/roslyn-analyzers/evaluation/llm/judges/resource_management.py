@@ -36,6 +36,22 @@ class ResourceManagementJudge(BaseJudge):
 
 You are evaluating the resource management detection capabilities of Roslyn Analyzers.
 
+## Evaluation Context
+
+{{ interpretation_guidance }}
+
+### Synthetic Repo Validation Results
+{{ synthetic_baseline }}
+
+### Evaluation Mode
+{{ evaluation_mode }}
+
+**Important**: When evaluation_mode is "real_world":
+- Low resource finding counts are NOT automatically failures
+- Judge output quality: schema compliance, rule categorization, severity mapping
+- Judge detection quality: Are the resource issues that WERE detected accurate and properly classified?
+- Consider: A tool that finds 0 resource issues in well-managed codebase deserves a high score
+
 ## Evidence to Review
 
 ### Resource Summary
@@ -101,8 +117,13 @@ Respond with JSON:
 """
 
     def collect_evidence(self) -> dict[str, Any]:
-        """Collect resource-related evidence from all analysis outputs."""
-        evidence = {
+        """Collect resource-related evidence from all analysis outputs.
+
+        For real-world evaluation mode, also injects synthetic evaluation
+        context to help the LLM understand tool baseline capability.
+        """
+        evidence: dict[str, Any] = {
+            "evaluation_mode": self.evaluation_mode,
             "resource_summary": {
                 "idisposable_impl": {"detected": 0, "rules": []},
                 "undisposed": {"detected": 0, "rules": []},
@@ -199,6 +220,25 @@ Respond with JSON:
                     "leaks": evidence["resource_summary"]["leaks"]["detected"],
                 },
             }
+
+        # Inject synthetic baseline context for real-world evaluation
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context:
+                evidence["synthetic_baseline"] = synthetic_context
+                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                    synthetic_context
+                )
+            else:
+                evidence["synthetic_baseline"] = "No synthetic baseline available"
+                evidence["interpretation_guidance"] = (
+                    "Evaluate based on ground truth comparison only"
+                )
+        else:
+            evidence["synthetic_baseline"] = (
+                "N/A - synthetic mode uses direct ground truth comparison"
+            )
+            evidence["interpretation_guidance"] = "Strict ground truth evaluation"
 
         return evidence
 

@@ -450,6 +450,28 @@ models:
         tests:
           - not_null
 
+  - name: stg_lz_roslyn_violations
+    description: "Staged Roslyn analyzer violations - individual findings"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: rule_id
+        tests:
+          - not_null
+      - name: severity
+        tests:
+          - not_null
+
   - name: stg_roslyn_file_metrics
     columns:
       - name: run_pk

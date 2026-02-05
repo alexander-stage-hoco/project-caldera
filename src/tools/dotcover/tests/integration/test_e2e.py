@@ -40,8 +40,6 @@ def test_full_pipeline(tool_root: Path, synthetic_repo: Path):
     1. make analyze on synthetic repo
     2. Verifies output.json is created
     3. Verifies output validates against schema
-
-    TODO: Implement once analyze.py is complete
     """
     # Skip if synthetic repo is empty
     if not synthetic_repo.exists() or not any(synthetic_repo.iterdir()):

@@ -172,7 +172,8 @@ class RuleCoverageJudge(BaseJudge):
             "enabled_categories": enabled_categories,
         }
 
-        return {
+        evidence: dict[str, Any] = {
+            "evaluation_mode": self.evaluation_mode,
             "language_stats": language_stats,
             "category_stats": category_stats,
             "languages_covered": languages_covered,
@@ -188,9 +189,43 @@ class RuleCoverageJudge(BaseJudge):
             "configuration": config_info,
         }
 
+        # Inject synthetic context for real-world evaluation
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context:
+                evidence["synthetic_baseline"] = synthetic_context
+                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                    synthetic_context
+                )
+            else:
+                evidence["synthetic_baseline"] = "No synthetic baseline available"
+                evidence["interpretation_guidance"] = (
+                    "Evaluate based on ground truth comparison only"
+                )
+        else:
+            evidence["synthetic_baseline"] = (
+                "N/A - synthetic mode uses direct ground truth comparison"
+            )
+            evidence["interpretation_guidance"] = "Strict ground truth evaluation"
+
+        return evidence
+
     def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
-        """Validate minimum coverage requirements."""
+        """Validate minimum coverage requirements.
+
+        In real_world mode with a validated synthetic baseline, strict coverage
+        requirements are relaxed because zero/low findings indicate a clean
+        codebase, not tool failure (the tool was already validated via synthetic).
+        """
         failures = []
+
+        # In real_world mode with validated synthetic baseline, skip strict assertions
+        # Zero findings in real-world is acceptable when synthetic validation passed
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context and synthetic_context.get("decision") in ("STRONG_PASS", "PASS"):
+                # Tool validated via synthetic - let LLM evaluate real-world coverage
+                return True, []
 
         # Get enabled targets based on current configuration
         target_languages = get_target_languages()

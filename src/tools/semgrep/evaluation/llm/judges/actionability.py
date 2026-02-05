@@ -96,7 +96,8 @@ class ActionabilityJudge(BaseJudge):
 
         summary = analysis.get("summary", {})
 
-        return {
+        evidence: dict[str, Any] = {
+            "evaluation_mode": self.evaluation_mode,
             "sample_messages": sample_messages[:20],
             "total_messages_sampled": total_messages,
             "with_fix_suggestion": with_fix_suggestion,
@@ -108,6 +109,27 @@ class ActionabilityJudge(BaseJudge):
             "total_smells": summary.get("total_smells", 0),
             "total_files": summary.get("total_files", 0),
         }
+
+        # Inject synthetic context for real-world evaluation
+        if self.evaluation_mode == "real_world":
+            synthetic_context = self.load_synthetic_evaluation_context()
+            if synthetic_context:
+                evidence["synthetic_baseline"] = synthetic_context
+                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                    synthetic_context
+                )
+            else:
+                evidence["synthetic_baseline"] = "No synthetic baseline available"
+                evidence["interpretation_guidance"] = (
+                    "Evaluate based on ground truth comparison only"
+                )
+        else:
+            evidence["synthetic_baseline"] = (
+                "N/A - synthetic mode uses direct ground truth comparison"
+            )
+            evidence["interpretation_guidance"] = "Strict ground truth evaluation"
+
+        return evidence
 
     def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
         """Validate actionability requirements."""
