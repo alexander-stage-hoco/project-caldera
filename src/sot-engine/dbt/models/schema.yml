@@ -1918,3 +1918,80 @@ models:
       - name: value_count
         tests:
           - not_null
+
+  - name: stg_symbol_coupling_metrics
+    description: "Per-symbol coupling metrics: fan-in, fan-out, and instability"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: symbol_name
+        tests:
+          - not_null
+      - name: fan_in
+        tests:
+          - not_null
+      - name: fan_out
+        tests:
+          - not_null
+      - name: total_coupling
+        tests:
+          - not_null
+      - name: instability
+        tests:
+          - not_null
+
+  - name: mart_blast_radius_symbol
+    description: "Transitive caller analysis for change impact assessment"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: target_symbol
+        tests:
+          - not_null
+      - name: blast_radius_symbols
+        tests:
+          - not_null
+      - name: blast_radius_files
+        tests:
+          - not_null
+      - name: max_depth
+        tests:
+          - not_null
+      - name: blast_radius_risk
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+
+  - name: mart_circular_dependencies
+    description: "Circular dependency detection in import graph"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: start_file
+        tests:
+          - not_null
+      - name: cycle_path
+        tests:
+          - not_null
+      - name: cycle_length
+        tests:
+          - not_null
+      - name: severity
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
