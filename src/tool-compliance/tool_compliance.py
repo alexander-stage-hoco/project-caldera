@@ -54,7 +54,7 @@ SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 
 # Key patterns for path detection
 _PATH_KEY_PATTERNS = {"path", "file", "dir", "folder", "location", "source"}
-_EXCLUDED_KEY_PATTERNS = {"endpoint", "url", "uri", "href", "schema", "ref", "api", "snapshot"}
+_EXCLUDED_KEY_PATTERNS = {"endpoint", "url", "uri", "href", "schema", "ref", "api", "snapshot", "repo"}
 
 # Patterns that indicate implementation of specific quality rules (loaded from YAML)
 QUALITY_RULE_PATTERNS = get_quality_rule_patterns()
