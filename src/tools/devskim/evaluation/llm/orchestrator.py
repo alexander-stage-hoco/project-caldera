@@ -390,7 +390,7 @@ def main():
     parser.add_argument(
         "--model",
         default="opus",
-        choices=["opus", "sonnet", "haiku"],
+        choices=["opus", "sonnet", "haiku", "opus-4.5"],
         help="Model to use for evaluation (default: opus)",
     )
     parser.add_argument(
