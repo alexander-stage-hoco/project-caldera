@@ -33,6 +33,50 @@ from evaluation.llm.judges import (
 )
 
 
+def calculate_combined_score(
+    programmatic_score: float,  # 0.0-1.0 or 1.0-5.0
+    llm_score: float,  # 1-5
+    programmatic_weight: float = 0.60,
+    llm_weight: float = 0.40,
+) -> dict[str, Any]:
+    """Calculate combined score from programmatic and LLM evaluations.
+
+    Returns dict with:
+    - combined_score: 1-5 scale
+    - programmatic_contribution: weighted contribution
+    - llm_contribution: weighted contribution
+    - decision: STRONG_PASS, PASS, WEAK_PASS, FAIL
+    """
+    # Score may be on 0-1 or 1-5 scale; normalize to 1-5
+    if programmatic_score <= 1.0:
+        programmatic_normalized = programmatic_score * 4 + 1  # 0.0 -> 1, 1.0 -> 5
+    else:
+        programmatic_normalized = programmatic_score  # Already on 1-5 scale
+
+    combined = (
+        programmatic_normalized * programmatic_weight +
+        llm_score * llm_weight
+    )
+
+    if combined >= 4.0:
+        decision = "STRONG_PASS"
+    elif combined >= 3.5:
+        decision = "PASS"
+    elif combined >= 3.0:
+        decision = "WEAK_PASS"
+    else:
+        decision = "FAIL"
+
+    return {
+        "combined_score": round(combined, 2),
+        "programmatic_contribution": round(programmatic_normalized * programmatic_weight, 2),
+        "llm_contribution": round(llm_score * llm_weight, 2),
+        "programmatic_normalized": round(programmatic_normalized, 2),
+        "llm_score": round(llm_score, 2),
+        "decision": decision,
+    }
+
+
 def run_llm_evaluation(
     analysis_path: str,
     model: str = "opus",
@@ -205,6 +249,16 @@ def main():
         action="store_true",
         help="Output as JSON only",
     )
+    parser.add_argument(
+        "--programmatic-score",
+        type=float,
+        help="Programmatic evaluation score (0.0-1.0) for combined scoring",
+    )
+    parser.add_argument(
+        "--programmatic-results",
+        type=Path,
+        help="Path to programmatic evaluation JSON (evaluation_report.json)",
+    )
 
     args = parser.parse_args()
 
@@ -219,6 +273,56 @@ def main():
         model=args.model,
         skip_judges=args.skip_judges,
     )
+
+    # Get weighted score for decision
+    weighted_score = report["summary"]["weighted_score"]
+
+    # Determine decision based on weighted score
+    if weighted_score >= 4.0:
+        decision = "STRONG_PASS"
+    elif weighted_score >= 3.5:
+        decision = "PASS"
+    elif weighted_score >= 3.0:
+        decision = "WEAK_PASS"
+    else:
+        decision = "FAIL"
+
+    # Add compliance-required root-level fields
+    report["model"] = args.model
+    report["score"] = round(weighted_score, 2)
+    report["decision"] = decision
+
+    # Load programmatic evaluation results if path provided
+    if args.programmatic_results and args.programmatic_results.exists():
+        try:
+            prog_data = json.loads(args.programmatic_results.read_text())
+            summary = prog_data.get("summary", {})
+            # Support both 'score' and 'total_score' field names
+            prog_score = prog_data.get("score") or prog_data.get("total_score") or summary.get("score", 0.0)
+            report["programmatic_input"] = {
+                "file": str(args.programmatic_results),
+                "decision": prog_data.get("decision", summary.get("decision", "UNKNOWN")),
+                "score": prog_score,
+                "passed": summary.get("passed", 0),
+                "failed": summary.get("failed", 0),
+                "total": summary.get("total", 0),
+            }
+            # Compute combined score from loaded results
+            combined = calculate_combined_score(
+                programmatic_score=prog_score,
+                llm_score=weighted_score,
+            )
+            report["combined"] = combined
+        except Exception:
+            pass  # Continue without programmatic input
+
+    # Add combined scoring if programmatic score provided
+    if args.programmatic_score is not None:
+        combined = calculate_combined_score(
+            programmatic_score=args.programmatic_score,
+            llm_score=weighted_score,
+        )
+        report["combined"] = combined
 
     # Print or output
     if args.json:
@@ -236,7 +340,6 @@ def main():
             print(f"\nReport saved to: {args.output}")
 
     # Exit with appropriate code
-    weighted_score = report["summary"]["weighted_score"]
     if weighted_score < 3.0:
         sys.exit(1)
 
