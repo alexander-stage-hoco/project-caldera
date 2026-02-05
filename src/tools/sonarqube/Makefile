@@ -208,7 +208,8 @@ evaluate-llm: $(VENV_READY)
 	$(PYTHON_VENV) -m scripts.llm_evaluate \
 		--analysis $(OUTPUT_DIR)/output.json \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
-		--model $(LLM_MODEL)
+		--model $(LLM_MODEL) \
+		--programmatic-results evaluation/results/evaluation_report.json
 	@mkdir -p evaluation/results
 	@cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json
 	@echo ""

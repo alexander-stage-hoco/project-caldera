@@ -107,7 +107,7 @@ evaluate-llm: $(VENV_READY)
 		--working-dir . \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
-		--programmatic-results $(EVAL_OUTPUT_DIR)/evaluation_report.json \
+		--programmatic-results evaluation/results/evaluation_report.json \
 		--model $(LLM_MODEL)
 	@mkdir -p evaluation/results
 	@if [ -w evaluation/results ]; then cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json; fi

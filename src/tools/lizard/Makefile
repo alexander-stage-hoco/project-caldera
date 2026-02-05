@@ -148,7 +148,7 @@ evaluate-llm: $(VENV_READY)
 	@$(PYTHON_VENV) -m evaluation.llm.orchestrator \
 		--working-dir . \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \
-		--programmatic-results $(EVAL_OUTPUT_DIR)/evaluation_report.json \
+		--programmatic-results evaluation/results/evaluation_report.json \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
 		--model $(LLM_MODEL)
 	@mkdir -p evaluation/results
@@ -170,7 +170,7 @@ evaluate-combined: $(VENV_READY) evaluate evaluate-llm
 	@$(PYTHON_VENV) -m evaluation.llm.orchestrator \
 		--working-dir . \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \
-		--programmatic-results $(EVAL_OUTPUT_DIR)/evaluation_report.json \
+		--programmatic-results evaluation/results/evaluation_report.json \
 		--output $(EVAL_OUTPUT_DIR)/combined_evaluation.json \
 		--model opus-4.5
 	@echo ""

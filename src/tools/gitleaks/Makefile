@@ -86,7 +86,7 @@ evaluate-llm: $(VENV_READY)  ## Run LLM evaluation
 	@mkdir -p evaluation/results
 	$(PYTHON_VENV) -m evaluation.llm.orchestrator \
 		--working-dir . \
-		--programmatic-results $(EVAL_OUTPUT_DIR)/evaluation_report.json \
+		--programmatic-results evaluation/results/evaluation_report.json \
 		--model $(LLM_MODEL) \
 		--evaluation-mode synthetic
 	@echo "LLM evaluation complete"

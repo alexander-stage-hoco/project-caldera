@@ -122,7 +122,7 @@ evaluate: $(VENV_READY) $(SCC_BIN)
 evaluate-llm: $(VENV_READY)
 	@echo "Running LLM-as-a-Judge evaluation..."
 	@mkdir -p $(EVAL_OUTPUT_DIR)
-	@LLM_TIMEOUT=$(LLM_TIMEOUT) $(PYTHON_VENV) scripts/llm_evaluate.py --mode full --model $(LLM_MODEL) --output $(EVAL_OUTPUT_DIR)/llm_evaluation.json
+	@LLM_TIMEOUT=$(LLM_TIMEOUT) $(PYTHON_VENV) scripts/llm_evaluate.py --mode full --model $(LLM_MODEL) --output $(EVAL_OUTPUT_DIR)/llm_evaluation.json --programmatic-results evaluation/results/evaluation_report.json
 	@mkdir -p evaluation/results
 	@cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"
