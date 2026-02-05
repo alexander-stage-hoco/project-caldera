@@ -117,6 +117,11 @@ def main():
         help="Path to programmatic evaluation JSON (evaluation_report.json)",
     )
     parser.add_argument(
+        "--programmatic-score",
+        type=float,
+        help="Programmatic evaluation score (0.0-1.0) for combined scoring",
+    )
+    parser.add_argument(
         "--evaluation-mode",
         choices=["synthetic", "real_world", "auto"],
         default="auto",
@@ -164,7 +169,19 @@ def main():
             checks_failed=summary.get("failed", 0),
         )
         # Compute combined score if programmatic results available
-        prog_score = prog_score_raw * 5.0  # Convert 0-1 to 0-5
+        # Normalize to 1-5 scale (0.0 → 1, 1.0 → 5)
+        if prog_score_raw <= 1.0:
+            prog_score = prog_score_raw * 4 + 1
+        else:
+            prog_score = prog_score_raw  # Already on 1-5 scale
+        result = evaluator.compute_combined_score(result, prog_score)
+
+    # Handle explicit --programmatic-score if provided (takes precedence)
+    if args.programmatic_score is not None:
+        if args.programmatic_score <= 1.0:
+            prog_score = args.programmatic_score * 4 + 1
+        else:
+            prog_score = args.programmatic_score
         result = evaluator.compute_combined_score(result, prog_score)
 
     print()
