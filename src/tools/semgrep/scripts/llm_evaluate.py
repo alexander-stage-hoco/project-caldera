@@ -75,10 +75,14 @@ class LLMEvaluationReport:
         timestamp: str,
         analysis_path: str,
         results: list[JudgeResult],
+        model: str = "opus",
+        programmatic_input: dict[str, Any] | None = None,
     ):
         self.timestamp = timestamp
         self.analysis_path = analysis_path
         self.results = results
+        self.model = model
+        self.programmatic_input = programmatic_input
 
     @property
     def weighted_score(self) -> float:
@@ -109,17 +113,34 @@ class LLMEvaluationReport:
             return 0.0
         return sum(r.confidence for r in self.results) / len(self.results)
 
+    @property
+    def decision(self) -> str:
+        """Determine decision based on weighted score."""
+        if self.weighted_score >= 4.0:
+            return "STRONG_PASS"
+        elif self.weighted_score >= 3.5:
+            return "PASS"
+        elif self.weighted_score >= 3.0:
+            return "WEAK_PASS"
+        else:
+            return "FAIL"
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "timestamp": self.timestamp,
-            "analysis_path": self.analysis_path,
+            "model": self.model,
+            "decision": self.decision,
+            "score": round(self.weighted_score, 2),
+            "programmatic_input": self.programmatic_input,
+            "dimensions": [r.to_dict() for r in self.results],
             "summary": {
                 "weighted_score": round(self.weighted_score, 2),
                 "avg_confidence": round(self.avg_confidence, 2),
                 "dimension_count": len(self.results),
             },
-            "dimensions": [r.to_dict() for r in self.results],
+            # Legacy fields
+            "analysis_path": self.analysis_path,
         }
 
 
@@ -205,6 +226,7 @@ def run_llm_evaluation(
         timestamp=datetime.now(timezone.utc).isoformat(),
         analysis_path=str(analysis_path),
         results=results,
+        model=model,
     )
 
 
@@ -376,6 +398,23 @@ def main():
 
     working_dir = Path(__file__).parent.parent
 
+    # Load programmatic evaluation results if available
+    programmatic_input = None
+    prog_eval_path = working_dir / "evaluation" / "results" / "evaluation_report.json"
+    if prog_eval_path.exists():
+        try:
+            prog_data = json.loads(prog_eval_path.read_text())
+            summary = prog_data.get("summary", {})
+            programmatic_input = {
+                "file": str(prog_eval_path),
+                "decision": prog_data.get("decision", "UNKNOWN"),
+                "score": prog_data.get("score", 0.0),
+                "checks_passed": summary.get("passed", 0),
+                "checks_failed": summary.get("failed", 0),
+            }
+        except Exception:
+            pass  # Continue without programmatic input
+
     # Run LLM evaluation
     if not args.json:
         print(c("\nRunning LLM evaluation...", Colors.CYAN, Colors.BOLD))
@@ -387,6 +426,9 @@ def main():
         timeout=args.timeout,
         skip_judges=args.skip_judges,
     )
+
+    # Attach programmatic input to report
+    report.programmatic_input = programmatic_input
 
     # Output results
     output_data = report.to_dict()

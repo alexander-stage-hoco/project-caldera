@@ -467,6 +467,193 @@ RULE_TO_SMELL_MAP = {
     "performance": "PERFORMANCE_ISSUE",
     "inefficient": "PERFORMANCE_ISSUE",
     "complexity": "A2_HIGH_CYCLOMATIC",
+
+    # ==========================================================================
+    # Multi-Language Registry Rulesets (SEMGREP_USE_MULTI_LANG=1)
+    # Patterns from p/javascript, p/typescript, p/python, p/java, p/go
+    # ==========================================================================
+
+    # JavaScript/TypeScript security patterns (p/javascript, p/typescript)
+    "react-dangerouslysetinnerhtml": "XSS_VULNERABILITY",
+    "react-raw-html": "XSS_VULNERABILITY",
+    "dom-xss": "XSS_VULNERABILITY",
+    "document-write": "XSS_VULNERABILITY",
+    "innerhtml": "XSS_VULNERABILITY",
+    "eval": "CODE_INJECTION",
+    "new-function": "CODE_INJECTION",
+    "settimeout-string": "CODE_INJECTION",
+    "setinterval-string": "CODE_INJECTION",
+    "child-process-exec": "COMMAND_INJECTION",
+    "spawn-shell": "COMMAND_INJECTION",
+    "nosql-injection": "SQL_INJECTION",
+    "mongodb-injection": "SQL_INJECTION",
+    "sequelize-injection": "SQL_INJECTION",
+    "knex-raw": "SQL_INJECTION",
+    "prototype-pollution": "SECURITY_MISCONFIGURATION",
+    "express-open-redirect": "OPEN_REDIRECT",
+    "express-ssrf": "SSRF_VULNERABILITY",
+    "jwt-hardcoded": "HARDCODED_SECRET",
+    "jwt-none-algorithm": "INSECURE_CRYPTO",
+    "weak-ssl": "INSECURE_CRYPTO",
+    "insecure-cookie": "SECURITY_MISCONFIGURATION",
+    "cors-misconfiguration": "SECURITY_MISCONFIGURATION",
+    "unsafe-regex": "PERFORMANCE_ISSUE",
+    "regex-dos": "PERFORMANCE_ISSUE",
+
+    # Python security patterns (p/python)
+    "flask-app-debug": "SECURITY_MISCONFIGURATION",
+    "flask-send-file": "PATH_TRAVERSAL",
+    "django-raw-sql": "SQL_INJECTION",
+    "django-orm-injection": "SQL_INJECTION",
+    "subprocess-shell": "COMMAND_INJECTION",
+    "os-system": "COMMAND_INJECTION",
+    "popen-shell": "COMMAND_INJECTION",
+    "yaml-load": "UNSAFE_DESERIALIZATION",
+    "pickle-load": "UNSAFE_DESERIALIZATION",
+    "marshal-loads": "UNSAFE_DESERIALIZATION",
+    "shelve-open": "UNSAFE_DESERIALIZATION",
+    "jinja2-autoescape": "XSS_VULNERABILITY",
+    "django-safestring": "XSS_VULNERABILITY",
+    "request-verify-false": "INSECURE_CRYPTO",
+    "weak-ssl-version": "INSECURE_CRYPTO",
+    "hashlib-md5": "INSECURE_CRYPTO",
+    "hashlib-sha1": "INSECURE_CRYPTO",
+    "pycrypto-weak": "INSECURE_CRYPTO",
+    "assert-debug": "BEST_PRACTICE_VIOLATION",
+    "hardcoded-binding": "SECURITY_MISCONFIGURATION",
+
+    # Java security patterns (p/java)
+    "spring-sqli": "SQL_INJECTION",
+    "jdbc-sqli": "SQL_INJECTION",
+    "hibernate-sqli": "SQL_INJECTION",
+    "jpa-sqli": "SQL_INJECTION",
+    "mybatis-sqli": "SQL_INJECTION",
+    "spring-xss": "XSS_VULNERABILITY",
+    "jsp-xss": "XSS_VULNERABILITY",
+    "freemarker-xss": "XSS_VULNERABILITY",
+    "velocity-xss": "XSS_VULNERABILITY",
+    "runtime-exec": "COMMAND_INJECTION",
+    "processbuilder-injection": "COMMAND_INJECTION",
+    "java-deserialization": "UNSAFE_DESERIALIZATION",
+    "objectinputstream": "UNSAFE_DESERIALIZATION",
+    "xmldecoder": "UNSAFE_DESERIALIZATION",
+    "snakeyaml-unsafe": "UNSAFE_DESERIALIZATION",
+    "xxe-documentbuilder": "XXE_VULNERABILITY",
+    "xxe-saxparser": "XXE_VULNERABILITY",
+    "xxe-xmlreader": "XXE_VULNERABILITY",
+    "spring-csrf": "CSRF_VULNERABILITY",
+    "spring-open-redirect": "OPEN_REDIRECT",
+    "spring-ssrf": "SSRF_VULNERABILITY",
+    "java-ldap-injection": "LDAP_INJECTION",
+    "java-xpath-injection": "XPATH_INJECTION",
+    "weak-random": "INSECURE_CRYPTO",
+    "ecb-mode": "INSECURE_CRYPTO",
+    "static-iv": "INSECURE_CRYPTO",
+    "hardcoded-iv": "INSECURE_CRYPTO",
+
+    # Go security patterns (p/go)
+    "go-sqli": "SQL_INJECTION",
+    "gorm-sqli": "SQL_INJECTION",
+    "sqlx-injection": "SQL_INJECTION",
+    "template-injection": "XSS_VULNERABILITY",
+    "html-template-xss": "XSS_VULNERABILITY",
+    "exec-injection": "COMMAND_INJECTION",
+    "os-exec-injection": "COMMAND_INJECTION",
+    "yaml-unmarshal": "UNSAFE_DESERIALIZATION",
+    "json-unmarshal-interface": "UNSAFE_DESERIALIZATION",
+    "ssrf-http-request": "SSRF_VULNERABILITY",
+    "path-traversal-join": "PATH_TRAVERSAL",
+    "filepath-join-traversal": "PATH_TRAVERSAL",
+    "tls-insecure-skip": "INSECURE_CRYPTO",
+    "weak-tls": "INSECURE_CRYPTO",
+    "rand-crypto": "INSECURE_CRYPTO",
+    "defer-in-loop": "RESOURCE_LEAK",
+    "goroutine-leak": "RESOURCE_LEAK",
+
+    # ==========================================================================
+    # Elttam Audit Rules (SEMGREP_USE_ELTTAM=1)
+    # Entrypoint discovery and code audit patterns
+    # ==========================================================================
+
+    # ASP.NET/C# entrypoints
+    "aspnet-controller": "ENTRYPOINT_DISCOVERY",
+    "aspnet-apicontroller": "ENTRYPOINT_DISCOVERY",
+    "aspnet-route": "ENTRYPOINT_DISCOVERY",
+    "aspnet-httpget": "ENTRYPOINT_DISCOVERY",
+    "aspnet-httppost": "ENTRYPOINT_DISCOVERY",
+    "aspnet-httpput": "ENTRYPOINT_DISCOVERY",
+    "aspnet-httpdelete": "ENTRYPOINT_DISCOVERY",
+    "aspnet-action": "ENTRYPOINT_DISCOVERY",
+    "webapi-controller": "ENTRYPOINT_DISCOVERY",
+    "mvc-controller": "ENTRYPOINT_DISCOVERY",
+    "razor-page": "ENTRYPOINT_DISCOVERY",
+    "minimal-api": "ENTRYPOINT_DISCOVERY",
+    "grpc-service": "ENTRYPOINT_DISCOVERY",
+    "signalr-hub": "ENTRYPOINT_DISCOVERY",
+
+    # Python web framework entrypoints
+    "flask-route": "ENTRYPOINT_DISCOVERY",
+    "flask-endpoint": "ENTRYPOINT_DISCOVERY",
+    "django-view": "ENTRYPOINT_DISCOVERY",
+    "django-urlpattern": "ENTRYPOINT_DISCOVERY",
+    "django-rest-viewset": "ENTRYPOINT_DISCOVERY",
+    "django-rest-apiview": "ENTRYPOINT_DISCOVERY",
+    "fastapi-route": "ENTRYPOINT_DISCOVERY",
+    "fastapi-endpoint": "ENTRYPOINT_DISCOVERY",
+    "tornado-handler": "ENTRYPOINT_DISCOVERY",
+    "aiohttp-route": "ENTRYPOINT_DISCOVERY",
+
+    # JavaScript/TypeScript web framework entrypoints
+    "express-route": "ENTRYPOINT_DISCOVERY",
+    "express-router": "ENTRYPOINT_DISCOVERY",
+    "express-middleware": "ENTRYPOINT_DISCOVERY",
+    "koa-route": "ENTRYPOINT_DISCOVERY",
+    "fastify-route": "ENTRYPOINT_DISCOVERY",
+    "hapi-route": "ENTRYPOINT_DISCOVERY",
+    "nestjs-controller": "ENTRYPOINT_DISCOVERY",
+    "nestjs-route": "ENTRYPOINT_DISCOVERY",
+
+    # Java web framework entrypoints
+    "spring-requestmapping": "ENTRYPOINT_DISCOVERY",
+    "spring-getmapping": "ENTRYPOINT_DISCOVERY",
+    "spring-postmapping": "ENTRYPOINT_DISCOVERY",
+    "spring-putmapping": "ENTRYPOINT_DISCOVERY",
+    "spring-deletemapping": "ENTRYPOINT_DISCOVERY",
+    "spring-controller": "ENTRYPOINT_DISCOVERY",
+    "spring-restcontroller": "ENTRYPOINT_DISCOVERY",
+    "jaxrs-path": "ENTRYPOINT_DISCOVERY",
+    "jaxrs-resource": "ENTRYPOINT_DISCOVERY",
+    "servlet-mapping": "ENTRYPOINT_DISCOVERY",
+    "struts-action": "ENTRYPOINT_DISCOVERY",
+
+    # Go web framework entrypoints
+    "http-handlefunc": "ENTRYPOINT_DISCOVERY",
+    "http-handler": "ENTRYPOINT_DISCOVERY",
+    "gin-route": "ENTRYPOINT_DISCOVERY",
+    "gin-handler": "ENTRYPOINT_DISCOVERY",
+    "echo-route": "ENTRYPOINT_DISCOVERY",
+    "fiber-route": "ENTRYPOINT_DISCOVERY",
+    "chi-route": "ENTRYPOINT_DISCOVERY",
+    "gorilla-route": "ENTRYPOINT_DISCOVERY",
+
+    # Rust web framework entrypoints
+    "actix-route": "ENTRYPOINT_DISCOVERY",
+    "actix-handler": "ENTRYPOINT_DISCOVERY",
+    "rocket-route": "ENTRYPOINT_DISCOVERY",
+    "axum-route": "ENTRYPOINT_DISCOVERY",
+    "warp-route": "ENTRYPOINT_DISCOVERY",
+
+    # Audit-specific patterns (from Elttam rules-audit)
+    "user-input-sink": "AUDIT_INPUT_SINK",
+    "sensitive-data-flow": "AUDIT_DATA_FLOW",
+    "authentication-bypass": "AUDIT_AUTH_BYPASS",
+    "authorization-check": "AUDIT_AUTH_CHECK",
+    "session-management": "AUDIT_SESSION",
+    "file-upload": "AUDIT_FILE_UPLOAD",
+    "output-encoding": "AUDIT_OUTPUT_ENCODING",
+    "crypto-usage": "AUDIT_CRYPTO_USAGE",
+    "logging-sensitive": "AUDIT_LOGGING",
+    "error-disclosure": "AUDIT_ERROR_DISCLOSURE",
 }
 
 # DD Smell Categories
@@ -545,6 +732,21 @@ SMELL_CATEGORIES = {
     "CORRECTNESS_ISSUE": "correctness",
     "BEST_PRACTICE_VIOLATION": "best_practice",
     "PERFORMANCE_ISSUE": "performance",
+    # Resource leaks (multi-language patterns)
+    "RESOURCE_LEAK": "resource_management",
+    # Entrypoint Discovery (Elttam audit rules)
+    "ENTRYPOINT_DISCOVERY": "entrypoint_discovery",
+    # Audit-specific categories (Elttam audit rules)
+    "AUDIT_INPUT_SINK": "audit",
+    "AUDIT_DATA_FLOW": "audit",
+    "AUDIT_AUTH_BYPASS": "audit",
+    "AUDIT_AUTH_CHECK": "audit",
+    "AUDIT_SESSION": "audit",
+    "AUDIT_FILE_UPLOAD": "audit",
+    "AUDIT_OUTPUT_ENCODING": "audit",
+    "AUDIT_CRYPTO_USAGE": "audit",
+    "AUDIT_LOGGING": "audit",
+    "AUDIT_ERROR_DISCLOSURE": "audit",
 }
 
 # Severity mapping
@@ -993,6 +1195,12 @@ def run_semgrep(
     jobs = str(max(1, min(8, os.cpu_count() or 1)))
     use_registry = os.environ.get("SEMGREP_USE_REGISTRY", "0") == "1"
     use_community = os.environ.get("SEMGREP_USE_COMMUNITY", "0") == "1"
+    use_multi_lang = os.environ.get("SEMGREP_USE_MULTI_LANG", "0") == "1"
+    use_elttam = os.environ.get("SEMGREP_USE_ELTTAM", "0") == "1"
+
+    # Elttam audit rules directory (external submodule)
+    elttam_rules_dir = script_dir / "external-rules" / "elttam"
+    elttam_audit_rules = elttam_rules_dir / "rules-audit"
 
     if use_registry:
         cmd = [
@@ -1014,8 +1222,17 @@ def run_semgrep(
             # Code quality rulesets (Phase 3)
             "--config", "p/r2c-best-practices",  # Best practices: mutable defaults, anti-patterns
             "--config", "p/r2c-ci",  # CI-safe correctness rules with low false-positives
-            "--max-target-bytes", "1000000",
         ]
+        # Multi-language rulesets for polyglot repository analysis
+        if use_multi_lang:
+            cmd.extend([
+                "--config", "p/javascript",  # JavaScript security rules
+                "--config", "p/typescript",  # TypeScript security rules
+                "--config", "p/python",  # Python security rules
+                "--config", "p/java",  # Java security rules
+                "--config", "p/go",  # Go security rules
+            ])
+        cmd.extend(["--max-target-bytes", "1000000"])
     else:
         cmd = [
             get_semgrep_cmd(),
@@ -1040,6 +1257,12 @@ def run_semgrep(
     # Note: Community rules may have validation errors; they are added conditionally
     community_rules = script_dir / "community-rules" / "csharp"
     use_community_rules = use_community and community_rules.exists()
+
+    # Add Elttam audit rules if enabled and available
+    # These provide entrypoint discovery and code audit helpers
+    use_elttam_rules = use_elttam and elttam_audit_rules.exists()
+    if use_elttam_rules:
+        cmd.extend(["--config", str(elttam_audit_rules)])
 
     # Add specific rulesets if provided
     if rules:
@@ -1070,7 +1293,7 @@ def run_semgrep(
             or "max retries exceeded" in lowered
         )
 
-    def _build_local_command(include_community: bool = True) -> list[str]:
+    def _build_local_command(include_community: bool = True, include_elttam: bool = True) -> list[str]:
         local_cmd = [
             get_semgrep_cmd(),
             "--json",
@@ -1085,6 +1308,8 @@ def run_semgrep(
             local_cmd.extend(["--config", str(rules_dir)])
         if include_community and use_community_rules:
             local_cmd.extend(["--config", str(community_rules)])
+        if include_elttam and use_elttam_rules:
+            local_cmd.extend(["--config", str(elttam_audit_rules)])
         if rules:
             for rule in rules:
                 local_cmd.extend(["--config", rule])

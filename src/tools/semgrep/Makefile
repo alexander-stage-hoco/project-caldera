@@ -7,7 +7,7 @@
 #   make evaluate - Run programmatic evaluation
 #   make test     - Run all tests
 
-.PHONY: all setup init-submodules analyze analyze-real analyze-interactive \
+.PHONY: all setup init-submodules init-elttam analyze analyze-real analyze-interactive \
         evaluate evaluate-json evaluate-quick evaluate-llm evaluate-llm-focused evaluate-combined evaluate-full \
         test test-quick test-cov clean clean-all help
 
@@ -66,9 +66,16 @@ help:
 	@echo "  OUTPUT_DIR=<path>   - Output directory (default: outputs/<run-id>)"
 	@echo "  LLM_MODEL=<model>   - Model for LLM evaluation (sonnet, opus, haiku)"
 	@echo ""
+	@echo "Environment variables for ruleset configuration:"
+	@echo "  SEMGREP_USE_REGISTRY=1    - Enable official Semgrep registry rulesets"
+	@echo "  SEMGREP_USE_COMMUNITY=1   - Enable community C# rules (Microsoft CA)"
+	@echo "  SEMGREP_USE_MULTI_LANG=1  - Enable multi-language rulesets (JS, TS, Python, Java, Go)"
+	@echo "  SEMGREP_USE_ELTTAM=1      - Enable Elttam audit rules (requires init-elttam)"
+	@echo ""
 	@echo "Examples:"
 	@echo "  make analyze REPO_PATH=/path/to/repo REPO_NAME=my-repo"
 	@echo "  make evaluate-llm LLM_MODEL=opus"
+	@echo "  SEMGREP_USE_REGISTRY=1 SEMGREP_USE_MULTI_LANG=1 make analyze"
 
 all: setup analyze evaluate
 	@echo ""
@@ -80,7 +87,7 @@ all: setup analyze evaluate
 # Setup
 # =============================================================================
 
-setup: $(VENV_READY) $(VENV)/bin/semgrep init-submodules
+setup: $(VENV_READY) $(VENV)/bin/semgrep init-submodules init-elttam
 	@echo "Setup complete!"
 
 ifeq ($(SKIP_SETUP),1)
@@ -103,6 +110,16 @@ endif
 init-submodules:
 	@echo "Initializing real repositories..."
 	@git submodule update --init --recursive 2>/dev/null || true
+
+init-elttam:
+	@echo "Initializing Elttam audit rules..."
+	@if [ ! -d "external-rules/elttam" ]; then \
+		mkdir -p external-rules && \
+		git clone --depth 1 https://github.com/elttam/semgrep-rules.git external-rules/elttam 2>/dev/null || \
+		echo "  Elttam rules clone failed (offline or network issue), skipping"; \
+	else \
+		echo "  Elttam rules already present"; \
+	fi
 
 # =============================================================================
 # Analysis

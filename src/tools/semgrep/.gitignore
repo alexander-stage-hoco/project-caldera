@@ -31,6 +31,9 @@ htmlcov/
 # Community rules (cloned from external repository)
 community-rules/
 
+# External rules (cloned via init-elttam)
+external-rules/
+
 # OS
 .DS_Store
 Thumbs.db

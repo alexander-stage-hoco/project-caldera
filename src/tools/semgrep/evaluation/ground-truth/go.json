@@ -1,18 +1,40 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "scenario": "go",
-  "description": "Ground truth for go.",
-  "generated_at": "2026-01-21T18:48:53Z",
+  "description": "Ground truth for Go smell and security vulnerability detection",
+  "generated_at": "2026-02-04T00:00:00Z",
   "repo_path": "eval-repos/synthetic/go",
+  "configuration": {
+    "base_rulesets": ["DD custom rules"],
+    "multi_lang_rulesets": ["p/go"],
+    "elttam_rulesets": ["elttam/rules-audit"],
+    "notes": "Expected detections vary based on enabled rulesets"
+  },
   "expected": {
     "language": "go",
-    "version": "1.0",
+    "version": "2.0",
     "summary": {
-      "total_files": 2,
-      "total_expected_smells": 6,
+      "total_files": 4,
+      "total_expected_smells": 35,
       "smell_categories_covered": [
         "error_handling",
-        "security"
+        "security",
+        "resource_management",
+        "entrypoint_discovery"
+      ],
+      "multi_lang_categories": [
+        "SQL_INJECTION",
+        "COMMAND_INJECTION",
+        "XSS_VULNERABILITY",
+        "PATH_TRAVERSAL",
+        "INSECURE_CRYPTO",
+        "SSRF_VULNERABILITY",
+        "RESOURCE_LEAK"
+      ],
+      "elttam_categories": [
+        "ENTRYPOINT_DISCOVERY",
+        "AUDIT_INPUT_SINK",
+        "AUDIT_FILE_UPLOAD"
       ],
       "notes": "D1_EMPTY_CATCH excluded due to Semgrep limitation"
     }
@@ -35,16 +57,79 @@
           "smell_id": "SQL_INJECTION",
           "count": 6,
           "lines": [
-            15,
-            22,
-            29,
-            36,
+            13,
+            20,
+            27,
+            35,
             43,
             50
           ]
         }
       ],
-      "total_expected": 6
+      "total_expected": 6,
+      "notes": "Lines indicate where vulnerable query string is constructed (Semgrep semantics), not where executed."
+    },
+    "security_patterns.go": {
+      "requires_ruleset": "SEMGREP_USE_MULTI_LANG",
+      "expected_smells": [
+        {
+          "smell_id": "SQL_INJECTION",
+          "min_count": 2,
+          "lines": [21, 27]
+        },
+        {
+          "smell_id": "COMMAND_INJECTION",
+          "min_count": 2,
+          "lines": [32, 38]
+        },
+        {
+          "smell_id": "XSS_VULNERABILITY",
+          "min_count": 1,
+          "lines": [43]
+        },
+        {
+          "smell_id": "PATH_TRAVERSAL",
+          "min_count": 2,
+          "lines": [48, 53]
+        },
+        {
+          "smell_id": "INSECURE_CRYPTO",
+          "min_count": 3,
+          "lines": [58, 63, 68]
+        },
+        {
+          "smell_id": "SSRF_VULNERABILITY",
+          "min_count": 1,
+          "lines": [73]
+        },
+        {
+          "smell_id": "RESOURCE_LEAK",
+          "min_count": 1,
+          "lines": [78]
+        }
+      ],
+      "total_expected": 12,
+      "notes": "Requires SEMGREP_USE_MULTI_LANG=1 for p/go ruleset"
+    },
+    "entrypoint_patterns.go": {
+      "requires_ruleset": "SEMGREP_USE_ELTTAM",
+      "expected_smells": [
+        {
+          "smell_id": "ENTRYPOINT_DISCOVERY",
+          "min_count": 15,
+          "notes": "net/http handlers, Gin routes, Echo routes, Chi routes, Gorilla mux"
+        },
+        {
+          "smell_id": "AUDIT_INPUT_SINK",
+          "min_count": 1
+        },
+        {
+          "smell_id": "AUDIT_FILE_UPLOAD",
+          "min_count": 1
+        }
+      ],
+      "total_expected": 17,
+      "notes": "Requires SEMGREP_USE_ELTTAM=1 for Elttam audit rules"
     }
   }
 }

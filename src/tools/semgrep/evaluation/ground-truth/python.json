@@ -1,16 +1,22 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "scenario": "python",
-  "description": "Ground truth for python.",
-  "generated_at": "2026-01-21T18:48:53Z",
+  "description": "Ground truth for Python smell and security vulnerability detection",
+  "generated_at": "2026-02-04T00:00:00Z",
   "repo_path": "eval-repos/synthetic/python",
+  "configuration": {
+    "base_rulesets": ["DD custom rules"],
+    "multi_lang_rulesets": ["p/python"],
+    "elttam_rulesets": ["elttam/rules-audit"],
+    "notes": "Expected detections vary based on enabled rulesets"
+  },
   "expected": {
     "language": "python",
-    "version": "2.0",
+    "version": "3.0",
     "summary": {
-      "total_files": 10,
-      "total_expected_smells": 22,
-      "notes": "Counts reconciled with actual line numbers (v2.1). Original total was 36 but included mismatched counts.",
+      "total_files": 12,
+      "total_expected_smells": 40,
+      "notes": "Counts reconciled with actual line numbers. Multi-lang adds security detections.",
       "smell_categories_covered": [
         "error_handling",
         "api_design",
@@ -18,7 +24,20 @@
         "security",
         "correctness",
         "best_practice",
-        "performance"
+        "performance",
+        "entrypoint_discovery"
+      ],
+      "multi_lang_categories": [
+        "COMMAND_INJECTION",
+        "UNSAFE_DESERIALIZATION",
+        "INSECURE_CRYPTO",
+        "SECURITY_MISCONFIGURATION",
+        "PATH_TRAVERSAL"
+      ],
+      "elttam_categories": [
+        "ENTRYPOINT_DISCOVERY",
+        "AUDIT_INPUT_SINK",
+        "AUDIT_FILE_UPLOAD"
       ]
     }
   },
@@ -55,16 +74,16 @@
           "smell_id": "SQL_INJECTION",
           "count": 5,
           "lines": [
-            14,
-            23,
-            32,
-            41,
-            50
+            13,
+            22,
+            31,
+            39,
+            47
           ]
         }
       ],
       "total_expected": 5,
-      "notes": "Count reconciled with actual line numbers. Additional SQL injection patterns may exist but are not detected by current Semgrep rules."
+      "notes": "Lines indicate where vulnerable query string is constructed (Semgrep semantics), not where executed."
     },
     "complexity.py": {
       "expected_smells": [
@@ -152,6 +171,58 @@
       ],
       "total_expected": 3,
       "notes": "Semgrep detects string concat in loop and list operations as excessive allocation patterns"
+    },
+    "command_injection.py": {
+      "requires_ruleset": "SEMGREP_USE_MULTI_LANG",
+      "expected_smells": [
+        {
+          "smell_id": "COMMAND_INJECTION",
+          "min_count": 5,
+          "lines": [12, 17, 22, 27, 32]
+        },
+        {
+          "smell_id": "UNSAFE_DESERIALIZATION",
+          "min_count": 3,
+          "lines": [39, 45, 51]
+        },
+        {
+          "smell_id": "INSECURE_CRYPTO",
+          "min_count": 4,
+          "lines": [57, 62, 72, 77]
+        },
+        {
+          "smell_id": "SECURITY_MISCONFIGURATION",
+          "min_count": 2,
+          "lines": [84, 92]
+        },
+        {
+          "smell_id": "PATH_TRAVERSAL",
+          "min_count": 1,
+          "lines": [98]
+        }
+      ],
+      "total_expected": 15,
+      "notes": "Requires SEMGREP_USE_MULTI_LANG=1 for p/python ruleset"
+    },
+    "entrypoint_patterns.py": {
+      "requires_ruleset": "SEMGREP_USE_ELTTAM",
+      "expected_smells": [
+        {
+          "smell_id": "ENTRYPOINT_DISCOVERY",
+          "min_count": 15,
+          "notes": "Flask routes, Django views, FastAPI endpoints"
+        },
+        {
+          "smell_id": "AUDIT_INPUT_SINK",
+          "min_count": 1
+        },
+        {
+          "smell_id": "AUDIT_FILE_UPLOAD",
+          "min_count": 1
+        }
+      ],
+      "total_expected": 17,
+      "notes": "Requires SEMGREP_USE_ELTTAM=1 for Elttam audit rules"
     }
   }
 }

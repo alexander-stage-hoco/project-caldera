@@ -24,6 +24,18 @@ from . import (
 )
 
 
+def _get_expected_count(smell: dict) -> int:
+    """Get expected count from smell dict, supporting both 'count' and 'min_count' fields.
+
+    Ground truth entries may have:
+    - 'count': exact expected count
+    - 'min_count': minimum expected count (used for flexible detection)
+
+    Returns count if present, otherwise min_count, otherwise 0.
+    """
+    return smell.get("count", smell.get("min_count", 0))
+
+
 def check_line_accuracy(
     analysis: dict,
     ground_truth: dict[str, dict],
@@ -104,7 +116,7 @@ def run_accuracy_checks(
     # AC-1: SQL injection detection
     sql_count = smells_by_type.get("SQL_INJECTION", 0)
     expected_sql = sum(
-        sum(s["count"] for s in f.get("expected_smells", []) if "SQL" in s["smell_id"])
+        sum(_get_expected_count(s) for s in f.get("expected_smells", []) if "SQL" in s.get("smell_id", ""))
         for lang_gt in gt.values()
         for f in lang_gt.get("files", {}).values()
     )
@@ -123,7 +135,7 @@ def run_accuracy_checks(
     # AC-2: Empty catch detection
     empty_catch_count = smells_by_type.get("D1_EMPTY_CATCH", 0)
     expected_empty = sum(
-        sum(s["count"] for s in f.get("expected_smells", []) if s["smell_id"] == "D1_EMPTY_CATCH")
+        sum(_get_expected_count(s) for s in f.get("expected_smells", []) if s.get("smell_id") == "D1_EMPTY_CATCH")
         for lang_gt in gt.values()
         for f in lang_gt.get("files", {}).values()
     )
@@ -148,7 +160,7 @@ def run_accuracy_checks(
     # AC-3: Catch-all detection
     catch_all_count = smells_by_type.get("D2_CATCH_ALL", 0)
     expected_catch_all = sum(
-        sum(s["count"] for s in f.get("expected_smells", []) if s["smell_id"] == "D2_CATCH_ALL")
+        sum(_get_expected_count(s) for s in f.get("expected_smells", []) if s.get("smell_id") == "D2_CATCH_ALL")
         for lang_gt in gt.values()
         for f in lang_gt.get("files", {}).values()
     )
@@ -167,7 +179,7 @@ def run_accuracy_checks(
     # AC-4: Async void detection (C# specific)
     async_void_count = smells_by_type.get("E2_ASYNC_VOID", 0)
     expected_async = sum(
-        sum(s["count"] for s in f.get("expected_smells", []) if s["smell_id"] == "E2_ASYNC_VOID")
+        sum(_get_expected_count(s) for s in f.get("expected_smells", []) if s.get("smell_id") == "E2_ASYNC_VOID")
         for lang_gt in gt.values()
         for f in lang_gt.get("files", {}).values()
     )

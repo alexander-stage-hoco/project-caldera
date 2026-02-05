@@ -1,18 +1,39 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "scenario": "java",
-  "description": "Ground truth for java.",
-  "generated_at": "2026-01-21T18:48:53Z",
+  "description": "Ground truth for Java smell and security vulnerability detection",
+  "generated_at": "2026-02-04T00:00:00Z",
   "repo_path": "eval-repos/synthetic/java",
+  "configuration": {
+    "base_rulesets": ["DD custom rules"],
+    "multi_lang_rulesets": ["p/java"],
+    "elttam_rulesets": ["elttam/rules-audit"],
+    "notes": "Expected detections vary based on enabled rulesets"
+  },
   "expected": {
     "language": "java",
-    "version": "2.0",
+    "version": "3.0",
     "summary": {
-      "total_files": 3,
-      "total_expected_smells": 8,
+      "total_files": 5,
+      "total_expected_smells": 40,
       "smell_categories_covered": [
         "error_handling",
-        "security"
+        "security",
+        "entrypoint_discovery"
+      ],
+      "multi_lang_categories": [
+        "SQL_INJECTION",
+        "COMMAND_INJECTION",
+        "UNSAFE_DESERIALIZATION",
+        "XXE_VULNERABILITY",
+        "XSS_VULNERABILITY",
+        "INSECURE_CRYPTO",
+        "OPEN_REDIRECT"
+      ],
+      "elttam_categories": [
+        "ENTRYPOINT_DISCOVERY",
+        "AUDIT_AUTH_CHECK",
+        "AUDIT_INPUT_SINK"
       ],
       "notes": "D1_EMPTY_CATCH excluded due to Semgrep limitation"
     }
@@ -35,15 +56,16 @@
           "smell_id": "SQL_INJECTION",
           "count": 5,
           "lines": [
-            16,
-            23,
-            30,
-            40,
-            50
+            14,
+            21,
+            28,
+            35,
+            47
           ]
         }
       ],
-      "total_expected": 5
+      "total_expected": 5,
+      "notes": "Lines indicate where vulnerable query string is constructed (Semgrep semantics), not where executed."
     },
     "GenericException.java": {
       "expected_smells": [
@@ -64,6 +86,68 @@
         }
       ],
       "total_expected": 3
+    },
+    "SecurityPatterns.java": {
+      "requires_ruleset": "SEMGREP_USE_MULTI_LANG",
+      "expected_smells": [
+        {
+          "smell_id": "SQL_INJECTION",
+          "min_count": 2,
+          "lines": [23, 30]
+        },
+        {
+          "smell_id": "COMMAND_INJECTION",
+          "min_count": 2,
+          "lines": [36, 42]
+        },
+        {
+          "smell_id": "UNSAFE_DESERIALIZATION",
+          "min_count": 1,
+          "lines": [48]
+        },
+        {
+          "smell_id": "XXE_VULNERABILITY",
+          "min_count": 1,
+          "lines": [54]
+        },
+        {
+          "smell_id": "XSS_VULNERABILITY",
+          "min_count": 1,
+          "lines": [60]
+        },
+        {
+          "smell_id": "INSECURE_CRYPTO",
+          "min_count": 2,
+          "lines": [66, 72]
+        },
+        {
+          "smell_id": "OPEN_REDIRECT",
+          "min_count": 1,
+          "lines": [83]
+        }
+      ],
+      "total_expected": 10,
+      "notes": "Requires SEMGREP_USE_MULTI_LANG=1 for p/java ruleset"
+    },
+    "EntrypointPatterns.java": {
+      "requires_ruleset": "SEMGREP_USE_ELTTAM",
+      "expected_smells": [
+        {
+          "smell_id": "ENTRYPOINT_DISCOVERY",
+          "min_count": 18,
+          "notes": "Spring controllers, JAX-RS resources, Servlet mappings"
+        },
+        {
+          "smell_id": "AUDIT_AUTH_CHECK",
+          "min_count": 1
+        },
+        {
+          "smell_id": "AUDIT_INPUT_SINK",
+          "min_count": 1
+        }
+      ],
+      "total_expected": 20,
+      "notes": "Requires SEMGREP_USE_ELTTAM=1 for Elttam audit rules"
     }
   }
 }

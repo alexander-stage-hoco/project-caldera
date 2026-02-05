@@ -16,15 +16,15 @@ def run_output_quality_checks(analysis: dict) -> list[CheckResult]:
     """Run output quality checks."""
     results = []
 
+    # Note: metadata exists at envelope root level (_root.metadata), not data level
+    # statistics is not defined in the schema
     required_sections = [
         "tool",
         "tool_version",
-        "metadata",
         "summary",
         "directories",
         "files",
         "by_language",
-        "statistics",
     ]
     missing_sections = [section for section in required_sections if section not in analysis]
     section_score = 1.0 if not missing_sections else 0.0

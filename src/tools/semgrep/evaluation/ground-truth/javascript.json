@@ -1,19 +1,37 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "scenario": "javascript",
-  "description": "Ground truth for javascript.",
-  "generated_at": "2026-01-21T18:48:53Z",
+  "description": "Ground truth for JavaScript smell and security vulnerability detection",
+  "generated_at": "2026-02-04T00:00:00Z",
   "repo_path": "eval-repos/synthetic/javascript",
+  "configuration": {
+    "base_rulesets": ["DD custom rules"],
+    "multi_lang_rulesets": ["p/javascript"],
+    "elttam_rulesets": ["elttam/rules-audit"],
+    "notes": "Expected detections vary based on enabled rulesets"
+  },
   "expected": {
     "language": "javascript",
-    "version": "2.0",
+    "version": "3.0",
     "summary": {
-      "total_files": 4,
-      "total_expected_smells": 13,
+      "total_files": 6,
+      "total_expected_smells": 25,
       "smell_categories_covered": [
         "error_handling",
         "dead_code",
-        "security"
+        "security",
+        "entrypoint_discovery"
+      ],
+      "multi_lang_categories": [
+        "CODE_INJECTION",
+        "COMMAND_INJECTION",
+        "XSS_VULNERABILITY"
+      ],
+      "elttam_categories": [
+        "ENTRYPOINT_DISCOVERY",
+        "AUDIT_INPUT_SINK",
+        "AUDIT_FILE_UPLOAD",
+        "AUDIT_SESSION"
       ],
       "notes": "A2_HIGH_CYCLOMATIC and A3_DEEP_NESTING excluded - use lizard for complexity metrics"
     }
@@ -41,16 +59,17 @@
           "smell_id": "SQL_INJECTION",
           "count": 6,
           "lines": [
-            11,
-            18,
+            10,
+            17,
             24,
-            30,
-            36,
-            43
+            29,
+            35,
+            42
           ]
         }
       ],
-      "total_expected": 6
+      "total_expected": 6,
+      "notes": "Lines indicate where vulnerable query string is constructed (Semgrep semantics), not where executed."
     },
     "complexity.js": {
       "expected_smells": [
@@ -81,6 +100,52 @@
       ],
       "total_expected": 2,
       "notes": "Semgrep only detects code after return, not after throw"
+    },
+    "xss_dom.js": {
+      "requires_ruleset": "SEMGREP_USE_MULTI_LANG",
+      "expected_smells": [
+        {
+          "smell_id": "XSS_VULNERABILITY",
+          "min_count": 3,
+          "lines": [8, 13, 18]
+        },
+        {
+          "smell_id": "CODE_INJECTION",
+          "min_count": 4,
+          "lines": [23, 28, 33, 38]
+        },
+        {
+          "smell_id": "COMMAND_INJECTION",
+          "min_count": 2,
+          "lines": [45, 53]
+        }
+      ],
+      "total_expected": 9,
+      "notes": "Requires SEMGREP_USE_MULTI_LANG=1 for p/javascript ruleset"
+    },
+    "entrypoint_patterns.js": {
+      "requires_ruleset": "SEMGREP_USE_ELTTAM",
+      "expected_smells": [
+        {
+          "smell_id": "ENTRYPOINT_DISCOVERY",
+          "min_count": 10,
+          "notes": "Express routes, middleware, and handlers"
+        },
+        {
+          "smell_id": "AUDIT_INPUT_SINK",
+          "min_count": 1
+        },
+        {
+          "smell_id": "AUDIT_FILE_UPLOAD",
+          "min_count": 1
+        },
+        {
+          "smell_id": "AUDIT_SESSION",
+          "min_count": 1
+        }
+      ],
+      "total_expected": 13,
+      "notes": "Requires SEMGREP_USE_ELTTAM=1 for Elttam audit rules"
     }
   }
 }

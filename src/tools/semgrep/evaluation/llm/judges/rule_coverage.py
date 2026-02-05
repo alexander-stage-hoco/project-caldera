@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
 from .base import BaseJudge, JudgeResult
 
 
-# DD Smell Categories
-DD_CATEGORIES = [
+# DD Smell Categories (base categories always evaluated)
+DD_CATEGORIES_BASE = [
     "size_complexity",
     "refactoring",
     "dependency",
@@ -23,8 +24,52 @@ DD_CATEGORIES = [
     "security",  # SQL injection, SSRF, etc.
 ]
 
-# Target languages
-TARGET_LANGUAGES = ["python", "javascript", "typescript", "csharp", "java", "go", "rust"]
+# Additional categories when multi-language rulesets are enabled
+DD_CATEGORIES_MULTI_LANG = [
+    "correctness",
+    "best_practice",
+    "performance",
+]
+
+# Additional categories when Elttam audit rules are enabled
+DD_CATEGORIES_ELTTAM = [
+    "entrypoint_discovery",
+    "audit",
+]
+
+# Target languages (base)
+TARGET_LANGUAGES_BASE = ["python", "javascript", "typescript", "csharp"]
+
+# Additional languages when multi-language rulesets are enabled
+TARGET_LANGUAGES_MULTI_LANG = ["java", "go"]
+
+# Additional languages when Elttam rules are enabled (Rust support)
+TARGET_LANGUAGES_ELTTAM = ["rust"]
+
+
+def get_enabled_categories() -> list[str]:
+    """Get the list of DD categories based on enabled rulesets."""
+    categories = list(DD_CATEGORIES_BASE)
+    if os.environ.get("SEMGREP_USE_MULTI_LANG", "0") == "1":
+        categories.extend(DD_CATEGORIES_MULTI_LANG)
+    if os.environ.get("SEMGREP_USE_ELTTAM", "0") == "1":
+        categories.extend(DD_CATEGORIES_ELTTAM)
+    return categories
+
+
+def get_target_languages() -> list[str]:
+    """Get the list of target languages based on enabled rulesets."""
+    languages = list(TARGET_LANGUAGES_BASE)
+    if os.environ.get("SEMGREP_USE_MULTI_LANG", "0") == "1":
+        languages.extend(TARGET_LANGUAGES_MULTI_LANG)
+    if os.environ.get("SEMGREP_USE_ELTTAM", "0") == "1":
+        languages.extend(TARGET_LANGUAGES_ELTTAM)
+    return languages
+
+
+# For backwards compatibility, provide the full lists
+DD_CATEGORIES = DD_CATEGORIES_BASE + DD_CATEGORIES_MULTI_LANG + DD_CATEGORIES_ELTTAM
+TARGET_LANGUAGES = TARGET_LANGUAGES_BASE + TARGET_LANGUAGES_MULTI_LANG + TARGET_LANGUAGES_ELTTAM
 
 
 class RuleCoverageJudge(BaseJudge):
@@ -47,6 +92,10 @@ class RuleCoverageJudge(BaseJudge):
 
     def collect_evidence(self) -> dict[str, Any]:
         """Load analysis and assess coverage."""
+        # Get enabled categories and languages based on current configuration
+        enabled_categories = get_enabled_categories()
+        target_languages = get_target_languages()
+
         # Load from all output files
         all_results = self.load_all_analysis_results()
         if not all_results:
@@ -84,8 +133,8 @@ class RuleCoverageJudge(BaseJudge):
             language_stats[lang]["categories_found"] = list(language_stats[lang]["categories_found"])
             language_stats[lang]["sample_rules"] = list(language_stats[lang]["sample_rules"])[:10]
 
-        # Category coverage
-        category_stats = {cat: {"count": 0, "languages": set(), "rules": set()} for cat in DD_CATEGORIES}
+        # Category coverage (use enabled categories)
+        category_stats = {cat: {"count": 0, "languages": set(), "rules": set()} for cat in enabled_categories}
         for file_info in analysis.get("files", []):
             lang = file_info.get("language", "unknown")
             for smell in file_info.get("smells", []):
@@ -106,14 +155,22 @@ class RuleCoverageJudge(BaseJudge):
             for smell in file_info.get("smells", []):
                 all_rules.add(smell.get("rule_id", ""))
 
-        # Coverage metrics
-        languages_covered = [l for l in TARGET_LANGUAGES if l in language_stats]
-        languages_missing = [l for l in TARGET_LANGUAGES if l not in language_stats]
+        # Coverage metrics (use dynamic targets)
+        languages_covered = [l for l in target_languages if l in language_stats]
+        languages_missing = [l for l in target_languages if l not in language_stats]
 
-        categories_covered = [c for c in DD_CATEGORIES if category_stats[c]["count"] > 0]
-        categories_missing = [c for c in DD_CATEGORIES if category_stats[c]["count"] == 0]
+        categories_covered = [c for c in enabled_categories if category_stats[c]["count"] > 0]
+        categories_missing = [c for c in enabled_categories if category_stats[c]["count"] == 0]
 
         summary = analysis.get("summary", {})
+
+        # Configuration info
+        config_info = {
+            "multi_lang_enabled": os.environ.get("SEMGREP_USE_MULTI_LANG", "0") == "1",
+            "elttam_enabled": os.environ.get("SEMGREP_USE_ELTTAM", "0") == "1",
+            "target_languages": target_languages,
+            "enabled_categories": enabled_categories,
+        }
 
         return {
             "language_stats": language_stats,
@@ -126,13 +183,18 @@ class RuleCoverageJudge(BaseJudge):
             "sample_rules": list(all_rules)[:30],
             "total_smells": summary.get("total_smells", 0),
             "total_files": summary.get("total_files", 0),
-            "language_coverage_pct": len(languages_covered) / len(TARGET_LANGUAGES) * 100,
-            "category_coverage_pct": len(categories_covered) / len(DD_CATEGORIES) * 100,
+            "language_coverage_pct": len(languages_covered) / len(target_languages) * 100 if target_languages else 0,
+            "category_coverage_pct": len(categories_covered) / len(enabled_categories) * 100 if enabled_categories else 0,
+            "configuration": config_info,
         }
 
     def run_ground_truth_assertions(self) -> tuple[bool, list[str]]:
         """Validate minimum coverage requirements."""
         failures = []
+
+        # Get enabled targets based on current configuration
+        target_languages = get_target_languages()
+        enabled_categories = get_enabled_categories()
 
         # Load from all output files
         all_results = self.load_all_analysis_results()
@@ -147,26 +209,28 @@ class RuleCoverageJudge(BaseJudge):
                 all_files.append(file_info)
         analysis = {"files": all_files}
 
-        # Check minimum language coverage (at least 3 languages)
+        # Check minimum language coverage (at least 3 languages or 50% of targets)
         languages_found = set()
         for file_info in analysis.get("files", []):
             lang = file_info.get("language", "")
-            if lang in TARGET_LANGUAGES:
+            if lang in target_languages:
                 languages_found.add(lang)
 
-        if len(languages_found) < 3:
-            failures.append(f"Only {len(languages_found)} languages covered, minimum 3 required")
+        min_languages = min(3, max(1, len(target_languages) // 2))
+        if len(languages_found) < min_languages:
+            failures.append(f"Only {len(languages_found)} languages covered, minimum {min_languages} required (of {len(target_languages)} targets)")
 
-        # Check minimum category coverage (at least 3 categories)
+        # Check minimum category coverage (at least 3 categories or 30% of enabled)
         categories_found = set()
         for file_info in analysis.get("files", []):
             for smell in file_info.get("smells", []):
                 cat = smell.get("dd_category", "")
-                if cat in DD_CATEGORIES:
+                if cat in enabled_categories:
                     categories_found.add(cat)
 
-        if len(categories_found) < 3:
-            failures.append(f"Only {len(categories_found)} DD categories covered, minimum 3 required")
+        min_categories = min(3, max(1, len(enabled_categories) // 3))
+        if len(categories_found) < min_categories:
+            failures.append(f"Only {len(categories_found)} DD categories covered, minimum {min_categories} required (of {len(enabled_categories)} enabled)")
 
         # Check minimum rule variety (at least 5 unique rules)
         rules_found = set()

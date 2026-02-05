@@ -1,15 +1,21 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "scenario": "csharp",
   "description": "Ground truth for C# smell and security vulnerability detection",
-  "generated_at": "2026-01-21T18:48:53Z",
+  "generated_at": "2026-02-04T00:00:00Z",
   "repo_path": "eval-repos/synthetic/csharp",
+  "configuration": {
+    "base_rulesets": ["DD custom rules", "p/csharp", "p/security-code-scan"],
+    "community_rulesets": ["community-rules/csharp (Microsoft CA)"],
+    "elttam_rulesets": ["elttam/rules-audit"],
+    "notes": "Expected detections vary based on enabled rulesets"
+  },
   "expected": {
     "language": "csharp",
-    "version": "4.0",
+    "version": "5.0",
     "summary": {
-      "total_files": 22,
-      "total_expected_smells": 145,
+      "total_files": 23,
+      "total_expected_smells": 165,
       "smell_categories_covered": [
         "async_concurrency",
         "resource_management",
@@ -21,7 +27,8 @@
         "security",
         "correctness",
         "best_practice",
-        "performance"
+        "performance",
+        "entrypoint_discovery"
       ],
       "dd_smell_ids_covered": [
         "E1_SYNC_OVER_ASYNC",
@@ -485,6 +492,23 @@
       "expected_smells": [],
       "total_expected": 0,
       "notes": "Semgrep does not detect C# performance issues. Use Roslyn analyzers for performance analysis."
+    },
+    "EntrypointPatterns.cs": {
+      "requires_ruleset": "SEMGREP_USE_ELTTAM",
+      "expected_smells": [
+        {
+          "smell_id": "ENTRYPOINT_DISCOVERY",
+          "min_count": 15,
+          "notes": "ASP.NET controllers, API routes, Minimal API endpoints"
+        },
+        {
+          "smell_id": "AUDIT_AUTH_CHECK",
+          "min_count": 2,
+          "notes": "Authorize attributes and role-based access"
+        }
+      ],
+      "total_expected": 17,
+      "notes": "Requires SEMGREP_USE_ELTTAM=1 for Elttam audit rules"
     }
   }
 }
