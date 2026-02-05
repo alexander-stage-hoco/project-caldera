@@ -350,6 +350,11 @@ def main():
         dest="skip_judges",
         help="Skip specific judges (can be repeated)",
     )
+    parser.add_argument(
+        "--programmatic-results",
+        type=Path,
+        help="Path to programmatic evaluation JSON (evaluation_report.json)",
+    )
 
     args = parser.parse_args()
 
@@ -378,6 +383,33 @@ def main():
 
     # Output results
     output_data = report.to_dict()
+
+    # Add compliance-required fields at root level
+    output_data["model"] = args.model
+    output_data["score"] = round(report.weighted_score, 2)
+    # Decision based on weighted score
+    ws = report.weighted_score
+    if ws >= 4.0:
+        output_data["decision"] = "STRONG_PASS"
+    elif ws >= 3.5:
+        output_data["decision"] = "PASS"
+    elif ws >= 3.0:
+        output_data["decision"] = "WEAK_PASS"
+    else:
+        output_data["decision"] = "FAIL"
+
+    # Add programmatic_input if provided (for compliance scanner)
+    if args.programmatic_results and args.programmatic_results.exists():
+        prog_data = json.loads(args.programmatic_results.read_text())
+        summary = prog_data.get("summary", {})
+        output_data["programmatic_input"] = {
+            "file": str(args.programmatic_results),
+            "decision": prog_data.get("decision", summary.get("decision", "UNKNOWN")),
+            "score": prog_data.get("score", summary.get("score", 0.0)),
+            "passed": summary.get("passed", 0),
+            "failed": summary.get("failed", 0),
+            "total": summary.get("total", 0),
+        }
 
     # Add combined scoring if programmatic score provided
     if args.programmatic_score is not None:
