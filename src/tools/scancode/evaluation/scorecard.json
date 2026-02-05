@@ -1,11 +1,11 @@
 {
   "tool": "scancode",
   "version": "1.0.0",
-  "generated_at": "2026-02-05T18:34:48.538330+00:00",
+  "generated_at": "2026-02-05T22:38:41.720648+00:00",
   "description": "Evaluation scorecard for ScanCode license analysis",
   "summary": {
-    "total_checks": 288,
-    "passed": 288,
+    "total_checks": 192,
+    "passed": 192,
     "failed": 0,
     "score": 1.0,
     "score_percent": 100.0,
@@ -17,264 +17,12 @@
       "id": "D1",
       "name": "Accuracy",
       "weight": 0.25,
-      "total_checks": 126,
-      "passed": 126,
+      "total_checks": 84,
+      "passed": 84,
       "failed": 0,
       "score": 5.0,
       "weighted_score": 1.25,
       "checks": [
-        {
-          "check_id": "LA-1",
-          "name": "LA-1",
-          "passed": true,
-          "message": "Total licenses found: expected=1, actual=1"
-        },
-        {
-          "check_id": "LA-2",
-          "name": "LA-2",
-          "passed": true,
-          "message": "Expected licenses detected: missing=none"
-        },
-        {
-          "check_id": "LA-3",
-          "name": "LA-3",
-          "passed": true,
-          "message": "License files found: expected=1, actual=1"
-        },
-        {
-          "check_id": "LA-4",
-          "name": "LA-4",
-          "passed": true,
-          "message": "Files with licenses: expected=2, actual=2"
-        },
-        {
-          "check_id": "LA-5",
-          "name": "LA-5",
-          "passed": true,
-          "message": "Overall risk level: expected=low, actual=low"
-        },
-        {
-          "check_id": "LA-6",
-          "name": "LA-6",
-          "passed": true,
-          "message": "Has permissive license: expected=True, actual=True"
-        },
-        {
-          "check_id": "LA-7",
-          "name": "LA-7",
-          "passed": true,
-          "message": "Has copyleft license: expected=False, actual=False"
-        },
-        {
-          "check_id": "LA-8",
-          "name": "LA-8",
-          "passed": true,
-          "message": "Has weak-copyleft license: expected=False, actual=False"
-        },
-        {
-          "check_id": "LA-9",
-          "name": "LA-9",
-          "passed": true,
-          "message": "Has unknown license: expected=False, actual=False"
-        },
-        {
-          "check_id": "LA-10",
-          "name": "LA-10",
-          "passed": true,
-          "message": "License counts: expected={'Unlicense': 2}, actual={'Unlicense': 2}"
-        },
-        {
-          "check_id": "LA-11",
-          "name": "LA-11",
-          "passed": true,
-          "message": "No unexpected licenses: unexpected=none"
-        },
-        {
-          "check_id": "LA-12",
-          "name": "LA-12",
-          "passed": true,
-          "message": "Finding paths present: 0 invalid"
-        },
-        {
-          "check_id": "LA-13",
-          "name": "LA-13",
-          "passed": true,
-          "message": "Expected paths detected: missing=none"
-        },
-        {
-          "check_id": "LA-14",
-          "name": "LA-14",
-          "passed": true,
-          "message": "No unexpected paths: extra=none"
-        },
-        {
-          "check_id": "LA-1",
-          "name": "LA-1",
-          "passed": true,
-          "message": "Total licenses found: expected=1, actual=1"
-        },
-        {
-          "check_id": "LA-2",
-          "name": "LA-2",
-          "passed": true,
-          "message": "Expected licenses detected: missing=none"
-        },
-        {
-          "check_id": "LA-3",
-          "name": "LA-3",
-          "passed": true,
-          "message": "License files found: expected=1, actual=1"
-        },
-        {
-          "check_id": "LA-4",
-          "name": "LA-4",
-          "passed": true,
-          "message": "Files with licenses: expected=2, actual=2"
-        },
-        {
-          "check_id": "LA-5",
-          "name": "LA-5",
-          "passed": true,
-          "message": "Overall risk level: expected=medium, actual=medium"
-        },
-        {
-          "check_id": "LA-6",
-          "name": "LA-6",
-          "passed": true,
-          "message": "Has permissive license: expected=False, actual=False"
-        },
-        {
-          "check_id": "LA-7",
-          "name": "LA-7",
-          "passed": true,
-          "message": "Has copyleft license: expected=False, actual=False"
-        },
-        {
-          "check_id": "LA-8",
-          "name": "LA-8",
-          "passed": true,
-          "message": "Has weak-copyleft license: expected=True, actual=True"
-        },
-        {
-          "check_id": "LA-9",
-          "name": "LA-9",
-          "passed": true,
-          "message": "Has unknown license: expected=False, actual=False"
-        },
-        {
-          "check_id": "LA-10",
-          "name": "LA-10",
-          "passed": true,
-          "message": "License counts: expected={'GPL-2.0-only WITH Classpath-exception-2.0': 2}, actual={'GPL-2.0-only WITH Classpath-exception-2.0': 2}"
-        },
-        {
-          "check_id": "LA-11",
-          "name": "LA-11",
-          "passed": true,
-          "message": "No unexpected licenses: unexpected=none"
-        },
-        {
-          "check_id": "LA-12",
-          "name": "LA-12",
-          "passed": true,
-          "message": "Finding paths present: 0 invalid"
-        },
-        {
-          "check_id": "LA-13",
-          "name": "LA-13",
-          "passed": true,
-          "message": "Expected paths detected: missing=none"
-        },
-        {
-          "check_id": "LA-14",
-          "name": "LA-14",
-          "passed": true,
-          "message": "No unexpected paths: extra=none"
-        },
-        {
-          "check_id": "LA-1",
-          "name": "LA-1",
-          "passed": true,
-          "message": "Total licenses found: expected=2, actual=2"
-        },
-        {
-          "check_id": "LA-2",
-          "name": "LA-2",
-          "passed": true,
-          "message": "Expected licenses detected: missing=none"
-        },
-        {
-          "check_id": "LA-3",
-          "name": "LA-3",
-          "passed": true,
-          "message": "License files found: expected=2, actual=2"
-        },
-        {
-          "check_id": "LA-4",
-          "name": "LA-4",
-          "passed": true,
-          "message": "Files with licenses: expected=3, actual=3"
-        },
-        {
-          "check_id": "LA-5",
-          "name": "LA-5",
-          "passed": true,
-          "message": "Overall risk level: expected=low, actual=low"
-        },
-        {
-          "check_id": "LA-6",
-          "name": "LA-6",
-          "passed": true,
-          "message": "Has permissive license: expected=True, actual=True"
-        },
-        {
-          "check_id": "LA-7",
-          "name": "LA-7",
-          "passed": true,
-          "message": "Has copyleft license: expected=False, actual=False"
-        },
-        {
-          "check_id": "LA-8",
-          "name": "LA-8",
-          "passed": true,
-          "message": "Has weak-copyleft license: expected=False, actual=False"
-        },
-        {
-          "check_id": "LA-9",
-          "name": "LA-9",
-          "passed": true,
-          "message": "Has unknown license: expected=False, actual=False"
-        },
-        {
-          "check_id": "LA-10",
-          "name": "LA-10",
-          "passed": true,
-          "message": "License counts: expected={'MIT': 2, 'Apache-2.0': 1}, actual={'Apache-2.0': 1, 'MIT': 2}"
-        },
-        {
-          "check_id": "LA-11",
-          "name": "LA-11",
-          "passed": true,
-          "message": "No unexpected licenses: unexpected=none"
-        },
-        {
-          "check_id": "LA-12",
-          "name": "LA-12",
-          "passed": true,
-          "message": "Finding paths present: 0 invalid"
-        },
-        {
-          "check_id": "LA-13",
-          "name": "LA-13",
-          "passed": true,
-          "message": "Expected paths detected: missing=none"
-        },
-        {
-          "check_id": "LA-14",
-          "name": "LA-14",
-          "passed": true,
-          "message": "No unexpected paths: extra=none"
-        },
         {
           "check_id": "LA-1",
           "name": "LA-1",
@@ -785,156 +533,12 @@
       "id": "D2",
       "name": "Coverage",
       "weight": 0.25,
-      "total_checks": 72,
-      "passed": 72,
+      "total_checks": 48,
+      "passed": 48,
       "failed": 0,
       "score": 5.0,
       "weighted_score": 1.25,
       "checks": [
-        {
-          "check_id": "LC-1",
-          "name": "LC-1",
-          "passed": true,
-          "message": "Summary fields: missing=none"
-        },
-        {
-          "check_id": "LC-2",
-          "name": "LC-2",
-          "passed": true,
-          "message": "License inventory: licenses_found=True, license_counts=True"
-        },
-        {
-          "check_id": "LC-3",
-          "name": "LC-3",
-          "passed": true,
-          "message": "Category flags: missing=none"
-        },
-        {
-          "check_id": "LC-4",
-          "name": "LC-4",
-          "passed": true,
-          "message": "Risk assessment: overall_risk=True, risk_reasons=True"
-        },
-        {
-          "check_id": "LC-5",
-          "name": "LC-5",
-          "passed": true,
-          "message": "Findings array: present=True, complete=True"
-        },
-        {
-          "check_id": "LC-6",
-          "name": "LC-6",
-          "passed": true,
-          "message": "File summaries: present=True, complete=True"
-        },
-        {
-          "check_id": "LC-7",
-          "name": "LC-7",
-          "passed": true,
-          "message": "Metadata: missing=none"
-        },
-        {
-          "check_id": "LC-8",
-          "name": "LC-8",
-          "passed": true,
-          "message": "Timing present (scan_time_ms): expected=True, actual=True"
-        },
-        {
-          "check_id": "LC-1",
-          "name": "LC-1",
-          "passed": true,
-          "message": "Summary fields: missing=none"
-        },
-        {
-          "check_id": "LC-2",
-          "name": "LC-2",
-          "passed": true,
-          "message": "License inventory: licenses_found=True, license_counts=True"
-        },
-        {
-          "check_id": "LC-3",
-          "name": "LC-3",
-          "passed": true,
-          "message": "Category flags: missing=none"
-        },
-        {
-          "check_id": "LC-4",
-          "name": "LC-4",
-          "passed": true,
-          "message": "Risk assessment: overall_risk=True, risk_reasons=True"
-        },
-        {
-          "check_id": "LC-5",
-          "name": "LC-5",
-          "passed": true,
-          "message": "Findings array: present=True, complete=True"
-        },
-        {
-          "check_id": "LC-6",
-          "name": "LC-6",
-          "passed": true,
-          "message": "File summaries: present=True, complete=True"
-        },
-        {
-          "check_id": "LC-7",
-          "name": "LC-7",
-          "passed": true,
-          "message": "Metadata: missing=none"
-        },
-        {
-          "check_id": "LC-8",
-          "name": "LC-8",
-          "passed": true,
-          "message": "Timing present (scan_time_ms): expected=True, actual=True"
-        },
-        {
-          "check_id": "LC-1",
-          "name": "LC-1",
-          "passed": true,
-          "message": "Summary fields: missing=none"
-        },
-        {
-          "check_id": "LC-2",
-          "name": "LC-2",
-          "passed": true,
-          "message": "License inventory: licenses_found=True, license_counts=True"
-        },
-        {
-          "check_id": "LC-3",
-          "name": "LC-3",
-          "passed": true,
-          "message": "Category flags: missing=none"
-        },
-        {
-          "check_id": "LC-4",
-          "name": "LC-4",
-          "passed": true,
-          "message": "Risk assessment: overall_risk=True, risk_reasons=True"
-        },
-        {
-          "check_id": "LC-5",
-          "name": "LC-5",
-          "passed": true,
-          "message": "Findings array: present=True, complete=True"
-        },
-        {
-          "check_id": "LC-6",
-          "name": "LC-6",
-          "passed": true,
-          "message": "File summaries: present=True, complete=True"
-        },
-        {
-          "check_id": "LC-7",
-          "name": "LC-7",
-          "passed": true,
-          "message": "Metadata: missing=none"
-        },
-        {
-          "check_id": "LC-8",
-          "name": "LC-8",
-          "passed": true,
-          "message": "Timing present (scan_time_ms): expected=True, actual=True"
-        },
         {
           "check_id": "LC-1",
           "name": "LC-1",
@@ -1229,120 +833,12 @@
       "id": "D3",
       "name": "Detection",
       "weight": 0.25,
-      "total_checks": 54,
-      "passed": 54,
+      "total_checks": 36,
+      "passed": 36,
       "failed": 0,
       "score": 5.0,
       "weighted_score": 1.25,
       "checks": [
-        {
-          "check_id": "LD-1",
-          "name": "LD-1",
-          "passed": true,
-          "message": "SPDX headers: expected=1, actual=1"
-        },
-        {
-          "check_id": "LD-2",
-          "name": "LD-2",
-          "passed": true,
-          "message": "License file detections: expected=1, actual=1"
-        },
-        {
-          "check_id": "LD-3",
-          "name": "LD-3",
-          "passed": true,
-          "message": "Confidence scores valid: all in [0,1]=True"
-        },
-        {
-          "check_id": "LD-4",
-          "name": "LD-4",
-          "passed": true,
-          "message": "Category classification: all valid=True"
-        },
-        {
-          "check_id": "LD-5",
-          "name": "LD-5",
-          "passed": true,
-          "message": "Match type classification: all valid=True"
-        },
-        {
-          "check_id": "LD-6",
-          "name": "LD-6",
-          "passed": true,
-          "message": "Finding count matches: expected=2, actual=2"
-        },
-        {
-          "check_id": "LD-1",
-          "name": "LD-1",
-          "passed": true,
-          "message": "SPDX headers: expected=2, actual=2"
-        },
-        {
-          "check_id": "LD-2",
-          "name": "LD-2",
-          "passed": true,
-          "message": "License file detections: expected=0, actual=0"
-        },
-        {
-          "check_id": "LD-3",
-          "name": "LD-3",
-          "passed": true,
-          "message": "Confidence scores valid: all in [0,1]=True"
-        },
-        {
-          "check_id": "LD-4",
-          "name": "LD-4",
-          "passed": true,
-          "message": "Category classification: all valid=True"
-        },
-        {
-          "check_id": "LD-5",
-          "name": "LD-5",
-          "passed": true,
-          "message": "Match type classification: all valid=True"
-        },
-        {
-          "check_id": "LD-6",
-          "name": "LD-6",
-          "passed": true,
-          "message": "Finding count matches: expected=2, actual=2"
-        },
-        {
-          "check_id": "LD-1",
-          "name": "LD-1",
-          "passed": true,
-          "message": "SPDX headers: expected=1, actual=1"
-        },
-        {
-          "check_id": "LD-2",
-          "name": "LD-2",
-          "passed": true,
-          "message": "License file detections: expected=2, actual=2"
-        },
-        {
-          "check_id": "LD-3",
-          "name": "LD-3",
-          "passed": true,
-          "message": "Confidence scores valid: all in [0,1]=True"
-        },
-        {
-          "check_id": "LD-4",
-          "name": "LD-4",
-          "passed": true,
-          "message": "Category classification: all valid=True"
-        },
-        {
-          "check_id": "LD-5",
-          "name": "LD-5",
-          "passed": true,
-          "message": "Match type classification: all valid=True"
-        },
-        {
-          "check_id": "LD-6",
-          "name": "LD-6",
-          "passed": true,
-          "message": "Finding count matches: expected=3, actual=3"
-        },
         {
           "check_id": "LD-1",
           "name": "LD-1",
@@ -1565,84 +1061,12 @@
       "id": "D4",
       "name": "Performance",
       "weight": 0.25,
-      "total_checks": 36,
-      "passed": 36,
+      "total_checks": 24,
+      "passed": 24,
       "failed": 0,
       "score": 5.0,
       "weighted_score": 1.25,
       "checks": [
-        {
-          "check_id": "LP-1",
-          "name": "LP-1",
-          "passed": true,
-          "message": "Scan time within limit: value=25.348186492919922, range=[0, 5000]"
-        },
-        {
-          "check_id": "LP-2",
-          "name": "LP-2",
-          "passed": true,
-          "message": "Scan time positive: 25.348186492919922ms > 0"
-        },
-        {
-          "check_id": "LP-3",
-          "name": "LP-3",
-          "passed": true,
-          "message": "Processing rate: 78.9 files/sec >= 1"
-        },
-        {
-          "check_id": "LP-4",
-          "name": "LP-4",
-          "passed": true,
-          "message": "Analysis completed: scan_time_ms=25.348186492919922"
-        },
-        {
-          "check_id": "LP-1",
-          "name": "LP-1",
-          "passed": true,
-          "message": "Scan time within limit: value=14.240026473999023, range=[0, 5000]"
-        },
-        {
-          "check_id": "LP-2",
-          "name": "LP-2",
-          "passed": true,
-          "message": "Scan time positive: 14.240026473999023ms > 0"
-        },
-        {
-          "check_id": "LP-3",
-          "name": "LP-3",
-          "passed": true,
-          "message": "Processing rate: 140.4 files/sec >= 1"
-        },
-        {
-          "check_id": "LP-4",
-          "name": "LP-4",
-          "passed": true,
-          "message": "Analysis completed: scan_time_ms=14.240026473999023"
-        },
-        {
-          "check_id": "LP-1",
-          "name": "LP-1",
-          "passed": true,
-          "message": "Scan time within limit: value=49.41511154174805, range=[0, 5000]"
-        },
-        {
-          "check_id": "LP-2",
-          "name": "LP-2",
-          "passed": true,
-          "message": "Scan time positive: 49.41511154174805ms > 0"
-        },
-        {
-          "check_id": "LP-3",
-          "name": "LP-3",
-          "passed": true,
-          "message": "Processing rate: 60.7 files/sec >= 1"
-        },
-        {
-          "check_id": "LP-4",
-          "name": "LP-4",
-          "passed": true,
-          "message": "Analysis completed: scan_time_ms=49.41511154174805"
-        },
         {
           "check_id": "LP-1",
           "name": "LP-1",
@@ -1798,6 +1222,6 @@
     "FAIL": "< 3.0 (below 60%)"
   },
   "metadata": {
-    "repositories_evaluated": 9
+    "repositories_evaluated": 6
   }
 }

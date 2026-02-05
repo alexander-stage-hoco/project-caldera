@@ -13,11 +13,11 @@
 
 | Category | Passed | Total | Pass Rate |
 |----------|--------|-------|-----------|
-| Accuracy | 126 | 126 | 100% |
-| Coverage | 72 | 72 | 100% |
-| Detection | 54 | 54 | 100% |
-| Performance | 36 | 36 | 100% |
-| **Overall** | 288 | 288 | 100% |
+| Accuracy | 84 | 84 | 100% |
+| Coverage | 48 | 48 | 100% |
+| Detection | 36 | 36 | 100% |
+| Performance | 24 | 24 | 100% |
+| **Overall** | 192 | 192 | 100% |
 
 ## Dimensions
 
@@ -25,25 +25,25 @@
 
 - **Score**: 5.0/5.0
 - **Weight**: 25%
-- **Checks**: 126/126 passed
+- **Checks**: 84/84 passed
 
 ### Coverage
 
 - **Score**: 5.0/5.0
 - **Weight**: 25%
-- **Checks**: 72/72 passed
+- **Checks**: 48/48 passed
 
 ### Detection
 
 - **Score**: 5.0/5.0
 - **Weight**: 25%
-- **Checks**: 54/54 passed
+- **Checks**: 36/36 passed
 
 ### Performance
 
 - **Score**: 5.0/5.0
 - **Weight**: 25%
-- **Checks**: 36/36 passed
+- **Checks**: 24/24 passed
 
 ## Thresholds
 
