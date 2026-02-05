@@ -311,7 +311,11 @@ def calculate_combined_score(
     - decision: STRONG_PASS, PASS, WEAK_PASS, FAIL
     """
     # Normalize programmatic to 1-5 scale
-    programmatic_normalized = programmatic_score * 4 + 1  # 0.0 -> 1, 1.0 -> 5
+    # Score may be on 0-1 or 1-5 scale; normalize to 1-5
+    if programmatic_score <= 1.0:
+        programmatic_normalized = programmatic_score * 4 + 1  # 0.0 -> 1, 1.0 -> 5
+    else:
+        programmatic_normalized = programmatic_score  # Already on 1-5 scale
 
     combined = (
         programmatic_normalized * programmatic_weight +
@@ -405,10 +409,12 @@ def main():
         try:
             prog_data = json.loads(prog_eval_path.read_text())
             summary = prog_data.get("summary", {})
+            # Support both 'score' and 'total_score' field names
+            prog_score = prog_data.get("score") or prog_data.get("total_score") or 0.0
             programmatic_input = {
                 "file": str(prog_eval_path),
                 "decision": prog_data.get("decision", "UNKNOWN"),
-                "score": prog_data.get("score", 0.0),
+                "score": prog_score,
                 "checks_passed": summary.get("passed", 0),
                 "checks_failed": summary.get("failed", 0),
             }
