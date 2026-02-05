@@ -416,8 +416,14 @@ def main():
             "failed": summary.get("failed", 0),
             "total": summary.get("total", 0),
         }
+        # Compute combined score from loaded results
+        combined = calculate_combined_score(
+            programmatic_score=prog_score,
+            llm_score=report.weighted_score,
+        )
+        output_data["combined"] = combined
 
-    # Add combined scoring if programmatic score provided
+    # Add combined scoring if programmatic score provided (CLI arg takes precedence)
     if args.programmatic_score is not None:
         combined = calculate_combined_score(
             programmatic_score=args.programmatic_score,

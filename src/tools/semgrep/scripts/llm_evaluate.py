@@ -404,6 +404,7 @@ def main():
 
     # Load programmatic evaluation results if available
     programmatic_input = None
+    prog_score = None
     prog_eval_path = working_dir / "evaluation" / "results" / "evaluation_report.json"
     if prog_eval_path.exists():
         try:
@@ -439,7 +440,15 @@ def main():
     # Output results
     output_data = report.to_dict()
 
-    # Add combined scoring if programmatic score provided
+    # Compute combined score from loaded programmatic results
+    if programmatic_input is not None and prog_score is not None:
+        combined = calculate_combined_score(
+            programmatic_score=prog_score,
+            llm_score=report.weighted_score,
+        )
+        output_data["combined"] = combined
+
+    # Add combined scoring if programmatic score provided (CLI arg takes precedence)
     if args.programmatic_score is not None:
         combined = calculate_combined_score(
             programmatic_score=args.programmatic_score,
