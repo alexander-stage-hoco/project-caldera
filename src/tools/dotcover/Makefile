@@ -71,7 +71,8 @@ evaluate-llm: $(VENV_READY)  ## Run LLM evaluation
 	$(PYTHON_VENV) -m evaluation.llm.orchestrator \
 		$(OUTPUT_DIR) \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
-		--model $(LLM_MODEL)
+		--model $(LLM_MODEL) \
+		--programmatic-results $(EVAL_OUTPUT_DIR)/evaluation_report.json
 	@if [ -w evaluation/results ]; then cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json; fi
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"
 

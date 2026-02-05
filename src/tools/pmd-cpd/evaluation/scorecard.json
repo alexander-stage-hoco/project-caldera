@@ -1,7 +1,7 @@
 {
   "tool": "pmd-cpd",
   "version": "1.0.0",
-  "generated_at": "2026-02-05T10:39:58.668293",
+  "generated_at": "2026-02-05T19:32:51.148293",
   "description": "Evaluation scorecard for PMD CPD duplication analysis",
   "summary": {
     "total_checks": 28,
@@ -238,7 +238,7 @@
     "FAIL": "< 3.0 (below 60%)"
   },
   "metadata": {
-    "analysis_path": "/var/folders/zr/c7zp4x316wvg0rsvdnq_dcm40000gn/T/tool-compliance-twr78yru/output.json",
+    "analysis_path": "/var/folders/zr/c7zp4x316wvg0rsvdnq_dcm40000gn/T/tool-compliance-xkfcden7/output.json",
     "ground_truth_dir": "evaluation/ground-truth"
   }
 }

@@ -101,7 +101,8 @@ evaluate-llm: setup
 		--working-dir $(CURDIR) \
 		--analysis $(OUTPUT_DIR)/output.json \
 		--model $(LLM_MODEL) \
-		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json
+		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
+		--programmatic-results $(EVAL_OUTPUT_DIR)/evaluation_report.json
 	@mkdir -p evaluation/results
 	@if [ "$(EVAL_OUTPUT_DIR)" != "evaluation/results" ] && [ -w evaluation/results ]; then cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json; fi
 
