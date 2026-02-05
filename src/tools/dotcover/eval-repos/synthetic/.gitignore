@@ -1,0 +1,15 @@
+# Build outputs
+bin/
+obj/
+
+# NuGet
+packages/
+*.nuget.props
+*.nuget.targets
+*.nuget.g.props
+*.nuget.g.targets
+
+# Coverage artifacts
+*.dcvr
+TestResults/
+coverage-results/

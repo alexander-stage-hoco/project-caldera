@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CoverageDemo.Tests/CoverageDemo.Tests.csproj" />
+  <Project Path="CoverageDemo/CoverageDemo.csproj" />
+</Solution>

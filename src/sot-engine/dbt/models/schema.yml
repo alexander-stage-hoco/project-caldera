@@ -31,6 +31,9 @@ sources:
       - name: lz_pmd_cpd_duplications
       - name: lz_pmd_cpd_occurrences
       - name: lz_devskim_findings
+      - name: lz_dotcover_assembly_coverage
+      - name: lz_dotcover_type_coverage
+      - name: lz_dotcover_method_coverage
 
 models:
   - name: stg_lz_tool_runs
@@ -1612,5 +1615,71 @@ models:
         tests:
           - not_null
       - name: total_issue_count
+        tests:
+          - not_null
+
+  - name: stg_lz_dotcover_assembly_coverage
+    description: "Assembly-level code coverage from dotCover analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: assembly_name
+        tests:
+          - not_null
+      - name: covered_statements
+        tests:
+          - not_null
+      - name: total_statements
+        tests:
+          - not_null
+      - name: statement_coverage_pct
+        tests:
+          - not_null
+
+  - name: stg_lz_dotcover_type_coverage
+    description: "Type (class) level code coverage from dotCover analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: assembly_name
+        tests:
+          - not_null
+      - name: type_name
+        tests:
+          - not_null
+      - name: covered_statements
+        tests:
+          - not_null
+      - name: total_statements
+        tests:
+          - not_null
+      - name: statement_coverage_pct
+        tests:
+          - not_null
+
+  - name: stg_lz_dotcover_method_coverage
+    description: "Method-level code coverage from dotCover analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: assembly_name
+        tests:
+          - not_null
+      - name: type_name
+        tests:
+          - not_null
+      - name: method_name
+        tests:
+          - not_null
+      - name: covered_statements
+        tests:
+          - not_null
+      - name: total_statements
+        tests:
+          - not_null
+      - name: statement_coverage_pct
         tests:
           - not_null

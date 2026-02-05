@@ -1,0 +1,21 @@
+# Tool compliance rules for dotcover
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - performance.py
+
+required_prompts:
+  - accuracy.md
+  - actionability.md
+  - false_positive.md
+  - integration.md
+
+ground_truth_mode: synthetic_json
+
+evaluation_outputs:
+  - scorecard.md
+  - evaluation_report.json
+
+adapter:
+  module: persistence.adapters.dotcover_adapter
+  class: DotcoverAdapter

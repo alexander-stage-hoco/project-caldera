@@ -1,0 +1,109 @@
+{
+  "metadata": {
+    "tool_name": "dotcover",
+    "tool_version": "2025.3.2",
+    "run_id": "test-fixture-run-id",
+    "repo_id": "test-fixture-repo-id",
+    "branch": "main",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-01-01T00:00:00.000000+00:00",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "dotcover",
+    "tool_version": "2025.3.2",
+    "summary": {
+      "total_assemblies": 2,
+      "total_types": 3,
+      "total_methods": 5,
+      "covered_statements": 150,
+      "total_statements": 200,
+      "statement_coverage_pct": 75.0
+    },
+    "assemblies": [
+      {
+        "name": "MyApp.Services",
+        "covered_statements": 100,
+        "total_statements": 120,
+        "statement_coverage_pct": 83.33
+      },
+      {
+        "name": "MyApp.Data",
+        "covered_statements": 50,
+        "total_statements": 80,
+        "statement_coverage_pct": 62.5
+      }
+    ],
+    "types": [
+      {
+        "assembly": "MyApp.Services",
+        "namespace": "MyApp.Services.Users",
+        "name": "UserService",
+        "file_path": null,
+        "covered_statements": 60,
+        "total_statements": 80,
+        "statement_coverage_pct": 75.0
+      },
+      {
+        "assembly": "MyApp.Services",
+        "namespace": "MyApp.Services.Auth",
+        "name": "AuthService",
+        "file_path": null,
+        "covered_statements": 40,
+        "total_statements": 40,
+        "statement_coverage_pct": 100.0
+      },
+      {
+        "assembly": "MyApp.Data",
+        "namespace": "MyApp.Data.Repositories",
+        "name": "UserRepository",
+        "file_path": null,
+        "covered_statements": 50,
+        "total_statements": 80,
+        "statement_coverage_pct": 62.5
+      }
+    ],
+    "methods": [
+      {
+        "assembly": "MyApp.Services",
+        "type_name": "UserService",
+        "name": "GetUser(int)",
+        "covered_statements": 20,
+        "total_statements": 20,
+        "statement_coverage_pct": 100.0
+      },
+      {
+        "assembly": "MyApp.Services",
+        "type_name": "UserService",
+        "name": "CreateUser(string)",
+        "covered_statements": 30,
+        "total_statements": 40,
+        "statement_coverage_pct": 75.0
+      },
+      {
+        "assembly": "MyApp.Services",
+        "type_name": "UserService",
+        "name": "DeleteUser(int)",
+        "covered_statements": 10,
+        "total_statements": 20,
+        "statement_coverage_pct": 50.0
+      },
+      {
+        "assembly": "MyApp.Services",
+        "type_name": "AuthService",
+        "name": "Login(string, string)",
+        "covered_statements": 40,
+        "total_statements": 40,
+        "statement_coverage_pct": 100.0
+      },
+      {
+        "assembly": "MyApp.Data",
+        "type_name": "UserRepository",
+        "name": "FindById(int)",
+        "covered_statements": 50,
+        "total_statements": 80,
+        "statement_coverage_pct": 62.5
+      }
+    ]
+  }
+}

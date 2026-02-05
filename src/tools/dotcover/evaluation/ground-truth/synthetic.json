@@ -1,0 +1,47 @@
+{
+  "id": "synthetic",
+  "description": "Synthetic .NET 10 project for dotCover coverage testing",
+  "expected_coverage": {
+    "overall_min": 50.0,
+    "overall_max": 75.0
+  },
+  "expected_assemblies": [
+    {
+      "name": "CoverageDemo",
+      "min_coverage": 50,
+      "max_coverage": 75,
+      "description": "Main library with Calculator, StringUtils, and UntestedClass"
+    }
+  ],
+  "expected_full_coverage_types": [
+    {
+      "name": "Calculator",
+      "reason": "All methods (Add, Subtract, Multiply, Divide) have complete test coverage"
+    }
+  ],
+  "expected_partial_coverage_types": [
+    {
+      "name": "StringUtils",
+      "reason": "Reverse() tested, Truncate() untested, IsValidEmail() partially tested"
+    }
+  ],
+  "expected_uncovered_types": [
+    {
+      "name": "UntestedClass",
+      "reason": "No tests exist for this class"
+    }
+  ],
+  "expected_low_coverage_methods": [
+    {
+      "type": "StringUtils",
+      "name": "Truncate",
+      "expected_coverage": 0,
+      "reason": "Intentionally not tested to demonstrate partial coverage"
+    }
+  ],
+  "notes": [
+    "Coverage percentages may vary slightly based on dotCover version",
+    "UntestedClass should have 0% coverage as no tests target it",
+    "Calculator should have 100% coverage with all branches covered"
+  ]
+}

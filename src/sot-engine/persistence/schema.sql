@@ -451,3 +451,47 @@ CREATE TABLE lz_pmd_cpd_occurrences (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (run_pk, clone_id, file_id, line_start)
 );
+
+-- =============================================================================
+-- dotcover: Code coverage metrics
+-- =============================================================================
+
+-- Assembly-level summary
+CREATE TABLE lz_dotcover_assembly_coverage (
+    run_pk BIGINT NOT NULL,
+    assembly_name VARCHAR NOT NULL,
+    covered_statements INTEGER NOT NULL,
+    total_statements INTEGER NOT NULL,
+    statement_coverage_pct DOUBLE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, assembly_name)
+);
+
+-- Type (class) level - links to files when available
+CREATE TABLE lz_dotcover_type_coverage (
+    run_pk BIGINT NOT NULL,
+    file_id VARCHAR,            -- NULL if file mapping unavailable
+    directory_id VARCHAR,
+    relative_path VARCHAR,      -- Source file path
+    assembly_name VARCHAR NOT NULL,
+    namespace VARCHAR,
+    type_name VARCHAR NOT NULL,
+    covered_statements INTEGER NOT NULL,
+    total_statements INTEGER NOT NULL,
+    statement_coverage_pct DOUBLE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, assembly_name, type_name)
+);
+
+-- Method-level detail
+CREATE TABLE lz_dotcover_method_coverage (
+    run_pk BIGINT NOT NULL,
+    assembly_name VARCHAR NOT NULL,
+    type_name VARCHAR NOT NULL,
+    method_name VARCHAR NOT NULL,
+    covered_statements INTEGER NOT NULL,
+    total_statements INTEGER NOT NULL,
+    statement_coverage_pct DOUBLE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, assembly_name, type_name, method_name)
+);

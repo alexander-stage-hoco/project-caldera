@@ -814,3 +814,85 @@ class PmdCpdOccurrence:
         _validate_required_string(self.clone_id, "clone_id")
         _validate_relative_path(self.relative_path, "relative_path")
         _validate_line_range(self.line_start, self.line_end)
+
+
+# =============================================================================
+# dotcover Entities
+# =============================================================================
+
+@dataclass(frozen=True)
+class DotcoverAssemblyCoverage:
+    """Assembly-level coverage metrics from dotCover analysis."""
+    run_pk: int
+    assembly_name: str
+    covered_statements: int
+    total_statements: int
+    statement_coverage_pct: float
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_required_string(self.assembly_name, "assembly_name")
+        _validate_fields_non_negative({
+            "covered_statements": self.covered_statements,
+            "total_statements": self.total_statements,
+        })
+        if self.statement_coverage_pct < 0 or self.statement_coverage_pct > 100:
+            raise ValueError("statement_coverage_pct must be between 0 and 100")
+        if self.covered_statements > self.total_statements:
+            raise ValueError("covered_statements cannot exceed total_statements")
+
+
+@dataclass(frozen=True)
+class DotcoverTypeCoverage:
+    """Type (class) level coverage metrics from dotCover analysis."""
+    run_pk: int
+    file_id: Optional[str]       # May be null if file mapping unavailable
+    directory_id: Optional[str]
+    relative_path: Optional[str]  # Source file path (from DetailedXML)
+    assembly_name: str
+    namespace: Optional[str]
+    type_name: str
+    covered_statements: int
+    total_statements: int
+    statement_coverage_pct: float
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_required_string(self.assembly_name, "assembly_name")
+        _validate_required_string(self.type_name, "type_name")
+        if self.relative_path:
+            _validate_relative_path(self.relative_path, "relative_path")
+        _validate_fields_non_negative({
+            "covered_statements": self.covered_statements,
+            "total_statements": self.total_statements,
+        })
+        if self.statement_coverage_pct < 0 or self.statement_coverage_pct > 100:
+            raise ValueError("statement_coverage_pct must be between 0 and 100")
+        if self.covered_statements > self.total_statements:
+            raise ValueError("covered_statements cannot exceed total_statements")
+
+
+@dataclass(frozen=True)
+class DotcoverMethodCoverage:
+    """Method-level coverage metrics from dotCover analysis."""
+    run_pk: int
+    assembly_name: str
+    type_name: str
+    method_name: str
+    covered_statements: int
+    total_statements: int
+    statement_coverage_pct: float
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_required_string(self.assembly_name, "assembly_name")
+        _validate_required_string(self.type_name, "type_name")
+        _validate_required_string(self.method_name, "method_name")
+        _validate_fields_non_negative({
+            "covered_statements": self.covered_statements,
+            "total_statements": self.total_statements,
+        })
+        if self.statement_coverage_pct < 0 or self.statement_coverage_pct > 100:
+            raise ValueError("statement_coverage_pct must be between 0 and 100")
+        if self.covered_statements > self.total_statements:
+            raise ValueError("covered_statements cannot exceed total_statements")

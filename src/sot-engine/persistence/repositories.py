@@ -8,6 +8,9 @@ from .entities import (
     CodeSymbol,
     CollectionRun,
     DevskimFinding,
+    DotcoverAssemblyCoverage,
+    DotcoverMethodCoverage,
+    DotcoverTypeCoverage,
     FileImport,
     GitSizerLfsCandidate,
     GitSizerMetric,
@@ -714,5 +717,60 @@ class PmdCpdRepository(BaseRepository):
             lambda r: (
                 r.run_pk, r.clone_id, r.file_id, r.directory_id, r.relative_path,
                 r.line_start, r.line_end, r.column_start, r.column_end,
+            ),
+        )
+
+
+class DotcoverRepository(BaseRepository):
+    """Repository for dotcover code coverage data."""
+
+    _ASSEMBLY_COLUMNS = (
+        "run_pk", "assembly_name", "covered_statements",
+        "total_statements", "statement_coverage_pct",
+    )
+    _TYPE_COLUMNS = (
+        "run_pk", "file_id", "directory_id", "relative_path",
+        "assembly_name", "namespace", "type_name",
+        "covered_statements", "total_statements", "statement_coverage_pct",
+    )
+    _METHOD_COLUMNS = (
+        "run_pk", "assembly_name", "type_name", "method_name",
+        "covered_statements", "total_statements", "statement_coverage_pct",
+    )
+
+    def insert_assembly_coverage(self, rows: Iterable[DotcoverAssemblyCoverage]) -> None:
+        """Insert assembly-level coverage metrics."""
+        self._insert_bulk(
+            "lz_dotcover_assembly_coverage",
+            self._ASSEMBLY_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.assembly_name, r.covered_statements,
+                r.total_statements, r.statement_coverage_pct,
+            ),
+        )
+
+    def insert_type_coverage(self, rows: Iterable[DotcoverTypeCoverage]) -> None:
+        """Insert type (class) level coverage metrics."""
+        self._insert_bulk(
+            "lz_dotcover_type_coverage",
+            self._TYPE_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.file_id, r.directory_id, r.relative_path,
+                r.assembly_name, r.namespace, r.type_name,
+                r.covered_statements, r.total_statements, r.statement_coverage_pct,
+            ),
+        )
+
+    def insert_method_coverage(self, rows: Iterable[DotcoverMethodCoverage]) -> None:
+        """Insert method-level coverage metrics."""
+        self._insert_bulk(
+            "lz_dotcover_method_coverage",
+            self._METHOD_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.assembly_name, r.type_name, r.method_name,
+                r.covered_statements, r.total_statements, r.statement_coverage_pct,
             ),
         )

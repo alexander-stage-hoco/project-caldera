@@ -54,7 +54,7 @@ SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 
 # Key patterns for path detection
 _PATH_KEY_PATTERNS = {"path", "file", "dir", "folder", "location", "source"}
-_EXCLUDED_KEY_PATTERNS = {"endpoint", "url", "uri", "href", "schema", "ref", "api"}
+_EXCLUDED_KEY_PATTERNS = {"endpoint", "url", "uri", "href", "schema", "ref", "api", "snapshot"}
 
 # Patterns that indicate implementation of specific quality rules (loaded from YAML)
 QUALITY_RULE_PATTERNS = get_quality_rule_patterns()
@@ -2234,6 +2234,7 @@ def _get_tool_repository(conn, tool_name: str):
         ScancodeRepository,
         PmdCpdRepository,
         DevskimRepository,
+        DotcoverRepository,
     )
     repos = {
         "scc": SccRepository,
@@ -2248,6 +2249,7 @@ def _get_tool_repository(conn, tool_name: str):
         "scancode": ScancodeRepository,
         "pmd-cpd": PmdCpdRepository,
         "devskim": DevskimRepository,
+        "dotcover": DotcoverRepository,
     }
     repo_cls = repos.get(tool_name)
     return repo_cls(conn) if repo_cls else None
