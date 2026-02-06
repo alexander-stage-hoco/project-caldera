@@ -7,6 +7,9 @@ import duckdb
 from .entities import (
     CodeSymbol,
     CollectionRun,
+    DependenseePackageReference,
+    DependenseeProject,
+    DependenseeProjectReference,
     DevskimFinding,
     DotcoverAssemblyCoverage,
     DotcoverMethodCoverage,
@@ -772,5 +775,53 @@ class DotcoverRepository(BaseRepository):
             lambda r: (
                 r.run_pk, r.assembly_name, r.type_name, r.method_name,
                 r.covered_statements, r.total_statements, r.statement_coverage_pct,
+            ),
+        )
+
+
+class DependenseeRepository(BaseRepository):
+    """Repository for dependensee analysis data."""
+
+    _PROJECT_COLUMNS = (
+        "run_pk", "project_path", "project_name", "target_framework",
+        "project_reference_count", "package_reference_count",
+    )
+
+    _PROJECT_REF_COLUMNS = (
+        "run_pk", "source_project_path", "target_project_path",
+    )
+
+    _PACKAGE_REF_COLUMNS = (
+        "run_pk", "project_path", "package_name", "package_version",
+    )
+
+    def insert_projects(self, rows: Iterable[DependenseeProject]) -> None:
+        self._insert_bulk(
+            "lz_dependensee_projects",
+            self._PROJECT_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.project_path, r.project_name, r.target_framework,
+                r.project_reference_count, r.package_reference_count,
+            ),
+        )
+
+    def insert_project_references(self, rows: Iterable[DependenseeProjectReference]) -> None:
+        self._insert_bulk(
+            "lz_dependensee_project_refs",
+            self._PROJECT_REF_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.source_project_path, r.target_project_path,
+            ),
+        )
+
+    def insert_package_references(self, rows: Iterable[DependenseePackageReference]) -> None:
+        self._insert_bulk(
+            "lz_dependensee_package_refs",
+            self._PACKAGE_REF_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.project_path, r.package_name, r.package_version,
             ),
         )

@@ -896,3 +896,54 @@ class DotcoverMethodCoverage:
             raise ValueError("statement_coverage_pct must be between 0 and 100")
         if self.covered_statements > self.total_statements:
             raise ValueError("covered_statements cannot exceed total_statements")
+
+
+# =============================================================================
+# dependensee Entities
+# =============================================================================
+
+@dataclass(frozen=True)
+class DependenseeProject:
+    """Project dependency information from dependensee analysis."""
+    run_pk: int
+    project_path: str
+    project_name: str
+    target_framework: Optional[str]
+    project_reference_count: int
+    package_reference_count: int
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.project_path, "project_path")
+        _validate_required_string(self.project_name, "project_name")
+        _validate_fields_non_negative({
+            "project_reference_count": self.project_reference_count,
+            "package_reference_count": self.package_reference_count,
+        })
+
+
+@dataclass(frozen=True)
+class DependenseeProjectReference:
+    """Project-to-project reference from dependensee analysis."""
+    run_pk: int
+    source_project_path: str
+    target_project_path: str
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.source_project_path, "source_project_path")
+        _validate_relative_path(self.target_project_path, "target_project_path")
+
+
+@dataclass(frozen=True)
+class DependenseePackageReference:
+    """NuGet package reference from dependensee analysis."""
+    run_pk: int
+    project_path: str
+    package_name: str
+    package_version: Optional[str]
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.project_path, "project_path")
+        _validate_required_string(self.package_name, "package_name")

@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "tool_name": "dependensee",
+    "tool_version": "2.2.0",
+    "run_id": "00000000-0000-0000-0000-000000000001",
+    "repo_id": "00000000-0000-0000-0000-000000000002",
+    "branch": "main",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-01-01T00:00:00.000000+00:00",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "dependensee",
+    "tool_version": "2.2.0",
+    "projects": [
+      {
+        "name": "MyApp",
+        "path": "src/MyApp/MyApp.csproj",
+        "target_framework": "net8.0",
+        "project_references": [
+          "src/MyApp.Core/MyApp.Core.csproj"
+        ],
+        "package_references": [
+          {"name": "Microsoft.Extensions.Hosting", "version": "8.0.0"},
+          {"name": "Serilog", "version": "3.1.1"}
+        ]
+      },
+      {
+        "name": "MyApp.Core",
+        "path": "src/MyApp.Core/MyApp.Core.csproj",
+        "target_framework": "net8.0",
+        "project_references": [],
+        "package_references": [
+          {"name": "Newtonsoft.Json", "version": "13.0.3"}
+        ]
+      }
+    ],
+    "dependency_graph": {
+      "nodes": [
+        {"id": "src/MyApp/MyApp.csproj", "name": "MyApp", "type": "project", "target_framework": "net8.0"},
+        {"id": "src/MyApp.Core/MyApp.Core.csproj", "name": "MyApp.Core", "type": "project", "target_framework": "net8.0"},
+        {"id": "nuget:Microsoft.Extensions.Hosting", "name": "Microsoft.Extensions.Hosting", "type": "package", "version": "8.0.0"},
+        {"id": "nuget:Serilog", "name": "Serilog", "type": "package", "version": "3.1.1"},
+        {"id": "nuget:Newtonsoft.Json", "name": "Newtonsoft.Json", "type": "package", "version": "13.0.3"}
+      ],
+      "edges": [
+        {"source": "src/MyApp/MyApp.csproj", "target": "src/MyApp.Core/MyApp.Core.csproj", "type": "project_reference"},
+        {"source": "src/MyApp/MyApp.csproj", "target": "nuget:Microsoft.Extensions.Hosting", "type": "package_reference"},
+        {"source": "src/MyApp/MyApp.csproj", "target": "nuget:Serilog", "type": "package_reference"},
+        {"source": "src/MyApp.Core/MyApp.Core.csproj", "target": "nuget:Newtonsoft.Json", "type": "package_reference"}
+      ]
+    },
+    "circular_dependencies": [],
+    "summary": {
+      "project_count": 2,
+      "package_count": 3,
+      "reference_count": 1,
+      "circular_dependency_count": 0
+    }
+  }
+}

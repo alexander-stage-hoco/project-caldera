@@ -495,3 +495,35 @@ CREATE TABLE lz_dotcover_method_coverage (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (run_pk, assembly_name, type_name, method_name)
 );
+
+-- =============================================================================
+-- dependensee: .NET dependency analysis
+-- =============================================================================
+
+CREATE TABLE lz_dependensee_projects (
+    run_pk BIGINT NOT NULL,
+    project_path VARCHAR NOT NULL,
+    project_name VARCHAR NOT NULL,
+    target_framework VARCHAR,
+    project_reference_count INTEGER NOT NULL,
+    package_reference_count INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, project_path)
+);
+
+CREATE TABLE lz_dependensee_project_refs (
+    run_pk BIGINT NOT NULL,
+    source_project_path VARCHAR NOT NULL,
+    target_project_path VARCHAR NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, source_project_path, target_project_path)
+);
+
+CREATE TABLE lz_dependensee_package_refs (
+    run_pk BIGINT NOT NULL,
+    project_path VARCHAR NOT NULL,
+    package_name VARCHAR NOT NULL,
+    package_version VARCHAR,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, project_path, package_name)
+);

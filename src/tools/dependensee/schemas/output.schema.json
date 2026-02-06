@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DependenSee Output",
+  "description": "Output schema for DependenSee .NET dependency analysis tool.",
+  "type": "object",
+  "required": ["metadata", "data"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Standard Caldera envelope metadata",
+      "required": [
+        "tool_name",
+        "tool_version",
+        "run_id",
+        "repo_id",
+        "branch",
+        "commit",
+        "timestamp",
+        "schema_version"
+      ],
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "const": "dependensee"
+        },
+        "tool_version": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "repo_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "description": ".NET dependency analysis data",
+      "required": ["tool", "tool_version", "projects", "dependency_graph", "circular_dependencies", "summary"],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "const": "dependensee"
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Version of DependenSee or 'fallback-parser' if using built-in parser"
+        },
+        "projects": {
+          "type": "array",
+          "description": "List of .NET projects found in the repository",
+          "items": {
+            "type": "object",
+            "required": ["name", "path", "project_references", "package_references"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Project name (from .csproj filename)"
+              },
+              "path": {
+                "type": "string",
+                "description": "Repo-relative path to the project file (e.g., 'src/MyApp/MyApp.csproj')"
+              },
+              "target_framework": {
+                "type": ["string", "null"],
+                "description": "Target framework (e.g., 'net8.0', 'netstandard2.0')"
+              },
+              "project_references": {
+                "type": "array",
+                "description": "List of repo-relative paths to referenced projects",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "package_references": {
+                "type": "array",
+                "description": "List of NuGet package dependencies",
+                "items": {
+                  "type": "object",
+                  "required": ["name"],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "NuGet package name"
+                    },
+                    "version": {
+                      "type": "string",
+                      "description": "Package version constraint"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dependency_graph": {
+          "type": "object",
+          "description": "Graph representation of all dependencies",
+          "required": ["nodes", "edges"],
+          "properties": {
+            "nodes": {
+              "type": "array",
+              "description": "Graph nodes (projects and packages)",
+              "items": {
+                "type": "object",
+                "required": ["id", "name", "type"],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Unique node identifier (path for projects, 'nuget:<name>' for packages)"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Display name"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["project", "package"],
+                    "description": "Node type"
+                  },
+                  "target_framework": {
+                    "type": ["string", "null"],
+                    "description": "Target framework (for project nodes)"
+                  },
+                  "version": {
+                    "type": ["string", "null"],
+                    "description": "Package version (for package nodes)"
+                  }
+                }
+              }
+            },
+            "edges": {
+              "type": "array",
+              "description": "Graph edges (dependencies)",
+              "items": {
+                "type": "object",
+                "required": ["source", "target", "type"],
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "description": "Source node ID (the depending project)"
+                  },
+                  "target": {
+                    "type": "string",
+                    "description": "Target node ID (the dependency)"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["project_reference", "package_reference"],
+                    "description": "Edge type"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "circular_dependencies": {
+          "type": "array",
+          "description": "List of detected circular dependency cycles",
+          "items": {
+            "type": "array",
+            "description": "A cycle represented as a list of project paths",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "summary": {
+          "type": "object",
+          "description": "Aggregate statistics",
+          "required": ["project_count", "package_count", "reference_count", "circular_dependency_count"],
+          "properties": {
+            "project_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of .NET projects found"
+            },
+            "package_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of unique NuGet packages referenced"
+            },
+            "reference_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of project-to-project references"
+            },
+            "circular_dependency_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of circular dependency cycles detected"
+            }
+          }
+        }
+      }
+    }
+  }
+}

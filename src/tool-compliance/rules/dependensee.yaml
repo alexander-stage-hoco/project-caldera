@@ -1,0 +1,23 @@
+# Tool compliance rules for dependensee
+# .NET project dependency graph analyzer
+
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - output_quality.py
+  - performance.py
+
+required_prompts:
+  - project_detection.md
+  - dependency_accuracy.md
+  - graph_quality.md
+  - circular_detection.md
+
+ground_truth_mode: synthetic_json
+
+evaluation_outputs:
+  - evaluation_report.json
+
+adapter:
+  module: persistence.adapters.dependensee_adapter
+  class: DependenseeAdapter

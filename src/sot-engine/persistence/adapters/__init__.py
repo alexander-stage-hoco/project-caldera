@@ -1,4 +1,5 @@
 from .base_adapter import BaseAdapter
+from .dependensee_adapter import DependenseeAdapter
 from .devskim_adapter import DevskimAdapter
 from .dotcover_adapter import DotcoverAdapter
 from .git_sizer_adapter import GitSizerAdapter
@@ -16,6 +17,7 @@ from .trivy_adapter import TrivyAdapter
 
 __all__ = [
     "BaseAdapter",
+    "DependenseeAdapter",
     "DevskimAdapter",
     "DotcoverAdapter",
     "GitSizerAdapter",

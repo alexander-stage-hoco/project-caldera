@@ -34,6 +34,9 @@ sources:
       - name: lz_dotcover_assembly_coverage
       - name: lz_dotcover_type_coverage
       - name: lz_dotcover_method_coverage
+      - name: lz_dependensee_projects
+      - name: lz_dependensee_project_refs
+      - name: lz_dependensee_package_refs
 
 models:
   - name: stg_lz_tool_runs

@@ -17,12 +17,13 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import DevskimAdapter, DotcoverAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
+from persistence.adapters import DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
 from persistence.repositories import (
     BaseRepository,
     CollectionRunRepository,
+    DependenseeRepository,
     DevskimRepository,
     DotcoverRepository,
     GitSizerRepository,
@@ -271,6 +272,7 @@ TOOL_INGESTION_CONFIGS = [
     ToolIngestionConfig("pmd-cpd", PmdCpdAdapter, PmdCpdRepository),
     ToolIngestionConfig("devskim", DevskimAdapter, DevskimRepository),
     ToolIngestionConfig("dotcover", DotcoverAdapter, DotcoverRepository),
+    ToolIngestionConfig("dependensee", DependenseeAdapter, DependenseeRepository),
 ]
 
 
