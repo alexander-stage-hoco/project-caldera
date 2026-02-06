@@ -36,7 +36,8 @@ class SecurityFocusJudge(BaseJudge):
         security_keywords = {
             "inject", "sql", "xss", "script", "secret", "password", "credential",
             "crypto", "encrypt", "hash", "auth", "session", "token", "csrf",
-            "deserial", "traversal", "path", "redirect", "ssrf", "xxe", "ldap"
+            "deserial", "traversal", "path", "redirect", "ssrf", "xxe", "ldap",
+            "random", "rng", "prng", "entropy",
         }
 
         security_samples = []
@@ -47,7 +48,8 @@ class SecurityFocusJudge(BaseJudge):
                 for finding in file_info.get("issues", file_info.get("findings", [])):
                     rule = finding.get("rule_id", finding.get("ruleId", "")).lower()
                     message = finding.get("message", "").lower()
-                    category = finding.get("category", "").lower()
+                    # Use dd_category (DevSkim's category field) with fallback
+                    category = finding.get("dd_category", finding.get("category", "")).lower()
 
                     combined_text = f"{rule} {message} {category}"
 
@@ -154,7 +156,7 @@ Provide your evaluation as a JSON object:
         failures = []
         all_results = self.load_all_analysis_results()
 
-        security_keywords = {"inject", "sql", "xss", "secret", "password", "crypto", "auth", "csrf"}
+        security_keywords = {"inject", "sql", "xss", "secret", "password", "crypto", "auth", "csrf", "random", "rng", "prng"}
 
         security_count = 0
         total_count = 0
@@ -163,7 +165,9 @@ Provide your evaluation as a JSON object:
             for file_info in data.get("files", data.get("results", [])):
                 for finding in file_info.get("issues", file_info.get("findings", [])):
                     total_count += 1
-                    combined = f"{finding.get('rule_id', '')} {finding.get('message', '')}".lower()
+                    # Include dd_category in the combined text for keyword matching
+                    category = finding.get("dd_category", finding.get("category", ""))
+                    combined = f"{finding.get('rule_id', '')} {finding.get('message', '')} {category}".lower()
                     if any(kw in combined for kw in security_keywords):
                         security_count += 1
 

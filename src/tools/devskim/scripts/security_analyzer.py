@@ -183,7 +183,7 @@ RULE_TO_CATEGORY_MAP = {
     "DS114352": "hardcoded_secret",  # Hardcoded API keys
     "DS173237": "hardcoded_secret",  # Hardcoded password
     "DS117838": "hardcoded_secret",  # Hardcoded symmetric key
-    "DS148264": "hardcoded_secret",  # Hardcoded connection string
+    "DS148264": "insecure_random",  # Weak/non-cryptographic random number generator
     "DS127901": "hardcoded_secret",  # Password in config
     "DS160340": "hardcoded_secret",  # AWS access key
     "DS114375": "hardcoded_secret",  # Private key in code
@@ -257,6 +257,75 @@ RULE_TO_CATEGORY_MAP = {
     "DS101136": "security_misconfiguration",  # Trace enabled
     "DS135675": "security_misconfiguration",  # Custom errors disabled
     "DS119977": "security_misconfiguration",  # HTTPS not enforced
+
+    # Custom Caldera Rules
+    "CALDERA001": "insecure_random",  # System.Random for security
+    "CALDERA002": "xxe",  # XmlResolver XXE
+    "CALDERA003": "xxe",  # DtdProcessing XXE
+    "CALDERA004": "xxe",  # XmlTextReader XXE
+    "CALDERA005": "command_injection",  # Process.Start with concatenation
+    "CALDERA006": "command_injection",  # Shell command execution
+    "CALDERA007": "security_misconfiguration",  # HttpOnly=false
+    "CALDERA008": "security_misconfiguration",  # Secure=false
+    "CALDERA009": "security_misconfiguration",  # CORS AllowAnyOrigin
+}
+
+# Map DevSkim rule IDs to CWE IDs for traceability
+RULE_TO_CWE_MAP: dict[str, list[str]] = {
+    # Custom Caldera Rules
+    "CALDERA001": ["CWE-330"],   # Insufficient Random Values
+    "CALDERA002": ["CWE-611"],   # XXE Injection
+    "CALDERA003": ["CWE-611"],   # XXE Injection
+    "CALDERA004": ["CWE-611"],   # XXE Injection
+    "CALDERA005": ["CWE-78"],    # OS Command Injection
+    "CALDERA006": ["CWE-78"],    # OS Command Injection
+    "CALDERA007": ["CWE-1004"],  # Cookie Without HttpOnly Flag
+    "CALDERA008": ["CWE-614"],   # Cookie Without Secure Attribute
+    "CALDERA009": ["CWE-942"],   # Permissive Cross-domain Policy
+
+    # DevSkim built-in rules
+    "DS126858": ["CWE-328"],     # Weak hash algorithm (MD5/SHA1)
+    "DS187371": ["CWE-327"],     # Weak cipher mode (RC2/RC4)
+    "DS106863": ["CWE-326"],     # DES usage (inadequate key size)
+    "DS197800": ["CWE-326"],     # DES usage
+    "DS425040": ["CWE-502"],     # Insecure deserialization
+    "DS137138": ["CWE-319"],     # Cleartext transmission (insecure transport)
+    "DS162092": ["CWE-489"],     # Debug code in production
+    "DS104456": ["CWE-89"],      # SQL injection
+    "DS127888": ["CWE-89"],      # SQL command from user input
+    "DS134411": ["CWE-798"],     # Hardcoded credentials
+    "DS114352": ["CWE-798"],     # Hardcoded API keys
+    "DS173237": ["CWE-798"],     # Hardcoded password
+    "DS117838": ["CWE-321"],     # Hardcoded symmetric key
+    "DS148264": ["CWE-330"],     # Weak/non-cryptographic PRNG
+    "DS175862": ["CWE-22"],      # Path traversal
+    "DS162155": ["CWE-22"],      # File path from user input
+    "DS172411": ["CWE-22"],      # Directory traversal
+    "DS181731": ["CWE-502"],     # Insecure deserialization
+    "DS113853": ["CWE-502"],     # BinaryFormatter usage
+    "DS162963": ["CWE-502"],     # TypeNameHandling
+    "DS168931": ["CWE-611"],     # XML external entity injection
+    "DS131307": ["CWE-611"],     # DTD processing enabled
+    "DS132956": ["CWE-611"],     # External entity resolution
+    "DS112860": ["CWE-78"],      # OS command injection
+    "DS117840": ["CWE-78"],      # Shell execution
+    "DS161095": ["CWE-78"],      # Process.Start with user input
+    "DS176209": ["CWE-601"],     # Open redirect
+    "DS173262": ["CWE-918"],     # SSRF
+    "DS180683": ["CWE-352"],     # Missing anti-forgery token (CSRF)
+    "DS186372": ["CWE-489"],     # Debug mode enabled
+    "DS126857": ["CWE-209"],     # Stack trace exposure
+    "DS142853": ["CWE-209"],     # Error details exposed
+    "DS115253": ["CWE-79"],      # HTML injection (XSS)
+    "DS183166": ["CWE-79"],      # DOM-based XSS
+    "DS126188": ["CWE-79"],      # JavaScript eval
+    "DS161085": ["CWE-327"],     # Weak cryptographic algorithm
+    "DS144436": ["CWE-327"],     # ECB mode usage
+    "DS156603": ["CWE-326"],     # Insufficient key size
+    "DS109501": ["CWE-329"],     # Hardcoded IV
+    "DS173287": ["CWE-328"],     # Weak hash algorithm
+    "DS176620": ["CWE-295"],     # Disabled certificate validation
+    "DS195456": ["CWE-327"],     # Outdated TLS version
 }
 
 # DevSkim severity to DD severity mapping
@@ -282,6 +351,7 @@ SECURITY_CATEGORIES = [
     "sql_injection",
     "hardcoded_secret",
     "insecure_crypto",
+    "insecure_random",
     "path_traversal",
     "xss",
     "deserialization",
@@ -306,6 +376,7 @@ class SecurityFinding:
     """A single security finding."""
     rule_id: str
     dd_category: str
+    cwe_ids: list[str]
     file_path: str
     line_start: int
     line_end: int
@@ -622,12 +693,14 @@ def get_devskim_version() -> str:
 def run_devskim(
     target_path: str,
     include_files: list[str] | None = None,
+    custom_rules_path: str | None = None,
 ) -> dict:
     """Run DevSkim analysis on target path.
 
     Args:
         target_path: Path to analyze
         include_files: Optional list of specific files to analyze (for incremental analysis)
+        custom_rules_path: Optional path to directory containing custom rule JSON files
 
     Returns:
         Parsed SARIF results
@@ -644,6 +717,10 @@ def run_devskim(
             "--severity", "Critical,Important,Moderate,BestPractice,ManualReview",
             "--confidence", "High,Medium,Low",
         ]
+
+        # Add custom rules path if provided
+        if custom_rules_path and os.path.isdir(custom_rules_path):
+            cmd.extend(["-r", custom_rules_path])
 
         # Run DevSkim
         result = subprocess.run(
@@ -705,6 +782,9 @@ def parse_sarif_results(sarif: dict, target_path: str) -> list[SecurityFinding]:
             # Map rule to DD category (use message for disambiguation)
             dd_category = map_rule_to_category(rule_id, message)
 
+            # Look up CWE IDs for traceability
+            cwe_ids = RULE_TO_CWE_MAP.get(rule_id, [])
+
             # Process locations
             for location in result.get("locations", []):
                 physical = location.get("physicalLocation", {})
@@ -726,6 +806,7 @@ def parse_sarif_results(sarif: dict, target_path: str) -> list[SecurityFinding]:
                 finding = SecurityFinding(
                     rule_id=rule_id,
                     dd_category=dd_category,
+                    cwe_ids=cwe_ids,
                     file_path=file_path,
                     line_start=region.get("startLine", 0),
                     line_end=region.get("endLine", region.get("startLine", 0)),
@@ -958,6 +1039,7 @@ def analyze_with_devskim(
     target_path: str,
     repo_name: str = "",
     repo_path: str = "",
+    custom_rules_path: str | None = None,
 ) -> AnalysisResult:
     """Run full DevSkim analysis and return structured results."""
     start_time = datetime.now(timezone.utc)
@@ -987,7 +1069,7 @@ def analyze_with_devskim(
             )
 
     # Run DevSkim
-    sarif_output = run_devskim(target_path, include_files)
+    sarif_output = run_devskim(target_path, include_files, custom_rules_path)
 
     # Initialize result
     result = AnalysisResult(
@@ -1361,6 +1443,7 @@ def result_to_dict(result: AnalysisResult) -> dict:
         for issue in f.issues:
             issues.append({
                 "rule_id": issue.rule_id,
+                "cwe_ids": issue.cwe_ids,
                 "dd_category": issue.dd_category,
                 "line_start": issue.line_start,
                 "line_end": issue.line_end,
@@ -1483,6 +1566,11 @@ def main():
         action="store_true",
         help="Only output JSON, no dashboard",
     )
+    parser.add_argument(
+        "--custom-rules",
+        help="Path to directory containing custom DevSkim rule JSON files",
+        default=None,
+    )
 
     args = parser.parse_args()
 
@@ -1495,7 +1583,7 @@ def main():
         sys.exit(1)
 
     # Run analysis
-    result = analyze_with_devskim(args.target, args.repo_name, args.repo_path)
+    result = analyze_with_devskim(args.target, args.repo_name, args.repo_path, args.custom_rules)
 
     # Create output directory
     output_dir = os.path.dirname(args.output)

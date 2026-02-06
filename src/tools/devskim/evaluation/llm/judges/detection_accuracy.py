@@ -8,6 +8,14 @@ from typing import Any
 
 from .base import BaseJudge, JudgeResult
 
+# Map DevSkim severity names to expected evaluation severity names
+SEVERITY_MAP = {
+    "critical": "critical",
+    "high": "important",
+    "medium": "moderate",
+    "low": "low",
+}
+
 
 class DetectionAccuracyJudge(BaseJudge):
     """Evaluates the accuracy of DevSkim's security issue detection.
@@ -60,8 +68,9 @@ class DetectionAccuracyJudge(BaseJudge):
 
                 for finding in findings:
                     # Categorize by security type
+                    # Use dd_category (DevSkim's category field) with fallback
                     rule_id = finding.get("rule_id", finding.get("ruleId", "")).lower()
-                    category = finding.get("category", "").lower()
+                    category = finding.get("dd_category", finding.get("category", "")).lower()
 
                     if "sql" in rule_id or "sql" in category:
                         security_categories["sql_injection"] += 1
@@ -71,17 +80,22 @@ class DetectionAccuracyJudge(BaseJudge):
                         security_categories["path_traversal"] += 1
                     elif "secret" in rule_id or "credential" in category or "password" in rule_id:
                         security_categories["secrets"] += 1
-                    elif "crypto" in rule_id or "encrypt" in category:
+                    elif "crypto" in rule_id or "encrypt" in category or "insecure_crypto" in category:
                         security_categories["crypto"] += 1
                     elif "serial" in rule_id or "deserial" in category:
                         security_categories["deserialization"] += 1
+                    elif "ldap" in rule_id or "ldap" in category:
+                        security_categories["ldap_injection"] = security_categories.get("ldap_injection", 0) + 1
+                    elif "disclosure" in category or "information" in category:
+                        security_categories["information_disclosure"] = security_categories.get("information_disclosure", 0) + 1
                     else:
                         security_categories["other"] += 1
 
-                    # Track severity
+                    # Track severity - map DevSkim severity names to expected names
                     severity = finding.get("severity", "moderate").lower()
-                    if severity in findings_by_severity:
-                        findings_by_severity[severity] += 1
+                    mapped_severity = SEVERITY_MAP.get(severity, severity)
+                    if mapped_severity in findings_by_severity:
+                        findings_by_severity[mapped_severity] += 1
 
                     # Collect samples
                     if len(sample_findings) < 10:

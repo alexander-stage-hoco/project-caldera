@@ -170,6 +170,7 @@ class TestSecurityFindingDataclass:
         finding = SecurityFinding(
             rule_id="DS126858",
             dd_category="insecure_crypto",
+            cwe_ids=["CWE-328"],
             file_path="InsecureCrypto.cs",
             line_start=10,
             line_end=10,
@@ -180,6 +181,7 @@ class TestSecurityFindingDataclass:
         )
         assert finding.rule_id == "DS126858"
         assert finding.dd_category == "insecure_crypto"
+        assert finding.cwe_ids == ["CWE-328"]
         assert finding.file_path == "InsecureCrypto.cs"
         assert finding.severity == "HIGH"
         assert finding.code_snippet == ""  # default
@@ -189,6 +191,7 @@ class TestSecurityFindingDataclass:
         finding = SecurityFinding(
             rule_id="DS104456",
             dd_category="sql_injection",
+            cwe_ids=["CWE-89"],
             file_path="SqlQuery.cs",
             line_start=25,
             line_end=25,
@@ -199,12 +202,14 @@ class TestSecurityFindingDataclass:
             code_snippet="cmd.CommandText = query;",
         )
         assert finding.code_snippet == "cmd.CommandText = query;"
+        assert finding.cwe_ids == ["CWE-89"]
 
     def test_finding_to_dict(self) -> None:
         """Convert finding to dict."""
         finding = SecurityFinding(
             rule_id="DS181731",
             dd_category="deserialization",
+            cwe_ids=["CWE-502"],
             file_path="Deserialize.cs",
             line_start=15,
             line_end=15,
@@ -216,6 +221,7 @@ class TestSecurityFindingDataclass:
         d = asdict(finding)
         assert d["rule_id"] == "DS181731"
         assert d["dd_category"] == "deserialization"
+        assert d["cwe_ids"] == ["CWE-502"]
 
 
 class TestFileStatsDataclass:
@@ -543,6 +549,7 @@ class TestResultToDict:
         finding = SecurityFinding(
             rule_id="DS126858",
             dd_category="insecure_crypto",
+            cwe_ids=["CWE-328"],
             file_path="Crypto.cs",
             line_start=10,
             line_end=10,

@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Insecure Random Number Generator",
+    "id": "CALDERA001",
+    "description": "System.Random is not cryptographically secure. Use System.Security.Cryptography.RandomNumberGenerator for security-sensitive operations like generating tokens, session IDs, or encryption keys.",
+    "recommendation": "Replace System.Random with System.Security.Cryptography.RandomNumberGenerator.Fill() or RandomNumberGenerator.GetBytes().",
+    "applies_to": ["csharp"],
+    "severity": "important",
+    "tags": ["Security.Cryptography", "OWASP.A02", "CWE-330"],
+    "patterns": [
+      {
+        "pattern": "new\\s+Random\\s*\\(",
+        "type": "regex",
+        "scopes": ["code"]
+      }
+    ]
+  }
+]

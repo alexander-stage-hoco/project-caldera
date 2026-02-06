@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Potential Command Injection via Process.Start",
+    "id": "CALDERA005",
+    "description": "Using Process.Start with string concatenation or interpolation may allow command injection if user input is included without proper validation.",
+    "recommendation": "Use ProcessStartInfo with Arguments property and properly escape or validate all user-supplied input. Avoid shell execution where possible.",
+    "applies_to": ["csharp"],
+    "severity": "critical",
+    "tags": ["Security.Injection", "OWASP.A03", "CWE-78"],
+    "patterns": [
+      {
+        "pattern": "Process\\.Start\\s*\\([^)]*\\+",
+        "type": "regex",
+        "scopes": ["code"]
+      },
+      {
+        "pattern": "Process\\.Start\\s*\\(\\s*\\$\"",
+        "type": "regex",
+        "scopes": ["code"]
+      }
+    ]
+  },
+  {
+    "name": "Shell Command Execution",
+    "id": "CALDERA006",
+    "description": "Executing shell commands via cmd.exe or /bin/sh can introduce command injection vulnerabilities if user input is not properly sanitized.",
+    "recommendation": "Avoid shell command execution. If necessary, use parameterized commands and strict input validation.",
+    "applies_to": ["csharp"],
+    "severity": "important",
+    "tags": ["Security.Injection", "OWASP.A03", "CWE-78"],
+    "patterns": [
+      {
+        "pattern": "FileName\\s*=\\s*\"cmd(\\.exe)?\"",
+        "type": "regex",
+        "scopes": ["code"]
+      },
+      {
+        "pattern": "FileName\\s*=\\s*\"/bin/(ba)?sh\"",
+        "type": "regex",
+        "scopes": ["code"]
+      }
+    ]
+  }
+]

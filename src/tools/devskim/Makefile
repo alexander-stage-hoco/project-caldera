@@ -7,7 +7,7 @@
 #   make evaluate - Run programmatic evaluation
 #   make test     - Run all tests
 
-.PHONY: all setup analyze evaluate evaluate-llm test test-quick clean clean-all help
+.PHONY: all setup analyze evaluate evaluate-llm test test-quick test-coverage clean clean-all help
 
 # Include shared configuration (provides VENV, RUN_ID, REPO_ID, OUTPUT_DIR, etc.)
 include ../Makefile.common
@@ -15,6 +15,7 @@ include ../Makefile.common
 # Tool-specific configuration
 EVAL_REPOS := eval-repos/synthetic
 GROUND_TRUTH := evaluation/ground-truth
+CUSTOM_RULES ?= rules/custom
 
 # Tool-specific defaults
 REPO_PATH ?= eval-repos/synthetic
@@ -29,10 +30,11 @@ help:
 	@echo "DevSkim Security Linter - Project Caldera Tool"
 	@echo ""
 	@echo "Quick start:"
-	@echo "  make setup        - Install DevSkim CLI and Python dependencies"
-	@echo "  make analyze      - Run security analysis with dashboard"
-	@echo "  make evaluate     - Run programmatic evaluation (~28 checks)"
-	@echo "  make test         - Run all tests"
+	@echo "  make setup         - Install DevSkim CLI and Python dependencies"
+	@echo "  make analyze       - Run security analysis with dashboard"
+	@echo "  make evaluate      - Run programmatic evaluation (~28 checks)"
+	@echo "  make test          - Run all tests"
+	@echo "  make test-coverage - Run tests with coverage report (generates coverage.json)"
 	@echo ""
 	@echo "Analysis targets:"
 	@echo "  make analyze            - Run analysis on default eval repo"
@@ -49,6 +51,7 @@ help:
 	@echo "  BRANCH=<branch>     - Branch being analyzed (default: main)"
 	@echo "  COMMIT=<sha>        - Commit SHA (auto-detected from git)"
 	@echo "  OUTPUT_DIR=<path>   - Output directory (default: outputs/<run-id>)"
+	@echo "  CUSTOM_RULES=<path> - Custom rules directory (default: rules/custom)"
 	@echo "  LLM_MODEL=<model>   - Model for LLM evaluation (sonnet, opus, haiku)"
 	@echo ""
 	@echo "Examples:"
@@ -89,7 +92,8 @@ ifdef REPO_PATH
 		--run-id "$(RUN_ID)" \
 		--repo-id "$(REPO_ID)" \
 		--branch "$(BRANCH)" \
-		$(if $(COMMIT),--commit "$(COMMIT)",)
+		$(if $(COMMIT),--commit "$(COMMIT)",) \
+		$(if $(CUSTOM_RULES),--custom-rules "$(CUSTOM_RULES)",)
 else
 	@for repo in $(EVAL_REPOS)/*/; do \
 		name=$$(basename $$repo); \
@@ -102,7 +106,8 @@ else
 			--output-dir "outputs/$$run_id" \
 			--run-id "$$run_id" \
 			--repo-id "$(REPO_ID)" \
-			--branch "$(BRANCH)"; \
+			--branch "$(BRANCH)" \
+			$(if $(CUSTOM_RULES),--custom-rules "$(CUSTOM_RULES)",); \
 	done
 endif
 
@@ -129,6 +134,17 @@ test: _common-test
 
 test-quick: _common-test-quick
 
+# Run tests with coverage report generation
+# Note: --cov-fail-under=50 is a baseline; aim for 80%+ over time
+test-coverage: $(VENV_READY)
+	@echo "Running tests with coverage..."
+	@$(PYTHON_VENV) -m pytest tests/ -v --tb=short \
+		--cov=scripts \
+		--cov-report=json \
+		--cov-report=term-missing \
+		--cov-fail-under=50
+	@echo "Coverage report generated: coverage.json"
+
 # =============================================================================
 # Cleanup
 # =============================================================================
@@ -136,5 +152,6 @@ test-quick: _common-test-quick
 clean: _common-clean
 	@rm -rf evaluation/llm/results/*
 	@rm -rf evaluation/results/
+	@rm -f coverage.json .coverage
 
 clean-all: _common-clean-all

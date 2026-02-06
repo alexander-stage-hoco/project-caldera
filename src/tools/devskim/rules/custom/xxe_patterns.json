@@ -1,0 +1,50 @@
+[
+  {
+    "name": "XML External Entity (XXE) via XmlResolver",
+    "id": "CALDERA002",
+    "description": "Setting XmlResolver to a non-null value enables external entity resolution, which can lead to XXE attacks. Attackers can read local files or make network requests.",
+    "recommendation": "Set XmlResolver = null to disable external entity resolution.",
+    "applies_to": ["csharp"],
+    "severity": "critical",
+    "tags": ["Security.XXE", "OWASP.A05", "CWE-611"],
+    "patterns": [
+      {
+        "pattern": "XmlResolver\\s*=\\s*new\\s+Xml",
+        "type": "regex",
+        "scopes": ["code"]
+      }
+    ]
+  },
+  {
+    "name": "XML External Entity (XXE) via DTD Processing",
+    "id": "CALDERA003",
+    "description": "Enabling DTD processing (DtdProcessing.Parse) allows XML documents to include Document Type Definitions, which can be exploited for XXE attacks.",
+    "recommendation": "Use DtdProcessing.Prohibit to disable DTD processing.",
+    "applies_to": ["csharp"],
+    "severity": "critical",
+    "tags": ["Security.XXE", "OWASP.A05", "CWE-611"],
+    "patterns": [
+      {
+        "pattern": "DtdProcessing\\s*=\\s*DtdProcessing\\.Parse",
+        "type": "regex",
+        "scopes": ["code"]
+      }
+    ]
+  },
+  {
+    "name": "Insecure XmlTextReader Usage",
+    "id": "CALDERA004",
+    "description": "XmlTextReader processes DTDs by default, making it vulnerable to XXE attacks unless explicitly configured otherwise.",
+    "recommendation": "Use XmlReader.Create() with secure XmlReaderSettings, or set DtdProcessing = DtdProcessing.Prohibit on XmlTextReader.",
+    "applies_to": ["csharp"],
+    "severity": "important",
+    "tags": ["Security.XXE", "OWASP.A05", "CWE-611"],
+    "patterns": [
+      {
+        "pattern": "new\\s+XmlTextReader\\s*\\(",
+        "type": "regex",
+        "scopes": ["code"]
+      }
+    ]
+  }
+]

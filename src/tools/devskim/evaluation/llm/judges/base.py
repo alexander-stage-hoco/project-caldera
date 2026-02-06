@@ -60,6 +60,15 @@ class BaseJudge(ABC):
     specialized prompts.
     """
 
+    MODEL_MAP = {
+        "opus": "claude-opus-4-20250514",
+        "opus-4.5": "claude-opus-4-5-20251101",
+        "sonnet": "claude-sonnet-4-20250514",
+        "sonnet-4.5": "claude-sonnet-4-5-20250929",
+        "haiku": "claude-3-5-haiku-20241022",
+        "haiku-4.5": "claude-haiku-4-5-20251001",
+    }
+
     def __init__(
         self,
         model: str = "opus",
@@ -72,30 +81,66 @@ class BaseJudge(ABC):
         self.model = model
         self.timeout = timeout
         self.working_dir = working_dir or Path.cwd()
-        self.output_dir = output_dir or self.working_dir / "output"
-        self.analysis_path = analysis_path or self.working_dir / "output" / "devskim_analysis.json"
+        self.output_dir = output_dir or self.working_dir / "outputs"
+        self.analysis_path = analysis_path or self.working_dir / "outputs" / "devskim_analysis.json"
         self.evaluation_mode = evaluation_mode
         self._prompt_template: str | None = None
 
+    def _unwrap_envelope(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Unwrap envelope structure if present.
+
+        Tool outputs use envelope: {"metadata": {...}, "data": {...}}
+        This extracts the inner "data" content for judge processing.
+        """
+        if "data" in data and isinstance(data["data"], dict):
+            # Preserve metadata alongside unwrapped data
+            inner = data["data"].copy()
+            if "metadata" in data:
+                inner["_metadata"] = data["metadata"]
+            return inner
+        return data
+
     def load_all_analysis_results(self) -> dict[str, Any]:
-        """Load all analysis JSON files from output_dir."""
+        """Load all analysis JSON files from output_dir.
+
+        Handles two directory structures:
+        1. Nested: outputs/<run-id>/output.json (preferred)
+        2. Flat: outputs/*.json (backwards compatibility)
+
+        Automatically unwraps envelope structure (metadata + data).
+        """
         results = {}
 
         if self.output_dir.exists() and self.output_dir.is_dir():
+            # Check for nested structure: outputs/<run-id>/output.json
+            for subdir in sorted(self.output_dir.iterdir()):
+                if subdir.is_dir():
+                    output_file = subdir / "output.json"
+                    if output_file.exists():
+                        try:
+                            raw_data = json.loads(output_file.read_text())
+                            repo_name = raw_data.get("metadata", {}).get("repo_name", subdir.name)
+                            results[repo_name] = self._unwrap_envelope(raw_data)
+                        except json.JSONDecodeError:
+                            continue
+
+            # Also check for flat structure: outputs/*.json (backwards compat)
             for json_file in sorted(self.output_dir.glob("*.json")):
                 if json_file.name.startswith("."):
                     continue
                 try:
-                    data = json.loads(json_file.read_text())
+                    raw_data = json.loads(json_file.read_text())
                     repo_name = json_file.stem
-                    results[repo_name] = data
+                    if repo_name not in results:
+                        results[repo_name] = self._unwrap_envelope(raw_data)
                 except json.JSONDecodeError:
                     continue
 
+        # Fallback to single analysis_path
         if not results and self.analysis_path.exists():
             try:
-                data = json.loads(self.analysis_path.read_text())
-                results["default"] = data
+                raw_data = json.loads(self.analysis_path.read_text())
+                results["default"] = self._unwrap_envelope(raw_data)
             except json.JSONDecodeError:
                 pass
 
@@ -190,12 +235,7 @@ class BaseJudge(ABC):
 
         try:
             client = anthropic.Anthropic(api_key=api_key)
-            model_map = {
-                "opus": "claude-opus-4-20250514",
-                "sonnet": "claude-sonnet-4-20250514",
-                "haiku": "claude-3-5-haiku-20241022",
-            }
-            model_id = model_map.get(self.model, f"claude-3-5-{self.model}-latest")
+            model_id = self.MODEL_MAP.get(self.model, f"claude-3-5-{self.model}-latest")
 
             response = client.messages.create(
                 model=model_id,
@@ -212,10 +252,11 @@ class BaseJudge(ABC):
             return "Error: Neither Anthropic SDK (ANTHROPIC_API_KEY) nor Claude CLI available"
 
         try:
+            model_id = self.MODEL_MAP.get(self.model, self.model)
             cmd = [
                 "claude",
                 "-p", prompt,
-                "--model", self.model,
+                "--model", model_id,
                 "--output-format", "text",
                 "--allowedTools", "",
                 "--max-turns", "5",

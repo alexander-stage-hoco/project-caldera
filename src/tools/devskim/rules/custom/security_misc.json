@@ -1,0 +1,55 @@
+[
+  {
+    "name": "Insecure Cookie Configuration - HttpOnly Disabled",
+    "id": "CALDERA007",
+    "description": "Setting HttpOnly = false on cookies allows JavaScript to access the cookie, making it vulnerable to XSS-based session hijacking.",
+    "recommendation": "Set HttpOnly = true for session and authentication cookies.",
+    "applies_to": ["csharp"],
+    "severity": "important",
+    "tags": ["Security.Cookie", "OWASP.A07", "CWE-1004"],
+    "patterns": [
+      {
+        "pattern": "HttpOnly\\s*=\\s*false",
+        "type": "regex",
+        "scopes": ["code"]
+      }
+    ]
+  },
+  {
+    "name": "Insecure Cookie Configuration - Secure Flag Disabled",
+    "id": "CALDERA008",
+    "description": "Setting Secure = false on cookies allows them to be transmitted over unencrypted HTTP connections, risking interception.",
+    "recommendation": "Set Secure = true for all sensitive cookies to ensure they are only sent over HTTPS.",
+    "applies_to": ["csharp"],
+    "severity": "moderate",
+    "tags": ["Security.Cookie", "OWASP.A07", "CWE-614"],
+    "patterns": [
+      {
+        "pattern": "Secure\\s*=\\s*false",
+        "type": "regex",
+        "scopes": ["code"]
+      }
+    ]
+  },
+  {
+    "name": "Disabled CORS Validation",
+    "id": "CALDERA009",
+    "description": "Setting Access-Control-Allow-Origin to '*' or allowing all origins can expose APIs to cross-origin attacks.",
+    "recommendation": "Configure CORS to allow only trusted origins instead of using wildcards.",
+    "applies_to": ["csharp"],
+    "severity": "moderate",
+    "tags": ["Security.CORS", "OWASP.A07", "CWE-942"],
+    "patterns": [
+      {
+        "pattern": "AllowAnyOrigin\\s*\\(\\s*\\)",
+        "type": "regex",
+        "scopes": ["code"]
+      },
+      {
+        "pattern": "Access-Control-Allow-Origin.*\\*",
+        "type": "regex",
+        "scopes": ["code"]
+      }
+    ]
+  }
+]

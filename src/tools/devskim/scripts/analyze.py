@@ -25,6 +25,7 @@ from .security_analyzer import (
     display_dashboard,
     get_devskim_version,
     set_color_enabled,
+    RULE_TO_CATEGORY_MAP,
 )
 
 # Tool version and schema version
@@ -44,6 +45,7 @@ def result_to_data_dict(result: AnalysisResult) -> dict[str, Any]:
         for issue in f.issues:
             issues.append({
                 "rule_id": issue.rule_id,
+                "cwe_ids": issue.cwe_ids,
                 "dd_category": issue.dd_category,
                 "line_start": issue.line_start,
                 "line_end": issue.line_end,
@@ -156,6 +158,11 @@ def main() -> None:
         action="store_true",
         help="Only output JSON, no dashboard",
     )
+    parser.add_argument(
+        "--custom-rules",
+        help="Path to directory containing custom DevSkim rule JSON files",
+        default=None,
+    )
     args = parser.parse_args()
 
     common = validate_common_args(args)
@@ -168,8 +175,18 @@ def main() -> None:
 
     print(f"Analyzing: {common.repo_path}")
 
+    # Resolve custom rules path relative to tool directory if provided
+    custom_rules_path = None
+    if args.custom_rules:
+        custom_rules = Path(args.custom_rules)
+        if not custom_rules.is_absolute():
+            # Resolve relative to devskim tool directory
+            tool_dir = Path(__file__).resolve().parents[1]
+            custom_rules = tool_dir / custom_rules
+        custom_rules_path = str(custom_rules) if custom_rules.exists() else None
+
     # Run security analysis
-    result = analyze_with_devskim(str(common.repo_path), common.repo_name, str(common.repo_path))
+    result = analyze_with_devskim(str(common.repo_path), common.repo_name, str(common.repo_path), custom_rules_path)
 
     # Get devskim version
     devskim_version = get_devskim_version()

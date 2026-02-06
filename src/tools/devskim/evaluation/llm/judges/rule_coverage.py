@@ -44,7 +44,8 @@ class RuleCoverageJudge(BaseJudge):
                     rule = finding.get("rule_id", finding.get("ruleId", "unknown"))
                     rules_triggered[rule] = rules_triggered.get(rule, 0) + 1
 
-                    category = finding.get("category", "unknown")
+                    # Use dd_category (DevSkim's category field) with fallback
+                    category = finding.get("dd_category", finding.get("category", "unknown"))
                     rule_categories[category] = rule_categories.get(category, 0) + 1
 
         # Expected categories from ground truth

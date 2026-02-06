@@ -3,60 +3,89 @@
   "language": "csharp",
   "scenario": "api-security",
   "description": "Ground truth for DevSkim API security vulnerability detection based on actual DevSkim rule capabilities",
-  "generated_at": "2026-01-25T10:00:00Z",
+  "generated_at": "2026-02-06T12:00:00Z",
   "repo_path": "eval-repos/synthetic/api-security",
   "expected": {
     "language": "csharp",
-    "version": "1.0",
+    "version": "1.2",
     "aggregate_expectations": {
       "min_total_issues": 2,
       "max_false_positives": 2,
       "required_categories": [
-        "hardcoded_credentials",
-        "insecure_deserialization"
-      ]
+        "ldap_injection",
+        "deserialization",
+        "security_misconfiguration"
+      ],
+      "notes": "DevSkim with CALDERA custom rules detects insecure URLs (mapped to ldap_injection), unsafe deserialization, and security misconfigurations (CORS). Hardcoded credentials require secret scanning tools."
     }
   },
   "files": {
     "CorsConfig.cs": {
-      "expected_issues": [],
-      "total_expected": 0,
-      "false_positives_allowed": 1,
-      "notes": "DevSkim does not have CORS-specific rules"
-    },
-    "AuthHeaders.cs": {
+      "expected_categories": ["security_misconfiguration"],
       "expected_issues": [
         {
-          "category": "hardcoded_credentials",
+          "category": "security_misconfiguration",
           "count": 1,
-          "description": "Hardcoded credential pattern detected"
+          "notes": "CORS wildcard origin may be detected by CALDERA009"
+        },
+        {
+          "rule_id": "CALDERA009",
+          "count": 1,
+          "description": "Disabled CORS Validation"
         }
       ],
       "total_expected": 1,
-      "false_positives_allowed": 1
+      "false_positives_allowed": 1,
+      "notes": "CORS misconfiguration detected by CALDERA009 custom rule"
     },
-    "InputValidation.cs": {
+    "AuthHeaders.cs": {
+      "expected_categories": ["ldap_injection"],
       "expected_issues": [
         {
-          "category": "insecure_deserialization",
+          "category": "ldap_injection",
+          "count": 1,
+          "description": "HTTP URL detected (insecure transport, mapped to ldap_injection)"
+        },
+        {
+          "rule_id": "DS137138",
+          "count": 1,
+          "description": "Insecure URL"
+        }
+      ],
+      "total_expected": 1,
+      "false_positives_allowed": 1,
+      "notes": "HTTP URL is flagged. Hardcoded credentials are NOT detected by DevSkim."
+    },
+    "InputValidation.cs": {
+      "expected_categories": ["deserialization"],
+      "expected_issues": [
+        {
+          "category": "deserialization",
           "count": 1,
           "description": "Unsafe deserialization with TypeNameHandling"
+        },
+        {
+          "rule_id": "DS425040",
+          "count": 1,
+          "description": "Do not deserialize untrusted data"
         }
       ],
       "total_expected": 1,
       "false_positives_allowed": 1
     },
     "ApiEndpoints.cs": {
+      "expected_categories": [],
       "expected_issues": [],
       "total_expected": 0,
       "false_positives_allowed": 1,
       "notes": "DevSkim does not flag verbose error message patterns"
     },
     "SafeApiCode.cs": {
+      "expected_categories": [],
       "expected_issues": [],
       "total_expected": 0,
       "false_positives_allowed": 0,
-      "notes": "This file contains only safe API code patterns"
+      "notes": "This file contains only safe API code patterns - negative test case"
     }
   }
 }

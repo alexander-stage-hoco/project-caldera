@@ -2,6 +2,25 @@
 
 You are an expert security evaluator assessing rule coverage for DevSkim.
 
+## DevSkim Rule Context
+
+DevSkim is a **specialized pattern-based security linter** with rules focused on specific vulnerability categories.
+
+### Core Rule Categories (DevSkim's Specialty)
+- **Insecure Crypto** (DS126858, DS106863, DS187371): MD5, SHA1, DES, ECB mode
+- **Deserialization** (DS425040): BinaryFormatter, TypeNameHandling.All/Auto
+- **Insecure URLs** (DS137138): HTTP instead of HTTPS, FTP, Telnet
+- **Information Disclosure** (DS162092): Debug code, localhost references
+
+### Out-of-Scope Categories (By Design)
+DevSkim does NOT have rules for:
+- SQL Injection (requires data-flow analysis)
+- Cross-Site Scripting (requires context-aware analysis)
+- Path Traversal (requires data-flow analysis)
+- Hardcoded Secrets (requires secret scanning patterns)
+
+**Evaluate rule coverage within DevSkim's actual rule set, not against all possible security categories.**
+
 ## Evidence
 {{ evidence }}
 

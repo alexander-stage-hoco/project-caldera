@@ -2,30 +2,36 @@
   "schema_version": "1.0",
   "scenario": "csharp",
   "description": "Ground truth for DevSkim C# security detection",
-  "generated_at": "2026-01-22T12:30:00Z",
+  "generated_at": "2026-02-06T12:00:00Z",
   "repo_path": "eval-repos/synthetic/csharp",
   "expected": {
     "language": "csharp",
-    "version": "1.0",
+    "version": "1.2",
     "aggregate_expectations": {
-      "min_total_issues": 13,
-      "max_false_positives": 2,
+      "min_total_issues": 25,
+      "max_false_positives": 5,
       "required_categories": [
         "insecure_crypto",
+        "insecure_random",
+        "xxe",
+        "command_injection",
+        "security_misconfiguration",
         "deserialization",
+        "ldap_injection",
         "information_disclosure"
-      ]
+      ],
+      "notes": "DevSkim with CALDERA custom rules detects: insecure crypto (MD5/SHA1/DES/ECB), insecure random (System.Random), XXE (XmlResolver/DtdProcessing/XmlTextReader), command injection (Process.Start/cmd.exe), security misconfiguration (cookies/CORS), deserialization, LDAP injection (HTTP URLs), information disclosure. Does NOT detect SQL injection, XSS, path traversal, or hardcoded secrets (requires semantic analysis)."
     }
   },
   "files": {
     "SqlInjection.cs": {
+      "expected_categories": ["information_disclosure"],
       "expected_issues": [
         {
           "category": "information_disclosure",
           "count": 1,
-          "lines": [
-            11
-          ]
+          "lines": [11],
+          "notes": "localhost pattern triggers debug code detection"
         },
         {
           "rule_id": "DS162092",
@@ -34,30 +40,29 @@
         }
       ],
       "total_expected": 1,
-      "false_positives_allowed": 0
+      "false_positives_allowed": 0,
+      "notes": "SQL injection patterns are NOT detected by DevSkim (requires data-flow analysis)"
     },
     "HardcodedSecrets.cs": {
+      "expected_categories": [],
       "expected_issues": [],
       "total_expected": 0,
-      "false_positives_allowed": 0
+      "false_positives_allowed": 0,
+      "notes": "Hardcoded secrets are NOT detected by DevSkim (requires secret scanning tools like GitLeaks)"
     },
     "InsecureCrypto.cs": {
+      "expected_categories": ["insecure_crypto", "insecure_random"],
       "expected_issues": [
         {
           "category": "insecure_crypto",
           "count": 10,
-          "lines": [
-            13,
-            15,
-            15,
-            17,
-            24,
-            26,
-            26,
-            28,
-            37,
-            52
-          ]
+          "lines": [13, 15, 15, 17, 24, 26, 26, 28, 37, 52]
+        },
+        {
+          "category": "insecure_random",
+          "count": 1,
+          "lines": [62],
+          "notes": "System.Random usage detected by CALDERA001"
         },
         {
           "rule_id": "DS126858",
@@ -73,30 +78,37 @@
           "rule_id": "DS187371",
           "count": 1,
           "description": "Weak cipher mode"
+        },
+        {
+          "rule_id": "CALDERA001",
+          "count": 1,
+          "description": "Insecure Random Number Generator"
         }
       ],
-      "total_expected": 10,
+      "total_expected": 11,
       "false_positives_allowed": 1
     },
     "PathTraversal.cs": {
+      "expected_categories": [],
       "expected_issues": [],
       "total_expected": 0,
-      "false_positives_allowed": 0
+      "false_positives_allowed": 0,
+      "notes": "Path traversal patterns are NOT detected by DevSkim (requires data-flow analysis)"
     },
     "XssVulnerability.cs": {
+      "expected_categories": [],
       "expected_issues": [],
       "total_expected": 0,
-      "false_positives_allowed": 0
+      "false_positives_allowed": 0,
+      "notes": "XSS patterns are NOT detected by DevSkim (requires data-flow analysis)"
     },
     "Deserialization.cs": {
+      "expected_categories": ["deserialization"],
       "expected_issues": [
         {
           "category": "deserialization",
           "count": 2,
-          "lines": [
-            31,
-            42
-          ]
+          "lines": [31, 42]
         },
         {
           "rule_id": "DS425040",
@@ -108,10 +120,117 @@
       "false_positives_allowed": 0
     },
     "SafeCode.cs": {
+      "expected_categories": [],
       "expected_issues": [],
       "total_expected": 0,
       "false_positives_allowed": 0,
-      "notes": "This file contains only safe code patterns"
+      "notes": "This file contains only safe code patterns - negative test case"
+    },
+    "InsecureUrls.cs": {
+      "expected_categories": ["ldap_injection"],
+      "expected_issues": [
+        {
+          "category": "ldap_injection",
+          "count": 6,
+          "notes": "HTTP URLs flagged as insecure transport (mapped to ldap_injection in DevSkim)"
+        },
+        {
+          "rule_id": "DS137138",
+          "count": 6,
+          "description": "Insecure URL (HTTP instead of HTTPS)"
+        }
+      ],
+      "total_expected": 6,
+      "false_positives_allowed": 1,
+      "notes": "Tests insecure transport detection (HTTP, FTP, Telnet URLs)"
+    },
+    "XxeVulnerability.cs": {
+      "expected_categories": ["xxe"],
+      "expected_issues": [
+        {
+          "category": "xxe",
+          "count": 4,
+          "lines": [17, 27, 28, 40],
+          "notes": "XXE vulnerabilities detected by CALDERA002-004 custom rules"
+        },
+        {
+          "rule_id": "CALDERA002",
+          "count": 2,
+          "description": "XML External Entity (XXE) via XmlResolver"
+        },
+        {
+          "rule_id": "CALDERA003",
+          "count": 1,
+          "description": "XML External Entity (XXE) via DTD Processing"
+        },
+        {
+          "rule_id": "CALDERA004",
+          "count": 2,
+          "description": "Insecure XmlTextReader Usage"
+        }
+      ],
+      "total_expected": 5,
+      "false_positives_allowed": 2,
+      "notes": "XXE patterns detected by CALDERA custom rules. May flag safe XmlTextReader after configuration."
+    },
+    "InsecureRandom.cs": {
+      "expected_categories": ["insecure_random"],
+      "expected_issues": [
+        {
+          "category": "insecure_random",
+          "count": 5,
+          "lines": [14, 24, 32, 39, 75],
+          "notes": "System.Random usage detected by CALDERA001 custom rule"
+        },
+        {
+          "rule_id": "CALDERA001",
+          "count": 5,
+          "description": "Insecure Random Number Generator (System.Random)"
+        }
+      ],
+      "total_expected": 5,
+      "false_positives_allowed": 1,
+      "notes": "Weak PRNG (System.Random) detected by CALDERA001. Line 75 (RollDice) may be considered acceptable FP for non-security use."
+    },
+    "SecurityMisconfigurations.cs": {
+      "expected_categories": ["security_misconfiguration", "command_injection"],
+      "expected_issues": [
+        {
+          "category": "security_misconfiguration",
+          "count": 5,
+          "lines": [17, 20, 29, 36, 44],
+          "notes": "Cookie and CORS misconfigurations detected by CALDERA007-009"
+        },
+        {
+          "category": "command_injection",
+          "count": 1,
+          "lines": [52],
+          "notes": "Shell command execution detected by CALDERA006"
+        },
+        {
+          "rule_id": "CALDERA006",
+          "count": 1,
+          "description": "Shell Command Execution (cmd.exe)"
+        },
+        {
+          "rule_id": "CALDERA007",
+          "count": 2,
+          "description": "Insecure Cookie Configuration - HttpOnly Disabled"
+        },
+        {
+          "rule_id": "CALDERA008",
+          "count": 1,
+          "description": "Insecure Cookie Configuration - Secure Flag Disabled"
+        },
+        {
+          "rule_id": "CALDERA009",
+          "count": 2,
+          "description": "Disabled CORS Validation (AllowAnyOrigin and wildcard)"
+        }
+      ],
+      "total_expected": 6,
+      "false_positives_allowed": 1,
+      "notes": "Security misconfiguration patterns detected by CALDERA007-009 and command injection by CALDERA006"
     }
   }
 }
