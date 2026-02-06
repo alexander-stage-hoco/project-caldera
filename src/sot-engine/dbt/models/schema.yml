@@ -2051,3 +2051,146 @@ models:
       - name: top_two_pct
         tests:
           - not_null
+
+  - name: mart_authorship_summary
+    description: "Authorship summary combining git-fame metrics with unified code metrics for correlation analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - unique
+      - name: collection_run_id
+        tests:
+          - not_null
+      - name: repo_id
+        tests:
+          - not_null
+      - name: author_count
+        tests:
+          - not_null
+      - name: hhi_index
+        tests:
+          - not_null
+      - name: bus_factor
+        tests:
+          - not_null
+      - name: concentration_risk
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+      - name: bus_factor_risk
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - warning
+                  - healthy
+      - name: single_author_dominated
+        tests:
+          - not_null
+
+  - name: mart_author_contributions
+    description: "Author contributions ranked and tiered by contribution level with commitment metrics"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: author_name
+        tests:
+          - not_null
+      - name: surviving_loc
+        tests:
+          - not_null
+      - name: ownership_pct
+        tests:
+          - not_null
+      - name: commit_count
+        tests:
+          - not_null
+      - name: files_touched
+        tests:
+          - not_null
+      - name: contribution_rank
+        tests:
+          - not_null
+      - name: contribution_tier
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - top_10_pct
+                  - top_25_pct
+                  - top_50_pct
+                  - bottom_50_pct
+
+  - name: mart_authorship_risk
+    description: "Authorship risk assessment with team health grades and recommended actions"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - unique
+      - name: collection_run_id
+        tests:
+          - not_null
+      - name: repo_id
+        tests:
+          - not_null
+      - name: author_count
+        tests:
+          - not_null
+      - name: hhi_index
+        tests:
+          - not_null
+      - name: bus_factor
+        tests:
+          - not_null
+      - name: concentration_level
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - highly_concentrated
+                  - moderately_concentrated
+                  - slightly_concentrated
+                  - well_distributed
+      - name: bus_factor_assessment
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - no_data
+                  - critical
+                  - at_risk
+                  - moderate
+                  - healthy
+      - name: single_author_risk
+        tests:
+          - not_null
+      - name: top_two_dominance
+        tests:
+          - not_null
+      - name: team_health_grade
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - A
+                  - B
+                  - C
+                  - D
+                  - F
+      - name: recommended_action
+        tests:
+          - not_null
