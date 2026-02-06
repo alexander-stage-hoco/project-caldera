@@ -1,0 +1,15 @@
+{
+  "id": "empty",
+  "description": "Ground truth for empty repository edge case",
+  "repo_path": "eval-repos/empty",
+  "expected": {
+    "project_count": 0,
+    "projects": [],
+    "package_count": 0,
+    "reference_count": 0,
+    "circular_dependency_count": 0,
+    "circular_dependencies": [],
+    "graph_node_count": 0,
+    "graph_edge_count": 0
+  }
+}

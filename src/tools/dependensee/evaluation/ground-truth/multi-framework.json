@@ -1,0 +1,50 @@
+{
+  "id": "multi-framework",
+  "description": "Ground truth for multi-framework .NET projects",
+  "repo_path": "eval-repos/multi-framework",
+  "expected": {
+    "project_count": 3,
+    "projects": [
+      {
+        "name": "LegacyService",
+        "path": "src/LegacyService/LegacyService.csproj",
+        "target_framework": "net6.0",
+        "project_references": [],
+        "package_references": [
+          {"name": "Dapper", "version": "2.0.123"},
+          {"name": "Microsoft.Extensions.Configuration", "version": "6.0.0"}
+        ]
+      },
+      {
+        "name": "ModernApi",
+        "path": "src/ModernApi/ModernApi.csproj",
+        "target_framework": "net7.0",
+        "project_references": [
+          "src/LegacyService/LegacyService.csproj"
+        ],
+        "package_references": [
+          {"name": "Swashbuckle.AspNetCore", "version": "6.5.0"},
+          {"name": "Microsoft.AspNetCore.OpenApi", "version": "7.0.0"}
+        ]
+      },
+      {
+        "name": "LatestWorker",
+        "path": "src/LatestWorker/LatestWorker.csproj",
+        "target_framework": "net8.0",
+        "project_references": [
+          "src/ModernApi/ModernApi.csproj"
+        ],
+        "package_references": [
+          {"name": "Microsoft.Extensions.Hosting", "version": "8.0.0"},
+          {"name": "Serilog.Extensions.Hosting", "version": "8.0.0"}
+        ]
+      }
+    ],
+    "package_count": 6,
+    "reference_count": 2,
+    "circular_dependency_count": 0,
+    "circular_dependencies": [],
+    "graph_node_count": 9,
+    "graph_edge_count": 8
+  }
+}

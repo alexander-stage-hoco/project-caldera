@@ -1,0 +1,58 @@
+{
+  "id": "transitive",
+  "description": "Ground truth for transitive dependency chain test case",
+  "repo_path": "eval-repos/transitive",
+  "expected": {
+    "project_count": 4,
+    "projects": [
+      {
+        "name": "App.Presentation",
+        "path": "src/App.Presentation/App.Presentation.csproj",
+        "target_framework": "net8.0",
+        "project_references": [
+          "src/App.Application/App.Application.csproj"
+        ],
+        "package_references": [
+          {"name": "Microsoft.AspNetCore.Mvc", "version": "2.2.0"}
+        ]
+      },
+      {
+        "name": "App.Application",
+        "path": "src/App.Application/App.Application.csproj",
+        "target_framework": "net8.0",
+        "project_references": [
+          "src/App.Domain/App.Domain.csproj"
+        ],
+        "package_references": [
+          {"name": "MediatR", "version": "12.2.0"},
+          {"name": "FluentValidation", "version": "11.9.0"}
+        ]
+      },
+      {
+        "name": "App.Domain",
+        "path": "src/App.Domain/App.Domain.csproj",
+        "target_framework": "net8.0",
+        "project_references": [
+          "src/App.Infrastructure/App.Infrastructure.csproj"
+        ],
+        "package_references": []
+      },
+      {
+        "name": "App.Infrastructure",
+        "path": "src/App.Infrastructure/App.Infrastructure.csproj",
+        "target_framework": "net8.0",
+        "project_references": [],
+        "package_references": [
+          {"name": "Microsoft.EntityFrameworkCore", "version": "8.0.0"},
+          {"name": "Npgsql.EntityFrameworkCore.PostgreSQL", "version": "8.0.0"}
+        ]
+      }
+    ],
+    "package_count": 5,
+    "reference_count": 3,
+    "circular_dependency_count": 0,
+    "circular_dependencies": [],
+    "graph_node_count": 9,
+    "graph_edge_count": 8
+  }
+}

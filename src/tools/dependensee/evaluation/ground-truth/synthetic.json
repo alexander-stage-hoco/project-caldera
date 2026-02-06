@@ -1,4 +1,5 @@
 {
+  "id": "synthetic",
   "description": "Ground truth for synthetic .NET solution test case",
   "repo_path": "eval-repos/synthetic",
   "expected": {

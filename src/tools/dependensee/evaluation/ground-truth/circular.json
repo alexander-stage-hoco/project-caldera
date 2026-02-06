@@ -1,0 +1,51 @@
+{
+  "id": "circular",
+  "description": "Ground truth for circular dependency detection test case",
+  "repo_path": "eval-repos/circular",
+  "expected": {
+    "project_count": 3,
+    "projects": [
+      {
+        "name": "ServiceA",
+        "path": "src/ServiceA/ServiceA.csproj",
+        "target_framework": "net8.0",
+        "project_references": [
+          "src/ServiceB/ServiceB.csproj"
+        ],
+        "package_references": [
+          {"name": "Microsoft.Extensions.DependencyInjection", "version": "8.0.0"}
+        ]
+      },
+      {
+        "name": "ServiceB",
+        "path": "src/ServiceB/ServiceB.csproj",
+        "target_framework": "net8.0",
+        "project_references": [
+          "src/ServiceC/ServiceC.csproj"
+        ],
+        "package_references": [
+          {"name": "Microsoft.Extensions.Logging", "version": "8.0.0"}
+        ]
+      },
+      {
+        "name": "ServiceC",
+        "path": "src/ServiceC/ServiceC.csproj",
+        "target_framework": "net8.0",
+        "project_references": [
+          "src/ServiceA/ServiceA.csproj"
+        ],
+        "package_references": [
+          {"name": "Newtonsoft.Json", "version": "13.0.3"}
+        ]
+      }
+    ],
+    "package_count": 3,
+    "reference_count": 3,
+    "circular_dependency_count": 1,
+    "circular_dependencies": [
+      ["ServiceA", "ServiceB", "ServiceC", "ServiceA"]
+    ],
+    "graph_node_count": 6,
+    "graph_edge_count": 6
+  }
+}
