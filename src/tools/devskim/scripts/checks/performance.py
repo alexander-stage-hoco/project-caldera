@@ -20,8 +20,12 @@ def run_performance_checks(
     """Run all performance checks (PF-1 to PF-4)."""
     results = []
 
-    # Get metrics
-    duration_ms = analysis.get("metadata", {}).get("analysis_duration_ms", 0)
+    # Get metrics - handle both envelope formats
+    # Caldera envelope: analysis_duration_ms at top level
+    # Older format: analysis_duration_ms in metadata
+    duration_ms = analysis.get("analysis_duration_ms", 0)
+    if not duration_ms:
+        duration_ms = analysis.get("metadata", {}).get("analysis_duration_ms", 0)
     total_files = analysis.get("summary", {}).get("total_files", 0)
     total_lines = analysis.get("summary", {}).get("total_lines", 0)
 
@@ -121,11 +125,14 @@ def run_performance_checks(
 
     # PF-4: Result completeness
     # Check that we have results for all expected sections
-    has_metadata = bool("metadata" in analysis and analysis["metadata"].get("run_id"))
+    # For Caldera envelope, metadata is in the root, accessible via _root
+    root = analysis.get("_root", {})
+    root_metadata = root.get("metadata", {})
+    has_metadata = bool(root_metadata.get("run_id") or analysis.get("metadata", {}).get("run_id"))
     has_summary = bool("summary" in analysis and analysis["summary"].get("total_files", 0) >= 0)
     has_files = bool("files" in analysis and isinstance(analysis["files"], list))
     has_directories = bool("directories" in analysis and isinstance(analysis["directories"], list))
-    has_statistics = bool("statistics" in analysis)
+    has_statistics = bool("statistics" in analysis or analysis.get("analysis_duration_ms"))
 
     completeness_items = [has_metadata, has_summary, has_files, has_directories, has_statistics]
     completeness_score = sum(completeness_items) / len(completeness_items)

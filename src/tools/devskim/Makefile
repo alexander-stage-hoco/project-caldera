@@ -71,7 +71,7 @@ setup: $(VENV_READY) _check-devskim
 _check-devskim:
 	@echo "Checking DevSkim CLI installation..."
 	@which devskim > /dev/null 2>&1 || (echo "Installing DevSkim CLI..." && dotnet tool install --global Microsoft.CST.DevSkim.CLI)
-	@devskim --version
+	@DOTNET_ROLL_FORWARD=LatestMajor devskim --version
 
 # =============================================================================
 # Analysis

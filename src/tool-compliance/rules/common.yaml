@@ -89,6 +89,10 @@ tool_entities:
     - DotcoverAssemblyCoverage
     - DotcoverTypeCoverage
     - DotcoverMethodCoverage
+  dependensee:
+    - DependenseeProject
+    - DependenseeProjectReference
+    - DependenseePackageReference
 
 entity_repository_map:
   SccFileMetric:
@@ -175,6 +179,15 @@ entity_repository_map:
   DotcoverMethodCoverage:
     repository: DotcoverRepository
     method: insert_method_coverage
+  DependenseeProject:
+    repository: DependenseeRepository
+    method: insert_projects
+  DependenseeProjectReference:
+    repository: DependenseeRepository
+    method: insert_project_references
+  DependenseePackageReference:
+    repository: DependenseeRepository
+    method: insert_package_references
 
 # Patterns for quality rule detection
 quality_rule_patterns:

@@ -167,13 +167,27 @@ class EvaluationReport:
 
 
 def load_analysis(analysis_path: str | Path) -> dict:
-    """Load analysis JSON file."""
+    """Load analysis JSON file.
+
+    Handles both envelope formats:
+    - {"results": {...}} - older format
+    - {"data": {...}} - Caldera envelope format
+    """
     with open(analysis_path) as f:
         data = json.load(f)
+
+    # Handle Caldera envelope format ({"data": {...}})
+    if isinstance(data, dict) and isinstance(data.get("data"), dict):
+        results = dict(data["data"])
+        results["_root"] = data
+        return results
+
+    # Handle older envelope format ({"results": {...}})
     if isinstance(data, dict) and isinstance(data.get("results"), dict):
         results = dict(data["results"])
         results["_root"] = data
         return results
+
     return data
 
 

@@ -4,20 +4,47 @@ from . import CheckResult, CheckCategory
 
 
 def _validate_root_payload(root_payload: dict) -> list[str]:
+    """Validate root payload structure.
+
+    Supports both envelope formats:
+    - {"results": {...}} - older format
+    - {"metadata": {...}, "data": {...}} - Caldera envelope format
+    """
     errors: list[str] = []
-    required_root = ["schema_version", "generated_at", "repo_name", "repo_path", "results"]
-    for field in required_root:
-        if field not in root_payload:
-            errors.append(f"Missing root field: {field}")
 
-    results = root_payload.get("results", {})
-    required_results = ["tool", "tool_version", "metadata", "summary"]
-    for field in required_results:
-        if field not in results:
-            errors.append(f"Missing results field: {field}")
+    # Check for Caldera envelope format (metadata + data)
+    if "metadata" in root_payload and "data" in root_payload:
+        # Caldera envelope format
+        required_metadata = ["run_id", "repo_id", "branch", "timestamp"]
+        metadata = root_payload.get("metadata", {})
+        for field in required_metadata:
+            if field not in metadata:
+                errors.append(f"Missing metadata field: {field}")
 
-    if results.get("tool") != "devskim":
-        errors.append("results.tool must be 'devskim'")
+        data = root_payload.get("data", {})
+        required_data = ["tool", "summary", "files"]
+        for field in required_data:
+            if field not in data:
+                errors.append(f"Missing data field: {field}")
+
+        if data.get("tool") != "devskim":
+            errors.append("data.tool must be 'devskim'")
+
+    else:
+        # Older envelope format
+        required_root = ["schema_version", "generated_at", "repo_name", "repo_path", "results"]
+        for field in required_root:
+            if field not in root_payload:
+                errors.append(f"Missing root field: {field}")
+
+        results = root_payload.get("results", {})
+        required_results = ["tool", "tool_version", "metadata", "summary"]
+        for field in required_results:
+            if field not in results:
+                errors.append(f"Missing results field: {field}")
+
+        if results.get("tool") != "devskim":
+            errors.append("results.tool must be 'devskim'")
 
     return errors
 

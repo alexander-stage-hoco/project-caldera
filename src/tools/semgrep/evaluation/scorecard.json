@@ -1,16 +1,16 @@
 {
   "tool": "semgrep",
   "version": "1.0.0",
-  "generated_at": "2026-01-30T20:52:55.524718+00:00",
+  "generated_at": "2026-02-06T09:28:46.245685+00:00",
   "description": "Evaluation scorecard for Semgrep static analysis",
   "summary": {
     "total_checks": 34,
-    "passed": 18,
-    "failed": 16,
-    "score": 0.4706,
-    "score_percent": 47.06,
-    "normalized_score": 2.35,
-    "decision": "FAIL"
+    "passed": 33,
+    "failed": 1,
+    "score": 0.9,
+    "score_percent": 90.0,
+    "normalized_score": 4.5,
+    "decision": "STRONG_PASS"
   },
   "dimensions": [
     {
@@ -18,40 +18,40 @@
       "name": "Accuracy",
       "weight": 0.16666666666666666,
       "total_checks": 9,
-      "passed": 5,
-      "failed": 4,
-      "score": 1.94,
-      "weighted_score": 0.32,
+      "passed": 8,
+      "failed": 1,
+      "score": 3.94,
+      "weighted_score": 0.66,
       "checks": [
         {
           "check_id": "AC-1",
           "name": "SQL injection detection",
-          "passed": false,
-          "message": "Detected 0 SQL injections (expected ~28)"
+          "passed": true,
+          "message": "Detected 38 SQL injections (expected ~32)"
         },
         {
           "check_id": "AC-2",
           "name": "Empty catch detection",
-          "passed": false,
-          "message": "Detected 0 empty catches (expected ~13)"
+          "passed": true,
+          "message": "Detected 13 empty catches (expected ~13)"
         },
         {
           "check_id": "AC-3",
           "name": "Catch-all detection",
-          "passed": false,
-          "message": "Detected 0 catch-all patterns"
+          "passed": true,
+          "message": "Detected 1 catch-all patterns"
         },
         {
           "check_id": "AC-4",
           "name": "Async void detection",
-          "passed": false,
-          "message": "Detected 0 async void methods"
+          "passed": true,
+          "message": "Detected 5 async void methods"
         },
         {
           "check_id": "AC-5",
           "name": "HttpClient/HTTP-related detection",
           "passed": true,
-          "message": "Detected 0 HTTP-related issues"
+          "message": "Detected 12 HTTP-related issues"
         },
         {
           "check_id": "AC-6",
@@ -69,13 +69,13 @@
           "check_id": "AC-8",
           "name": "Overall detection quality",
           "passed": true,
-          "message": "Categorization: 100.0% (0/0 properly categorized)"
+          "message": "Categorization: 100.0% (193/193 properly categorized)"
         },
         {
           "check_id": "AC-9",
           "name": "Line number accuracy",
-          "passed": true,
-          "message": "Line accuracy: 100.0% (0 exact, 0 near \u00b12, 0 missed)"
+          "passed": false,
+          "message": "Line accuracy: 60.0% (110 exact, 10 near \u00b12, 80 missed)"
         }
       ]
     },
@@ -84,58 +84,58 @@
       "name": "Coverage",
       "weight": 0.16666666666666666,
       "total_checks": 8,
-      "passed": 0,
-      "failed": 8,
-      "score": 0.0,
-      "weighted_score": 0.0,
+      "passed": 8,
+      "failed": 0,
+      "score": 4.38,
+      "weighted_score": 0.73,
       "checks": [
         {
           "check_id": "CV-1",
           "name": "Python coverage",
-          "passed": false,
-          "message": "0 files, 0 smells, 0 categories"
+          "passed": true,
+          "message": "12 files, 17 smells, 4 categories"
         },
         {
           "check_id": "CV-2",
           "name": "JavaScript coverage",
-          "passed": false,
-          "message": "0 files, 0 smells, 0 categories"
+          "passed": true,
+          "message": "6 files, 12 smells, 3 categories"
         },
         {
           "check_id": "CV-3",
           "name": "TypeScript coverage",
-          "passed": false,
-          "message": "0 files, 0 smells, 0 categories"
+          "passed": true,
+          "message": "5 files, 16 smells, 3 categories"
         },
         {
           "check_id": "CV-4",
           "name": "C# coverage",
-          "passed": false,
-          "message": "0 files, 0 smells, 0 categories"
+          "passed": true,
+          "message": "23 files, 118 smells, 8 categories"
         },
         {
           "check_id": "CV-5",
           "name": "Java coverage",
-          "passed": false,
-          "message": "0 files, 0 smells, 0 categories"
+          "passed": true,
+          "message": "5 files, 22 smells, 3 categories"
         },
         {
           "check_id": "CV-6",
           "name": "Go coverage",
-          "passed": false,
-          "message": "0 files, 0 smells, 0 categories"
+          "passed": true,
+          "message": "4 files, 8 smells, 1 categories"
         },
         {
           "check_id": "CV-7",
           "name": "Rust coverage",
-          "passed": false,
-          "message": "0 files, 0 smells, 0 categories"
+          "passed": true,
+          "message": "3 files, 0 smells, 0 categories"
         },
         {
           "check_id": "CV-8",
           "name": "DD category coverage",
-          "passed": false,
-          "message": "Covered 0/13 DD categories"
+          "passed": true,
+          "message": "Covered 9/13 DD categories"
         }
       ]
     },
@@ -144,10 +144,10 @@
       "name": "Edge Cases",
       "weight": 0.16666666666666666,
       "total_checks": 8,
-      "passed": 7,
-      "failed": 1,
-      "score": 4.06,
-      "weighted_score": 0.68,
+      "passed": 8,
+      "failed": 0,
+      "score": 4.69,
+      "weighted_score": 0.78,
       "checks": [
         {
           "check_id": "EC-1",
@@ -177,13 +177,13 @@
           "check_id": "EC-5",
           "name": "Mixed language files (JS/TS)",
           "passed": true,
-          "message": "Processed 0 JS/TS files"
+          "message": "Processed 11 JS/TS files"
         },
         {
           "check_id": "EC-6",
           "name": "No false positives in clean files",
           "passed": true,
-          "message": "0 false positives in 0 clean files"
+          "message": "0 false positives in 1 clean files"
         },
         {
           "check_id": "EC-7",
@@ -194,8 +194,8 @@
         {
           "check_id": "EC-8",
           "name": "Path handling",
-          "passed": false,
-          "message": "Handled 0 file paths correctly"
+          "passed": true,
+          "message": "Handled 58 file paths correctly"
         }
       ]
     },
@@ -213,13 +213,13 @@
           "check_id": "IF-1",
           "name": "Relative file paths",
           "passed": true,
-          "message": "0/0 files have relative paths"
+          "message": "58/58 files have relative paths"
         },
         {
           "check_id": "IF-2",
           "name": "Smell entries include required fields",
           "passed": true,
-          "message": "0/0 smells include required fields"
+          "message": "193/193 smells include required fields"
         }
       ]
     },
@@ -228,28 +228,28 @@
       "name": "Output Quality",
       "weight": 0.16666666666666666,
       "total_checks": 3,
-      "passed": 1,
-      "failed": 2,
-      "score": 1.67,
-      "weighted_score": 0.28,
+      "passed": 3,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.83,
       "checks": [
         {
           "check_id": "OQ-1",
           "name": "Required sections present",
-          "passed": false,
-          "message": "Missing sections: ['tool', 'tool_version', 'summary', 'directories', 'files', 'by_language', 'statistics']"
+          "passed": true,
+          "message": "All required sections present"
         },
         {
           "check_id": "OQ-2",
           "name": "File entries include required fields",
           "passed": true,
-          "message": "0/0 files include required fields"
+          "message": "58/58 files include required fields"
         },
         {
           "check_id": "OQ-3",
           "name": "Schema validation",
-          "passed": false,
-          "message": "Schema validation failed"
+          "passed": true,
+          "message": "Schema validation passed"
         }
       ]
     },
@@ -258,10 +258,10 @@
       "name": "Performance",
       "weight": 0.16666666666666666,
       "total_checks": 4,
-      "passed": 3,
-      "failed": 1,
-      "score": 3.75,
-      "weighted_score": 0.62,
+      "passed": 4,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.83,
       "checks": [
         {
           "check_id": "PF-1",
@@ -278,8 +278,8 @@
         {
           "check_id": "PF-3",
           "name": "Analysis throughput",
-          "passed": false,
-          "message": "0 LOC/s (threshold: 100 LOC/s)"
+          "passed": true,
+          "message": "5370000 LOC/s (threshold: 100 LOC/s)"
         },
         {
           "check_id": "PF-4",
@@ -298,7 +298,7 @@
     "FAIL": "< 3.0 (below 60%)"
   },
   "metadata": {
-    "analysis_path": "/var/folders/zr/c7zp4x316wvg0rsvdnq_dcm40000gn/T/tool-compliance-5rgj1z8j/output.json",
+    "analysis_path": "outputs/04B80681-E8E3-4DC8-961B-4BAA2F09C001/output.json",
     "ground_truth_dir": "evaluation/ground-truth"
   }
 }

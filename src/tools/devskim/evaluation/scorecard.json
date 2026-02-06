@@ -1,16 +1,16 @@
 {
   "tool": "devskim",
   "version": "1.0.0",
-  "generated_at": "2026-02-06T07:11:54.468494+00:00",
+  "generated_at": "2026-02-06T09:05:49.221856+00:00",
   "description": "Evaluation scorecard for DevSkim security analysis",
   "summary": {
     "total_checks": 30,
-    "passed": 21,
-    "failed": 9,
-    "score": 0.6733,
-    "score_percent": 67.33,
-    "normalized_score": 3.37,
-    "decision": "WEAK_PASS"
+    "passed": 30,
+    "failed": 0,
+    "score": 0.9257,
+    "score_percent": 92.57,
+    "normalized_score": 4.63,
+    "decision": "STRONG_PASS"
   },
   "dimensions": [
     {
@@ -18,10 +18,10 @@
       "name": "Accuracy",
       "weight": 0.16666666666666666,
       "total_checks": 8,
-      "passed": 5,
-      "failed": 3,
-      "score": 3.12,
-      "weighted_score": 0.52,
+      "passed": 8,
+      "failed": 0,
+      "score": 4.92,
+      "weighted_score": 0.82,
       "checks": [
         {
           "check_id": "AC-1",
@@ -38,8 +38,8 @@
         {
           "check_id": "AC-3",
           "name": "Insecure crypto detection",
-          "passed": false,
-          "message": "Found 0 insecure crypto issues (expected >= 10)"
+          "passed": true,
+          "message": "Found 10 insecure crypto issues (expected >= 10)"
         },
         {
           "check_id": "AC-4",
@@ -56,20 +56,20 @@
         {
           "check_id": "AC-6",
           "name": "Deserialization detection",
-          "passed": false,
-          "message": "Found 0 deserialization issues"
+          "passed": true,
+          "message": "Found 2 deserialization issues"
         },
         {
           "check_id": "AC-7",
           "name": "False positive rate",
           "passed": true,
-          "message": "No findings to check for false positives"
+          "message": "Found 0 potential false positives out of 13 total"
         },
         {
           "check_id": "AC-8",
           "name": "Overall precision/recall",
-          "passed": false,
-          "message": "Precision: 1.00, Recall: 0.00, F1: 0.00"
+          "passed": true,
+          "message": "Precision: 1.00, Recall: 0.77, F1: 0.87"
         }
       ]
     },
@@ -78,16 +78,16 @@
       "name": "Coverage",
       "weight": 0.16666666666666666,
       "total_checks": 8,
-      "passed": 5,
-      "failed": 3,
-      "score": 3.12,
-      "weighted_score": 0.52,
+      "passed": 8,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.83,
       "checks": [
         {
           "check_id": "CV-1",
           "name": "C# coverage",
-          "passed": false,
-          "message": "0 files, 0 issues, 0 categories"
+          "passed": true,
+          "message": "10 files, 13 issues, 3 categories"
         },
         {
           "check_id": "CV-2",
@@ -122,14 +122,14 @@
         {
           "check_id": "CV-7",
           "name": "Multi-language support",
-          "passed": false,
-          "message": "Analyzed 0 of 1 expected languages"
+          "passed": true,
+          "message": "Analyzed 1 of 1 expected languages"
         },
         {
           "check_id": "CV-8",
           "name": "DD security category coverage",
-          "passed": false,
-          "message": "Covered 0/3 security categories"
+          "passed": true,
+          "message": "Covered 3/3 security categories"
         }
       ]
     },
@@ -140,14 +140,14 @@
       "total_checks": 8,
       "passed": 8,
       "failed": 0,
-      "score": 4.62,
-      "weighted_score": 0.77,
+      "score": 4.31,
+      "weighted_score": 0.72,
       "checks": [
         {
           "check_id": "EC-1",
           "name": "Empty files handling",
           "passed": true,
-          "message": "Found 0 empty files, handled correctly"
+          "message": "Found 7 empty files, handled correctly"
         },
         {
           "check_id": "EC-2",
@@ -207,7 +207,7 @@
           "check_id": "IF-1",
           "name": "Relative file paths",
           "passed": true,
-          "message": "0/0 files have relative paths"
+          "message": "10/10 files have relative paths"
         }
       ]
     },
@@ -216,16 +216,16 @@
       "name": "Output Quality",
       "weight": 0.16666666666666666,
       "total_checks": 1,
-      "passed": 0,
-      "failed": 1,
-      "score": 0.0,
-      "weighted_score": 0.0,
+      "passed": 1,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.83,
       "checks": [
         {
           "check_id": "OQ-1",
           "name": "Schema validation",
-          "passed": false,
-          "message": "Missing root wrapper for schema validation"
+          "passed": true,
+          "message": "Schema validation passed"
         }
       ]
     },
@@ -234,34 +234,34 @@
       "name": "Performance",
       "weight": 0.16666666666666666,
       "total_checks": 4,
-      "passed": 2,
-      "failed": 2,
-      "score": 2.25,
-      "weighted_score": 0.38,
+      "passed": 4,
+      "failed": 0,
+      "score": 3.75,
+      "weighted_score": 0.62,
       "checks": [
         {
           "check_id": "PF-1",
           "name": "Analysis duration",
           "passed": true,
-          "message": "Completed in 0.0s (target: <30s)"
+          "message": "Completed in 1.0s (target: <30s)"
         },
         {
           "check_id": "PF-2",
           "name": "Files per second throughput",
-          "passed": false,
-          "message": "Throughput: 0.0 files/second"
+          "passed": true,
+          "message": "Throughput: 9.7 files/second"
         },
         {
           "check_id": "PF-3",
           "name": "Lines per second throughput",
           "passed": true,
-          "message": "Throughput: 0 lines/second (waived)"
+          "message": "Throughput: 256 lines/second (waived)"
         },
         {
           "check_id": "PF-4",
           "name": "Result completeness",
-          "passed": false,
-          "message": "Output completeness: 20%"
+          "passed": true,
+          "message": "Output completeness: 100%"
         }
       ]
     }
@@ -274,7 +274,7 @@
     "FAIL": "< 3.0 (below 60%)"
   },
   "metadata": {
-    "analysis_path": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/233da6a1-8d93-4dfc-90b8-6886fb622001/output.json",
+    "analysis_path": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/68806B0D-7043-43F7-B8D6-1209BB941741/output.json",
     "ground_truth_dir": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/evaluation/ground-truth"
   }
 }

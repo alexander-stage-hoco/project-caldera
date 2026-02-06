@@ -1,29 +1,29 @@
 # DevSkim Evaluation Scorecard
 
-**Generated:** 2026-02-06T07:11:54.468494+00:00
-**Decision:** WEAK_PASS
-**Score:** 67.33%
+**Generated:** 2026-02-06T09:05:49.221856+00:00
+**Decision:** STRONG_PASS
+**Score:** 92.57%
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Total Checks | 30 |
-| Passed | 21 |
-| Failed | 9 |
-| Raw Score | 0.673 |
-| Normalized Score | 3.37/5.0 |
+| Passed | 30 |
+| Failed | 0 |
+| Raw Score | 0.926 |
+| Normalized Score | 4.63/5.0 |
 
 ## Dimensions
 
 | Dimension | Checks | Passed | Score |
 |-----------|--------|--------|-------|
-| Accuracy | 8 | 5/8 | 62.4% |
-| Coverage | 8 | 5/8 | 62.4% |
-| Edge Cases | 8 | 8/8 | 92.4% |
+| Accuracy | 8 | 8/8 | 98.4% |
+| Coverage | 8 | 8/8 | 100.0% |
+| Edge Cases | 8 | 8/8 | 86.2% |
 | Integration Fit | 1 | 1/1 | 100.0% |
-| Output Quality | 1 | 0/1 | 0.0% |
-| Performance | 4 | 2/4 | 45.0% |
+| Output Quality | 1 | 1/1 | 100.0% |
+| Performance | 4 | 4/4 | 75.0% |
 
 ## Detailed Results
 
@@ -33,31 +33,31 @@
 |-------|--------|---------|
 | AC-1 | PASS | Skipped: No SQL injection expectations in ground t... |
 | AC-2 | PASS | Skipped: No hardcoded secret expectations in groun... |
-| AC-3 | FAIL | Found 0 insecure crypto issues (expected >= 10) |
+| AC-3 | PASS | Found 10 insecure crypto issues (expected >= 10) |
 | AC-4 | PASS | Skipped: No path traversal expectations in ground ... |
 | AC-5 | PASS | Skipped: No XSS expectations in ground truth |
-| AC-6 | FAIL | Found 0 deserialization issues |
-| AC-7 | PASS | No findings to check for false positives |
-| AC-8 | FAIL | Precision: 1.00, Recall: 0.00, F1: 0.00 |
+| AC-6 | PASS | Found 2 deserialization issues |
+| AC-7 | PASS | Found 0 potential false positives out of 13 total |
+| AC-8 | PASS | Precision: 1.00, Recall: 0.77, F1: 0.87 |
 
 ### Coverage
 
 | Check | Status | Message |
 |-------|--------|---------|
-| CV-1 | FAIL | 0 files, 0 issues, 0 categories |
+| CV-1 | PASS | 10 files, 13 issues, 3 categories |
 | CV-2 | PASS | Skipped: python not present in ground truth |
 | CV-3 | PASS | Skipped: javascript not present in ground truth |
 | CV-4 | PASS | Skipped: java not present in ground truth |
 | CV-5 | PASS | Skipped: go not present in ground truth |
 | CV-6 | PASS | Skipped: cpp not present in ground truth |
-| CV-7 | FAIL | Analyzed 0 of 1 expected languages |
-| CV-8 | FAIL | Covered 0/3 security categories |
+| CV-7 | PASS | Analyzed 1 of 1 expected languages |
+| CV-8 | PASS | Covered 3/3 security categories |
 
 ### Edge Cases
 
 | Check | Status | Message |
 |-------|--------|---------|
-| EC-1 | PASS | Found 0 empty files, handled correctly |
+| EC-1 | PASS | Found 7 empty files, handled correctly |
 | EC-2 | PASS | Analyzed 0 large files (>1000 lines) |
 | EC-3 | PASS | Found 0 files with multiple issue types |
 | EC-4 | PASS | Nested code structures handled |
@@ -70,22 +70,22 @@
 
 | Check | Status | Message |
 |-------|--------|---------|
-| IF-1 | PASS | 0/0 files have relative paths |
+| IF-1 | PASS | 10/10 files have relative paths |
 
 ### Output Quality
 
 | Check | Status | Message |
 |-------|--------|---------|
-| OQ-1 | FAIL | Missing root wrapper for schema validation |
+| OQ-1 | PASS | Schema validation passed |
 
 ### Performance
 
 | Check | Status | Message |
 |-------|--------|---------|
-| PF-1 | PASS | Completed in 0.0s (target: <30s) |
-| PF-2 | FAIL | Throughput: 0.0 files/second |
-| PF-3 | PASS | Throughput: 0 lines/second (waived) |
-| PF-4 | FAIL | Output completeness: 20% |
+| PF-1 | PASS | Completed in 1.0s (target: <30s) |
+| PF-2 | PASS | Throughput: 9.7 files/second |
+| PF-3 | PASS | Throughput: 256 lines/second (waived) |
+| PF-4 | PASS | Output completeness: 100% |
 
 ## Decision Thresholds
 
@@ -98,5 +98,5 @@
 
 ---
 
-*Analysis: `/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/233da6a1-8d93-4dfc-90b8-6886fb622001/output.json`*
+*Analysis: `/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/68806B0D-7043-43F7-B8D6-1209BB941741/output.json`*
 *Ground Truth: `/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/evaluation/ground-truth`*
