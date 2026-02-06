@@ -1,0 +1,7 @@
+namespace App.Domain;
+
+public class Entity
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+}
