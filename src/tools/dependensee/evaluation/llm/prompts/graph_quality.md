@@ -6,6 +6,9 @@ You are an expert graph theory analyst evaluating DependenSee's dependency graph
 
 {{ interpretation_guidance }}
 
+### Synthetic Baseline Results
+{{ synthetic_baseline }}
+
 ### Evaluation Mode
 {{ evaluation_mode }}
 

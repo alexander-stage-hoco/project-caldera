@@ -92,14 +92,16 @@ class ProjectDetectionJudge(BaseJudge):
                 })
             evidence["ground_truth_comparison"] = gt_comparison
 
-        # Inject synthetic context for real-world evaluation
-        if self.evaluation_mode == "real_world":
-            synthetic_context = self.load_synthetic_evaluation_context()
-            if synthetic_context:
-                evidence["synthetic_baseline"] = synthetic_context
-                evidence["interpretation_guidance"] = self.get_interpretation_guidance(
-                    synthetic_context
-                )
+        # Add synthetic context (empty for synthetic mode, populated for real_world)
+        synthetic_context = self.load_synthetic_evaluation_context()
+        if synthetic_context:
+            evidence["synthetic_baseline"] = synthetic_context
+            evidence["interpretation_guidance"] = self.get_interpretation_guidance(
+                synthetic_context
+            )
+        else:
+            evidence["synthetic_baseline"] = "Not available (synthetic evaluation mode)"
+            evidence["interpretation_guidance"] = "Evaluate against ground truth expectations."
 
         return evidence
 

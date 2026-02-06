@@ -6,6 +6,9 @@ You are an expert .NET architect evaluating DependenSee's ability to detect and 
 
 {{ interpretation_guidance }}
 
+### Synthetic Baseline Results
+{{ synthetic_baseline }}
+
 ### Evaluation Mode
 {{ evaluation_mode }}
 
