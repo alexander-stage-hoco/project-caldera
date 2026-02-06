@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "scenario": "xxe",
+  "language": "csharp",
+  "description": "XXE (XML External Entity) vulnerability detection via CALDERA custom rules",
+  "generated_at": "2026-02-06T12:00:00Z",
+  "repo_path": "eval-repos/synthetic/csharp",
+  "expected": {
+    "language": "csharp",
+    "version": "1.0",
+    "aggregate_expectations": {
+      "min_total_issues": 4,
+      "max_false_positives": 2,
+      "required_categories": [
+        "xxe"
+      ],
+      "notes": "XXE vulnerabilities detected by CALDERA custom rules: CALDERA002 (XmlResolver), CALDERA003 (DTD Processing), CALDERA004 (XmlTextReader). These rules detect insecure XML parsing configurations that can lead to XXE attacks."
+    }
+  },
+  "files": {
+    "XxeVulnerability.cs": {
+      "expected_categories": ["xxe"],
+      "expected_issues": [
+        {
+          "category": "xxe",
+          "count": 4,
+          "lines": [17, 27, 28, 40],
+          "notes": "XXE vulnerabilities via XmlResolver, DtdProcessing.Parse, and insecure XmlTextReader"
+        },
+        {
+          "rule_id": "CALDERA002",
+          "count": 2,
+          "description": "XML External Entity (XXE) via XmlResolver"
+        },
+        {
+          "rule_id": "CALDERA003",
+          "count": 1,
+          "description": "XML External Entity (XXE) via DTD Processing"
+        },
+        {
+          "rule_id": "CALDERA004",
+          "count": 2,
+          "description": "Insecure XmlTextReader Usage"
+        }
+      ],
+      "total_expected": 5,
+      "false_positives_allowed": 2,
+      "notes": "XXE patterns detected by CALDERA002-004 custom rules. May flag safe XmlTextReader after configuration."
+    }
+  }
+}

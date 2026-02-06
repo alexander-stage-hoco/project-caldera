@@ -21,12 +21,20 @@ from checks import load_ground_truth
 TOOL_ROOT = Path(__file__).parents[2]
 SYNTHETIC_REPOS = TOOL_ROOT / "eval-repos" / "synthetic"
 GROUND_TRUTH_DIR = TOOL_ROOT / "evaluation" / "ground-truth"
+CUSTOM_RULES_DIR = TOOL_ROOT / "rules" / "custom"
 
 
 def is_devskim_available() -> bool:
     """Check if DevSkim is available."""
     version = get_devskim_version()
     return version != "unknown"
+
+
+def get_custom_rules_path() -> str | None:
+    """Get custom rules path if directory exists."""
+    if CUSTOM_RULES_DIR.exists():
+        return str(CUSTOM_RULES_DIR)
+    return None
 
 
 def skip_if_missing_deps():
@@ -61,6 +69,7 @@ class TestCSharpScenario:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
 
         assert len(result.files) > 0
@@ -77,6 +86,7 @@ class TestCSharpScenario:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
 
         gt = ground_truth.get("csharp", {})
@@ -99,6 +109,7 @@ class TestCSharpScenario:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
 
         gt = ground_truth.get("csharp", {})
@@ -127,6 +138,7 @@ class TestInsecureCryptoFile:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
 
         # Find InsecureCrypto.cs findings
@@ -150,6 +162,7 @@ class TestInsecureCryptoFile:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
 
         gt = ground_truth.get("csharp", {})
@@ -183,6 +196,7 @@ class TestDeserializationFile:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
 
         # Find Deserialization.cs findings
@@ -210,6 +224,7 @@ class TestSafeCodeFile:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
 
         safe_file = next(
@@ -239,6 +254,7 @@ class TestOutputFormatValidation:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
         output = result_to_dict(result)
 
@@ -268,6 +284,7 @@ class TestOutputFormatValidation:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
         output = result_to_dict(result)
 
@@ -299,6 +316,7 @@ class TestDirectoryRollups:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
 
         # Should have directory entries
@@ -315,6 +333,7 @@ class TestDirectoryRollups:
         result = analyze_with_devskim(
             str(repo_path),
             repo_name="csharp-synthetic",
+            custom_rules_path=get_custom_rules_path(),
         )
 
         root_dir = next(

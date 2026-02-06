@@ -1,15 +1,15 @@
 {
   "tool": "devskim",
   "version": "1.0.0",
-  "generated_at": "2026-02-06T09:05:49.221856+00:00",
+  "generated_at": "2026-02-06T15:44:21.355293+00:00",
   "description": "Evaluation scorecard for DevSkim security analysis",
   "summary": {
     "total_checks": 30,
-    "passed": 30,
-    "failed": 0,
-    "score": 0.9257,
-    "score_percent": 92.57,
-    "normalized_score": 4.63,
+    "passed": 29,
+    "failed": 1,
+    "score": 0.9113,
+    "score_percent": 91.13,
+    "normalized_score": 4.56,
     "decision": "STRONG_PASS"
   },
   "dimensions": [
@@ -20,8 +20,8 @@
       "total_checks": 8,
       "passed": 8,
       "failed": 0,
-      "score": 4.92,
-      "weighted_score": 0.82,
+      "score": 5.0,
+      "weighted_score": 0.83,
       "checks": [
         {
           "check_id": "AC-1",
@@ -39,7 +39,7 @@
           "check_id": "AC-3",
           "name": "Insecure crypto detection",
           "passed": true,
-          "message": "Found 10 insecure crypto issues (expected >= 10)"
+          "message": "Skipped: No insecure crypto expectations in ground truth"
         },
         {
           "check_id": "AC-4",
@@ -57,19 +57,19 @@
           "check_id": "AC-6",
           "name": "Deserialization detection",
           "passed": true,
-          "message": "Found 2 deserialization issues"
+          "message": "Skipped: No deserialization expectations in ground truth"
         },
         {
           "check_id": "AC-7",
           "name": "False positive rate",
           "passed": true,
-          "message": "Found 0 potential false positives out of 13 total"
+          "message": "Found 0 potential false positives out of 50 total"
         },
         {
           "check_id": "AC-8",
           "name": "Overall precision/recall",
           "passed": true,
-          "message": "Precision: 1.00, Recall: 0.77, F1: 0.87"
+          "message": "Precision: 1.00, Recall: 1.00, F1: 1.00"
         }
       ]
     },
@@ -80,14 +80,14 @@
       "total_checks": 8,
       "passed": 8,
       "failed": 0,
-      "score": 5.0,
-      "weighted_score": 0.83,
+      "score": 4.65,
+      "weighted_score": 0.78,
       "checks": [
         {
           "check_id": "CV-1",
           "name": "C# coverage",
           "passed": true,
-          "message": "10 files, 13 issues, 3 categories"
+          "message": "25 files, 50 issues, 8 categories"
         },
         {
           "check_id": "CV-2",
@@ -129,7 +129,7 @@
           "check_id": "CV-8",
           "name": "DD security category coverage",
           "passed": true,
-          "message": "Covered 3/3 security categories"
+          "message": "Covered 7/15 security categories"
         }
       ]
     },
@@ -138,16 +138,16 @@
       "name": "Edge Cases",
       "weight": 0.16666666666666666,
       "total_checks": 8,
-      "passed": 8,
-      "failed": 0,
-      "score": 4.31,
-      "weighted_score": 0.72,
+      "passed": 7,
+      "failed": 1,
+      "score": 4.0,
+      "weighted_score": 0.67,
       "checks": [
         {
           "check_id": "EC-1",
           "name": "Empty files handling",
           "passed": true,
-          "message": "Found 7 empty files, handled correctly"
+          "message": "Found 16 empty files, handled correctly"
         },
         {
           "check_id": "EC-2",
@@ -159,7 +159,7 @@
           "check_id": "EC-3",
           "name": "Mixed content files",
           "passed": true,
-          "message": "Found 0 files with multiple issue types"
+          "message": "Found 4 files with multiple issue types"
         },
         {
           "check_id": "EC-4",
@@ -176,8 +176,8 @@
         {
           "check_id": "EC-6",
           "name": "String literal handling",
-          "passed": true,
-          "message": "String literals handled correctly"
+          "passed": false,
+          "message": "Found 6 potential false positives in string literals"
         },
         {
           "check_id": "EC-7",
@@ -207,7 +207,7 @@
           "check_id": "IF-1",
           "name": "Relative file paths",
           "passed": true,
-          "message": "10/10 files have relative paths"
+          "message": "25/25 files have relative paths"
         }
       ]
     },
@@ -236,26 +236,26 @@
       "total_checks": 4,
       "passed": 4,
       "failed": 0,
-      "score": 3.75,
-      "weighted_score": 0.62,
+      "score": 4.38,
+      "weighted_score": 0.73,
       "checks": [
         {
           "check_id": "PF-1",
           "name": "Analysis duration",
           "passed": true,
-          "message": "Completed in 1.0s (target: <30s)"
+          "message": "Completed in 0.9s (target: <30s)"
         },
         {
           "check_id": "PF-2",
           "name": "Files per second throughput",
           "passed": true,
-          "message": "Throughput: 9.7 files/second"
+          "message": "Throughput: 28.2 files/second"
         },
         {
           "check_id": "PF-3",
           "name": "Lines per second throughput",
           "passed": true,
-          "message": "Throughput: 256 lines/second (waived)"
+          "message": "Throughput: 847 lines/second (waived)"
         },
         {
           "check_id": "PF-4",
@@ -274,7 +274,7 @@
     "FAIL": "< 3.0 (below 60%)"
   },
   "metadata": {
-    "analysis_path": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/68806B0D-7043-43F7-B8D6-1209BB941741/output.json",
+    "analysis_path": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/302BD23E-0445-4F82-99E2-F90732B4803B/output.json",
     "ground_truth_dir": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/evaluation/ground-truth"
   }
 }

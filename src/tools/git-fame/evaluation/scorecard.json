@@ -1,16 +1,16 @@
 {
   "tool": "git-fame",
   "version": "3.1.1",
-  "generated_at": "2026-02-06T12:43:10.247485+00:00",
+  "generated_at": "2026-02-06T15:48:18.637657+00:00",
   "description": "Evaluation scorecard for git-fame git analytics",
   "summary": {
     "total_checks": 28,
-    "passed": 28,
-    "failed": 0,
-    "score": 1.0,
-    "score_percent": 100.0,
-    "normalized_score": 5.0,
-    "decision": "STRONG_PASS"
+    "passed": 23,
+    "failed": 5,
+    "score": 0.738,
+    "score_percent": 73.8,
+    "normalized_score": 3.69,
+    "decision": "PASS"
   },
   "dimensions": [
     {
@@ -27,13 +27,13 @@
           "check_id": "OQ-1",
           "name": "OQ-1",
           "passed": true,
-          "message": "schema_version present in all 5 analyses"
+          "message": "schema_version present in all 1 analyses"
         },
         {
           "check_id": "OQ-2",
           "name": "OQ-2",
           "passed": true,
-          "message": "Valid ISO8601 timestamps in all 5 analyses"
+          "message": "Valid ISO8601 timestamps in all 1 analyses"
         },
         {
           "check_id": "OQ-3",
@@ -45,7 +45,7 @@
           "check_id": "OQ-4",
           "name": "OQ-4",
           "passed": true,
-          "message": "All required fields present for 16 authors"
+          "message": "All required fields present for 159 authors"
         },
         {
           "check_id": "OQ-5",
@@ -57,7 +57,7 @@
           "check_id": "OQ-6",
           "name": "OQ-6",
           "passed": true,
-          "message": "All 2 JSON files are valid"
+          "message": "All 1 JSON files are valid"
         }
       ]
     },
@@ -117,7 +117,7 @@
           "check_id": "AA-8",
           "name": "AA-8",
           "passed": true,
-          "message": "Author-level attribution present (4 authors)"
+          "message": "Author-level attribution present (159 authors)"
         }
       ]
     },
@@ -126,16 +126,16 @@
       "name": "Reliability",
       "weight": 0.15,
       "total_checks": 4,
-      "passed": 4,
-      "failed": 0,
-      "score": 5.0,
-      "weighted_score": 0.75,
+      "passed": 2,
+      "failed": 2,
+      "score": 2.5,
+      "weighted_score": 0.38,
       "checks": [
         {
           "check_id": "RL-1",
           "name": "RL-1",
-          "passed": true,
-          "message": "Two consecutive runs produced identical output"
+          "passed": false,
+          "message": "Run 1 failed: /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/.venv/bin/python: No module named gitfame"
         },
         {
           "check_id": "RL-2",
@@ -146,8 +146,8 @@
         {
           "check_id": "RL-3",
           "name": "RL-3",
-          "passed": true,
-          "message": "Single-author repository handled correctly"
+          "passed": false,
+          "message": "Single-author repo failed: /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/.venv/bin/python: No module named gitfame"
         },
         {
           "check_id": "RL-4",
@@ -162,34 +162,34 @@
       "name": "Performance",
       "weight": 0.15,
       "total_checks": 4,
-      "passed": 4,
-      "failed": 0,
-      "score": 5.0,
-      "weighted_score": 0.75,
+      "passed": 3,
+      "failed": 1,
+      "score": 3.75,
+      "weighted_score": 0.56,
       "checks": [
         {
           "check_id": "PF-1",
           "name": "PF-1",
           "passed": true,
-          "message": "Completed in 0.23s (threshold: 5.0s)"
+          "message": "Completed in 0.02s (threshold: 5.0s)"
         },
         {
           "check_id": "PF-2",
           "name": "PF-2",
           "passed": true,
-          "message": "Completed in 0.23s (threshold: 30.0s)"
+          "message": "Completed in 0.02s (threshold: 30.0s)"
         },
         {
           "check_id": "PF-3",
           "name": "PF-3",
-          "passed": true,
-          "message": "Memory usage: 23.5MB (threshold: 500.0MB)"
+          "passed": false,
+          "message": "Execution failed: /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/.venv/bin/python: No module named gitfame"
         },
         {
           "check_id": "PF-4",
           "name": "PF-4",
           "passed": true,
-          "message": "Second run 14.7% faster (0.28s -> 0.24s)"
+          "message": "Second run 2.8% faster (0.02s -> 0.02s)"
         }
       ]
     },
@@ -225,7 +225,7 @@
           "check_id": "IF-4",
           "name": "IF-4",
           "passed": true,
-          "message": "Output matches collector schema (5 analyses validated)"
+          "message": "Output matches collector schema (1 analyses validated)"
         }
       ]
     },
@@ -234,22 +234,22 @@
       "name": "Installation",
       "weight": 0.15,
       "total_checks": 2,
-      "passed": 2,
-      "failed": 0,
-      "score": 5.0,
-      "weighted_score": 0.75,
+      "passed": 0,
+      "failed": 2,
+      "score": 0.0,
+      "weighted_score": 0.0,
       "checks": [
         {
           "check_id": "IN-1",
           "name": "IN-1",
-          "passed": true,
-          "message": "git-fame installed, version: 3.1.1"
+          "passed": false,
+          "message": "git-fame not properly installed: /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/.venv/bin/python: No module named gitfame"
         },
         {
           "check_id": "IN-2",
           "name": "IN-2",
-          "passed": true,
-          "message": "git-fame --help returns valid help text"
+          "passed": false,
+          "message": "git-fame --help failed with code 1: /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/.venv/bin/python: No module named gitfame"
         }
       ]
     }

@@ -93,6 +93,9 @@ tool_entities:
     - DependenseeProject
     - DependenseeProjectReference
     - DependenseePackageReference
+  git-fame:
+    - GitFameAuthor
+    - GitFameSummary
 
 entity_repository_map:
   SccFileMetric:
@@ -188,6 +191,12 @@ entity_repository_map:
   DependenseePackageReference:
     repository: DependenseeRepository
     method: insert_package_references
+  GitFameAuthor:
+    repository: GitFameRepository
+    method: insert_authors
+  GitFameSummary:
+    repository: GitFameRepository
+    method: insert_summary
 
 # Patterns for quality rule detection
 quality_rule_patterns:

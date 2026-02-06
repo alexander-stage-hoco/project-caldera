@@ -45,6 +45,143 @@ from security_analyzer import (
 )
 
 
+class TestTerminalHelpers:
+    """Tests for terminal and formatting helper functions."""
+
+    def test_get_terminal_width_returns_minimum(self) -> None:
+        """get_terminal_width should return at least minimum."""
+        from security_analyzer import get_terminal_width
+        width = get_terminal_width(default=120, minimum=80)
+        assert width >= 80
+
+    def test_get_terminal_width_exception_returns_default(self) -> None:
+        """get_terminal_width should return default on exception."""
+        from security_analyzer import get_terminal_width
+        from unittest.mock import patch
+
+        with patch("shutil.get_terminal_size", side_effect=Exception("no terminal")):
+            width = get_terminal_width(default=120, minimum=80)
+            assert width == 120
+
+    def test_c_with_color_enabled(self) -> None:
+        """c() should apply color codes when enabled."""
+        from security_analyzer import c, set_color_enabled, Colors
+        set_color_enabled(True)
+        result = c("test", Colors.RED)
+        assert Colors.RED in result
+        assert "test" in result
+        set_color_enabled(True)  # Reset
+
+    def test_c_without_color(self) -> None:
+        """c() should return plain text when disabled."""
+        from security_analyzer import c, set_color_enabled, Colors
+        set_color_enabled(False)
+        result = c("test", Colors.RED)
+        assert result == "test"
+        set_color_enabled(True)  # Reset
+
+    def test_strip_ansi_removes_codes(self) -> None:
+        """strip_ansi should remove ANSI escape codes."""
+        from security_analyzer import strip_ansi
+        text_with_ansi = "\033[31mred text\033[0m"
+        result = strip_ansi(text_with_ansi)
+        assert result == "red text"
+        assert "\033" not in result
+
+    def test_strip_ansi_preserves_plain_text(self) -> None:
+        """strip_ansi should preserve plain text."""
+        from security_analyzer import strip_ansi
+        plain = "plain text"
+        assert strip_ansi(plain) == plain
+
+    def test_truncate_path_middle_short_path(self) -> None:
+        """Short paths should not be truncated."""
+        from security_analyzer import truncate_path_middle
+        path = "short/path"
+        result = truncate_path_middle(path, 20)
+        assert result == path
+
+    def test_truncate_path_middle_long_path(self) -> None:
+        """Long paths should be truncated with ellipsis."""
+        from security_analyzer import truncate_path_middle
+        path = "very/long/path/to/some/file/in/deep/directory"
+        result = truncate_path_middle(path, 20)
+        assert len(result) == 20
+        assert "..." in result
+
+    def test_format_number_no_decimals(self) -> None:
+        """format_number without decimals should return integer."""
+        from security_analyzer import format_number
+        assert format_number(1234567) == "1,234,567"
+        assert format_number(0) == "0"
+
+    def test_format_number_with_decimals(self) -> None:
+        """format_number with decimals should format correctly."""
+        from security_analyzer import format_number
+        assert format_number(1234.5678, 2) == "1,234.57"
+
+    def test_format_percent(self) -> None:
+        """format_percent should format percentage."""
+        from security_analyzer import format_percent
+        assert format_percent(75.5) == "75.5%"
+        assert format_percent(100.0) == "100.0%"
+
+
+class TestPrintHelpers:
+    """Tests for print helper functions."""
+
+    def test_print_header(self, capsys) -> None:
+        """print_header should output header box."""
+        from security_analyzer import print_header, set_color_enabled
+        set_color_enabled(False)
+        print_header("Test Header", width=40)
+        captured = capsys.readouterr()
+        assert "Test Header" in captured.out
+        assert "─" in captured.out or "-" in captured.out
+
+    def test_print_section(self, capsys) -> None:
+        """print_section should output section header."""
+        from security_analyzer import print_section, set_color_enabled
+        set_color_enabled(False)
+        print_section("Test Section", width=40)
+        captured = capsys.readouterr()
+        assert "Test Section" in captured.out
+
+    def test_print_section_end(self, capsys) -> None:
+        """print_section_end should output border."""
+        from security_analyzer import print_section_end, set_color_enabled
+        set_color_enabled(False)
+        print_section_end(width=40)
+        captured = capsys.readouterr()
+        assert len(captured.out) > 0
+
+    def test_print_row_single_column(self, capsys) -> None:
+        """print_row with single column should output correctly."""
+        from security_analyzer import print_row, set_color_enabled
+        set_color_enabled(False)
+        print_row("Label:", "Value", width=40)
+        captured = capsys.readouterr()
+        assert "Label:" in captured.out
+        assert "Value" in captured.out
+
+    def test_print_row_two_columns(self, capsys) -> None:
+        """print_row with two columns should output both."""
+        from security_analyzer import print_row, set_color_enabled
+        set_color_enabled(False)
+        print_row("Left:", "Val1", "Right:", "Val2", width=60)
+        captured = capsys.readouterr()
+        assert "Left:" in captured.out
+        assert "Right:" in captured.out
+
+    def test_print_empty_row(self, capsys) -> None:
+        """print_empty_row should output empty line."""
+        from security_analyzer import print_empty_row, set_color_enabled
+        set_color_enabled(False)
+        print_empty_row(width=40)
+        captured = capsys.readouterr()
+        assert len(captured.out) > 0
+
+
 class TestMapRuleToCategory:
     """Tests for map_rule_to_category function."""
 

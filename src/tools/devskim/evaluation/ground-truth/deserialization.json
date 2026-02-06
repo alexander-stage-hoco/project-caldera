@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "scenario": "deserialization",
+  "language": "csharp",
+  "description": "Unsafe deserialization detection via DevSkim built-in rules",
+  "generated_at": "2026-02-06T12:00:00Z",
+  "repo_path": "eval-repos/synthetic/csharp",
+  "expected": {
+    "language": "csharp",
+    "version": "1.0",
+    "aggregate_expectations": {
+      "min_total_issues": 2,
+      "max_false_positives": 1,
+      "required_categories": [
+        "deserialization"
+      ],
+      "notes": "DevSkim built-in rule DS425040 detects unsafe deserialization patterns including BinaryFormatter and TypeNameHandling configurations."
+    }
+  },
+  "files": {
+    "Deserialization.cs": {
+      "expected_categories": ["deserialization"],
+      "expected_issues": [
+        {
+          "category": "deserialization",
+          "count": 2,
+          "lines": [31, 42],
+          "notes": "BinaryFormatter.Deserialize and TypeNameHandling.All usage"
+        },
+        {
+          "rule_id": "DS425040",
+          "count": 2,
+          "description": "Do not deserialize untrusted data"
+        }
+      ],
+      "total_expected": 2,
+      "false_positives_allowed": 0,
+      "notes": "Tests unsafe deserialization detection: BinaryFormatter and TypeNameHandling.All"
+    }
+  }
+}

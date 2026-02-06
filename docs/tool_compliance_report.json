@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-02-06T10:36:41.267287+00:00",
+  "generated_at": "2026-02-06T15:10:11.405498+00:00",
   "summary": {
-    "failed": 1,
-    "passed": 0,
+    "failed": 0,
+    "passed": 1,
     "tool_count": 1
   },
   "tools": [
@@ -12,7 +12,7 @@
           "check_id": "run.analyze",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dependensee/outputs/9AB15700-6108-4BB7-A101-31B4A1A7908E/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dependensee/outputs/f23f9a48-fb85-4c81-8e04-da14641d23b3/output.json"
           ],
           "message": "Pre-existing analysis output found",
           "severity": "critical",
@@ -34,7 +34,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.05,
+          "duration_ms": 0.08,
           "evidence": [
             "PASS"
           ],
@@ -58,7 +58,7 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.03,
+          "duration_ms": 0.05,
           "evidence": [
             "PASS"
           ],
@@ -70,9 +70,9 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 0.05,
+          "duration_ms": 0.08,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dependensee/outputs/9AB15700-6108-4BB7-A101-31B4A1A7908E/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/dependensee/outputs/f23f9a48-fb85-4c81-8e04-da14641d23b3/output.json"
           ],
           "message": "Output JSON loaded",
           "severity": "high",
@@ -82,7 +82,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 0.47,
+          "duration_ms": 0.86,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -102,7 +102,7 @@
         },
         {
           "check_id": "output.path_consistency",
-          "duration_ms": 0.0,
+          "duration_ms": 0.01,
           "evidence": [],
           "message": "No path fields found to validate",
           "severity": "medium",
@@ -147,7 +147,7 @@
         },
         {
           "check_id": "output.metadata_consistency",
-          "duration_ms": 0.03,
+          "duration_ms": 0.04,
           "evidence": [],
           "message": "Metadata formats are consistent",
           "severity": "medium",
@@ -157,7 +157,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.07,
+          "duration_ms": 0.09,
           "evidence": [
             "1.0.0"
           ],
@@ -169,7 +169,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 99.96,
+          "duration_ms": 91.71,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -179,7 +179,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.22,
+          "duration_ms": 0.25,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -189,7 +189,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.12,
+          "duration_ms": 0.2,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -199,7 +199,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -209,7 +209,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.17,
+          "duration_ms": 0.25,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -219,7 +219,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.11,
+          "duration_ms": 0.14,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -231,7 +231,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.08,
+          "duration_ms": 0.1,
           "evidence": [],
           "message": "analyze target uses output directory argument",
           "severity": "medium",
@@ -241,7 +241,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.08,
+          "duration_ms": 0.11,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -251,7 +251,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.06,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -261,7 +261,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.11,
+          "duration_ms": 0.24,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -271,7 +271,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.1,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -281,7 +281,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.04,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -301,7 +301,7 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.17,
+          "duration_ms": 0.2,
           "evidence": [
             "project_detection.py",
             "circular_detection.py",
@@ -316,13 +316,15 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 5.08,
+          "duration_ms": 5.1,
           "evidence": [
-            "missing: {{ synthetic_baseline }}"
+            "base.py: evaluation_mode parameter present",
+            "primary judge: dependency_accuracy.py",
+            "prompt: dependency_accuracy.md has all placeholders"
           ],
-          "message": "Primary prompt (dependency_accuracy.md) missing required placeholders",
+          "message": "Synthetic evaluation context pattern implemented correctly",
           "severity": "high",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
@@ -348,7 +350,7 @@
         },
         {
           "check_id": "evaluation.programmatic_exists",
-          "duration_ms": 0.02,
+          "duration_ms": 0.04,
           "evidence": [
             "evaluation/results/evaluation_report.json"
           ],
@@ -360,7 +362,7 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.04,
+          "duration_ms": 0.05,
           "evidence": [
             "timestamp",
             "decision",
@@ -388,7 +390,7 @@
         },
         {
           "check_id": "evaluation.llm_exists",
-          "duration_ms": 0.02,
+          "duration_ms": 0.01,
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
@@ -443,7 +445,7 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.16,
+          "duration_ms": 0.15,
           "evidence": [
             "src/tools/dependensee/tests/unit/test_analyze.py"
           ],
@@ -455,7 +457,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 80.13,
+          "duration_ms": 76.21,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -465,7 +467,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 1.66,
+          "duration_ms": 1.85,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -475,7 +477,7 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 34.85,
+          "duration_ms": 36.03,
           "evidence": [
             "Fixture: dependensee_output.json"
           ],
@@ -487,7 +489,7 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 0.41,
+          "duration_ms": 0.35,
           "evidence": [
             "paths",
             "required_fields"
@@ -500,7 +502,7 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.16,
+          "duration_ms": 0.15,
           "evidence": [],
           "message": "Adapter DependenseeAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
@@ -510,7 +512,7 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.22,
+          "duration_ms": 0.2,
           "evidence": [
             "Found 3 table(s)"
           ],
@@ -546,19 +548,21 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.41,
+          "duration_ms": 0.16,
           "evidence": [
-            "Missing rollup model for None (project-level tool)"
+            "stg_dependensee_package_refs.sql",
+            "stg_dependensee_projects.sql",
+            "stg_dependensee_project_refs.sql"
           ],
-          "message": "Missing dbt model coverage",
+          "message": "dbt models present for tool",
           "severity": "high",
-          "status": "fail",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 6.17,
+          "duration_ms": 6.6,
           "evidence": [
             "DependenseeProject",
             "DependenseeProjectReference",
@@ -572,7 +576,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 0.21,
+          "duration_ms": 0.27,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -582,9 +586,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 13.37,
+          "duration_ms": 19.24,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (161 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (170 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -604,7 +608,7 @@
         }
       ],
       "name": "dependensee",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "tools_root": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools"

@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "scenario": "clean",
+  "language": "csharp",
+  "description": "Negative test case - secure coding patterns with no expected issues",
+  "generated_at": "2026-02-06T12:00:00Z",
+  "repo_path": "eval-repos/synthetic/csharp",
+  "expected": {
+    "language": "csharp",
+    "version": "1.0",
+    "aggregate_expectations": {
+      "min_total_issues": 0,
+      "max_false_positives": 2,
+      "required_categories": [],
+      "notes": "This ground truth validates that secure coding patterns do not produce false positives. SafeCode.cs uses: parameterized SQL, SHA256/SHA512, RNGCryptoServiceProvider, AES with CBC, safe JSON serialization, HTML encoding."
+    }
+  },
+  "files": {
+    "SafeCode.cs": {
+      "expected_categories": [],
+      "expected_issues": [],
+      "total_expected": 0,
+      "false_positives_allowed": 2,
+      "notes": "Secure patterns: parameterized SQL, SHA256, RNGCryptoServiceProvider, AES-CBC, safe JsonConvert, HTML encoding"
+    }
+  }
+}
