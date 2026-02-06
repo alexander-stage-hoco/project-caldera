@@ -1,0 +1,264 @@
+{
+  "tool": "git-fame",
+  "version": "3.1.1",
+  "generated_at": "2026-02-06T12:43:10.247485+00:00",
+  "description": "Evaluation scorecard for git-fame git analytics",
+  "summary": {
+    "total_checks": 28,
+    "passed": 28,
+    "failed": 0,
+    "score": 1.0,
+    "score_percent": 100.0,
+    "normalized_score": 5.0,
+    "decision": "STRONG_PASS"
+  },
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "Output Quality",
+      "weight": 0.2,
+      "total_checks": 6,
+      "passed": 6,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.0,
+      "checks": [
+        {
+          "check_id": "OQ-1",
+          "name": "OQ-1",
+          "passed": true,
+          "message": "schema_version present in all 5 analyses"
+        },
+        {
+          "check_id": "OQ-2",
+          "name": "OQ-2",
+          "passed": true,
+          "message": "Valid ISO8601 timestamps in all 5 analyses"
+        },
+        {
+          "check_id": "OQ-3",
+          "name": "OQ-3",
+          "passed": true,
+          "message": "All 5 required summary fields present"
+        },
+        {
+          "check_id": "OQ-4",
+          "name": "OQ-4",
+          "passed": true,
+          "message": "All required fields present for 16 authors"
+        },
+        {
+          "check_id": "OQ-5",
+          "name": "OQ-5",
+          "passed": true,
+          "message": "No file-level data present (author-level analysis only)"
+        },
+        {
+          "check_id": "OQ-6",
+          "name": "OQ-6",
+          "passed": true,
+          "message": "All 2 JSON files are valid"
+        }
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Authorship Accuracy",
+      "weight": 0.2,
+      "total_checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.0,
+      "checks": [
+        {
+          "check_id": "AA-1",
+          "name": "AA-1",
+          "passed": true,
+          "message": "No expected_total_loc in ground truth (skipped)"
+        },
+        {
+          "check_id": "AA-2",
+          "name": "AA-2",
+          "passed": true,
+          "message": "No expected_author_count in ground truth (skipped)"
+        },
+        {
+          "check_id": "AA-3",
+          "name": "AA-3",
+          "passed": true,
+          "message": "No expected_top_author_loc in ground truth (skipped)"
+        },
+        {
+          "check_id": "AA-4",
+          "name": "AA-4",
+          "passed": true,
+          "message": "No expected_authors in ground truth (skipped)"
+        },
+        {
+          "check_id": "AA-5",
+          "name": "AA-5",
+          "passed": true,
+          "message": "No expected_bus_factor in ground truth (skipped)"
+        },
+        {
+          "check_id": "AA-6",
+          "name": "AA-6",
+          "passed": true,
+          "message": "No expected_hhi in ground truth (skipped)"
+        },
+        {
+          "check_id": "AA-7",
+          "name": "AA-7",
+          "passed": true,
+          "message": "No expected_top_two_pct in ground truth (skipped)"
+        },
+        {
+          "check_id": "AA-8",
+          "name": "AA-8",
+          "passed": true,
+          "message": "Author-level attribution present (4 authors)"
+        }
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Reliability",
+      "weight": 0.15,
+      "total_checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.75,
+      "checks": [
+        {
+          "check_id": "RL-1",
+          "name": "RL-1",
+          "passed": true,
+          "message": "Two consecutive runs produced identical output"
+        },
+        {
+          "check_id": "RL-2",
+          "name": "RL-2",
+          "passed": true,
+          "message": "No empty repository to test (skipped)"
+        },
+        {
+          "check_id": "RL-3",
+          "name": "RL-3",
+          "passed": true,
+          "message": "Single-author repository handled correctly"
+        },
+        {
+          "check_id": "RL-4",
+          "name": "RL-4",
+          "passed": true,
+          "message": "No rename test repository available (git-fame uses git blame which tracks renames)"
+        }
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "Performance",
+      "weight": 0.15,
+      "total_checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.75,
+      "checks": [
+        {
+          "check_id": "PF-1",
+          "name": "PF-1",
+          "passed": true,
+          "message": "Completed in 0.23s (threshold: 5.0s)"
+        },
+        {
+          "check_id": "PF-2",
+          "name": "PF-2",
+          "passed": true,
+          "message": "Completed in 0.23s (threshold: 30.0s)"
+        },
+        {
+          "check_id": "PF-3",
+          "name": "PF-3",
+          "passed": true,
+          "message": "Memory usage: 23.5MB (threshold: 500.0MB)"
+        },
+        {
+          "check_id": "PF-4",
+          "name": "PF-4",
+          "passed": true,
+          "message": "Second run 14.7% faster (0.28s -> 0.24s)"
+        }
+      ]
+    },
+    {
+      "id": "D5",
+      "name": "Integration Fit",
+      "weight": 0.15,
+      "total_checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.75,
+      "checks": [
+        {
+          "check_id": "IF-1",
+          "name": "IF-1",
+          "passed": true,
+          "message": "All paths are properly normalized"
+        },
+        {
+          "check_id": "IF-2",
+          "name": "IF-2",
+          "passed": true,
+          "message": "All 4 required metrics present for L5/L8/L9 lenses"
+        },
+        {
+          "check_id": "IF-3",
+          "name": "IF-3",
+          "passed": true,
+          "message": "Author-level tool - directory rollups not applicable"
+        },
+        {
+          "check_id": "IF-4",
+          "name": "IF-4",
+          "passed": true,
+          "message": "Output matches collector schema (5 analyses validated)"
+        }
+      ]
+    },
+    {
+      "id": "D6",
+      "name": "Installation",
+      "weight": 0.15,
+      "total_checks": 2,
+      "passed": 2,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.75,
+      "checks": [
+        {
+          "check_id": "IN-1",
+          "name": "IN-1",
+          "passed": true,
+          "message": "git-fame installed, version: 3.1.1"
+        },
+        {
+          "check_id": "IN-2",
+          "name": "IN-2",
+          "passed": true,
+          "message": "git-fame --help returns valid help text"
+        }
+      ]
+    }
+  ],
+  "critical_failures": [],
+  "thresholds": {
+    "STRONG_PASS": ">= 4.0 (80%+)",
+    "PASS": ">= 3.5 (70%+)",
+    "WEAK_PASS": ">= 3.0 (60%+)",
+    "FAIL": "< 3.0 (below 60%)"
+  }
+}

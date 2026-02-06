@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "scenario": "multi-branch",
+  "description": "Repository with multiple branches (master, develop, feature-payments, feature-notifications, release-1.0) and four contributors with varying activity across branches. Tests git-fame's ability to correctly analyze authorship across complex branching patterns and merge histories.",
+  "repo_path": "eval-repos/synthetic/multi-branch",
+  "expected": {
+    "summary": {
+      "author_count": 4,
+      "file_count": {"min": 10, "max": 10},
+      "total_loc": {"min": 500, "max": 650},
+      "description": "10 Python files across main, features/, and utils/ directories, ~570 LOC total"
+    },
+    "concentration_metrics": {
+      "bus_factor": {"min": 1, "max": 2},
+      "hhi_index": {"min": 0.20, "max": 0.35},
+      "gini_coefficient": {"min": 0.10, "max": 0.30},
+      "top_author_pct": {"min": 25.0, "max": 45.0},
+      "description": "Moderate-to-low concentration depending on how git-fame handles merged branches"
+    },
+    "authors": [
+      {
+        "name": "Alice Developer",
+        "email": "alice@example.com",
+        "loc_pct": {"min": 25.0, "max": 35.0},
+        "file_count": {"min": 3, "max": 4},
+        "description": "main.py (60) + config.py (40) + utils/helpers.py (55) + version.py (10) = ~165 LOC"
+      },
+      {
+        "name": "Bob Engineer",
+        "email": "bob@example.com",
+        "loc_pct": {"min": 22.0, "max": 30.0},
+        "file_count": 2,
+        "description": "features/auth.py (80) + features/api.py (70) = 150 LOC"
+      },
+      {
+        "name": "Carol Coder",
+        "email": "carol@example.com",
+        "loc_pct": {"min": 20.0, "max": 28.0},
+        "file_count": 2,
+        "description": "features/payments.py (90) + features/invoices.py (50) = 140 LOC"
+      },
+      {
+        "name": "Dave Designer",
+        "email": "dave@example.com",
+        "loc_pct": {"min": 17.0, "max": 25.0},
+        "file_count": 2,
+        "description": "features/notifications.py (70) + features/templates.py (45) = 115 LOC"
+      }
+    ],
+    "branching": {
+      "branch_count": {"min": 4, "max": 6},
+      "branches": ["master", "develop", "feature-payments", "feature-notifications", "release-1.0"],
+      "merge_commit_count": {"min": 2, "max": 4},
+      "description": "Tests that merged branch contributions are correctly attributed"
+    }
+  },
+  "risk_indicators": {
+    "high_bus_factor_risk": false,
+    "description": "Moderate bus factor risk - Alice contributes slightly more but ownership is reasonably distributed"
+  },
+  "thresholds": {
+    "max_analysis_time_ms": 10000,
+    "description": "Slightly longer analysis time due to multiple branches and merge history"
+  }
+}

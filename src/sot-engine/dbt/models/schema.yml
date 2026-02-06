@@ -37,6 +37,8 @@ sources:
       - name: lz_dependensee_projects
       - name: lz_dependensee_project_refs
       - name: lz_dependensee_package_refs
+      - name: lz_git_fame_authors
+      - name: lz_git_fame_summary
 
 models:
   - name: stg_lz_tool_runs
@@ -1998,3 +2000,54 @@ models:
                   - medium
                   - high
                   - critical
+
+  - name: stg_lz_git_fame_authors
+    description: "Per-author authorship metrics from git-fame analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: author_name
+        tests:
+          - not_null
+      - name: surviving_loc
+        tests:
+          - not_null
+      - name: ownership_pct
+        tests:
+          - not_null
+      - name: commit_count
+        tests:
+          - not_null
+      - name: files_touched
+        tests:
+          - not_null
+
+  - name: stg_lz_git_fame_summary
+    description: "Repository-level authorship summary from git-fame analysis"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - unique
+      - name: repo_id
+        tests:
+          - not_null
+      - name: author_count
+        tests:
+          - not_null
+      - name: total_loc
+        tests:
+          - not_null
+      - name: hhi_index
+        tests:
+          - not_null
+      - name: bus_factor
+        tests:
+          - not_null
+      - name: top_author_pct
+        tests:
+          - not_null
+      - name: top_two_pct
+        tests:
+          - not_null

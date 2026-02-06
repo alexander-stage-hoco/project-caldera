@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "tool_name": "git-fame",
+    "tool_version": "2.0.0",
+    "run_id": "11111111-1111-1111-1111-111111111111",
+    "repo_id": "22222222-2222-2222-2222-222222222222",
+    "repo_name": "fixture-repo",
+    "branch": "main",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-01-25T09:00:00Z",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "summary": {
+      "author_count": 2,
+      "total_loc": 1000,
+      "hhi_index": 0.52,
+      "bus_factor": 2,
+      "top_author_pct": 60.0,
+      "top_two_pct": 100.0
+    },
+    "authors": [
+      {
+        "author": "Alice Developer",
+        "email": "alice@example.com",
+        "loc": 600,
+        "ownership_pct": 60.0,
+        "insertions": 800,
+        "deletions": 200,
+        "commits": 45,
+        "files": 25
+      },
+      {
+        "author": "Bob Contributor",
+        "email": "bob@example.com",
+        "loc": 400,
+        "ownership_pct": 40.0,
+        "insertions": 500,
+        "deletions": 100,
+        "commits": 30,
+        "files": 18
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "scenario": "single-author",
+  "description": "Repository where all code is written by a single author. Represents maximum ownership concentration with HHI=1.0 and bus_factor=1. Tests git-fame's ability to correctly identify single-author repos and calculate concentration metrics at their theoretical maximum.",
+  "repo_path": "eval-repos/synthetic/single-author",
+  "expected": {
+    "summary": {
+      "author_count": 1,
+      "file_count": {"min": 4, "max": 4},
+      "total_loc": {"min": 300, "max": 400},
+      "description": "4 Python files (main.py, utils.py, config.py, models.py) totaling ~350 LOC"
+    },
+    "concentration_metrics": {
+      "bus_factor": 1,
+      "hhi_index": {"min": 0.99, "max": 1.01},
+      "gini_coefficient": {"min": 0.0, "max": 0.01},
+      "top_author_pct": {"min": 99.0, "max": 100.1},
+      "description": "Maximum concentration - single author owns 100% of code"
+    },
+    "authors": [
+      {
+        "name": "Alice Developer",
+        "email": "alice@example.com",
+        "loc_pct": {"min": 99.0, "max": 100.1},
+        "file_count": 4,
+        "commit_count": {"min": 4, "max": 4}
+      }
+    ]
+  },
+  "thresholds": {
+    "max_analysis_time_ms": 5000,
+    "description": "Analysis should complete quickly for small repo"
+  }
+}

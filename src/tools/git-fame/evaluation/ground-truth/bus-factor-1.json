@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "scenario": "bus-factor-1",
+  "description": "Repository with a dominant author (90%) and two minor contributors (5% each). This is a high-risk bus factor scenario where one person owns the vast majority of the codebase. Tests git-fame's ability to detect dangerous concentration levels.",
+  "repo_path": "eval-repos/synthetic/bus-factor-1",
+  "expected": {
+    "summary": {
+      "author_count": 3,
+      "file_count": {"min": 6, "max": 6},
+      "total_loc": {"min": 300, "max": 400},
+      "description": "6 Python files - 4 by dominant author, 1 each by minor contributors, ~350 LOC total"
+    },
+    "concentration_metrics": {
+      "bus_factor": 1,
+      "hhi_index": {"min": 0.80, "max": 0.86},
+      "gini_coefficient": {"min": 0.55, "max": 0.65},
+      "top_author_pct": {"min": 88.0, "max": 93.0},
+      "description": "High concentration - HHI = 0.90^2 + 0.05^2 + 0.05^2 = 0.815"
+    },
+    "authors": [
+      {
+        "name": "Alice Developer",
+        "email": "alice@example.com",
+        "loc_pct": {"min": 88.0, "max": 93.0},
+        "file_count": 4,
+        "commit_count": {"min": 4, "max": 4},
+        "description": "90% of LOC - main.py (80) + core.py (100) + services.py (85) + models.py (50) = ~315 LOC"
+      },
+      {
+        "name": "Bob Engineer",
+        "email": "bob@example.com",
+        "loc_pct": {"min": 3.0, "max": 7.0},
+        "file_count": 1,
+        "commit_count": {"min": 1, "max": 1},
+        "description": "5% of LOC - tests/test_main.py (18 LOC)"
+      },
+      {
+        "name": "Carol Coder",
+        "email": "carol@example.com",
+        "loc_pct": {"min": 3.0, "max": 7.0},
+        "file_count": 1,
+        "commit_count": {"min": 1, "max": 1},
+        "description": "5% of LOC - config.py (17 LOC)"
+      }
+    ]
+  },
+  "risk_indicators": {
+    "high_bus_factor_risk": true,
+    "description": "This repository has critical bus factor risk - if Alice leaves, 90% of the codebase knowledge is lost"
+  },
+  "thresholds": {
+    "max_analysis_time_ms": 5000,
+    "description": "Analysis should complete quickly for small repo"
+  }
+}

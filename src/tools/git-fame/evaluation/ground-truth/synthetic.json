@@ -1,0 +1,51 @@
+{
+  "description": "Ground truth values for synthetic test repositories with controlled authorship patterns",
+  "generated_from": "scripts/build_repos.py with known author distributions",
+  "repos": {
+    "single-author": {
+      "description": "All code by single author - maximum concentration",
+      "expected": {
+        "author_count": 1,
+        "bus_factor": 1,
+        "hhi_index": {"min": 0.99, "max": 1.01},
+        "top_author_pct": {"min": 99.0, "max": 100.1}
+      }
+    },
+    "multi-author": {
+      "description": "Three authors with 50/30/20 split",
+      "expected": {
+        "author_count": 3,
+        "bus_factor": 1,
+        "hhi_index": {"min": 0.35, "max": 0.42},
+        "top_author_pct": {"min": 48.0, "max": 53.0}
+      }
+    },
+    "bus-factor-1": {
+      "description": "Dominant author (90%) with two minor contributors (5% each)",
+      "expected": {
+        "author_count": 3,
+        "bus_factor": 1,
+        "hhi_index": {"min": 0.80, "max": 0.86},
+        "top_author_pct": {"min": 88.0, "max": 93.0}
+      }
+    },
+    "balanced": {
+      "description": "Four authors with approximately equal contributions (25% each)",
+      "expected": {
+        "author_count": 4,
+        "bus_factor": 2,
+        "hhi_index": {"min": 0.24, "max": 0.27},
+        "top_author_pct": {"min": 23.0, "max": 27.0}
+      }
+    },
+    "multi-branch": {
+      "description": "Four authors across multiple branches with varying contribution patterns",
+      "expected": {
+        "author_count": 4,
+        "bus_factor": {"min": 1, "max": 2},
+        "hhi_index": {"min": 0.20, "max": 0.35},
+        "top_author_pct": {"min": 25.0, "max": 45.0}
+      }
+    }
+  }
+}

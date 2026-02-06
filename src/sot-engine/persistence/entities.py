@@ -947,3 +947,65 @@ class DependenseePackageReference:
         _validate_positive_pk(self.run_pk)
         _validate_relative_path(self.project_path, "project_path")
         _validate_required_string(self.package_name, "package_name")
+
+
+# =============================================================================
+# git-fame Entities
+# =============================================================================
+
+@dataclass(frozen=True)
+class GitFameAuthor:
+    """Per-author authorship metrics from git-fame analysis.
+
+    git-fame provides line-level authorship attribution via git blame.
+    """
+    run_pk: int
+    author_name: str
+    author_email: Optional[str]
+    surviving_loc: int
+    ownership_pct: float
+    insertions_total: int
+    deletions_total: int
+    commit_count: int
+    files_touched: int
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_required_string(self.author_name, "author_name")
+        _validate_fields_non_negative({
+            "surviving_loc": self.surviving_loc,
+            "insertions_total": self.insertions_total,
+            "deletions_total": self.deletions_total,
+            "commit_count": self.commit_count,
+            "files_touched": self.files_touched,
+        })
+        if self.ownership_pct < 0 or self.ownership_pct > 100:
+            raise ValueError("ownership_pct must be between 0 and 100")
+
+
+@dataclass(frozen=True)
+class GitFameSummary:
+    """Repository-level summary metrics from git-fame analysis."""
+    run_pk: int
+    repo_id: str
+    author_count: int
+    total_loc: int
+    hhi_index: float
+    bus_factor: int
+    top_author_pct: float
+    top_two_pct: float
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_identifier(self.repo_id, "repo_id")
+        _validate_fields_non_negative({
+            "author_count": self.author_count,
+            "total_loc": self.total_loc,
+            "bus_factor": self.bus_factor,
+        })
+        if self.hhi_index < 0 or self.hhi_index > 1:
+            raise ValueError("hhi_index must be between 0 and 1")
+        if self.top_author_pct < 0 or self.top_author_pct > 100:
+            raise ValueError("top_author_pct must be between 0 and 100")
+        if self.top_two_pct < 0 or self.top_two_pct > 100:
+            raise ValueError("top_two_pct must be between 0 and 100")

@@ -1,0 +1,25 @@
+# Tool compliance rules for git-fame
+required_check_modules:
+  - authorship_accuracy.py
+  - output_quality.py
+  - reliability.py
+  - performance.py
+  - integration_fit.py
+  - installation.py
+
+required_prompts:
+  - authorship_quality.md
+  - bus_factor_accuracy.md
+  - concentration_metrics.md
+  - evidence_quality.md
+  - integration_readiness.md
+  - output_completeness.md
+
+ground_truth_mode: synthetic
+
+evaluation_outputs:
+  - scorecard.md
+
+adapter:
+  module: persistence.adapters.git_fame_adapter
+  class: GitFameAdapter

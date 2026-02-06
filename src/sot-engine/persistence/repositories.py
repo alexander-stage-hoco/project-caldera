@@ -15,6 +15,8 @@ from .entities import (
     DotcoverMethodCoverage,
     DotcoverTypeCoverage,
     FileImport,
+    GitFameAuthor,
+    GitFameSummary,
     GitSizerLfsCandidate,
     GitSizerMetric,
     GitSizerViolation,
@@ -823,5 +825,45 @@ class DependenseeRepository(BaseRepository):
             rows,
             lambda r: (
                 r.run_pk, r.project_path, r.package_name, r.package_version,
+            ),
+        )
+
+
+class GitFameRepository(BaseRepository):
+    """Repository for git-fame authorship analysis data."""
+
+    _AUTHOR_COLUMNS = (
+        "run_pk", "author_name", "author_email", "surviving_loc",
+        "ownership_pct", "insertions_total", "deletions_total",
+        "commit_count", "files_touched",
+    )
+
+    _SUMMARY_COLUMNS = (
+        "run_pk", "repo_id", "author_count", "total_loc",
+        "hhi_index", "bus_factor", "top_author_pct", "top_two_pct",
+    )
+
+    def insert_authors(self, rows: Iterable[GitFameAuthor]) -> None:
+        """Insert per-author authorship metrics."""
+        self._insert_bulk(
+            "lz_git_fame_authors",
+            self._AUTHOR_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.author_name, r.author_email, r.surviving_loc,
+                r.ownership_pct, r.insertions_total, r.deletions_total,
+                r.commit_count, r.files_touched,
+            ),
+        )
+
+    def insert_summary(self, rows: Iterable[GitFameSummary]) -> None:
+        """Insert repository-level summary metrics."""
+        self._insert_bulk(
+            "lz_git_fame_summary",
+            self._SUMMARY_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.repo_id, r.author_count, r.total_loc,
+                r.hhi_index, r.bus_factor, r.top_author_pct, r.top_two_pct,
             ),
         )

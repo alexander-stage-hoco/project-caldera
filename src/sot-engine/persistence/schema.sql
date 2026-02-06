@@ -527,3 +527,33 @@ CREATE TABLE lz_dependensee_package_refs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (run_pk, project_path, package_name)
 );
+
+-- =============================================================================
+-- git-fame: Author-level authorship metrics
+-- =============================================================================
+
+CREATE TABLE lz_git_fame_authors (
+    run_pk BIGINT NOT NULL,
+    author_name VARCHAR NOT NULL,
+    author_email VARCHAR,
+    surviving_loc INTEGER NOT NULL,
+    ownership_pct DOUBLE NOT NULL,
+    insertions_total INTEGER NOT NULL,
+    deletions_total INTEGER NOT NULL,
+    commit_count INTEGER NOT NULL,
+    files_touched INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, author_name)
+);
+
+CREATE TABLE lz_git_fame_summary (
+    run_pk BIGINT NOT NULL PRIMARY KEY,
+    repo_id VARCHAR NOT NULL,
+    author_count INTEGER NOT NULL,
+    total_loc INTEGER NOT NULL,
+    hhi_index DOUBLE NOT NULL,
+    bus_factor INTEGER NOT NULL,
+    top_author_pct DOUBLE NOT NULL,
+    top_two_pct DOUBLE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

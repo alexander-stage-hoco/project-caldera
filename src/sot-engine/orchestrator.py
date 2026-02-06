@@ -17,7 +17,7 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
+from persistence.adapters import DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitFameAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
 from persistence.repositories import (
@@ -26,6 +26,7 @@ from persistence.repositories import (
     DependenseeRepository,
     DevskimRepository,
     DotcoverRepository,
+    GitFameRepository,
     GitSizerRepository,
     GitleaksRepository,
     LayoutRepository,
@@ -266,6 +267,7 @@ TOOL_INGESTION_CONFIGS = [
     ToolIngestionConfig("sonarqube", SonarqubeAdapter, SonarqubeRepository, validate_metadata=False),
     ToolIngestionConfig("trivy", TrivyAdapter, TrivyRepository, validate_metadata=False),
     ToolIngestionConfig("git-sizer", GitSizerAdapter, GitSizerRepository),
+    ToolIngestionConfig("git-fame", GitFameAdapter, GitFameRepository),
     ToolIngestionConfig("gitleaks", GitleaksAdapter, GitleaksRepository),
     ToolIngestionConfig("symbol-scanner", SymbolScannerAdapter, SymbolScannerRepository),
     ToolIngestionConfig("scancode", ScancodeAdapter, ScancodeRepository),

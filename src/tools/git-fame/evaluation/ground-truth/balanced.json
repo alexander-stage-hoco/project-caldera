@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "scenario": "balanced",
+  "description": "Repository with four authors having approximately equal contributions (25% each). This represents the ideal low-risk scenario with distributed ownership. Tests git-fame's ability to recognize healthy team distributions.",
+  "repo_path": "eval-repos/synthetic/balanced",
+  "expected": {
+    "summary": {
+      "author_count": 4,
+      "file_count": {"min": 8, "max": 8},
+      "total_loc": {"min": 300, "max": 400},
+      "description": "8 Python files across module_a/, module_b/, module_c/, module_d/ directories, ~350 LOC total"
+    },
+    "concentration_metrics": {
+      "bus_factor": 2,
+      "hhi_index": {"min": 0.24, "max": 0.27},
+      "gini_coefficient": {"min": 0.0, "max": 0.05},
+      "top_author_pct": {"min": 23.0, "max": 27.0},
+      "description": "Minimum concentration - HHI = 4 * 0.25^2 = 0.25 (theoretical minimum for 4 authors)"
+    },
+    "authors": [
+      {
+        "name": "Alice Developer",
+        "email": "alice@example.com",
+        "loc_pct": {"min": 23.0, "max": 27.0},
+        "file_count": 2,
+        "commit_count": {"min": 2, "max": 2},
+        "description": "25% of LOC - module_a/main.py (50) + module_a/utils.py (38) = 88 LOC"
+      },
+      {
+        "name": "Bob Engineer",
+        "email": "bob@example.com",
+        "loc_pct": {"min": 23.0, "max": 27.0},
+        "file_count": 2,
+        "commit_count": {"min": 2, "max": 2},
+        "description": "25% of LOC - module_b/main.py (50) + module_b/utils.py (38) = 88 LOC"
+      },
+      {
+        "name": "Carol Coder",
+        "email": "carol@example.com",
+        "loc_pct": {"min": 23.0, "max": 27.0},
+        "file_count": 2,
+        "commit_count": {"min": 2, "max": 2},
+        "description": "25% of LOC - module_c/main.py (50) + module_c/utils.py (38) = 88 LOC"
+      },
+      {
+        "name": "Dave Designer",
+        "email": "dave@example.com",
+        "loc_pct": {"min": 23.0, "max": 27.0},
+        "file_count": 2,
+        "commit_count": {"min": 2, "max": 2},
+        "description": "25% of LOC - module_d/main.py (50) + module_d/utils.py (36) = 86 LOC"
+      }
+    ]
+  },
+  "risk_indicators": {
+    "high_bus_factor_risk": false,
+    "description": "Low bus factor risk - ownership is well distributed across the team"
+  },
+  "thresholds": {
+    "max_analysis_time_ms": 5000,
+    "description": "Analysis should complete quickly for small repo"
+  }
+}
