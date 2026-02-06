@@ -1,0 +1,79 @@
+{
+  "tool": "dotcover",
+  "version": "1.0.0",
+  "generated_at": "2026-02-06T08:39:37.373735+00:00",
+  "description": "Evaluation scorecard for dotCover code coverage analysis",
+  "summary": {
+    "total_checks": 3,
+    "passed": 2,
+    "failed": 0,
+    "score": 0.6667,
+    "score_percent": 66.67,
+    "normalized_score": 3.33,
+    "decision": "WEAK_PASS"
+  },
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "Accuracy",
+      "weight": 0.3333333333333333,
+      "total_checks": 1,
+      "passed": 1,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.67,
+      "checks": [
+        {
+          "check_id": "accuracy.file_count",
+          "name": "accuracy.file_count",
+          "passed": true,
+          "message": "File count matches: 0"
+        }
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Coverage",
+      "weight": 0.3333333333333333,
+      "total_checks": 1,
+      "passed": 0,
+      "failed": 1,
+      "score": 0.0,
+      "weighted_score": 0.0,
+      "checks": [
+        {
+          "check_id": "coverage.files_analyzed",
+          "name": "coverage.files_analyzed",
+          "passed": false,
+          "message": "No files in output"
+        }
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Performance",
+      "weight": 0.3333333333333333,
+      "total_checks": 1,
+      "passed": 1,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.67,
+      "checks": [
+        {
+          "check_id": "performance.execution_time",
+          "name": "performance.execution_time",
+          "passed": true,
+          "message": "Execution time check not implemented"
+        }
+      ]
+    }
+  ],
+  "critical_failures": [],
+  "thresholds": {
+    "STRONG_PASS": ">= 4.0 (80%+)",
+    "PASS": ">= 3.5 (70%+)",
+    "WEAK_PASS": ">= 3.0 (60%+)",
+    "FAIL": "< 3.0 (below 60%)"
+  },
+  "metadata": {}
+}

@@ -57,10 +57,18 @@ analyze: $(VENV_READY)  ## Run analysis on a repository
 # Evaluation targets
 # ============================================
 
+# Synthetic test run output (stable path for compliance checking)
+SYNTHETIC_OUTPUT_DIR ?= outputs/dotcover-test-run
+
 evaluate: $(VENV_READY)  ## Run programmatic evaluation
+	@if [ ! -f "$(SYNTHETIC_OUTPUT_DIR)/output.json" ]; then \
+		echo "Synthetic output not found at $(SYNTHETIC_OUTPUT_DIR)"; \
+		echo "Running analysis on synthetic repo first..."; \
+		$(MAKE) analyze REPO_PATH=eval-repos/synthetic RUN_ID=dotcover-test-run; \
+	fi
 	@mkdir -p $(EVAL_OUTPUT_DIR)
 	$(PYTHON_VENV) -m scripts.evaluate \
-		--results-dir $(OUTPUT_DIR) \
+		--results-dir $(SYNTHETIC_OUTPUT_DIR) \
 		--ground-truth-dir evaluation/ground-truth \
 		--output $(EVAL_OUTPUT_DIR)/evaluation_report.json
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/evaluation_report.json"

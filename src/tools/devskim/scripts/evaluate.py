@@ -145,6 +145,92 @@ def generate_scorecard_json(report: EvaluationReport) -> dict:
     }
 
 
+def generate_scorecard_md(scorecard: dict) -> str:
+    """Generate comprehensive markdown scorecard."""
+    summary = scorecard.get("summary", {})
+    dimensions = scorecard.get("dimensions", [])
+    critical_failures = scorecard.get("critical_failures", [])
+    thresholds = scorecard.get("thresholds", {})
+
+    lines = [
+        "# DevSkim Evaluation Scorecard",
+        "",
+        f"**Generated:** {scorecard.get('generated_at', '')}",
+        f"**Decision:** {summary.get('decision', '')}",
+        f"**Score:** {summary.get('score_percent', 0)}%",
+        "",
+        "## Summary",
+        "",
+        "| Metric | Value |",
+        "|--------|-------|",
+        f"| Total Checks | {summary.get('total_checks', 0)} |",
+        f"| Passed | {summary.get('passed', 0)} |",
+        f"| Failed | {summary.get('failed', 0)} |",
+        f"| Raw Score | {summary.get('score', 0):.3f} |",
+        f"| Normalized Score | {summary.get('normalized_score', 0):.2f}/5.0 |",
+        "",
+    ]
+
+    # Dimensions table
+    if dimensions:
+        lines.append("## Dimensions")
+        lines.append("")
+        lines.append("| Dimension | Checks | Passed | Score |")
+        lines.append("|-----------|--------|--------|-------|")
+        for dim in dimensions:
+            score_pct = dim.get("score", 0) / 5.0 * 100 if dim.get("score") else 0
+            lines.append(
+                f"| {dim.get('name', '')} | {dim.get('total_checks', 0)} | "
+                f"{dim.get('passed', 0)}/{dim.get('total_checks', 0)} | {score_pct:.1f}% |"
+            )
+        lines.append("")
+
+    # Critical failures
+    if critical_failures:
+        lines.append("## Critical Failures")
+        lines.append("")
+        for failure in critical_failures:
+            lines.append(f"- **{failure.get('check_id', '')}** - {failure.get('name', '')}: {failure.get('message', '')}")
+        lines.append("")
+
+    # Detailed results by category
+    if dimensions:
+        lines.append("## Detailed Results")
+        lines.append("")
+        for dim in dimensions:
+            lines.append(f"### {dim.get('name', '')}")
+            lines.append("")
+            lines.append("| Check | Status | Message |")
+            lines.append("|-------|--------|---------|")
+            for check in dim.get("checks", []):
+                status = "PASS" if check.get("passed") else "FAIL"
+                msg = check.get("message", "")
+                msg = msg[:50] + "..." if len(msg) > 50 else msg
+                lines.append(f"| {check.get('check_id', '')} | {status} | {msg} |")
+            lines.append("")
+
+    # Decision thresholds
+    if thresholds:
+        lines.append("## Decision Thresholds")
+        lines.append("")
+        lines.append("| Decision | Criteria |")
+        lines.append("|----------|----------|")
+        for decision, criteria in thresholds.items():
+            lines.append(f"| {decision} | {criteria} |")
+        lines.append("")
+
+    # Footer
+    lines.append("---")
+    lines.append("")
+    metadata = scorecard.get("metadata", {})
+    if metadata.get("analysis_path"):
+        lines.append(f"*Analysis: `{metadata.get('analysis_path')}`*")
+    if metadata.get("ground_truth_dir"):
+        lines.append(f"*Ground Truth: `{metadata.get('ground_truth_dir')}`*")
+
+    return "\n".join(lines)
+
+
 # =============================================================================
 # Evaluation Runner
 # =============================================================================
@@ -361,14 +447,21 @@ def main():
     if not args.json:
         print(f"  Results saved to: {output_path}")
 
-    # Generate and save scorecard.json
+    # Generate and save scorecard.json and scorecard.md
     scorecard_json = generate_scorecard_json(report)
-    scorecard_path = script_dir / "evaluation" / "scorecard.json"
-    scorecard_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(scorecard_path, "w") as f:
+    scorecard_dir = script_dir / "evaluation"
+    scorecard_dir.mkdir(parents=True, exist_ok=True)
+
+    scorecard_json_path = scorecard_dir / "scorecard.json"
+    with open(scorecard_json_path, "w") as f:
         json.dump(scorecard_json, f, indent=2)
+
+    scorecard_md_path = scorecard_dir / "scorecard.md"
+    scorecard_md_path.write_text(generate_scorecard_md(scorecard_json))
+
     if not args.json:
-        print(f"  Scorecard saved to: {scorecard_path}")
+        print(f"  Scorecard JSON saved to: {scorecard_json_path}")
+        print(f"  Scorecard Markdown saved to: {scorecard_md_path}")
         print()
 
     # Exit with appropriate code

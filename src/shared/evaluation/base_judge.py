@@ -467,10 +467,11 @@ Respond with ONLY a JSON object:
 
     @staticmethod
     def extract_files(analysis: dict[str, Any]) -> list[dict[str, Any]]:
-        """Extract files list from analysis data, handling both formats.
+        """Extract files list from analysis data, handling multiple formats.
 
         Supports:
             - data["results"]["files"] (current format)
+            - data["data"]["files"] (envelope format, e.g., semgrep)
             - data["files"] (legacy format)
 
         Args:
@@ -482,15 +483,19 @@ Respond with ONLY a JSON object:
         # Try current format first (results.files)
         if "results" in analysis and isinstance(analysis["results"], dict):
             return analysis["results"].get("files", [])
+        # Try envelope format (data.files) - used by semgrep and similar tools
+        if "data" in analysis and isinstance(analysis["data"], dict):
+            return analysis["data"].get("files", [])
         # Fallback to legacy format (direct files)
         return analysis.get("files", [])
 
     @staticmethod
     def extract_summary(analysis: dict[str, Any]) -> dict[str, Any]:
-        """Extract summary dict from analysis data, handling both formats.
+        """Extract summary dict from analysis data, handling multiple formats.
 
         Supports:
             - data["results"]["summary"] (current format)
+            - data["data"]["summary"] (envelope format, e.g., semgrep)
             - data["summary"] (legacy format)
 
         Args:
@@ -502,6 +507,9 @@ Respond with ONLY a JSON object:
         # Try current format first (results.summary)
         if "results" in analysis and isinstance(analysis["results"], dict):
             return analysis["results"].get("summary", {})
+        # Try envelope format (data.summary) - used by semgrep and similar tools
+        if "data" in analysis and isinstance(analysis["data"], dict):
+            return analysis["data"].get("summary", {})
         # Fallback to legacy format (direct summary)
         return analysis.get("summary", {})
 

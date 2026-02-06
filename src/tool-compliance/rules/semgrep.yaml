@@ -14,6 +14,10 @@ required_prompts:
   - rule_coverage.md
   - smell_accuracy.md
 
+evaluation_outputs:
+  - scorecard.md
+  - scorecard.json
+
 adapter:
   module: persistence.adapters.semgrep_adapter
   class: SemgrepAdapter

@@ -1,0 +1,387 @@
+{
+  "tool": "layout-scanner",
+  "version": "1.0.0",
+  "generated_at": "2026-01-25T16:29:23.213583Z",
+  "description": "Evaluation scorecard for Layout Scanner repository analysis",
+  "summary": {
+    "total_checks": 350,
+    "passed": 350,
+    "failed": 0,
+    "score": 1.0,
+    "score_percent": 100.0,
+    "normalized_score": 5.0,
+    "decision": "STRONG_PASS"
+  },
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "Accuracy",
+      "weight": 0.2,
+      "total_checks": 80,
+      "passed": 80,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.0,
+      "checks": [
+        {
+          "check_id": "AC-1",
+          "name": "File Count",
+          "passed": true,
+          "message": "File count accurate: 34"
+        },
+        {
+          "check_id": "AC-2",
+          "name": "Directory Count",
+          "passed": true,
+          "message": "Directory count accurate: 9"
+        },
+        {
+          "check_id": "AC-3",
+          "name": "Path Normalization",
+          "passed": true,
+          "message": "All paths properly normalized"
+        },
+        {
+          "check_id": "AC-4",
+          "name": "Size Accuracy",
+          "passed": true,
+          "message": "Size calculations accurate: 3682 bytes total"
+        },
+        {
+          "check_id": "AC-5",
+          "name": "Depth Calculation",
+          "passed": true,
+          "message": "All depth values correct"
+        },
+        {
+          "check_id": "AC-6",
+          "name": "Parent Links",
+          "passed": true,
+          "message": "All parent links valid"
+        },
+        {
+          "check_id": "AC-7",
+          "name": "Child Lists",
+          "passed": true,
+          "message": "All child lists correct"
+        },
+        {
+          "check_id": "AC-8",
+          "name": "Recursive Counts",
+          "passed": true,
+          "message": "All recursive counts valid"
+        },
+        {
+          "check_id": "AC-1",
+          "name": "File Count",
+          "passed": true,
+          "message": "File count accurate: 5"
+        },
+        {
+          "check_id": "AC-2",
+          "name": "Directory Count",
+          "passed": true,
+          "message": "Directory count accurate: 3"
+        }
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Classification",
+      "weight": 0.2,
+      "total_checks": 90,
+      "passed": 88,
+      "failed": 2,
+      "score": 5.0,
+      "weighted_score": 1.0,
+      "checks": [
+        {
+          "check_id": "CL-1",
+          "name": "Test Detection",
+          "passed": true,
+          "message": "1 test files correctly detected"
+        },
+        {
+          "check_id": "CL-2",
+          "name": "Config Detection",
+          "passed": true,
+          "message": "27 config files correctly detected"
+        },
+        {
+          "check_id": "CL-3",
+          "name": "Generated Detection",
+          "passed": true,
+          "message": "0 generated files correctly detected"
+        },
+        {
+          "check_id": "CL-4",
+          "name": "Vendor Detection",
+          "passed": true,
+          "message": "0 vendor dirs, 0 vendor files detected"
+        },
+        {
+          "check_id": "CL-5",
+          "name": "Docs Detection",
+          "passed": true,
+          "message": "1 doc files correctly detected"
+        },
+        {
+          "check_id": "CL-6",
+          "name": "Language Detection",
+          "passed": true,
+          "message": "11 languages detected correctly"
+        },
+        {
+          "check_id": "CL-7",
+          "name": "Shebang Detection",
+          "passed": true,
+          "message": "Shebang detection not available (enry not installed)"
+        },
+        {
+          "check_id": "CL-8",
+          "name": "Content Disambiguation",
+          "passed": true,
+          "message": "Content disambiguation not available (enry not installed)"
+        },
+        {
+          "check_id": "CL-9",
+          "name": "Detection Capabilities",
+          "passed": true,
+          "message": "Fallback mode only (extension-based detection)"
+        },
+        {
+          "check_id": "CL-1",
+          "name": "Test Detection",
+          "passed": true,
+          "message": "1 test files correctly detected"
+        }
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Edge Cases",
+      "weight": 0.2,
+      "total_checks": 60,
+      "passed": 60,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.0,
+      "checks": [
+        {
+          "check_id": "EC-1",
+          "name": "Empty Directories",
+          "passed": true,
+          "message": "0 empty directories handled correctly"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "Hidden Files",
+          "passed": true,
+          "message": "5 hidden files, 2 hidden dirs handled"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "Symlinks",
+          "passed": true,
+          "message": "0 file symlinks, 0 dir symlinks detected"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "Unicode Paths",
+          "passed": true,
+          "message": "0 unicode files, 0 unicode dirs handled"
+        },
+        {
+          "check_id": "EC-5",
+          "name": "Deep Nesting",
+          "passed": true,
+          "message": "Max depth 2 handled correctly"
+        },
+        {
+          "check_id": "EC-6",
+          "name": "Special Characters",
+          "passed": true,
+          "message": "0 files, 0 dirs with special chars handled"
+        },
+        {
+          "check_id": "EC-1",
+          "name": "Empty Directories",
+          "passed": true,
+          "message": "0 empty directories handled correctly"
+        },
+        {
+          "check_id": "EC-2",
+          "name": "Hidden Files",
+          "passed": true,
+          "message": "0 hidden files, 0 hidden dirs handled"
+        },
+        {
+          "check_id": "EC-3",
+          "name": "Symlinks",
+          "passed": true,
+          "message": "0 file symlinks, 0 dir symlinks detected"
+        },
+        {
+          "check_id": "EC-4",
+          "name": "Unicode Paths",
+          "passed": true,
+          "message": "0 unicode files, 0 unicode dirs handled"
+        }
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "Output Quality",
+      "weight": 0.2,
+      "total_checks": 80,
+      "passed": 80,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.0,
+      "checks": [
+        {
+          "check_id": "OQ-1",
+          "name": "JSON Valid",
+          "passed": true,
+          "message": "All required keys present"
+        },
+        {
+          "check_id": "OQ-2",
+          "name": "Schema Compliant",
+          "passed": true,
+          "message": "Output validates against schema"
+        },
+        {
+          "check_id": "OQ-3",
+          "name": "Files Present",
+          "passed": true,
+          "message": "Files section valid with 34 files"
+        },
+        {
+          "check_id": "OQ-4",
+          "name": "Directories Present",
+          "passed": true,
+          "message": "Directories section valid with 9 directories"
+        },
+        {
+          "check_id": "OQ-5",
+          "name": "Hierarchy Valid",
+          "passed": true,
+          "message": "All parent-child relationships valid"
+        },
+        {
+          "check_id": "OQ-6",
+          "name": "IDs Unique",
+          "passed": true,
+          "message": "All 43 IDs are unique"
+        },
+        {
+          "check_id": "OQ-7",
+          "name": "IDs Format",
+          "passed": true,
+          "message": "All IDs follow expected format"
+        },
+        {
+          "check_id": "OQ-8",
+          "name": "Statistics Accurate",
+          "passed": true,
+          "message": "All statistics match actual counts"
+        },
+        {
+          "check_id": "OQ-1",
+          "name": "JSON Valid",
+          "passed": true,
+          "message": "All required keys present"
+        },
+        {
+          "check_id": "OQ-2",
+          "name": "Schema Compliant",
+          "passed": true,
+          "message": "Output validates against schema"
+        }
+      ]
+    },
+    {
+      "id": "D5",
+      "name": "Performance",
+      "weight": 0.2,
+      "total_checks": 40,
+      "passed": 40,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.0,
+      "checks": [
+        {
+          "check_id": "PF-1",
+          "name": "Small Repo Speed",
+          "passed": true,
+          "message": "Scanned 34 files in 35ms"
+        },
+        {
+          "check_id": "PF-2",
+          "name": "Medium Repo Speed",
+          "passed": true,
+          "message": "Not applicable (repo has 34 files, too small)"
+        },
+        {
+          "check_id": "PF-3",
+          "name": "Large Repo Speed",
+          "passed": true,
+          "message": "Not applicable (repo has 34 files, too small)"
+        },
+        {
+          "check_id": "PF-4",
+          "name": "Files Per Second",
+          "passed": true,
+          "message": "971 files/second"
+        },
+        {
+          "check_id": "PF-1",
+          "name": "Small Repo Speed",
+          "passed": true,
+          "message": "Scanned 5 files in 2ms"
+        },
+        {
+          "check_id": "PF-2",
+          "name": "Medium Repo Speed",
+          "passed": true,
+          "message": "Not applicable (repo has 5 files, too small)"
+        },
+        {
+          "check_id": "PF-3",
+          "name": "Large Repo Speed",
+          "passed": true,
+          "message": "Not applicable (repo has 5 files, too small)"
+        },
+        {
+          "check_id": "PF-4",
+          "name": "Files Per Second",
+          "passed": true,
+          "message": "2500 files/second"
+        },
+        {
+          "check_id": "PF-1",
+          "name": "Small Repo Speed",
+          "passed": true,
+          "message": "Scanned 12 files in 18ms"
+        },
+        {
+          "check_id": "PF-2",
+          "name": "Medium Repo Speed",
+          "passed": true,
+          "message": "Not applicable (repo has 12 files, too small)"
+        }
+      ]
+    }
+  ],
+  "critical_failures": [],
+  "thresholds": {
+    "STRONG_PASS": ">= 4.0 (80%+)",
+    "PASS": ">= 3.5 (70%+)",
+    "WEAK_PASS": ">= 3.0 (60%+)",
+    "FAIL": "< 3.0 (below 60%)"
+  },
+  "metadata": {
+    "evaluated_count": 10
+  }
+}

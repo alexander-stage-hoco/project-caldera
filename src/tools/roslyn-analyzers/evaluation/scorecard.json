@@ -1,7 +1,7 @@
 {
   "tool": "roslyn-analyzers",
   "version": "1.0.0",
-  "generated_at": "2026-01-30T20:38:51.114795Z",
+  "generated_at": "2026-02-06T07:12:01.773936Z",
   "description": "Evaluation scorecard for Roslyn Analyzers C# analysis",
   "summary": {
     "total_checks": 34,
@@ -75,7 +75,7 @@
           "check_id": "AC-9",
           "name": "Overall Precision",
           "passed": true,
-          "message": "Precision: 1291/1291 (100.0%). 0 false positives on 3 clean files."
+          "message": "Precision: 1051/1051 (100.0%). 0 false positives on 3 clean files."
         },
         {
           "check_id": "AC-10",
@@ -105,7 +105,7 @@
           "check_id": "CV-2",
           "name": "Design Rule Coverage",
           "passed": true,
-          "message": "14/12 design rules triggered"
+          "message": "13/12 design rules triggered"
         },
         {
           "check_id": "CV-3",
@@ -141,7 +141,7 @@
           "check_id": "CV-8",
           "name": "Line-Level Precision",
           "passed": true,
-          "message": "1291/1291 violations have line numbers (100.0%)"
+          "message": "1051/1051 violations have line numbers (100.0%)"
         }
       ]
     },
@@ -165,7 +165,7 @@
           "check_id": "EC-2",
           "name": "Unicode Content Handling",
           "passed": true,
-          "message": "Analyzed 64 files with potential unicode content"
+          "message": "Analyzed 71 files with potential unicode content"
         },
         {
           "check_id": "EC-3",
@@ -219,7 +219,7 @@
           "check_id": "EC-11",
           "name": "Framework-Specific Rules",
           "passed": true,
-          "message": "1 framework-specific diagnostics detected"
+          "message": "No framework info captured (may not be multi-targeting)"
         },
         {
           "check_id": "EC-12",
@@ -243,19 +243,19 @@
           "check_id": "PF-1",
           "name": "Synthetic Analysis Speed",
           "passed": true,
-          "message": "Analysis completed in 5.80 seconds < 30s threshold"
+          "message": "Analysis completed in 3.27 seconds < 30s threshold"
         },
         {
           "check_id": "PF-2",
           "name": "Per-File Efficiency",
           "passed": true,
-          "message": "91ms per file average < 2000ms threshold"
+          "message": "46ms per file average < 2000ms threshold"
         },
         {
           "check_id": "PF-3",
           "name": "Throughput",
           "passed": true,
-          "message": "820 LOC/second >= 50 threshold"
+          "message": "1745 LOC/second >= 50 threshold"
         },
         {
           "check_id": "PF-4",
@@ -274,6 +274,6 @@
     "FAIL": "< 3.0 (below 60%)"
   },
   "metadata": {
-    "analysis_file": "/var/folders/zr/c7zp4x316wvg0rsvdnq_dcm40000gn/T/tool-compliance-fqx9heul/output.json"
+    "analysis_file": "outputs/191da4b5-931d-42d5-8fca-b0f3b37eadcc/output.json"
   }
 }

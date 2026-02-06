@@ -144,11 +144,19 @@ analyze-semantic: check-java $(VENV_READY) $(PMD)
 # Evaluation
 # =============================================================================
 
-evaluate: $(VENV_READY) analyze
+# Synthetic test run output (stable path for compliance checking)
+SYNTHETIC_OUTPUT ?= outputs/cpd-test-run/output.json
+
+evaluate: $(VENV_READY)
 	@echo "Running programmatic evaluation (~28 checks)..."
+	@if [ ! -f "$(SYNTHETIC_OUTPUT)" ]; then \
+		echo "Synthetic output not found at $(SYNTHETIC_OUTPUT)"; \
+		echo "Running analysis on synthetic repo first..."; \
+		$(MAKE) analyze REPO_PATH=eval-repos/synthetic RUN_ID=cpd-test-run; \
+	fi
 	@mkdir -p $(EVAL_OUTPUT_DIR)
 	@$(PYTHON_VENV) scripts/evaluate.py \
-		--analysis $(OUTPUT_DIR)/output.json \
+		--analysis $(SYNTHETIC_OUTPUT) \
 		--ground-truth evaluation/ground-truth \
 		--output $(EVAL_OUTPUT_DIR)/evaluation_report.json
 	@echo ""

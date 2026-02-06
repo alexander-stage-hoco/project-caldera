@@ -13,8 +13,7 @@ required_prompts:
 
 ground_truth_mode: synthetic_json
 
-evaluation_outputs:
-  - scorecard.md
+evaluation_outputs: []
 
 adapter:
   module: persistence.adapters.gitleaks_adapter

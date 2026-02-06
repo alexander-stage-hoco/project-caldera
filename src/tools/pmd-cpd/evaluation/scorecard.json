@@ -1,16 +1,16 @@
 {
   "tool": "pmd-cpd",
   "version": "1.0.0",
-  "generated_at": "2026-02-06T00:13:58.173030",
+  "generated_at": "2026-02-06T09:47:51.039805",
   "description": "Evaluation scorecard for PMD CPD duplication analysis",
   "summary": {
     "total_checks": 28,
-    "passed": 16,
-    "failed": 12,
-    "score": 0.5482,
-    "score_percent": 54.82,
-    "normalized_score": 2.74,
-    "decision": "FAIL"
+    "passed": 27,
+    "failed": 1,
+    "score": 0.8903,
+    "score_percent": 89.03,
+    "normalized_score": 4.45,
+    "decision": "STRONG_PASS"
   },
   "dimensions": [
     {
@@ -18,28 +18,28 @@
       "name": "Accuracy",
       "weight": 0.25,
       "total_checks": 8,
-      "passed": 5,
-      "failed": 3,
-      "score": 2.72,
-      "weighted_score": 0.68,
+      "passed": 8,
+      "failed": 0,
+      "score": 3.85,
+      "weighted_score": 0.96,
       "checks": [
         {
           "check_id": "AC-1",
           "name": "Heavy duplication detection",
-          "passed": false,
-          "message": "Detected 0/7 heavy duplication files"
+          "passed": true,
+          "message": "Detected 6/7 heavy duplication files"
         },
         {
           "check_id": "AC-2",
           "name": "Clone count accuracy",
           "passed": true,
-          "message": "28/35 files have clone counts in expected range"
+          "message": "26/35 files have clone counts in expected range"
         },
         {
           "check_id": "AC-3",
           "name": "Duplication percentage accuracy",
-          "passed": false,
-          "message": "11/20 files have duplication % in expected range"
+          "passed": true,
+          "message": "14/20 files have duplication % in expected range"
         },
         {
           "check_id": "AC-4",
@@ -50,8 +50,8 @@
         {
           "check_id": "AC-5",
           "name": "Cross-file clone detection",
-          "passed": false,
-          "message": "Detected 0/7 cross-file duplication pairs"
+          "passed": true,
+          "message": "Detected 6/7 cross-file duplication pairs"
         },
         {
           "check_id": "AC-6",
@@ -69,7 +69,7 @@
           "check_id": "AC-8",
           "name": "Clone line accuracy",
           "passed": true,
-          "message": "No clones detected to verify"
+          "message": "39/39 clones have valid line counts"
         }
       ]
     },
@@ -78,58 +78,58 @@
       "name": "Coverage",
       "weight": 0.25,
       "total_checks": 8,
-      "passed": 0,
-      "failed": 8,
-      "score": 0.0,
-      "weighted_score": 0.0,
+      "passed": 8,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.25,
       "checks": [
         {
           "check_id": "CV-1",
           "name": "Python file coverage",
-          "passed": false,
-          "message": "Analyzed 0/7 python files from ground truth"
+          "passed": true,
+          "message": "Analyzed 7/7 python files from ground truth"
         },
         {
           "check_id": "CV-2",
           "name": "JavaScript file coverage",
-          "passed": false,
-          "message": "Analyzed 0/7 javascript files from ground truth"
+          "passed": true,
+          "message": "Analyzed 7/7 javascript files from ground truth"
         },
         {
           "check_id": "CV-3",
           "name": "TypeScript file coverage",
-          "passed": false,
-          "message": "Analyzed 0/7 typescript files from ground truth"
+          "passed": true,
+          "message": "Analyzed 7/7 typescript files from ground truth"
         },
         {
           "check_id": "CV-4",
           "name": "C# file coverage",
-          "passed": false,
-          "message": "Analyzed 0/7 csharp files from ground truth"
+          "passed": true,
+          "message": "Analyzed 7/7 csharp files from ground truth"
         },
         {
           "check_id": "CV-5",
           "name": "Java file coverage",
-          "passed": false,
-          "message": "Analyzed 0/7 java files from ground truth"
+          "passed": true,
+          "message": "Analyzed 7/7 java files from ground truth"
         },
         {
           "check_id": "CV-6",
           "name": "Go file coverage",
-          "passed": false,
-          "message": "Analyzed 0/7 go files from ground truth"
+          "passed": true,
+          "message": "Analyzed 7/7 go files from ground truth"
         },
         {
           "check_id": "CV-7",
           "name": "Rust file coverage",
-          "passed": false,
-          "message": "Analyzed 0/7 rust files from ground truth"
+          "passed": true,
+          "message": "Analyzed 7/7 rust files from ground truth"
         },
         {
           "check_id": "CV-8",
           "name": "Multi-language detection",
-          "passed": false,
-          "message": "Detected 0/7 expected languages"
+          "passed": true,
+          "message": "Detected 7/7 expected languages"
         }
       ]
     },
@@ -140,8 +140,8 @@
       "total_checks": 8,
       "passed": 8,
       "failed": 0,
-      "score": 5.0,
-      "weighted_score": 1.25,
+      "score": 4.86,
+      "weighted_score": 1.21,
       "checks": [
         {
           "check_id": "EC-1",
@@ -177,19 +177,19 @@
           "check_id": "EC-6",
           "name": "Deeply nested code handling",
           "passed": true,
-          "message": "Nested code structures analyzed (0 clones found)"
+          "message": "Nested code structures analyzed (39 clones found)"
         },
         {
           "check_id": "EC-7",
           "name": "Special character paths handling",
           "passed": true,
-          "message": "File paths handled correctly (0 files processed)"
+          "message": "File paths handled correctly (49 files processed)"
         },
         {
           "check_id": "EC-8",
           "name": "Zero duplication handling",
           "passed": true,
-          "message": "Overall duplication: 0.0% (0 clones)"
+          "message": "Overall duplication: 23.0% (39 clones)"
         }
       ]
     },
@@ -219,7 +219,7 @@
           "check_id": "PF-3",
           "name": "Memory efficiency",
           "passed": true,
-          "message": "No files analyzed"
+          "message": "Efficient clone representation"
         },
         {
           "check_id": "PF-4",
@@ -238,7 +238,7 @@
     "FAIL": "< 3.0 (below 60%)"
   },
   "metadata": {
-    "analysis_path": "/var/folders/zr/c7zp4x316wvg0rsvdnq_dcm40000gn/T/tool-compliance-u7pgusvs/output.json",
+    "analysis_path": "outputs/cpd-test-run/output.json",
     "ground_truth_dir": "evaluation/ground-truth"
   }
 }

@@ -15,6 +15,9 @@ required_prompts:
   - hierarchy_consistency.md
   - language_detection.md
 
+evaluation_outputs:
+  - scorecard.md
+
 adapter:
   module: persistence.adapters.layout_adapter
   class: LayoutAdapter

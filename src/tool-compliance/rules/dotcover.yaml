@@ -13,7 +13,6 @@ required_prompts:
 ground_truth_mode: synthetic_json
 
 evaluation_outputs:
-  - scorecard.md
   - evaluation_report.json
 
 adapter:

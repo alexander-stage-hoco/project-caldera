@@ -32,6 +32,175 @@ from .checks.performance import run_performance_checks
 from .report_formatter import EvaluationResult, ReportFormatter
 
 
+def generate_scorecard_json(summary: Dict[str, Any], results: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Generate structured scorecard JSON data from evaluation results."""
+    from datetime import datetime, timezone
+
+    # Group checks by dimension/category
+    dimension_data: Dict[str, Dict] = {}
+    for repo_result in results:
+        for dim in repo_result.get("dimensions", []):
+            cat_name = dim.get("category", "unknown")
+            if cat_name not in dimension_data:
+                dimension_data[cat_name] = {
+                    "checks": [],
+                    "passed": 0,
+                    "failed": 0,
+                    "scores": [],
+                }
+            for check in dim.get("checks", []):
+                dimension_data[cat_name]["checks"].append({
+                    "check_id": check.get("check_id", ""),
+                    "name": check.get("name", check.get("check_id", "")),
+                    "passed": check.get("passed", False),
+                    "message": check.get("message", ""),
+                })
+                if check.get("passed"):
+                    dimension_data[cat_name]["passed"] += 1
+                else:
+                    dimension_data[cat_name]["failed"] += 1
+            dimension_data[cat_name]["scores"].append(dim.get("score", 0))
+
+    # Build dimensions array
+    dimensions = []
+    num_categories = len(dimension_data) if dimension_data else 1
+    for i, (cat_name, data) in enumerate(sorted(dimension_data.items())):
+        total = data["passed"] + data["failed"]
+        avg_score = sum(data["scores"]) / len(data["scores"]) if data["scores"] else 0
+        dimensions.append({
+            "id": f"D{i+1}",
+            "name": cat_name.replace("_", " ").title(),
+            "weight": 1.0 / num_categories,
+            "total_checks": total,
+            "passed": data["passed"],
+            "failed": data["failed"],
+            "score": round(avg_score, 2),
+            "weighted_score": round(avg_score / num_categories, 2),
+            "checks": data["checks"],
+        })
+
+    avg_score = summary.get("average_score", 0)
+    score_normalized = avg_score  # Already on 0-5 scale
+
+    return {
+        "tool": "layout-scanner",
+        "version": "1.0.0",
+        "generated_at": summary.get("timestamp", datetime.now(timezone.utc).isoformat()),
+        "description": "Evaluation scorecard for Layout Scanner repository analysis",
+        "summary": {
+            "total_checks": sum(d["total_checks"] for d in dimensions),
+            "passed": sum(d["passed"] for d in dimensions),
+            "failed": sum(d["failed"] for d in dimensions),
+            "score": round(avg_score / 5.0, 4) if avg_score else 0,
+            "score_percent": round(avg_score / 5.0 * 100, 2) if avg_score else 0,
+            "normalized_score": round(score_normalized, 2),
+            "decision": summary.get("decision", "FAIL"),
+        },
+        "dimensions": dimensions,
+        "critical_failures": [
+            {
+                "check_id": c["check_id"],
+                "name": c["name"],
+                "message": c["message"],
+            }
+            for d in dimensions
+            for c in d["checks"]
+            if not c["passed"] and "critical" in c["check_id"].lower()
+        ],
+        "thresholds": {
+            "STRONG_PASS": ">= 4.0 (80%+)",
+            "PASS": ">= 3.5 (70%+)",
+            "WEAK_PASS": ">= 3.0 (60%+)",
+            "FAIL": "< 3.0 (below 60%)",
+        },
+        "metadata": {
+            "evaluated_count": summary.get("evaluated_count", 0),
+        },
+    }
+
+
+def generate_scorecard_md(scorecard: Dict[str, Any]) -> str:
+    """Generate comprehensive markdown scorecard."""
+    summary = scorecard.get("summary", {})
+    dimensions = scorecard.get("dimensions", [])
+    critical_failures = scorecard.get("critical_failures", [])
+    thresholds = scorecard.get("thresholds", {})
+
+    lines = [
+        "# Layout Scanner Evaluation Scorecard",
+        "",
+        f"**Generated:** {scorecard.get('generated_at', '')}",
+        f"**Decision:** {summary.get('decision', '')}",
+        f"**Score:** {summary.get('normalized_score', 0)}/5.0",
+        "",
+        "## Summary",
+        "",
+        "| Metric | Value |",
+        "|--------|-------|",
+        f"| Evaluated Outputs | {scorecard.get('metadata', {}).get('evaluated_count', 0)} |",
+        f"| Total Checks | {summary.get('total_checks', 0)} |",
+        f"| Passed | {summary.get('passed', 0)} |",
+        f"| Failed | {summary.get('failed', 0)} |",
+        f"| Normalized Score | {summary.get('normalized_score', 0):.2f}/5.0 |",
+        "",
+    ]
+
+    # Dimensions table
+    if dimensions:
+        lines.append("## Dimensions")
+        lines.append("")
+        lines.append("| Dimension | Checks | Passed | Score |")
+        lines.append("|-----------|--------|--------|-------|")
+        for dim in dimensions:
+            score_pct = dim.get("score", 0) / 5.0 * 100 if dim.get("score") else 0
+            lines.append(
+                f"| {dim.get('name', '')} | {dim.get('total_checks', 0)} | "
+                f"{dim.get('passed', 0)}/{dim.get('total_checks', 0)} | {score_pct:.1f}% |"
+            )
+        lines.append("")
+
+    # Critical failures
+    if critical_failures:
+        lines.append("## Critical Failures")
+        lines.append("")
+        for failure in critical_failures:
+            lines.append(f"- **{failure.get('check_id', '')}** - {failure.get('name', '')}: {failure.get('message', '')}")
+        lines.append("")
+
+    # Detailed results by category
+    if dimensions:
+        lines.append("## Detailed Results")
+        lines.append("")
+        for dim in dimensions:
+            lines.append(f"### {dim.get('name', '')}")
+            lines.append("")
+            lines.append("| Check | Status | Message |")
+            lines.append("|-------|--------|---------|")
+            for check in dim.get("checks", []):
+                status = "PASS" if check.get("passed") else "FAIL"
+                msg = check.get("message", "")
+                msg = msg[:50] + "..." if len(msg) > 50 else msg
+                lines.append(f"| {check.get('check_id', '')} | {status} | {msg} |")
+            lines.append("")
+
+    # Decision thresholds
+    if thresholds:
+        lines.append("## Decision Thresholds")
+        lines.append("")
+        lines.append("| Decision | Criteria |")
+        lines.append("|----------|----------|")
+        for decision, criteria in thresholds.items():
+            lines.append(f"| {decision} | {criteria} |")
+        lines.append("")
+
+    # Footer
+    lines.append("---")
+    lines.append("")
+    lines.append("*Generated by Layout Scanner evaluation framework*")
+
+    return "\n".join(lines)
+
+
 def load_output(path: Path) -> Dict[str, Any]:
     """Load scanner output from JSON file."""
     with open(path) as f:
@@ -285,25 +454,18 @@ def evaluate_all(
     with open(results_path, "w") as f:
         json.dump(summary, f, indent=2)
 
-    scorecard_lines = [
-        "# Layout Scanner Evaluation Scorecard",
-        "",
-        f"**Generated:** {summary['timestamp']}",
-        f"**Decision:** {summary['decision']}",
-        f"**Average Score:** {summary['average_score']}/5.0",
-        "",
-        "## Summary",
-        "",
-        "| Metric | Value |",
-        "|--------|-------|",
-        f"| Evaluated Outputs | {summary['evaluated_count']} |",
-        f"| Average Score | {summary['average_score']} |",
-        f"| Decision | {summary['decision']} |",
-        "",
-    ]
-    (results_dir / "scorecard.md").write_text("\n".join(scorecard_lines))
+    # Generate and save scorecards
+    scorecard = generate_scorecard_json(summary, results)
+
+    scorecard_json_path = results_dir / "scorecard.json"
+    with open(scorecard_json_path, "w") as f:
+        json.dump(scorecard, f, indent=2)
+
+    scorecard_md_path = results_dir / "scorecard.md"
+    scorecard_md_path.write_text(generate_scorecard_md(scorecard))
 
     print(f"\nResults saved to {results_path}")
+    print(f"Scorecard saved to {scorecard_md_path}")
     print(f"\nAggregate: {avg_score:.2f}/5.0 - {aggregate_decision}")
 
     return summary

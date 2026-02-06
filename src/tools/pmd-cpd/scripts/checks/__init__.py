@@ -122,15 +122,29 @@ class EvaluationReport:
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
+        # Compute decision based on score (0-1 scale converted to 0-5)
+        normalized = self.score * 5.0
+        if normalized >= 4.0:
+            decision = "STRONG_PASS"
+        elif normalized >= 3.5:
+            decision = "PASS"
+        elif normalized >= 3.0:
+            decision = "WEAK_PASS"
+        else:
+            decision = "FAIL"
+
         return {
             "timestamp": self.timestamp,
             "analysis_path": self.analysis_path,
             "ground_truth_dir": self.ground_truth_dir,
+            "decision": decision,  # Top-level for compliance
+            "score": round(self.score, 4),  # Top-level for compliance
             "summary": {
                 "passed": self.passed,
                 "failed": self.failed,
                 "total": self.total,
                 "score": round(self.score, 4),
+                "decision": decision,
                 "score_by_category": {
                     k: round(v, 4) for k, v in self.score_by_category.items()
                 },
@@ -143,12 +157,18 @@ class EvaluationReport:
 def load_analysis(analysis_path: str | Path) -> dict:
     """Load analysis JSON file.
 
-    Supports both full output (with top-level results wrapper) and
-    direct results payloads.
+    Supports multiple output formats:
+    - Envelope with top-level "data" wrapper (current format)
+    - Envelope with top-level "results" wrapper (legacy format)
+    - Direct results payloads
     """
     with open(analysis_path) as f:
         data = json.load(f)
 
+    # Try "data" wrapper first (current envelope format)
+    if isinstance(data, dict) and "data" in data and isinstance(data["data"], dict):
+        return data["data"]
+    # Try "results" wrapper (legacy format)
     if isinstance(data, dict) and "results" in data and isinstance(data["results"], dict):
         return data["results"]
     return data

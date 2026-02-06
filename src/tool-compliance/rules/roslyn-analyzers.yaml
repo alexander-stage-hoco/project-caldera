@@ -11,6 +11,10 @@ required_prompts:
   - false_positive_rate.md
   - security_coverage.md
 
+evaluation_outputs:
+  - scorecard.md
+  - scorecard.json
+
 adapter:
   module: persistence.adapters.roslyn_adapter
   class: RoslynAdapter

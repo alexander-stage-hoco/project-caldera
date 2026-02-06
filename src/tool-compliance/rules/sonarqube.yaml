@@ -11,6 +11,9 @@ required_prompts:
   - coverage_completeness.md
   - actionability.md
 
+evaluation_outputs:
+  - scorecard.md
+
 adapter:
   module: persistence.adapters.sonarqube_adapter
   class: SonarqubeAdapter

@@ -1,7 +1,7 @@
 {
   "tool": "devskim",
   "version": "1.0.0",
-  "generated_at": "2026-02-04T16:02:53.544350+00:00",
+  "generated_at": "2026-02-06T07:11:54.468494+00:00",
   "description": "Evaluation scorecard for DevSkim security analysis",
   "summary": {
     "total_checks": 30,
@@ -274,7 +274,7 @@
     "FAIL": "< 3.0 (below 60%)"
   },
   "metadata": {
-    "analysis_path": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/3B8C39E0-AF85-4BDB-B0EF-E5FA6BD0B779/output.json",
+    "analysis_path": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/outputs/233da6a1-8d93-4dfc-90b8-6886fb622001/output.json",
     "ground_truth_dir": "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/devskim/evaluation/ground-truth"
   }
 }
