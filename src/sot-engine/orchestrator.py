@@ -193,6 +193,8 @@ TOOL_CONFIGS = [
     ToolConfig("pmd-cpd", "src/tools/pmd-cpd"),
     ToolConfig("devskim", "src/tools/devskim"),
     ToolConfig("dotcover", "src/tools/dotcover"),
+    ToolConfig("git-fame", "src/tools/git-fame"),
+    ToolConfig("dependensee", "src/tools/dependensee"),
 ]
 
 
@@ -299,6 +301,8 @@ def ingest_outputs(
     pmd_cpd_output: Optional[Path] = None,
     devskim_output: Optional[Path] = None,
     dotcover_output: Optional[Path] = None,
+    git_fame_output: Optional[Path] = None,
+    dependensee_output: Optional[Path] = None,
     schema_path: Path = None,
     logger: Optional[OrchestratorLogger] = None,
 ) -> None:
@@ -328,6 +332,8 @@ def ingest_outputs(
         "pmd-cpd": pmd_cpd_output,
         "devskim": devskim_output,
         "dotcover": dotcover_output,
+        "git-fame": git_fame_output,
+        "dependensee": dependensee_output,
     }
 
     # Ingest each tool using its configuration
@@ -418,6 +424,8 @@ def main() -> int:
     parser.add_argument("--pmd-cpd-output", type=str)
     parser.add_argument("--devskim-output", type=str)
     parser.add_argument("--dotcover-output", type=str)
+    parser.add_argument("--git-fame-output", type=str)
+    parser.add_argument("--dependensee-output", type=str)
     parser.add_argument("--run-tools", action="store_true")
     parser.add_argument("--run-dbt", action="store_true")
     parser.add_argument("--replace", action="store_true")
@@ -449,6 +457,8 @@ def main() -> int:
     pmd_cpd_output = Path(args.pmd_cpd_output) if args.pmd_cpd_output else None
     devskim_output = Path(args.devskim_output) if args.devskim_output else None
     dotcover_output = Path(args.dotcover_output) if args.dotcover_output else None
+    git_fame_output = Path(args.git_fame_output) if args.git_fame_output else None
+    dependensee_output = Path(args.dependensee_output) if args.dependensee_output else None
 
     try:
         logger.info(f"Log file: {logger.log_path}")
@@ -504,6 +514,8 @@ def main() -> int:
             pmd_cpd_output = outputs.get("pmd-cpd", pmd_cpd_output)
             devskim_output = outputs.get("devskim", devskim_output)
             dotcover_output = outputs.get("dotcover", dotcover_output)
+            git_fame_output = outputs.get("git-fame", git_fame_output)
+            dependensee_output = outputs.get("dependensee", dependensee_output)
             logger.info(f"Completed tools in {_format_duration(time.perf_counter() - start)}")
             for name, path in outputs.items():
                 logger.info(f"{name} output: {path}")
@@ -531,6 +543,8 @@ def main() -> int:
             pmd_cpd_output,
             devskim_output,
             dotcover_output,
+            git_fame_output,
+            dependensee_output,
             schema_path,
             logger,
         )

@@ -2194,3 +2194,127 @@ models:
       - name: recommended_action
         tests:
           - not_null
+
+  - name: mart_project_dependency_cycles
+    description: "Circular dependency detection in .NET project reference graph"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: start_project
+        tests:
+          - not_null
+      - name: cycle_path
+        tests:
+          - not_null
+      - name: cycle_length
+        tests:
+          - not_null
+      - name: severity
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+
+  - name: mart_project_blast_radius
+    description: "Impact analysis for .NET project changes"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: target_project_path
+        tests:
+          - not_null
+      - name: blast_radius_projects
+        tests:
+          - not_null
+      - name: blast_radius_depth
+        tests:
+          - not_null
+      - name: total_paths
+        tests:
+          - not_null
+      - name: blast_radius_risk
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+
+  - name: mart_package_version_conflicts
+    description: "NuGet package version conflict detection"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: package_name
+        tests:
+          - not_null
+      - name: version_count
+        tests:
+          - not_null
+      - name: versions_list
+        tests:
+          - not_null
+      - name: projects_affected
+        tests:
+          - not_null
+      - name: conflict_severity
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+
+  - name: mart_dependency_health_summary
+    description: "Repository-level .NET dependency health metrics"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - unique
+      - name: total_projects
+        tests:
+          - not_null
+      - name: total_project_refs
+        tests:
+          - not_null
+      - name: total_package_refs
+        tests:
+          - not_null
+      - name: unique_packages
+        tests:
+          - not_null
+      - name: circular_dependency_count
+        tests:
+          - not_null
+      - name: version_conflict_count
+        tests:
+          - not_null
+      - name: health_grade
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - A
+                  - B
+                  - C
+                  - D
+                  - F
+      - name: recommendations
+        tests:
+          - not_null
