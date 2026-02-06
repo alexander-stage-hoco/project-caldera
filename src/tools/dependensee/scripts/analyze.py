@@ -439,6 +439,14 @@ def main() -> int:
 
         # Create envelope
         timestamp = get_current_timestamp()
+
+        # Extract relative path from repo_path for ground truth matching
+        script_parent = Path(__file__).resolve().parent.parent
+        try:
+            rel_path = str(common.repo_path.resolve().relative_to(script_parent))
+        except ValueError:
+            rel_path = str(common.repo_path.name)
+
         output = create_envelope(
             data,
             tool_name=TOOL_NAME,
@@ -448,6 +456,7 @@ def main() -> int:
             branch=common.branch,
             commit=common.commit,
             timestamp=timestamp,
+            extra_metadata={"repo_path": rel_path},
         )
 
         # Write output

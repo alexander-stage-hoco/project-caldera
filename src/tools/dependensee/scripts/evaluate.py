@@ -101,8 +101,19 @@ def main() -> int:
     output = json.loads(output_path.read_text())
 
     # Load ground truth if available
+    # Extract repo_path from output metadata for dynamic scenario detection
+    metadata = output.get("metadata", {})
+    repo_path = metadata.get("repo_path", "")
+
+    # Extract scenario name (e.g., "synthetic" from "eval-repos/synthetic")
+    if "/" in repo_path:
+        scenario = repo_path.split("/")[-1]
+    else:
+        scenario = repo_path or "synthetic"  # fallback
+
+    # Load matching ground truth
     ground_truth = None
-    gt_path = args.ground_truth_dir / "synthetic.json"
+    gt_path = args.ground_truth_dir / f"{scenario}.json"
     if gt_path.exists():
         ground_truth = json.loads(gt_path.read_text())
 
