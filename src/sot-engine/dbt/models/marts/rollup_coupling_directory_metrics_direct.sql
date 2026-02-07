@@ -1,6 +1,6 @@
 -- Coupling metrics per directory (direct - fan-in/fan-out for files in directory)
 -- Fan-out: Number of distinct callee files/symbols a directory calls
--- Fan-in: Number of distinct caller files/symbols that call into this directory
+-- Fan-in: Number of distinct caller files from OTHER directories that call into this directory
 
 with symbol_runs as (
     select run_pk, collection_run_id
@@ -35,6 +35,24 @@ calls_with_directory as (
     join run_map rm
         on rm.symbol_run_pk = sc.run_pk
 ),
+-- Resolve callee_directory_id by joining with layout files
+calls_with_callee_directory as (
+    select
+        cwd.run_pk,
+        cwd.layout_run_pk,
+        cwd.caller_directory_id,
+        cwd.caller_file_id,
+        cwd.caller_symbol,
+        cwd.callee_symbol,
+        cwd.callee_file_id,
+        lf.directory_id as callee_directory_id,
+        cwd.call_type
+    from calls_with_directory cwd
+    join {{ source('lz', 'lz_layout_files') }} lf
+        on lf.run_pk = cwd.layout_run_pk
+        and lf.file_id = cwd.callee_file_id
+    where cwd.callee_file_id is not null
+),
 directory_paths as (
     select
         run_pk,
@@ -57,18 +75,17 @@ fan_out as (
     from calls_with_directory
     group by run_pk, layout_run_pk, caller_directory_id
 ),
--- Fan-in: calls INTO this directory FROM other files
--- Note: We use caller_directory_id since callee_directory_id is not tracked
--- This provides a simplified view based on caller directories
+-- Fan-in: calls INTO this directory FROM other directories (external calls only)
+-- Groups by callee directory and counts distinct caller files from OTHER directories
 fan_in_prep as (
     select
         run_pk,
         layout_run_pk,
-        caller_directory_id as directory_id,
+        callee_directory_id as directory_id,
         count(distinct caller_file_id) as distinct_caller_files
-    from calls_with_directory
-    where callee_file_id is not null
-    group by run_pk, layout_run_pk, caller_directory_id
+    from calls_with_callee_directory
+    where caller_directory_id != callee_directory_id  -- external calls only
+    group by run_pk, layout_run_pk, callee_directory_id
 ),
 combined as (
     select

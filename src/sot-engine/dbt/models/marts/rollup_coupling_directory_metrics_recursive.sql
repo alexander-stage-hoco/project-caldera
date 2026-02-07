@@ -1,6 +1,6 @@
 -- Coupling metrics per directory (recursive - includes all files in subtree)
 -- Fan-out: Number of distinct callee files/symbols a directory subtree calls
--- Fan-in: Number of distinct caller files/symbols that call into this directory subtree
+-- Fan-in: Number of distinct caller files from OUTSIDE the subtree that call into this directory subtree
 
 with recursive symbol_runs as (
     select run_pk, collection_run_id
@@ -45,6 +45,7 @@ dir_tree as (
         on child.run_pk = parent.layout_run_pk
         and child.parent_id = parent.descendant_id
 ),
+-- Map files to their ancestor directories (for caller lookup)
 files_with_ancestor as (
     select
         dt.symbol_run_pk,
@@ -57,7 +58,8 @@ files_with_ancestor as (
         on dt.layout_run_pk = lf.run_pk
         and dt.descendant_id = lf.directory_id
 ),
-calls_with_ancestor as (
+-- Calls with caller mapped to ancestor directories (for fan-out)
+calls_with_caller_ancestor as (
     select
         fa.symbol_run_pk as run_pk,
         fa.layout_run_pk,
@@ -71,6 +73,40 @@ calls_with_ancestor as (
     join files_with_ancestor fa
         on fa.symbol_run_pk = sc.run_pk
         and fa.file_id = sc.caller_file_id
+),
+-- Calls with callee mapped to ancestor directories (for fan-in)
+-- Also includes caller file and its ancestors to filter external calls
+calls_with_callee_ancestor as (
+    select
+        fa_callee.symbol_run_pk as run_pk,
+        fa_callee.layout_run_pk,
+        fa_callee.directory_id as callee_ancestor_id,
+        sc.caller_file_id,
+        sc.callee_file_id,
+        sc.call_type
+    from {{ ref('stg_lz_symbol_calls') }} sc
+    join files_with_ancestor fa_callee
+        on fa_callee.symbol_run_pk = sc.run_pk
+        and fa_callee.file_id = sc.callee_file_id
+    where sc.callee_file_id is not null
+),
+-- For fan-in, we need to know if caller is within the ancestor subtree
+-- A call is external to ancestor A if the caller file is NOT in the subtree of A
+fan_in_external_calls as (
+    select
+        cca.run_pk,
+        cca.layout_run_pk,
+        cca.callee_ancestor_id as directory_id,
+        cca.caller_file_id
+    from calls_with_callee_ancestor cca
+    -- Exclude internal calls: caller must NOT be in the subtree of the callee ancestor
+    where not exists (
+        select 1
+        from files_with_ancestor fa_caller
+        where fa_caller.symbol_run_pk = cca.run_pk
+          and fa_caller.file_id = cca.caller_file_id
+          and fa_caller.directory_id = cca.callee_ancestor_id
+    )
 ),
 directory_paths as (
     select
@@ -91,19 +127,17 @@ fan_out as (
         sum(case when call_type = 'direct' then 1 else 0 end) as direct_calls,
         sum(case when call_type = 'dynamic' then 1 else 0 end) as dynamic_calls,
         sum(case when call_type = 'async' then 1 else 0 end) as async_calls
-    from calls_with_ancestor
+    from calls_with_caller_ancestor
     group by run_pk, layout_run_pk, directory_id
 ),
--- Fan-in: calls INTO this directory subtree FROM other files
--- Note: We use the same data but group differently to get distinct callers
+-- Fan-in: calls INTO this directory subtree FROM files OUTSIDE the subtree
 fan_in_prep as (
     select
         run_pk,
         layout_run_pk,
         directory_id,
         count(distinct caller_file_id) as distinct_caller_files
-    from calls_with_ancestor
-    where callee_file_id is not null
+    from fan_in_external_calls
     group by run_pk, layout_run_pk, directory_id
 ),
 combined as (
