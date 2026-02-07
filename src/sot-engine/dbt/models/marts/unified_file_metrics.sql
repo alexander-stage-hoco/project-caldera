@@ -38,6 +38,16 @@ symbol_runs as (
     from {{ source('lz', 'lz_tool_runs') }}
     where tool_name = 'symbol-scanner'
 ),
+gitleaks_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'gitleaks'
+),
+trivy_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'trivy'
+),
 layout_runs as (
     select run_pk, collection_run_id
     from {{ source('lz', 'lz_tool_runs') }}
@@ -104,6 +114,24 @@ sonarqube_map as (
         lr.run_pk as layout_run_pk
     from sonarqube_runs sr
     join layout_runs lr on lr.collection_run_id = sr.collection_run_id
+),
+gitleaks_map as (
+    select
+        gr.run_pk as tool_run_pk,
+        gr.collection_run_id,
+        lr.run_pk as layout_run_pk
+    from gitleaks_runs gr
+    join layout_runs lr
+        on lr.collection_run_id = gr.collection_run_id
+),
+trivy_map as (
+    select
+        tr.run_pk as tool_run_pk,
+        tr.collection_run_id,
+        lr.run_pk as layout_run_pk
+    from trivy_runs tr
+    join layout_runs lr
+        on lr.collection_run_id = tr.collection_run_id
 ),
 scc_files as (
     select
@@ -227,6 +255,49 @@ sonarqube_files as (
     from {{ ref('stg_sonarqube_file_metrics') }} sf
     join sonarqube_map sm on sm.tool_run_pk = sf.run_pk
 ),
+gitleaks_files as (
+    select
+        gm.layout_run_pk,
+        gs.run_pk,
+        gs.file_id,
+        gs.secret_count,
+        gs.severity_critical,
+        gs.severity_high,
+        gs.severity_medium,
+        gs.severity_low,
+        gs.severity_high_plus,
+        gs.secrets_in_head,
+        gs.secrets_in_history,
+        gs.unique_rule_count,
+        gs.avg_entropy,
+        gs.max_entropy
+    from {{ ref('stg_gitleaks_secrets') }} gs
+    join gitleaks_map gm
+        on gm.tool_run_pk = gs.run_pk
+),
+trivy_files as (
+    select
+        tm.layout_run_pk,
+        tf.run_pk,
+        tf.file_id,
+        tf.vulnerability_count,
+        tf.vuln_critical,
+        tf.vuln_high,
+        tf.vuln_medium,
+        tf.vuln_low,
+        tf.iac_misconfig_count,
+        tf.iac_critical,
+        tf.iac_high,
+        tf.iac_medium,
+        tf.iac_low,
+        tf.total_finding_count,
+        tf.total_critical,
+        tf.total_high,
+        tf.severity_high_plus
+    from {{ ref('stg_trivy_file_metrics') }} tf
+    join trivy_map tm
+        on tm.tool_run_pk = tf.run_pk
+),
 call_files as (
     select
         cm.run_pk,
@@ -337,6 +408,33 @@ select
     sq.cognitive_complexity as sonarqube_cognitive_complexity,
     sq.duplicated_lines as sonarqube_duplicated_lines,
     sq.duplicated_lines_density as sonarqube_duplicated_lines_density,
+    -- Gitleaks metrics
+    gl.run_pk as gitleaks_run_pk,
+    gl.secret_count as gitleaks_secret_count,
+    gl.severity_critical as gitleaks_severity_critical,
+    gl.severity_high as gitleaks_severity_high,
+    gl.severity_medium as gitleaks_severity_medium,
+    gl.severity_low as gitleaks_severity_low,
+    gl.severity_high_plus as gitleaks_severity_high_plus,
+    gl.secrets_in_head as gitleaks_secrets_in_head,
+    gl.secrets_in_history as gitleaks_secrets_in_history,
+    gl.unique_rule_count as gitleaks_unique_rule_count,
+    gl.avg_entropy as gitleaks_avg_entropy,
+    gl.max_entropy as gitleaks_max_entropy,
+    -- Trivy metrics
+    tv.run_pk as trivy_run_pk,
+    tv.vulnerability_count as trivy_vulnerability_count,
+    tv.vuln_critical as trivy_vuln_critical,
+    tv.vuln_high as trivy_vuln_high,
+    tv.vuln_medium as trivy_vuln_medium,
+    tv.vuln_low as trivy_vuln_low,
+    tv.iac_misconfig_count as trivy_iac_misconfig_count,
+    tv.iac_critical as trivy_iac_critical,
+    tv.iac_high as trivy_iac_high,
+    tv.iac_medium as trivy_iac_medium,
+    tv.iac_low as trivy_iac_low,
+    tv.total_finding_count as trivy_total_finding_count,
+    tv.severity_high_plus as trivy_severity_high_plus,
     concat_ws(
         ',',
         combined.sources,
@@ -345,7 +443,9 @@ select
         case when ros.run_pk is not null then 'roslyn-analyzers' end,
         case when sg.run_pk is not null then 'semgrep' end,
         case when dsk.run_pk is not null then 'devskim' end,
-        case when sq.run_pk is not null then 'sonarqube' end
+        case when sq.run_pk is not null then 'sonarqube' end,
+        case when gl.run_pk is not null then 'gitleaks' end,
+        case when tv.run_pk is not null then 'trivy' end
     ) as sources
 from combined
 join {{ source('lz', 'lz_layout_files') }} lf
@@ -375,3 +475,9 @@ left join devskim_files dsk
 left join sonarqube_files sq
     on sq.layout_run_pk = combined.layout_run_pk
    and sq.file_id = combined.file_id
+left join gitleaks_files gl
+    on gl.layout_run_pk = combined.layout_run_pk
+   and gl.file_id = combined.file_id
+left join trivy_files tv
+    on tv.layout_run_pk = combined.layout_run_pk
+   and tv.file_id = combined.file_id

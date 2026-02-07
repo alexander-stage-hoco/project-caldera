@@ -416,6 +416,56 @@ models:
         description: "Number of duplicated lines detected by SonarQube"
       - name: sonarqube_duplicated_lines_density
         description: "Percentage of duplicated lines"
+      - name: gitleaks_run_pk
+        description: "Gitleaks tool run primary key (null if not available)"
+      - name: gitleaks_secret_count
+        description: "Total count of secrets detected in file"
+      - name: gitleaks_severity_critical
+        description: "Count of CRITICAL severity secrets"
+      - name: gitleaks_severity_high
+        description: "Count of HIGH severity secrets"
+      - name: gitleaks_severity_medium
+        description: "Count of MEDIUM severity secrets"
+      - name: gitleaks_severity_low
+        description: "Count of LOW severity secrets"
+      - name: gitleaks_severity_high_plus
+        description: "Count of CRITICAL + HIGH severity secrets"
+      - name: gitleaks_secrets_in_head
+        description: "Count of secrets present in current HEAD"
+      - name: gitleaks_secrets_in_history
+        description: "Count of secrets only in git history (not in HEAD)"
+      - name: gitleaks_unique_rule_count
+        description: "Count of distinct gitleaks rules that matched"
+      - name: gitleaks_avg_entropy
+        description: "Average entropy of detected secrets"
+      - name: gitleaks_max_entropy
+        description: "Maximum entropy of detected secrets"
+      - name: trivy_run_pk
+        description: "Trivy tool run primary key (null if not available)"
+      - name: trivy_vulnerability_count
+        description: "Total count of vulnerabilities in file"
+      - name: trivy_vuln_critical
+        description: "Count of CRITICAL severity vulnerabilities"
+      - name: trivy_vuln_high
+        description: "Count of HIGH severity vulnerabilities"
+      - name: trivy_vuln_medium
+        description: "Count of MEDIUM severity vulnerabilities"
+      - name: trivy_vuln_low
+        description: "Count of LOW severity vulnerabilities"
+      - name: trivy_iac_misconfig_count
+        description: "Total count of IaC misconfigurations in file"
+      - name: trivy_iac_critical
+        description: "Count of CRITICAL severity IaC misconfigurations"
+      - name: trivy_iac_high
+        description: "Count of HIGH severity IaC misconfigurations"
+      - name: trivy_iac_medium
+        description: "Count of MEDIUM severity IaC misconfigurations"
+      - name: trivy_iac_low
+        description: "Count of LOW severity IaC misconfigurations"
+      - name: trivy_total_finding_count
+        description: "Total count of all trivy findings (vulnerabilities + IaC misconfigs)"
+      - name: trivy_severity_high_plus
+        description: "Count of CRITICAL + HIGH severity findings (vulns + IaC)"
 
   - name: unified_run_summary
     columns:
@@ -821,6 +871,34 @@ models:
         tests:
           - not_null
 
+  - name: stg_trivy_file_metrics
+    description: "File-level aggregation of trivy findings combining vulnerabilities and IaC misconfigurations"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: vulnerability_count
+        tests:
+          - not_null
+      - name: iac_misconfig_count
+        tests:
+          - not_null
+      - name: total_finding_count
+        tests:
+          - not_null
+      - name: severity_high_plus
+        tests:
+          - not_null
+
   - name: rollup_trivy_directory_counts_direct
     columns:
       - name: run_pk
@@ -854,6 +932,132 @@ models:
         tests:
           - not_null
       - name: total_iac_misconfig_count
+        tests:
+          - not_null
+
+  - name: rollup_trivy_combined_directory_counts_direct
+    description: "Combined Trivy file metrics (vulns + IaC) per directory (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: tool_run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: files_with_vulns
+        tests:
+          - not_null
+      - name: files_with_iac_misconfigs
+        tests:
+          - not_null
+      - name: total_vulnerability_count
+        tests:
+          - not_null
+      - name: total_iac_misconfig_count
+        tests:
+          - not_null
+      - name: total_finding_count
+        tests:
+          - not_null
+      - name: total_severity_high_plus
+        tests:
+          - not_null
+
+  - name: rollup_trivy_combined_directory_counts_recursive
+    description: "Combined Trivy file metrics (vulns + IaC) per directory (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: tool_run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: files_with_vulns
+        tests:
+          - not_null
+      - name: files_with_iac_misconfigs
+        tests:
+          - not_null
+      - name: total_vulnerability_count
+        tests:
+          - not_null
+      - name: total_iac_misconfig_count
+        tests:
+          - not_null
+      - name: total_finding_count
+        tests:
+          - not_null
+      - name: total_severity_high_plus
+        tests:
+          - not_null
+
+  - name: rollup_trivy_combined_directory_direct_distributions
+    description: "Distribution statistics for combined Trivy metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - vulnerability_count
+                  - iac_misconfig_count
+                  - total_finding_count
+                  - severity_high_plus
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_trivy_combined_directory_recursive_distributions
+    description: "Distribution statistics for combined Trivy metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - vulnerability_count
+                  - iac_misconfig_count
+                  - total_finding_count
+                  - severity_high_plus
+      - name: value_count
         tests:
           - not_null
 
