@@ -13,6 +13,11 @@ dotcover_runs as (
     from {{ source('lz', 'lz_tool_runs') }}
     where tool_name = 'dotcover'
 ),
+roslyn_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'roslyn-analyzers'
+),
 semgrep_runs as (
     select run_pk, collection_run_id
     from {{ source('lz', 'lz_tool_runs') }}
@@ -65,6 +70,14 @@ dotcover_map as (
         lr.run_pk as layout_run_pk
     from dotcover_runs dr
     join layout_runs lr on lr.collection_run_id = dr.collection_run_id
+),
+roslyn_map as (
+    select
+        rr.run_pk as tool_run_pk,
+        rr.collection_run_id,
+        lr.run_pk as layout_run_pk
+    from roslyn_runs rr
+    join layout_runs lr on lr.collection_run_id = rr.collection_run_id
 ),
 scc_files as (
     select
@@ -120,6 +133,35 @@ dotcover_files as (
         dcf.statement_coverage_pct
     from {{ ref('stg_dotcover_file_metrics') }} dcf
     join dotcover_map dm on dm.tool_run_pk = dcf.run_pk
+),
+roslyn_files as (
+    select
+        rf.run_pk,
+        rm.collection_run_id,
+        rm.layout_run_pk,
+        rf.file_id,
+        rf.violation_count,
+        rf.severity_critical,
+        rf.severity_high,
+        rf.severity_medium,
+        rf.severity_low,
+        rf.severity_info,
+        rf.severity_high_plus
+    from {{ ref('stg_roslyn_file_metrics') }} rf
+    join roslyn_map rm on rm.tool_run_pk = rf.run_pk
+),
+semgrep_files as (
+    select
+        sf.run_pk,
+        sf.file_id,
+        sf.smell_count,
+        sf.severity_critical,
+        sf.severity_high,
+        sf.severity_medium,
+        sf.severity_low,
+        sf.severity_info,
+        sf.severity_high_plus
+    from {{ ref('stg_semgrep_file_metrics') }} sf
 ),
 call_files as (
     select
@@ -194,11 +236,28 @@ select
     dc.covered_statements as coverage_covered_statements,
     dc.total_statements as coverage_total_statements,
     dc.statement_coverage_pct as coverage_statement_pct,
+    ros.run_pk as roslyn_run_pk,
+    ros.violation_count as roslyn_violation_count,
+    ros.severity_critical as roslyn_severity_critical,
+    ros.severity_high as roslyn_severity_high,
+    ros.severity_medium as roslyn_severity_medium,
+    ros.severity_low as roslyn_severity_low,
+    ros.severity_info as roslyn_severity_info,
+    ros.severity_high_plus as roslyn_severity_high_plus,
+    sg.smell_count as semgrep_smell_count,
+    sg.severity_critical as semgrep_severity_critical,
+    sg.severity_high as semgrep_severity_high,
+    sg.severity_medium as semgrep_severity_medium,
+    sg.severity_low as semgrep_severity_low,
+    sg.severity_info as semgrep_severity_info,
+    sg.severity_high_plus as semgrep_severity_high_plus,
     concat_ws(
         ',',
         combined.sources,
         case when sf.run_pk is not null then 'symbol-scanner' end,
-        case when dc.run_pk is not null then 'dotcover' end
+        case when dc.run_pk is not null then 'dotcover' end,
+        case when ros.run_pk is not null then 'roslyn-analyzers' end,
+        case when sg.run_pk is not null then 'semgrep' end
     ) as sources
 from combined
 join {{ source('lz', 'lz_layout_files') }} lf
@@ -216,3 +275,9 @@ left join import_files imf
 left join dotcover_files dc
     on dc.layout_run_pk = combined.layout_run_pk
    and dc.file_id = combined.file_id
+left join roslyn_files ros
+    on ros.layout_run_pk = combined.layout_run_pk
+   and ros.file_id = combined.file_id
+left join semgrep_files sg
+    on sg.run_pk = combined.semgrep_run_pk
+   and sg.file_id = combined.file_id

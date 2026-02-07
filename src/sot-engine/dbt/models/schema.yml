@@ -342,6 +342,36 @@ models:
         description: "Number of outgoing function calls"
       - name: import_count
         description: "Number of file imports"
+      - name: roslyn_run_pk
+        description: "Roslyn analyzers tool run primary key (null if not available)"
+      - name: roslyn_violation_count
+        description: "Total count of Roslyn analyzer violations in file"
+      - name: roslyn_severity_critical
+        description: "Count of CRITICAL severity violations"
+      - name: roslyn_severity_high
+        description: "Count of HIGH severity violations"
+      - name: roslyn_severity_medium
+        description: "Count of MEDIUM severity violations"
+      - name: roslyn_severity_low
+        description: "Count of LOW severity violations"
+      - name: roslyn_severity_info
+        description: "Count of INFO severity violations"
+      - name: roslyn_severity_high_plus
+        description: "Count of CRITICAL + HIGH severity violations"
+      - name: semgrep_smell_count
+        description: "Total count of Semgrep code smells in file"
+      - name: semgrep_severity_critical
+        description: "Count of CRITICAL severity smells"
+      - name: semgrep_severity_high
+        description: "Count of HIGH severity smells"
+      - name: semgrep_severity_medium
+        description: "Count of MEDIUM severity smells"
+      - name: semgrep_severity_low
+        description: "Count of LOW severity smells"
+      - name: semgrep_severity_info
+        description: "Count of INFO severity smells"
+      - name: semgrep_severity_high_plus
+        description: "Count of CRITICAL + HIGH severity smells"
 
   - name: unified_run_summary
     columns:
