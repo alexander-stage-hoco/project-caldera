@@ -1,11 +1,11 @@
 {
   "tool": "dotcover",
   "version": "1.0.0",
-  "generated_at": "2026-02-07T10:05:47.093870+00:00",
+  "generated_at": "2026-02-07T12:07:11.553100+00:00",
   "description": "Evaluation scorecard for dotCover code coverage analysis",
   "summary": {
-    "total_checks": 4,
-    "passed": 4,
+    "total_checks": 19,
+    "passed": 19,
     "failed": 0,
     "score": 1.0,
     "score_percent": 100.0,
@@ -16,12 +16,12 @@
     {
       "id": "D1",
       "name": "Accuracy",
-      "weight": 0.3333333333333333,
+      "weight": 0.25,
       "total_checks": 2,
       "passed": 2,
       "failed": 0,
       "score": 5.0,
-      "weighted_score": 1.67,
+      "weighted_score": 1.25,
       "checks": [
         {
           "check_id": "accuracy.assembly_detected",
@@ -40,12 +40,12 @@
     {
       "id": "D2",
       "name": "Coverage",
-      "weight": 0.3333333333333333,
+      "weight": 0.25,
       "total_checks": 1,
       "passed": 1,
       "failed": 0,
       "score": 5.0,
-      "weighted_score": 1.67,
+      "weighted_score": 1.25,
       "checks": [
         {
           "check_id": "coverage.files_analyzed",
@@ -57,19 +57,121 @@
     },
     {
       "id": "D3",
+      "name": "Invariants",
+      "weight": 0.25,
+      "total_checks": 15,
+      "passed": 15,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.25,
+      "checks": [
+        {
+          "check_id": "invariants.covered_lte_total.summary",
+          "name": "invariants.covered_lte_total.summary",
+          "passed": true,
+          "message": "Summary: covered (17) <= total (24)"
+        },
+        {
+          "check_id": "invariants.covered_lte_total.assemblies",
+          "name": "invariants.covered_lte_total.assemblies",
+          "passed": true,
+          "message": "All 1 assemblies have covered <= total"
+        },
+        {
+          "check_id": "invariants.covered_lte_total.types",
+          "name": "invariants.covered_lte_total.types",
+          "passed": true,
+          "message": "All 3 types have covered <= total"
+        },
+        {
+          "check_id": "invariants.covered_lte_total.methods",
+          "name": "invariants.covered_lte_total.methods",
+          "passed": true,
+          "message": "All 10 methods have covered <= total"
+        },
+        {
+          "check_id": "invariants.hierarchy_consistency.types_to_assemblies",
+          "name": "invariants.hierarchy_consistency.types_to_assemblies",
+          "passed": true,
+          "message": "All 3 types reference valid assemblies"
+        },
+        {
+          "check_id": "invariants.hierarchy_consistency.methods_to_types",
+          "name": "invariants.hierarchy_consistency.methods_to_types",
+          "passed": true,
+          "message": "All 10 methods reference valid types"
+        },
+        {
+          "check_id": "invariants.hierarchy_consistency.methods_to_assemblies",
+          "name": "invariants.hierarchy_consistency.methods_to_assemblies",
+          "passed": true,
+          "message": "All 10 methods reference valid assemblies"
+        },
+        {
+          "check_id": "invariants.non_negative_counts.summary",
+          "name": "invariants.non_negative_counts.summary",
+          "passed": true,
+          "message": "Summary counts non-negative: covered=17, total=24"
+        },
+        {
+          "check_id": "invariants.non_negative_counts.assemblies",
+          "name": "invariants.non_negative_counts.assemblies",
+          "passed": true,
+          "message": "All 1 assemblies have non-negative counts"
+        },
+        {
+          "check_id": "invariants.non_negative_counts.types",
+          "name": "invariants.non_negative_counts.types",
+          "passed": true,
+          "message": "All 3 types have non-negative counts"
+        },
+        {
+          "check_id": "invariants.non_negative_counts.methods",
+          "name": "invariants.non_negative_counts.methods",
+          "passed": true,
+          "message": "All 10 methods have non-negative counts"
+        },
+        {
+          "check_id": "invariants.percentage_bounds.summary",
+          "name": "invariants.percentage_bounds.summary",
+          "passed": true,
+          "message": "Summary coverage percentage valid: 70.83%"
+        },
+        {
+          "check_id": "invariants.percentage_bounds.assemblies",
+          "name": "invariants.percentage_bounds.assemblies",
+          "passed": true,
+          "message": "All 1 assemblies have valid percentage bounds"
+        },
+        {
+          "check_id": "invariants.percentage_bounds.types",
+          "name": "invariants.percentage_bounds.types",
+          "passed": true,
+          "message": "All 3 types have valid percentage bounds"
+        },
+        {
+          "check_id": "invariants.percentage_bounds.methods",
+          "name": "invariants.percentage_bounds.methods",
+          "passed": true,
+          "message": "All 10 methods have valid percentage bounds"
+        }
+      ]
+    },
+    {
+      "id": "D4",
       "name": "Performance",
-      "weight": 0.3333333333333333,
+      "weight": 0.25,
       "total_checks": 1,
       "passed": 1,
       "failed": 0,
       "score": 5.0,
-      "weighted_score": 1.67,
+      "weighted_score": 1.25,
       "checks": [
         {
           "check_id": "performance.execution_time",
           "name": "performance.execution_time",
           "passed": true,
-          "message": "Execution time check not implemented"
+          "message": "No timing data available in output (timing not recorded)"
         }
       ]
     }

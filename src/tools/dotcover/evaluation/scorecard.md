@@ -1,6 +1,6 @@
 # dotCover Evaluation Scorecard
 
-**Generated:** 2026-02-07T10:05:47.093870+00:00
+**Generated:** 2026-02-07T12:07:11.553100+00:00
 **Decision:** STRONG_PASS
 **Score:** 100.0%
 
@@ -8,8 +8,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Checks | 4 |
-| Passed | 4 |
+| Total Checks | 19 |
+| Passed | 19 |
 | Failed | 0 |
 | Raw Score | 1.000 |
 | Normalized Score | 5.00/5.0 |
@@ -20,6 +20,7 @@
 |-----------|--------|--------|-------|
 | Accuracy | 2 | 2/2 | 100.0% |
 | Coverage | 1 | 1/1 | 100.0% |
+| Invariants | 15 | 15/15 | 100.0% |
 | Performance | 1 | 1/1 | 100.0% |
 
 ## Detailed Results
@@ -37,11 +38,31 @@
 |-------|--------|---------|
 | coverage.files_analyzed | PASS | 3 types analyzed |
 
+### Invariants
+
+| Check | Status | Message |
+|-------|--------|---------|
+| invariants.covered_lte_total.summary | PASS | Summary: covered (17) <= total (24) |
+| invariants.covered_lte_total.assemblies | PASS | All 1 assemblies have covered <= total |
+| invariants.covered_lte_total.types | PASS | All 3 types have covered <= total |
+| invariants.covered_lte_total.methods | PASS | All 10 methods have covered <= total |
+| invariants.hierarchy_consistency.types_to_assemblies | PASS | All 3 types reference valid assemblies |
+| invariants.hierarchy_consistency.methods_to_types | PASS | All 10 methods reference valid types |
+| invariants.hierarchy_consistency.methods_to_assemblies | PASS | All 10 methods reference valid assemblies |
+| invariants.non_negative_counts.summary | PASS | Summary counts non-negative: covered=17, total=24 |
+| invariants.non_negative_counts.assemblies | PASS | All 1 assemblies have non-negative counts |
+| invariants.non_negative_counts.types | PASS | All 3 types have non-negative counts |
+| invariants.non_negative_counts.methods | PASS | All 10 methods have non-negative counts |
+| invariants.percentage_bounds.summary | PASS | Summary coverage percentage valid: 70.83% |
+| invariants.percentage_bounds.assemblies | PASS | All 1 assemblies have valid percentage bounds |
+| invariants.percentage_bounds.types | PASS | All 3 types have valid percentage bounds |
+| invariants.percentage_bounds.methods | PASS | All 10 methods have valid percentage bounds |
+
 ### Performance
 
 | Check | Status | Message |
 |-------|--------|---------|
-| performance.execution_time | PASS | Execution time check not implemented |
+| performance.execution_time | PASS | No timing data available in output (timing not rec... |
 
 ## Decision Thresholds
 

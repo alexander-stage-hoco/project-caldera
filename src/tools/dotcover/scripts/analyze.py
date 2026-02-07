@@ -377,6 +377,14 @@ def parse_cobertura_xml(xml_path: Path, repo_path: Path) -> dict | None:
     lines_covered = int(root.get("lines-covered", "0"))
     lines_valid = int(root.get("lines-valid", "0"))
 
+    # Parse source directories for path resolution
+    source_dirs: list[Path] = []
+    sources_elem = root.find("sources")
+    if sources_elem is not None:
+        for source in sources_elem.findall("source"):
+            if source.text:
+                source_dirs.append(Path(source.text))
+
     # Build coverage data structures
     assemblies_dict: dict[str, dict] = {}
     types_list: list[dict] = []
@@ -433,10 +441,23 @@ def parse_cobertura_xml(xml_path: Path, repo_path: Path) -> dict | None:
                     if int(line.get("hits", "0")) > 0:
                         cls_covered += 1
 
-            # Normalize file path
+            # Resolve file path using source directories
+            # Coverlet reports filenames relative to source directories
             normalized_path = None
             if filename:
-                normalized_path = normalize_file_path(filename, repo_path)
+                # Try to resolve full path using source directories
+                resolved_path = None
+                for source_dir in source_dirs:
+                    candidate = source_dir / filename
+                    if candidate.exists():
+                        resolved_path = str(candidate)
+                        break
+                # If not found, try joining with first source dir anyway
+                if resolved_path is None and source_dirs:
+                    resolved_path = str(source_dirs[0] / filename)
+                elif resolved_path is None:
+                    resolved_path = filename
+                normalized_path = normalize_file_path(resolved_path, repo_path)
 
             # Add type coverage
             types_list.append({
