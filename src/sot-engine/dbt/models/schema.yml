@@ -4104,3 +4104,760 @@ models:
                   - high
                   - medium
                   - low
+
+  - name: mart_devskim_rule_hotspots
+    description: "DevSkim rule hotspots for security remediation prioritization"
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: rule_id
+        description: "DevSkim rule identifier"
+        tests:
+          - not_null
+      - name: dd_category
+        description: "Category classification for the rule"
+      - name: sample_message
+        description: "Example message for this rule"
+      - name: issue_count
+        description: "Total occurrences of this rule"
+        tests:
+          - not_null
+      - name: files_affected
+        description: "Count of distinct files with this issue"
+        tests:
+          - not_null
+      - name: directories_affected
+        description: "Count of distinct directories with this issue"
+        tests:
+          - not_null
+      - name: severity_critical
+        description: "Count of CRITICAL severity issues"
+        tests:
+          - not_null
+      - name: severity_high
+        description: "Count of HIGH severity issues"
+        tests:
+          - not_null
+      - name: severity_medium
+        description: "Count of MEDIUM severity issues"
+        tests:
+          - not_null
+      - name: severity_low
+        description: "Count of LOW severity issues"
+        tests:
+          - not_null
+      - name: severity_high_plus
+        description: "Count of CRITICAL + HIGH severity issues"
+        tests:
+          - not_null
+      - name: severity_score
+        description: "Weighted score: CRITICAL*4 + HIGH*3 + MEDIUM*2 + LOW*1"
+        tests:
+          - not_null
+      - name: issue_rank
+        description: "Rank by issue_count within run (1 = most frequent)"
+        tests:
+          - not_null
+      - name: severity_rank
+        description: "Rank by critical/high counts within run (1 = most severe)"
+        tests:
+          - not_null
+      - name: spread_rank
+        description: "Rank by files_affected within run (1 = most widespread)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (has CRITICAL), high (has HIGH), medium (has MEDIUM), low (LOW only)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+
+  - name: mart_scancode_license_hotspots
+    description: "Scancode license hotspots for compliance review and license distribution analysis"
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: spdx_id
+        description: "SPDX license identifier"
+        tests:
+          - not_null
+      - name: category
+        description: "Representative license category (most restrictive if mixed)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - permissive
+                  - weak-copyleft
+                  - copyleft
+                  - unknown
+      - name: detection_count
+        description: "Total occurrences of this license"
+        tests:
+          - not_null
+      - name: files_affected
+        description: "Count of distinct files with this license"
+        tests:
+          - not_null
+      - name: directories_affected
+        description: "Count of distinct directories with this license"
+        tests:
+          - not_null
+      - name: avg_confidence
+        description: "Average detection confidence for this license"
+        tests:
+          - not_null
+      - name: min_confidence
+        description: "Minimum detection confidence (identifies uncertain detections)"
+        tests:
+          - not_null
+      - name: max_confidence
+        description: "Maximum detection confidence"
+        tests:
+          - not_null
+      - name: category_permissive
+        description: "Count of detections in permissive category"
+        tests:
+          - not_null
+      - name: category_weak_copyleft
+        description: "Count of detections in weak-copyleft category"
+        tests:
+          - not_null
+      - name: category_copyleft
+        description: "Count of detections in copyleft category"
+        tests:
+          - not_null
+      - name: category_unknown
+        description: "Count of detections in unknown category"
+        tests:
+          - not_null
+      - name: detection_rank
+        description: "Rank by detection_count within run (1 = most frequent)"
+        tests:
+          - not_null
+      - name: spread_rank
+        description: "Rank by files_affected within run (1 = most widespread)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification based on license restrictiveness: high (copyleft), medium (weak-copyleft), low (permissive), unknown"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - high
+                  - medium
+                  - low
+                  - unknown
+
+  - name: mart_trivy_iac_misconfig_hotspots
+    description: "Trivy IaC misconfig hotspots for security remediation prioritization by misconfiguration type"
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: misconfig_id
+        description: "Trivy misconfiguration identifier"
+        tests:
+          - not_null
+      - name: sample_title
+        description: "Example title for this misconfiguration type"
+      - name: sample_resolution
+        description: "Example resolution guidance for this misconfiguration"
+      - name: issue_count
+        description: "Total occurrences of this misconfiguration"
+        tests:
+          - not_null
+      - name: files_affected
+        description: "Count of distinct files with this misconfiguration"
+        tests:
+          - not_null
+      - name: directories_affected
+        description: "Count of distinct directories with this misconfiguration"
+        tests:
+          - not_null
+      - name: severity_critical
+        description: "Count of CRITICAL severity issues"
+        tests:
+          - not_null
+      - name: severity_high
+        description: "Count of HIGH severity issues"
+        tests:
+          - not_null
+      - name: severity_medium
+        description: "Count of MEDIUM severity issues"
+        tests:
+          - not_null
+      - name: severity_low
+        description: "Count of LOW severity issues"
+        tests:
+          - not_null
+      - name: severity_unknown
+        description: "Count of UNKNOWN severity issues"
+        tests:
+          - not_null
+      - name: severity_high_plus
+        description: "Count of CRITICAL + HIGH severity issues"
+        tests:
+          - not_null
+      - name: severity_score
+        description: "Weighted score: CRITICAL*4 + HIGH*3 + MEDIUM*2 + LOW*1"
+        tests:
+          - not_null
+      - name: target_terraform
+        description: "Count of issues in Terraform files"
+        tests:
+          - not_null
+      - name: target_dockerfile
+        description: "Count of issues in Dockerfiles"
+        tests:
+          - not_null
+      - name: target_kubernetes
+        description: "Count of issues in Kubernetes manifests"
+        tests:
+          - not_null
+      - name: target_other
+        description: "Count of issues in other target types"
+        tests:
+          - not_null
+      - name: issue_rank
+        description: "Rank by issue_count within run (1 = most frequent)"
+        tests:
+          - not_null
+      - name: severity_rank
+        description: "Rank by critical/high counts within run (1 = most severe)"
+        tests:
+          - not_null
+      - name: spread_rank
+        description: "Rank by files_affected within run (1 = most widespread)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (has CRITICAL), high (has HIGH), medium (has MEDIUM), low (only LOW/UNKNOWN)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+
+  - name: mart_git_sizer_violation_hotspots
+    description: "Git-sizer violation hotspots for repository health analysis by metric"
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: metric
+        description: "Name of the violated metric (e.g., blob.big.size, commit.count)"
+        tests:
+          - not_null
+      - name: violation_count
+        description: "Total violations of this metric"
+        tests:
+          - not_null
+      - name: max_level
+        description: "Highest severity level seen (1-4)"
+        tests:
+          - not_null
+      - name: min_level
+        description: "Lowest severity level seen (1-4)"
+        tests:
+          - not_null
+      - name: sample_value_display
+        description: "Example human-readable value"
+      - name: sample_object_ref
+        description: "Example object reference (blob SHA, path, etc.)"
+      - name: level_1_count
+        description: "Count of level 1 (notice) violations"
+        tests:
+          - not_null
+      - name: level_2_count
+        description: "Count of level 2 (warning) violations"
+        tests:
+          - not_null
+      - name: level_3_count
+        description: "Count of level 3 (attention needed) violations"
+        tests:
+          - not_null
+      - name: level_4_count
+        description: "Count of level 4 (critical) violations"
+        tests:
+          - not_null
+      - name: level_3_plus
+        description: "Count of level 3 + 4 (actionable) violations"
+        tests:
+          - not_null
+      - name: severity_score
+        description: "Weighted score: level4*4 + level3*3 + level2*2 + level1*1"
+        tests:
+          - not_null
+      - name: min_raw_value
+        description: "Smallest raw value"
+        tests:
+          - not_null
+      - name: max_raw_value
+        description: "Largest raw value"
+        tests:
+          - not_null
+      - name: distinct_objects
+        description: "Count of distinct object_refs (unique offenders)"
+        tests:
+          - not_null
+      - name: violation_rank
+        description: "Rank by violation_count within run (1 = most frequent)"
+        tests:
+          - not_null
+      - name: severity_rank
+        description: "Rank by max_level, then level_4_count (1 = most severe)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (level 4), high (level 3), medium (level 2), low (level 1)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+
+  - name: mart_dotcover_coverage_hotspots
+    description: "Low-coverage file hotspots for coverage improvement prioritization. Target threshold: 80% statement coverage."
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+      - name: file_id
+        description: "File identifier"
+        tests:
+          - not_null
+      - name: directory_id
+        description: "Directory identifier for file location"
+        tests:
+          - not_null
+      - name: relative_path
+        description: "Repository-relative file path"
+        tests:
+          - not_null
+      - name: type_count
+        description: "Number of types (classes/structs) in the file"
+        tests:
+          - not_null
+      - name: covered_statements
+        description: "Number of statements covered by tests"
+        tests:
+          - not_null
+      - name: total_statements
+        description: "Total number of statements in the file"
+        tests:
+          - not_null
+      - name: statement_coverage_pct
+        description: "Percentage of statements covered (0-100)"
+        tests:
+          - not_null
+      - name: gap_to_target_pct
+        description: "Percentage points needed to reach 80% target (0 if already passing)"
+        tests:
+          - not_null
+      - name: statements_needed_for_target
+        description: "Number of additional statements to cover to reach 80% target"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (<20%), high (20-40%), medium (40-60%), low (60-80%), passing (80%+)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+                  - passing
+      - name: risk_level_numeric
+        description: "Numeric risk level: 5=critical, 4=high, 3=medium, 2=low, 1=passing"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+      - name: relative_position
+        description: "Statistical position: p25_low_outlier, below_median, above_median, p90_high, p90_plus_high"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - p25_low_outlier
+                  - below_median
+                  - above_median
+                  - p90_high
+                  - p90_plus_high
+      - name: coverage_zscore
+        description: "Z-score of coverage relative to run distribution (negative = worse coverage)"
+        tests:
+          - not_null
+      - name: is_below_target
+        description: "True if coverage is below 80% target"
+        tests:
+          - not_null
+      - name: is_medium_plus
+        description: "True if coverage is below 60%"
+        tests:
+          - not_null
+      - name: is_high_plus
+        description: "True if coverage is below 40%"
+        tests:
+          - not_null
+      - name: is_critical
+        description: "True if coverage is below 20%"
+        tests:
+          - not_null
+      - name: run_coverage_avg
+        description: "Average coverage across all files in run"
+      - name: run_coverage_stddev
+        description: "Standard deviation of coverage in run"
+      - name: run_coverage_p25
+        description: "25th percentile coverage in run"
+      - name: run_coverage_p50
+        description: "Median coverage in run"
+      - name: run_coverage_p75
+        description: "75th percentile coverage in run"
+      - name: run_coverage_p90
+        description: "90th percentile coverage in run"
+      - name: run_coverage_p95
+        description: "95th percentile coverage in run"
+      - name: run_total_files
+        description: "Total files with coverage data in run"
+
+  - name: mart_git_fame_contributor_hotspots
+    description: "Author concentration hotspots for bus factor and knowledge risk analysis. Identifies contributors with high ownership concentration."
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+      - name: author_name
+        description: "Git author name"
+        tests:
+          - not_null
+      - name: author_email
+        description: "Git author email (may be null for some commits)"
+      - name: surviving_loc
+        description: "Lines of code currently in the repo attributed to this author"
+        tests:
+          - not_null
+      - name: ownership_pct
+        description: "Percentage of codebase owned by this author"
+        tests:
+          - not_null
+      - name: insertions_total
+        description: "Total lines inserted by this author"
+        tests:
+          - not_null
+      - name: deletions_total
+        description: "Total lines deleted by this author"
+        tests:
+          - not_null
+      - name: commit_count
+        description: "Number of commits by this author"
+        tests:
+          - not_null
+      - name: files_touched
+        description: "Number of files touched by this author"
+        tests:
+          - not_null
+      - name: collection_run_id
+        description: "Collection run identifier"
+        tests:
+          - not_null
+      - name: run_id
+        description: "Tool run identifier"
+        tests:
+          - not_null
+      - name: repo_id
+        description: "Repository identifier"
+        tests:
+          - not_null
+      - name: author_count
+        description: "Total number of authors in repository"
+        tests:
+          - not_null
+      - name: total_loc
+        description: "Total lines of code in repository"
+        tests:
+          - not_null
+      - name: hhi_index
+        description: "Herfindahl-Hirschman Index of ownership concentration (0-10000)"
+        tests:
+          - not_null
+      - name: bus_factor
+        description: "Minimum authors needed for 50% code ownership"
+        tests:
+          - not_null
+      - name: top_author_pct
+        description: "Ownership percentage of top contributor"
+        tests:
+          - not_null
+      - name: top_two_pct
+        description: "Combined ownership percentage of top two contributors"
+        tests:
+          - not_null
+      - name: ownership_rank
+        description: "Rank by ownership percentage (1 = highest)"
+        tests:
+          - not_null
+      - name: commit_rank
+        description: "Rank by commit count (1 = most commits)"
+        tests:
+          - not_null
+      - name: files_rank
+        description: "Rank by files touched (1 = most files)"
+        tests:
+          - not_null
+      - name: cumulative_ownership_pct
+        description: "Cumulative ownership up to and including this author"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (50%+), high (25-50%), medium (10-25%), low (5-10%), minimal (<5%)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+                  - minimal
+      - name: risk_level_numeric
+        description: "Numeric risk level: 5=critical, 4=high, 3=medium, 2=low, 1=minimal"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+      - name: is_bus_factor_member
+        description: "True if author is in minimum set for 50% coverage"
+        tests:
+          - not_null
+      - name: ownership_zscore
+        description: "Z-score of ownership relative to run distribution"
+        tests:
+          - not_null
+      - name: relative_position
+        description: "Statistical position: normal, above_median, p90_outlier, p95_outlier, p99_outlier"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - normal
+                  - above_median
+                  - p90_outlier
+                  - p95_outlier
+                  - p99_outlier
+      - name: code_retention_ratio
+        description: "Ratio of surviving LOC to insertions (how much code survives)"
+      - name: churn_ratio
+        description: "Ratio of deletions to insertions"
+      - name: is_significant_contributor
+        description: "True if ownership >= 10%"
+        tests:
+          - not_null
+      - name: is_high_plus
+        description: "True if ownership >= 25%"
+        tests:
+          - not_null
+      - name: is_critical
+        description: "True if ownership >= 50%"
+        tests:
+          - not_null
+      - name: run_ownership_avg
+        description: "Average ownership percentage in run"
+      - name: run_ownership_stddev
+        description: "Standard deviation of ownership in run"
+      - name: run_ownership_p50
+        description: "Median ownership in run"
+      - name: run_ownership_p75
+        description: "75th percentile ownership in run"
+      - name: run_ownership_p90
+        description: "90th percentile ownership in run"
+      - name: run_ownership_p95
+        description: "95th percentile ownership in run"
+      - name: run_ownership_p99
+        description: "99th percentile ownership in run"
+
+  - name: mart_symbol_coupling_hotspots
+    description: "High coupling symbol hotspots for architectural risk and refactoring prioritization. Identifies god objects, octopus symbols, and hub components."
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+      - name: file_id
+        description: "File identifier (may be null for external callees)"
+      - name: directory_id
+        description: "Directory identifier for file location (may be null for external callees)"
+      - name: relative_path
+        description: "Repository-relative file path (may be null for external callees)"
+      - name: symbol_name
+        description: "Name of the symbol (function, class, etc.)"
+        tests:
+          - not_null
+      - name: symbol_type
+        description: "Type of symbol (function, class, method, etc.)"
+      - name: fan_out
+        description: "Number of distinct symbols this symbol calls"
+        tests:
+          - not_null
+      - name: fan_in
+        description: "Number of distinct symbols that call this symbol"
+        tests:
+          - not_null
+      - name: total_coupling
+        description: "Total coupling (fan_in + fan_out)"
+        tests:
+          - not_null
+      - name: instability
+        description: "Instability metric: fan_out / (fan_in + fan_out). 0=stable, 1=unstable"
+        tests:
+          - not_null
+      - name: coupling_risk
+        description: "Coupling risk level: critical (20+), high (10-19), medium (5-9), low (<5)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+      - name: coupling_risk_numeric
+        description: "Numeric coupling risk: 4=critical, 3=high, 2=medium, 1=low"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+      - name: instability_zone
+        description: "Instability classification: unstable (0.8+), flexible (0.5-0.8), stable (0.2-0.5), rigid (<0.2)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - unstable
+                  - flexible
+                  - stable
+                  - rigid
+      - name: coupling_pattern
+        description: "Detected coupling pattern: hub (both high), god_object (high fan-in), octopus (high fan-out), normal"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - hub
+                  - god_object
+                  - octopus
+                  - normal
+      - name: coupling_zscore
+        description: "Z-score of total coupling relative to run distribution"
+        tests:
+          - not_null
+      - name: relative_position
+        description: "Statistical position: normal, above_median, p90_outlier, p95_outlier, p99_outlier"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - normal
+                  - above_median
+                  - p90_outlier
+                  - p95_outlier
+                  - p99_outlier
+      - name: is_rigid_dependency
+        description: "True if instability < 0.2 and has fan-in (hard to change)"
+        tests:
+          - not_null
+      - name: is_unstable_dependency
+        description: "True if instability > 0.8 and has fan-out (volatile)"
+        tests:
+          - not_null
+      - name: is_medium_plus
+        description: "True if total coupling >= 5"
+        tests:
+          - not_null
+      - name: is_high_plus
+        description: "True if total coupling >= 10"
+        tests:
+          - not_null
+      - name: is_critical
+        description: "True if total coupling >= 20"
+        tests:
+          - not_null
+      - name: run_coupling_avg
+        description: "Average total coupling in run"
+      - name: run_coupling_stddev
+        description: "Standard deviation of total coupling in run"
+      - name: run_coupling_p50
+        description: "Median total coupling in run"
+      - name: run_coupling_p75
+        description: "75th percentile total coupling in run"
+      - name: run_coupling_p90
+        description: "90th percentile total coupling in run"
+      - name: run_coupling_p95
+        description: "95th percentile total coupling in run"
+      - name: run_coupling_p99
+        description: "99th percentile total coupling in run"
+      - name: run_fan_in_avg
+        description: "Average fan-in in run"
+      - name: run_fan_out_avg
+        description: "Average fan-out in run"
+      - name: run_fan_in_p90
+        description: "90th percentile fan-in in run"
+      - name: run_fan_out_p90
+        description: "90th percentile fan-out in run"
+      - name: run_total_symbols
+        description: "Total symbols with coupling in run"
