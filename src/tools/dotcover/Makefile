@@ -12,7 +12,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-.PHONY: help setup analyze analyze-docker docker-build evaluate evaluate-llm test test-quick clean clean-all
+.PHONY: help setup analyze analyze-docker analyze-coverlet docker-build evaluate evaluate-llm test test-quick clean clean-all
 
 # Include shared configuration (provides VENV, RUN_ID, REPO_ID, OUTPUT_DIR, etc.)
 include ../Makefile.common
@@ -72,6 +72,19 @@ analyze-docker: docker-build $(VENV_READY)  ## Run analysis in Docker (bypasses 
 		--branch $(BRANCH) \
 		--commit $(COMMIT) \
 		--docker
+
+analyze-coverlet: $(VENV_READY)  ## Run analysis with Coverlet backend (ARM64 native)
+	@mkdir -p $(OUTPUT_DIR)
+	@echo "Analyzing $(REPO_PATH) as project '$(REPO_NAME)' with Coverlet"
+	$(PYTHON_VENV) -m scripts.analyze \
+		--repo-path $(REPO_PATH) \
+		--repo-name $(REPO_NAME) \
+		--output-dir $(OUTPUT_DIR) \
+		--run-id $(RUN_ID) \
+		--repo-id $(REPO_ID) \
+		--branch $(BRANCH) \
+		--commit $(COMMIT) \
+		--backend coverlet
 
 # ============================================
 # Evaluation targets
