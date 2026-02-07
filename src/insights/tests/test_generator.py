@@ -14,6 +14,7 @@ class TestInsightsGenerator:
     def test_sections_registered(self):
         """Test that all expected sections are registered."""
         expected_sections = [
+            "tool_readiness",
             "executive_summary",
             "repo_health",
             "file_hotspots",
@@ -41,7 +42,7 @@ class TestInsightsGenerator:
 
             sections = generator.list_sections()
 
-            assert len(sections) == 13
+            assert len(sections) == 14
             assert all("name" in s for s in sections)
             assert all("title" in s for s in sections)
             assert all("description" in s for s in sections)
@@ -57,7 +58,7 @@ class TestInsightsGenerator:
         # All priorities should be valid integers in range 0-11
         # Note: Some sections share priorities (e.g., secrets and cross_tool both use 5)
         assert all(0 <= p <= 11 for p in priorities)
-        assert len(priorities) == 13
+        assert len(priorities) == 14
 
     @pytest.mark.parametrize("format_type", ["html", "md"])
     def test_format_support(self, format_type: str):

@@ -1,0 +1,172 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Tool Readiness Report</h2>
+
+    {% if not has_tools %}
+    <div class="empty-state">
+        <p>No tools found. Ensure the tools directory exists at <code>src/tools/</code>.</p>
+    </div>
+    {% else %}
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Tools</div>
+            <div class="value">{{ summary.total }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Ready for Reports</div>
+            <div class="value" style="color: var(--color-low);">{{ summary.ready }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Needs Investigation</div>
+            <div class="value" style="color: var(--color-medium);">{{ summary.investigate }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Not Ready</div>
+            <div class="value" style="color: var(--color-critical);">{{ summary.not_ready }}</div>
+        </div>
+    </div>
+
+    {% if ready_for_reports %}
+    <div class="subsection">
+        <h3>Tools Ready for Reports (STRONG_PASS / PASS)</h3>
+        <p class="subsection-description">These tools deliver reliable, validated data to the marts.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Score</th>
+                    <th class="number">Checks</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for tool in ready_for_reports %}
+                <tr>
+                    <td><strong>{{ tool.name }}</strong></td>
+                    <td>
+                        <span class="severity-badge {{ tool.decision | lower }}">
+                            {{ tool.score_percent | round(1) }}%
+                        </span>
+                    </td>
+                    <td class="number">{{ tool.passed_checks }}/{{ tool.total_checks }}</td>
+                    <td>{{ tool.purpose }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if needs_investigation %}
+    <div class="subsection">
+        <h3>Tools Needing Investigation</h3>
+        <p class="subsection-description">These have complete pipelines but missing or incomplete evaluation scorecards.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Issue</th>
+                    <th>Action Needed</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for tool in needs_investigation %}
+                <tr>
+                    <td><strong>{{ tool.name }}</strong></td>
+                    <td>
+                        {% if tool.has_md_only %}
+                        Has <code>scorecard.md</code> but missing <code>scorecard.json</code>
+                        {% else %}
+                        No scorecard generated
+                        {% endif %}
+                    </td>
+                    <td>Run evaluation to generate JSON scorecard</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if not_ready %}
+    <div class="subsection">
+        <h3>Tools NOT Ready for Reports</h3>
+        <p class="subsection-description">These tools have evaluation issues that need to be resolved.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Decision</th>
+                    <th>Score</th>
+                    <th class="number">Passed</th>
+                    <th class="number">Failed</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for tool in not_ready %}
+                <tr>
+                    <td><strong>{{ tool.name }}</strong></td>
+                    <td><span class="severity-badge {{ tool.decision | lower }}">{{ tool.decision }}</span></td>
+                    <td>{{ tool.score_percent | round(1) if tool.score_percent else 'N/A' }}%</td>
+                    <td class="number">{{ tool.passed_checks if tool.passed_checks else 0 }}</td>
+                    <td class="number">{{ tool.failed_checks if tool.failed_checks else 0 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% for tool in not_ready %}
+        {% if tool.failed_check_details %}
+        <div class="tool-details">
+            <h4>{{ tool.name }} - Failed Checks</h4>
+            <table class="compact">
+                <thead>
+                    <tr>
+                        <th>Check</th>
+                        <th>Dimension</th>
+                        <th>Issue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for check in tool.failed_check_details %}
+                    <tr>
+                        <td><code>{{ check.check_id }}</code></td>
+                        <td>{{ check.dimension }}</td>
+                        <td>{{ check.message | truncate(80) }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if no_scorecard %}
+    <div class="subsection">
+        <h3>Tools Without Evaluation</h3>
+        <p class="subsection-description">These tools do not have evaluation infrastructure set up.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Status</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for tool in no_scorecard %}
+                <tr>
+                    <td><strong>{{ tool.name }}</strong></td>
+                    <td><span class="severity-badge info">No Evaluation</span></td>
+                    <td>{{ tool.purpose }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

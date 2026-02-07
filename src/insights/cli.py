@@ -306,6 +306,50 @@ def list_collections(
         raise typer.Exit(1)
 
 
+@app.command("tool-readiness")
+def tool_readiness_report(
+    format: str = typer.Option("md", "--format", "-f", help="Output format: html, md"),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+) -> None:
+    """Generate a tool readiness report.
+
+    This report scans all tools in src/tools/ and summarizes their evaluation
+    status based on scorecard.json files. Unlike other reports, this does not
+    require a database connection.
+
+    Example:
+        insights tool-readiness
+        insights tool-readiness --format html -o readiness.html
+    """
+    from .sections.tool_readiness import ToolReadinessSection
+    from .formatters.html import HtmlFormatter
+    from .formatters.markdown import MarkdownFormatter
+
+    section = ToolReadinessSection()
+    data = section.fetch_data(None, 0)  # run_pk is ignored
+
+    if format == "html":
+        formatter = HtmlFormatter()
+        template_name = section.get_template_name()
+    else:
+        formatter = MarkdownFormatter()
+        template_name = section.get_markdown_template_name()
+
+    try:
+        content = formatter.format_section("tool_readiness", template_name, data)
+
+        if output:
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(content)
+            console.print(f"[green]Report written to:[/green] {output}")
+        else:
+            console.print(content)
+
+    except Exception as e:
+        console.print(f"[red]Error generating report:[/red] {e}")
+        raise typer.Exit(1)
+
+
 def main() -> None:
     """Main entry point."""
     app()

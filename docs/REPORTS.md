@@ -59,9 +59,33 @@ Report analyses are covered by DuckDB-based unit-style tests under:
 - `src/sot-engine/tests/test_report_*.py`
 - `src/insights/tests/` (unit and E2E tests)
 
+## Tool Readiness Report
+
+The tool readiness report scans all tools in `src/tools/` and summarizes their
+evaluation status. Unlike other reports, this does not require a database.
+
+```bash
+# Generate markdown (default)
+cd src/insights && .venv/bin/python -m insights tool-readiness
+
+# Generate HTML
+cd src/insights && .venv/bin/python -m insights tool-readiness --format html -o output/readiness.html
+```
+
+The report categorizes tools into:
+- **Ready for Reports**: STRONG_PASS or PASS decision
+- **Needs Investigation**: Missing scorecard.json but has evaluation infrastructure
+- **Not Ready**: WEAK_PASS or FAIL decision
+- **No Evaluation**: No evaluation infrastructure set up
+
+Data sources (in order of precedence):
+1. `evaluation/scorecard.json` - primary scorecard format
+2. `evaluation/results/evaluation_report.json` - fallback format
+
 ## Insights Component
 
 The `src/insights/` component generates consolidated HTML/Markdown reports with multiple sections:
+- Tool Readiness (meta-report, no database required)
 - Repository Health Overview
 - File Hotspots
 - Directory Analysis

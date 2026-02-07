@@ -1,0 +1,115 @@
+## Tool Readiness Report
+
+{% if not has_tools %}
+*No tools found. Ensure the tools directory exists at `src/tools/`.*
+{% else %}
+
+### Executive Summary
+
+Project Caldera has **{{ summary.total }} analysis tools**.
+
+| Category | Count | Status |
+|----------|-------|--------|
+| **Ready for Reports** | {{ summary.ready }} | STRONG_PASS / PASS |
+| **Needs Investigation** | {{ summary.investigate }} | Missing scorecard.json |
+| **Not Ready** | {{ summary.not_ready }} | WEAK_PASS / FAIL |
+| **No Evaluation** | {{ summary.no_scorecard }} | No scorecard infrastructure |
+
+---
+
+{% if ready_for_reports %}
+### Tools Ready for Reports (STRONG_PASS / PASS)
+
+These tools deliver reliable, validated data to the marts:
+
+| Tool | Score | Checks | Purpose |
+|------|-------|--------|---------|
+{% for tool in ready_for_reports %}
+| **{{ tool.name }}** | {{ tool.score_percent | round(1) }}% | {{ tool.passed_checks }}/{{ tool.total_checks }} | {{ tool.purpose }} |
+{% endfor %}
+
+**All have:**
+- Adapters in `src/sot-engine/persistence/adapters/`
+- Entity definitions in `entities.py`
+- Landing zone tables in `schema.sql`
+- dbt staging models (`stg_*`)
+- Directory rollup models (where applicable)
+
+{% endif %}
+
+{% if needs_investigation %}
+---
+
+### Tools Needing Investigation
+
+These have complete pipelines but missing or incomplete evaluation scorecards:
+
+| Tool | Issue | Action Needed |
+|------|-------|---------------|
+{% for tool in needs_investigation %}
+| **{{ tool.name }}** | {% if tool.has_md_only %}Has `scorecard.md` but missing `scorecard.json`{% else %}No scorecard generated{% endif %} | Run evaluation to generate JSON scorecard |
+{% endfor %}
+
+{% endif %}
+
+{% if not_ready %}
+---
+
+### Tools NOT Ready for Reports
+
+| Tool | Decision | Score | Passed | Failed |
+|------|----------|-------|--------|--------|
+{% for tool in not_ready %}
+| **{{ tool.name }}** | {{ tool.decision }} | {{ tool.score_percent | round(1) if tool.score_percent else 'N/A' }}% | {{ tool.passed_checks if tool.passed_checks else 0 }} | {{ tool.failed_checks if tool.failed_checks else 0 }} |
+{% endfor %}
+
+{% for tool in not_ready %}
+{% if tool.failed_check_details %}
+#### {{ tool.name }} - Failed Checks
+
+| Check | Dimension | Issue |
+|-------|-----------|-------|
+{% for check in tool.failed_check_details %}
+| `{{ check.check_id }}` | {{ check.dimension }} | {{ check.message | truncate(60) }} |
+{% endfor %}
+
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if no_scorecard %}
+---
+
+### Tools Without Evaluation
+
+| Tool | Status | Purpose |
+|------|--------|---------|
+{% for tool in no_scorecard %}
+| **{{ tool.name }}** | No Evaluation | {{ tool.purpose }} |
+{% endfor %}
+
+{% endif %}
+
+---
+
+### Recommended Actions
+
+**Immediate (use for reports now):**
+1. Use the {{ summary.ready }} STRONG_PASS/PASS tools for reporting
+2. Trust their data quality based on evaluation scores
+
+{% if needs_investigation %}
+**Short-term (investigate):**
+{% for tool in needs_investigation %}
+- Run `make evaluate` for {{ tool.name }}
+{% endfor %}
+{% endif %}
+
+{% if not_ready %}
+**Fix required:**
+{% for tool in not_ready %}
+- **{{ tool.name }}:** Debug evaluation failures
+{% endfor %}
+{% endif %}
+
+{% endif %}
