@@ -23,7 +23,9 @@ Project Caldera is a tool-first workspace for building and validating code analy
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              TOOL LAYER                                     │
-│  layout-scanner │ scc │ lizard │ semgrep │ roslyn-analyzers │ sonarqube │
+│  layout-scanner │ scc │ lizard │ semgrep │ roslyn-analyzers │ sonarqube │  │
+│  trivy │ gitleaks │ symbol-scanner │ scancode │ pmd-cpd │ devskim │       │
+│  dotcover │ git-fame │ git-sizer │ dependensee │                          │
 └────────────────────────────────────┬────────────────────────────────────────┘
                                      │ JSON outputs
 ┌────────────────────────────────────▼────────────────────────────────────────┐
@@ -33,7 +35,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
                                      │
 ┌────────────────────────────────────▼────────────────────────────────────────┐
 │                         LANDING ZONE (DuckDB)                               │
-│  lz_collection_runs │ lz_tool_runs │ lz_layout_* │ lz_scc_* │ lz_lizard_* │
+│  lz_collection_runs │ lz_tool_runs │ lz_<tool>_* (16 tool-specific tables) │
 └────────────────────────────────────┬────────────────────────────────────────┘
                                      │ dbt run
 ┌────────────────────────────────────▼────────────────────────────────────────┐
@@ -51,13 +53,23 @@ src/
 ├── shared/                  # Shared evaluation utilities
 │   └── evaluation/          # LLM judge infrastructure (BaseJudge, observability)
 ├── tool-compliance/         # Tool readiness verification scanner
-├── tools/                   # Individual analysis tools
+├── tools/                   # Individual analysis tools (16 total)
 │   ├── layout-scanner/      # Repository file structure analysis
-│   ├── lizard/              # Function-level complexity analysis (CCN, NLOC)
-│   ├── roslyn-analyzers/    # .NET Roslyn analyzer violations
-│   ├── scc/                 # Size & LOC analysis (lines, blanks, comments)
+│   ├── scc/                 # Size & LOC analysis
+│   ├── lizard/              # Function-level complexity (CCN, NLOC)
 │   ├── semgrep/             # Code smell detection
-│   └── sonarqube/           # SonarQube issue and metric analysis
+│   ├── roslyn-analyzers/    # .NET Roslyn analyzer violations
+│   ├── sonarqube/           # SonarQube issue and metric analysis
+│   ├── trivy/               # Container/IaC vulnerability scanning
+│   ├── gitleaks/            # Secret detection in git history
+│   ├── symbol-scanner/      # Code symbol extraction
+│   ├── scancode/            # License and copyright detection
+│   ├── pmd-cpd/             # Copy-paste detection
+│   ├── devskim/             # Security linting rules
+│   ├── dotcover/            # .NET code coverage (Coverlet)
+│   ├── git-fame/            # Git contributor statistics
+│   ├── git-sizer/           # Git repository size analysis
+│   └── dependensee/         # Dependency visualization
 └── sot-engine/              # Core engine
     ├── dbt/                 # Data transformation (staging → marts)
     ├── persistence/         # Data layer (adapters, entities, repositories)
@@ -83,8 +95,25 @@ make orchestrate             # Full end-to-end pipeline
 ### Orchestrator
 
 ```bash
-python src/sot-engine/orchestrator.py --repo-path /path/to/repo --commit abc123
-python src/sot-engine/orchestrator.py --repo-path . --commit HEAD --replace
+# Basic usage (required: --repo-path and --repo-id)
+.venv/bin/python src/sot-engine/orchestrator.py \
+    --repo-path /path/to/repo \
+    --repo-id my-project \
+    --commit abc123def...  # Full 40-char SHA
+
+# Current directory with replace mode
+.venv/bin/python src/sot-engine/orchestrator.py \
+    --repo-path . \
+    --repo-id $(basename $(pwd)) \
+    --commit $(git rev-parse HEAD) \
+    --replace
+
+# Run tools as part of orchestration
+.venv/bin/python src/sot-engine/orchestrator.py \
+    --repo-path . \
+    --repo-id my-project \
+    --run-tools \
+    --run-dbt
 ```
 
 ### Testing

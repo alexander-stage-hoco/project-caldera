@@ -91,6 +91,32 @@ BaseJudge(
 
 ---
 
+## LLM Invocation Standards
+
+### File-Based Prompts
+
+All prompts are passed via file to avoid ARG_MAX limits:
+
+```python
+# Prompts are written to temp file and passed via @file syntax
+claude --print @prompt_file --output-format json
+```
+
+### JSON-Only Enforcement
+
+The base judge automatically appends JSON format instructions:
+- Responses must be valid JSON
+- Non-JSON responses cause parse failures
+
+### Synthetic Evaluation Context
+
+When evaluating against synthetic test repos, judges receive:
+- `evaluation_mode: synthetic` in context
+- Baseline expectations from ground truth
+- Known file inventory for validation
+
+---
+
 ## JudgeResult Dataclass
 
 ```python

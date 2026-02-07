@@ -34,10 +34,6 @@ If we cannot point to concrete evidence, the claim does not belong in the output
 8. [Implementation Roadmap](#8-implementation-roadmap)
 9. [Success Criteria](#9-success-criteria)
 
-### Related Documents
-
-- **[DECISION_FRAMEWORK.md](DECISION_FRAMEWORK.md)** - Complete methodology for evidence collection, lenses, claims, axis decisions, and IC outputs. This is the single source of truth for technical due diligence methodology.
-
 ---
 
 ## 1. Stakeholder Requirements
