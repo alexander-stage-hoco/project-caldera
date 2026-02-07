@@ -35,6 +35,7 @@ from common.path_normalization import normalize_file_path
 
 TOOL_NAME = "dotcover"
 SCHEMA_VERSION = "1.0.0"
+DOCKER_IMAGE = "dotcover-runner"
 
 
 @dataclass
@@ -238,6 +239,163 @@ def run_dotcover(
     return None, None
 
 
+def run_dotcover_docker(
+    repo_path: Path,
+    output_dir: Path,
+    test_project: Path | None = None,
+) -> tuple[dict | None, Path | None]:
+    """Run dotCover coverage analysis in Docker container.
+
+    This bypasses the macOS ARM64 bug by running dotCover in a Linux x64 container.
+
+    Args:
+        repo_path: Path to the repository to analyze
+        output_dir: Directory for output files
+        test_project: Optional specific test project to run
+
+    Returns:
+        Tuple of (parsed JSON report, detailed XML path if available)
+    """
+    # Ensure paths are absolute for Docker volume mounts
+    repo_path = repo_path.resolve()
+    output_dir = output_dir.resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    json_report = output_dir / "coverage.json"
+    xml_report = output_dir / "coverage.xml"
+    snapshot = output_dir / "coverage.dcvr"
+
+    # Determine test target relative to repo root
+    if test_project:
+        # Make test project path relative to repo for container
+        try:
+            test_target = str(test_project.relative_to(repo_path))
+        except ValueError:
+            test_target = str(test_project)
+    else:
+        test_target = "."
+
+    # Step 1: Build the solution in the container first
+    # Use --platform linux/amd64 to force x64 execution (bypasses ARM64 bug)
+    build_cmd = [
+        "docker", "run", "--rm",
+        "--platform", "linux/amd64",
+        "-v", f"{repo_path}:/repo",
+        "-w", "/repo",
+        "--entrypoint", "dotnet",
+        DOCKER_IMAGE,
+        "build",
+    ]
+
+    print(f"Building project in Docker: {' '.join(build_cmd)}")
+
+    try:
+        result = subprocess.run(
+            build_cmd,
+            capture_output=True,
+            text=True,
+            timeout=300,  # 5 minute build timeout
+        )
+        if result.returncode != 0:
+            print(f"Build warning (exit {result.returncode}):")
+            if result.stderr:
+                print(result.stderr[:500])
+    except subprocess.TimeoutExpired:
+        print("Docker build timed out after 5 minutes")
+        return None, None
+    except FileNotFoundError:
+        print("Docker not found. Install Docker to use --docker mode.")
+        return None, None
+
+    # Step 2: Run coverage collection in Docker
+    # Use --platform linux/amd64 to force x64 execution (bypasses ARM64 bug)
+    cover_cmd = [
+        "docker", "run", "--rm",
+        "--platform", "linux/amd64",
+        "-v", f"{repo_path}:/repo",
+        "-v", f"{output_dir}:/output",
+        "-w", "/repo",
+        DOCKER_IMAGE,
+        "cover",
+        "--snapshot-output", "/output/coverage.dcvr",
+        "--target-working-directory", "/repo",
+        "--",
+        "dotnet", "test", test_target, "--no-build",
+    ]
+
+    print(f"Running dotCover in Docker: {' '.join(cover_cmd)}")
+
+    try:
+        result = subprocess.run(
+            cover_cmd,
+            capture_output=True,
+            text=True,
+            timeout=600,  # 10 minute timeout
+        )
+
+        if result.returncode != 0:
+            print(f"dotCover coverage warning (exit {result.returncode}):")
+            if result.stderr:
+                print(result.stderr[:500])
+
+    except subprocess.TimeoutExpired:
+        print("dotCover coverage collection timed out after 10 minutes")
+        return None, None
+    except FileNotFoundError:
+        print("Docker not found. Install Docker to use --docker mode.")
+        return None, None
+
+    if not snapshot.exists():
+        print(f"No coverage snapshot generated at {snapshot}")
+        return None, None
+
+    # Step 3: Generate reports from snapshot in Docker
+    # Use --platform linux/amd64 to force x64 execution (bypasses ARM64 bug)
+    report_cmd = [
+        "docker", "run", "--rm",
+        "--platform", "linux/amd64",
+        "-v", f"{output_dir}:/output",
+        "-w", "/output",
+        DOCKER_IMAGE,
+        "report",
+        "--snapshot-source", "/output/coverage.dcvr",
+        "--json-report-output", "/output/coverage.json",
+        "--xml-report-output", "/output/coverage.xml",
+    ]
+
+    print(f"Generating reports in Docker: {' '.join(report_cmd)}")
+
+    try:
+        result = subprocess.run(
+            report_cmd,
+            capture_output=True,
+            text=True,
+            timeout=300,  # 5 minute timeout for report generation
+        )
+
+        if result.returncode != 0:
+            print(f"dotCover report warning (exit {result.returncode}):")
+            if result.stderr:
+                print(result.stderr[:500])
+
+    except subprocess.TimeoutExpired:
+        print("dotCover report generation timed out")
+        return {"_snapshot_only": True, "_snapshot_path": str(snapshot)}, None
+    except FileNotFoundError:
+        return None, None
+
+    # Parse JSON report
+    if json_report.exists():
+        try:
+            with open(json_report) as f:
+                report = json.load(f)
+            return report, xml_report if xml_report.exists() else None
+        except json.JSONDecodeError as e:
+            print(f"Failed to parse JSON report: {e}")
+
+    return None, None
+
+
 def parse_source_file_mapping(xml_path: Path, repo_path: Path) -> dict[str, str]:
     """Parse DetailedXML to extract type-to-file mappings.
 
@@ -366,6 +524,7 @@ def analyze_repo(
     repo_path: Path,
     output_dir: Path,
     test_project: Path | None = None,
+    use_docker: bool = False,
 ) -> dict:
     """Run dotCover analysis on the repository.
 
@@ -373,6 +532,7 @@ def analyze_repo(
         repo_path: Path to repository
         output_dir: Directory for output files
         test_project: Optional specific test project
+        use_docker: Use Docker container (bypasses macOS ARM64 bug)
 
     Returns:
         Analysis data dict for envelope
@@ -386,10 +546,11 @@ def analyze_repo(
         if test_project:
             print(f"Found test project: {test_project}")
 
-    # Check if dotCover is available
-    if shutil.which("dotCover") is None:
+    # Check if dotCover is available (skip check for Docker mode)
+    if not use_docker and shutil.which("dotCover") is None:
         print("Warning: dotCover not found. Returning empty analysis.")
         print("Install with: dotnet tool install --global JetBrains.dotCover.CommandLineTools")
+        print("Or use --docker mode to run in a container.")
         return {
             "tool": TOOL_NAME,
             "tool_version": tool_version,
@@ -407,8 +568,12 @@ def analyze_repo(
             "methods": [],
         }
 
-    # Run dotCover
-    report, xml_path = run_dotcover(repo_path, output_dir, test_project)
+    # Run dotCover (use Docker to bypass macOS ARM64 bug if requested)
+    if use_docker:
+        print("Running dotCover in Docker container (bypasses ARM64 bug)")
+        report, xml_path = run_dotcover_docker(repo_path, output_dir, test_project)
+    else:
+        report, xml_path = run_dotcover(repo_path, output_dir, test_project)
 
     if not report:
         print("Warning: No coverage report generated")
@@ -517,6 +682,8 @@ def main() -> int:
     # Tool-specific arguments
     parser.add_argument("--test-project", type=Path, default=None,
                         help="Path to test project (.csproj)")
+    parser.add_argument("--docker", action="store_true",
+                        help="Run dotCover in Docker container (bypasses macOS ARM64 bug)")
     args = parser.parse_args()
 
     # Validate common args (uses lenient commit mode for orchestrator trust)
@@ -524,7 +691,12 @@ def main() -> int:
 
     # Run analysis
     print(f"Analyzing: {common.repo_path}")
-    data = analyze_repo(common.repo_path.resolve(), common.output_dir, args.test_project)
+    data = analyze_repo(
+        common.repo_path.resolve(),
+        common.output_dir,
+        args.test_project,
+        use_docker=args.docker,
+    )
 
     # Create envelope using common formatter
     envelope = create_envelope(

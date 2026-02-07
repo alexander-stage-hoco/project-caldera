@@ -12,7 +12,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-.PHONY: help setup analyze evaluate evaluate-llm test test-quick clean clean-all
+.PHONY: help setup analyze analyze-docker docker-build evaluate evaluate-llm test test-quick clean clean-all
 
 # Include shared configuration (provides VENV, RUN_ID, REPO_ID, OUTPUT_DIR, etc.)
 include ../Makefile.common
@@ -52,6 +52,26 @@ analyze: $(VENV_READY)  ## Run analysis on a repository
 		--repo-id $(REPO_ID) \
 		--branch $(BRANCH) \
 		--commit $(COMMIT)
+
+# Docker image for ARM64 workaround
+DOCKER_IMAGE ?= dotcover-runner
+
+docker-build:  ## Build Docker image for dotCover (bypasses ARM64 bug)
+	@echo "Building Docker image (linux/amd64)..."
+	docker build --platform linux/amd64 -t $(DOCKER_IMAGE) .
+
+analyze-docker: docker-build $(VENV_READY)  ## Run analysis in Docker (bypasses ARM64 bug)
+	@mkdir -p $(OUTPUT_DIR)
+	@echo "Analyzing $(REPO_PATH) as project '$(REPO_NAME)' via Docker"
+	$(PYTHON_VENV) -m scripts.analyze \
+		--repo-path $(REPO_PATH) \
+		--repo-name $(REPO_NAME) \
+		--output-dir $(OUTPUT_DIR) \
+		--run-id $(RUN_ID) \
+		--repo-id $(REPO_ID) \
+		--branch $(BRANCH) \
+		--commit $(COMMIT) \
+		--docker
 
 # ============================================
 # Evaluation targets
