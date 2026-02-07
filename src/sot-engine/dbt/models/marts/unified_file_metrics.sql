@@ -367,6 +367,18 @@ import_files as (
         im.import_count
     from {{ ref('stg_file_imports_file_metrics') }} im
 ),
+coupling_files as (
+    select
+        cpl.run_pk,
+        cpl.file_id,
+        cpl.symbol_count as coupling_symbol_count,
+        cpl.total_fan_out,
+        cpl.total_fan_in,
+        cpl.total_coupling,
+        cpl.avg_instability,
+        cpl.max_instability
+    from {{ ref('stg_coupling_file_metrics') }} cpl
+),
 combined as (
     select
         coalesce(scc.run_pk, lizard.run_pk) as run_pk,
@@ -422,6 +434,13 @@ select
     sf.class_count,
     cf.call_count,
     imf.import_count,
+    -- Coupling metrics
+    cpl.coupling_symbol_count,
+    cpl.total_fan_out as coupling_fan_out,
+    cpl.total_fan_in as coupling_fan_in,
+    cpl.total_coupling,
+    cpl.avg_instability as coupling_avg_instability,
+    cpl.max_instability as coupling_max_instability,
     dc.type_count as coverage_type_count,
     dc.covered_statements as coverage_covered_statements,
     dc.total_statements as coverage_total_statements,
@@ -533,6 +552,9 @@ left join call_files cf
 left join import_files imf
     on imf.run_pk = combined.symbol_run_pk
    and imf.file_id = combined.file_id
+left join coupling_files cpl
+    on cpl.run_pk = combined.symbol_run_pk
+   and cpl.file_id = combined.file_id
 left join dotcover_files dc
     on dc.layout_run_pk = combined.layout_run_pk
    and dc.file_id = combined.file_id

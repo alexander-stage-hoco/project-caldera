@@ -2350,6 +2350,54 @@ models:
         tests:
           - not_null
 
+  - name: rollup_devskim_directory_direct_distributions
+    description: "Distribution statistics for DevSkim security findings (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_lz_tool_runs')
+              field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - issue_count
+                  - severity_high_plus
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_devskim_directory_recursive_distributions
+    description: "Distribution statistics for DevSkim security findings (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_lz_tool_runs')
+              field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - issue_count
+                  - severity_high_plus
+      - name: value_count
+        tests:
+          - not_null
+
   - name: stg_lz_dotcover_assembly_coverage
     description: "Assembly-level code coverage from dotCover analysis"
     columns:
@@ -3152,3 +3200,907 @@ models:
       - name: package_name
         tests:
           - not_null
+
+  - name: unified_repo_metrics
+    description: "Unified repository-level metrics combining git-sizer health and git-fame authorship metrics"
+    columns:
+      - name: collection_run_id
+        description: "Unique collection run identifier"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('lz', 'lz_collection_runs')
+                field: collection_run_id
+      - name: repo_id
+        description: "Repository identifier"
+        tests:
+          - not_null
+      - name: commit
+        description: "Commit SHA"
+        tests:
+          - not_null
+      - name: branch
+        description: "Branch name"
+      - name: git_sizer_run_pk
+        description: "Git-sizer tool run primary key (null if not available)"
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: health_grade
+        description: "Repository health grade from git-sizer (A-F)"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['A', 'A+', 'B', 'B+', 'C', 'C+', 'D', 'D+', 'F']
+      - name: commit_count
+        description: "Total number of commits in the repository"
+      - name: blob_total_size
+        description: "Total size of all blobs in bytes"
+      - name: max_blob_size
+        description: "Size of the largest blob in bytes"
+      - name: branch_count
+        description: "Number of branches"
+      - name: tag_count
+        description: "Number of tags"
+      - name: max_path_depth
+        description: "Maximum directory nesting depth"
+      - name: max_path_length
+        description: "Longest file path length"
+      - name: expanded_blob_size
+        description: "Working directory size in bytes"
+      - name: violation_count
+        description: "Number of git-sizer threshold violations"
+        tests:
+          - not_null
+      - name: max_violation_level
+        description: "Highest violation severity level (1-4, 4 being most severe)"
+        tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+      - name: lfs_candidate_count
+        description: "Number of files recommended for Git LFS migration"
+        tests:
+          - not_null
+      - name: git_fame_run_pk
+        description: "Git-fame tool run primary key (null if not available)"
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: author_count
+        description: "Total number of contributors"
+      - name: total_loc
+        description: "Total lines of code"
+      - name: hhi_index
+        description: "Herfindahl-Hirschman Index for ownership concentration (0-10000)"
+      - name: bus_factor
+        description: "Minimum authors for 50% coverage (knowledge concentration risk)"
+      - name: top_author_pct
+        description: "Top contributor's percentage of code ownership"
+      - name: top_two_pct
+        description: "Top two contributors' combined percentage"
+      - name: sources
+        description: "Comma-separated list of tools with data for this repo"
+        tests:
+          - not_null
+
+  - name: mart_complexity_hotspots
+    description: "Function-level complexity hotspots identifying high-CCN functions as refactoring candidates using McCabe/NIST thresholds"
+    columns:
+      - name: run_pk
+        description: "Lizard tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_lz_tool_runs')
+              field: run_pk
+      - name: collection_run_id
+        description: "Collection run identifier"
+        tests:
+          - not_null
+          - relationships:
+              to: source('lz', 'lz_collection_runs')
+              field: collection_run_id
+      - name: file_id
+        description: "File identifier from layout-scanner"
+        tests:
+          - not_null
+      - name: relative_path
+        description: "Repository-relative file path"
+        tests:
+          - not_null
+      - name: directory_id
+        description: "Directory identifier for file location"
+        tests:
+          - not_null
+      - name: function_name
+        description: "Short function name"
+        tests:
+          - not_null
+      - name: long_name
+        description: "Fully qualified function name with parameters"
+        tests:
+          - not_null
+      - name: ccn
+        description: "Cyclomatic Complexity Number (McCabe complexity)"
+        tests:
+          - not_null
+      - name: nloc
+        description: "Non-commenting Lines Of Code in function"
+        tests:
+          - not_null
+      - name: params
+        description: "Number of parameters"
+        tests:
+          - not_null
+      - name: token_count
+        description: "Number of tokens in function"
+        tests:
+          - not_null
+      - name: line_start
+        description: "Starting line number"
+        tests:
+          - not_null
+      - name: line_end
+        description: "Ending line number"
+        tests:
+          - not_null
+      - name: line_span
+        description: "Number of lines the function spans (line_end - line_start + 1)"
+        tests:
+          - not_null
+      - name: complexity_density
+        description: "CCN per line of code (ccn / nloc)"
+      - name: risk_level
+        description: "Risk classification: low (1-10), medium (11-20), high (21-50), critical (51+)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+      - name: risk_level_numeric
+        description: "Numeric risk level: 1=low, 2=medium, 3=high, 4=critical"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+      - name: relative_position
+        description: "Statistical position relative to run: normal, above_median, p90_outlier, p95_outlier, p99_outlier"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - normal
+                  - above_median
+                  - p90_outlier
+                  - p95_outlier
+                  - p99_outlier
+      - name: ccn_zscore
+        description: "Z-score of CCN relative to run distribution (stddevs from mean)"
+        tests:
+          - not_null
+      - name: is_medium_plus
+        description: "True if CCN > 10 (medium risk or higher)"
+        tests:
+          - not_null
+      - name: is_high_plus
+        description: "True if CCN > 20 (high risk or higher)"
+        tests:
+          - not_null
+      - name: is_critical
+        description: "True if CCN > 50 (critical risk)"
+        tests:
+          - not_null
+      - name: run_ccn_avg
+        description: "Average CCN across all functions in the run"
+        tests:
+          - not_null
+      - name: run_ccn_stddev
+        description: "Standard deviation of CCN across all functions in the run"
+        tests:
+          - not_null
+      - name: run_ccn_p50
+        description: "50th percentile (median) of CCN in the run"
+        tests:
+          - not_null
+      - name: run_ccn_p75
+        description: "75th percentile of CCN in the run"
+        tests:
+          - not_null
+      - name: run_ccn_p90
+        description: "90th percentile of CCN in the run"
+        tests:
+          - not_null
+      - name: run_ccn_p95
+        description: "95th percentile of CCN in the run"
+        tests:
+          - not_null
+      - name: run_ccn_p99
+        description: "99th percentile of CCN in the run"
+        tests:
+          - not_null
+      - name: run_total_functions
+        description: "Total number of functions analyzed in the run"
+        tests:
+          - not_null
+
+  - name: mart_sonarqube_rule_hotspots
+    description: "SonarQube rule-level hotspots identifying most impactful rules for code quality prioritization"
+    columns:
+      - name: run_pk
+        description: "SonarQube tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: collection_run_id
+        description: "Collection run identifier"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('lz', 'lz_collection_runs')
+                field: collection_run_id
+      - name: rule_id
+        description: "SonarQube rule identifier (e.g., 'csharpsquid:S1481')"
+        tests:
+          - not_null
+      - name: issue_type
+        description: "Issue category: BUG, VULNERABILITY, CODE_SMELL, SECURITY_HOTSPOT"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - BUG
+                  - VULNERABILITY
+                  - CODE_SMELL
+                  - SECURITY_HOTSPOT
+      - name: issue_count
+        description: "Total number of occurrences of this rule"
+        tests:
+          - not_null
+      - name: files_affected
+        description: "Number of distinct files where this rule triggered"
+        tests:
+          - not_null
+      - name: severity_blocker
+        description: "Count of BLOCKER severity issues"
+        tests:
+          - not_null
+      - name: severity_critical
+        description: "Count of CRITICAL severity issues"
+        tests:
+          - not_null
+      - name: severity_major
+        description: "Count of MAJOR severity issues"
+        tests:
+          - not_null
+      - name: severity_minor
+        description: "Count of MINOR severity issues"
+        tests:
+          - not_null
+      - name: severity_info
+        description: "Count of INFO severity issues"
+        tests:
+          - not_null
+      - name: severity_high_plus
+        description: "Count of BLOCKER + CRITICAL severity issues"
+        tests:
+          - not_null
+      - name: total_effort_minutes
+        description: "Total estimated fix effort in minutes for this rule"
+        tests:
+          - not_null
+      - name: avg_effort_minutes
+        description: "Average fix effort per issue in minutes"
+        tests:
+          - not_null
+      - name: open_count
+        description: "Number of issues still in OPEN status"
+        tests:
+          - not_null
+      - name: impact_score
+        description: "Weighted impact score: blocker*4 + critical*3 + major*2 + minor*1"
+        tests:
+          - not_null
+      - name: occurrence_rank
+        description: "Rank by issue count within collection run (1 = most frequent)"
+        tests:
+          - not_null
+      - name: effort_rank
+        description: "Rank by total effort within collection run (1 = highest effort)"
+        tests:
+          - not_null
+      - name: impact_rank
+        description: "Rank by impact score within collection run (1 = highest impact)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification based on severity: critical (blocker), high (critical), medium (major), low (minor/info)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+
+  - name: mart_trivy_vulnerability_hotspots
+    description: "Trivy vulnerability hotspots: CVE-level aggregation for remediation prioritization"
+    columns:
+      - name: run_pk
+        description: "Trivy tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: collection_run_id
+        description: "Collection run identifier"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('lz', 'lz_collection_runs')
+                field: collection_run_id
+      - name: vulnerability_id
+        description: "CVE or vulnerability identifier (e.g., 'CVE-2023-12345')"
+        tests:
+          - not_null
+      - name: title
+        description: "Representative title/description for this vulnerability"
+      - name: occurrence_count
+        description: "Total occurrences of this CVE across all packages"
+        tests:
+          - not_null
+      - name: packages_affected
+        description: "Number of distinct packages with this vulnerability"
+        tests:
+          - not_null
+      - name: severity_critical
+        description: "Count of CRITICAL severity occurrences"
+        tests:
+          - not_null
+      - name: severity_high
+        description: "Count of HIGH severity occurrences"
+        tests:
+          - not_null
+      - name: severity_medium
+        description: "Count of MEDIUM severity occurrences"
+        tests:
+          - not_null
+      - name: severity_low
+        description: "Count of LOW severity occurrences"
+        tests:
+          - not_null
+      - name: severity_high_plus
+        description: "Count of CRITICAL + HIGH severity occurrences"
+        tests:
+          - not_null
+      - name: max_cvss_score
+        description: "Maximum CVSS score across all occurrences"
+      - name: avg_cvss_score
+        description: "Average CVSS score across all occurrences"
+      - name: fix_available_count
+        description: "Number of occurrences with available fixes"
+        tests:
+          - not_null
+      - name: fix_available_pct
+        description: "Percentage of occurrences with available fixes"
+        tests:
+          - not_null
+      - name: min_age_days
+        description: "Minimum age in days since vulnerability was published"
+      - name: max_age_days
+        description: "Maximum age in days since vulnerability was published"
+      - name: avg_age_days
+        description: "Average age in days since vulnerability was published"
+      - name: risk_score
+        description: "Composite risk score: severity_weight × count × age_factor"
+        tests:
+          - not_null
+      - name: occurrence_rank
+        description: "Rank by occurrence count within collection run (1 = most frequent)"
+        tests:
+          - not_null
+      - name: severity_rank
+        description: "Rank by max CVSS score within collection run (1 = most severe)"
+        tests:
+          - not_null
+      - name: risk_rank
+        description: "Rank by composite risk score within collection run (1 = highest risk)"
+        tests:
+          - not_null
+      - name: fixability_rank
+        description: "Rank by fix availability within collection run (1 = most fixable)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification based on max CVSS: critical (>=9), high (7-8.9), medium (4-6.9), low (<4)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+
+  - name: mart_gitleaks_secret_hotspots
+    description: "Gitleaks secret hotspots: rule-level aggregation for remediation prioritization"
+    columns:
+      - name: run_pk
+        description: "Gitleaks tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: rule_id
+        description: "Gitleaks rule identifier (e.g., 'aws-access-key-id', 'generic-api-key')"
+        tests:
+          - not_null
+      - name: secret_type
+        description: "Type of secret detected (e.g., 'AWS', 'Generic API Key')"
+      - name: description
+        description: "Rule description"
+      - name: detection_count
+        description: "Total detections of this secret type"
+        tests:
+          - not_null
+      - name: files_affected
+        description: "Number of distinct files with this secret type"
+        tests:
+          - not_null
+      - name: authors_affected
+        description: "Number of distinct commit authors who introduced this secret type"
+        tests:
+          - not_null
+      - name: in_head_count
+        description: "Secrets still present in current HEAD (urgent - requires remediation)"
+        tests:
+          - not_null
+      - name: historical_count
+        description: "Secrets only in git history (less urgent - already removed)"
+        tests:
+          - not_null
+      - name: in_head_pct
+        description: "Percentage of detections still in current HEAD"
+      - name: severity_critical
+        description: "Count of CRITICAL severity detections"
+        tests:
+          - not_null
+      - name: severity_high
+        description: "Count of HIGH severity detections"
+        tests:
+          - not_null
+      - name: severity_medium
+        description: "Count of MEDIUM severity detections"
+        tests:
+          - not_null
+      - name: severity_low
+        description: "Count of LOW severity detections"
+        tests:
+          - not_null
+      - name: severity_high_plus
+        description: "Count of CRITICAL + HIGH severity detections"
+        tests:
+          - not_null
+      - name: min_entropy
+        description: "Minimum entropy value across detections"
+      - name: max_entropy
+        description: "Maximum entropy value across detections"
+      - name: avg_entropy
+        description: "Average entropy value across detections"
+      - name: high_entropy_count
+        description: "Detections with entropy > 4.0 (more likely real secrets)"
+        tests:
+          - not_null
+      - name: risk_score
+        description: "Composite risk score: in_head_count × severity_weight"
+        tests:
+          - not_null
+      - name: detection_rank
+        description: "Rank by detection count within run (1 = most frequent)"
+        tests:
+          - not_null
+      - name: urgency_rank
+        description: "Rank by in_head_count within run (1 = most urgent)"
+        tests:
+          - not_null
+      - name: risk_rank
+        description: "Rank by risk score within run (1 = highest risk)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (in_head + CRITICAL), high (in_head + HIGH), medium (in_head), low (historical only)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+
+  - name: mart_roslyn_rule_hotspots
+    description: "Roslyn analyzer rule hotspots for code quality prioritization"
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: rule_id
+        description: "Roslyn analyzer rule identifier (e.g. CA1000)"
+        tests:
+          - not_null
+      - name: dd_category
+        description: "Design/documentation category for the rule"
+      - name: sample_message
+        description: "Example violation message for this rule"
+      - name: violation_count
+        description: "Total violations of this rule"
+        tests:
+          - not_null
+      - name: files_affected
+        description: "Count of distinct files with this violation"
+        tests:
+          - not_null
+      - name: directories_affected
+        description: "Count of distinct directories with this violation"
+        tests:
+          - not_null
+      - name: severity_error
+        description: "Count of Error severity violations"
+        tests:
+          - not_null
+      - name: severity_warning
+        description: "Count of Warning severity violations"
+        tests:
+          - not_null
+      - name: severity_info
+        description: "Count of Info severity violations"
+        tests:
+          - not_null
+      - name: severity_hidden
+        description: "Count of Hidden severity violations"
+        tests:
+          - not_null
+      - name: severity_high_plus
+        description: "Count of Error + Warning severity violations"
+        tests:
+          - not_null
+      - name: severity_score
+        description: "Weighted severity score: Error×4 + Warning×3 + Info×2 + Hidden×1"
+        tests:
+          - not_null
+      - name: violation_rank
+        description: "Rank by violation count within run (1 = most frequent)"
+        tests:
+          - not_null
+      - name: severity_rank
+        description: "Rank by error count, then warning count within run (1 = most severe)"
+        tests:
+          - not_null
+      - name: spread_rank
+        description: "Rank by files affected within run (1 = most widespread)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (has Error), high (has Warning), medium (has Info), low (Hidden only)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+
+  - name: rollup_git_sizer_lfs_candidates_direct
+    description: "Git-sizer LFS candidates per directory (direct scope - files in directory only)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: lfs_candidate_count
+        tests:
+          - not_null
+
+  - name: rollup_git_sizer_lfs_candidates_recursive
+    description: "Git-sizer LFS candidates per directory (recursive scope - all files in subtree)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: lfs_candidate_count
+        tests:
+          - not_null
+
+  - name: stg_coupling_file_metrics
+    description: "File-level aggregation of symbol coupling metrics"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: symbol_count
+        tests:
+          - not_null
+      - name: total_fan_out
+        tests:
+          - not_null
+      - name: total_fan_in
+        tests:
+          - not_null
+
+  - name: rollup_coupling_directory_direct_distributions
+    description: "Distribution statistics for coupling metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - total_fan_out
+                  - total_fan_in
+                  - total_coupling
+                  - avg_instability
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_coupling_directory_recursive_distributions
+    description: "Distribution statistics for coupling metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - total_fan_out
+                  - total_fan_in
+                  - total_coupling
+                  - avg_instability
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: mart_pmd_cpd_clone_hotspots
+    description: "PMD-CPD clone hotspots for code duplication prioritization"
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: clone_id
+        description: "Unique identifier for the clone group"
+        tests:
+          - not_null
+      - name: lines
+        description: "Number of lines in the cloned code"
+        tests:
+          - not_null
+      - name: tokens
+        description: "Number of tokens in the cloned code"
+        tests:
+          - not_null
+      - name: occurrence_count
+        description: "Number of times this code appears (>=2)"
+        tests:
+          - not_null
+      - name: is_cross_file
+        description: "Whether the clone spans multiple files"
+        tests:
+          - not_null
+      - name: files_affected
+        description: "Count of distinct files containing this clone"
+        tests:
+          - not_null
+      - name: directories_affected
+        description: "Count of distinct directories containing this clone"
+        tests:
+          - not_null
+      - name: total_duplicated_lines
+        description: "Total code debt: lines × occurrence_count"
+        tests:
+          - not_null
+      - name: token_density
+        description: "Complexity indicator: tokens / lines"
+      - name: impact_score
+        description: "Impact metric: size × occurrences × spread factor (1.5× for cross-file)"
+        tests:
+          - not_null
+      - name: size_rank
+        description: "Rank by lines within run (1 = largest clone)"
+        tests:
+          - not_null
+      - name: occurrence_rank
+        description: "Rank by occurrence count within run (1 = most repeated)"
+        tests:
+          - not_null
+      - name: impact_rank
+        description: "Rank by total duplicated lines within run (1 = highest debt)"
+        tests:
+          - not_null
+      - name: spread_rank
+        description: "Rank by files affected within run (1 = most widespread)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (>=100 lines + cross-file), high (>=100 lines or >=50 + cross-file or >=5 occurrences), medium (>=20 lines or cross-file or >=3 occurrences), low (small same-file clones)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+
+  - name: mart_semgrep_rule_hotspots
+    description: "Semgrep rule hotspots for code quality prioritization"
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: rule_id
+        description: "Semgrep rule identifier"
+        tests:
+          - not_null
+      - name: dd_category
+        description: "Category classification for the rule"
+      - name: sample_message
+        description: "Example message for this rule"
+      - name: smell_count
+        description: "Total occurrences of this rule"
+        tests:
+          - not_null
+      - name: files_affected
+        description: "Count of distinct files with this smell"
+        tests:
+          - not_null
+      - name: directories_affected
+        description: "Count of distinct directories with this smell"
+        tests:
+          - not_null
+      - name: severity_critical
+        description: "Count of CRITICAL severity smells"
+        tests:
+          - not_null
+      - name: severity_high
+        description: "Count of HIGH severity smells"
+        tests:
+          - not_null
+      - name: severity_medium
+        description: "Count of MEDIUM severity smells"
+        tests:
+          - not_null
+      - name: severity_low
+        description: "Count of LOW severity smells"
+        tests:
+          - not_null
+      - name: severity_info
+        description: "Count of INFO severity smells"
+        tests:
+          - not_null
+      - name: severity_high_plus
+        description: "Count of CRITICAL + HIGH severity smells"
+        tests:
+          - not_null
+      - name: severity_score
+        description: "Weighted score: CRITICAL*5 + HIGH*4 + MEDIUM*3 + LOW*2 + INFO*1"
+        tests:
+          - not_null
+      - name: smell_rank
+        description: "Rank by smell_count within run (1 = most frequent)"
+        tests:
+          - not_null
+      - name: severity_rank
+        description: "Rank by critical/high counts within run (1 = most severe)"
+        tests:
+          - not_null
+      - name: spread_rank
+        description: "Rank by files_affected within run (1 = most widespread)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (has CRITICAL), high (has HIGH), medium (has MEDIUM), low (LOW or INFO only)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
