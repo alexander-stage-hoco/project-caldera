@@ -1237,7 +1237,7 @@ models:
           - not_null
 
   - name: rollup_coupling_directory_metrics_direct
-    description: "Coupling metrics per directory (direct - fan-in/fan-out for files in directory only)"
+    description: "Coupling metrics per directory (direct - fan-in/fan-out for files directly in directory only)"
     columns:
       - name: run_pk
         tests:
@@ -1249,32 +1249,40 @@ models:
         tests:
           - not_null
       - name: outgoing_calls
+        description: "Total count of outgoing calls from files in this directory (may include duplicates)"
         tests:
           - not_null
       - name: distinct_callees
+        description: "Count of distinct callee symbols called by files in this directory"
         tests:
           - not_null
       - name: fan_out
+        description: "Count of distinct callee files that files in this directory call"
         tests:
           - not_null
       - name: fan_in
+        description: "Count of distinct external caller files from OTHER directories calling into this directory (excludes internal calls)"
         tests:
           - not_null
       - name: direct_calls
+        description: "Count of direct (non-dynamic, non-async) calls"
         tests:
           - not_null
       - name: dynamic_calls
+        description: "Count of dynamic/late-bound calls"
         tests:
           - not_null
       - name: async_calls
+        description: "Count of asynchronous calls"
         tests:
           - not_null
       - name: instability
+        description: "fan_out / (fan_in + fan_out) - 0 = stable (many incoming deps), 1 = unstable (many outgoing deps)"
         tests:
           - not_null
 
   - name: rollup_coupling_directory_metrics_recursive
-    description: "Coupling metrics per directory (recursive - includes all files in subtree)"
+    description: "Coupling metrics per directory (recursive - includes all files in subtree, external means outside the subtree)"
     columns:
       - name: run_pk
         tests:
@@ -1286,27 +1294,35 @@ models:
         tests:
           - not_null
       - name: outgoing_calls
+        description: "Total count of outgoing calls from files in this subtree (may include duplicates)"
         tests:
           - not_null
       - name: distinct_callees
+        description: "Count of distinct callee symbols called by files in this subtree"
         tests:
           - not_null
       - name: fan_out
+        description: "Count of distinct callee files that files in this subtree call"
         tests:
           - not_null
       - name: fan_in
+        description: "Count of distinct external caller files from OUTSIDE this subtree calling into this subtree (excludes internal calls)"
         tests:
           - not_null
       - name: direct_calls
+        description: "Count of direct (non-dynamic, non-async) calls in this subtree"
         tests:
           - not_null
       - name: dynamic_calls
+        description: "Count of dynamic/late-bound calls in this subtree"
         tests:
           - not_null
       - name: async_calls
+        description: "Count of asynchronous calls in this subtree"
         tests:
           - not_null
       - name: instability
+        description: "fan_out / (fan_in + fan_out) - 0 = stable (many incoming deps), 1 = unstable (many outgoing deps)"
         tests:
           - not_null
 

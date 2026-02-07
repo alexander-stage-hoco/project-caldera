@@ -87,6 +87,42 @@ if not is_repo_relative_path(normalized):
     raise ValueError(f"Path not repo-relative: {normalized}")
 ```
 
+---
+
+## Coupling Metrics
+
+Coupling metrics measure inter-directory dependencies based on symbol call relationships.
+
+### Definitions
+
+| Metric | Definition |
+|--------|------------|
+| **Fan-in** | Distinct files from OTHER directories that call into this directory |
+| **Fan-out** | Distinct files that this directory calls |
+| **Instability** | `fan_out / (fan_in + fan_out)` - range [0, 1] |
+
+### Instability Interpretation
+
+| Value | Meaning |
+|-------|---------|
+| 0.0 | Fully stable - only receives calls, no outgoing dependencies |
+| 0.5 | Balanced - equal incoming and outgoing dependencies |
+| 1.0 | Fully unstable - only makes calls, no incoming dependencies |
+
+### External vs Internal Calls
+
+- **External calls**: Caller and callee are in different directories
+- **Internal calls**: Caller and callee are in the same directory (excluded from fan-in)
+
+For recursive metrics, "external" means outside the entire subtree.
+
+### Models
+
+- `rollup_coupling_directory_metrics_direct` - Files directly in directory only
+- `rollup_coupling_directory_metrics_recursive` - All files in directory subtree
+
+---
+
 ### Commit Hash for Non-Git Repos
 
 When no git metadata is available, compute a deterministic content hash:
