@@ -11,7 +11,8 @@
 FROM --platform=linux/amd64 mcr.microsoft.com/dotnet/sdk:10.0
 
 # Install dotCover CLI tool globally
-RUN dotnet tool install --global JetBrains.dotCover.CommandLineTools
+# Note: Using version 2024.3.0 because 2025.x has a report generation bug
+RUN dotnet tool install --global JetBrains.dotCover.CommandLineTools --version 2024.3.0
 
 # Add dotnet tools to PATH
 ENV PATH="$PATH:/root/.dotnet/tools"
@@ -19,5 +20,5 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 # Set working directory for repo mount
 WORKDIR /repo
 
-# Default entrypoint is dotCover
-ENTRYPOINT ["dotCover"]
+# Default entrypoint is dotnet-dotCover (older versions use this name)
+ENTRYPOINT ["dotnet-dotCover"]
