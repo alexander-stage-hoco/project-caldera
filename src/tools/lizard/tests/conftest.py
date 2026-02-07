@@ -7,7 +7,8 @@ from typing import Any, Dict
 
 import pytest
 
-# Add scripts and shared src to path for imports
+# Add lizard tool root, scripts, and shared src to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))  # lizard tool root
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 

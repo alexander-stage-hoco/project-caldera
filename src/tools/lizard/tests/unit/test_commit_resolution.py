@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 import pytest
 
-from scripts import analyze
+# Add src/ to path for common imports
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from common import git_utilities
 
 
 class DummyResult:
@@ -22,8 +28,8 @@ def test_resolve_commit_accepts_valid_commit(monkeypatch, tmp_path):
             return DummyResult(0)
         return DummyResult(1)
 
-    monkeypatch.setattr(analyze, "_git_run", fake_git_run)
-    commit = analyze._resolve_commit(tmp_path, "a" * 40, None)
+    monkeypatch.setattr(git_utilities, "git_run", fake_git_run)
+    commit = git_utilities.resolve_commit(tmp_path, "a" * 40, None, strict=True)
     assert commit == "a" * 40
 
 
@@ -34,8 +40,8 @@ def test_resolve_commit_uses_head(monkeypatch, tmp_path):
             return DummyResult(0, "b" * 40)
         return DummyResult(1)
 
-    monkeypatch.setattr(analyze, "_git_run", fake_git_run)
-    commit = analyze._resolve_commit(tmp_path, "", None)
+    monkeypatch.setattr(git_utilities, "git_run", fake_git_run)
+    commit = git_utilities.resolve_commit(tmp_path, "", None)
     assert commit == "b" * 40
 
 
@@ -44,8 +50,8 @@ def test_resolve_commit_unversioned_when_missing_head(monkeypatch, tmp_path):
     def fake_git_run(repo_path, args):
         return DummyResult(1)
 
-    monkeypatch.setattr(analyze, "_git_run", fake_git_run)
-    commit = analyze._resolve_commit(tmp_path, "", None)
+    monkeypatch.setattr(git_utilities, "git_run", fake_git_run)
+    commit = git_utilities.resolve_commit(tmp_path, "", None)
     assert commit == "0" * 40
 
 
@@ -54,6 +60,6 @@ def test_resolve_commit_errors_on_missing(monkeypatch, tmp_path):
     def fake_git_run(repo_path, args):
         return DummyResult(1)
 
-    monkeypatch.setattr(analyze, "_git_run", fake_git_run)
+    monkeypatch.setattr(git_utilities, "git_run", fake_git_run)
     with pytest.raises(ValueError):
-        analyze._resolve_commit(tmp_path, "deadbeef", None)
+        git_utilities.resolve_commit(tmp_path, "deadbeef", None, strict=True)
