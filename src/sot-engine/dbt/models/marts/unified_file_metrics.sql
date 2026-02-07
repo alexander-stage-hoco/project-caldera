@@ -48,6 +48,16 @@ trivy_runs as (
     from {{ source('lz', 'lz_tool_runs') }}
     where tool_name = 'trivy'
 ),
+scancode_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'scancode'
+),
+pmd_cpd_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'pmd-cpd'
+),
 layout_runs as (
     select run_pk, collection_run_id
     from {{ source('lz', 'lz_tool_runs') }}
@@ -132,6 +142,22 @@ trivy_map as (
     from trivy_runs tr
     join layout_runs lr
         on lr.collection_run_id = tr.collection_run_id
+),
+scancode_map as (
+    select
+        scr.run_pk as tool_run_pk,
+        scr.collection_run_id,
+        lr.run_pk as layout_run_pk
+    from scancode_runs scr
+    join layout_runs lr on lr.collection_run_id = scr.collection_run_id
+),
+pmd_cpd_map as (
+    select
+        pr.run_pk as tool_run_pk,
+        pr.collection_run_id,
+        lr.run_pk as layout_run_pk
+    from pmd_cpd_runs pr
+    join layout_runs lr on lr.collection_run_id = pr.collection_run_id
 ),
 scc_files as (
     select
@@ -298,6 +324,35 @@ trivy_files as (
     join trivy_map tm
         on tm.tool_run_pk = tf.run_pk
 ),
+scancode_files as (
+    select
+        scm.layout_run_pk,
+        scf.run_pk,
+        scf.file_id,
+        scf.license_count,
+        scf.cat_copyleft,
+        scf.cat_permissive,
+        scf.cat_weak_copyleft,
+        scf.cat_unknown,
+        scf.match_file,
+        scf.match_header,
+        scf.match_spdx,
+        scf.avg_confidence
+    from {{ ref('stg_scancode_file_metrics') }} scf
+    join scancode_map scm on scm.tool_run_pk = scf.run_pk
+),
+pmd_cpd_files as (
+    select
+        pm.layout_run_pk,
+        pf.run_pk,
+        pf.file_id,
+        pf.total_lines as pmd_total_lines,
+        pf.duplicate_lines,
+        pf.duplicate_blocks,
+        pf.duplication_percentage
+    from {{ ref('stg_lz_pmd_cpd_file_metrics') }} pf
+    join pmd_cpd_map pm on pm.tool_run_pk = pf.run_pk
+),
 call_files as (
     select
         cm.run_pk,
@@ -435,6 +490,22 @@ select
     tv.iac_low as trivy_iac_low,
     tv.total_finding_count as trivy_total_finding_count,
     tv.severity_high_plus as trivy_severity_high_plus,
+    -- Scancode metrics
+    sc.run_pk as scancode_run_pk,
+    sc.license_count as scancode_license_count,
+    sc.cat_copyleft as scancode_cat_copyleft,
+    sc.cat_permissive as scancode_cat_permissive,
+    sc.cat_weak_copyleft as scancode_cat_weak_copyleft,
+    sc.cat_unknown as scancode_cat_unknown,
+    sc.match_file as scancode_match_file,
+    sc.match_header as scancode_match_header,
+    sc.match_spdx as scancode_match_spdx,
+    sc.avg_confidence as scancode_avg_confidence,
+    -- PMD-CPD metrics
+    pmd.run_pk as pmd_cpd_run_pk,
+    pmd.duplicate_lines as pmd_cpd_duplicate_lines,
+    pmd.duplicate_blocks as pmd_cpd_duplicate_blocks,
+    pmd.duplication_percentage as pmd_cpd_duplication_percentage,
     concat_ws(
         ',',
         combined.sources,
@@ -445,7 +516,9 @@ select
         case when dsk.run_pk is not null then 'devskim' end,
         case when sq.run_pk is not null then 'sonarqube' end,
         case when gl.run_pk is not null then 'gitleaks' end,
-        case when tv.run_pk is not null then 'trivy' end
+        case when tv.run_pk is not null then 'trivy' end,
+        case when sc.run_pk is not null then 'scancode' end,
+        case when pmd.run_pk is not null then 'pmd-cpd' end
     ) as sources
 from combined
 join {{ source('lz', 'lz_layout_files') }} lf
@@ -481,3 +554,9 @@ left join gitleaks_files gl
 left join trivy_files tv
     on tv.layout_run_pk = combined.layout_run_pk
    and tv.file_id = combined.file_id
+left join scancode_files sc
+    on sc.layout_run_pk = combined.layout_run_pk
+   and sc.file_id = combined.file_id
+left join pmd_cpd_files pmd
+    on pmd.layout_run_pk = combined.layout_run_pk
+   and pmd.file_id = combined.file_id
