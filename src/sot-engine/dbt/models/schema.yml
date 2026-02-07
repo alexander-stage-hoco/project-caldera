@@ -4861,3 +4861,145 @@ models:
         description: "90th percentile fan-out in run"
       - name: run_total_symbols
         description: "Total symbols with coupling in run"
+
+  - name: mart_dependensee_project_coupling_hotspots
+    description: "Project coupling hotspots for .NET architecture risk and dependency analysis. Identifies hub projects, god projects, and octopus projects based on fan-in/fan-out patterns."
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: project_path
+        description: "Repository-relative path to the .csproj file"
+        tests:
+          - not_null
+      - name: project_name
+        description: "Name of the .NET project"
+        tests:
+          - not_null
+      - name: target_framework
+        description: "Target framework (e.g., net8.0, netstandard2.0)"
+      - name: project_reference_count
+        description: "Count of project references from source project metadata"
+      - name: package_reference_count
+        description: "Count of NuGet package references"
+      - name: fan_out
+        description: "Number of distinct projects this project references"
+        tests:
+          - not_null
+      - name: fan_in
+        description: "Number of distinct projects that reference this project"
+        tests:
+          - not_null
+      - name: total_coupling
+        description: "Total coupling (fan_in + fan_out)"
+        tests:
+          - not_null
+      - name: instability
+        description: "Instability metric: fan_out / (fan_in + fan_out). 0=stable, 1=unstable"
+        tests:
+          - not_null
+      - name: coupling_risk
+        description: "Coupling risk level: critical (10+), high (5-9), medium (3-4), low (<3)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
+      - name: coupling_risk_numeric
+        description: "Numeric coupling risk: 4=critical, 3=high, 2=medium, 1=low"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+      - name: instability_zone
+        description: "Instability classification: unstable (0.8+), flexible (0.5-0.8), stable (0.2-0.5), rigid (<0.2)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - unstable
+                  - flexible
+                  - stable
+                  - rigid
+      - name: coupling_pattern
+        description: "Detected coupling pattern: hub (both high), god_project (high fan-in), octopus (high fan-out), normal"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - hub
+                  - god_project
+                  - octopus
+                  - normal
+      - name: coupling_zscore
+        description: "Z-score of total coupling relative to run distribution"
+        tests:
+          - not_null
+      - name: relative_position
+        description: "Statistical position: normal, above_median, p90_outlier, p95_outlier, p99_outlier"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - normal
+                  - above_median
+                  - p90_outlier
+                  - p95_outlier
+                  - p99_outlier
+      - name: is_rigid_dependency
+        description: "True if instability < 0.2 and has fan-in (hard to change)"
+        tests:
+          - not_null
+      - name: is_unstable_dependency
+        description: "True if instability > 0.8 and has fan-out (volatile)"
+        tests:
+          - not_null
+      - name: is_medium_plus
+        description: "True if total coupling >= 3"
+        tests:
+          - not_null
+      - name: is_high_plus
+        description: "True if total coupling >= 5"
+        tests:
+          - not_null
+      - name: is_critical
+        description: "True if total coupling >= 10"
+        tests:
+          - not_null
+      - name: run_coupling_avg
+        description: "Average total coupling in run"
+      - name: run_coupling_stddev
+        description: "Standard deviation of total coupling in run"
+      - name: run_coupling_p50
+        description: "Median total coupling in run"
+      - name: run_coupling_p75
+        description: "75th percentile total coupling in run"
+      - name: run_coupling_p90
+        description: "90th percentile total coupling in run"
+      - name: run_coupling_p95
+        description: "95th percentile total coupling in run"
+      - name: run_coupling_p99
+        description: "99th percentile total coupling in run"
+      - name: run_fan_in_avg
+        description: "Average fan-in in run"
+      - name: run_fan_out_avg
+        description: "Average fan-out in run"
+      - name: run_fan_in_p90
+        description: "90th percentile fan-in in run"
+      - name: run_fan_out_p90
+        description: "90th percentile fan-out in run"
+      - name: run_total_projects
+        description: "Total projects analyzed in run"
