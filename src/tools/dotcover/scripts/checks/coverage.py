@@ -4,19 +4,19 @@ from __future__ import annotations
 
 
 def check_all_files_analyzed(output: dict, ground_truth: dict | None) -> dict:
-    """Check that all expected files were analyzed."""
+    """Check that types were analyzed (Coverlet reports by type, not file)."""
     data = output.get("data", {})
-    files = data.get("files", [])
+    types = data.get("types", [])
 
-    if not files:
+    if not types:
         return {
             "check_id": "coverage.files_analyzed",
             "status": "warn",
-            "message": "No files in output",
+            "message": "No types in output",
         }
 
     return {
         "check_id": "coverage.files_analyzed",
         "status": "pass",
-        "message": f"{len(files)} files analyzed",
+        "message": f"{len(types)} types analyzed",
     }

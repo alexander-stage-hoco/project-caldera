@@ -3,65 +3,65 @@
 This module contains programmatic evaluation checks for accuracy.
 Each check_* function receives the tool output and ground truth,
 and returns a dict with check_id, status, and message.
-
-For implementation examples, see:
-- src/tools/scc/scripts/checks/per_file.py - Per-file metric validation
-- src/tools/lizard/scripts/checks/accuracy.py - Function detection accuracy
-- src/tools/semgrep/scripts/checks/accuracy.py - Smell detection precision/recall
-
-Documentation:
-- docs/TOOL_REQUIREMENTS.md - Check format requirements
-- Your EVAL_STRATEGY.md - Defines which checks to implement
 """
 
 from __future__ import annotations
 
 
-def check_file_count_accuracy(output: dict, ground_truth: dict | None) -> dict:
-    """Check if file count matches ground truth.
-
-    This is a basic example check. You should implement checks specific
-    to your tool's metrics and accuracy requirements.
-    """
+def check_overall_coverage(output: dict, ground_truth: dict | None) -> dict:
+    """Check overall coverage is within expected range."""
     if ground_truth is None:
         return {
-            "check_id": "accuracy.file_count",
+            "check_id": "accuracy.overall_coverage",
             "status": "pass",
-            "message": "No ground truth available (skipped)",
+            "message": "No ground truth (skipped)",
         }
 
     data = output.get("data", {})
-    actual_count = len(data.get("files", []))
-    expected_count = ground_truth.get("expected_file_count", 0)
+    summary = data.get("summary", {})
+    actual_pct = summary.get("statement_coverage_pct", 0)
 
-    if actual_count == expected_count:
+    expected = ground_truth.get("expected_coverage", {})
+    min_pct = expected.get("overall_min", 0)
+    max_pct = expected.get("overall_max", 100)
+
+    if min_pct <= actual_pct <= max_pct:
         return {
-            "check_id": "accuracy.file_count",
+            "check_id": "accuracy.overall_coverage",
             "status": "pass",
-            "message": f"File count matches: {actual_count}",
+            "message": f"Coverage {actual_pct:.1f}% within range [{min_pct}-{max_pct}]",
         }
     else:
         return {
-            "check_id": "accuracy.file_count",
+            "check_id": "accuracy.overall_coverage",
             "status": "fail",
-            "message": f"File count mismatch: expected {expected_count}, got {actual_count}",
+            "message": f"Coverage {actual_pct:.1f}% outside range [{min_pct}-{max_pct}]",
         }
 
 
-# TODO: Add your tool-specific accuracy checks below.
-#
-# Example check patterns:
-#
-# def check_metric_precision(output: dict, ground_truth: dict | None) -> dict:
-#     """Check precision of detected metrics against ground truth."""
-#     # Precision = true_positives / (true_positives + false_positives)
-#     ...
-#
-# def check_metric_recall(output: dict, ground_truth: dict | None) -> dict:
-#     """Check recall of detected metrics against ground truth."""
-#     # Recall = true_positives / (true_positives + false_negatives)
-#     ...
-#
-# def check_threshold_compliance(output: dict, ground_truth: dict | None) -> dict:
-#     """Check that metrics meet minimum thresholds defined in ground truth."""
-#     ...
+def check_assembly_detected(output: dict, ground_truth: dict | None) -> dict:
+    """Check expected assemblies are present."""
+    if ground_truth is None:
+        return {
+            "check_id": "accuracy.assembly_detected",
+            "status": "pass",
+            "message": "No ground truth (skipped)",
+        }
+
+    data = output.get("data", {})
+    assemblies = {a["name"] for a in data.get("assemblies", [])}
+    expected = {a["name"] for a in ground_truth.get("expected_assemblies", [])}
+
+    if expected <= assemblies:
+        return {
+            "check_id": "accuracy.assembly_detected",
+            "status": "pass",
+            "message": f"All expected assemblies found: {expected}",
+        }
+    else:
+        missing = expected - assemblies
+        return {
+            "check_id": "accuracy.assembly_detected",
+            "status": "fail",
+            "message": f"Missing assemblies: {missing}",
+        }
