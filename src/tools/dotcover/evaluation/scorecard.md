@@ -1,25 +1,25 @@
 # dotCover Evaluation Scorecard
 
-**Generated:** 2026-02-06T16:02:58.983848+00:00
-**Decision:** WEAK_PASS
-**Score:** 66.67%
+**Generated:** 2026-02-07T10:05:47.093870+00:00
+**Decision:** STRONG_PASS
+**Score:** 100.0%
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Total Checks | 3 |
-| Passed | 2 |
+| Total Checks | 4 |
+| Passed | 4 |
 | Failed | 0 |
-| Raw Score | 0.667 |
-| Normalized Score | 3.33/5.0 |
+| Raw Score | 1.000 |
+| Normalized Score | 5.00/5.0 |
 
 ## Dimensions
 
 | Dimension | Checks | Passed | Score |
 |-----------|--------|--------|-------|
-| Accuracy | 1 | 1/1 | 100.0% |
-| Coverage | 1 | 0/1 | 0.0% |
+| Accuracy | 2 | 2/2 | 100.0% |
+| Coverage | 1 | 1/1 | 100.0% |
 | Performance | 1 | 1/1 | 100.0% |
 
 ## Detailed Results
@@ -28,13 +28,14 @@
 
 | Check | Status | Message |
 |-------|--------|---------|
-| accuracy.file_count | PASS | File count matches: 0 |
+| accuracy.assembly_detected | PASS | All expected assemblies found: {'CoverageDemo'} |
+| accuracy.overall_coverage | PASS | Coverage 70.8% within range [50.0-75.0] |
 
 ### Coverage
 
 | Check | Status | Message |
 |-------|--------|---------|
-| coverage.files_analyzed | FAIL | No files in output |
+| coverage.files_analyzed | PASS | 3 types analyzed |
 
 ### Performance
 

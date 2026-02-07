@@ -1,33 +1,39 @@
 {
   "tool": "dotcover",
   "version": "1.0.0",
-  "generated_at": "2026-02-06T16:02:58.983848+00:00",
+  "generated_at": "2026-02-07T10:05:47.093870+00:00",
   "description": "Evaluation scorecard for dotCover code coverage analysis",
   "summary": {
-    "total_checks": 3,
-    "passed": 2,
+    "total_checks": 4,
+    "passed": 4,
     "failed": 0,
-    "score": 0.6667,
-    "score_percent": 66.67,
-    "normalized_score": 3.33,
-    "decision": "WEAK_PASS"
+    "score": 1.0,
+    "score_percent": 100.0,
+    "normalized_score": 5.0,
+    "decision": "STRONG_PASS"
   },
   "dimensions": [
     {
       "id": "D1",
       "name": "Accuracy",
       "weight": 0.3333333333333333,
-      "total_checks": 1,
-      "passed": 1,
+      "total_checks": 2,
+      "passed": 2,
       "failed": 0,
       "score": 5.0,
       "weighted_score": 1.67,
       "checks": [
         {
-          "check_id": "accuracy.file_count",
-          "name": "accuracy.file_count",
+          "check_id": "accuracy.assembly_detected",
+          "name": "accuracy.assembly_detected",
           "passed": true,
-          "message": "File count matches: 0"
+          "message": "All expected assemblies found: {'CoverageDemo'}"
+        },
+        {
+          "check_id": "accuracy.overall_coverage",
+          "name": "accuracy.overall_coverage",
+          "passed": true,
+          "message": "Coverage 70.8% within range [50.0-75.0]"
         }
       ]
     },
@@ -36,16 +42,16 @@
       "name": "Coverage",
       "weight": 0.3333333333333333,
       "total_checks": 1,
-      "passed": 0,
-      "failed": 1,
-      "score": 0.0,
-      "weighted_score": 0.0,
+      "passed": 1,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 1.67,
       "checks": [
         {
           "check_id": "coverage.files_analyzed",
           "name": "coverage.files_analyzed",
-          "passed": false,
-          "message": "No files in output"
+          "passed": true,
+          "message": "3 types analyzed"
         }
       ]
     },
