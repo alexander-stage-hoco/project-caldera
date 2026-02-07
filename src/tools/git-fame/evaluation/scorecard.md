@@ -1,6 +1,6 @@
 # git-fame Evaluation Scorecard
 
-**Generated**: 2026-02-06T15:48:18.637657+00:00
+**Generated**: 2026-02-06T16:02:59.742240+00:00
 **Tool**: git-fame v3.1.1
 
 ## Overall Score
@@ -61,7 +61,7 @@
 | PF-1 | PASS | Completed in 0.02s (threshold: 5.0s) |
 | PF-2 | PASS | Completed in 0.02s (threshold: 30.0s) |
 | PF-3 | FAIL | Execution failed: /Users/alexander.stage/Projects/2026-01-24... |
-| PF-4 | PASS | Second run 2.8% faster (0.02s -> 0.02s) |
+| PF-4 | PASS | Second run 5.6% faster (0.02s -> 0.02s) |
 
 ### Integration Fit
 

@@ -1,6 +1,6 @@
 # dotCover Evaluation Scorecard
 
-**Generated:** 2026-02-06T15:48:17.801776+00:00
+**Generated:** 2026-02-06T16:02:58.983848+00:00
 **Decision:** WEAK_PASS
 **Score:** 66.67%
 
