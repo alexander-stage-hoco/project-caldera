@@ -25,7 +25,17 @@ select
     max(u.complexity_max) as max_ccn,
     avg(u.nloc) as avg_nloc,
     sum(case when u.loc_total is not null then 1 else 0 end) as scc_file_count,
-    sum(case when u.complexity_total_ccn is not null then 1 else 0 end) as lizard_file_count
+    sum(case when u.complexity_total_ccn is not null then 1 else 0 end) as lizard_file_count,
+    -- Coverage metrics (dotCover)
+    sum(u.coverage_covered_statements) as total_covered_statements,
+    sum(u.coverage_total_statements) as total_statements,
+    case
+        when sum(u.coverage_total_statements) > 0
+        then round(100.0 * sum(u.coverage_covered_statements) / sum(u.coverage_total_statements), 2)
+        else null
+    end as overall_coverage_pct,
+    sum(u.coverage_type_count) as total_types_covered,
+    sum(case when u.dotcover_run_pk is not null then 1 else 0 end) as dotcover_file_count
 from unified u
 left join run_meta rm
     on rm.run_pk = u.run_pk

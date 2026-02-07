@@ -8,6 +8,11 @@ lizard_runs as (
     from {{ source('lz', 'lz_tool_runs') }}
     where tool_name = 'lizard'
 ),
+dotcover_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'dotcover'
+),
 semgrep_runs as (
     select run_pk, collection_run_id
     from {{ source('lz', 'lz_tool_runs') }}
@@ -53,6 +58,14 @@ lizard_map as (
     left join symbol_runs sym
         on sym.collection_run_id = lr.collection_run_id
 ),
+dotcover_map as (
+    select
+        dr.run_pk as tool_run_pk,
+        dr.collection_run_id,
+        lr.run_pk as layout_run_pk
+    from dotcover_runs dr
+    join layout_runs lr on lr.collection_run_id = dr.collection_run_id
+),
 scc_files as (
     select
         sm.run_pk,
@@ -94,6 +107,19 @@ symbol_files as (
         sm.function_count,
         sm.class_count
     from {{ ref('stg_symbols_file_metrics') }} sm
+),
+dotcover_files as (
+    select
+        dcf.run_pk,
+        dm.collection_run_id,
+        dm.layout_run_pk,
+        dcf.file_id,
+        dcf.type_count,
+        dcf.covered_statements,
+        dcf.total_statements,
+        dcf.statement_coverage_pct
+    from {{ ref('stg_dotcover_file_metrics') }} dcf
+    join dotcover_map dm on dm.tool_run_pk = dcf.run_pk
 ),
 call_files as (
     select
@@ -145,6 +171,7 @@ select
     combined.lizard_run_pk,
     combined.semgrep_run_pk,
     combined.symbol_run_pk as symbol_run_pk,
+    dc.run_pk as dotcover_run_pk,
     combined.layout_run_pk,
     combined.file_id,
     lf.relative_path,
@@ -163,10 +190,15 @@ select
     sf.class_count,
     cf.call_count,
     imf.import_count,
+    dc.type_count as coverage_type_count,
+    dc.covered_statements as coverage_covered_statements,
+    dc.total_statements as coverage_total_statements,
+    dc.statement_coverage_pct as coverage_statement_pct,
     concat_ws(
         ',',
         combined.sources,
-        case when sf.run_pk is not null then 'symbol-scanner' end
+        case when sf.run_pk is not null then 'symbol-scanner' end,
+        case when dc.run_pk is not null then 'dotcover' end
     ) as sources
 from combined
 join {{ source('lz', 'lz_layout_files') }} lf
@@ -181,3 +213,6 @@ left join call_files cf
 left join import_files imf
     on imf.run_pk = combined.symbol_run_pk
    and imf.file_id = combined.file_id
+left join dotcover_files dc
+    on dc.layout_run_pk = combined.layout_run_pk
+   and dc.file_id = combined.file_id
