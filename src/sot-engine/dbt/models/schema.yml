@@ -372,6 +372,50 @@ models:
         description: "Count of INFO severity smells"
       - name: semgrep_severity_high_plus
         description: "Count of CRITICAL + HIGH severity smells"
+      - name: devskim_run_pk
+        description: "DevSkim tool run primary key (null if not available)"
+      - name: devskim_issue_count
+        description: "Total count of DevSkim security issues in file"
+      - name: devskim_severity_critical
+        description: "Count of CRITICAL severity issues"
+      - name: devskim_severity_high
+        description: "Count of HIGH severity issues"
+      - name: devskim_severity_medium
+        description: "Count of MEDIUM severity issues"
+      - name: devskim_severity_low
+        description: "Count of LOW severity issues"
+      - name: devskim_severity_high_plus
+        description: "Count of CRITICAL + HIGH severity issues"
+      - name: sonarqube_run_pk
+        description: "SonarQube tool run primary key (null if not available)"
+      - name: sonarqube_issue_count
+        description: "Total count of SonarQube issues in file"
+      - name: sonarqube_type_bug
+        description: "Count of BUG type issues"
+      - name: sonarqube_type_vulnerability
+        description: "Count of VULNERABILITY type issues"
+      - name: sonarqube_type_code_smell
+        description: "Count of CODE_SMELL type issues"
+      - name: sonarqube_type_security_hotspot
+        description: "Count of SECURITY_HOTSPOT type issues"
+      - name: sonarqube_severity_blocker
+        description: "Count of BLOCKER severity issues"
+      - name: sonarqube_severity_critical
+        description: "Count of CRITICAL severity issues"
+      - name: sonarqube_severity_major
+        description: "Count of MAJOR severity issues"
+      - name: sonarqube_severity_minor
+        description: "Count of MINOR severity issues"
+      - name: sonarqube_severity_info
+        description: "Count of INFO severity issues"
+      - name: sonarqube_severity_high_plus
+        description: "Count of BLOCKER + CRITICAL severity issues"
+      - name: sonarqube_cognitive_complexity
+        description: "SonarQube cognitive complexity score"
+      - name: sonarqube_duplicated_lines
+        description: "Number of duplicated lines detected by SonarQube"
+      - name: sonarqube_duplicated_lines_density
+        description: "Percentage of duplicated lines"
 
   - name: unified_run_summary
     columns:
@@ -666,6 +710,60 @@ models:
         tests:
           - not_null
       - name: total_issue_count
+        tests:
+          - not_null
+
+  - name: rollup_sonarqube_directory_direct_distributions
+    description: "Distribution statistics for SonarQube metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - issue_count
+                  - severity_high_plus
+                  - ncloc
+                  - complexity
+                  - cognitive_complexity
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_sonarqube_directory_recursive_distributions
+    description: "Distribution statistics for SonarQube metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - issue_count
+                  - severity_high_plus
+                  - ncloc
+                  - complexity
+                  - cognitive_complexity
+      - name: value_count
         tests:
           - not_null
 

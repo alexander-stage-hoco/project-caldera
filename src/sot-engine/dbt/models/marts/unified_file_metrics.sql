@@ -23,6 +23,16 @@ semgrep_runs as (
     from {{ source('lz', 'lz_tool_runs') }}
     where tool_name = 'semgrep'
 ),
+devskim_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'devskim'
+),
+sonarqube_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'sonarqube'
+),
 symbol_runs as (
     select run_pk, collection_run_id
     from {{ source('lz', 'lz_tool_runs') }}
@@ -78,6 +88,22 @@ roslyn_map as (
         lr.run_pk as layout_run_pk
     from roslyn_runs rr
     join layout_runs lr on lr.collection_run_id = rr.collection_run_id
+),
+devskim_map as (
+    select
+        dr.run_pk as tool_run_pk,
+        dr.collection_run_id,
+        lr.run_pk as layout_run_pk
+    from devskim_runs dr
+    join layout_runs lr on lr.collection_run_id = dr.collection_run_id
+),
+sonarqube_map as (
+    select
+        sr.run_pk as tool_run_pk,
+        sr.collection_run_id,
+        lr.run_pk as layout_run_pk
+    from sonarqube_runs sr
+    join layout_runs lr on lr.collection_run_id = sr.collection_run_id
 ),
 scc_files as (
     select
@@ -162,6 +188,44 @@ semgrep_files as (
         sf.severity_info,
         sf.severity_high_plus
     from {{ ref('stg_semgrep_file_metrics') }} sf
+),
+devskim_files as (
+    select
+        df.run_pk,
+        dm.collection_run_id,
+        dm.layout_run_pk,
+        df.file_id,
+        df.issue_count,
+        df.severity_critical,
+        df.severity_high,
+        df.severity_medium,
+        df.severity_low,
+        df.severity_high_plus
+    from {{ ref('stg_devskim_file_metrics') }} df
+    join devskim_map dm on dm.tool_run_pk = df.run_pk
+),
+sonarqube_files as (
+    select
+        sf.run_pk,
+        sm.collection_run_id,
+        sm.layout_run_pk,
+        sf.file_id,
+        sf.issue_count,
+        sf.type_bug,
+        sf.type_vulnerability,
+        sf.type_code_smell,
+        sf.type_security_hotspot,
+        sf.severity_blocker,
+        sf.severity_critical,
+        sf.severity_major,
+        sf.severity_minor,
+        sf.severity_info,
+        sf.severity_high_plus,
+        sf.cognitive_complexity,
+        sf.duplicated_lines,
+        sf.duplicated_lines_density
+    from {{ ref('stg_sonarqube_file_metrics') }} sf
+    join sonarqube_map sm on sm.tool_run_pk = sf.run_pk
 ),
 call_files as (
     select
@@ -251,13 +315,37 @@ select
     sg.severity_low as semgrep_severity_low,
     sg.severity_info as semgrep_severity_info,
     sg.severity_high_plus as semgrep_severity_high_plus,
+    dsk.run_pk as devskim_run_pk,
+    dsk.issue_count as devskim_issue_count,
+    dsk.severity_critical as devskim_severity_critical,
+    dsk.severity_high as devskim_severity_high,
+    dsk.severity_medium as devskim_severity_medium,
+    dsk.severity_low as devskim_severity_low,
+    dsk.severity_high_plus as devskim_severity_high_plus,
+    sq.run_pk as sonarqube_run_pk,
+    sq.issue_count as sonarqube_issue_count,
+    sq.type_bug as sonarqube_type_bug,
+    sq.type_vulnerability as sonarqube_type_vulnerability,
+    sq.type_code_smell as sonarqube_type_code_smell,
+    sq.type_security_hotspot as sonarqube_type_security_hotspot,
+    sq.severity_blocker as sonarqube_severity_blocker,
+    sq.severity_critical as sonarqube_severity_critical,
+    sq.severity_major as sonarqube_severity_major,
+    sq.severity_minor as sonarqube_severity_minor,
+    sq.severity_info as sonarqube_severity_info,
+    sq.severity_high_plus as sonarqube_severity_high_plus,
+    sq.cognitive_complexity as sonarqube_cognitive_complexity,
+    sq.duplicated_lines as sonarqube_duplicated_lines,
+    sq.duplicated_lines_density as sonarqube_duplicated_lines_density,
     concat_ws(
         ',',
         combined.sources,
         case when sf.run_pk is not null then 'symbol-scanner' end,
         case when dc.run_pk is not null then 'dotcover' end,
         case when ros.run_pk is not null then 'roslyn-analyzers' end,
-        case when sg.run_pk is not null then 'semgrep' end
+        case when sg.run_pk is not null then 'semgrep' end,
+        case when dsk.run_pk is not null then 'devskim' end,
+        case when sq.run_pk is not null then 'sonarqube' end
     ) as sources
 from combined
 join {{ source('lz', 'lz_layout_files') }} lf
@@ -281,3 +369,9 @@ left join roslyn_files ros
 left join semgrep_files sg
     on sg.run_pk = combined.semgrep_run_pk
    and sg.file_id = combined.file_id
+left join devskim_files dsk
+    on dsk.layout_run_pk = combined.layout_run_pk
+   and dsk.file_id = combined.file_id
+left join sonarqube_files sq
+    on sq.layout_run_pk = combined.layout_run_pk
+   and sq.file_id = combined.file_id
