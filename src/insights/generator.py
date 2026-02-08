@@ -28,6 +28,7 @@ from .sections.code_inequality import CodeInequalitySection
 from .sections.module_health import ModuleHealthSection
 from .sections.secrets import SecretsSection
 from .sections.tool_readiness import ToolReadinessSection
+from .sections.tool_coverage_dashboard import ToolCoverageDashboardSection
 
 
 class InsightsGenerator:
@@ -36,6 +37,7 @@ class InsightsGenerator:
     # Available sections, ordered by priority
     SECTIONS: dict[str, type[BaseSection]] = {
         "tool_readiness": ToolReadinessSection,
+        "tool_coverage_dashboard": ToolCoverageDashboardSection,
         "executive_summary": ExecutiveSummarySection,
         "repo_health": RepoHealthSection,
         "file_hotspots": FileHotspotsSection,
