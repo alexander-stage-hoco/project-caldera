@@ -24,6 +24,8 @@ from .dependency_health import DependencyHealthSection
 from .license_compliance import LicenseComplianceSection
 from .directory_structure import DirectoryStructureSection
 from .blast_radius import BlastRadiusSection
+from .code_size_hotspots import CodeSizeHotspotsSection
+from .code_quality_rules import CodeQualityRulesSection
 from .secrets import SecretsSection
 from .tool_readiness import ToolReadinessSection
 from .tool_coverage_dashboard import ToolCoverageDashboardSection
@@ -53,6 +55,8 @@ __all__ = [
     "LicenseComplianceSection",
     "DirectoryStructureSection",
     "BlastRadiusSection",
+    "CodeSizeHotspotsSection",
+    "CodeQualityRulesSection",
     "SecretsSection",
     "ToolReadinessSection",
     "ToolCoverageDashboardSection",

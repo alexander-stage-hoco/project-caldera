@@ -1,0 +1,68 @@
+## Code Quality Rules
+
+{% if not has_data %}
+*No code quality rule data available for this run.*
+{% else %}
+
+### Summary
+
+Identifies which code quality rules are most frequently violated, helping prioritize technical debt remediation.
+
+| Metric | Value |
+|--------|-------|
+| Rules Analyzed | {{ summary.total_rules }} |
+| Total Violations | {{ "{:,}".format(summary.total_violations) }} |
+| Files Affected | {{ summary.total_files_affected }} |
+| High Risk Rules | {{ summary.critical_count + summary.high_count }} |
+| Widespread Rules | {{ summary.widespread_rules }} |
+
+### Severity Distribution
+
+| Severity | Violations |
+|----------|------------|
+| Critical | {{ "{:,}".format(severity_distribution.critical) }} |
+| High | {{ "{:,}".format(severity_distribution.high) }} |
+| Medium | {{ "{:,}".format(severity_distribution.medium) }} |
+| Low | {{ "{:,}".format(severity_distribution.low) }} |
+| Info | {{ "{:,}".format(severity_distribution.info) }} |
+
+{% if has_high_risk and high_risk_rules %}
+### High Risk Rules
+
+Rules with critical or high severity violations:
+
+| Rule ID | Category | Violations | Files | Dirs | Critical | High | Risk |
+|---------|----------|------------|-------|------|----------|------|------|
+{% for r in high_risk_rules[:10] %}
+| {{ r.rule_id }} | {{ r.dd_category or 'N/A' }} | {{ "{:,}".format(r.smell_count) }} | {{ r.files_affected }} | {{ r.directories_affected }} | {{ r.severity_critical }} | {{ r.severity_high }} | {{ r.risk_level }} |
+{% endfor %}
+{% endif %}
+
+### Top Rules by Violation Count
+
+| Rule ID | Category | Violations | Files | Dirs | Score | Risk |
+|---------|----------|------------|-------|------|-------|------|
+{% for r in rules[:15] %}
+| {{ r.rule_id }} | {{ r.dd_category or 'N/A' }} | {{ "{:,}".format(r.smell_count) }} | {{ r.files_affected }} | {{ r.directories_affected }} | {{ r.severity_score }} | {{ r.risk_level }} |
+{% endfor %}
+
+{% if category_breakdown %}
+### Category Breakdown
+
+| Category | Rules | Total Violations |
+|----------|-------|------------------|
+{% for cat in category_breakdown[:10] %}
+| {{ cat.category }} | {{ cat.count }} | {{ "{:,}".format(cat.violations) }} |
+{% endfor %}
+{% endif %}
+
+### Risk Level Thresholds
+
+| Level | Criteria |
+|-------|----------|
+| Critical | Any violation with CRITICAL severity |
+| High | Any violation with HIGH severity |
+| Medium | Violations with MEDIUM severity only |
+| Low | Violations with LOW or INFO severity only |
+
+{% endif %}

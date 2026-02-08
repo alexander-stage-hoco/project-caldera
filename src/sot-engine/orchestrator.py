@@ -438,7 +438,7 @@ def main() -> int:
     args = parser.parse_args()
 
     repo_path = Path(args.repo_path)
-    repo_name = repo_path.name
+    repo_name = args.repo_id
     schema_path = Path(args.schema_path)
     repo_root = Path(__file__).resolve().parents[2]
     log_path = Path(args.log_path) if args.log_path else Path("/tmp") / f"caldera_orchestrator_{args.run_id}.log"

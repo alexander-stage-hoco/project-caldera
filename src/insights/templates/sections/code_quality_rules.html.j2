@@ -1,0 +1,170 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Code Quality Rules</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No code quality rule data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Identifies which code quality rules are most frequently violated, helping prioritize technical debt remediation.</p>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="label">Rules Analyzed</div>
+                <div class="value">{{ summary.total_rules }}</div>
+                <div class="sublabel">Unique rule IDs</div>
+            </div>
+            <div class="metric-card {% if summary.total_violations > 100 %}warning{% endif %}">
+                <div class="label">Total Violations</div>
+                <div class="value">{{ "{:,}".format(summary.total_violations) }}</div>
+                <div class="sublabel">Code smell instances</div>
+            </div>
+            <div class="metric-card {% if summary.high_count > 0 %}warning{% endif %}">
+                <div class="label">High Risk Rules</div>
+                <div class="value">{{ summary.critical_count + summary.high_count }}</div>
+                <div class="sublabel">Critical + High severity</div>
+            </div>
+            <div class="metric-card {% if summary.widespread_rules > 3 %}info{% endif %}">
+                <div class="label">Widespread Rules</div>
+                <div class="value">{{ summary.widespread_rules }}</div>
+                <div class="sublabel">Affecting 5+ directories</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Severity Distribution</h3>
+        <div class="stat-grid">
+            <div class="stat-item"><span class="label">Critical:</span> {{ "{:,}".format(severity_distribution.critical) }}</div>
+            <div class="stat-item"><span class="label">High:</span> {{ "{:,}".format(severity_distribution.high) }}</div>
+            <div class="stat-item"><span class="label">Medium:</span> {{ "{:,}".format(severity_distribution.medium) }}</div>
+            <div class="stat-item"><span class="label">Low:</span> {{ "{:,}".format(severity_distribution.low) }}</div>
+            <div class="stat-item"><span class="label">Info:</span> {{ "{:,}".format(severity_distribution.info) }}</div>
+        </div>
+    </div>
+
+    {% if has_high_risk and high_risk_rules %}
+    <div class="subsection">
+        <h3>High Risk Rules</h3>
+        <p>Rules with critical or high severity violations requiring immediate attention:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rule ID</th>
+                    <th>Category</th>
+                    <th class="number">Violations</th>
+                    <th class="number">Files</th>
+                    <th class="number">Dirs</th>
+                    <th class="number">Critical</th>
+                    <th class="number">High</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for r in high_risk_rules[:10] %}
+                <tr class="{% if r.risk_level == 'critical' %}critical-row{% else %}warning-row{% endif %}">
+                    <td class="truncate" title="{{ r.rule_id }}">{{ r.rule_id | truncate(50) }}</td>
+                    <td>{{ r.dd_category or 'N/A' }}</td>
+                    <td class="number">{{ "{:,}".format(r.smell_count) }}</td>
+                    <td class="number">{{ r.files_affected }}</td>
+                    <td class="number">{{ r.directories_affected }}</td>
+                    <td class="number">{{ r.severity_critical }}</td>
+                    <td class="number">{{ r.severity_high }}</td>
+                    <td><span class="badge badge-{{ r.risk_level }}">{{ r.risk_level }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Top Rules by Violation Count</h3>
+        <p>Rules ordered by total number of violations:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rule ID</th>
+                    <th>Category</th>
+                    <th class="number">Violations</th>
+                    <th class="number">Files</th>
+                    <th class="number">Dirs</th>
+                    <th class="number">Score</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for r in rules[:15] %}
+                <tr class="{% if r.risk_level == 'critical' %}critical-row{% elif r.risk_level == 'high' %}warning-row{% else %}info-row{% endif %}">
+                    <td class="truncate" title="{{ r.rule_id }}">{{ r.rule_id | truncate(50) }}</td>
+                    <td>{{ r.dd_category or 'N/A' }}</td>
+                    <td class="number">{{ "{:,}".format(r.smell_count) }}</td>
+                    <td class="number">{{ r.files_affected }}</td>
+                    <td class="number">{{ r.directories_affected }}</td>
+                    <td class="number">{{ r.severity_score }}</td>
+                    <td><span class="badge badge-{{ r.risk_level }}">{{ r.risk_level }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if category_breakdown %}
+    <div class="subsection">
+        <h3>Category Breakdown</h3>
+        <p>Rules grouped by code quality category:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th class="number">Rules</th>
+                    <th class="number">Total Violations</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for cat in category_breakdown[:10] %}
+                <tr>
+                    <td>{{ cat.category }}</td>
+                    <td class="number">{{ cat.count }}</td>
+                    <td class="number">{{ "{:,}".format(cat.violations) }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Risk Level Thresholds</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Level</th>
+                    <th>Criteria</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="critical-row">
+                    <td><span class="badge badge-critical">Critical</span></td>
+                    <td>Any violation with CRITICAL severity</td>
+                </tr>
+                <tr class="warning-row">
+                    <td><span class="badge badge-high">High</span></td>
+                    <td>Any violation with HIGH severity</td>
+                </tr>
+                <tr class="info-row">
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td>Violations with MEDIUM severity only</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-low">Low</span></td>
+                    <td>Violations with LOW or INFO severity only</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% endif %}
+</section>

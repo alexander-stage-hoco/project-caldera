@@ -1,0 +1,191 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Code Size Hotspots</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No code size hotspot data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Identifies oversized files that may need refactoring or splitting based on lines of code and complexity.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical Risk</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">&gt;1000 lines or complexity &gt;50</div>
+            </div>
+            <div class="metric-card {% if summary.high_count > 0 %}warning{% endif %}">
+                <div class="label">High Risk</div>
+                <div class="value">{{ summary.high_count }}</div>
+                <div class="sublabel">&gt;500 lines or complexity &gt;30</div>
+            </div>
+            <div class="metric-card {% if summary.medium_count > 0 %}info{% endif %}">
+                <div class="label">Medium Risk</div>
+                <div class="value">{{ summary.medium_count }}</div>
+                <div class="sublabel">&gt;200 lines or complexity &gt;15</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Max Lines</div>
+                <div class="value">{{ "{:,}".format(summary.max_lines) }}</div>
+                <div class="sublabel">Largest file</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Size Thresholds</h3>
+        <div class="stat-grid">
+            <div class="stat-item"><span class="label">Total Hotspots:</span> {{ summary.total_hotspots }}</div>
+            <div class="stat-item"><span class="label">Files &gt;1000 lines:</span> {{ summary.files_over_1000 }}</div>
+            <div class="stat-item"><span class="label">Files &gt;500 lines:</span> {{ summary.files_over_500 }}</div>
+            <div class="stat-item"><span class="label">Files &gt;200 lines:</span> {{ summary.files_over_200 }}</div>
+        </div>
+    </div>
+
+    {% if run_statistics %}
+    <div class="subsection">
+        <h3>Run Statistics</h3>
+        <p>Distribution statistics across all {{ run_statistics.total_files }} files in the repository:</p>
+        <div class="stat-grid">
+            <div class="stat-item"><span class="label">Avg Lines:</span> {{ "%.1f"|format(run_statistics.avg_lines) }}</div>
+            <div class="stat-item"><span class="label">Median (p50):</span> {{ run_statistics.p50|int }}</div>
+            <div class="stat-item"><span class="label">p75:</span> {{ run_statistics.p75|int }}</div>
+            <div class="stat-item"><span class="label">p90:</span> {{ run_statistics.p90|int }}</div>
+            <div class="stat-item"><span class="label">p95:</span> {{ run_statistics.p95|int }}</div>
+            <div class="stat-item"><span class="label">p99:</span> {{ run_statistics.p99|int }}</div>
+        </div>
+        <div class="stat-grid">
+            <div class="stat-item"><span class="label">p99 Outliers:</span> {{ summary.p99_outliers }}</div>
+            <div class="stat-item"><span class="label">p95 Outliers:</span> {{ summary.p95_outliers }}</div>
+            <div class="stat-item"><span class="label">p90 Outliers:</span> {{ summary.p90_outliers }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if has_critical and critical_files %}
+    <div class="subsection">
+        <h3>Critical Size Hotspots</h3>
+        <p>Files exceeding critical thresholds (&gt;1000 lines, complexity &gt;50, or density &gt;0.20):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Language</th>
+                    <th class="number">Lines</th>
+                    <th class="number">Code</th>
+                    <th class="number">Complexity</th>
+                    <th class="number">Density</th>
+                    <th class="number">Z-Score</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in critical_files[:15] %}
+                <tr class="critical-row">
+                    <td class="truncate" title="{{ f.relative_path }}">{{ f.relative_path | truncate_path }}</td>
+                    <td>{{ f.language }}</td>
+                    <td class="number">{{ "{:,}".format(f.lines_total) }}</td>
+                    <td class="number">{{ "{:,}".format(f.code_lines) }}</td>
+                    <td class="number">{{ f.complexity }}</td>
+                    <td class="number">{{ "%.3f"|format(f.complexity_density) }}</td>
+                    <td class="number">{{ "%.1f"|format(f.lines_zscore) }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Top Size Hotspots</h3>
+        <p>Files ordered by total lines (includes medium, high, and critical risk):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Language</th>
+                    <th class="number">Lines</th>
+                    <th class="number">Code</th>
+                    <th class="number">Comments</th>
+                    <th class="number">Complexity</th>
+                    <th class="number">Density</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in files[:15] %}
+                <tr class="{% if f.risk_level == 'critical' %}critical-row{% elif f.risk_level == 'high' %}warning-row{% else %}info-row{% endif %}">
+                    <td class="truncate" title="{{ f.relative_path }}">{{ f.relative_path | truncate_path }}</td>
+                    <td>{{ f.language }}</td>
+                    <td class="number">{{ "{:,}".format(f.lines_total) }}</td>
+                    <td class="number">{{ "{:,}".format(f.code_lines) }}</td>
+                    <td class="number">{{ "{:,}".format(f.comment_lines) }}</td>
+                    <td class="number">{{ f.complexity }}</td>
+                    <td class="number">{{ "%.3f"|format(f.complexity_density) }}</td>
+                    <td><span class="badge badge-{{ f.risk_level }}">{{ f.risk_level }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if language_breakdown %}
+    <div class="subsection">
+        <h3>Language Distribution</h3>
+        <p>Hotspot distribution by programming language:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Language</th>
+                    <th class="number">Hotspot Files</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lang in language_breakdown[:10] %}
+                <tr>
+                    <td>{{ lang.language }}</td>
+                    <td class="number">{{ lang.count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Risk Level Thresholds</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Level</th>
+                    <th>Lines</th>
+                    <th>Complexity</th>
+                    <th>Density</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="critical-row">
+                    <td><span class="badge badge-critical">Critical</span></td>
+                    <td>&gt;1,000</td>
+                    <td>&gt;50</td>
+                    <td>&gt;0.20</td>
+                </tr>
+                <tr class="warning-row">
+                    <td><span class="badge badge-high">High</span></td>
+                    <td>&gt;500</td>
+                    <td>&gt;30</td>
+                    <td>&gt;0.10</td>
+                </tr>
+                <tr class="info-row">
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td>&gt;200</td>
+                    <td>&gt;15</td>
+                    <td>&gt;0.05</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% endif %}
+</section>

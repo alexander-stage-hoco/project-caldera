@@ -1,0 +1,80 @@
+## Code Size Hotspots
+
+{% if not has_data %}
+*No code size hotspot data available for this run.*
+{% else %}
+
+### Summary
+
+Identifies oversized files that may need refactoring or splitting based on lines of code and complexity.
+
+| Metric | Value |
+|--------|-------|
+| Critical Risk | {{ summary.critical_count }} |
+| High Risk | {{ summary.high_count }} |
+| Medium Risk | {{ summary.medium_count }} |
+| Total Hotspots | {{ summary.total_hotspots }} |
+| Max Lines | {{ "{:,}".format(summary.max_lines) }} |
+| Files >1000 lines | {{ summary.files_over_1000 }} |
+| Files >500 lines | {{ summary.files_over_500 }} |
+| Files >200 lines | {{ summary.files_over_200 }} |
+
+{% if run_statistics %}
+### Run Statistics
+
+Distribution across {{ run_statistics.total_files }} files:
+
+| Metric | Value |
+|--------|-------|
+| Avg Lines | {{ "%.1f"|format(run_statistics.avg_lines) }} |
+| Median (p50) | {{ run_statistics.p50|int }} |
+| p75 | {{ run_statistics.p75|int }} |
+| p90 | {{ run_statistics.p90|int }} |
+| p95 | {{ run_statistics.p95|int }} |
+| p99 | {{ run_statistics.p99|int }} |
+| p99 Outliers | {{ summary.p99_outliers }} |
+| p95 Outliers | {{ summary.p95_outliers }} |
+| p90 Outliers | {{ summary.p90_outliers }} |
+{% endif %}
+
+{% if has_critical and critical_files %}
+### Critical Size Hotspots
+
+Files exceeding critical thresholds (>1000 lines, complexity >50, or density >0.20):
+
+| File | Language | Lines | Code | Complexity | Density | Z-Score |
+|------|----------|-------|------|------------|---------|---------|
+{% for f in critical_files[:15] %}
+| {{ f.relative_path }} | {{ f.language }} | {{ "{:,}".format(f.lines_total) }} | {{ "{:,}".format(f.code_lines) }} | {{ f.complexity }} | {{ "%.3f"|format(f.complexity_density) }} | {{ "%.1f"|format(f.lines_zscore) }} |
+{% endfor %}
+{% endif %}
+
+### Top Size Hotspots
+
+Files ordered by total lines:
+
+| File | Language | Lines | Code | Comments | Complexity | Density | Risk |
+|------|----------|-------|------|----------|------------|---------|------|
+{% for f in files[:15] %}
+| {{ f.relative_path }} | {{ f.language }} | {{ "{:,}".format(f.lines_total) }} | {{ "{:,}".format(f.code_lines) }} | {{ "{:,}".format(f.comment_lines) }} | {{ f.complexity }} | {{ "%.3f"|format(f.complexity_density) }} | {{ f.risk_level }} |
+{% endfor %}
+
+{% if language_breakdown %}
+### Language Distribution
+
+| Language | Hotspot Files |
+|----------|---------------|
+{% for lang in language_breakdown[:10] %}
+| {{ lang.language }} | {{ lang.count }} |
+{% endfor %}
+{% endif %}
+
+### Risk Level Thresholds
+
+| Level | Lines | Complexity | Density |
+|-------|-------|------------|---------|
+| Critical | >1,000 | >50 | >0.20 |
+| High | >500 | >30 | >0.10 |
+| Medium | >200 | >15 | >0.05 |
+
+{% endif %}

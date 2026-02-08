@@ -38,6 +38,8 @@ from .sections.dependency_health import DependencyHealthSection
 from .sections.license_compliance import LicenseComplianceSection
 from .sections.directory_structure import DirectoryStructureSection
 from .sections.blast_radius import BlastRadiusSection
+from .sections.code_size_hotspots import CodeSizeHotspotsSection
+from .sections.code_quality_rules import CodeQualityRulesSection
 
 
 class InsightsGenerator:
@@ -52,6 +54,7 @@ class InsightsGenerator:
         "dependency_health": DependencyHealthSection,
         "function_complexity": FunctionComplexitySection,
         "blast_radius": BlastRadiusSection,
+        "code_size_hotspots": CodeSizeHotspotsSection,
         "repo_health": RepoHealthSection,
         "directory_structure": DirectoryStructureSection,
         "file_hotspots": FileHotspotsSection,
@@ -59,6 +62,7 @@ class InsightsGenerator:
         "vulnerabilities": VulnerabilitiesSection,
         "secrets": SecretsSection,
         "cross_tool": CrossToolSection,
+        "code_quality_rules": CodeQualityRulesSection,
         "coupling_analysis": CouplingAnalysisSection,
         "authorship_risk": AuthorshipRiskSection,
         "language_coverage": LanguageCoverageSection,
