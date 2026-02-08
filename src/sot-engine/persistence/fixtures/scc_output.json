@@ -25,6 +25,7 @@
         "blank": 10,
         "bytes": 2048,
         "complexity": 12,
+        "uloc": 82,
         "comment_ratio": 0.166,
         "blank_ratio": 0.083,
         "code_ratio": 0.75,

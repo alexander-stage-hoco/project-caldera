@@ -50,12 +50,21 @@ def test_layout_adapter_persists_files(tmp_path: Path) -> None:
         [run_pk],
     ).fetchall()
 
-    # Fixture includes trivy-specific files (Dockerfile, package-lock.json, requirements.txt)
+    # Fixture includes 14 files for various tool testing scenarios
     assert rows == [
+        ("f-000000000006", "d-000000000001", ".env"),
         ("f-000000000005", "d-000000000001", "Dockerfile"),
+        ("f-000000000009", "d-000000000001", "LICENSE"),
+        ("f-000000000007", "d-000000000004", "config/api.py"),
         ("f-000000000003", "d-000000000001", "package-lock.json"),
         ("f-000000000004", "d-000000000001", "requirements.txt"),
         ("f-000000000001", "d-000000000002", "src/app.py"),
+        ("f-000000000012", "d-000000000002", "src/crypto.cs"),
+        ("f-000000000011", "d-000000000002", "src/helpers.py"),
+        ("f-000000000008", "d-000000000002", "src/main.py"),
+        ("f-000000000014", "d-000000000002", "src/safe.cs"),
+        ("f-000000000013", "d-000000000002", "src/serializer.cs"),
+        ("f-000000000010", "d-000000000002", "src/utils.py"),
         ("f-000000000002", "d-000000000003", "src/utils/helpers.py"),
     ]
 

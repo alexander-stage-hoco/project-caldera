@@ -5384,3 +5384,178 @@ models:
         description: "Total files in the run for context"
         tests:
           - not_null
+
+  - name: mart_composite_file_hotspots
+    description: "Cross-tool composite file hotspots identifying files with multiple overlapping risk factors from 5 dimensions: complexity (lizard), size (scc), issues (semgrep/sonarqube/roslyn/devskim), coverage (dotcover), and coupling (symbol-scanner). Only includes files with 2+ medium or higher risk factors."
+    columns:
+      - name: collection_run_id
+        description: "Collection run identifier"
+        tests:
+          - not_null
+          - relationships:
+              to: source('lz', 'lz_collection_runs')
+              field: collection_run_id
+      - name: file_id
+        description: "File identifier from layout-scanner"
+        tests:
+          - not_null
+      - name: relative_path
+        description: "Repository-relative file path"
+        tests:
+          - not_null
+      - name: directory_id
+        description: "Directory identifier for file location"
+        tests:
+          - not_null
+      - name: composite_score
+        description: "Normalized composite risk score (0-100 scale). Calculated as (sum of dimension scores) / (available_dimensions * 4) * 100"
+        tests:
+          - not_null
+      - name: composite_risk_level
+        description: "Overall risk classification based on risk counts: critical (2+ critical), high (1 critical or 2+ high), medium (1 high or 2+ medium), low"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+      - name: risk_pattern
+        description: "Classification of risk type: complex_untested, complex_smelly, god_file, risky_untested, coupled_complex, multi_dimension_risk, dual_risk, single_risk"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - complex_untested
+                  - complex_smelly
+                  - god_file
+                  - risky_untested
+                  - coupled_complex
+                  - multi_dimension_risk
+                  - dual_risk
+                  - single_risk
+      - name: medium_plus_risk_count
+        description: "Count of dimensions with medium or higher risk (score >= 2)"
+        tests:
+          - not_null
+      - name: high_plus_risk_count
+        description: "Count of dimensions with high or higher risk (score >= 3)"
+        tests:
+          - not_null
+      - name: critical_risk_count
+        description: "Count of dimensions with critical risk (score = 4)"
+        tests:
+          - not_null
+      - name: available_dimensions
+        description: "Count of dimensions with available data (0-5)"
+        tests:
+          - not_null
+      - name: total_score
+        description: "Sum of all dimension scores (0 to available_dimensions * 4)"
+        tests:
+          - not_null
+      - name: max_ccn
+        description: "Maximum cyclomatic complexity in file (from lizard)"
+      - name: complexity_risk
+        description: "Complexity risk level: critical (>50), high (>20), medium (>10), low"
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+      - name: complexity_score
+        description: "Complexity dimension score (1-4)"
+      - name: loc_code
+        description: "Lines of code (from scc)"
+      - name: size_risk
+        description: "Size risk level: critical (>1000), high (>500), medium (>200), low"
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+      - name: size_score
+        description: "Size dimension score (1-4)"
+      - name: total_high_plus_issues
+        description: "Total high+ severity issues across all issue tools"
+        tests:
+          - not_null
+      - name: semgrep_high_plus
+        description: "High+ severity issues from semgrep"
+      - name: sonarqube_high_plus
+        description: "High+ severity issues from sonarqube"
+      - name: roslyn_high_plus
+        description: "High+ severity issues from roslyn-analyzers"
+      - name: devskim_high_plus
+        description: "High+ severity issues from devskim"
+      - name: issues_risk
+        description: "Issues risk level: critical (>=10), high (>=5), medium (>=1), low"
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+      - name: issues_score
+        description: "Issues dimension score (1-4)"
+      - name: coverage_statement_pct
+        description: "Statement coverage percentage (from dotcover)"
+      - name: coverage_total_statements
+        description: "Total statements in file (from dotcover)"
+      - name: coverage_risk
+        description: "Coverage risk level: critical (<20%), high (<40%), medium (<60%), low"
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+      - name: coverage_score
+        description: "Coverage dimension score (1-4)"
+      - name: total_coupling
+        description: "Total coupling (fan_in + fan_out) from symbol-scanner"
+      - name: coupling_risk
+        description: "Coupling risk level: critical (>=20), high (>=10), medium (>=5), low"
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+      - name: coupling_score
+        description: "Coupling dimension score (1-4)"
+      - name: has_complexity_data
+        description: "True if complexity data is available from lizard"
+        tests:
+          - not_null
+      - name: has_size_data
+        description: "True if size data is available from scc"
+        tests:
+          - not_null
+      - name: has_issues_data
+        description: "True if issues data is available from any issue tool"
+        tests:
+          - not_null
+      - name: has_coverage_data
+        description: "True if coverage data is available from dotcover"
+        tests:
+          - not_null
+      - name: has_coupling_data
+        description: "True if coupling data is available from symbol-scanner"
+        tests:
+          - not_null

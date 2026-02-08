@@ -313,6 +313,16 @@ def generate_scorecard(results: dict[str, Any], output_path: Path) -> None:
 
 def main():
     """Main entry point."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run git-fame programmatic evaluation")
+    parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        help="Output file path for evaluation report JSON"
+    )
+    args = parser.parse_args()
+
     base_dir = Path(__file__).parent.parent
 
     print("=" * 60)
@@ -322,11 +332,15 @@ def main():
 
     results = run_evaluation(base_dir)
 
-    # Save JSON results
-    results_dir = base_dir / "evaluation" / "results"
-    results_dir.mkdir(parents=True, exist_ok=True)
+    # Determine output path
+    if args.output:
+        json_file = args.output
+        json_file.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        results_dir = base_dir / "evaluation" / "results"
+        results_dir.mkdir(parents=True, exist_ok=True)
+        json_file = results_dir / "evaluation_report.json"
 
-    json_file = results_dir / "evaluation_report.json"
     json_file.write_text(json.dumps(results, indent=2))
     print(f"JSON results: {json_file}")
 

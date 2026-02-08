@@ -369,10 +369,16 @@ def main() -> None:
         scorecard_dir = Path(__file__).parent.parent / "evaluation"
         scorecard_dir.mkdir(parents=True, exist_ok=True)
 
+        # Also save to EVAL_OUTPUT_DIR as evaluation_report.json for compliance
+        eval_report_path = args.output / "evaluation_report.json"
+        with open(eval_report_path, "w") as f:
+            json.dump(scorecard_json, f, indent=2)
+        print(f"\nEvaluation report saved to: {eval_report_path}")
+
         scorecard_json_path = scorecard_dir / "scorecard.json"
         with open(scorecard_json_path, "w") as f:
             json.dump(scorecard_json, f, indent=2)
-        print(f"\nScorecard JSON saved to: {scorecard_json_path}")
+        print(f"Scorecard JSON saved to: {scorecard_json_path}")
 
         scorecard_md_path = scorecard_dir / "scorecard.md"
         scorecard_md_path.write_text(generate_scorecard_md(scorecard_json))

@@ -69,7 +69,8 @@ analyze-%: $(VENV_READY)
 
 evaluate: $(VENV_READY)  ## Run programmatic evaluation
 	@echo "Running programmatic evaluation..."
-	$(PYTHON_VENV) scripts/evaluate.py
+	@mkdir -p $(EVAL_OUTPUT_DIR)
+	$(PYTHON_VENV) scripts/evaluate.py --output $(EVAL_OUTPUT_DIR)/evaluation_report.json
 	@echo "Evaluation complete. See evaluation/scorecard.md"
 
 evaluate-llm: $(VENV_READY)  ## Run LLM-as-a-Judge evaluation
