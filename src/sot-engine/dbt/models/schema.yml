@@ -5007,3 +5007,380 @@ models:
         description: "90th percentile fan-out in run"
       - name: run_total_projects
         description: "Total projects analyzed in run"
+
+  - name: stg_git_sizer_lfs_file_metrics
+    description: "Git-sizer LFS candidates with file size metrics from SCC"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: file_path
+        tests:
+          - not_null
+      - name: file_size_bytes
+        tests:
+          - not_null
+
+  - name: rollup_git_sizer_lfs_direct_distributions
+    description: "Distribution statistics for LFS candidate file sizes (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - file_size_bytes
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_git_sizer_lfs_recursive_distributions
+    description: "Distribution statistics for LFS candidate file sizes (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - file_size_bytes
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: mart_layout_structure_hotspots
+    description: "Layout structure hotspots identifying deeply nested directories, oversized folders, file concentration, and organization issues"
+    columns:
+      - name: run_pk
+        description: "Layout tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: collection_run_id
+        description: "Collection run identifier"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('lz', 'lz_collection_runs')
+                field: collection_run_id
+      - name: directory_id
+        description: "Directory identifier"
+        tests:
+          - not_null
+      - name: directory_path
+        description: "Repository-relative directory path"
+        tests:
+          - not_null
+      - name: depth
+        description: "Directory nesting depth (0 = root)"
+        tests:
+          - not_null
+      - name: file_count_recursive
+        description: "Total files in directory subtree"
+        tests:
+          - not_null
+      - name: file_count_direct
+        description: "Files directly in this directory"
+        tests:
+          - not_null
+      - name: total_size_bytes_recursive
+        description: "Total size of files in directory subtree"
+        tests:
+          - not_null
+      - name: total_size_bytes_direct
+        description: "Size of files directly in this directory"
+        tests:
+          - not_null
+      - name: language_count
+        description: "Number of distinct languages in directory subtree"
+        tests:
+          - not_null
+      - name: category_count
+        description: "Number of distinct file categories in directory subtree"
+        tests:
+          - not_null
+      - name: size_gini
+        description: "Gini coefficient for file size distribution (0=equal, 1=concentrated)"
+        tests:
+          - not_null
+      - name: size_palma
+        description: "Palma ratio for file size distribution (top 10% / bottom 40%)"
+        tests:
+          - not_null
+      - name: depth_rank
+        description: "Rank by depth within run (1 = deepest)"
+        tests:
+          - not_null
+      - name: depth_zscore
+        description: "Z-score of depth relative to run distribution"
+        tests:
+          - not_null
+      - name: file_rank
+        description: "Rank by recursive file count within run (1 = most files)"
+        tests:
+          - not_null
+      - name: file_zscore
+        description: "Z-score of file count relative to run distribution"
+        tests:
+          - not_null
+      - name: size_rank
+        description: "Rank by recursive size within run (1 = largest)"
+        tests:
+          - not_null
+      - name: size_zscore
+        description: "Z-score of size relative to run distribution"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (≥p99 or zscore>3), high (≥p95 or zscore>2), medium (≥p75 or zscore>1), low"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+      - name: risk_level_numeric
+        description: "Numeric risk level: 1=low, 2=medium, 3=high, 4=critical"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+      - name: is_deeply_nested
+        description: "True if depth is at or above p75"
+        tests:
+          - not_null
+      - name: is_file_heavy
+        description: "True if recursive file count is at or above p75"
+        tests:
+          - not_null
+      - name: is_size_heavy
+        description: "True if recursive size is at or above p75"
+        tests:
+          - not_null
+      - name: has_size_concentration
+        description: "True if size gini coefficient > 0.5"
+        tests:
+          - not_null
+      - name: run_total_directories
+        description: "Total directories in the run for context"
+        tests:
+          - not_null
+
+  - name: mart_scc_size_hotspots
+    description: "File-level size and complexity hotspots identifying large files, high complexity density, and refactoring candidates from SCC"
+    columns:
+      - name: run_pk
+        description: "SCC tool run primary key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: collection_run_id
+        description: "Collection run identifier"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('lz', 'lz_collection_runs')
+                field: collection_run_id
+      - name: file_id
+        description: "File identifier from layout-scanner"
+        tests:
+          - not_null
+      - name: directory_id
+        description: "Directory identifier for file location"
+        tests:
+          - not_null
+      - name: relative_path
+        description: "Repository-relative file path"
+        tests:
+          - not_null
+      - name: language
+        description: "Programming language detected by SCC"
+        tests:
+          - not_null
+      - name: lines_total
+        description: "Total lines in file (code + comments + blank)"
+        tests:
+          - not_null
+      - name: code_lines
+        description: "Lines of executable code"
+        tests:
+          - not_null
+      - name: comment_lines
+        description: "Lines of comments"
+        tests:
+          - not_null
+      - name: blank_lines
+        description: "Blank lines"
+        tests:
+          - not_null
+      - name: bytes
+        description: "File size in bytes"
+        tests:
+          - not_null
+      - name: complexity
+        description: "Total cyclomatic complexity for file"
+        tests:
+          - not_null
+      - name: complexity_density
+        description: "Complexity per line of code"
+      - name: uloc
+        description: "Unique lines of code"
+        tests:
+          - not_null
+      - name: comment_ratio
+        description: "Ratio of comments to total lines"
+        tests:
+          - not_null
+      - name: code_ratio
+        description: "Ratio of code to total lines"
+        tests:
+          - not_null
+      - name: bytes_per_loc
+        description: "Bytes per line of code"
+      - name: is_minified
+        description: "True if file is minified"
+        tests:
+          - not_null
+      - name: is_generated
+        description: "True if file is generated"
+        tests:
+          - not_null
+      - name: lines_rank
+        description: "Rank by total lines within run (1 = most lines)"
+        tests:
+          - not_null
+      - name: lines_zscore
+        description: "Z-score of lines relative to run distribution"
+        tests:
+          - not_null
+      - name: complexity_rank
+        description: "Rank by complexity within run (1 = highest complexity)"
+        tests:
+          - not_null
+      - name: complexity_zscore
+        description: "Z-score of complexity relative to run distribution"
+        tests:
+          - not_null
+      - name: density_rank
+        description: "Rank by complexity density within run (1 = highest density)"
+        tests:
+          - not_null
+      - name: density_zscore
+        description: "Z-score of complexity density relative to run distribution"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (>1000 lines or >50 complexity or >0.20 density), high (>500 or >30 or >0.10), medium (>200 or >15 or >0.05), low"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - low
+                  - medium
+                  - high
+                  - critical
+      - name: risk_level_numeric
+        description: "Numeric risk level: 1=low, 2=medium, 3=high, 4=critical"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+      - name: relative_position
+        description: "Statistical position relative to run: normal, above_median, p90_outlier, p95_outlier, p99_outlier"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - normal
+                  - above_median
+                  - p90_outlier
+                  - p95_outlier
+                  - p99_outlier
+      - name: is_medium_plus
+        description: "True if file meets medium or higher risk threshold"
+        tests:
+          - not_null
+      - name: is_high_plus
+        description: "True if file meets high or higher risk threshold"
+        tests:
+          - not_null
+      - name: is_critical
+        description: "True if file meets critical risk threshold"
+        tests:
+          - not_null
+      - name: run_lines_avg
+        description: "Average lines per file in the run"
+        tests:
+          - not_null
+      - name: run_lines_stddev
+        description: "Standard deviation of lines in the run"
+      - name: run_lines_p50
+        description: "50th percentile (median) of lines in the run"
+        tests:
+          - not_null
+      - name: run_lines_p75
+        description: "75th percentile of lines in the run"
+        tests:
+          - not_null
+      - name: run_lines_p90
+        description: "90th percentile of lines in the run"
+        tests:
+          - not_null
+      - name: run_lines_p95
+        description: "95th percentile of lines in the run"
+        tests:
+          - not_null
+      - name: run_lines_p99
+        description: "99th percentile of lines in the run"
+        tests:
+          - not_null
+      - name: run_total_files
+        description: "Total files in the run for context"
+        tests:
+          - not_null
