@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-07T11:37:21.297776+00:00",
+  "generated_at": "2026-02-08T08:53:48.217891+00:00",
   "summary": {
     "failed": 0,
     "passed": 1,
@@ -12,7 +12,7 @@
           "check_id": "run.analyze",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/git-sizer/evaluation/results/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/git-fame/outputs/f23f9a48-fb85-4c81-8e04-da14641d23b3/output.json"
           ],
           "message": "Pre-existing analysis output found",
           "severity": "critical",
@@ -24,7 +24,7 @@
           "check_id": "run.evaluate",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/git-sizer/evaluation/scorecard.md"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/git-fame/evaluation/scorecard.md"
           ],
           "message": "Pre-existing evaluation output found",
           "severity": "high",
@@ -34,7 +34,7 @@
         },
         {
           "check_id": "evaluation.quality",
-          "duration_ms": 0.3,
+          "duration_ms": 0.14,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -48,7 +48,7 @@
           "check_id": "run.evaluate_llm",
           "duration_ms": 0.0,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/git-sizer/evaluation/llm/results/llm_evaluation.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/git-fame/evaluation/results/llm_evaluation.json"
           ],
           "message": "Pre-existing LLM evaluation output found",
           "severity": "medium",
@@ -58,9 +58,9 @@
         },
         {
           "check_id": "evaluation.llm_quality",
-          "duration_ms": 0.06,
+          "duration_ms": 0.16,
           "evidence": [
-            "WEAK_PASS"
+            "PASS"
           ],
           "message": "LLM evaluation decision meets threshold",
           "severity": "medium",
@@ -70,9 +70,9 @@
         },
         {
           "check_id": "output.load",
-          "duration_ms": 0.05,
+          "duration_ms": 0.33,
           "evidence": [
-            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/git-sizer/evaluation/results/output.json"
+            "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/git-fame/outputs/f23f9a48-fb85-4c81-8e04-da14641d23b3/output.json"
           ],
           "message": "Output JSON loaded",
           "severity": "high",
@@ -82,7 +82,7 @@
         },
         {
           "check_id": "output.paths",
-          "duration_ms": 0.18,
+          "duration_ms": 4.5,
           "evidence": [],
           "message": "Path values are repo-relative",
           "severity": "high",
@@ -92,7 +92,7 @@
         },
         {
           "check_id": "output.data_completeness",
-          "duration_ms": 0.02,
+          "duration_ms": 0.05,
           "evidence": [],
           "message": "Data completeness validated",
           "severity": "high",
@@ -112,7 +112,7 @@
         },
         {
           "check_id": "output.required_fields",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [],
           "message": "Required metadata fields present",
           "severity": "high",
@@ -122,7 +122,7 @@
         },
         {
           "check_id": "output.schema_version",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [
             "1.0.0"
           ],
@@ -134,10 +134,10 @@
         },
         {
           "check_id": "output.tool_name_match",
-          "duration_ms": 0.01,
+          "duration_ms": 0.02,
           "evidence": [
-            "git-sizer",
-            "git-sizer"
+            "git-fame",
+            "git-fame"
           ],
           "message": "Tool name matches data.tool",
           "severity": "low",
@@ -147,7 +147,7 @@
         },
         {
           "check_id": "output.metadata_consistency",
-          "duration_ms": 0.04,
+          "duration_ms": 0.17,
           "evidence": [],
           "message": "Metadata formats are consistent",
           "severity": "medium",
@@ -157,7 +157,7 @@
         },
         {
           "check_id": "schema.version_alignment",
-          "duration_ms": 0.1,
+          "duration_ms": 0.35,
           "evidence": [
             "1.0.0"
           ],
@@ -169,7 +169,7 @@
         },
         {
           "check_id": "output.schema_validate",
-          "duration_ms": 174.85,
+          "duration_ms": 182.07,
           "evidence": [],
           "message": "Output validates against schema (venv)",
           "severity": "critical",
@@ -179,7 +179,7 @@
         },
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.75,
+          "duration_ms": 0.35,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -189,7 +189,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.37,
+          "duration_ms": 0.24,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -199,7 +199,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.08,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -209,7 +209,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.53,
+          "duration_ms": 0.32,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -219,7 +219,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.22,
+          "duration_ms": 0.2,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -231,9 +231,9 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.12,
+          "duration_ms": 0.13,
           "evidence": [],
-          "message": "analyze target uses output directory argument",
+          "message": "analyze target produces output.json",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -241,7 +241,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.16,
+          "duration_ms": 0.15,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -251,7 +251,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.08,
+          "duration_ms": 0.09,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -261,7 +261,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.23,
+          "duration_ms": 1.15,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -271,7 +271,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.19,
+          "duration_ms": 0.25,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -281,7 +281,7 @@
         },
         {
           "check_id": "evaluation.check_modules",
-          "duration_ms": 0.07,
+          "duration_ms": 0.11,
           "evidence": [],
           "message": "Check modules present",
           "severity": "medium",
@@ -291,7 +291,7 @@
         },
         {
           "check_id": "evaluation.llm_prompts",
-          "duration_ms": 0.06,
+          "duration_ms": 0.09,
           "evidence": [],
           "message": "LLM prompts present",
           "severity": "medium",
@@ -301,14 +301,17 @@
         },
         {
           "check_id": "evaluation.llm_judge_count",
-          "duration_ms": 0.2,
+          "duration_ms": 0.26,
           "evidence": [
-            "integration_fit.py",
-            "size_accuracy.py",
-            "actionability.py",
-            "threshold_quality.py"
+            "integration_readiness.py",
+            "concentration_metrics.py",
+            "evidence_quality.py",
+            "authorship_quality.py",
+            "utils.py",
+            "bus_factor_accuracy.py",
+            "output_completeness.py"
           ],
-          "message": "LLM judge count meets minimum (4 >= 4)",
+          "message": "LLM judge count meets minimum (7 >= 4)",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -316,11 +319,11 @@
         },
         {
           "check_id": "evaluation.synthetic_context",
-          "duration_ms": 8.02,
+          "duration_ms": 17.48,
           "evidence": [
             "base.py: evaluation_mode parameter present",
-            "primary judge: size_accuracy.py",
-            "prompt: size_accuracy.md has all placeholders"
+            "primary judge: authorship_quality.py",
+            "prompt: authorship_quality.md has all placeholders"
           ],
           "message": "Synthetic evaluation context pattern implemented correctly",
           "severity": "high",
@@ -330,9 +333,16 @@
         },
         {
           "check_id": "evaluation.ground_truth",
-          "duration_ms": 0.18,
-          "evidence": [],
-          "message": "Ground truth covers synthetic repos",
+          "duration_ms": 0.14,
+          "evidence": [
+            "synthetic.json",
+            "multi-author.json",
+            "bus-factor-1.json",
+            "balanced.json",
+            "multi-branch.json",
+            "single-author.json"
+          ],
+          "message": "Ground truth files present",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -340,7 +350,7 @@
         },
         {
           "check_id": "evaluation.scorecard",
-          "duration_ms": 0.01,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "Scorecard present",
           "severity": "low",
@@ -350,7 +360,7 @@
         },
         {
           "check_id": "evaluation.programmatic_exists",
-          "duration_ms": 0.02,
+          "duration_ms": 0.03,
           "evidence": [
             "evaluation/results/evaluation_report.json"
           ],
@@ -362,15 +372,15 @@
         },
         {
           "check_id": "evaluation.programmatic_schema",
-          "duration_ms": 0.1,
+          "duration_ms": 0.11,
           "evidence": [
             "timestamp",
-            "decision",
-            "score",
-            "analysis_path",
-            "ground_truth_dir",
+            "tool",
+            "version",
+            "overall_score",
+            "classification",
             "summary",
-            "checks"
+            "dimensions"
           ],
           "message": "Programmatic evaluation schema valid",
           "severity": "high",
@@ -380,7 +390,7 @@
         },
         {
           "check_id": "evaluation.programmatic_quality",
-          "duration_ms": 0.08,
+          "duration_ms": 0.09,
           "evidence": [
             "STRONG_PASS"
           ],
@@ -392,7 +402,7 @@
         },
         {
           "check_id": "evaluation.llm_exists",
-          "duration_ms": 0.02,
+          "duration_ms": 0.03,
           "evidence": [
             "evaluation/results/llm_evaluation.json"
           ],
@@ -404,18 +414,18 @@
         },
         {
           "check_id": "evaluation.llm_schema",
-          "duration_ms": 0.11,
+          "duration_ms": 0.14,
           "evidence": [
             "timestamp",
-            "analysis_path",
             "model",
-            "trace_id",
-            "judges",
-            "summary",
-            "programmatic_input",
             "decision",
             "score",
-            "dimensions"
+            "programmatic_input",
+            "dimensions",
+            "summary",
+            "run_id",
+            "total_score",
+            "average_confidence"
           ],
           "message": "LLM evaluation schema valid",
           "severity": "medium",
@@ -425,10 +435,10 @@
         },
         {
           "check_id": "evaluation.llm_includes_programmatic",
-          "duration_ms": 0.09,
+          "duration_ms": 0.13,
           "evidence": [
-            "file=evaluation/results/evaluation_report.json",
-            "decision=STRONG_PASS"
+            "file=/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/tools/git-fame/evaluation/results/evaluation_report.json",
+            "decision=MARGINAL_PASS"
           ],
           "message": "LLM evaluation includes programmatic input",
           "severity": "medium",
@@ -438,9 +448,9 @@
         },
         {
           "check_id": "evaluation.llm_decision_quality",
-          "duration_ms": 0.08,
+          "duration_ms": 0.11,
           "evidence": [
-            "STRONG_PASS"
+            "PASS"
           ],
           "message": "LLM evaluation passed",
           "severity": "medium",
@@ -450,9 +460,12 @@
         },
         {
           "check_id": "evaluation.rollup_validation",
-          "duration_ms": 0.2,
+          "duration_ms": 0.44,
           "evidence": [
-            "src/sot-engine/dbt/tests/test_rollup_git_sizer_repo_level_only.sql"
+            "src/tools/git-fame/tests/scripts/test_analyze.py",
+            "src/tools/git-fame/tests/scripts/test_authorship_accuracy_checks.py",
+            "src/tools/git-fame/tests/scripts/test_output_quality_checks.py",
+            "src/tools/git-fame/tests/scripts/test_reliability_checks.py"
           ],
           "message": "Rollup Validation declared with valid tests",
           "severity": "high",
@@ -462,7 +475,7 @@
         },
         {
           "check_id": "adapter.compliance",
-          "duration_ms": 132.75,
+          "duration_ms": 146.3,
           "evidence": [],
           "message": "Adapter exposes schema, LZ contract, and validation hooks",
           "severity": "info",
@@ -472,7 +485,7 @@
         },
         {
           "check_id": "adapter.schema_alignment",
-          "duration_ms": 2.3,
+          "duration_ms": 3.19,
           "evidence": [],
           "message": "TABLE_DDL matches schema.sql",
           "severity": "high",
@@ -482,9 +495,9 @@
         },
         {
           "check_id": "adapter.integration",
-          "duration_ms": 76.26,
+          "duration_ms": 76.58,
           "evidence": [
-            "Fixture: git_sizer_output.json"
+            "Fixture: git_fame_output.json"
           ],
           "message": "Adapter successfully persisted fixture data",
           "severity": "high",
@@ -494,11 +507,11 @@
         },
         {
           "check_id": "adapter.quality_rules_coverage",
-          "duration_ms": 1.28,
+          "duration_ms": 0.98,
           "evidence": [
-            "health_grade_valid",
-            "metrics_non_negative",
-            "violation_levels"
+            "hhi_valid",
+            "ownership_sums_100",
+            "bus_factor_valid"
           ],
           "message": "All 3 quality rules have implementation coverage",
           "severity": "info",
@@ -508,9 +521,9 @@
         },
         {
           "check_id": "sot.adapter_registered",
-          "duration_ms": 0.73,
+          "duration_ms": 0.32,
           "evidence": [],
-          "message": "Adapter GitSizerAdapter properly registered in adapters/__init__.py",
+          "message": "Adapter GitFameAdapter properly registered in adapters/__init__.py",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -518,9 +531,9 @@
         },
         {
           "check_id": "sot.schema_table",
-          "duration_ms": 0.72,
+          "duration_ms": 0.37,
           "evidence": [
-            "Found 3 table(s)"
+            "Found 2 table(s)"
           ],
           "message": "Schema tables found for tool",
           "severity": "high",
@@ -530,9 +543,9 @@
         },
         {
           "check_id": "sot.orchestrator_wired",
-          "duration_ms": 0.18,
+          "duration_ms": 0.2,
           "evidence": [],
-          "message": "Tool 'git-sizer' wired in TOOL_INGESTION_CONFIGS",
+          "message": "Tool 'git-fame' wired in TOOL_INGESTION_CONFIGS",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -540,11 +553,10 @@
         },
         {
           "check_id": "sot.dbt_staging_model",
-          "duration_ms": 0.48,
+          "duration_ms": 0.3,
           "evidence": [
-            "stg_lz_git_sizer_metrics.sql",
-            "stg_lz_git_sizer_violations.sql",
-            "stg_lz_git_sizer_lfs_candidates.sql"
+            "stg_lz_git_fame_authors.sql",
+            "stg_lz_git_fame_summary.sql"
           ],
           "message": "dbt staging model(s) found",
           "severity": "high",
@@ -554,11 +566,10 @@
         },
         {
           "check_id": "dbt.model_coverage",
-          "duration_ms": 0.25,
+          "duration_ms": 0.26,
           "evidence": [
-            "stg_lz_git_sizer_metrics.sql",
-            "stg_lz_git_sizer_violations.sql",
-            "stg_lz_git_sizer_lfs_candidates.sql"
+            "stg_lz_git_fame_authors.sql",
+            "stg_lz_git_fame_summary.sql"
           ],
           "message": "dbt models present for tool",
           "severity": "high",
@@ -568,11 +579,10 @@
         },
         {
           "check_id": "entity.repository_alignment",
-          "duration_ms": 9.63,
+          "duration_ms": 14.52,
           "evidence": [
-            "GitSizerMetric",
-            "GitSizerViolation",
-            "GitSizerLfsCandidate"
+            "GitFameAuthor",
+            "GitFameSummary"
           ],
           "message": "All entities have aligned repositories",
           "severity": "high",
@@ -582,7 +592,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 0.44,
+          "duration_ms": 1.85,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -592,9 +602,9 @@
         },
         {
           "check_id": "sql.cross_tool_join_patterns",
-          "duration_ms": 30.92,
+          "duration_ms": 36.71,
           "evidence": [],
-          "message": "Cross-tool SQL joins use correct patterns (170 files checked)",
+          "message": "Cross-tool SQL joins use correct patterns (200 files checked)",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -602,7 +612,7 @@
         },
         {
           "check_id": "test.coverage_threshold",
-          "duration_ms": 0.11,
+          "duration_ms": 0.46,
           "evidence": [
             "coverage.json not found"
           ],
@@ -613,7 +623,7 @@
           "stdout_summary": null
         }
       ],
-      "name": "git-sizer",
+      "name": "git-fame",
       "status": "pass"
     }
   ],

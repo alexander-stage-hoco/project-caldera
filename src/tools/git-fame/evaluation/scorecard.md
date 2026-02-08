@@ -1,12 +1,12 @@
 # git-fame Evaluation Scorecard
 
-**Generated**: 2026-02-06T16:02:59.742240+00:00
+**Generated**: 2026-02-08T09:03:01.052748+00:00
 **Tool**: git-fame v3.1.1
 
 ## Overall Score
 
-**Score**: 3.69/5.0
-**Classification**: MARGINAL_PASS
+**Score**: 5.0/5.0
+**Classification**: STRONG_PASS
 
 ## Dimension Scores
 
@@ -14,10 +14,10 @@
 |-----------|--------|-------|--------|
 | Output Quality | 20% | 5.0/5.0 | PASS |
 | Authorship Accuracy | 20% | 5.0/5.0 | PASS |
-| Reliability | 15% | 2.5/5.0 | FAIL |
-| Performance | 15% | 3.75/5.0 | MARGINAL |
+| Reliability | 15% | 5.0/5.0 | PASS |
+| Performance | 15% | 5.0/5.0 | PASS |
 | Integration Fit | 15% | 5.0/5.0 | PASS |
-| Installation | 15% | 0.0/5.0 | FAIL |
+| Installation | 15% | 5.0/5.0 | PASS |
 
 ## Detailed Results
 
@@ -49,19 +49,19 @@
 
 | Check | Status | Message |
 |-------|--------|---------|
-| RL-1 | FAIL | Run 1 failed: /Users/alexander.stage/Projects/2026-01-24-Pro... |
+| RL-1 | PASS | Two consecutive runs produced identical output |
 | RL-2 | PASS | No empty repository to test (skipped) |
-| RL-3 | FAIL | Single-author repo failed: /Users/alexander.stage/Projects/2... |
+| RL-3 | PASS | Single-author repository handled correctly |
 | RL-4 | PASS | No rename test repository available (git-fame uses git blame... |
 
 ### Performance
 
 | Check | Status | Message |
 |-------|--------|---------|
-| PF-1 | PASS | Completed in 0.02s (threshold: 5.0s) |
-| PF-2 | PASS | Completed in 0.02s (threshold: 30.0s) |
-| PF-3 | FAIL | Execution failed: /Users/alexander.stage/Projects/2026-01-24... |
-| PF-4 | PASS | Second run 5.6% faster (0.02s -> 0.02s) |
+| PF-1 | PASS | Completed in 0.82s (threshold: 5.0s) |
+| PF-2 | PASS | Completed in 0.74s (threshold: 30.0s) |
+| PF-3 | PASS | Memory usage: 22.8MB (threshold: 500.0MB) |
+| PF-4 | PASS | Second run 16.8% slower (0.76s -> 0.88s) |
 
 ### Integration Fit
 
@@ -76,5 +76,5 @@
 
 | Check | Status | Message |
 |-------|--------|---------|
-| IN-1 | FAIL | git-fame not properly installed: /Users/alexander.stage/Proj... |
-| IN-2 | FAIL | git-fame --help failed with code 1: /Users/alexander.stage/P... |
+| IN-1 | PASS | git-fame installed, version: 3.1.1 |
+| IN-2 | PASS | git-fame --help returns valid help text |

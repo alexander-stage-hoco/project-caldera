@@ -297,7 +297,11 @@ class TrivyAdapter(BaseAdapter):
         layout_run_pk: int,
         targets: list[dict],
     ) -> Iterable[TrivyTarget]:
-        """Map Trivy targets to TrivyTarget entities."""
+        """Map Trivy targets to TrivyTarget entities with deduplication.
+
+        Deduplicates by target_key to match primary key constraint.
+        """
+        seen: set[str] = set()
         for target in targets:
             raw_path = target.get("path", "")
             if not raw_path:
@@ -306,6 +310,12 @@ class TrivyAdapter(BaseAdapter):
             relative_path = self._normalize_path(raw_path)
             target_type = target.get("type")
             target_key = self._generate_target_key(relative_path, target_type)
+
+            # Deduplicate by target_key
+            if target_key in seen:
+                self._log(f"WARN: skipping duplicate target: {relative_path}")
+                continue
+            seen.add(target_key)
 
             # Try to link to layout for file_id resolution (best-effort)
             file_id = None
@@ -337,7 +347,11 @@ class TrivyAdapter(BaseAdapter):
         run_pk: int,
         vulnerabilities: list[dict],
     ) -> Iterable[TrivyVulnerability]:
-        """Map Trivy vulnerabilities to TrivyVulnerability entities."""
+        """Map Trivy vulnerabilities to TrivyVulnerability entities with deduplication.
+
+        Deduplicates by (target_key, vulnerability_id, package_name) to match primary key.
+        """
+        seen: set[tuple[str, str, str]] = set()
         for vuln in vulnerabilities:
             # Generate target_key from the vulnerability's target path
             target_path = vuln.get("target", "")
@@ -347,11 +361,21 @@ class TrivyAdapter(BaseAdapter):
                 target_type,
             )
 
+            vuln_id = vuln.get("id", "")
+            package_name = vuln.get("package", "")
+
+            # Deduplicate by (target_key, vulnerability_id, package_name)
+            key = (target_key, vuln_id, package_name)
+            if key in seen:
+                self._log(f"WARN: skipping duplicate vulnerability: {vuln_id} in {package_name}")
+                continue
+            seen.add(key)
+
             yield TrivyVulnerability(
                 run_pk=run_pk,
                 target_key=target_key,
-                vulnerability_id=vuln.get("id", ""),
-                package_name=vuln.get("package", ""),
+                vulnerability_id=vuln_id,
+                package_name=package_name,
                 installed_version=vuln.get("installed_version"),
                 fixed_version=vuln.get("fixed_version"),
                 severity=vuln.get("severity"),
@@ -368,13 +392,35 @@ class TrivyAdapter(BaseAdapter):
         layout_run_pk: int,
         misconfigs: list[dict],
     ) -> Iterable[TrivyIacMisconfig]:
-        """Map Trivy IaC misconfigurations to TrivyIacMisconfig entities."""
+        """Map Trivy IaC misconfigurations to TrivyIacMisconfig entities with deduplication.
+
+        Deduplicates by (relative_path, misconfig_id, start_line) to match primary key.
+        """
+        seen: set[tuple[str, str, int]] = set()
         for misconfig in misconfigs:
             raw_path = misconfig.get("target", "")
             if not raw_path:
                 continue
 
             relative_path = self._normalize_path(raw_path)
+
+            # Trivy uses 0 for file-level issues; convert to -1 for primary key compatibility
+            # (DuckDB doesn't allow NULL in primary key columns)
+            start_line = misconfig.get("start_line")
+            end_line = misconfig.get("end_line")
+            if start_line is None or start_line == 0:
+                start_line = -1
+            if end_line is None or end_line == 0:
+                end_line = -1
+
+            misconfig_id = misconfig.get("id", "")
+
+            # Deduplicate by (relative_path, misconfig_id, start_line)
+            key = (relative_path, misconfig_id, start_line)
+            if key in seen:
+                self._log(f"WARN: skipping duplicate IaC misconfig: {misconfig_id} at {relative_path}:{start_line}")
+                continue
+            seen.add(key)
 
             # Try to link to layout for file_id resolution
             file_id = None
@@ -386,21 +432,12 @@ class TrivyAdapter(BaseAdapter):
             except KeyError:
                 self._log(f"WARN: IaC file not in layout: {relative_path}")
 
-            # Trivy uses 0 for file-level issues; convert to -1 for primary key compatibility
-            # (DuckDB doesn't allow NULL in primary key columns)
-            start_line = misconfig.get("start_line")
-            end_line = misconfig.get("end_line")
-            if start_line is None or start_line == 0:
-                start_line = -1
-            if end_line is None or end_line == 0:
-                end_line = -1
-
             yield TrivyIacMisconfig(
                 run_pk=run_pk,
                 file_id=file_id,
                 directory_id=directory_id,
                 relative_path=relative_path,
-                misconfig_id=misconfig.get("id", ""),
+                misconfig_id=misconfig_id,
                 severity=misconfig.get("severity"),
                 title=misconfig.get("title"),
                 description=misconfig.get("description"),

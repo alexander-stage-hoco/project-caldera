@@ -191,7 +191,11 @@ class PmdCpdAdapter(BaseAdapter):
     def _map_file_metrics(
         self, run_pk: int, layout_run_pk: int, files: Iterable[dict]
     ) -> Iterable[PmdCpdFileMetric]:
-        """Map file entries to PmdCpdFileMetric entities."""
+        """Map file entries to PmdCpdFileMetric entities with deduplication.
+
+        Deduplicates by file_id to match primary key constraint.
+        """
+        seen: set[str] = set()
         for file_entry in files:
             relative_path = self._normalize_path(file_entry.get("path", ""))
 
@@ -202,6 +206,12 @@ class PmdCpdAdapter(BaseAdapter):
             except KeyError:
                 self._log(f"WARN: skipping file not in layout: {relative_path}")
                 continue
+
+            # Deduplicate by file_id
+            if file_id in seen:
+                self._log(f"WARN: skipping duplicate file: {relative_path}")
+                continue
+            seen.add(file_id)
 
             yield PmdCpdFileMetric(
                 run_pk=run_pk,
@@ -218,12 +228,24 @@ class PmdCpdAdapter(BaseAdapter):
     def _map_duplications(
         self, run_pk: int, layout_run_pk: int, duplications: Iterable[dict]
     ) -> tuple[list[PmdCpdDuplication], list[PmdCpdOccurrence]]:
-        """Map duplication entries to PmdCpdDuplication and PmdCpdOccurrence entities."""
+        """Map duplication entries to PmdCpdDuplication and PmdCpdOccurrence entities.
+
+        Deduplicates duplications by clone_id and occurrences by (clone_id, file_id, line_start).
+        """
         dup_entities: list[PmdCpdDuplication] = []
         occ_entities: list[PmdCpdOccurrence] = []
+        seen_dups: set[str] = set()
+        seen_occs: set[tuple[str, str, int]] = set()
 
         for dup in duplications:
             clone_id = dup.get("clone_id", "")
+
+            # Deduplicate duplications by clone_id
+            if clone_id in seen_dups:
+                self._log(f"WARN: skipping duplicate clone_id: {clone_id}")
+                continue
+            seen_dups.add(clone_id)
+
             occurrences = dup.get("occurrences", [])
 
             # Determine if cross-file
@@ -254,6 +276,15 @@ class PmdCpdAdapter(BaseAdapter):
                     self._log(f"WARN: skipping occurrence in file not in layout: {relative_path}")
                     continue
 
+                line_start = occ.get("line_start", 1)
+
+                # Deduplicate occurrences by (clone_id, file_id, line_start)
+                occ_key = (clone_id, file_id, line_start)
+                if occ_key in seen_occs:
+                    self._log(f"WARN: skipping duplicate occurrence: {clone_id} at {relative_path}:{line_start}")
+                    continue
+                seen_occs.add(occ_key)
+
                 occ_entities.append(
                     PmdCpdOccurrence(
                         run_pk=run_pk,
@@ -261,7 +292,7 @@ class PmdCpdAdapter(BaseAdapter):
                         file_id=file_id,
                         directory_id=directory_id,
                         relative_path=relative_path,
-                        line_start=occ.get("line_start", 1),
+                        line_start=line_start,
                         line_end=occ.get("line_end", 1),
                         column_start=occ.get("column_start"),
                         column_end=occ.get("column_end"),

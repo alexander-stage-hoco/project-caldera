@@ -151,3 +151,62 @@ def check_required(value: object, field: str) -> Iterable[str]:
     if value in (None, ""):
         return [f"{field} is required"]
     return []
+
+
+def check_enum(value: object, allowed: set, field: str) -> Iterable[str]:
+    """Validate that value is one of the allowed enum values.
+
+    Args:
+        value: The value to check
+        allowed: Set of allowed values
+        field: Field name for error messages
+
+    Returns:
+        List of error messages (empty if valid)
+    """
+    if value is None:
+        return []
+    if value not in allowed:
+        return [f"{field} must be one of {sorted(allowed)}, got {value!r}"]
+    return []
+
+
+def check_bounded(
+    value: int | float | None,
+    min_val: int | float,
+    max_val: int | float,
+    field: str,
+) -> Iterable[str]:
+    """Validate that value is within bounds [min_val, max_val].
+
+    Args:
+        value: The numeric value to check
+        min_val: Minimum allowed value (inclusive)
+        max_val: Maximum allowed value (inclusive)
+        field: Field name for error messages
+
+    Returns:
+        List of error messages (empty if valid)
+    """
+    if value is None:
+        return []
+    if value < min_val or value > max_val:
+        return [f"{field} must be between {min_val} and {max_val}, got {value}"]
+    return []
+
+
+def check_positive(value: int | float | None, field: str) -> Iterable[str]:
+    """Validate that value is strictly positive (> 0).
+
+    Args:
+        value: The numeric value to check
+        field: Field name for error messages
+
+    Returns:
+        List of error messages (empty if valid)
+    """
+    if value is None:
+        return []
+    if value <= 0:
+        return [f"{field} must be > 0, got {value}"]
+    return []

@@ -381,6 +381,7 @@ models:
           - relationships:
               to: ref('stg_lz_tool_runs')
               field: run_pk
+              where: "symbol_run_pk is not null"
       - name: symbol_count
         description: "Number of symbols defined in file"
       - name: function_count
@@ -397,6 +398,7 @@ models:
           - relationships:
               to: ref('stg_lz_tool_runs')
               field: run_pk
+              where: "roslyn_run_pk is not null"
       - name: roslyn_violation_count
         description: "Total count of Roslyn analyzer violations in file"
       - name: roslyn_severity_critical
@@ -431,6 +433,7 @@ models:
           - relationships:
               to: ref('stg_lz_tool_runs')
               field: run_pk
+              where: "devskim_run_pk is not null"
       - name: devskim_issue_count
         description: "Total count of DevSkim security issues in file"
       - name: devskim_severity_critical
@@ -483,6 +486,7 @@ models:
           - relationships:
               to: ref('stg_lz_tool_runs')
               field: run_pk
+              where: "gitleaks_run_pk is not null"
       - name: gitleaks_secret_count
         description: "Total count of secrets detected in file"
       - name: gitleaks_severity_critical

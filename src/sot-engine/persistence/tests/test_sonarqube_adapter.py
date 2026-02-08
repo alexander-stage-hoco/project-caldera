@@ -165,7 +165,7 @@ def test_sonarqube_adapter_skips_files_not_in_layout(
     layout_repo: LayoutRepository,
     seed_layout,
 ) -> None:
-    """Verify adapter fails when files not present in layout run."""
+    """Verify adapter skips issues/metrics for files not present in layout run."""
     fixture_path = FIXTURE_DIR / "sonarqube_output.json"
     payload = json.loads(fixture_path.read_text())
 
@@ -186,9 +186,26 @@ def test_sonarqube_adapter_skips_files_not_in_layout(
         SonarqubeRepository(duckdb_conn),
         logger=logs.append,
     )
-    with pytest.raises(ValueError, match="file not in layout"):
-        adapter.persist(payload)
-    assert any("not in layout" in log for log in logs)
+    run_pk = adapter.persist(payload)
+
+    # Verify warning was logged for skipped file
+    assert any("not in layout" in log and "WARN" in log for log in logs)
+
+    # Verify only issues for src/app.py were inserted (2 issues)
+    issue_rows = duckdb_conn.execute(
+        "SELECT relative_path FROM lz_sonarqube_issues WHERE run_pk = ?",
+        [run_pk],
+    ).fetchall()
+    assert all(r[0] == "src/app.py" for r in issue_rows)
+    assert len(issue_rows) == 2  # issue-001 and issue-003 are for src/app.py
+
+    # Verify only metrics for src/app.py were inserted
+    metric_rows = duckdb_conn.execute(
+        "SELECT relative_path FROM lz_sonarqube_metrics WHERE run_pk = ?",
+        [run_pk],
+    ).fetchall()
+    assert all(r[0] == "src/app.py" for r in metric_rows)
+    assert len(metric_rows) == 1
 
 
 def test_sonarqube_adapter_normalizes_paths(

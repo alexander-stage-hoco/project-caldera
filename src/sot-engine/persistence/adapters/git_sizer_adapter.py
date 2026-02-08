@@ -7,6 +7,12 @@ from typing import Any, Callable
 from .base_adapter import BaseAdapter
 from ..entities import GitSizerLfsCandidate, GitSizerMetric, GitSizerViolation
 from ..repositories import GitSizerRepository, LayoutRepository, ToolRunRepository
+from ..validation import (
+    check_bounded,
+    check_enum,
+    check_non_negative,
+    check_required,
+)
 
 # Schema path points to the local git-sizer tool directory
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "git-sizer" / "schemas" / "output.schema.json"
@@ -239,30 +245,40 @@ class GitSizerAdapter(BaseAdapter):
         return run_pk
 
     def validate_quality(self, data: Any) -> None:
-        """Validate git-sizer data quality."""
+        """Validate git-sizer data quality.
+
+        Validates:
+        - health_grade is one of valid grades (A, A+, B, B+, C, C+, D, D+, F)
+        - All metrics are non-negative integers
+        - Violation levels are 1-4
+        - Violations have required metric field
+        """
         errors = []
 
-        # Health grade validation
-        grade = data.get("health_grade", "")
-        valid_grades = ("A", "A+", "B", "B+", "C", "C+", "D", "D+", "F")
-        if grade not in valid_grades:
-            errors.append(f"Invalid health_grade: {grade}, must be one of {valid_grades}")
+        # Health grade validation using enum helper
+        valid_grades = {"A", "A+", "B", "B+", "C", "C+", "D", "D+", "F"}
+        errors.extend(check_enum(data.get("health_grade"), valid_grades, "health_grade"))
+
+        # Duration validation
+        errors.extend(check_non_negative(data.get("duration_ms"), "duration_ms"))
 
         # Metrics validation - all should be non-negative
         metrics = data.get("metrics", {})
         for key, value in metrics.items():
-            if isinstance(value, (int, float)) and value < 0:
-                errors.append(f"Negative metric {key}: {value}")
+            if isinstance(value, (int, float)):
+                errors.extend(check_non_negative(value, f"metrics.{key}"))
 
-        # Violation level validation
+        # Violation validation
         for i, v in enumerate(data.get("violations", [])):
-            level = v.get("level", 0)
-            if not 1 <= level <= 4:
-                errors.append(f"violations[{i}].level must be 1-4, got {level}")
-            if not v.get("metric"):
-                errors.append(f"violations[{i}].metric is required")
+            prefix = f"violations[{i}]"
 
-        if errors:
-            for error in errors:
-                self._log(f"DATA_QUALITY_ERROR: {error}")
-            raise ValueError(f"git-sizer data quality validation failed ({len(errors)} errors)")
+            # Required fields
+            errors.extend(check_required(v.get("metric"), f"{prefix}.metric"))
+
+            # Level must be 1-4 (git-sizer severity levels)
+            errors.extend(check_bounded(v.get("level"), 1, 4, f"{prefix}.level"))
+
+            # raw_value should be non-negative
+            errors.extend(check_non_negative(v.get("raw_value"), f"{prefix}.raw_value"))
+
+        self._raise_quality_errors(errors)

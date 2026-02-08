@@ -7,6 +7,11 @@ from typing import Any, Callable
 from .base_adapter import BaseAdapter
 from ..entities import GitFameAuthor, GitFameSummary
 from ..repositories import GitFameRepository, LayoutRepository, ToolRunRepository
+from ..validation import (
+    check_bounded,
+    check_non_negative,
+    check_required,
+)
 
 # Schema path points to the local git-fame tool directory
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "git-fame" / "schemas" / "output.schema.json"
@@ -172,41 +177,68 @@ class GitFameAdapter(BaseAdapter):
         return run_pk
 
     def validate_quality(self, data: Any) -> None:
-        """Validate git-fame data quality."""
+        """Validate git-fame data quality.
+
+        Validates:
+        - Summary: hhi_index (0-1), bus_factor non-negative, author_count non-negative
+        - Authors: required name/author, ownership_pct (0-100), non-negative metrics
+        - Aggregate: ownership_pct values sum to ~100%
+        """
         errors = []
 
         summary = data.get("summary", {})
 
-        # HHI validation (0-1 range)
-        hhi = summary.get("hhi_index", 0.0)
-        if hhi < 0 or hhi > 1:
-            errors.append(f"Invalid hhi_index: {hhi}, must be between 0 and 1")
+        # Summary validations
+        errors.extend(check_bounded(summary.get("hhi_index"), 0, 1, "summary.hhi_index"))
+        errors.extend(check_non_negative(summary.get("bus_factor"), "summary.bus_factor"))
+        errors.extend(check_non_negative(summary.get("author_count"), "summary.author_count"))
+        errors.extend(check_non_negative(summary.get("total_loc"), "summary.total_loc"))
+        errors.extend(check_bounded(summary.get("top_author_pct"), 0, 100, "summary.top_author_pct"))
+        errors.extend(check_bounded(summary.get("top_two_pct"), 0, 100, "summary.top_two_pct"))
 
-        # Bus factor validation
+        # Bus factor vs author_count invariant
         bus_factor = summary.get("bus_factor", 0)
         author_count = summary.get("author_count", 0)
-        if bus_factor < 0:
-            errors.append(f"bus_factor must be non-negative, got {bus_factor}")
         if author_count > 0 and bus_factor > author_count:
             errors.append(f"bus_factor ({bus_factor}) cannot exceed author_count ({author_count})")
 
-        # Ownership percentage validation
+        # Per-author validation
         authors = data.get("authors", [])
+        for i, a in enumerate(authors):
+            prefix = f"authors[{i}]"
+
+            # Required fields - support both "name" (analyze.py) and "author" (fixture) field names
+            author_name = a.get("name", a.get("author"))
+            errors.extend(check_required(author_name, f"{prefix}.name/author"))
+
+            # Bounded metrics
+            errors.extend(check_bounded(a.get("ownership_pct"), 0, 100, f"{prefix}.ownership_pct"))
+
+            # Non-negative metrics
+            errors.extend(check_non_negative(
+                a.get("surviving_loc", a.get("loc")),
+                f"{prefix}.surviving_loc",
+            ))
+            errors.extend(check_non_negative(
+                a.get("commit_count", a.get("commits")),
+                f"{prefix}.commit_count",
+            ))
+            errors.extend(check_non_negative(
+                a.get("files_touched", a.get("files")),
+                f"{prefix}.files_touched",
+            ))
+            errors.extend(check_non_negative(
+                a.get("insertions_total", a.get("insertions")),
+                f"{prefix}.insertions_total",
+            ))
+            errors.extend(check_non_negative(
+                a.get("deletions_total", a.get("deletions")),
+                f"{prefix}.deletions_total",
+            ))
+
+        # Aggregate ownership validation
         total_ownership = sum(a.get("ownership_pct", 0) for a in authors)
         if authors and abs(total_ownership - 100.0) > 0.5:
             errors.append(f"ownership_pct values should sum to ~100%, got {total_ownership:.2f}%")
 
-        # Per-author validation
-        # Support both "name" (analyze.py) and "author" (fixture) field names
-        for i, a in enumerate(authors):
-            pct = a.get("ownership_pct", 0)
-            if pct < 0 or pct > 100:
-                errors.append(f"authors[{i}].ownership_pct must be 0-100, got {pct}")
-            author_name = a.get("name", a.get("author"))
-            if not author_name:
-                errors.append(f"authors[{i}].name/author is required")
-
-        if errors:
-            for error in errors:
-                self._log(f"DATA_QUALITY_ERROR: {error}")
-            raise ValueError(f"git-fame data quality validation failed ({len(errors)} errors)")
+        self._raise_quality_errors(errors)

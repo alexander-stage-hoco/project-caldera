@@ -15,10 +15,7 @@ from .base_adapter import BaseAdapter
 from ..entities import DependenseeProject, DependenseeProjectReference, DependenseePackageReference
 from ..repositories import DependenseeRepository, LayoutRepository, ToolRunRepository
 from common.path_normalization import is_repo_relative_path, normalize_file_path
-from ..validation import (
-    check_non_negative,
-    check_required,
-)
+from ..validation import check_non_negative, check_required
 
 # Path to the tool's JSON schema for validation
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "dependensee" / "schemas" / "output.schema.json"
@@ -140,28 +137,63 @@ class DependenseeAdapter(BaseAdapter):
         return run_pk
 
     def validate_quality(self, projects: Any) -> None:
-        """Validate data quality rules for dependensee output."""
+        """Validate data quality rules for dependensee output.
+
+        Validates:
+        - Project paths are repo-relative
+        - Required fields: name
+        - Project reference paths are repo-relative
+        - Package references have required name field
+        - Reference counts are non-negative
+        """
         errors = []
         for idx, entry in enumerate(projects):
+            prefix = f"project[{idx}]"
+
             # Path validation
             raw_path = entry.get("path", "")
             normalized = normalize_file_path(raw_path, self._repo_root)
             if not is_repo_relative_path(normalized):
-                errors.append(f"project[{idx}] path invalid: {raw_path} -> {normalized}")
+                errors.append(f"{prefix} path invalid: {raw_path} -> {normalized}")
 
             # Required fields
-            errors.extend(check_required(entry.get("name"), f"project[{idx}].name"))
+            errors.extend(check_required(entry.get("name"), f"{prefix}.name"))
 
             # Validate project references are repo-relative
-            for ref_idx, ref in enumerate(entry.get("project_references", [])):
+            project_refs = entry.get("project_references", [])
+            for ref_idx, ref in enumerate(project_refs):
                 ref_normalized = normalize_file_path(ref, self._repo_root)
                 if not is_repo_relative_path(ref_normalized):
-                    errors.append(f"project[{idx}].project_references[{ref_idx}] invalid path: {ref}")
+                    errors.append(f"{prefix}.project_references[{ref_idx}] invalid path: {ref}")
 
-        if errors:
-            for error in errors:
-                self._log(f"DATA_QUALITY_ERROR: {error}")
-            raise ValueError(f"dependensee data quality validation failed ({len(errors)} errors)")
+            # Validate package references
+            package_refs = entry.get("package_references", [])
+            for pkg_idx, pkg in enumerate(package_refs):
+                errors.extend(check_required(
+                    pkg.get("name"),
+                    f"{prefix}.package_references[{pkg_idx}].name",
+                ))
+
+            # Validate counts match actual lists (if counts are present)
+            stated_proj_count = entry.get("project_reference_count")
+            if stated_proj_count is not None:
+                errors.extend(check_non_negative(stated_proj_count, f"{prefix}.project_reference_count"))
+                if stated_proj_count != len(project_refs):
+                    errors.append(
+                        f"{prefix}.project_reference_count ({stated_proj_count}) "
+                        f"doesn't match actual count ({len(project_refs)})"
+                    )
+
+            stated_pkg_count = entry.get("package_reference_count")
+            if stated_pkg_count is not None:
+                errors.extend(check_non_negative(stated_pkg_count, f"{prefix}.package_reference_count"))
+                if stated_pkg_count != len(package_refs):
+                    errors.append(
+                        f"{prefix}.package_reference_count ({stated_pkg_count}) "
+                        f"doesn't match actual count ({len(package_refs)})"
+                    )
+
+        self._raise_quality_errors(errors)
 
     def _map_projects(
         self, run_pk: int, projects: Iterable[dict]

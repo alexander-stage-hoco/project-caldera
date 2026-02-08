@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import duckdb
@@ -10,6 +11,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from orchestrator import OrchestratorLogger, ingest_outputs, run_dbt
+from persistence.entities import CollectionRun
+from persistence.repositories import CollectionRunRepository
 
 
 def _load_schema(conn: duckdb.DuckDBPyConnection) -> None:
@@ -93,6 +96,20 @@ def test_orchestrator_end_to_end(tmp_path: Path) -> None:
     trivy_path.write_text(json.dumps(trivy_payload))
     layout_path = tmp_path / "layout.json"
     layout_path.write_text(json.dumps(layout_payload))
+
+    # Create collection run record (required for FK relationship tests)
+    collection_repo = CollectionRunRepository(conn)
+    collection_run = CollectionRun(
+        collection_run_id=run_id,
+        repo_id=repo_id,
+        run_id=run_id,
+        branch="main",
+        commit="a" * 40,
+        started_at=datetime.now(timezone.utc),
+        completed_at=None,
+        status="running",
+    )
+    collection_repo.insert(collection_run)
 
     ingest_outputs(
         conn,

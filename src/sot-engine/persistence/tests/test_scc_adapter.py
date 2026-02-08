@@ -146,12 +146,13 @@ def test_scc_adapter_normalizes_repo_root_prefix(
     ]
 
 
-def test_scc_adapter_rejects_duplicate_file_rows(
+def test_scc_adapter_deduplicates_file_rows(
     duckdb_conn,
     tool_run_repo: ToolRunRepository,
     layout_repo: LayoutRepository,
     seed_layout,
 ) -> None:
+    """Test that duplicate files are silently skipped during persistence."""
     fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "scc_output.json"
     payload = json.loads(fixture_path.read_text())
 
@@ -166,13 +167,26 @@ def test_scc_adapter_rejects_duplicate_file_rows(
         ],
     )
 
+    # Add duplicate entry
     payload["data"]["files"].append(payload["data"]["files"][0])
 
-    adapter = SccAdapter(tool_run_repo, layout_repo, SccRepository(duckdb_conn))
+    logs: list[str] = []
+    adapter = SccAdapter(
+        tool_run_repo,
+        layout_repo,
+        SccRepository(duckdb_conn),
+        logger=logs.append,
+    )
 
-    try:
-        adapter.persist(payload)
-    except Exception as exc:
-        assert "duplicate" in str(exc).lower() or "constraint" in str(exc).lower()
-    else:
-        raise AssertionError("Expected failure for duplicate file rows")
+    # Should succeed without error
+    run_pk = adapter.persist(payload)
+
+    # Verify duplicate was skipped and logged
+    assert any("duplicate" in log.lower() for log in logs)
+
+    # Verify only 2 unique files were inserted
+    rows = duckdb_conn.execute(
+        "SELECT file_id FROM lz_scc_file_metrics WHERE run_pk = ?",
+        [run_pk],
+    ).fetchall()
+    assert len(rows) == 2

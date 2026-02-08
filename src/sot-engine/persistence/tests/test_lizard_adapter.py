@@ -81,12 +81,13 @@ def test_lizard_adapter_raises_on_missing_layout(
         raise AssertionError("Expected KeyError for missing layout run")
 
 
-def test_lizard_adapter_rejects_duplicate_function_rows(
+def test_lizard_adapter_deduplicates_function_rows(
     duckdb_conn,
     tool_run_repo: ToolRunRepository,
     layout_repo: LayoutRepository,
     seed_layout,
 ) -> None:
+    """Test that duplicate functions are silently skipped during persistence."""
     fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "lizard_output.json"
     payload = json.loads(fixture_path.read_text())
 
@@ -101,17 +102,36 @@ def test_lizard_adapter_rejects_duplicate_function_rows(
         ],
     )
 
+    # Get original function count
+    original_func_count = sum(
+        len(f.get("functions", []) or [])
+        for f in payload["data"]["files"]
+    )
+
+    # Add duplicate function
     duplicate = payload["data"]["files"][0]["functions"][0]
     payload["data"]["files"][0]["functions"].append(duplicate)
 
-    adapter = LizardAdapter(tool_run_repo, layout_repo, LizardRepository(duckdb_conn))
+    logs: list[str] = []
+    adapter = LizardAdapter(
+        tool_run_repo,
+        layout_repo,
+        LizardRepository(duckdb_conn),
+        logger=logs.append,
+    )
 
-    try:
-        adapter.persist(payload)
-    except Exception as exc:
-        assert "duplicate" in str(exc).lower() or "constraint" in str(exc).lower()
-    else:
-        raise AssertionError("Expected failure for duplicate function rows")
+    # Should succeed without error
+    run_pk = adapter.persist(payload)
+
+    # Verify duplicate was skipped and logged
+    assert any("duplicate" in log.lower() for log in logs)
+
+    # Verify only original count of unique functions were inserted
+    rows = duckdb_conn.execute(
+        "SELECT function_name FROM lz_lizard_function_metrics WHERE run_pk = ?",
+        [run_pk],
+    ).fetchall()
+    assert len(rows) == original_func_count
 
 
 def test_lizard_adapter_normalizes_repo_root_prefix(

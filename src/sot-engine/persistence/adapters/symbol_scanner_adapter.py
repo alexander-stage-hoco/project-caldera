@@ -249,8 +249,8 @@ class SymbolScannerAdapter(BaseAdapter):
                     callee_file_id, _ = self._layout_repo.get_file_record(layout_run_pk, callee_path)
                     callee_file_path = callee_path
                 except KeyError:
-                    # External/unresolved - keep as None
-                    pass
+                    self._log(f"WARN: callee file not in layout (external): {callee_path}")
+                    # External/unresolved - keep callee_file_id as None
 
             caller_symbol = call.get("caller_symbol", "")
             callee_symbol = call.get("callee_symbol", "")

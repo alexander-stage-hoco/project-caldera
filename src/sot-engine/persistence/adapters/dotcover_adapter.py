@@ -281,8 +281,8 @@ class DotcoverAdapter(BaseAdapter):
                         layout_run_pk, relative_path
                     )
                 except KeyError:
-                    # File not in layout - may be generated or external
-                    pass
+                    self._log(f"WARN: type file not in layout: {relative_path}")
+                    # Continue with null file_id - valid for generated/external files
 
             yield DotcoverTypeCoverage(
                 run_pk=run_pk,

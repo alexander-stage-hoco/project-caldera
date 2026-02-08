@@ -141,9 +141,11 @@ class RoslynAdapter(BaseAdapter):
         for file_entry in files:
             relative_path = self._normalize_path(file_entry.get("path", ""))
 
-            # Skip external files (e.g., NuGet packages) that are outside the repo
-            if relative_path.startswith("Users/") or "/.nuget/" in relative_path or "\\.nuget\\" in relative_path:
-                self._log(f"WARN: skipping external file (NuGet package): {relative_path}")
+            # Skip external files (e.g., NuGet packages, node_modules) that are outside the repo
+            EXTERNAL_PATTERNS = {".nuget", "node_modules", "packages", ".dotnet"}
+            path_parts = set(relative_path.lower().replace("\\", "/").split("/"))
+            if path_parts & EXTERNAL_PATTERNS:
+                self._log(f"WARN: skipping external file: {relative_path}")
                 continue
 
             try:

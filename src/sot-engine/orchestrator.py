@@ -303,6 +303,7 @@ def ingest_outputs(
     dotcover_output: Optional[Path] = None,
     git_fame_output: Optional[Path] = None,
     dependensee_output: Optional[Path] = None,
+    git_sizer_output: Optional[Path] = None,
     schema_path: Path = None,
     logger: Optional[OrchestratorLogger] = None,
 ) -> None:
@@ -334,6 +335,7 @@ def ingest_outputs(
         "dotcover": dotcover_output,
         "git-fame": git_fame_output,
         "dependensee": dependensee_output,
+        "git-sizer": git_sizer_output,
     }
 
     # Ingest each tool using its configuration

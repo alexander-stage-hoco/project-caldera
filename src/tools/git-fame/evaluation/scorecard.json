@@ -1,16 +1,16 @@
 {
   "tool": "git-fame",
   "version": "3.1.1",
-  "generated_at": "2026-02-06T16:02:59.742240+00:00",
+  "generated_at": "2026-02-08T09:03:01.052748+00:00",
   "description": "Evaluation scorecard for git-fame git analytics",
   "summary": {
     "total_checks": 28,
-    "passed": 23,
-    "failed": 5,
-    "score": 0.738,
-    "score_percent": 73.8,
-    "normalized_score": 3.69,
-    "decision": "PASS"
+    "passed": 28,
+    "failed": 0,
+    "score": 1.0,
+    "score_percent": 100.0,
+    "normalized_score": 5.0,
+    "decision": "STRONG_PASS"
   },
   "dimensions": [
     {
@@ -126,16 +126,16 @@
       "name": "Reliability",
       "weight": 0.15,
       "total_checks": 4,
-      "passed": 2,
-      "failed": 2,
-      "score": 2.5,
-      "weighted_score": 0.38,
+      "passed": 4,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.75,
       "checks": [
         {
           "check_id": "RL-1",
           "name": "RL-1",
-          "passed": false,
-          "message": "Run 1 failed: /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/.venv/bin/python: No module named gitfame"
+          "passed": true,
+          "message": "Two consecutive runs produced identical output"
         },
         {
           "check_id": "RL-2",
@@ -146,8 +146,8 @@
         {
           "check_id": "RL-3",
           "name": "RL-3",
-          "passed": false,
-          "message": "Single-author repo failed: /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/.venv/bin/python: No module named gitfame"
+          "passed": true,
+          "message": "Single-author repository handled correctly"
         },
         {
           "check_id": "RL-4",
@@ -162,34 +162,34 @@
       "name": "Performance",
       "weight": 0.15,
       "total_checks": 4,
-      "passed": 3,
-      "failed": 1,
-      "score": 3.75,
-      "weighted_score": 0.56,
+      "passed": 4,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.75,
       "checks": [
         {
           "check_id": "PF-1",
           "name": "PF-1",
           "passed": true,
-          "message": "Completed in 0.02s (threshold: 5.0s)"
+          "message": "Completed in 0.82s (threshold: 5.0s)"
         },
         {
           "check_id": "PF-2",
           "name": "PF-2",
           "passed": true,
-          "message": "Completed in 0.02s (threshold: 30.0s)"
+          "message": "Completed in 0.74s (threshold: 30.0s)"
         },
         {
           "check_id": "PF-3",
           "name": "PF-3",
-          "passed": false,
-          "message": "Execution failed: /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/.venv/bin/python: No module named gitfame"
+          "passed": true,
+          "message": "Memory usage: 22.8MB (threshold: 500.0MB)"
         },
         {
           "check_id": "PF-4",
           "name": "PF-4",
           "passed": true,
-          "message": "Second run 5.6% faster (0.02s -> 0.02s)"
+          "message": "Second run 16.8% slower (0.76s -> 0.88s)"
         }
       ]
     },
@@ -234,22 +234,22 @@
       "name": "Installation",
       "weight": 0.15,
       "total_checks": 2,
-      "passed": 0,
-      "failed": 2,
-      "score": 0.0,
-      "weighted_score": 0.0,
+      "passed": 2,
+      "failed": 0,
+      "score": 5.0,
+      "weighted_score": 0.75,
       "checks": [
         {
           "check_id": "IN-1",
           "name": "IN-1",
-          "passed": false,
-          "message": "git-fame not properly installed: /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/.venv/bin/python: No module named gitfame"
+          "passed": true,
+          "message": "git-fame installed, version: 3.1.1"
         },
         {
           "check_id": "IN-2",
           "name": "IN-2",
-          "passed": false,
-          "message": "git-fame --help failed with code 1: /Users/alexander.stage/Projects/2026-01-24-Project-Caldera/.venv/bin/python: No module named gitfame"
+          "passed": true,
+          "message": "git-fame --help returns valid help text"
         }
       ]
     }

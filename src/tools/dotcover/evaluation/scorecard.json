@@ -1,7 +1,7 @@
 {
   "tool": "dotcover",
   "version": "1.0.0",
-  "generated_at": "2026-02-07T12:07:11.553100+00:00",
+  "generated_at": "2026-02-08T09:02:46.178031+00:00",
   "description": "Evaluation scorecard for dotCover code coverage analysis",
   "summary": {
     "total_checks": 19,
