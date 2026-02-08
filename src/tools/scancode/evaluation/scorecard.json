@@ -1,7 +1,7 @@
 {
   "tool": "scancode",
   "version": "1.0.0",
-  "generated_at": "2026-02-08T09:17:21.273515+00:00",
+  "generated_at": "2026-02-08T09:52:25.806354+00:00",
   "description": "Evaluation scorecard for ScanCode license analysis",
   "summary": {
     "total_checks": 192,

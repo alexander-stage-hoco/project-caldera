@@ -1,6 +1,6 @@
 # git-fame Evaluation Scorecard
 
-**Generated**: 2026-02-08T09:03:01.052748+00:00
+**Generated**: 2026-02-08T09:40:28.859020+00:00
 **Tool**: git-fame v3.1.1
 
 ## Overall Score
@@ -58,10 +58,10 @@
 
 | Check | Status | Message |
 |-------|--------|---------|
-| PF-1 | PASS | Completed in 0.82s (threshold: 5.0s) |
-| PF-2 | PASS | Completed in 0.74s (threshold: 30.0s) |
-| PF-3 | PASS | Memory usage: 22.8MB (threshold: 500.0MB) |
-| PF-4 | PASS | Second run 16.8% slower (0.76s -> 0.88s) |
+| PF-1 | PASS | Completed in 0.55s (threshold: 5.0s) |
+| PF-2 | PASS | Completed in 0.57s (threshold: 30.0s) |
+| PF-3 | PASS | Memory usage: 23.0MB (threshold: 500.0MB) |
+| PF-4 | PASS | Second run 16.1% slower (0.54s -> 0.62s) |
 
 ### Integration Fit
 

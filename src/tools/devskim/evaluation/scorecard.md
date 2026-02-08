@@ -1,6 +1,6 @@
 # DevSkim Evaluation Scorecard
 
-**Generated:** 2026-02-08T08:58:53.278914+00:00
+**Generated:** 2026-02-08T09:36:22.510100+00:00
 **Decision:** STRONG_PASS
 **Score:** 91.13%
 
