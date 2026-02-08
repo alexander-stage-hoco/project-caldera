@@ -29,6 +29,11 @@ from .sections.module_health import ModuleHealthSection
 from .sections.secrets import SecretsSection
 from .sections.tool_readiness import ToolReadinessSection
 from .sections.tool_coverage_dashboard import ToolCoverageDashboardSection
+from .sections.composite_risk import CompositeRiskSection
+from .sections.function_complexity import FunctionComplexitySection
+from .sections.coupling_analysis import CouplingAnalysisSection
+from .sections.authorship_risk import AuthorshipRiskSection
+from .sections.code_duplication import CodeDuplicationSection
 
 
 class InsightsGenerator:
@@ -39,13 +44,18 @@ class InsightsGenerator:
         "tool_readiness": ToolReadinessSection,
         "tool_coverage_dashboard": ToolCoverageDashboardSection,
         "executive_summary": ExecutiveSummarySection,
+        "composite_risk": CompositeRiskSection,
+        "function_complexity": FunctionComplexitySection,
         "repo_health": RepoHealthSection,
         "file_hotspots": FileHotspotsSection,
         "directory_analysis": DirectoryAnalysisSection,
         "vulnerabilities": VulnerabilitiesSection,
         "secrets": SecretsSection,
         "cross_tool": CrossToolSection,
+        "coupling_analysis": CouplingAnalysisSection,
+        "authorship_risk": AuthorshipRiskSection,
         "language_coverage": LanguageCoverageSection,
+        "code_duplication": CodeDuplicationSection,
         "distribution_insights": DistributionInsightsSection,
         "roslyn_violations": RoslynViolationsSection,
         "iac_misconfigs": IacMisconfigsSection,

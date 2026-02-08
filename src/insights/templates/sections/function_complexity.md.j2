@@ -1,0 +1,58 @@
+## Function Complexity Hotspots
+
+{% if not has_data %}
+*No function complexity data available for this run.*
+{% else %}
+
+### Summary
+
+Function-level cyclomatic complexity analysis. CCN thresholds: Critical >= 50, High >= 25, Medium >= 15.
+
+| Metric | Value |
+|--------|-------|
+| Critical (CCN >= 50) | {{ summary.critical_count }} |
+| High (CCN >= 25) | {{ summary.high_count }} |
+| Avg CCN (Top Functions) | {{ summary.avg_ccn }} |
+| Max CCN | {{ summary.max_ccn }} |
+| Files Affected | {{ summary.files_affected }} |
+
+{% if run_statistics and run_statistics.total_functions %}
+### Repository Statistics
+
+Complexity distribution across {{ run_statistics.total_functions }} functions:
+
+| Metric | Value |
+|--------|-------|
+| Average | {{ run_statistics.avg_ccn | round(1) }} |
+| P50 (Median) | {{ run_statistics.p50 | round(1) }} |
+| P75 | {{ run_statistics.p75 | round(1) }} |
+| P90 | {{ run_statistics.p90 | round(1) }} |
+| P95 | {{ run_statistics.p95 | round(1) }} |
+| P99 | {{ run_statistics.p99 | round(1) }} |
+{% endif %}
+
+{% if has_critical and critical_functions %}
+### Critical Complexity Functions
+
+Functions with CCN >= 50 requiring refactoring:
+
+| Function | File | CCN | NLOC | Params | Line |
+|----------|------|-----|------|--------|------|
+{% for func in critical_functions %}
+| {{ func.function_name }} | {{ func.relative_path }} | {{ func.ccn }} | {{ func.nloc }} | {{ func.parameter_count }} | {{ func.line_start }} |
+{% endfor %}
+{% endif %}
+
+{% if has_high and high_functions %}
+### High Complexity Functions
+
+Functions with CCN >= 25:
+
+| Function | File | CCN | NLOC | Params | Line |
+|----------|------|-----|------|--------|------|
+{% for func in high_functions[:15] %}
+| {{ func.function_name }} | {{ func.relative_path }} | {{ func.ccn }} | {{ func.nloc }} | {{ func.parameter_count }} | {{ func.line_start }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

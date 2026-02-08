@@ -1,0 +1,148 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Coupling Analysis</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No coupling data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Symbol-level fan-in/fan-out analysis. Total coupling = fan_in + fan_out.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">High coupling</div>
+            </div>
+            <div class="metric-card {% if summary.high_count > 0 %}warning{% endif %}">
+                <div class="label">High</div>
+                <div class="value">{{ summary.high_count }}</div>
+                <div class="sublabel">Elevated coupling</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Avg Fan-In</div>
+                <div class="value">{{ summary.avg_fan_in }}</div>
+                <div class="sublabel">Incoming deps</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Avg Fan-Out</div>
+                <div class="value">{{ summary.avg_fan_out }}</div>
+                <div class="sublabel">Outgoing deps</div>
+            </div>
+        </div>
+    </div>
+
+    {% if patterns %}
+    <div class="subsection">
+        <h3>Coupling Patterns</h3>
+        <p>Architectural patterns detected:</p>
+        <ul class="pattern-legend">
+            <li><strong>god_object:</strong> High fan-in and fan-out - central point of failure</li>
+            <li><strong>octopus:</strong> High fan-out only - depends on many components</li>
+            <li><strong>hub:</strong> High fan-in only - many components depend on this</li>
+            <li><strong>normal:</strong> Balanced coupling within expected range</li>
+        </ul>
+        <div class="pattern-grid">
+        {% for pattern, count in patterns %}
+            <div class="pattern-item">
+                <span class="pattern-name">{{ pattern }}</span>
+                <span class="pattern-count">{{ count }}</span>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if instability_zones %}
+    <div class="subsection">
+        <h3>Instability Distribution</h3>
+        <p>Instability = fan_out / (fan_in + fan_out). Lower is more stable.</p>
+        <div class="zone-grid">
+            <div class="zone-item stable">
+                <span class="zone-label">Stable (I &lt; 0.3)</span>
+                <span class="zone-count">{{ instability_zones.stable }}</span>
+            </div>
+            <div class="zone-item balanced">
+                <span class="zone-label">Balanced (0.3 - 0.7)</span>
+                <span class="zone-count">{{ instability_zones.balanced }}</span>
+            </div>
+            <div class="zone-item unstable">
+                <span class="zone-label">Unstable (I > 0.7)</span>
+                <span class="zone-count">{{ instability_zones.unstable }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if high_coupling_symbols %}
+    <div class="subsection">
+        <h3>High Coupling Symbols</h3>
+        <p>Symbols with critical or high coupling risk:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Type</th>
+                    <th>File</th>
+                    <th class="number">Fan-In</th>
+                    <th class="number">Fan-Out</th>
+                    <th class="number">Total</th>
+                    <th class="number">Instability</th>
+                    <th>Pattern</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for sym in high_coupling_symbols %}
+                <tr class="{{ 'critical-row' if sym.coupling_risk == 'critical' else 'warning-row' }}">
+                    <td class="truncate" title="{{ sym.symbol_name }}">{{ sym.symbol_name }}</td>
+                    <td>{{ sym.symbol_type or '-' }}</td>
+                    <td class="truncate" title="{{ sym.relative_path }}">{{ sym.relative_path | truncate_path }}</td>
+                    <td class="number">{{ sym.fan_in }}</td>
+                    <td class="number">{{ sym.fan_out }}</td>
+                    <td class="number">{{ sym.total_coupling }}</td>
+                    <td class="number">{{ sym.instability | round(2) }}</td>
+                    <td>{{ sym.coupling_pattern }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if symbols and not high_coupling_symbols %}
+    <div class="subsection">
+        <h3>Top Coupled Symbols</h3>
+        <p>Symbols with highest total coupling:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Type</th>
+                    <th>File</th>
+                    <th class="number">Fan-In</th>
+                    <th class="number">Fan-Out</th>
+                    <th class="number">Total</th>
+                    <th class="number">Instability</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for sym in symbols[:15] %}
+                <tr>
+                    <td class="truncate" title="{{ sym.symbol_name }}">{{ sym.symbol_name }}</td>
+                    <td>{{ sym.symbol_type or '-' }}</td>
+                    <td class="truncate" title="{{ sym.relative_path }}">{{ sym.relative_path | truncate_path }}</td>
+                    <td class="number">{{ sym.fan_in }}</td>
+                    <td class="number">{{ sym.fan_out }}</td>
+                    <td class="number">{{ sym.total_coupling }}</td>
+                    <td class="number">{{ sym.instability | round(2) }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

@@ -1,0 +1,139 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Composite Risk Analysis</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No composite risk data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Multi-dimensional risk assessment combining complexity, size, code smells, coverage gaps, and coupling.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">Score >= 90</div>
+            </div>
+            <div class="metric-card {% if summary.high_count > 0 %}warning{% endif %}">
+                <div class="label">High</div>
+                <div class="value">{{ summary.high_count }}</div>
+                <div class="sublabel">Score >= 70</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Medium</div>
+                <div class="value">{{ summary.medium_count }}</div>
+                <div class="sublabel">Score >= 50</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Active Dimensions</div>
+                <div class="value">{{ summary.dimensions_active }}/5</div>
+                <div class="sublabel">Data sources</div>
+            </div>
+        </div>
+    </div>
+
+    {% if risk_patterns %}
+    <div class="subsection">
+        <h3>Risk Patterns</h3>
+        <p>Distribution of risk patterns across analyzed files:</p>
+        <div class="pattern-grid">
+        {% for pattern, count in risk_patterns[:6] %}
+            <div class="pattern-item">
+                <span class="pattern-name">{{ pattern }}</span>
+                <span class="pattern-count">{{ count }}</span>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if has_critical and critical_hotspots %}
+    <div class="subsection">
+        <h3>Critical Risk Files</h3>
+        <p>Files with composite risk score >= 90 requiring immediate attention:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Pattern</th>
+                    <th class="number">Score</th>
+                    <th class="number">Max CCN</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Issues</th>
+                    <th class="number">Coverage</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in critical_hotspots %}
+                <tr class="critical-row">
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td>{{ file.risk_pattern }}</td>
+                    <td class="number">{{ file.composite_score | round(1) }}</td>
+                    <td class="number">{{ file.max_ccn or '-' }}</td>
+                    <td class="number">{{ file.loc_code | format_number if file.loc_code else '-' }}</td>
+                    <td class="number">{{ file.total_high_plus_issues or '-' }}</td>
+                    <td class="number">{{ (file.coverage_statement_pct | round(1)) ~ '%' if file.coverage_statement_pct else '-' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_high and high_hotspots %}
+    <div class="subsection">
+        <h3>High Risk Files</h3>
+        <p>Files with composite risk score >= 70:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Pattern</th>
+                    <th class="number">Score</th>
+                    <th class="number">Max CCN</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Issues</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in high_hotspots %}
+                <tr class="warning-row">
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td>{{ file.risk_pattern }}</td>
+                    <td class="number">{{ file.composite_score | round(1) }}</td>
+                    <td class="number">{{ file.max_ccn or '-' }}</td>
+                    <td class="number">{{ file.loc_code | format_number if file.loc_code else '-' }}</td>
+                    <td class="number">{{ file.total_high_plus_issues or '-' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Dimension Coverage</h3>
+        <p>Data availability across risk dimensions:</p>
+        <ul class="dimension-list">
+            <li class="{{ 'active' if dimensions_with_data.complexity else 'inactive' }}">
+                Complexity (CCN): {{ 'Available' if dimensions_with_data.complexity else 'No data' }}
+            </li>
+            <li class="{{ 'active' if dimensions_with_data.size else 'inactive' }}">
+                Size (LOC): {{ 'Available' if dimensions_with_data.size else 'No data' }}
+            </li>
+            <li class="{{ 'active' if dimensions_with_data.issues else 'inactive' }}">
+                Code Issues: {{ 'Available' if dimensions_with_data.issues else 'No data' }}
+            </li>
+            <li class="{{ 'active' if dimensions_with_data.coverage else 'inactive' }}">
+                Test Coverage: {{ 'Available' if dimensions_with_data.coverage else 'No data' }}
+            </li>
+            <li class="{{ 'active' if dimensions_with_data.coupling else 'inactive' }}">
+                Coupling: {{ 'Available' if dimensions_with_data.coupling else 'No data' }}
+            </li>
+        </ul>
+    </div>
+
+    {% endif %}
+</section>

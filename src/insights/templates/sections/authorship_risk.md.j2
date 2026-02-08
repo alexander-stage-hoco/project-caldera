@@ -1,0 +1,63 @@
+## Authorship Risk
+
+{% if not has_data %}
+*No authorship data available for this run.*
+{% else %}
+
+### Summary
+
+Bus factor and contributor concentration analysis. Low bus factor indicates knowledge silos.
+
+| Metric | Value |
+|--------|-------|
+| Bus Factor | {{ summary.bus_factor }} ({{ bus_factor_risk }} risk) |
+| Top Author Ownership | {{ summary.top_author_pct }}% |
+| Top Two Ownership | {{ summary.top_two_pct }}% |
+| Total Authors | {{ summary.author_count }} |
+| HHI Index | {{ summary.hhi_index }} |
+| Total LOC | {{ summary.total_loc }} |
+
+{% if is_critical %}
+### Critical Risk Warning
+
+{% if bus_factor_risk == 'critical' %}
+**Bus factor of {{ summary.bus_factor }}** means the project is at high risk if key contributors become unavailable.
+{% endif %}
+{% if concentration_risk == 'critical' and summary.single_author_dominated %}
+A **single author owns {{ summary.top_author_pct }}%** of the codebase, creating a single point of failure.
+{% endif %}
+{% endif %}
+
+### Risk Classification
+
+| Risk Type | Level |
+|-----------|-------|
+| Bus Factor Risk | {{ bus_factor_risk | capitalize }} |
+| Concentration Risk | {{ concentration_risk | capitalize }} |
+| Single Author Dominated | {{ 'Yes' if summary.single_author_dominated else 'No' }} |
+
+{% if bus_factor_members %}
+### Bus Factor Members
+
+Contributors who are critical to project continuity:
+
+| Author | LOC | Ownership | Commits | Files | Churn Ratio |
+|--------|-----|-----------|---------|-------|-------------|
+{% for author in bus_factor_members %}
+| {{ author.author_name }} | {{ author.surviving_loc }} | {{ author.ownership_pct | round(1) }}% | {{ author.commit_count }} | {{ author.files_touched }} | {{ author.churn_ratio | round(2) if author.churn_ratio else '-' }} |
+{% endfor %}
+{% endif %}
+
+{% if contributors and not bus_factor_members %}
+### Top Contributors
+
+Contributors by code ownership:
+
+| Author | LOC | Ownership | Commits | Files | Risk |
+|--------|-----|-----------|---------|-------|------|
+{% for author in contributors %}
+| {{ author.author_name }} | {{ author.surviving_loc }} | {{ author.ownership_pct | round(1) }}% | {{ author.commit_count }} | {{ author.files_touched }} | {{ author.risk_level | capitalize }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

@@ -15,6 +15,11 @@ from .roslyn_violations import RoslynViolationsSection
 from .iac_misconfigs import IacMisconfigsSection
 from .code_inequality import CodeInequalitySection
 from .module_health import ModuleHealthSection
+from .composite_risk import CompositeRiskSection
+from .function_complexity import FunctionComplexitySection
+from .coupling_analysis import CouplingAnalysisSection
+from .authorship_risk import AuthorshipRiskSection
+from .code_duplication import CodeDuplicationSection
 
 __all__ = [
     "BaseSection",
@@ -32,4 +37,9 @@ __all__ = [
     "IacMisconfigsSection",
     "CodeInequalitySection",
     "ModuleHealthSection",
+    "CompositeRiskSection",
+    "FunctionComplexitySection",
+    "CouplingAnalysisSection",
+    "AuthorshipRiskSection",
+    "CodeDuplicationSection",
 ]

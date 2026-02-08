@@ -1,0 +1,70 @@
+## Coupling Analysis
+
+{% if not has_data %}
+*No coupling data available for this run.*
+{% else %}
+
+### Summary
+
+Symbol-level fan-in/fan-out analysis. Total coupling = fan_in + fan_out.
+
+| Metric | Value |
+|--------|-------|
+| Critical Coupling | {{ summary.critical_count }} |
+| High Coupling | {{ summary.high_count }} |
+| Avg Fan-In | {{ summary.avg_fan_in }} |
+| Avg Fan-Out | {{ summary.avg_fan_out }} |
+| Max Total Coupling | {{ summary.max_coupling }} |
+
+{% if patterns %}
+### Coupling Patterns
+
+- **god_object:** High fan-in and fan-out - central point of failure
+- **octopus:** High fan-out only - depends on many components
+- **hub:** High fan-in only - many components depend on this
+- **normal:** Balanced coupling within expected range
+
+| Pattern | Count |
+|---------|-------|
+{% for pattern, count in patterns %}
+| {{ pattern }} | {{ count }} |
+{% endfor %}
+{% endif %}
+
+{% if instability_zones %}
+### Instability Distribution
+
+Instability = fan_out / (fan_in + fan_out). Lower is more stable.
+
+| Zone | Count |
+|------|-------|
+| Stable (I < 0.3) | {{ instability_zones.stable }} |
+| Balanced (0.3 - 0.7) | {{ instability_zones.balanced }} |
+| Unstable (I > 0.7) | {{ instability_zones.unstable }} |
+{% endif %}
+
+{% if high_coupling_symbols %}
+### High Coupling Symbols
+
+Symbols with critical or high coupling risk:
+
+| Symbol | Type | File | Fan-In | Fan-Out | Total | Instability | Pattern |
+|--------|------|------|--------|---------|-------|-------------|---------|
+{% for sym in high_coupling_symbols %}
+| {{ sym.symbol_name }} | {{ sym.symbol_type or '-' }} | {{ sym.relative_path }} | {{ sym.fan_in }} | {{ sym.fan_out }} | {{ sym.total_coupling }} | {{ sym.instability | round(2) }} | {{ sym.coupling_pattern }} |
+{% endfor %}
+{% endif %}
+
+{% if symbols and not high_coupling_symbols %}
+### Top Coupled Symbols
+
+Symbols with highest total coupling:
+
+| Symbol | Type | File | Fan-In | Fan-Out | Total |
+|--------|------|------|--------|---------|-------|
+{% for sym in symbols[:15] %}
+| {{ sym.symbol_name }} | {{ sym.symbol_type or '-' }} | {{ sym.relative_path }} | {{ sym.fan_in }} | {{ sym.fan_out }} | {{ sym.total_coupling }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

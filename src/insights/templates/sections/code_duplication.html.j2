@@ -1,0 +1,135 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Code Duplication</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No code duplication data available for this run. This could mean no duplicates were detected or PMD-CPD did not run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Copy-paste detection identifying duplicated code blocks that impact maintainability.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">Large duplicates</div>
+            </div>
+            <div class="metric-card {% if summary.high_count > 0 %}warning{% endif %}">
+                <div class="label">High</div>
+                <div class="value">{{ summary.high_count }}</div>
+                <div class="sublabel">Significant duplicates</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Total Clones</div>
+                <div class="value">{{ summary.total_clones }}</div>
+                <div class="sublabel">Unique patterns</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Duplicated Lines</div>
+                <div class="value">{{ summary.total_duplicated_lines | format_number }}</div>
+                <div class="sublabel">Total impact</div>
+            </div>
+        </div>
+    </div>
+
+    {% if has_cross_file %}
+    <div class="subsection">
+        <h3>Cross-File Duplicates</h3>
+        <p>Duplicated code appearing across multiple files - candidates for extraction:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Clone ID</th>
+                    <th class="number">Lines</th>
+                    <th class="number">Occurrences</th>
+                    <th class="number">Files</th>
+                    <th class="number">Directories</th>
+                    <th class="number">Impact</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for clone in cross_file_clones %}
+                <tr class="{{ 'critical-row' if clone.risk_level == 'critical' else 'warning-row' if clone.risk_level == 'high' else '' }}">
+                    <td class="truncate">{{ clone.clone_id[:12] }}...</td>
+                    <td class="number">{{ clone.lines }}</td>
+                    <td class="number">{{ clone.occurrence_count }}</td>
+                    <td class="number">{{ clone.files_affected }}</td>
+                    <td class="number">{{ clone.directories_affected }}</td>
+                    <td class="number">{{ clone.total_duplicated_lines }}</td>
+                    <td class="{{ clone.risk_level }}">{{ clone.risk_level | capitalize }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if largest_clones %}
+    <div class="subsection">
+        <h3>Largest Code Clones</h3>
+        <p>Duplicated blocks with the most lines:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Clone ID</th>
+                    <th class="number">Lines</th>
+                    <th class="number">Tokens</th>
+                    <th class="number">Occurrences</th>
+                    <th class="number">Files</th>
+                    <th class="number">Total Dup Lines</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for clone in largest_clones %}
+                <tr class="{{ 'critical-row' if clone.risk_level == 'critical' else 'warning-row' if clone.risk_level == 'high' else '' }}">
+                    <td class="truncate">{{ clone.clone_id[:12] }}...</td>
+                    <td class="number">{{ clone.lines }}</td>
+                    <td class="number">{{ clone.tokens }}</td>
+                    <td class="number">{{ clone.occurrence_count }}</td>
+                    <td class="number">{{ clone.files_affected }}</td>
+                    <td class="number">{{ clone.total_duplicated_lines }}</td>
+                    <td class="{{ clone.risk_level }}">{{ clone.risk_level | capitalize }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if most_impactful and most_impactful != largest_clones %}
+    <div class="subsection">
+        <h3>Most Impactful Clones</h3>
+        <p>Clones with highest total duplicated lines (occurrences * lines):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Clone ID</th>
+                    <th class="number">Lines</th>
+                    <th class="number">Occurrences</th>
+                    <th class="number">Total Dup Lines</th>
+                    <th class="number">Impact Score</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for clone in most_impactful %}
+                <tr>
+                    <td class="truncate">{{ clone.clone_id[:12] }}...</td>
+                    <td class="number">{{ clone.lines }}</td>
+                    <td class="number">{{ clone.occurrence_count }}</td>
+                    <td class="number">{{ clone.total_duplicated_lines }}</td>
+                    <td class="number">{{ clone.impact_score | round(1) if clone.impact_score else '-' }}</td>
+                    <td class="{{ clone.risk_level }}">{{ clone.risk_level | capitalize }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

@@ -1,0 +1,135 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Authorship Risk</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No authorship data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Bus factor and contributor concentration analysis. Low bus factor indicates knowledge silos.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if bus_factor_risk == 'critical' %}critical{% elif bus_factor_risk == 'high' %}warning{% endif %}">
+                <div class="label">Bus Factor</div>
+                <div class="value">{{ summary.bus_factor }}</div>
+                <div class="sublabel">{{ bus_factor_risk | capitalize }} risk</div>
+            </div>
+            <div class="metric-card {% if concentration_risk == 'critical' %}critical{% elif concentration_risk == 'high' %}warning{% endif %}">
+                <div class="label">Top Author</div>
+                <div class="value">{{ summary.top_author_pct }}%</div>
+                <div class="sublabel">Code ownership</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Top Two</div>
+                <div class="value">{{ summary.top_two_pct }}%</div>
+                <div class="sublabel">Combined ownership</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Authors</div>
+                <div class="value">{{ summary.author_count }}</div>
+                <div class="sublabel">Total contributors</div>
+            </div>
+        </div>
+    </div>
+
+    {% if is_critical %}
+    <div class="alert critical">
+        <h4>Critical Risk: Knowledge Concentration</h4>
+        {% if bus_factor_risk == 'critical' %}
+        <p>Bus factor of {{ summary.bus_factor }} means the project is at high risk if key contributors become unavailable.</p>
+        {% endif %}
+        {% if concentration_risk == 'critical' and summary.single_author_dominated %}
+        <p>A single author owns {{ summary.top_author_pct }}% of the codebase, creating a single point of failure.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Concentration Metrics</h3>
+        <div class="metric-details">
+            <div class="metric-row">
+                <span class="label">Total Lines of Code:</span>
+                <span class="value">{{ summary.total_loc | format_number }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">HHI Index:</span>
+                <span class="value">{{ summary.hhi_index }}</span>
+                <span class="explanation">(> 0.25 = high concentration)</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Bus Factor Risk:</span>
+                <span class="value {{ bus_factor_risk }}">{{ bus_factor_risk | capitalize }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Concentration Risk:</span>
+                <span class="value {{ concentration_risk }}">{{ concentration_risk | capitalize }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if bus_factor_members %}
+    <div class="subsection">
+        <h3>Bus Factor Members</h3>
+        <p>Contributors who are critical to project continuity:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Author</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Ownership</th>
+                    <th class="number">Commits</th>
+                    <th class="number">Files</th>
+                    <th class="number">Churn Ratio</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for author in bus_factor_members %}
+                <tr class="{{ 'critical-row' if author.risk_level == 'critical' else 'warning-row' }}">
+                    <td class="truncate" title="{{ author.author_email }}">{{ author.author_name }}</td>
+                    <td class="number">{{ author.surviving_loc | format_number }}</td>
+                    <td class="number">{{ author.ownership_pct | round(1) }}%</td>
+                    <td class="number">{{ author.commit_count }}</td>
+                    <td class="number">{{ author.files_touched }}</td>
+                    <td class="number">{{ author.churn_ratio | round(2) if author.churn_ratio else '-' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if contributors and not bus_factor_members %}
+    <div class="subsection">
+        <h3>Top Contributors</h3>
+        <p>Contributors by code ownership:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Author</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Ownership</th>
+                    <th class="number">Commits</th>
+                    <th class="number">Files</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for author in contributors %}
+                <tr>
+                    <td class="truncate" title="{{ author.author_email }}">{{ author.author_name }}</td>
+                    <td class="number">{{ author.surviving_loc | format_number }}</td>
+                    <td class="number">{{ author.ownership_pct | round(1) }}%</td>
+                    <td class="number">{{ author.commit_count }}</td>
+                    <td class="number">{{ author.files_touched }}</td>
+                    <td class="{{ author.risk_level }}">{{ author.risk_level | capitalize }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

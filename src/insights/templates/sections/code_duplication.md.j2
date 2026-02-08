@@ -1,0 +1,43 @@
+## Code Duplication
+
+{% if not has_data %}
+*No code duplication data available for this run.*
+{% else %}
+
+### Summary
+
+Copy-paste detection identifying duplicated code blocks that impact maintainability.
+
+| Metric | Value |
+|--------|-------|
+| Total Clones | {{ summary.total_clones }} |
+| Critical | {{ summary.critical_count }} |
+| High | {{ summary.high_count }} |
+| Total Duplicated Lines | {{ summary.total_duplicated_lines }} |
+| Cross-File Clones | {{ summary.cross_file_count }} |
+
+{% if has_cross_file %}
+### Cross-File Duplicates
+
+Duplicated code appearing across multiple files - candidates for extraction:
+
+| Clone ID | Lines | Occurrences | Files | Directories | Impact | Risk |
+|----------|-------|-------------|-------|-------------|--------|------|
+{% for clone in cross_file_clones %}
+| {{ clone.clone_id[:12] }}... | {{ clone.lines }} | {{ clone.occurrence_count }} | {{ clone.files_affected }} | {{ clone.directories_affected }} | {{ clone.total_duplicated_lines }} | {{ clone.risk_level | capitalize }} |
+{% endfor %}
+{% endif %}
+
+{% if largest_clones %}
+### Largest Code Clones
+
+Duplicated blocks with the most lines:
+
+| Clone ID | Lines | Tokens | Occurrences | Files | Total Dup Lines | Risk |
+|----------|-------|--------|-------------|-------|-----------------|------|
+{% for clone in largest_clones %}
+| {{ clone.clone_id[:12] }}... | {{ clone.lines }} | {{ clone.tokens }} | {{ clone.occurrence_count }} | {{ clone.files_affected }} | {{ clone.total_duplicated_lines }} | {{ clone.risk_level | capitalize }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

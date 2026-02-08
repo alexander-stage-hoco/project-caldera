@@ -1,0 +1,142 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Function Complexity Hotspots</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No function complexity data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Function-level cyclomatic complexity analysis. CCN thresholds: Critical >= 50, High >= 25, Medium >= 15.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">CCN >= 50</div>
+            </div>
+            <div class="metric-card {% if summary.high_count > 0 %}warning{% endif %}">
+                <div class="label">High</div>
+                <div class="value">{{ summary.high_count }}</div>
+                <div class="sublabel">CCN >= 25</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Avg CCN</div>
+                <div class="value">{{ summary.avg_ccn }}</div>
+                <div class="sublabel">Top {{ summary.total_functions }} functions</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Max CCN</div>
+                <div class="value">{{ summary.max_ccn }}</div>
+                <div class="sublabel">Worst function</div>
+            </div>
+        </div>
+    </div>
+
+    {% if run_statistics and run_statistics.total_functions %}
+    <div class="subsection">
+        <h3>Repository Statistics</h3>
+        <p>Complexity distribution across {{ run_statistics.total_functions | format_number }} functions:</p>
+        <div class="stat-grid">
+            <div class="stat-item"><span class="label">Avg:</span> {{ run_statistics.avg_ccn | round(1) }}</div>
+            <div class="stat-item"><span class="label">P50:</span> {{ run_statistics.p50 | round(1) }}</div>
+            <div class="stat-item"><span class="label">P75:</span> {{ run_statistics.p75 | round(1) }}</div>
+            <div class="stat-item"><span class="label">P90:</span> {{ run_statistics.p90 | round(1) }}</div>
+            <div class="stat-item"><span class="label">P95:</span> {{ run_statistics.p95 | round(1) }}</div>
+            <div class="stat-item"><span class="label">P99:</span> {{ run_statistics.p99 | round(1) }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if has_critical and critical_functions %}
+    <div class="subsection">
+        <h3>Critical Complexity Functions</h3>
+        <p>Functions with CCN >= 50 requiring refactoring:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Function</th>
+                    <th>File</th>
+                    <th class="number">CCN</th>
+                    <th class="number">NLOC</th>
+                    <th class="number">Params</th>
+                    <th class="number">Line</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for func in critical_functions %}
+                <tr class="critical-row">
+                    <td class="truncate" title="{{ func.long_name }}">{{ func.function_name }}</td>
+                    <td class="truncate" title="{{ func.relative_path }}">{{ func.relative_path | truncate_path }}</td>
+                    <td class="number">{{ func.ccn }}</td>
+                    <td class="number">{{ func.nloc }}</td>
+                    <td class="number">{{ func.parameter_count }}</td>
+                    <td class="number">{{ func.line_start }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_high and high_functions %}
+    <div class="subsection">
+        <h3>High Complexity Functions</h3>
+        <p>Functions with CCN >= 25:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Function</th>
+                    <th>File</th>
+                    <th class="number">CCN</th>
+                    <th class="number">NLOC</th>
+                    <th class="number">Params</th>
+                    <th class="number">Line</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for func in high_functions[:15] %}
+                <tr class="warning-row">
+                    <td class="truncate" title="{{ func.long_name }}">{{ func.function_name }}</td>
+                    <td class="truncate" title="{{ func.relative_path }}">{{ func.relative_path | truncate_path }}</td>
+                    <td class="number">{{ func.ccn }}</td>
+                    <td class="number">{{ func.nloc }}</td>
+                    <td class="number">{{ func.parameter_count }}</td>
+                    <td class="number">{{ func.line_start }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if files_with_complex_functions %}
+    <div class="subsection">
+        <h3>Files with Complex Functions</h3>
+        <p>Files containing the most complex functions:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Functions</th>
+                    <th class="number">Max CCN</th>
+                    <th>Worst Function</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for path, funcs in files_with_complex_functions %}
+                <tr>
+                    <td class="truncate" title="{{ path }}">{{ path | truncate_path }}</td>
+                    <td class="number">{{ funcs | length }}</td>
+                    <td class="number">{{ funcs | map(attribute='ccn') | max }}</td>
+                    <td class="truncate">{{ funcs | sort(attribute='ccn', reverse=true) | first | attr('function_name') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

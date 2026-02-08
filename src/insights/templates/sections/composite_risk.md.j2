@@ -1,0 +1,59 @@
+## Composite Risk Analysis
+
+{% if not has_data %}
+*No composite risk data available for this run.*
+{% else %}
+
+### Summary
+
+Multi-dimensional risk assessment combining complexity, size, code smells, coverage gaps, and coupling.
+
+| Metric | Value |
+|--------|-------|
+| Critical (Score >= 90) | {{ summary.critical_count }} |
+| High (Score >= 70) | {{ summary.high_count }} |
+| Medium (Score >= 50) | {{ summary.medium_count }} |
+| Active Dimensions | {{ summary.dimensions_active }}/5 |
+| Total Hotspots | {{ summary.total_hotspots }} |
+
+{% if risk_patterns %}
+### Risk Patterns
+
+| Pattern | Count |
+|---------|-------|
+{% for pattern, count in risk_patterns[:6] %}
+| {{ pattern }} | {{ count }} |
+{% endfor %}
+{% endif %}
+
+{% if has_critical and critical_hotspots %}
+### Critical Risk Files
+
+Files with composite risk score >= 90 requiring immediate attention:
+
+| File | Pattern | Score | Max CCN | LOC | Issues |
+|------|---------|-------|---------|-----|--------|
+{% for file in critical_hotspots %}
+| {{ file.relative_path }} | {{ file.risk_pattern }} | {{ file.composite_score | round(1) }} | {{ file.max_ccn or '-' }} | {{ file.loc_code or '-' }} | {{ file.total_high_plus_issues or '-' }} |
+{% endfor %}
+{% endif %}
+
+{% if has_high and high_hotspots %}
+### High Risk Files
+
+Files with composite risk score >= 70:
+
+| File | Pattern | Score | Max CCN | LOC |
+|------|---------|-------|---------|-----|
+{% for file in high_hotspots %}
+| {{ file.relative_path }} | {{ file.risk_pattern }} | {{ file.composite_score | round(1) }} | {{ file.max_ccn or '-' }} | {{ file.loc_code or '-' }} |
+{% endfor %}
+{% endif %}
+
+### Dimension Coverage
+
+{% for dim, available in dimensions_with_data.items() %}
+- {{ dim | capitalize }}: {{ 'Available' if available else 'No data' }}
+{% endfor %}
+
+{% endif %}
