@@ -64,6 +64,7 @@ htmlcov/
 # Tool binaries (downloaded by make setup)
 bin/git-sizer
 bin/git-sizer-*
+src/tools/trivy/bin/trivy
 
 # Database files
 *.duckdb
