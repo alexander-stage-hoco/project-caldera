@@ -39,6 +39,60 @@ Key fields:
 - `started_at`, `completed_at`
 - `tool_runs`
 
+## File Hotspots
+
+File: `src/sot-engine/dbt/analysis/report_file_hotspots.sql`
+
+Purpose: identify top files by LOC, complexity, and other metrics.
+
+## Cross-Tool Insights
+
+File: `src/sot-engine/dbt/analysis/report_cross_tool_insights.sql`
+
+Purpose: correlate findings across multiple tools for the same files.
+
+## Category Breakdowns
+
+Files:
+- `src/sot-engine/dbt/analysis/report_semgrep_category_breakdown.sql` - Semgrep findings by category
+- `src/sot-engine/dbt/analysis/report_roslyn_category_breakdown.sql` - Roslyn violations by category
+- `src/sot-engine/dbt/analysis/report_category_severity.sql` - Findings by severity level
+
+## Language Coverage
+
+File: `src/sot-engine/dbt/analysis/report_language_coverage.sql`
+
+Purpose: show file counts and LOC by programming language.
+
+## Inequality Analyses
+
+Files:
+- `src/sot-engine/dbt/analysis/inequality_by_gini.sql` - Gini coefficient analysis
+- `src/sot-engine/dbt/analysis/inequality_by_palma.sql` - Palma ratio analysis
+- `src/sot-engine/dbt/analysis/inequality_concentration.sql` - Concentration metrics
+- `src/sot-engine/dbt/analysis/inequality_cross_tool.sql` - Cross-tool inequality comparison
+- `src/sot-engine/dbt/analysis/inequality_cross_tool_correlation.sql` - Tool correlation analysis
+
+## Distribution Analyses
+
+Files:
+- `src/sot-engine/dbt/analysis/distribution_scope_comparison.sql` - Compare direct vs recursive distributions
+- `src/sot-engine/dbt/analysis/distribution_shape_patterns.sql` - Distribution shape classification
+- `src/sot-engine/dbt/analysis/distribution_tail_risk.sql` - Tail risk metrics (p95, p99)
+
+## Module Health
+
+Files:
+- `src/sot-engine/dbt/analysis/module_health_scores.sql` - Directory-level health scoring
+- `src/sot-engine/dbt/analysis/module_health_summary.sql` - Aggregated health summary
+- `src/sot-engine/dbt/analysis/module_risk_factors.sql` - Risk factor identification
+
+## Extended Directory Analysis
+
+File: `src/sot-engine/dbt/analysis/report_directory_hotspots_full.sql`
+
+Purpose: comprehensive directory analysis with all metrics.
+
 ## Running Reports
 
 1. Ensure marts are built:

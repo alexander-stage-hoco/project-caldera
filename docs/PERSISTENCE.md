@@ -454,7 +454,12 @@ TOOL_CONFIGS = [
 # Add to TOOL_INGESTION_CONFIGS
 TOOL_INGESTION_CONFIGS = [
     # ... existing configs
-    ToolIngestionConfig("my-tool", MyToolAdapter, MyToolRepository),
+    ToolIngestionConfig(
+        name="my-tool",
+        adapter_class=MyToolAdapter,
+        repo_class=MyToolRepository,
+        validate_metadata=True,  # Set False for tools like sonarqube/trivy that have non-standard metadata
+    ),
 ]
 ```
 

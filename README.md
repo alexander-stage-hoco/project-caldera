@@ -119,7 +119,7 @@ make compliance COMPLIANCE_OUT_JSON=/tmp/custom.json COMPLIANCE_OUT_MD=/tmp/cust
 
 ## Standards
 
-Tool requirements and readiness gates are defined in `docs/TOOL_REQUIREMENTS.md`.
+Tool requirements and readiness gates are defined in `docs/COMPLIANCE.md`.
 
 ## Orchestrator
 

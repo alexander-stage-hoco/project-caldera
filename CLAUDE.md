@@ -51,7 +51,8 @@ src/
 ├── common/                  # Shared utilities (path normalization)
 ├── insights/                # Consolidated reporting component
 ├── shared/                  # Shared evaluation utilities
-│   └── evaluation/          # LLM judge infrastructure (BaseJudge, observability)
+│   ├── evaluation/          # LLM judge infrastructure (BaseJudge, JudgeResult)
+│   └── observability/       # LLM interaction logging and tracing
 ├── tool-compliance/         # Tool readiness verification scanner
 ├── tools/                   # Individual analysis tools (16 total)
 │   ├── layout-scanner/      # Repository file structure analysis
@@ -84,12 +85,18 @@ scripts/                     # Automation scripts
 
 ```bash
 make compliance              # Run tool compliance scanner
+make tools-setup             # Run 'make setup' for tools
 make tools-analyze           # Run analysis for all tools
 make tools-evaluate          # Run programmatic evaluations
+make tools-evaluate-llm      # Run LLM evaluations for tools
 make tools-test              # Execute all tool tests
+make tools-clean             # Clean tool outputs
+make test                    # Run all project tests (pytest + tools + dbt)
 make dbt-run                 # Execute dbt models
 make dbt-test                # Run dbt tests
+make dbt-test-reports        # Run report-specific dbt tests
 make orchestrate             # Full end-to-end pipeline
+make pipeline-eval           # Full E2E: orchestrate -> insights -> LLM eval -> top 3
 ```
 
 ### Orchestrator
@@ -99,7 +106,7 @@ make orchestrate             # Full end-to-end pipeline
 .venv/bin/python src/sot-engine/orchestrator.py \
     --repo-path /path/to/repo \
     --repo-id my-project \
-    --commit abc123def...  # Full 40-char SHA
+    --commit abc123def...  # Full 40-char SHA (optional, defaults to zeros for non-git repos)
 
 # Current directory with replace mode
 .venv/bin/python src/sot-engine/orchestrator.py \
@@ -115,6 +122,8 @@ make orchestrate             # Full end-to-end pipeline
     --run-tools \
     --run-dbt
 ```
+
+**Note:** `--commit` defaults to all zeros (`0000...`) if not specified. For non-git repos, tools can compute their own content-based fallback hash.
 
 ### Testing
 
@@ -212,6 +221,9 @@ class SccFileMetric:
 | `docs/REFERENCE.md` | Technical specifications (envelope, paths, patterns) |
 | `docs/EVALUATION.md` | LLM judge infrastructure and observability |
 | `docs/REPORTS.md` | dbt analyses and reports |
+| `docs/INSIGHTS_PRODUCT_SPEC.md` | Insights component product specification |
+| `docs/ARCHITECTURE_V2_PROPOSAL.md` | Proposed architecture improvements |
+| `docs/PLAN.md` | Current development plan and roadmap |
 | `docs/templates/BLUEPRINT.md.template` | Architecture document template |
 | `docs/templates/EVAL_STRATEGY.md.template` | Evaluation strategy template |
 

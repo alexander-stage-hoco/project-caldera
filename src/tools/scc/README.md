@@ -14,7 +14,7 @@ make analyze-interactive # Interactive multi-repo analysis
 
 `repo_id` is provided by the orchestrator/app alongside `repo_path`. The tool analyzes `repo_path` directly; `repo_id` is emitted in the output for correlation in the SoT engine. If `commit` is not supplied, the tool resolves the repository HEAD when `repo_path` is a git repo; otherwise it falls back to the project repo HEAD. Supplied commits are validated against the repo before use.
 
-Production readiness gates are defined in `docs/TOOL_REQUIREMENTS.md`.
+Production readiness gates are defined in `docs/COMPLIANCE.md`.
 
 ## Features
 

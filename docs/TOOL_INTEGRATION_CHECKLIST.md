@@ -1029,9 +1029,10 @@ from persistence.repositories import <Tool>Repository
 TOOL_INGESTION_CONFIGS = [
     # ... existing configs
     ToolIngestionConfig(
-        tool_name="<tool>",
-        makefile_dir="src/tools/<tool>",
+        name="<tool>",
         adapter_class=<Tool>Adapter,
+        repo_class=<Tool>Repository,
+        validate_metadata=True,  # Set False for tools with non-standard metadata (e.g., sonarqube, trivy)
     ),
 ]
 ```

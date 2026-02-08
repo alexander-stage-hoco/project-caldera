@@ -924,24 +924,102 @@ python src/tool-compliance/tool_compliance.py src/tools/<tool> --preflight
 
 ---
 
-## Tool-Specific Rules (TOOL_RULES)
+## Tool-Specific Rules (YAML Configuration)
 
-The compliance scanner uses `TOOL_RULES` dict to enforce tool-specific requirements:
+Tool-specific compliance rules are defined in YAML config files under `src/tool-compliance/rules/`:
 
-```python
-TOOL_RULES = {
-    "scc": {
-        "required_check_modules": ["cocomo.py", "coverage.py", ...],
-        "required_prompts": ["api_design.md", "code_quality.md", ...],
-        "ground_truth_mode": "synthetic_json",
-        "evaluation_outputs": ["scorecard.md", "checks.json"],
-        "adapter": ("persistence.adapters.scc_adapter", "SccAdapter"),
-    },
-    # ... other tools
-}
+```
+src/tool-compliance/rules/
+├── common.yaml         # Shared settings (entities, coverage thresholds)
+├── scc.yaml            # scc-specific requirements
+├── lizard.yaml         # lizard-specific requirements
+├── semgrep.yaml        # semgrep-specific requirements
+└── <tool>.yaml         # Other tool-specific configs
 ```
 
-To add custom requirements, edit `src/tool-compliance/tool_compliance.py`.
+**Example tool rule file (`src/tool-compliance/rules/scc.yaml`):**
+```yaml
+required_check_modules:
+  - cocomo.py
+  - coverage.py
+  - accuracy.py
+
+required_prompts:
+  - api_design.md
+  - code_quality.md
+  - actionability.md
+
+ground_truth_mode: synthetic_json
+
+adapter:
+  module: persistence.adapters.scc_adapter
+  class: SccAdapter
+```
+
+**Shared configuration (`src/tool-compliance/rules/common.yaml`):**
+```yaml
+tool_entities:
+  scc:
+    - SccFileMetric
+  lizard:
+    - LizardFileMetric
+    - LizardFunctionMetric
+
+entity_repository_map:
+  SccFileMetric:
+    repository: SccRepository
+    method: insert_file_metrics
+
+test_coverage_rules:
+  threshold: 80
+  source_dirs:
+    - scripts
+  omit_patterns:
+    - "scripts/checks/*"
+    - "scripts/evaluate.py"
+```
+
+To add custom requirements for a new tool, create `src/tool-compliance/rules/<tool>.yaml`.
+
+---
+
+## Run Check Fix Actions
+
+#### evaluation.results (high)
+
+**Validates:** Programmatic evaluation outputs exist in `evaluation/results/`.
+
+**Common failures:**
+- `make evaluate` has never been run
+- Evaluation script failed silently
+
+**Fix action:**
+```bash
+cd src/tools/<tool> && make evaluate
+# Outputs should appear in evaluation/results/
+ls evaluation/results/  # Should contain checks.json, scorecard.md, etc.
+```
+
+#### evaluation.llm_results (medium)
+
+**Validates:** LLM evaluation outputs exist in `evaluation/results/`.
+
+**Common failures:**
+- `make evaluate-llm` has never been run
+- LLM judges failed or timed out
+- Missing ANTHROPIC_API_KEY
+
+**Fix action:**
+```bash
+# Ensure API key is set
+export ANTHROPIC_API_KEY="your-key"
+
+# Run LLM evaluation
+cd src/tools/<tool> && make evaluate-llm
+
+# Outputs should appear in evaluation/results/
+ls evaluation/results/  # Should contain llm_evaluation.json
+```
 
 ---
 

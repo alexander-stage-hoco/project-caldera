@@ -73,6 +73,7 @@ BaseJudge(
     use_llm: bool = True,                # False for heuristic-only evaluation
     trace_id: str | None = None,         # Correlation ID for observability
     enable_observability: bool = True,   # Log LLM interactions
+    evaluation_mode: str | None = None,  # "synthetic", "real_world", or None for auto-detect
 )
 ```
 
@@ -473,7 +474,7 @@ judge = AccuracyJudge(model="claude-opus-4-5-20250514")
 └────────────────────────────────┬────────────────────────────┘
                                  │ logs to
 ┌────────────────────────────────▼────────────────────────────┐
-│           insights.evaluation.llm.observability              │
+│              shared.observability                            │
 │  LLMLogger (singleton) → FileStore (JSONL)                  │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -507,7 +508,7 @@ export LLM_OBSERVABILITY_ENABLED=false
 
 Or programmatically:
 ```python
-from insights.evaluation.llm.observability import set_config, ObservabilityConfig
+from shared.observability import set_config, ObservabilityConfig
 set_config(ObservabilityConfig(enabled=False))
 ```
 
@@ -522,7 +523,7 @@ accuracy_judge = AccuracyJudge(trace_id=trace_id)
 coverage_judge = CoverageJudge(trace_id=trace_id)
 
 # Later, query all interactions for this evaluation
-from insights.evaluation.llm.observability import FileStore
+from shared.observability import FileStore
 store = FileStore()
 interactions = store.query_by_trace(trace_id)
 ```
@@ -563,7 +564,7 @@ Each line is a complete JSON object:
 ### Query API
 
 ```python
-from insights.evaluation.llm.observability import FileStore
+from shared.observability import FileStore
 from datetime import datetime
 
 store = FileStore()
@@ -666,4 +667,4 @@ python scripts/check_observability_compliance.py --verbose
 - [COMPLIANCE.md](./COMPLIANCE.md) - Compliance requirements
 - `src/shared/evaluation/` - Shared module source
 - `src/shared/README.md` - Module overview
-- `src/insights/evaluation/llm/observability/` - Observability module
+- `src/shared/observability/` - Observability module
