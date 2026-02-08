@@ -1,0 +1,118 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Tool Coverage Dashboard</h2>
+
+    {% if has_data %}
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Tools Ran</div>
+            <div class="value">{{ summary.ran }} / {{ summary.total }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Coverage</div>
+            <div class="value">{{ summary.coverage_pct }}%</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Confidence Level</div>
+            <div class="value {% if confidence_level == 'complete' %}status-success{% elif confidence_level == 'high' %}status-success{% elif confidence_level == 'medium' %}status-warning{% else %}status-error{% endif %}">
+                {{ confidence_level | upper }}
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Files Analyzed</div>
+            <div class="value">{{ summary.total_files_analyzed | format_number }}</div>
+        </div>
+    </div>
+
+    {% if missing_critical %}
+    <div class="alert alert-error">
+        <strong>Missing Critical Tools:</strong>
+        {% for tool in missing_critical %}
+            {{ tool.tool_name }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if missing_security and confidence_level != 'complete' %}
+    <div class="alert alert-warning">
+        <strong>Missing Security Tools:</strong>
+        {% for tool in missing_security %}
+            {{ tool.tool_name }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>All Tools</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Purpose</th>
+                    <th>Status</th>
+                    <th>Version</th>
+                    <th class="number">Files Analyzed</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for tool in tools %}
+                <tr class="{% if tool.status == 'missing' %}row-warning{% endif %}">
+                    <td>
+                        {{ tool.tool_name }}
+                        {% if tool.tool_name in critical_tools %}
+                            <span class="badge badge-primary" title="Critical tool">C</span>
+                        {% endif %}
+                        {% if tool.tool_name in security_tools %}
+                            <span class="badge badge-secondary" title="Security tool">S</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ tool.purpose }}</td>
+                    <td>
+                        {% if tool.status == 'ran' %}
+                            <span class="status-badge status-success">Ran</span>
+                        {% else %}
+                            <span class="status-badge status-error">Missing</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ tool.tool_version if tool.tool_version else '-' }}</td>
+                    <td class="number">{{ tool.files_analyzed | format_number if tool.files_analyzed else '-' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if tools_ran %}
+    <div class="subsection">
+        <h3>Tools That Ran ({{ tools_ran | length }})</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Version</th>
+                    <th>Schema Version</th>
+                    <th class="number">Files Analyzed</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for tool in tools_ran %}
+                <tr>
+                    <td>{{ tool.tool_name }}</td>
+                    <td>{{ tool.tool_version if tool.tool_version else '-' }}</td>
+                    <td>{{ tool.schema_version if tool.schema_version else '-' }}</td>
+                    <td class="number">{{ tool.files_analyzed | format_number }}</td>
+                    <td>{{ tool.timestamp if tool.timestamp else '-' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <p>No tool coverage data available for this run.</p>
+        <p>This may indicate the run_pk is incorrect or no tools have been executed yet.</p>
+    </div>
+    {% endif %}
+</section>

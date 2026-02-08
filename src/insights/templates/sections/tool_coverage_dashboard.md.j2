@@ -1,0 +1,40 @@
+## Tool Coverage Dashboard
+
+{% if has_data %}
+| Metric | Value |
+|--------|-------|
+| Tools Ran | {{ summary.ran }} / {{ summary.total }} |
+| Coverage | {{ summary.coverage_pct }}% |
+| Confidence Level | {{ confidence_level | upper }} |
+| Files Analyzed | {{ summary.total_files_analyzed | format_number }} |
+
+{% if missing_critical %}
+**Missing Critical Tools:** {% for tool in missing_critical %}{{ tool.tool_name }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% endif %}
+
+{% if missing_security and confidence_level != 'complete' %}
+**Missing Security Tools:** {% for tool in missing_security %}{{ tool.tool_name }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% endif %}
+
+### All Tools
+
+| Tool | Purpose | Status | Version | Files |
+|------|---------|--------|---------|------:|
+{% for tool in tools %}
+| {{ tool.tool_name }}{% if tool.tool_name in critical_tools %} (C){% endif %}{% if tool.tool_name in security_tools %} (S){% endif %} | {{ tool.purpose }} | {{ 'Ran' if tool.status == 'ran' else 'Missing' }} | {{ tool.tool_version if tool.tool_version else '-' }} | {{ tool.files_analyzed | format_number if tool.files_analyzed else '-' }} |
+{% endfor %}
+
+*Legend: (C) = Critical tool, (S) = Security tool*
+
+### Confidence Level Definitions
+
+| Level | Criteria |
+|-------|----------|
+| COMPLETE | All 16 tools ran |
+| HIGH | All critical tools + 2+ security tools |
+| MEDIUM | All critical tools ran |
+| LOW | Missing critical tools |
+
+{% else %}
+*No tool coverage data available for this run.*
+{% endif %}
