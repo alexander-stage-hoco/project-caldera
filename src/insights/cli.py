@@ -4,7 +4,6 @@ CLI entry point for Caldera Insights reporting.
 
 import warnings
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -24,18 +23,18 @@ def _show_warnings_handler(message: warnings.WarningMessage | str, category: typ
 
 @app.command()
 def generate(
-    run_pk: Optional[int] = typer.Argument(None, help="Tool run primary key (use --collection-run-id instead for collection-level reports)"),
+    run_pk: int | None = typer.Argument(None, help="Tool run primary key (use --collection-run-id instead for collection-level reports)"),
     db: Path = typer.Option(..., "--db", "-d", help="Path to DuckDB database"),
-    collection_run_id: Optional[str] = typer.Option(
+    collection_run_id: str | None = typer.Option(
         None,
         "--collection-run-id",
         "-c",
         help="Collection run ID (auto-resolves to SCC tool's run_pk)",
     ),
     format: str = typer.Option("html", "--format", "-f", help="Output format: html, md"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
-    sections: Optional[str] = typer.Option(None, "--sections", "-s", help="Comma-separated section names"),
-    title: Optional[str] = typer.Option(None, "--title", "-t", help="Custom report title"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
+    sections: str | None = typer.Option(None, "--sections", "-s", help="Comma-separated section names"),
+    title: str | None = typer.Option(None, "--title", "-t", help="Custom report title"),
 ) -> None:
     """Generate an insights report for a collection run.
 
@@ -149,7 +148,7 @@ def generate_section(
     run_pk: int = typer.Argument(..., help="Collection run primary key"),
     db: Path = typer.Option(..., "--db", "-d", help="Path to DuckDB database"),
     format: str = typer.Option("html", "--format", "-f", help="Output format: html, md"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """Generate a single report section."""
     from .generator import InsightsGenerator
@@ -309,7 +308,7 @@ def list_collections(
 @app.command("tool-readiness")
 def tool_readiness_report(
     format: str = typer.Option("md", "--format", "-f", help="Output format: html, md"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """Generate a tool readiness report.
 

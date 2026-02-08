@@ -10,14 +10,14 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Optional, Type
+from typing import Any, Callable
 
 import duckdb
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitFameAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
+from persistence.adapters import DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitBlameScannerAdapter, GitFameAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
 from persistence.repositories import (
@@ -26,6 +26,7 @@ from persistence.repositories import (
     DependenseeRepository,
     DevskimRepository,
     DotcoverRepository,
+    GitBlameRepository,
     GitFameRepository,
     GitSizerRepository,
     GitleaksRepository,
@@ -55,8 +56,8 @@ class ToolConfig:
 class ToolIngestionConfig:
     """Configuration for ingesting a tool's output."""
     name: str
-    adapter_class: Type[BaseAdapter]
-    repo_class: Type[BaseRepository] | None  # None for layout adapter
+    adapter_class: type[BaseAdapter]
+    repo_class: type[BaseRepository] | None  # None for layout adapter
     validate_metadata: bool = True  # Whether to validate standard metadata structure
 
 
@@ -134,7 +135,7 @@ def run_tool_make(
     commit: str,
     output_dir: Path,
     logger: OrchestratorLogger,
-    extra_env: Optional[dict[str, str]] = None,
+    extra_env: dict[str, str] | None = None,
 ) -> None:
     env = os.environ.copy()
     env.update(
@@ -163,7 +164,7 @@ def run_tool_make(
     )
 
 
-def _default_output_path(tool: ToolConfig, run_id: str, output_root: Optional[Path]) -> Path:
+def _default_output_path(tool: ToolConfig, run_id: str, output_root: Path | None) -> Path:
     if output_root:
         return (output_root / tool.name / run_id / "output.json").resolve()
     return (Path(tool.path) / "outputs" / run_id / "output.json").resolve()
@@ -194,6 +195,8 @@ TOOL_CONFIGS = [
     ToolConfig("devskim", "src/tools/devskim"),
     ToolConfig("dotcover", "src/tools/dotcover"),
     ToolConfig("git-fame", "src/tools/git-fame"),
+    ToolConfig("git-sizer", "src/tools/git-sizer"),
+    ToolConfig("git-blame-scanner", "src/tools/git-blame-scanner"),
     ToolConfig("dependensee", "src/tools/dependensee"),
 ]
 
@@ -238,7 +241,7 @@ def _run_tools(
     branch: str,
     commit: str,
     logger: OrchestratorLogger,
-    output_root: Optional[Path],
+    output_root: Path | None,
 ) -> dict[str, Path]:
     """Run all configured tools and return their output paths."""
     outputs: dict[str, Path] = {}
@@ -270,6 +273,7 @@ TOOL_INGESTION_CONFIGS = [
     ToolIngestionConfig("trivy", TrivyAdapter, TrivyRepository, validate_metadata=False),
     ToolIngestionConfig("git-sizer", GitSizerAdapter, GitSizerRepository),
     ToolIngestionConfig("git-fame", GitFameAdapter, GitFameRepository),
+    ToolIngestionConfig("git-blame-scanner", GitBlameScannerAdapter, GitBlameRepository),
     ToolIngestionConfig("gitleaks", GitleaksAdapter, GitleaksRepository),
     ToolIngestionConfig("symbol-scanner", SymbolScannerAdapter, SymbolScannerRepository),
     ToolIngestionConfig("scancode", ScancodeAdapter, ScancodeRepository),
@@ -288,24 +292,25 @@ def ingest_outputs(
     branch: str,
     commit: str,
     repo_path: Path,
-    layout_output: Optional[Path],
-    scc_output: Optional[Path],
-    lizard_output: Optional[Path],
-    roslyn_output: Optional[Path],
-    semgrep_output: Optional[Path] = None,
-    sonarqube_output: Optional[Path] = None,
-    trivy_output: Optional[Path] = None,
-    gitleaks_output: Optional[Path] = None,
-    symbol_scanner_output: Optional[Path] = None,
-    scancode_output: Optional[Path] = None,
-    pmd_cpd_output: Optional[Path] = None,
-    devskim_output: Optional[Path] = None,
-    dotcover_output: Optional[Path] = None,
-    git_fame_output: Optional[Path] = None,
-    dependensee_output: Optional[Path] = None,
-    git_sizer_output: Optional[Path] = None,
+    layout_output: Path | None,
+    scc_output: Path | None,
+    lizard_output: Path | None,
+    roslyn_output: Path | None,
+    semgrep_output: Path | None = None,
+    sonarqube_output: Path | None = None,
+    trivy_output: Path | None = None,
+    gitleaks_output: Path | None = None,
+    symbol_scanner_output: Path | None = None,
+    scancode_output: Path | None = None,
+    pmd_cpd_output: Path | None = None,
+    devskim_output: Path | None = None,
+    dotcover_output: Path | None = None,
+    git_fame_output: Path | None = None,
+    git_sizer_output: Path | None = None,
+    git_blame_scanner_output: Path | None = None,
+    dependensee_output: Path | None = None,
     schema_path: Path = None,
-    logger: Optional[OrchestratorLogger] = None,
+    logger: OrchestratorLogger | None = None,
 ) -> None:
     ensure_schema(conn, schema_path)
     run_repo = ToolRunRepository(conn)
@@ -334,6 +339,7 @@ def ingest_outputs(
         "devskim": devskim_output,
         "dotcover": dotcover_output,
         "git-fame": git_fame_output,
+        "git-blame-scanner": git_blame_scanner_output,
         "dependensee": dependensee_output,
         "git-sizer": git_sizer_output,
     }
@@ -427,6 +433,8 @@ def main() -> int:
     parser.add_argument("--devskim-output", type=str)
     parser.add_argument("--dotcover-output", type=str)
     parser.add_argument("--git-fame-output", type=str)
+    parser.add_argument("--git-sizer-output", type=str)
+    parser.add_argument("--git-blame-scanner-output", type=str)
     parser.add_argument("--dependensee-output", type=str)
     parser.add_argument("--run-tools", action="store_true")
     parser.add_argument("--run-dbt", action="store_true")
@@ -460,6 +468,8 @@ def main() -> int:
     devskim_output = Path(args.devskim_output) if args.devskim_output else None
     dotcover_output = Path(args.dotcover_output) if args.dotcover_output else None
     git_fame_output = Path(args.git_fame_output) if args.git_fame_output else None
+    git_sizer_output = Path(args.git_sizer_output) if args.git_sizer_output else None
+    git_blame_scanner_output = Path(args.git_blame_scanner_output) if args.git_blame_scanner_output else None
     dependensee_output = Path(args.dependensee_output) if args.dependensee_output else None
 
     try:
@@ -517,6 +527,8 @@ def main() -> int:
             devskim_output = outputs.get("devskim", devskim_output)
             dotcover_output = outputs.get("dotcover", dotcover_output)
             git_fame_output = outputs.get("git-fame", git_fame_output)
+            git_sizer_output = outputs.get("git-sizer", git_sizer_output)
+            git_blame_scanner_output = outputs.get("git-blame-scanner", git_blame_scanner_output)
             dependensee_output = outputs.get("dependensee", dependensee_output)
             logger.info(f"Completed tools in {_format_duration(time.perf_counter() - start)}")
             for name, path in outputs.items():
@@ -546,6 +558,8 @@ def main() -> int:
             devskim_output,
             dotcover_output,
             git_fame_output,
+            git_sizer_output,
+            git_blame_scanner_output,
             dependensee_output,
             schema_path,
             logger,

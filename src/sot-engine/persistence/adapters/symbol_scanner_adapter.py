@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Iterable, List, Tuple
+from typing import Callable, Iterable
 
 from .base_adapter import BaseAdapter
 from ..entities import CodeSymbol, SymbolCall, FileImport
@@ -194,9 +194,9 @@ class SymbolScannerAdapter(BaseAdapter):
 
     def _map_symbols(
         self, run_pk: int, layout_run_pk: int, symbols: Iterable[dict]
-    ) -> List[CodeSymbol]:
+    ) -> list[CodeSymbol]:
         """Map symbol entries to CodeSymbol entities."""
-        result: List[CodeSymbol] = []
+        result: list[CodeSymbol] = []
 
         for symbol in symbols:
             relative_path = self._normalize_path(symbol.get("path", ""))
@@ -227,7 +227,7 @@ class SymbolScannerAdapter(BaseAdapter):
 
     def _map_calls(
         self, run_pk: int, layout_run_pk: int, calls: Iterable[dict]
-    ) -> List[SymbolCall]:
+    ) -> list[SymbolCall]:
         """Map call entries to SymbolCall entities, deduplicating by primary key."""
         # Use dict to deduplicate by PK (caller_file_id, caller_symbol, callee_symbol, line_number)
         unique_calls: dict[tuple, SymbolCall] = {}
@@ -276,9 +276,9 @@ class SymbolScannerAdapter(BaseAdapter):
 
     def _map_imports(
         self, run_pk: int, layout_run_pk: int, imports: Iterable[dict]
-    ) -> List[FileImport]:
+    ) -> list[FileImport]:
         """Map import entries to FileImport entities."""
-        result: List[FileImport] = []
+        result: list[FileImport] = []
 
         for imp in imports:
             relative_path = self._normalize_path(imp.get("file", ""))

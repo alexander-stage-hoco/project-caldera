@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Callable, Iterable, List, Tuple
+from typing import Any, Callable, Iterable
 
 from .base_adapter import BaseAdapter
 from ..entities import LizardFileMetric, LizardFunctionMetric
@@ -133,13 +133,13 @@ class LizardAdapter(BaseAdapter):
 
     def _map_metrics(
         self, run_pk: int, layout_run_pk: int, files: Iterable[dict]
-    ) -> Tuple[List[LizardFileMetric], List[LizardFunctionMetric]]:
+    ) -> tuple[list[LizardFileMetric], list[LizardFunctionMetric]]:
         """Map file and function entries to entities with deduplication.
 
         Deduplicates files by (file_id) and functions by (file_id, function_name, line_start).
         """
-        file_metrics: List[LizardFileMetric] = []
-        function_metrics: List[LizardFunctionMetric] = []
+        file_metrics: list[LizardFileMetric] = []
+        function_metrics: list[LizardFunctionMetric] = []
         seen_files: set[str] = set()
         seen_functions: set[tuple[str, str, int | None]] = set()
 

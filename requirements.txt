@@ -1,6 +1,7 @@
 duckdb==1.4.3
 dbt-duckdb==1.10.0
 pytest==9.0.2
+pytest-cov>=4.0.0
 numpy==2.4.1
 lizard==1.20.0
 jsonschema==4.23.0
