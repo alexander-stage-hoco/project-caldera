@@ -1,0 +1,66 @@
+## Directory Structure Quality
+
+{% if not has_data %}
+*No directory structure data available for this run.*
+{% else %}
+
+### Summary
+
+Repository organization analysis including nesting depth, file concentration, and size distribution.
+
+| Metric | Value |
+|--------|-------|
+| Structure Health | {{ structure_health | replace('_', ' ') | capitalize }} |
+| Total Directories | {{ summary.total_directories }} |
+| Max Depth | {{ summary.max_depth }} |
+| Avg Depth | {{ summary.avg_depth }} |
+| Deeply Nested | {{ summary.deeply_nested_count }} |
+| File Heavy | {{ summary.file_heavy_count }} |
+| Size Heavy | {{ summary.size_heavy_count }} |
+
+### Risk Distribution
+
+| Risk Level | Count |
+|------------|-------|
+| Critical | {{ risk_distribution.critical }} |
+| High | {{ risk_distribution.high }} |
+| Medium | {{ risk_distribution.medium }} |
+| Low | {{ risk_distribution.low }} |
+
+{% if deeply_nested %}
+### Deeply Nested Directories
+
+Directories with excessive nesting depth (may indicate poor organization):
+
+| Directory | Depth | Files (Direct) | Files (Recursive) | Risk |
+|-----------|-------|----------------|-------------------|------|
+{% for dir in deeply_nested %}
+| {{ dir.directory_path }} | {{ dir.depth }} | {{ dir.file_count_direct }} | {{ dir.file_count_recursive }} | {{ dir.risk_level | capitalize }} |
+{% endfor %}
+{% endif %}
+
+{% if file_heavy %}
+### File-Heavy Directories
+
+Directories with unusually high file counts (may need restructuring):
+
+| Directory | Depth | Files (Direct) | Languages | Risk |
+|-----------|-------|----------------|-----------|------|
+{% for dir in file_heavy %}
+| {{ dir.directory_path }} | {{ dir.depth }} | {{ dir.file_count_direct }} | {{ dir.language_count }} | {{ dir.risk_level | capitalize }} |
+{% endfor %}
+{% endif %}
+
+{% if size_heavy %}
+### Size-Heavy Directories
+
+Directories with high size concentration (may contain large assets or generated files):
+
+| Directory | Depth | Size (Direct) | Size Gini | Risk |
+|-----------|-------|---------------|-----------|------|
+{% for dir in size_heavy %}
+| {{ dir.directory_path }} | {{ dir.depth }} | {{ (dir.total_size_bytes_direct / 1024) | round(0) | int }} KB | {{ dir.size_gini | round(2) if dir.size_gini else '-' }} | {{ dir.risk_level | capitalize }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

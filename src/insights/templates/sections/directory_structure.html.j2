@@ -1,0 +1,170 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Directory Structure Quality</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No directory structure data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Repository organization analysis including nesting depth, file concentration, and size distribution.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if structure_health == 'poor' %}critical{% elif structure_health == 'needs_attention' %}warning{% endif %}">
+                <div class="label">Structure Health</div>
+                <div class="value">{{ structure_health | replace('_', ' ') | capitalize }}</div>
+                <div class="sublabel">Overall quality</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Directories</div>
+                <div class="value">{{ summary.total_directories }}</div>
+                <div class="sublabel">Total analyzed</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Max Depth</div>
+                <div class="value">{{ summary.max_depth }}</div>
+                <div class="sublabel">Deepest nesting</div>
+            </div>
+            <div class="metric-card {% if summary.deeply_nested_count > 0 %}warning{% endif %}">
+                <div class="label">Deeply Nested</div>
+                <div class="value">{{ summary.deeply_nested_count }}</div>
+                <div class="sublabel">Directories</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Risk Distribution</h3>
+        <p>Directories by risk level based on depth, file count, and size concentration:</p>
+        <div class="zone-grid">
+            <div class="zone-item critical">
+                <span class="zone-label">Critical</span>
+                <span class="zone-count">{{ risk_distribution.critical }}</span>
+            </div>
+            <div class="zone-item high">
+                <span class="zone-label">High</span>
+                <span class="zone-count">{{ risk_distribution.high }}</span>
+            </div>
+            <div class="zone-item medium">
+                <span class="zone-label">Medium</span>
+                <span class="zone-count">{{ risk_distribution.medium }}</span>
+            </div>
+            <div class="zone-item low">
+                <span class="zone-label">Low</span>
+                <span class="zone-count">{{ risk_distribution.low }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Structure Metrics</h3>
+        <div class="metric-details">
+            <div class="metric-row">
+                <span class="label">Avg Directory Depth:</span>
+                <span class="value">{{ summary.avg_depth }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Deeply Nested:</span>
+                <span class="value {% if summary.deeply_nested_count > 0 %}warning{% endif %}">{{ summary.deeply_nested_count }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">File Heavy:</span>
+                <span class="value {% if summary.file_heavy_count > 0 %}warning{% endif %}">{{ summary.file_heavy_count }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Size Heavy:</span>
+                <span class="value {% if summary.size_heavy_count > 0 %}warning{% endif %}">{{ summary.size_heavy_count }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if deeply_nested %}
+    <div class="subsection">
+        <h3>Deeply Nested Directories</h3>
+        <p>Directories with excessive nesting depth (may indicate poor organization):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th class="number">Depth</th>
+                    <th class="number">Files (Direct)</th>
+                    <th class="number">Files (Recursive)</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in deeply_nested %}
+                <tr class="{{ 'critical-row' if dir.risk_level == 'critical' else 'warning-row' }}">
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path }}</td>
+                    <td class="number">{{ dir.depth }}</td>
+                    <td class="number">{{ dir.file_count_direct }}</td>
+                    <td class="number">{{ dir.file_count_recursive }}</td>
+                    <td class="{{ dir.risk_level }}">{{ dir.risk_level | capitalize }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if file_heavy %}
+    <div class="subsection">
+        <h3>File-Heavy Directories</h3>
+        <p>Directories with unusually high file counts (may need restructuring):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th class="number">Depth</th>
+                    <th class="number">Files (Direct)</th>
+                    <th class="number">Languages</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in file_heavy %}
+                <tr class="{{ 'critical-row' if dir.risk_level == 'critical' else 'warning-row' }}">
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path }}</td>
+                    <td class="number">{{ dir.depth }}</td>
+                    <td class="number">{{ dir.file_count_direct }}</td>
+                    <td class="number">{{ dir.language_count }}</td>
+                    <td class="{{ dir.risk_level }}">{{ dir.risk_level | capitalize }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if size_heavy %}
+    <div class="subsection">
+        <h3>Size-Heavy Directories</h3>
+        <p>Directories with high size concentration (may contain large assets or generated files):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th class="number">Depth</th>
+                    <th class="number">Size (Direct)</th>
+                    <th class="number">Size Gini</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dir in size_heavy %}
+                <tr class="{{ 'critical-row' if dir.risk_level == 'critical' else 'warning-row' }}">
+                    <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path }}</td>
+                    <td class="number">{{ dir.depth }}</td>
+                    <td class="number">{{ (dir.total_size_bytes_direct / 1024) | round(0) | int }} KB</td>
+                    <td class="number">{{ dir.size_gini | round(2) if dir.size_gini else '-' }}</td>
+                    <td class="{{ dir.risk_level }}">{{ dir.risk_level | capitalize }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>
