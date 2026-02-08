@@ -1,7 +1,7 @@
 {
   "tool": "git-fame",
   "version": "3.1.1",
-  "generated_at": "2026-02-08T09:40:28.859020+00:00",
+  "generated_at": "2026-02-08T11:05:16.063398+00:00",
   "description": "Evaluation scorecard for git-fame git analytics",
   "summary": {
     "total_checks": 28,
@@ -171,13 +171,13 @@
           "check_id": "PF-1",
           "name": "PF-1",
           "passed": true,
-          "message": "Completed in 0.55s (threshold: 5.0s)"
+          "message": "Completed in 0.81s (threshold: 5.0s)"
         },
         {
           "check_id": "PF-2",
           "name": "PF-2",
           "passed": true,
-          "message": "Completed in 0.57s (threshold: 30.0s)"
+          "message": "Completed in 0.72s (threshold: 30.0s)"
         },
         {
           "check_id": "PF-3",
@@ -189,7 +189,7 @@
           "check_id": "PF-4",
           "name": "PF-4",
           "passed": true,
-          "message": "Second run 16.1% slower (0.54s -> 0.62s)"
+          "message": "Second run 16.5% slower (0.61s -> 0.71s)"
         }
       ]
     },

@@ -118,7 +118,8 @@ endif
 # Run programmatic evaluation
 evaluate: setup
 	@echo "Running programmatic evaluation..."
-	@$(PYTHON_VENV) scripts/evaluate.py
+	@mkdir -p $(EVAL_OUTPUT_DIR)
+	@$(PYTHON_VENV) scripts/evaluate.py --output $(EVAL_OUTPUT_DIR)/evaluation_report.json
 
 # Run LLM evaluation
 evaluate-llm: setup analyze
