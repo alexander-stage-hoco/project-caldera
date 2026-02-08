@@ -1,0 +1,52 @@
+## Dependency Health
+
+{% if not has_data %}
+*No dependency data available for this run.*
+{% else %}
+
+### Summary
+
+Repository-level dependency health analysis including blast radius and circular dependencies.
+
+| Metric | Value |
+|--------|-------|
+| Health Grade | {{ health_grade }} ({{ health_status }}) |
+| Total Projects | {{ summary.total_projects }} |
+| Unique Packages | {{ summary.unique_packages }} |
+| Project References | {{ summary.total_project_refs }} |
+| Package References | {{ summary.total_package_refs }} |
+| Avg Packages per Project | {{ summary.avg_packages_per_project }} |
+| Max Blast Radius | {{ summary.max_blast_radius }} |
+| Avg Blast Radius | {{ summary.avg_blast_radius }} |
+
+{% if recommendations %}
+### Recommendations
+
+{{ recommendations }}
+{% endif %}
+
+{% if has_circular %}
+### Circular Dependencies Warning
+
+Found **{{ summary.circular_dependency_count }}** circular dependencies{% if summary.critical_cycles > 0 %} ({{ summary.critical_cycles }} critical){% endif %}.
+{% endif %}
+
+{% if has_conflicts %}
+### Version Conflicts Warning
+
+Found **{{ summary.version_conflict_count }}** version conflicts{% if summary.critical_conflicts > 0 %} ({{ summary.critical_conflicts }} critical){% endif %}.
+{% endif %}
+
+{% if blast_radius_items %}
+### Project Blast Radius
+
+Change impact analysis - how many projects are affected when a project changes:
+
+| Project | Path | Affected Projects | Max Depth | Total Paths | Risk |
+|---------|------|-------------------|-----------|-------------|------|
+{% for item in blast_radius_items %}
+| {{ item.target_project or 'N/A' }} | {{ item.target_project_path }} | {{ item.blast_radius_projects }} | {{ item.blast_radius_depth }} | {{ item.total_paths }} | {{ item.blast_radius_risk | capitalize }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

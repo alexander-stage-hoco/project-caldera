@@ -20,6 +20,9 @@ from .function_complexity import FunctionComplexitySection
 from .coupling_analysis import CouplingAnalysisSection
 from .authorship_risk import AuthorshipRiskSection
 from .code_duplication import CodeDuplicationSection
+from .dependency_health import DependencyHealthSection
+from .license_compliance import LicenseComplianceSection
+from .directory_structure import DirectoryStructureSection
 
 __all__ = [
     "BaseSection",
@@ -42,4 +45,7 @@ __all__ = [
     "CouplingAnalysisSection",
     "AuthorshipRiskSection",
     "CodeDuplicationSection",
+    "DependencyHealthSection",
+    "LicenseComplianceSection",
+    "DirectoryStructureSection",
 ]

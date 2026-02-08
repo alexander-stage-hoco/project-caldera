@@ -1,0 +1,117 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>License Compliance</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No license data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>License detection and copyleft risk analysis for compliance review.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if compliance_risk == 'high' %}critical{% elif compliance_risk == 'medium' %}warning{% endif %}">
+                <div class="label">Status</div>
+                <div class="value">{{ compliance_status }}</div>
+                <div class="sublabel">{{ compliance_risk | capitalize }} risk</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Licenses Found</div>
+                <div class="value">{{ summary.total_licenses }}</div>
+                <div class="sublabel">Unique licenses</div>
+            </div>
+            <div class="metric-card {% if has_copyleft %}critical{% endif %}">
+                <div class="label">Copyleft</div>
+                <div class="value">{{ summary.copyleft_count }}</div>
+                <div class="sublabel">Requires review</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Files Affected</div>
+                <div class="value">{{ summary.total_files_affected }}</div>
+                <div class="sublabel">With license info</div>
+            </div>
+        </div>
+    </div>
+
+    {% if has_copyleft %}
+    <div class="alert critical">
+        <h4>Copyleft Licenses Detected</h4>
+        <p>Found {{ summary.copyleft_count }} copyleft license(s) that may require source code disclosure.
+        Legal review recommended before distribution.</p>
+        <ul>
+        {% for lic in copyleft_licenses %}
+            <li><strong>{{ lic.spdx_id }}</strong> - {{ lic.files_affected }} file(s) affected ({{ (lic.avg_confidence * 100) | round(0) }}% confidence)</li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if has_weak_copyleft and not has_copyleft %}
+    <div class="alert warning">
+        <h4>Weak Copyleft Licenses Detected</h4>
+        <p>Found {{ summary.weak_copyleft_count }} weak copyleft license(s) (e.g., LGPL).
+        Review recommended for linking requirements.</p>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>License Distribution</h3>
+        <div class="metric-details">
+            <div class="metric-row">
+                <span class="label">Permissive:</span>
+                <span class="value">{{ summary.permissive_count }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Copyleft:</span>
+                <span class="value critical">{{ summary.copyleft_count }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Weak Copyleft:</span>
+                <span class="value warning">{{ summary.weak_copyleft_count }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Unknown:</span>
+                <span class="value">{{ summary.unknown_count }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Avg Detection Confidence:</span>
+                <span class="value">{{ (avg_confidence * 100) | round(0) }}%</span>
+            </div>
+        </div>
+    </div>
+
+    {% if licenses %}
+    <div class="subsection">
+        <h3>All Detected Licenses</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>License (SPDX)</th>
+                    <th>Category</th>
+                    <th class="number">Detections</th>
+                    <th class="number">Files</th>
+                    <th class="number">Directories</th>
+                    <th class="number">Confidence</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lic in licenses %}
+                <tr class="{% if lic.category == 'copyleft' %}critical-row{% elif lic.category == 'weak_copyleft' %}warning-row{% endif %}">
+                    <td>{{ lic.spdx_id }}</td>
+                    <td>{{ lic.category | replace('_', ' ') | capitalize }}</td>
+                    <td class="number">{{ lic.detection_count }}</td>
+                    <td class="number">{{ lic.files_affected }}</td>
+                    <td class="number">{{ lic.directories_affected }}</td>
+                    <td class="number">{{ (lic.avg_confidence * 100) | round(0) }}%</td>
+                    <td class="{{ lic.risk_level }}">{{ lic.risk_level | capitalize }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

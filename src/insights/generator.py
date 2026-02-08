@@ -34,6 +34,9 @@ from .sections.function_complexity import FunctionComplexitySection
 from .sections.coupling_analysis import CouplingAnalysisSection
 from .sections.authorship_risk import AuthorshipRiskSection
 from .sections.code_duplication import CodeDuplicationSection
+from .sections.dependency_health import DependencyHealthSection
+from .sections.license_compliance import LicenseComplianceSection
+from .sections.directory_structure import DirectoryStructureSection
 
 
 class InsightsGenerator:
@@ -45,8 +48,10 @@ class InsightsGenerator:
         "tool_coverage_dashboard": ToolCoverageDashboardSection,
         "executive_summary": ExecutiveSummarySection,
         "composite_risk": CompositeRiskSection,
+        "dependency_health": DependencyHealthSection,
         "function_complexity": FunctionComplexitySection,
         "repo_health": RepoHealthSection,
+        "directory_structure": DirectoryStructureSection,
         "file_hotspots": FileHotspotsSection,
         "directory_analysis": DirectoryAnalysisSection,
         "vulnerabilities": VulnerabilitiesSection,
@@ -61,6 +66,7 @@ class InsightsGenerator:
         "iac_misconfigs": IacMisconfigsSection,
         "module_health": ModuleHealthSection,
         "code_inequality": CodeInequalitySection,
+        "license_compliance": LicenseComplianceSection,
     }
 
     def __init__(

@@ -1,0 +1,114 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Dependency Health</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No dependency data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Repository-level dependency health analysis including blast radius and circular dependencies.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if health_status == 'critical' %}critical{% elif health_status == 'warning' %}warning{% endif %}">
+                <div class="label">Health Grade</div>
+                <div class="value">{{ health_grade }}</div>
+                <div class="sublabel">{{ health_status | capitalize }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Projects</div>
+                <div class="value">{{ summary.total_projects }}</div>
+                <div class="sublabel">Total analyzed</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Packages</div>
+                <div class="value">{{ summary.unique_packages }}</div>
+                <div class="sublabel">Unique dependencies</div>
+            </div>
+            <div class="metric-card {% if summary.max_blast_radius > 3 %}warning{% endif %}">
+                <div class="label">Max Blast Radius</div>
+                <div class="value">{{ summary.max_blast_radius }}</div>
+                <div class="sublabel">Projects affected</div>
+            </div>
+        </div>
+    </div>
+
+    {% if recommendations %}
+    <div class="subsection">
+        <h3>Recommendations</h3>
+        <p>{{ recommendations }}</p>
+    </div>
+    {% endif %}
+
+    {% if has_circular %}
+    <div class="alert warning">
+        <h4>Circular Dependencies Detected</h4>
+        <p>Found {{ summary.circular_dependency_count }} circular dependencies
+        {% if summary.critical_cycles > 0 %} ({{ summary.critical_cycles }} critical){% endif %}.</p>
+    </div>
+    {% endif %}
+
+    {% if has_conflicts %}
+    <div class="alert warning">
+        <h4>Version Conflicts Detected</h4>
+        <p>Found {{ summary.version_conflict_count }} version conflicts
+        {% if summary.critical_conflicts > 0 %} ({{ summary.critical_conflicts }} critical){% endif %}.</p>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Dependency Metrics</h3>
+        <div class="metric-details">
+            <div class="metric-row">
+                <span class="label">Project References:</span>
+                <span class="value">{{ summary.total_project_refs }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Package References:</span>
+                <span class="value">{{ summary.total_package_refs }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Avg Packages per Project:</span>
+                <span class="value">{{ summary.avg_packages_per_project }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Avg Blast Radius:</span>
+                <span class="value">{{ summary.avg_blast_radius }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if blast_radius_items %}
+    <div class="subsection">
+        <h3>Project Blast Radius</h3>
+        <p>Change impact analysis - how many projects are affected when a project changes:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Path</th>
+                    <th class="number">Affected Projects</th>
+                    <th class="number">Max Depth</th>
+                    <th class="number">Total Paths</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for item in blast_radius_items %}
+                <tr class="{% if item.blast_radius_risk == 'high' or item.blast_radius_risk == 'critical' %}warning-row{% endif %}">
+                    <td class="truncate" title="{{ item.target_project or 'N/A' }}">{{ item.target_project or 'N/A' }}</td>
+                    <td class="truncate" title="{{ item.target_project_path }}">{{ item.target_project_path | truncate_path }}</td>
+                    <td class="number">{{ item.blast_radius_projects }}</td>
+                    <td class="number">{{ item.blast_radius_depth }}</td>
+                    <td class="number">{{ item.total_paths }}</td>
+                    <td class="{{ item.blast_radius_risk }}">{{ item.blast_radius_risk | capitalize }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

@@ -1,0 +1,56 @@
+## License Compliance
+
+{% if not has_data %}
+*No license data available for this run.*
+{% else %}
+
+### Summary
+
+License detection and copyleft risk analysis for compliance review.
+
+| Metric | Value |
+|--------|-------|
+| Compliance Status | **{{ compliance_status }}** ({{ compliance_risk }} risk) |
+| Licenses Found | {{ summary.total_licenses }} |
+| Total Detections | {{ summary.total_detections }} |
+| Files Affected | {{ summary.total_files_affected }} |
+| Avg Confidence | {{ (avg_confidence * 100) | round(0) }}% |
+
+{% if has_copyleft %}
+### Copyleft Licenses - REVIEW REQUIRED
+
+Found **{{ summary.copyleft_count }}** copyleft license(s) that may require source code disclosure.
+Legal review recommended before distribution.
+
+{% for lic in copyleft_licenses %}
+- **{{ lic.spdx_id }}** - {{ lic.files_affected }} file(s) affected ({{ (lic.avg_confidence * 100) | round(0) }}% confidence)
+{% endfor %}
+{% endif %}
+
+{% if has_weak_copyleft and not has_copyleft %}
+### Weak Copyleft Licenses - Review Recommended
+
+Found **{{ summary.weak_copyleft_count }}** weak copyleft license(s) (e.g., LGPL).
+Review recommended for linking requirements.
+{% endif %}
+
+### License Distribution
+
+| Category | Count |
+|----------|-------|
+| Permissive | {{ summary.permissive_count }} |
+| Copyleft | {{ summary.copyleft_count }} |
+| Weak Copyleft | {{ summary.weak_copyleft_count }} |
+| Unknown | {{ summary.unknown_count }} |
+
+{% if licenses %}
+### All Detected Licenses
+
+| License (SPDX) | Category | Detections | Files | Directories | Confidence | Risk |
+|----------------|----------|------------|-------|-------------|------------|------|
+{% for lic in licenses %}
+| {{ lic.spdx_id }} | {{ lic.category | replace('_', ' ') | capitalize }} | {{ lic.detection_count }} | {{ lic.files_affected }} | {{ lic.directories_affected }} | {{ (lic.avg_confidence * 100) | round(0) }}% | {{ lic.risk_level | capitalize }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}
