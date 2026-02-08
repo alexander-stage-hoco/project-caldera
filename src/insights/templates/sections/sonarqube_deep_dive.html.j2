@@ -1,0 +1,323 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>SonarQube Deep Dive</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No SonarQube data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Overview</h3>
+        <p>Comprehensive analysis of SonarQube findings including cognitive complexity, issue categorization, and effort estimation.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if health_grade in ('D', 'F') %}danger{% elif health_grade == 'C' %}warning{% endif %}">
+                <div class="label">Health Score</div>
+                <div class="value">{{ health_score }} <span class="grade">({{ health_grade }})</span></div>
+                <div class="sublabel">0-100, higher is better</div>
+            </div>
+            <div class="metric-card {% if summary.total_issues > 100 %}warning{% endif %}">
+                <div class="label">Total Issues</div>
+                <div class="value">{{ "{:,}".format(summary.total_issues or 0) }}</div>
+                <div class="sublabel">Across {{ "{:,}".format(summary.total_files or 0) }} files</div>
+            </div>
+            <div class="metric-card {% if cognitive_analysis.critical_count > 0 %}danger{% elif cognitive_analysis.high_count > 0 %}warning{% endif %}">
+                <div class="label">Cognitive Complexity</div>
+                <div class="value">{{ cognitive_analysis.average or 0 }}</div>
+                <div class="sublabel">Average per file</div>
+            </div>
+            <div class="metric-card {% if effort_metrics.total_days > 5 %}warning{% endif %}">
+                <div class="label">Est. Remediation Effort</div>
+                <div class="value">{{ effort_metrics.total_days }} days</div>
+                <div class="sublabel">{{ "{:,}".format(effort_metrics.total_minutes) }} minutes total</div>
+            </div>
+        </div>
+    </div>
+
+    {% if has_issues %}
+    <div class="subsection">
+        <h3>Issue Type Breakdown</h3>
+        <p>SonarQube categorizes findings into distinct types:</p>
+        <div class="stat-grid">
+            <div class="stat-item {% if summary.total_bugs > 0 %}danger{% endif %}">
+                <span class="label">Bugs:</span> {{ "{:,}".format(summary.total_bugs or 0) }}
+            </div>
+            <div class="stat-item {% if summary.total_vulnerabilities > 0 %}danger{% endif %}">
+                <span class="label">Vulnerabilities:</span> {{ "{:,}".format(summary.total_vulnerabilities or 0) }}
+            </div>
+            <div class="stat-item">
+                <span class="label">Code Smells:</span> {{ "{:,}".format(summary.total_code_smells or 0) }}
+            </div>
+            <div class="stat-item">
+                <span class="label">Security Hotspots:</span> {{ "{:,}".format(summary.total_security_hotspots or 0) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Severity Distribution</h3>
+        <div class="stat-grid">
+            <div class="stat-item {% if severity_distribution.blocker > 0 %}danger{% endif %}">
+                <span class="label">Blocker:</span> {{ "{:,}".format(severity_distribution.blocker) }}
+            </div>
+            <div class="stat-item {% if severity_distribution.critical > 0 %}danger{% endif %}">
+                <span class="label">Critical:</span> {{ "{:,}".format(severity_distribution.critical) }}
+            </div>
+            <div class="stat-item {% if severity_distribution.major > 0 %}warning{% endif %}">
+                <span class="label">Major:</span> {{ "{:,}".format(severity_distribution.major) }}
+            </div>
+            <div class="stat-item">
+                <span class="label">Minor:</span> {{ "{:,}".format(severity_distribution.minor) }}
+            </div>
+            <div class="stat-item">
+                <span class="label">Info:</span> {{ "{:,}".format(severity_distribution.info) }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if has_cognitive_data %}
+    <div class="subsection">
+        <h3>Cognitive Complexity Analysis</h3>
+        <p>Cognitive complexity measures how difficult code is to understand. High values indicate code that is hard to maintain and prone to bugs.</p>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="label">Total</div>
+                <div class="value">{{ "{:,}".format(cognitive_analysis.total) }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Average</div>
+                <div class="value">{{ cognitive_analysis.average }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Maximum</div>
+                <div class="value">{{ cognitive_analysis.max }}</div>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Level</th>
+                    <th>Threshold</th>
+                    <th class="number">Files</th>
+                    <th class="number">% of Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="critical-row">
+                    <td><span class="badge badge-critical">Critical</span></td>
+                    <td>&ge; {{ cognitive_analysis.thresholds.critical }}</td>
+                    <td class="number">{{ cognitive_analysis.critical_count }}</td>
+                    <td class="number">{{ cognitive_analysis.critical_pct }}%</td>
+                </tr>
+                <tr class="warning-row">
+                    <td><span class="badge badge-high">High</span></td>
+                    <td>&ge; {{ cognitive_analysis.thresholds.high }}</td>
+                    <td class="number">{{ cognitive_analysis.high_count }}</td>
+                    <td class="number">{{ cognitive_analysis.high_pct }}%</td>
+                </tr>
+                <tr class="info-row">
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td>&ge; {{ cognitive_analysis.thresholds.medium }}</td>
+                    <td class="number">{{ cognitive_analysis.medium_count }}</td>
+                    <td class="number">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% if cognitive_hotspots %}
+    <div class="subsection">
+        <h3>Top Cognitive Complexity Files</h3>
+        <p>Files with the highest cognitive complexity scores:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Cognitive</th>
+                    <th class="number">Cyclomatic</th>
+                    <th class="number">NCLOC</th>
+                    <th class="number">Issues</th>
+                    <th>Level</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in cognitive_hotspots[:15] %}
+                <tr class="{% if f.complexity_level == 'critical' %}critical-row{% elif f.complexity_level == 'high' %}warning-row{% else %}info-row{% endif %}">
+                    <td class="truncate" title="{{ f.relative_path }}">{{ f.relative_path | truncate(60) }}</td>
+                    <td class="number">{{ f.cognitive_complexity }}</td>
+                    <td class="number">{{ f.cyclomatic_complexity or '-' }}</td>
+                    <td class="number">{{ f.ncloc or '-' }}</td>
+                    <td class="number">{{ f.issue_count }}</td>
+                    <td><span class="badge badge-{{ f.complexity_level }}">{{ f.complexity_level }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if hotspot_files %}
+    <div class="subsection">
+        <h3>Hotspot Files</h3>
+        <p>Files with the most severe issues, ranked by risk score:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Issues</th>
+                    <th class="number">Bugs</th>
+                    <th class="number">Vulns</th>
+                    <th class="number">Smells</th>
+                    <th class="number">Blocker</th>
+                    <th class="number">Critical</th>
+                    <th class="number">Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in hotspot_files[:15] %}
+                <tr class="{% if f.severity_blocker > 0 %}critical-row{% elif f.severity_critical > 0 %}warning-row{% else %}info-row{% endif %}">
+                    <td class="truncate" title="{{ f.relative_path }}">{{ f.relative_path | truncate(50) }}</td>
+                    <td class="number">{{ f.issue_count }}</td>
+                    <td class="number">{{ f.type_bug }}</td>
+                    <td class="number">{{ f.type_vulnerability }}</td>
+                    <td class="number">{{ f.type_code_smell }}</td>
+                    <td class="number">{{ f.severity_blocker }}</td>
+                    <td class="number">{{ f.severity_critical }}</td>
+                    <td class="number">{{ f.risk_score }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if rule_hotspots %}
+    <div class="subsection">
+        <h3>Rule Hotspots</h3>
+        <p>Most impactful rules ranked by issue count and severity:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rule ID</th>
+                    <th>Type</th>
+                    <th class="number">Issues</th>
+                    <th class="number">Files</th>
+                    <th class="number">Open</th>
+                    <th class="number">Effort (min)</th>
+                    <th class="number">Impact</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for r in rule_hotspots[:15] %}
+                <tr class="{% if r.risk_level == 'critical' %}critical-row{% elif r.risk_level == 'high' %}warning-row{% else %}info-row{% endif %}">
+                    <td class="truncate" title="{{ r.rule_id }}">{{ r.rule_id | truncate(40) }}</td>
+                    <td>{{ r.issue_type }}</td>
+                    <td class="number">{{ "{:,}".format(r.issue_count) }}</td>
+                    <td class="number">{{ r.files_affected }}</td>
+                    <td class="number">{{ r.open_count }}</td>
+                    <td class="number">{{ r.total_effort_minutes or 0 }}</td>
+                    <td class="number">{{ r.impact_score }}</td>
+                    <td><span class="badge badge-{{ r.risk_level }}">{{ r.risk_level }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if effort_metrics.total_minutes > 0 %}
+    <div class="subsection">
+        <h3>Effort Estimation</h3>
+        <p>Estimated time to remediate all issues based on SonarQube effort analysis:</p>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="label">Total Effort</div>
+                <div class="value">{{ effort_metrics.total_days }} days</div>
+                <div class="sublabel">{{ "{:,}".format(effort_metrics.total_hours) }} hours</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Rules Analyzed</div>
+                <div class="value">{{ rule_stats.total_rules }}</div>
+                <div class="sublabel">{{ rule_stats.critical_rules }} critical, {{ rule_stats.high_rules }} high</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Open Issues</div>
+                <div class="value">{{ "{:,}".format(rule_stats.total_open) }}</div>
+                <div class="sublabel">Requiring attention</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Avg per Rule</div>
+                <div class="value">{{ effort_metrics.avg_per_rule }} min</div>
+                <div class="sublabel">Remediation time</div>
+            </div>
+        </div>
+
+        {% if effort_metrics.top_effort_rules %}
+        <h4>Top Rules by Effort</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rule ID</th>
+                    <th>Type</th>
+                    <th class="number">Issues</th>
+                    <th class="number">Effort (min)</th>
+                    <th class="number">Avg (min)</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for r in effort_metrics.top_effort_rules %}
+                <tr>
+                    <td class="truncate" title="{{ r.rule_id }}">{{ r.rule_id | truncate(50) }}</td>
+                    <td>{{ r.issue_type }}</td>
+                    <td class="number">{{ "{:,}".format(r.issue_count) }}</td>
+                    <td class="number">{{ "{:,}".format(r.total_effort_minutes or 0) }}</td>
+                    <td class="number">{{ r.avg_effort_minutes or 0 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Health Score Methodology</h3>
+        <p>The health score (0-100) is calculated based on:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Factor</th>
+                    <th>Weight</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Issue Density</td>
+                    <td>30%</td>
+                    <td>Issues per 1,000 lines of code</td>
+                </tr>
+                <tr>
+                    <td>Severity Mix</td>
+                    <td>30%</td>
+                    <td>Weighted by blocker, critical, major</td>
+                </tr>
+                <tr>
+                    <td>Bugs & Vulnerabilities</td>
+                    <td>20%</td>
+                    <td>Bug and vulnerability count relative to file count</td>
+                </tr>
+                <tr>
+                    <td>Cognitive Complexity</td>
+                    <td>20%</td>
+                    <td>Files with critical/high cognitive complexity</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% endif %}
+</section>

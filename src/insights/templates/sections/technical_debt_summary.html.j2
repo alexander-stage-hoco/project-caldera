@@ -1,0 +1,167 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Technical Debt Summary</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No technical debt data available. This section requires file metrics data from analysis tools.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Overall Debt Assessment</h3>
+        <p>Aggregated view of technical debt across complexity, duplication, code smells, coverage gaps, and file size.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if overall_grade == 'F' %}critical{% elif overall_grade == 'D' %}warning{% elif overall_grade == 'C' %}info{% endif %}">
+                <div class="label">Debt Grade</div>
+                <div class="value">{{ overall_grade }}</div>
+                <div class="sublabel">Score: {{ overall_score }}/100</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Total Files</div>
+                <div class="value">{{ summary.total_files | format_number }}</div>
+                <div class="sublabel">Analyzed</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Total LOC</div>
+                <div class="value">{{ summary.total_loc | format_number }}</div>
+                <div class="sublabel">Lines of code</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Debt Hotspots</div>
+                <div class="value">{{ hotspots | length }}</div>
+                <div class="sublabel">Files needing attention</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Debt by Category</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th class="number">Score</th>
+                    <th class="number">Critical</th>
+                    <th class="number">High</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="{% if categories.complexity.score >= 60 %}critical-row{% elif categories.complexity.score >= 40 %}warning-row{% endif %}">
+                    <td>Complexity</td>
+                    <td class="number">{{ categories.complexity.score | round(1) }}</td>
+                    <td class="number">{{ categories.complexity.critical }}</td>
+                    <td class="number">{{ categories.complexity.high }}</td>
+                    <td>{{ categories.complexity.medium }} medium complexity files</td>
+                </tr>
+                <tr class="{% if categories.duplication.score >= 60 %}critical-row{% elif categories.duplication.score >= 40 %}warning-row{% endif %}">
+                    <td>Duplication</td>
+                    <td class="number">{{ categories.duplication.score | round(1) }}</td>
+                    <td class="number">{{ categories.duplication.critical }}</td>
+                    <td class="number">{{ categories.duplication.high }}</td>
+                    <td>{{ categories.duplication.total_lines | format_number }} duplicate lines</td>
+                </tr>
+                <tr class="{% if categories.code_smells.score >= 60 %}critical-row{% elif categories.code_smells.score >= 40 %}warning-row{% endif %}">
+                    <td>Code Smells</td>
+                    <td class="number">{{ categories.code_smells.score | round(1) }}</td>
+                    <td class="number">{{ categories.code_smells.high_plus }}</td>
+                    <td class="number">-</td>
+                    <td>{{ categories.code_smells.sonarqube }} SonarQube smells</td>
+                </tr>
+                <tr class="{% if categories.coverage_gaps.score >= 60 %}critical-row{% elif categories.coverage_gaps.score >= 40 %}warning-row{% endif %}">
+                    <td>Coverage Gaps</td>
+                    <td class="number">{{ categories.coverage_gaps.score | round(1) }}</td>
+                    <td class="number">{{ categories.coverage_gaps.critical }}</td>
+                    <td class="number">{{ categories.coverage_gaps.high }}</td>
+                    <td>{% if categories.coverage_gaps.avg_coverage %}Avg {{ categories.coverage_gaps.avg_coverage }}% coverage{% else %}No coverage data{% endif %}</td>
+                </tr>
+                <tr class="{% if categories.size.score >= 60 %}critical-row{% elif categories.size.score >= 40 %}warning-row{% endif %}">
+                    <td>File Size</td>
+                    <td class="number">{{ categories.size.score | round(1) }}</td>
+                    <td class="number">{{ categories.size.critical }}</td>
+                    <td class="number">{{ categories.size.high }}</td>
+                    <td>Files exceeding size thresholds</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% if priorities %}
+    <div class="subsection">
+        <h3>Remediation Priorities</h3>
+        <p>Recommended actions based on debt severity:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th class="number">#</th>
+                    <th>Category</th>
+                    <th class="number">Score</th>
+                    <th>Recommended Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for priority in priorities %}
+                <tr>
+                    <td class="number">{{ loop.index }}</td>
+                    <td>{{ priority.category | replace('_', ' ') | title }}</td>
+                    <td class="number">{{ priority.score }}</td>
+                    <td>{{ priority.action }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if hotspots %}
+    <div class="subsection">
+        <h3>Top Debt Hotspots</h3>
+        <p>Files with the highest combined debt scores:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Debt Score</th>
+                    <th>Primary Debt</th>
+                    <th class="number">CCN</th>
+                    <th class="number">Dup Lines</th>
+                    <th class="number">Issues</th>
+                    <th class="number">Coverage</th>
+                    <th class="number">LOC</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in hotspots %}
+                <tr class="{% if file.debt_score >= 50 %}critical-row{% elif file.debt_score >= 30 %}warning-row{% endif %}">
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.debt_score }}</td>
+                    <td>{{ file.primary_debt_type | replace('_', ' ') | title }}</td>
+                    <td class="number">{{ file.complexity_max or '-' }}</td>
+                    <td class="number">{{ file.duplicate_lines or '-' }}</td>
+                    <td class="number">{{ file.high_plus_issues or '-' }}</td>
+                    <td class="number">{% if file.coverage_statement_pct is not none %}{{ file.coverage_statement_pct | round(1) }}%{% else %}-{% endif %}</td>
+                    <td class="number">{{ file.loc_code | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if hotspots_by_type %}
+    <div class="subsection">
+        <h3>Hotspots by Debt Type</h3>
+        <div class="metric-grid">
+            {% for dtype, files in hotspots_by_type.items() %}
+            <div class="metric-card">
+                <div class="label">{{ dtype | replace('_', ' ') | title }}</div>
+                <div class="value">{{ files | length }}</div>
+                <div class="sublabel">files</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

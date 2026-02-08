@@ -1,0 +1,57 @@
+## Coverage Gap Analysis
+
+{% if not has_data %}
+*No coverage gap data available. This section requires both complexity (lizard) and coverage (dotcover) data.*
+{% else %}
+
+### Summary
+
+Files with high cyclomatic complexity but low test coverage represent the highest-risk untested code paths.
+
+| Metric | Value |
+|--------|-------|
+| Critical (CCN ≥30, Coverage <40%) | {{ summary.critical_count }} |
+| High (CCN ≥20, Coverage <60%) | {{ summary.high_count }} |
+| Medium (CCN ≥10, Coverage <80%) | {{ summary.medium_count }} |
+| Total Files Below 80% | {{ summary.total_files }} |
+| Avg Coverage (flagged files) | {{ summary.avg_coverage }}% |
+| Avg Max CCN (flagged files) | {{ summary.avg_complexity }} |
+| Uncovered Statements at Risk | {{ summary.total_statements_at_risk }} |
+
+{% if has_critical and critical_hotspots %}
+### Critical Coverage Gaps
+
+Files with CCN ≥30 and coverage below 40% - highest risk untested complexity:
+
+| File | Max CCN | Total CCN | Coverage % | Gap to 80% | Stmts Needed | Risk Score |
+|------|---------|-----------|------------|------------|--------------|------------|
+{% for file in critical_hotspots %}
+| {{ file.relative_path }} | {{ file.complexity_max }} | {{ file.complexity_total_ccn }} | {{ file.coverage_statement_pct | round(1) }}% | {{ file.gap_to_target | round(1) }}% | {{ file.statements_needed | int }} | {{ file.risk_score }} |
+{% endfor %}
+{% endif %}
+
+{% if has_high and high_hotspots %}
+### High Coverage Gaps
+
+Files with CCN ≥20 and coverage below 60%:
+
+| File | Max CCN | Total CCN | Coverage % | Gap to 80% | Risk Score |
+|------|---------|-----------|------------|------------|------------|
+{% for file in high_hotspots %}
+| {{ file.relative_path }} | {{ file.complexity_max }} | {{ file.complexity_total_ccn }} | {{ file.coverage_statement_pct | round(1) }}% | {{ file.gap_to_target | round(1) }}% | {{ file.risk_score }} |
+{% endfor %}
+{% endif %}
+
+{% if hotspots and not has_critical and not has_high %}
+### Medium Coverage Gaps
+
+Files with moderate complexity and coverage below 80%:
+
+| File | Max CCN | Coverage % | Gap to 80% | Risk Score |
+|------|---------|------------|------------|------------|
+{% for file in hotspots[:15] %}
+| {{ file.relative_path }} | {{ file.complexity_max }} | {{ file.coverage_statement_pct | round(1) }}% | {{ file.gap_to_target | round(1) }}% | {{ file.risk_score }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

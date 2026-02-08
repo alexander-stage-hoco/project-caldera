@@ -1,0 +1,56 @@
+## Technical Debt Summary
+
+{% if not has_data %}
+*No technical debt data available. This section requires file metrics data from analysis tools.*
+{% else %}
+
+### Overall Debt Assessment
+
+Aggregated view of technical debt across complexity, duplication, code smells, coverage gaps, and file size.
+
+| Metric | Value |
+|--------|-------|
+| Debt Grade | **{{ overall_grade }}** (Score: {{ overall_score }}/100) |
+| Total Files | {{ summary.total_files }} |
+| Total LOC | {{ summary.total_loc }} |
+| Debt Hotspots | {{ hotspots | length }} files |
+
+### Debt by Category
+
+| Category | Score | Critical | High | Details |
+|----------|-------|----------|------|---------|
+| Complexity | {{ categories.complexity.score | round(1) }} | {{ categories.complexity.critical }} | {{ categories.complexity.high }} | {{ categories.complexity.medium }} medium |
+| Duplication | {{ categories.duplication.score | round(1) }} | {{ categories.duplication.critical }} | {{ categories.duplication.high }} | {{ categories.duplication.total_lines }} dup lines |
+| Code Smells | {{ categories.code_smells.score | round(1) }} | {{ categories.code_smells.high_plus }} | - | {{ categories.code_smells.sonarqube }} SonarQube |
+| Coverage Gaps | {{ categories.coverage_gaps.score | round(1) }} | {{ categories.coverage_gaps.critical }} | {{ categories.coverage_gaps.high }} | {% if categories.coverage_gaps.avg_coverage %}{{ categories.coverage_gaps.avg_coverage }}% avg{% else %}No data{% endif %} |
+| File Size | {{ categories.size.score | round(1) }} | {{ categories.size.critical }} | {{ categories.size.high }} | Oversized files |
+
+{% if priorities %}
+### Remediation Priorities
+
+| # | Category | Score | Recommended Action |
+|---|----------|-------|-------------------|
+{% for priority in priorities %}
+| {{ loop.index }} | {{ priority.category | replace('_', ' ') | title }} | {{ priority.score }} | {{ priority.action }} |
+{% endfor %}
+{% endif %}
+
+{% if hotspots %}
+### Top Debt Hotspots
+
+| File | Debt Score | Primary Debt | CCN | Dup Lines | Issues | Coverage | LOC |
+|------|------------|--------------|-----|-----------|--------|----------|-----|
+{% for file in hotspots %}
+| {{ file.relative_path }} | {{ file.debt_score }} | {{ file.primary_debt_type | replace('_', ' ') }} | {{ file.complexity_max or '-' }} | {{ file.duplicate_lines or '-' }} | {{ file.high_plus_issues or '-' }} | {% if file.coverage_statement_pct is not none %}{{ file.coverage_statement_pct | round(1) }}%{% else %}-{% endif %} | {{ file.loc_code }} |
+{% endfor %}
+{% endif %}
+
+{% if hotspots_by_type %}
+### Hotspots by Debt Type
+
+{% for dtype, files in hotspots_by_type.items() %}
+- **{{ dtype | replace('_', ' ') | title }}**: {{ files | length }} files
+{% endfor %}
+{% endif %}
+
+{% endif %}

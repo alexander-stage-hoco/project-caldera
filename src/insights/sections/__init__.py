@@ -26,6 +26,9 @@ from .directory_structure import DirectoryStructureSection
 from .blast_radius import BlastRadiusSection
 from .code_size_hotspots import CodeSizeHotspotsSection
 from .code_quality_rules import CodeQualityRulesSection
+from .coverage_gap import CoverageGapSection
+from .technical_debt_summary import TechnicalDebtSummarySection
+from .sonarqube_deep_dive import SonarQubeDeepDiveSection
 from .secrets import SecretsSection
 from .tool_readiness import ToolReadinessSection
 from .tool_coverage_dashboard import ToolCoverageDashboardSection
@@ -57,6 +60,9 @@ __all__ = [
     "BlastRadiusSection",
     "CodeSizeHotspotsSection",
     "CodeQualityRulesSection",
+    "CoverageGapSection",
+    "TechnicalDebtSummarySection",
+    "SonarQubeDeepDiveSection",
     "SecretsSection",
     "ToolReadinessSection",
     "ToolCoverageDashboardSection",

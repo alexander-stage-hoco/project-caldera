@@ -1,0 +1,148 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Coverage Gap Analysis</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No coverage gap data available. This section requires both complexity (lizard) and coverage (dotcover) data.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Files with high cyclomatic complexity but low test coverage represent the highest-risk untested code paths.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">CCN ≥30, Coverage &lt;40%</div>
+            </div>
+            <div class="metric-card {% if summary.high_count > 0 %}warning{% endif %}">
+                <div class="label">High</div>
+                <div class="value">{{ summary.high_count }}</div>
+                <div class="sublabel">CCN ≥20, Coverage &lt;60%</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Medium</div>
+                <div class="value">{{ summary.medium_count }}</div>
+                <div class="sublabel">CCN ≥10, Coverage &lt;80%</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Files Below 80%</div>
+                <div class="value">{{ summary.total_files }}</div>
+                <div class="sublabel">With complexity ≥5</div>
+            </div>
+        </div>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="label">Avg Coverage</div>
+                <div class="value">{{ summary.avg_coverage }}%</div>
+                <div class="sublabel">Among flagged files</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Avg Max CCN</div>
+                <div class="value">{{ summary.avg_complexity }}</div>
+                <div class="sublabel">Among flagged files</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Statements at Risk</div>
+                <div class="value">{{ summary.total_statements_at_risk | format_number }}</div>
+                <div class="sublabel">Uncovered statements</div>
+            </div>
+        </div>
+    </div>
+
+    {% if has_critical and critical_hotspots %}
+    <div class="subsection">
+        <h3>Critical Coverage Gaps</h3>
+        <p>Files with CCN ≥30 and coverage below 40% - highest risk untested complexity:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Max CCN</th>
+                    <th class="number">Total CCN</th>
+                    <th class="number">Coverage %</th>
+                    <th class="number">Gap to 80%</th>
+                    <th class="number">Stmts Needed</th>
+                    <th class="number">Risk Score</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in critical_hotspots %}
+                <tr class="critical-row">
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.complexity_max }}</td>
+                    <td class="number">{{ file.complexity_total_ccn }}</td>
+                    <td class="number">{{ file.coverage_statement_pct | round(1) }}%</td>
+                    <td class="number">{{ file.gap_to_target | round(1) }}%</td>
+                    <td class="number">{{ file.statements_needed | int }}</td>
+                    <td class="number">{{ file.risk_score }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if has_high and high_hotspots %}
+    <div class="subsection">
+        <h3>High Coverage Gaps</h3>
+        <p>Files with CCN ≥20 and coverage below 60%:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Max CCN</th>
+                    <th class="number">Total CCN</th>
+                    <th class="number">Coverage %</th>
+                    <th class="number">Gap to 80%</th>
+                    <th class="number">Risk Score</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in high_hotspots %}
+                <tr class="warning-row">
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.complexity_max }}</td>
+                    <td class="number">{{ file.complexity_total_ccn }}</td>
+                    <td class="number">{{ file.coverage_statement_pct | round(1) }}%</td>
+                    <td class="number">{{ file.gap_to_target | round(1) }}%</td>
+                    <td class="number">{{ file.risk_score }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if hotspots and not has_critical and not has_high %}
+    <div class="subsection">
+        <h3>Medium Coverage Gaps</h3>
+        <p>Files with moderate complexity and coverage below 80%:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Max CCN</th>
+                    <th class="number">Coverage %</th>
+                    <th class="number">Gap to 80%</th>
+                    <th class="number">Risk Score</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in hotspots[:15] %}
+                <tr>
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.complexity_max }}</td>
+                    <td class="number">{{ file.coverage_statement_pct | round(1) }}%</td>
+                    <td class="number">{{ file.gap_to_target | round(1) }}%</td>
+                    <td class="number">{{ file.risk_score }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

@@ -1,0 +1,110 @@
+## SonarQube Deep Dive
+
+{% if not has_data %}
+*No SonarQube data available for this run.*
+{% else %}
+
+### Overview
+
+Comprehensive analysis of SonarQube findings including cognitive complexity, issue categorization, and effort estimation.
+
+| Metric | Value |
+|--------|-------|
+| Health Score | {{ health_score }} ({{ health_grade }}) |
+| Total Issues | {{ "{:,}".format(summary.total_issues or 0) }} |
+| Files Analyzed | {{ "{:,}".format(summary.total_files or 0) }} |
+| Avg Cognitive Complexity | {{ cognitive_analysis.average or 0 }} |
+| Est. Remediation Effort | {{ effort_metrics.total_days }} days |
+
+{% if has_issues %}
+### Issue Type Breakdown
+
+| Type | Count |
+|------|-------|
+| Bugs | {{ "{:,}".format(summary.total_bugs or 0) }} |
+| Vulnerabilities | {{ "{:,}".format(summary.total_vulnerabilities or 0) }} |
+| Code Smells | {{ "{:,}".format(summary.total_code_smells or 0) }} |
+| Security Hotspots | {{ "{:,}".format(summary.total_security_hotspots or 0) }} |
+
+### Severity Distribution
+
+| Severity | Count |
+|----------|-------|
+| Blocker | {{ "{:,}".format(severity_distribution.blocker) }} |
+| Critical | {{ "{:,}".format(severity_distribution.critical) }} |
+| Major | {{ "{:,}".format(severity_distribution.major) }} |
+| Minor | {{ "{:,}".format(severity_distribution.minor) }} |
+| Info | {{ "{:,}".format(severity_distribution.info) }} |
+{% endif %}
+
+{% if has_cognitive_data %}
+### Cognitive Complexity Analysis
+
+Cognitive complexity measures how difficult code is to understand.
+
+| Metric | Value |
+|--------|-------|
+| Total | {{ "{:,}".format(cognitive_analysis.total) }} |
+| Average | {{ cognitive_analysis.average }} |
+| Maximum | {{ cognitive_analysis.max }} |
+| Critical Files (>= {{ cognitive_analysis.thresholds.critical }}) | {{ cognitive_analysis.critical_count }} ({{ cognitive_analysis.critical_pct }}%) |
+| High Files (>= {{ cognitive_analysis.thresholds.high }}) | {{ cognitive_analysis.high_count }} ({{ cognitive_analysis.high_pct }}%) |
+
+{% if cognitive_hotspots %}
+### Top Cognitive Complexity Files
+
+| File | Cognitive | Cyclomatic | NCLOC | Issues | Level |
+|------|-----------|------------|-------|--------|-------|
+{% for f in cognitive_hotspots[:10] %}
+| {{ f.relative_path }} | {{ f.cognitive_complexity }} | {{ f.cyclomatic_complexity or '-' }} | {{ f.ncloc or '-' }} | {{ f.issue_count }} | {{ f.complexity_level }} |
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% if hotspot_files %}
+### Hotspot Files
+
+Files with the most severe issues:
+
+| File | Issues | Bugs | Vulns | Smells | Blocker | Critical | Risk |
+|------|--------|------|-------|--------|---------|----------|------|
+{% for f in hotspot_files[:10] %}
+| {{ f.relative_path }} | {{ f.issue_count }} | {{ f.type_bug }} | {{ f.type_vulnerability }} | {{ f.type_code_smell }} | {{ f.severity_blocker }} | {{ f.severity_critical }} | {{ f.risk_score }} |
+{% endfor %}
+{% endif %}
+
+{% if rule_hotspots %}
+### Rule Hotspots
+
+Most impactful rules:
+
+| Rule ID | Type | Issues | Files | Open | Effort (min) | Impact | Risk |
+|---------|------|--------|-------|------|--------------|--------|------|
+{% for r in rule_hotspots[:10] %}
+| {{ r.rule_id }} | {{ r.issue_type }} | {{ "{:,}".format(r.issue_count) }} | {{ r.files_affected }} | {{ r.open_count }} | {{ r.total_effort_minutes or 0 }} | {{ r.impact_score }} | {{ r.risk_level }} |
+{% endfor %}
+{% endif %}
+
+{% if effort_metrics.total_minutes > 0 %}
+### Effort Estimation
+
+| Metric | Value |
+|--------|-------|
+| Total Effort | {{ effort_metrics.total_days }} days ({{ "{:,}".format(effort_metrics.total_hours) }} hours) |
+| Rules Analyzed | {{ rule_stats.total_rules }} |
+| Critical Rules | {{ rule_stats.critical_rules }} |
+| High Rules | {{ rule_stats.high_rules }} |
+| Open Issues | {{ "{:,}".format(rule_stats.total_open) }} |
+| Avg per Rule | {{ effort_metrics.avg_per_rule }} min |
+{% endif %}
+
+### Health Score Methodology
+
+| Factor | Weight | Description |
+|--------|--------|-------------|
+| Issue Density | 30% | Issues per 1,000 lines of code |
+| Severity Mix | 30% | Weighted by blocker, critical, major |
+| Bugs & Vulnerabilities | 20% | Bug and vulnerability count relative to file count |
+| Cognitive Complexity | 20% | Files with critical/high cognitive complexity |
+
+{% endif %}

@@ -9,6 +9,8 @@ from insights.sections.directory_analysis import DirectoryAnalysisSection
 from insights.sections.vulnerabilities import VulnerabilitiesSection
 from insights.sections.cross_tool import CrossToolSection
 from insights.sections.language_coverage import LanguageCoverageSection
+from insights.sections.coverage_gap import CoverageGapSection
+from insights.sections.technical_debt_summary import TechnicalDebtSummarySection
 
 
 class TestRepoHealthSection:
@@ -163,3 +165,198 @@ class TestCrossToolSection:
         assert summary["total_risks"] == 3  # file1, file2, file3
         assert summary["complex_smelly_count"] == 2
         assert summary["complex_vulnerable_count"] == 2
+
+
+class TestCoverageGapSection:
+    """Tests for CoverageGapSection."""
+
+    def test_config(self):
+        """Test section configuration."""
+        section = CoverageGapSection()
+
+        assert section.config.name == "coverage_gap"
+        assert section.config.title == "Coverage Gap Analysis"
+        assert section.config.priority == 3.5
+        assert "complexity" in section.config.description.lower()
+
+    def test_get_template_name(self):
+        """Test template name."""
+        section = CoverageGapSection()
+        assert section.get_template_name() == "coverage_gap.html.j2"
+
+    def test_get_fallback_data(self):
+        """Test fallback data structure."""
+        section = CoverageGapSection()
+        fallback = section.get_fallback_data()
+
+        # Check top-level keys
+        assert "hotspots" in fallback
+        assert "critical_hotspots" in fallback
+        assert "high_hotspots" in fallback
+        assert "summary" in fallback
+        assert "has_data" in fallback
+
+        # Check fallback values
+        assert fallback["hotspots"] == []
+        assert fallback["has_data"] is False
+
+        # Check summary structure
+        summary = fallback["summary"]
+        assert summary["critical_count"] == 0
+        assert summary["high_count"] == 0
+        assert summary["total_files"] == 0
+        assert summary["total_statements_at_risk"] == 0
+
+    def test_validate_data_no_data(self):
+        """Test validation returns error when no data available."""
+        section = CoverageGapSection()
+        errors = section.validate_data({"has_data": False})
+
+        assert len(errors) == 1
+        assert "lizard" in errors[0].lower() or "coverage" in errors[0].lower()
+
+    def test_validate_data_with_data(self):
+        """Test validation passes when data is available."""
+        section = CoverageGapSection()
+        errors = section.validate_data({"has_data": True})
+
+        assert len(errors) == 0
+
+
+class TestTechnicalDebtSummarySection:
+    """Tests for TechnicalDebtSummarySection."""
+
+    def test_config(self):
+        """Test section configuration."""
+        section = TechnicalDebtSummarySection()
+
+        assert section.config.name == "technical_debt_summary"
+        assert section.config.title == "Technical Debt Summary"
+        assert section.config.priority == 2
+        assert "debt" in section.config.description.lower()
+
+    def test_get_template_name(self):
+        """Test template name."""
+        section = TechnicalDebtSummarySection()
+        assert section.get_template_name() == "technical_debt_summary.html.j2"
+
+    def test_get_fallback_data(self):
+        """Test fallback data structure."""
+        section = TechnicalDebtSummarySection()
+        fallback = section.get_fallback_data()
+
+        # Check top-level keys
+        assert "summary" in fallback
+        assert "categories" in fallback
+        assert "overall_score" in fallback
+        assert "overall_grade" in fallback
+        assert "hotspots" in fallback
+        assert "hotspots_by_type" in fallback
+        assert "priorities" in fallback
+        assert "has_data" in fallback
+
+        # Check category keys
+        categories = fallback["categories"]
+        assert "complexity" in categories
+        assert "duplication" in categories
+        assert "code_smells" in categories
+        assert "coverage_gaps" in categories
+        assert "size" in categories
+
+        # Check default values
+        assert fallback["overall_grade"] == "A"
+        assert fallback["overall_score"] == 0
+        assert fallback["has_data"] is False
+
+    def test_validate_data_no_data(self):
+        """Test validation returns error when no data available."""
+        section = TechnicalDebtSummarySection()
+        errors = section.validate_data({"has_data": False})
+
+        assert len(errors) == 1
+        assert "technical debt" in errors[0].lower() or "data" in errors[0].lower()
+
+    def test_validate_data_with_data(self):
+        """Test validation passes when data is available."""
+        section = TechnicalDebtSummarySection()
+        errors = section.validate_data({"has_data": True})
+
+        assert len(errors) == 0
+
+    def test_score_to_grade(self):
+        """Test grade conversion from score."""
+        section = TechnicalDebtSummarySection()
+
+        # score >= 80 → "F"
+        assert section._score_to_grade(80) == "F"
+        assert section._score_to_grade(100) == "F"
+
+        # score >= 60 → "D"
+        assert section._score_to_grade(60) == "D"
+        assert section._score_to_grade(79) == "D"
+
+        # score >= 40 → "C"
+        assert section._score_to_grade(40) == "C"
+        assert section._score_to_grade(59) == "C"
+
+        # score >= 20 → "B"
+        assert section._score_to_grade(20) == "B"
+        assert section._score_to_grade(39) == "B"
+
+        # score < 20 → "A"
+        assert section._score_to_grade(0) == "A"
+        assert section._score_to_grade(19) == "A"
+
+    def test_calculate_overall_score(self):
+        """Test weighted score calculation."""
+        section = TechnicalDebtSummarySection()
+
+        categories = {
+            "complexity": {"score": 50},
+            "duplication": {"score": 40},
+            "code_smells": {"score": 30},
+            "coverage_gaps": {"score": 20},
+            "size": {"score": 10},
+        }
+
+        # Weights: complexity=0.30, duplication=0.20, code_smells=0.25, coverage_gaps=0.15, size=0.10
+        # Expected: 50*0.30 + 40*0.20 + 30*0.25 + 20*0.15 + 10*0.10
+        # = 15 + 8 + 7.5 + 3 + 1 = 34.5 → rounds to 34 or 35
+        score = section._calculate_overall_score(categories)
+
+        assert score == 34 or score == 35  # Allow for rounding
+        assert 30 <= score <= 40
+
+    def test_get_remediation_action(self):
+        """Test remediation action text generation."""
+        section = TechnicalDebtSummarySection()
+
+        # Complexity action
+        complexity_data = {"critical": 5, "high": 10}
+        action = section._get_remediation_action("complexity", complexity_data)
+        assert "5 critical" in action
+        assert "10 high" in action
+
+        # Duplication action
+        duplication_data = {"total_lines": 1500}
+        action = section._get_remediation_action("duplication", duplication_data)
+        assert "1,500" in action  # formatted with comma
+
+        # Code smells action
+        smells_data = {"high_plus": 25}
+        action = section._get_remediation_action("code_smells", smells_data)
+        assert "25" in action
+
+        # Coverage gaps action
+        coverage_data = {"critical": 3}
+        action = section._get_remediation_action("coverage_gaps", coverage_data)
+        assert "3 critical" in action
+
+        # Size action
+        size_data = {"critical": 8}
+        action = section._get_remediation_action("size", size_data)
+        assert "8 oversized" in action
+
+        # Unknown category
+        action = section._get_remediation_action("unknown", {})
+        assert "review" in action.lower()

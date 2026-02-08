@@ -40,6 +40,9 @@ from .sections.directory_structure import DirectoryStructureSection
 from .sections.blast_radius import BlastRadiusSection
 from .sections.code_size_hotspots import CodeSizeHotspotsSection
 from .sections.code_quality_rules import CodeQualityRulesSection
+from .sections.coverage_gap import CoverageGapSection
+from .sections.technical_debt_summary import TechnicalDebtSummarySection
+from .sections.sonarqube_deep_dive import SonarQubeDeepDiveSection
 
 
 class InsightsGenerator:
@@ -50,9 +53,11 @@ class InsightsGenerator:
         "tool_readiness": ToolReadinessSection,
         "tool_coverage_dashboard": ToolCoverageDashboardSection,
         "executive_summary": ExecutiveSummarySection,
+        "technical_debt_summary": TechnicalDebtSummarySection,
         "composite_risk": CompositeRiskSection,
         "dependency_health": DependencyHealthSection,
         "function_complexity": FunctionComplexitySection,
+        "coverage_gap": CoverageGapSection,
         "blast_radius": BlastRadiusSection,
         "code_size_hotspots": CodeSizeHotspotsSection,
         "repo_health": RepoHealthSection,
@@ -63,6 +68,7 @@ class InsightsGenerator:
         "secrets": SecretsSection,
         "cross_tool": CrossToolSection,
         "code_quality_rules": CodeQualityRulesSection,
+        "sonarqube_deep_dive": SonarQubeDeepDiveSection,
         "coupling_analysis": CouplingAnalysisSection,
         "authorship_risk": AuthorshipRiskSection,
         "language_coverage": LanguageCoverageSection,
