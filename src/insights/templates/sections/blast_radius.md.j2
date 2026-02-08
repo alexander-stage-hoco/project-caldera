@@ -1,0 +1,55 @@
+## Symbol Blast Radius
+
+{% if not has_data %}
+*No blast radius data available for this run.*
+{% else %}
+
+### Summary
+
+Symbol-level change impact analysis. Shows how many other symbols are affected when a symbol is modified.
+
+| Metric | Value |
+|--------|-------|
+| Critical Risk | {{ summary.critical_count }} |
+| High Risk | {{ summary.high_count }} |
+| Medium Risk | {{ summary.medium_count }} |
+| Low Risk | {{ summary.low_count }} |
+| Total Symbols | {{ summary.total_symbols }} |
+| Max Blast Radius | {{ summary.max_blast_radius }} |
+| Avg Blast Radius | {{ summary.avg_blast_radius }} |
+| Max Files Affected | {{ summary.max_affected_files }} |
+
+{% if has_high_impact and high_impact_symbols %}
+### High-Impact Symbols
+
+Symbols with medium or higher blast radius risk:
+
+| Symbol | File | Affected Symbols | Affected Files | Max Depth | Risk |
+|--------|------|------------------|----------------|-----------|------|
+{% for sym in high_impact_symbols[:15] %}
+| {{ sym.target_symbol }} | {{ sym.target_file_path or '(builtin)' }} | {{ sym.blast_radius_symbols }} | {{ sym.blast_radius_files }} | {{ sym.max_depth }} | {{ sym.blast_radius_risk }} |
+{% endfor %}
+{% endif %}
+
+### Top Symbols by Blast Radius
+
+Symbols ordered by number of affected downstream symbols:
+
+| Symbol | File | Affected Symbols | Affected Files | Call Paths | Risk |
+|--------|------|------------------|----------------|------------|------|
+{% for sym in symbols[:15] %}
+| {{ sym.target_symbol }} | {{ sym.target_file_path or '(builtin)' }} | {{ sym.blast_radius_symbols }} | {{ sym.blast_radius_files }} | {{ sym.total_paths }} | {{ sym.blast_radius_risk }} |
+{% endfor %}
+
+{% if files_with_high_impact_symbols %}
+### Files with High-Impact Symbols
+
+| File | Symbols | Max Radius | Highest Impact Symbol |
+|------|---------|------------|----------------------|
+{% for path, syms in files_with_high_impact_symbols %}
+{% set top_sym = syms | sort(attribute='blast_radius_symbols', reverse=true) | first %}
+| {{ path }} | {{ syms | length }} | {{ syms | map(attribute='blast_radius_symbols') | max }} | {{ top_sym.target_symbol }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

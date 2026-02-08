@@ -1,0 +1,136 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Symbol Blast Radius</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No blast radius data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>Symbol-level change impact analysis. Shows how many other symbols are affected when a symbol is modified.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical Risk</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">Very high impact</div>
+            </div>
+            <div class="metric-card {% if summary.high_count > 0 %}warning{% endif %}">
+                <div class="label">High Risk</div>
+                <div class="value">{{ summary.high_count }}</div>
+                <div class="sublabel">High impact</div>
+            </div>
+            <div class="metric-card {% if summary.medium_count > 0 %}info{% endif %}">
+                <div class="label">Medium Risk</div>
+                <div class="value">{{ summary.medium_count }}</div>
+                <div class="sublabel">Moderate impact</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Max Radius</div>
+                <div class="value">{{ summary.max_blast_radius }}</div>
+                <div class="sublabel">Affected symbols</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Analysis Overview</h3>
+        <div class="stat-grid">
+            <div class="stat-item"><span class="label">Total Symbols:</span> {{ summary.total_symbols }}</div>
+            <div class="stat-item"><span class="label">Avg Radius:</span> {{ summary.avg_blast_radius }}</div>
+            <div class="stat-item"><span class="label">Max Files Affected:</span> {{ summary.max_affected_files }}</div>
+            <div class="stat-item"><span class="label">Low Risk:</span> {{ summary.low_count }}</div>
+        </div>
+    </div>
+
+    {% if has_high_impact and high_impact_symbols %}
+    <div class="subsection">
+        <h3>High-Impact Symbols</h3>
+        <p>Symbols with medium or higher blast radius risk (changes affect many other symbols):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>File</th>
+                    <th class="number">Affected Symbols</th>
+                    <th class="number">Affected Files</th>
+                    <th class="number">Max Depth</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for sym in high_impact_symbols[:15] %}
+                <tr class="{% if sym.blast_radius_risk == 'critical' %}critical-row{% elif sym.blast_radius_risk == 'high' %}warning-row{% else %}info-row{% endif %}">
+                    <td class="truncate" title="{{ sym.target_symbol }}">{{ sym.target_symbol }}</td>
+                    <td class="truncate" title="{{ sym.target_file_path or '(builtin/external)' }}">{{ (sym.target_file_path or '(builtin)') | truncate_path }}</td>
+                    <td class="number">{{ sym.blast_radius_symbols }}</td>
+                    <td class="number">{{ sym.blast_radius_files }}</td>
+                    <td class="number">{{ sym.max_depth }}</td>
+                    <td><span class="badge badge-{{ sym.blast_radius_risk }}">{{ sym.blast_radius_risk }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Top Symbols by Blast Radius</h3>
+        <p>Symbols ordered by number of affected downstream symbols:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>File</th>
+                    <th class="number">Affected Symbols</th>
+                    <th class="number">Affected Files</th>
+                    <th class="number">Call Paths</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for sym in symbols[:15] %}
+                <tr>
+                    <td class="truncate" title="{{ sym.target_symbol }}">{{ sym.target_symbol }}</td>
+                    <td class="truncate" title="{{ sym.target_file_path or '(builtin/external)' }}">{{ (sym.target_file_path or '(builtin)') | truncate_path }}</td>
+                    <td class="number">{{ sym.blast_radius_symbols }}</td>
+                    <td class="number">{{ sym.blast_radius_files }}</td>
+                    <td class="number">{{ sym.total_paths }}</td>
+                    <td><span class="badge badge-{{ sym.blast_radius_risk }}">{{ sym.blast_radius_risk }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if files_with_high_impact_symbols %}
+    <div class="subsection">
+        <h3>Files with High-Impact Symbols</h3>
+        <p>Files containing symbols with the highest change impact:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Symbols</th>
+                    <th class="number">Max Radius</th>
+                    <th>Highest Impact Symbol</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for path, syms in files_with_high_impact_symbols %}
+                {% set top_sym = syms | sort(attribute='blast_radius_symbols', reverse=true) | first %}
+                <tr>
+                    <td class="truncate" title="{{ path }}">{{ path | truncate_path }}</td>
+                    <td class="number">{{ syms | length }}</td>
+                    <td class="number">{{ syms | map(attribute='blast_radius_symbols') | max }}</td>
+                    <td class="truncate">{{ top_sym.target_symbol }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

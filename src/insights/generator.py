@@ -37,6 +37,7 @@ from .sections.code_duplication import CodeDuplicationSection
 from .sections.dependency_health import DependencyHealthSection
 from .sections.license_compliance import LicenseComplianceSection
 from .sections.directory_structure import DirectoryStructureSection
+from .sections.blast_radius import BlastRadiusSection
 
 
 class InsightsGenerator:
@@ -50,6 +51,7 @@ class InsightsGenerator:
         "composite_risk": CompositeRiskSection,
         "dependency_health": DependencyHealthSection,
         "function_complexity": FunctionComplexitySection,
+        "blast_radius": BlastRadiusSection,
         "repo_health": RepoHealthSection,
         "directory_structure": DirectoryStructureSection,
         "file_hotspots": FileHotspotsSection,

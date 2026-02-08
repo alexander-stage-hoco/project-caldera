@@ -23,6 +23,10 @@ from .code_duplication import CodeDuplicationSection
 from .dependency_health import DependencyHealthSection
 from .license_compliance import LicenseComplianceSection
 from .directory_structure import DirectoryStructureSection
+from .blast_radius import BlastRadiusSection
+from .secrets import SecretsSection
+from .tool_readiness import ToolReadinessSection
+from .tool_coverage_dashboard import ToolCoverageDashboardSection
 
 __all__ = [
     "BaseSection",
@@ -48,4 +52,8 @@ __all__ = [
     "DependencyHealthSection",
     "LicenseComplianceSection",
     "DirectoryStructureSection",
+    "BlastRadiusSection",
+    "SecretsSection",
+    "ToolReadinessSection",
+    "ToolCoverageDashboardSection",
 ]
