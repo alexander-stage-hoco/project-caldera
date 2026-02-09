@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from common.path_normalization import normalize_file_path
+from shared.path_utils import normalize_file_path
 from persistence.adapters.lizard_adapter import LizardAdapter
 from persistence.adapters.scc_adapter import SccAdapter
 

@@ -11,7 +11,7 @@ from pathlib import Path
 
 # Add shared src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from common.path_normalization import normalize_file_path
+from shared.path_utils import normalize_file_path
 from common.git_utilities import is_fallback_commit, resolve_commit
 from common.cli_parser import add_common_args, validate_common_args_raising, CommitResolutionConfig, ValidationError
 from common.envelope_formatter import create_envelope, get_current_timestamp

@@ -6,7 +6,7 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import SonarqubeIssue, SonarqubeMetric
 from ..repositories import LayoutRepository, SonarqubeRepository, ToolRunRepository
-from common.path_normalization import is_repo_relative_path, normalize_file_path
+from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import check_required
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "sonarqube" / "schemas" / "output.schema.json"

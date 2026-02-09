@@ -20,7 +20,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 # Add shared src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from common.path_normalization import normalize_file_path
+from shared.path_utils import normalize_file_path
+from shared.severity import normalize_severity
 from common.envelope_formatter import create_envelope, get_current_timestamp
 
 from roslyn_analyzer import analyze
@@ -106,15 +107,8 @@ def wrap_in_envelope(
 
 
 def _map_severity(dd_severity: str) -> str:
-    """Map dd_severity to standard severity values."""
-    severity_map = {
-        "critical": "CRITICAL",
-        "high": "HIGH",
-        "medium": "MEDIUM",
-        "low": "LOW",
-        "info": "INFO",
-    }
-    return severity_map.get(dd_severity.lower(), "MEDIUM")
+    """Map dd_severity to standard severity values using shared normalization."""
+    return normalize_severity(dd_severity, default="MEDIUM")
 
 
 def main() -> None:

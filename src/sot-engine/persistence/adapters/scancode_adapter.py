@@ -6,7 +6,7 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import ScancodeFileLicense, ScancodeSummary
 from ..repositories import ScancodeRepository, LayoutRepository, ToolRunRepository
-from common.path_normalization import is_repo_relative_path, normalize_file_path
+from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import check_required
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "scancode" / "schemas" / "output.schema.json"

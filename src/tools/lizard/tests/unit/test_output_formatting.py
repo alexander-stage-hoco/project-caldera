@@ -26,7 +26,7 @@ from function_analyzer import (
     Colors,
     set_color_enabled,
 )
-from common.path_normalization import normalize_file_path
+from shared.path_utils import normalize_file_path
 
 
 class TestPathTruncation:

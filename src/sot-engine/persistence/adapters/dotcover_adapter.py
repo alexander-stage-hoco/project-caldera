@@ -21,7 +21,7 @@ from ..entities import (
     DotcoverTypeCoverage,
 )
 from ..repositories import DotcoverRepository, LayoutRepository, ToolRunRepository
-from common.path_normalization import is_repo_relative_path, normalize_file_path
+from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import (
     check_non_negative,
     check_required,

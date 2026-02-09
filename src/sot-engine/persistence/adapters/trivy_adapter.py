@@ -11,7 +11,7 @@ from ..repositories import LayoutRepository, ToolRunRepository, TrivyRepository
 from ..validation import (
     check_required,
 )
-from common.path_normalization import is_repo_relative_path, normalize_file_path
+from shared.path_utils import is_repo_relative_path, normalize_file_path
 
 # Schema path points to the local trivy tool directory
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "trivy" / "schemas" / "output.schema.json"

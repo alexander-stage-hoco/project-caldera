@@ -14,7 +14,7 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import DependenseeProject, DependenseeProjectReference, DependenseePackageReference
 from ..repositories import DependenseeRepository, LayoutRepository, ToolRunRepository
-from common.path_normalization import is_repo_relative_path, normalize_file_path
+from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import check_non_negative, check_required
 
 # Path to the tool's JSON schema for validation

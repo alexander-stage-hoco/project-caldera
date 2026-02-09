@@ -4,12 +4,17 @@
 import argparse
 import json
 import subprocess
+import sys
 import tempfile
 import time
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+
+# Add shared src to path for imports
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from shared.severity import PRODUCTION_PATH_PATTERNS, escalate_for_production_path
 
 
 @dataclass
@@ -87,16 +92,7 @@ RULE_SEVERITY_MAP = {
     "sendgrid-api-token": "LOW",
 }
 
-# File path patterns that elevate severity (production context)
-PRODUCTION_PATH_PATTERNS = [
-    ".env.production",
-    ".env.prod",
-    "prod/",
-    "production/",
-    ".aws/credentials",
-    "config/prod",
-    "deploy/prod",
-]
+# NOTE: PRODUCTION_PATH_PATTERNS imported from shared.severity
 
 
 def calculate_severity(rule_id: str, file_path: str, in_current_head: bool) -> str:
@@ -112,21 +108,14 @@ def calculate_severity(rule_id: str, file_path: str, in_current_head: bool) -> s
     """
     base_severity = RULE_SEVERITY_MAP.get(rule_id, "MEDIUM")
 
-    # Elevate for production paths
-    file_path_lower = file_path.lower()
-    for pattern in PRODUCTION_PATH_PATTERNS:
-        if pattern in file_path_lower:
-            if base_severity == "MEDIUM":
-                return "HIGH"
-            elif base_severity == "HIGH":
-                return "CRITICAL"
-            break  # Only apply elevation once
+    # Escalate for production paths using shared utility
+    escalated = escalate_for_production_path(base_severity, file_path, PRODUCTION_PATH_PATTERNS)
 
     # Reduce for historical-only secrets (not in current HEAD)
-    if not in_current_head and base_severity in ("MEDIUM", "LOW"):
+    if not in_current_head and escalated in ("MEDIUM", "LOW"):
         return "LOW"
 
-    return base_severity
+    return escalated
 
 
 @dataclass

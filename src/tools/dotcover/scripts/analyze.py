@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from common.cli_parser import add_common_args, validate_common_args, CommitResolutionConfig
 from common.envelope_formatter import create_envelope
-from common.path_normalization import normalize_file_path
+from shared.path_utils import normalize_file_path
 
 TOOL_NAME = "dotcover"
 SCHEMA_VERSION = "1.0.0"

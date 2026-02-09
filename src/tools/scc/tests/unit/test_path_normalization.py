@@ -10,7 +10,7 @@ sys.path.insert(0, str(scripts_path))
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from directory_analyzer import truncate_path_middle
-from common.path_normalization import normalize_file_path
+from shared.path_utils import normalize_file_path
 
 
 class TestTruncatePathMiddle:

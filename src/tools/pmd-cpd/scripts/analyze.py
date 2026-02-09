@@ -28,7 +28,7 @@ from xml.etree import ElementTree as ET
 # Add src directory to path for common imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from common.path_normalization import normalize_file_path
+from shared.path_utils import normalize_file_path
 
 
 # Language mapping: CPD language names -> file extensions

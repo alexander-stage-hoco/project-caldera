@@ -18,7 +18,7 @@ from function_analyzer import (
 )
 # Add shared src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from common.path_normalization import normalize_file_path, normalize_dir_path
+from shared.path_utils import normalize_file_path, normalize_dir_path
 from common.cli_parser import (
     add_common_args,
     validate_common_args_raising,

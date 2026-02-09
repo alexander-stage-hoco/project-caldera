@@ -10,7 +10,7 @@ import duckdb
 
 from ..entities import ToolRun
 from ..repositories import LayoutRepository, ToolRunRepository
-from common.path_normalization import normalize_file_path
+from shared.path_utils import normalize_file_path
 from ..validation import (
     ensure_lz_tables,
     validate_json_schema,

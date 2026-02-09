@@ -6,7 +6,7 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import PmdCpdDuplication, PmdCpdFileMetric, PmdCpdOccurrence
 from ..repositories import LayoutRepository, PmdCpdRepository, ToolRunRepository
-from common.path_normalization import is_repo_relative_path, normalize_file_path
+from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import check_required
 
 

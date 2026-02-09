@@ -219,11 +219,11 @@ def analyze_repo(repo_path: Path) -> dict:
                 # Analyze each file...
 
     Path normalization (REQUIRED - see docs/TOOL_REQUIREMENTS.md):
-        from common.path_normalization import normalize_file_path
+        from shared.path_utils import normalize_file_path
         relative_path = normalize_file_path(absolute_path, repo_path)
     """
     # Import path normalization utilities (uncomment when implementing)
-    # from common.path_normalization import normalize_file_path, normalize_dir_path
+    # from shared.path_utils import normalize_file_path, normalize_dir_path
 
     files = []
     for path in sorted(repo_path.rglob("*")):
@@ -1456,7 +1456,7 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import {class_name}FileMetric
 from ..repositories import LayoutRepository, {class_name}Repository, ToolRunRepository
-from common.path_normalization import is_repo_relative_path, normalize_file_path
+from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import (
     check_non_negative,
     check_ratio,

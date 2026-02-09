@@ -749,7 +749,8 @@ SMELL_CATEGORIES = {
     "AUDIT_ERROR_DISCLOSURE": "audit",
 }
 
-# Severity mapping
+# Semgrep-specific severity mapping (differs from shared.severity defaults)
+# Semgrep ERROR is a code analysis critical finding, not a general "error" like a 500 HTTP error
 SEVERITY_MAP = {
     "ERROR": "CRITICAL",
     "WARNING": "HIGH",

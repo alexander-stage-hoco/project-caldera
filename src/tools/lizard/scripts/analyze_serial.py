@@ -16,7 +16,7 @@ import lizard
 
 # Add shared src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from common.path_normalization import normalize_file_path, normalize_dir_path
+from shared.path_utils import normalize_file_path, normalize_dir_path
 
 
 def timeout_handler(signum, frame):

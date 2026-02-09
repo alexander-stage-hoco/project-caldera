@@ -381,85 +381,57 @@ class TestBaseJudgeParseResponse:
 
 
 class TestBaseJudgeInvokeClaude:
-    """Tests for Claude invocation (mocked)."""
+    """Tests for Claude invocation (mocked via LLMClient)."""
 
-    def test_invoke_claude_prefers_sdk(self, tmp_path):
-        """invoke_claude should prefer SDK over CLI."""
+    def test_invoke_claude_uses_llm_client(self, tmp_path):
+        """invoke_claude should use the internal LLMClient."""
         judge = TestJudge(working_dir=tmp_path)
 
-        with patch.object(judge, "_invoke_via_sdk", return_value="SDK response") as mock_sdk:
-            with patch.object(judge, "_invoke_via_cli") as mock_cli:
+        with patch.object(judge._llm_client, "invoke", return_value="LLM response") as mock_invoke:
+            result = judge.invoke_claude("test prompt")
+
+            assert result == "LLM response"
+            mock_invoke.assert_called_once_with("test prompt")
+
+    def test_invoke_claude_handles_error_response(self, tmp_path):
+        """invoke_claude should handle error responses from LLMClient."""
+        judge = TestJudge(working_dir=tmp_path)
+
+        with patch.object(judge._llm_client, "invoke", return_value="Error: CLI not found"):
+            with patch.object(judge._llm_client, "is_error_response", return_value=True):
+                with patch.object(judge._llm_client, "is_timeout_error", return_value=False):
+                    result = judge.invoke_claude("test prompt")
+
+                    assert result == "Error: CLI not found"
+
+    def test_invoke_claude_handles_timeout_error(self, tmp_path):
+        """invoke_claude should handle timeout errors from LLMClient."""
+        judge = TestJudge(working_dir=tmp_path)
+
+        with patch.object(judge._llm_client, "invoke", return_value="Error: timed out"):
+            with patch.object(judge._llm_client, "is_error_response", return_value=True):
+                with patch.object(judge._llm_client, "is_timeout_error", return_value=True):
+                    result = judge.invoke_claude("test prompt")
+
+                    assert result == "Error: timed out"
+
+    def test_llm_client_initialized_with_judge_params(self, tmp_path):
+        """LLMClient should be initialized with judge's model and timeout."""
+        judge = TestJudge(working_dir=tmp_path, model="haiku", timeout=30)
+
+        assert judge._llm_client.model == "haiku"
+        assert judge._llm_client.timeout == 30
+        assert judge._llm_client.working_dir == tmp_path
+
+    def test_invoke_claude_success_response(self, tmp_path):
+        """invoke_claude should return successful responses unchanged."""
+        judge = TestJudge(working_dir=tmp_path)
+
+        with patch.object(judge._llm_client, "invoke", return_value='{"score": 4}'):
+            with patch.object(judge._llm_client, "is_error_response", return_value=False):
                 result = judge.invoke_claude("test prompt")
 
-                assert result == "SDK response"
-                mock_sdk.assert_called_once_with("test prompt")
-                mock_cli.assert_not_called()
-
-    def test_invoke_claude_falls_back_to_cli(self, tmp_path):
-        """invoke_claude should fall back to CLI when SDK returns None."""
-        judge = TestJudge(working_dir=tmp_path)
-
-        with patch.object(judge, "_invoke_via_sdk", return_value=None):
-            with patch.object(judge, "_invoke_via_cli", return_value="CLI response") as mock_cli:
-                result = judge.invoke_claude("test prompt")
-
-                assert result == "CLI response"
-                mock_cli.assert_called_once_with("test prompt")
-
-    def test_invoke_via_cli_success(self, tmp_path):
-        """_invoke_via_cli should return stdout on success."""
-        judge = TestJudge(working_dir=tmp_path)
-
-        mock_result = MagicMock()
-        mock_result.returncode = 0
-        mock_result.stdout = '{"score": 4}'
-
-        with patch("shutil.which", return_value="/usr/bin/claude"):
-            with patch("os.access", return_value=True):
-                with patch("subprocess.run", return_value=mock_result):
-                    result = judge._invoke_via_cli("test prompt")
-
-                    assert result == '{"score": 4}'
-
-    def test_invoke_via_cli_not_found(self, tmp_path):
-        """_invoke_via_cli should return error when CLI not found."""
-        judge = TestJudge(working_dir=tmp_path)
-
-        with patch("shutil.which", return_value=None):
-            result = judge._invoke_via_cli("test prompt")
-
-            assert "Error" in result
-            assert "not found" in result.lower()
-
-    def test_invoke_via_cli_timeout(self, tmp_path):
-        """_invoke_via_cli should handle timeout."""
-        judge = TestJudge(working_dir=tmp_path, timeout=5)
-
-        import subprocess
-        with patch("shutil.which", return_value="/usr/bin/claude"):
-            with patch("os.access", return_value=True):
-                with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("claude", 5)):
-                    result = judge._invoke_via_cli("test prompt")
-
-                    assert "Error" in result
-                    assert "timed out" in result.lower()
-
-    def test_invoke_via_cli_nonzero_exit(self, tmp_path):
-        """_invoke_via_cli should handle non-zero exit code."""
-        judge = TestJudge(working_dir=tmp_path)
-
-        mock_result = MagicMock()
-        mock_result.returncode = 1
-        mock_result.stderr = "Some error occurred"
-        mock_result.stdout = ""
-
-        with patch("shutil.which", return_value="/usr/bin/claude"):
-            with patch("os.access", return_value=True):
-                with patch("subprocess.run", return_value=mock_result):
-                    result = judge._invoke_via_cli("test prompt")
-
-                    assert "Error" in result
-                    assert "exit_code=1" in result
+                assert result == '{"score": 4}'
 
 
 class TestBaseJudgeHeuristic:
