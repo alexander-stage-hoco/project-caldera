@@ -148,7 +148,7 @@ orchestrate:
 
 test:
 	@.venv/bin/python -m pytest -q
-	@$(MAKE) tools-test VENV=$(CURDIR)/.venv SKIP_SETUP=1
+	@$(MAKE) tools-test
 	@$(MAKE) dbt-run
 	@$(MAKE) dbt-test
 
