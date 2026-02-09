@@ -7,15 +7,12 @@ functionality like unwrapping envelope format and loading analysis results.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
-# Add shared src to path for imports
-sys.path.insert(0, str(Path(__file__).resolve().parents[6]))
-
 # Import shared base judge (reuses LLMClient, observability, etc.)
 from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult
+from shared.output_management import unwrap_envelope
 
 
 # Re-export JudgeResult for backwards compatibility
@@ -93,13 +90,12 @@ class BaseJudge(SharedBaseJudge):
         Returns:
             Unwrapped data dictionary
         """
-        if "data" in data and isinstance(data["data"], dict):
-            # Preserve metadata alongside unwrapped data
-            inner = data["data"].copy()
-            if "metadata" in data:
-                inner["_metadata"] = data["metadata"]
-            return inner
-        return data
+        inner = unwrap_envelope(data)
+        # Preserve metadata alongside unwrapped data
+        if inner is not data and "metadata" in data:
+            inner = inner.copy()
+            inner["_metadata"] = data["metadata"]
+        return inner
 
     def load_all_analysis_results(self) -> dict[str, Any]:
         """Load all analysis JSON files from output_dir.

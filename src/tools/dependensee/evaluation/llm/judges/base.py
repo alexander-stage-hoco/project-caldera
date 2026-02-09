@@ -13,6 +13,7 @@ from typing import Any
 
 # Import from shared module - eliminates duplicate code
 from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult
+from shared.output_management import unwrap_envelope
 
 # Re-export JudgeResult for backwards compatibility
 __all__ = ["BaseJudge", "JudgeResult"]
@@ -113,12 +114,10 @@ class BaseJudge(SharedBaseJudge):
 
     def extract_projects(self, data: dict) -> list[dict]:
         """Extract projects from analysis data."""
-        if "data" in data:
-            return data["data"].get("projects", [])
-        return data.get("projects", [])
+        inner = unwrap_envelope(data)
+        return inner.get("projects", [])
 
     def extract_dependency_graph(self, data: dict) -> dict:
         """Extract dependency graph from analysis data."""
-        if "data" in data:
-            return data["data"].get("dependency_graph", {"nodes": [], "edges": []})
-        return data.get("dependency_graph", {"nodes": [], "edges": []})
+        inner = unwrap_envelope(data)
+        return inner.get("dependency_graph", {"nodes": [], "edges": []})

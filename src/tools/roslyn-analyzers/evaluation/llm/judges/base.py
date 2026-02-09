@@ -12,6 +12,7 @@ from typing import Any
 
 # Import from shared module - eliminates duplicate code
 from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult
+from shared.output_management import unwrap_envelope
 
 # Re-export JudgeResult for backwards compatibility
 __all__ = ["BaseJudge", "JudgeResult"]
@@ -101,14 +102,12 @@ class BaseJudge(SharedBaseJudge):
 
         Returns the unwrapped data dict that should contain summary, files, etc.
         """
-        # Check for envelope format (has 'data' key)
-        if "data" in output:
-            return output["data"]
+        # Use shared unwrap_envelope helper
+        data = unwrap_envelope(output)
         # Check for results wrapper
-        if "results" in output and isinstance(output["results"], dict):
-            return output["results"]
-        # Return as-is
-        return output
+        if "results" in data and isinstance(data["results"], dict):
+            return data["results"]
+        return data
 
     def load_all_analysis_results(self) -> dict[str, Any]:
         """Load all analysis JSON files from output_dir.

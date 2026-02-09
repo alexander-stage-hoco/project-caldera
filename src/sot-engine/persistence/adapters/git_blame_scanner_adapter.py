@@ -17,11 +17,11 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import GitBlameAuthorStats, GitBlameFileSummary
 from ..repositories import GitBlameRepository, LayoutRepository, ToolRunRepository
-from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import (
     check_bounded,
     check_non_negative,
     check_required,
+    validate_file_paths_in_entries,
 )
 
 # Path to the tool's JSON schema for validation
@@ -164,17 +164,18 @@ class GitBlameScannerAdapter(BaseAdapter):
         - Churn is monotonic (30d <= 90d)
         - Unique authors >= 1
         """
-        errors = []
+        errors: list[str] = []
 
         files = data.get("files", [])
+        # Use shared path validation helper
+        errors.extend(validate_file_paths_in_entries(
+            files,
+            path_field="path",
+            repo_root=self._repo_root,
+            entry_prefix="files",
+        ))
         for idx, entry in enumerate(files):
             prefix = f"files[{idx}]"
-
-            # Path validation
-            raw_path = entry.get("path", "")
-            normalized = normalize_file_path(raw_path, self._repo_root)
-            if not is_repo_relative_path(normalized):
-                errors.append(f"{prefix}.path invalid: {raw_path}")
 
             # Non-negative metrics
             errors.extend(check_non_negative(

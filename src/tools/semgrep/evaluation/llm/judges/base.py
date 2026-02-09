@@ -13,6 +13,7 @@ from typing import Any
 
 # Import from shared module - eliminates duplicate code
 from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult
+from shared.output_management import load_all_outputs
 
 # Re-export JudgeResult for backwards compatibility
 __all__ = ["BaseJudge", "JudgeResult"]

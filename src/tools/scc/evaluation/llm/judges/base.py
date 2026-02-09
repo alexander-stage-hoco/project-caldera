@@ -13,6 +13,7 @@ from typing import Any
 
 # Import from shared module - eliminates duplicate code
 from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult
+from shared.output_management import unwrap_envelope
 
 # Re-export JudgeResult for backwards compatibility
 __all__ = ["BaseJudge", "JudgeResult"]
@@ -62,9 +63,7 @@ class BaseJudge(SharedBaseJudge):
     def _load_tool_output(self, output_path: Path) -> dict[str, Any]:
         """Load output JSON, unwrapping envelope data when present."""
         payload = json.loads(output_path.read_text())
-        if isinstance(payload, dict) and "data" in payload:
-            return payload.get("data") or {}
-        return payload
+        return unwrap_envelope(payload)
 
     def _resolve_output_dir(self) -> Path:
         """Resolve the most recent output directory."""

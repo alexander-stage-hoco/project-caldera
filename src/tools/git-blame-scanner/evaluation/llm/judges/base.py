@@ -11,6 +11,7 @@ from typing import Any
 
 from shared.evaluation.base_judge import BaseJudge as SharedBaseJudge
 from shared.evaluation.base_judge import JudgeResult
+from shared.output_management import unwrap_envelope
 
 
 class BaseJudge(SharedBaseJudge):
@@ -86,13 +87,12 @@ class BaseJudge(SharedBaseJudge):
         Returns:
             List of file dictionaries
         """
-        # Try various formats
-        if "files" in analysis:
-            return analysis["files"]
-        if "results" in analysis and isinstance(analysis["results"], dict):
-            return analysis["results"].get("files", [])
-        if "data" in analysis and isinstance(analysis["data"], dict):
-            return analysis["data"].get("files", [])
+        # Use shared unwrap_envelope helper
+        inner = unwrap_envelope(analysis)
+        if "files" in inner:
+            return inner["files"]
+        if "results" in inner and isinstance(inner["results"], dict):
+            return inner["results"].get("files", [])
         return []
 
     @staticmethod
@@ -105,13 +105,12 @@ class BaseJudge(SharedBaseJudge):
         Returns:
             List of author dictionaries
         """
-        # Try various formats
-        if "authors" in analysis:
-            return analysis["authors"]
-        if "results" in analysis and isinstance(analysis["results"], dict):
-            return analysis["results"].get("authors", [])
-        if "data" in analysis and isinstance(analysis["data"], dict):
-            return analysis["data"].get("authors", [])
+        # Use shared unwrap_envelope helper
+        inner = unwrap_envelope(analysis)
+        if "authors" in inner:
+            return inner["authors"]
+        if "results" in inner and isinstance(inner["results"], dict):
+            return inner["results"].get("authors", [])
         return []
 
     @staticmethod
@@ -124,13 +123,12 @@ class BaseJudge(SharedBaseJudge):
         Returns:
             Summary dictionary
         """
-        # Try various formats
-        if "summary" in analysis:
-            return analysis["summary"]
-        if "results" in analysis and isinstance(analysis["results"], dict):
-            return analysis["results"].get("summary", {})
-        if "data" in analysis and isinstance(analysis["data"], dict):
-            return analysis["data"].get("summary", {})
+        # Use shared unwrap_envelope helper
+        inner = unwrap_envelope(analysis)
+        if "summary" in inner:
+            return inner["summary"]
+        if "results" in inner and isinstance(inner["results"], dict):
+            return inner["results"].get("summary", {})
         return {}
 
 

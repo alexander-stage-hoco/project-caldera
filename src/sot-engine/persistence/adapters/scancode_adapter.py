@@ -6,8 +6,7 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import ScancodeFileLicense, ScancodeSummary
 from ..repositories import ScancodeRepository, LayoutRepository, ToolRunRepository
-from shared.path_utils import is_repo_relative_path, normalize_file_path
-from ..validation import check_required
+from ..validation import check_required, validate_file_paths_in_entries
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "scancode" / "schemas" / "output.schema.json"
 LZ_TABLES = {
@@ -128,13 +127,15 @@ class ScancodeAdapter(BaseAdapter):
 
     def validate_quality(self, findings: Any) -> None:
         """Validate data quality rules for scancode findings."""
-        errors = []
+        errors: list[str] = []
+        # Use shared path validation helper
+        errors.extend(validate_file_paths_in_entries(
+            findings,
+            path_field="file_path",
+            repo_root=self._repo_root,
+            entry_prefix="scancode finding",
+        ))
         for idx, finding in enumerate(findings):
-            raw_path = finding.get("file_path", "")
-            normalized = normalize_file_path(raw_path, self._repo_root)
-            if not is_repo_relative_path(normalized):
-                errors.append(f"scancode finding[{idx}] path invalid: {raw_path} -> {normalized}")
-
             errors.extend(
                 check_required(finding.get("spdx_id"), f"finding[{idx}].spdx_id")
             )

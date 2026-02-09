@@ -12,6 +12,7 @@ from typing import Any
 
 # Import from shared module - eliminates duplicate code
 from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult
+from shared.output_management import unwrap_envelope
 
 # Re-export JudgeResult for backwards compatibility
 __all__ = ["BaseJudge", "JudgeResult"]
@@ -101,14 +102,13 @@ class BaseJudge(SharedBaseJudge):
         Returns:
             Results dictionary with summary and authors
         """
-        # Handle Caldera envelope format (metadata/data)
-        if "data" in data:
-            return data["data"]
+        # Use shared unwrap_envelope helper
+        inner = unwrap_envelope(data)
         # Handle legacy format (results)
-        if "results" in data:
-            return data["results"]
+        if "results" in inner:
+            return inner["results"]
         # Handle direct format
-        return data
+        return inner
 
     def extract_authors(self, data: dict) -> list[dict[str, Any]]:
         """Extract authors list from analysis data.

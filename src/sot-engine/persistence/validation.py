@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 import duckdb
 import jsonschema
+
+from shared.path_utils import is_repo_relative_path, normalize_file_path
 
 
 # Core landing zone table DDL (required by all adapters)
@@ -210,3 +212,42 @@ def check_positive(value: int | float | None, field: str) -> Iterable[str]:
     if value <= 0:
         return [f"{field} must be > 0, got {value}"]
     return []
+
+
+def validate_file_paths_in_entries(
+    entries: Iterable[dict[str, Any]],
+    path_field: str = "path",
+    repo_root: Path | None = None,
+    entry_prefix: str = "file",
+) -> list[str]:
+    """Validate and normalize file paths in a list of entries.
+
+    Checks that each entry's path field, after normalization, is a valid
+    repo-relative path (no leading `/`, `./`, or `..`).
+
+    Args:
+        entries: Iterable of dictionaries containing path fields
+        path_field: Name of the field containing the path (default: "path")
+        repo_root: Optional repository root for path normalization
+        entry_prefix: Prefix for error messages (default: "file")
+
+    Returns:
+        List of error messages (empty if all paths are valid)
+
+    Example:
+        >>> errors = validate_file_paths_in_entries(
+        ...     files,
+        ...     path_field="path",
+        ...     repo_root=Path("/repo"),
+        ...     entry_prefix="scc file",
+        ... )
+        >>> if errors:
+        ...     raise ValueError(f"Path validation failed: {errors}")
+    """
+    errors: list[str] = []
+    for idx, entry in enumerate(entries):
+        raw_path = entry.get(path_field, "")
+        normalized = normalize_file_path(raw_path, repo_root)
+        if not is_repo_relative_path(normalized):
+            errors.append(f"{entry_prefix}[{idx}] path invalid: {raw_path} -> {normalized}")
+    return errors

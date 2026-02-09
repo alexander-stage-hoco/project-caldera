@@ -10,6 +10,7 @@ from ..entities import TrivyIacMisconfig, TrivyTarget, TrivyVulnerability, ToolR
 from ..repositories import LayoutRepository, ToolRunRepository, TrivyRepository
 from ..validation import (
     check_required,
+    validate_file_paths_in_entries,
 )
 from shared.path_utils import is_repo_relative_path, normalize_file_path
 
@@ -219,7 +220,7 @@ class TrivyAdapter(BaseAdapter):
 
     def validate_quality(self, vulnerabilities: Any, targets: Any = None, iac_misconfigs: Any = None) -> None:
         """Validate data quality rules for Trivy vulnerabilities and IaC misconfigs."""
-        errors = []
+        errors: list[str] = []
 
         for vuln_idx, vuln in enumerate(vulnerabilities):
             errors.extend(
@@ -251,28 +252,32 @@ class TrivyAdapter(BaseAdapter):
                     )
 
         if targets:
+            # Use shared path validation helper for targets
+            errors.extend(validate_file_paths_in_entries(
+                targets,
+                path_field="path",
+                repo_root=self._repo_root,
+                entry_prefix="targets",
+            ))
+            # Also check required field
             for target_idx, target in enumerate(targets):
-                raw_path = target.get("path", "")
                 errors.extend(
-                    check_required(raw_path, f"targets[{target_idx}].path")
+                    check_required(target.get("path", ""), f"targets[{target_idx}].path")
                 )
-                # Validate path is repo-relative after normalization
-                normalized = normalize_file_path(raw_path, self._repo_root)
-                if not is_repo_relative_path(normalized):
-                    errors.append(f"targets[{target_idx}] path invalid: {raw_path} -> {normalized}")
 
         if iac_misconfigs:
+            # Use shared path validation helper for IaC misconfigs (uses "target" field)
+            errors.extend(validate_file_paths_in_entries(
+                iac_misconfigs,
+                path_field="target",
+                repo_root=self._repo_root,
+                entry_prefix="iac_misconfigs",
+            ))
             for iac_idx, iac in enumerate(iac_misconfigs):
                 # IaC misconfigs use "target" field for file path
-                raw_path = iac.get("target", "")
                 errors.extend(
-                    check_required(raw_path, f"iac_misconfigs[{iac_idx}].target")
+                    check_required(iac.get("target", ""), f"iac_misconfigs[{iac_idx}].target")
                 )
-                # Validate path is repo-relative after normalization
-                if raw_path:
-                    normalized = normalize_file_path(raw_path, self._repo_root)
-                    if not is_repo_relative_path(normalized):
-                        errors.append(f"iac_misconfigs[{iac_idx}] path invalid: {raw_path} -> {normalized}")
                 # Validate line_start and line_end: both must be >= 1 if present
                 line_start = iac.get("start_line")
                 line_end = iac.get("end_line")

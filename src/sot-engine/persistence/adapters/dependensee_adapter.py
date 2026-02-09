@@ -15,7 +15,7 @@ from .base_adapter import BaseAdapter
 from ..entities import DependenseeProject, DependenseeProjectReference, DependenseePackageReference
 from ..repositories import DependenseeRepository, LayoutRepository, ToolRunRepository
 from shared.path_utils import is_repo_relative_path, normalize_file_path
-from ..validation import check_non_negative, check_required
+from ..validation import check_non_negative, check_required, validate_file_paths_in_entries
 
 # Path to the tool's JSON schema for validation
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "dependensee" / "schemas" / "output.schema.json"
@@ -146,15 +146,16 @@ class DependenseeAdapter(BaseAdapter):
         - Package references have required name field
         - Reference counts are non-negative
         """
-        errors = []
+        errors: list[str] = []
+        # Use shared path validation helper
+        errors.extend(validate_file_paths_in_entries(
+            projects,
+            path_field="path",
+            repo_root=self._repo_root,
+            entry_prefix="project",
+        ))
         for idx, entry in enumerate(projects):
             prefix = f"project[{idx}]"
-
-            # Path validation
-            raw_path = entry.get("path", "")
-            normalized = normalize_file_path(raw_path, self._repo_root)
-            if not is_repo_relative_path(normalized):
-                errors.append(f"{prefix} path invalid: {raw_path} -> {normalized}")
 
             # Required fields
             errors.extend(check_required(entry.get("name"), f"{prefix}.name"))

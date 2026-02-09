@@ -7,12 +7,8 @@ functionality like loading ground truth fixtures.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 from typing import Any
-
-# Add shared src to path for imports
-sys.path.insert(0, str(Path(__file__).resolve().parents[6]))
 
 # Import shared base judge (reuses LLMClient, observability, etc.)
 from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult

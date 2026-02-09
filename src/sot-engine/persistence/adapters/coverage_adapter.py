@@ -7,10 +7,10 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import CoverageSummary
 from ..repositories import CoverageRepository, LayoutRepository, ToolRunRepository
-from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import (
     check_non_negative,
     check_required,
+    validate_file_paths_in_entries,
 )
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "coverage-ingest" / "schemas" / "output.schema.json"
@@ -106,13 +106,15 @@ class CoverageAdapter(BaseAdapter):
 
     def validate_quality(self, files: Any) -> None:
         """Validate data quality rules for coverage files."""
-        errors = []
+        errors: list[str] = []
+        # Use shared path validation helper
+        errors.extend(validate_file_paths_in_entries(
+            files,
+            path_field="relative_path",
+            repo_root=self._repo_root,
+            entry_prefix="coverage file",
+        ))
         for idx, entry in enumerate(files):
-            raw_path = entry.get("relative_path", "")
-            normalized = normalize_file_path(raw_path, self._repo_root)
-            if not is_repo_relative_path(normalized):
-                errors.append(f"coverage file[{idx}] path invalid: {raw_path} -> {normalized}")
-
             # Required fields
             errors.extend(check_required(entry.get("lines_total"), f"file[{idx}].lines_total"))
             errors.extend(check_required(entry.get("lines_covered"), f"file[{idx}].lines_covered"))

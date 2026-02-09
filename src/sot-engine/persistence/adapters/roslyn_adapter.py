@@ -6,9 +6,9 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import RoslynViolation
 from ..repositories import LayoutRepository, RoslynRepository, ToolRunRepository
-from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import (
     check_required,
+    validate_file_paths_in_entries,
 )
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "roslyn-analyzers" / "schemas" / "output.schema.json"
@@ -109,13 +109,15 @@ class RoslynAdapter(BaseAdapter):
 
     def validate_quality(self, files: Any) -> None:
         """Validate data quality rules for roslyn files."""
-        errors = []
+        errors: list[str] = []
+        # Use shared path validation helper
+        errors.extend(validate_file_paths_in_entries(
+            files,
+            path_field="path",
+            repo_root=self._repo_root,
+            entry_prefix="roslyn file",
+        ))
         for file_idx, file_entry in enumerate(files):
-            raw_path = file_entry.get("path", "")
-            normalized = normalize_file_path(raw_path, self._repo_root)
-            if not is_repo_relative_path(normalized):
-                errors.append(f"roslyn file[{file_idx}] path invalid: {raw_path} -> {normalized}")
-
             for violation_idx, violation in enumerate(file_entry.get("violations", [])):
                 prefix = f"file[{file_idx}].violations[{violation_idx}]"
                 errors.extend(check_required(violation.get("rule_id"), f"{prefix}.rule_id"))
