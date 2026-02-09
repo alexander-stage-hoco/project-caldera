@@ -284,13 +284,16 @@ class ToolReadinessSection(BaseSection):
     def _parse_evaluation_report(self, report: dict[str, Any]) -> dict[str, Any]:
         """Parse an evaluation_report.json into a tool readiness entry."""
         summary = report.get("summary", {})
+        # Handle case where summary is a string instead of a dict
+        if not isinstance(summary, dict):
+            summary = {}
         decision = report.get("decision", summary.get("decision", "UNKNOWN"))
         score = report.get("score", summary.get("score", 0))
         score_percent = score * 100 if score <= 1 else score
 
-        total_checks = summary.get("total", 0)
-        passed_checks = summary.get("passed", 0)
-        failed_checks = summary.get("failed", 0)
+        total_checks = report.get("total", summary.get("total", 0))
+        passed_checks = report.get("passed", summary.get("passed", 0))
+        failed_checks = report.get("failed", summary.get("failed", 0))
 
         # Categorize based on decision
         if decision == "STRONG_PASS":

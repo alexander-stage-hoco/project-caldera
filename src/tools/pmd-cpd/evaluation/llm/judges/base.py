@@ -31,6 +31,9 @@ class BaseJudge(SharedBaseJudge):
         model: str = "opus-4.5",
         timeout: int = 120,
         working_dir: Path | None = None,
+        output_dir: Path | None = None,
+        ground_truth_dir: Path | None = None,
+        use_llm: bool = True,
         trace_id: str | None = None,
         enable_observability: bool = True,
         evaluation_mode: str | None = None,
@@ -41,6 +44,9 @@ class BaseJudge(SharedBaseJudge):
             model: Model name ("sonnet", "opus", "haiku") or full API ID
             timeout: Timeout in seconds for LLM invocation
             working_dir: Working directory for the tool
+            output_dir: Directory containing analysis output files
+            ground_truth_dir: Directory containing ground truth files
+            use_llm: Whether to use LLM evaluation (False for heuristic-only)
             trace_id: Correlation ID for linking all judges in one evaluation run
             enable_observability: Whether to log LLM interactions (default True)
             evaluation_mode: Evaluation mode ("synthetic", "real_world", or None for auto-detect)
@@ -49,6 +55,9 @@ class BaseJudge(SharedBaseJudge):
             model=model,
             timeout=timeout,
             working_dir=working_dir,
+            output_dir=output_dir,
+            ground_truth_dir=ground_truth_dir,
+            use_llm=use_llm,
             trace_id=trace_id,
             enable_observability=enable_observability,
             evaluation_mode=evaluation_mode,
