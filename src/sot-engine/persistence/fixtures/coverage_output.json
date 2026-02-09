@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "tool_name": "coverage-ingest",
+    "tool_version": "1.0.0",
+    "run_id": "test-fixture-run-id",
+    "repo_id": "test-fixture-repo-id",
+    "branch": "main",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-01-01T00:00:00.000000+00:00",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "tool": "coverage-ingest",
+    "tool_version": "1.0.0",
+    "source_format": "lcov",
+    "file_count": 2,
+    "files": [
+      {
+        "relative_path": "src/main.py",
+        "line_coverage_pct": 80.0,
+        "branch_coverage_pct": null,
+        "lines_total": 10,
+        "lines_covered": 8,
+        "lines_missed": 2,
+        "branches_total": null,
+        "branches_covered": null
+      },
+      {
+        "relative_path": "src/utils.py",
+        "line_coverage_pct": 50.0,
+        "branch_coverage_pct": 40.0,
+        "lines_total": 20,
+        "lines_covered": 10,
+        "lines_missed": 10,
+        "branches_total": 10,
+        "branches_covered": 4
+      }
+    ],
+    "summary": {
+      "total_files": 2,
+      "avg_line_coverage_pct": 65.0,
+      "avg_branch_coverage_pct": 40.0
+    }
+  }
+}

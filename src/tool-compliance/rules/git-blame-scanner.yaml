@@ -1,0 +1,21 @@
+# Tool compliance rules for git-blame-scanner
+# Per-file authorship and knowledge risk analysis
+
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - performance.py
+
+required_prompts:
+  - accuracy.md
+  - actionability.md
+
+ground_truth_mode: synthetic_json
+
+evaluation_outputs:
+  - evaluation_report.json
+
+adapter:
+  module: persistence.adapters.git_blame_scanner_adapter
+  class: GitBlameScannerAdapter
+  table_prefix: git_blame  # Uses 'git_blame' for table naming

@@ -1,0 +1,93 @@
+{
+  "id": "synthetic",
+  "description": "Consolidated ground truth for all format test cases",
+  "formats": ["lcov", "cobertura", "jacoco", "istanbul"],
+  "test_cases": [
+    {
+      "format": "lcov",
+      "file": "simple.lcov",
+      "scenario": "simple",
+      "expected": {
+        "file_count": 1,
+        "files": [
+          {
+            "relative_path": "src/main.py",
+            "lines_total": 10,
+            "lines_covered": 8,
+            "line_coverage_pct": 80.0
+          }
+        ]
+      }
+    },
+    {
+      "format": "lcov",
+      "file": "branches.lcov",
+      "scenario": "branches",
+      "expected": {
+        "file_count": 1,
+        "has_branch_coverage": true
+      }
+    },
+    {
+      "format": "cobertura",
+      "file": "simple.xml",
+      "scenario": "simple",
+      "expected": {
+        "file_count": 1,
+        "files": [
+          {
+            "relative_path": "src/main.py",
+            "lines_total": 10,
+            "lines_covered": 8,
+            "line_coverage_pct": 80.0
+          }
+        ]
+      }
+    },
+    {
+      "format": "jacoco",
+      "file": "simple.xml",
+      "scenario": "simple",
+      "expected": {
+        "file_count": 1,
+        "files": [
+          {
+            "relative_path": "com/example/Main.java",
+            "lines_total": 10,
+            "lines_covered": 7,
+            "line_coverage_pct": 70.0
+          }
+        ]
+      }
+    },
+    {
+      "format": "istanbul",
+      "file": "simple.json",
+      "scenario": "simple",
+      "expected": {
+        "file_count": 1,
+        "files": [
+          {
+            "relative_path": "src/main.js",
+            "lines_total": 10,
+            "lines_covered": 8,
+            "line_coverage_pct": 80.0
+          }
+        ]
+      }
+    }
+  ],
+  "invariants": [
+    "lines_covered <= lines_total",
+    "branches_covered <= branches_total (when present)",
+    "0 <= line_coverage_pct <= 100",
+    "0 <= branch_coverage_pct <= 100 (when present)",
+    "All paths are repo-relative POSIX format"
+  ],
+  "evaluation_thresholds": {
+    "STRONG_PASS": 95,
+    "PASS": 85,
+    "WEAK_PASS": 75,
+    "FAIL": 0
+  }
+}

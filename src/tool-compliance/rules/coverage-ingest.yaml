@@ -1,0 +1,23 @@
+# Tool compliance rules for coverage-ingest
+# Multi-format test coverage ingestion (LCOV, Cobertura, JaCoCo, Istanbul)
+
+required_check_modules:
+  - accuracy.py
+  - coverage.py
+  - output_quality.py
+
+required_prompts:
+  - cross_format_consistency.md
+  - gap_actionability.md
+  - risk_tier_quality.md
+  - parser_accuracy.md
+
+ground_truth_mode: synthetic_json
+
+evaluation_outputs:
+  - evaluation_report.json
+
+adapter:
+  module: persistence.adapters.coverage_adapter
+  class: CoverageAdapter
+  table_prefix: coverage  # Uses 'coverage' instead of 'coverage_ingest' for table naming

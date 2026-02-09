@@ -2,3 +2,4 @@
 defusedxml>=0.7.0  # Safe XML parsing
 jsonschema>=4.0.0  # Schema validation
 pytest>=7.0.0      # Testing
+pytest-cov>=4.0.0  # Test coverage measurement

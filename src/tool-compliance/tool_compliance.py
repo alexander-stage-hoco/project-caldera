@@ -1867,7 +1867,12 @@ def _check_adapter_compliance(tool_root: Path, tool_name: str) -> CheckResult:
             message="No adapter compliance rule defined",
             evidence=[],
         )
-    module_name, class_name = adapter
+    # Handle both dict and tuple formats for adapter
+    if isinstance(adapter, dict):
+        module_name = adapter.get("module", "")
+        class_name = adapter.get("class", "")
+    else:
+        module_name, class_name = adapter
     project_root = tool_root.parents[2]
     sys.path.insert(0, str(project_root / "src" / "sot-engine"))
     sys.path.insert(0, str(project_root / "src"))
@@ -2049,7 +2054,12 @@ def _check_adapter_schema_alignment(tool_root: Path, tool_name: str) -> CheckRes
             evidence=[],
         )
 
-    module_name, class_name = adapter
+    # Handle both dict and tuple formats for adapter
+    if isinstance(adapter, dict):
+        module_name = adapter.get("module", "")
+        class_name = adapter.get("class", "")
+    else:
+        module_name, class_name = adapter
     project_root = tool_root.parents[2]
     sys.path.insert(0, str(project_root / "src" / "sot-engine"))
     sys.path.insert(0, str(project_root / "src"))
@@ -2188,7 +2198,7 @@ def _seed_layout_for_fixture(
             ]
     layout_files = []
     for idx, f in enumerate(files_data):
-        path = f.get("path", "")
+        path = f.get("path", "") or f.get("relative_path", "")
         directory = f.get("directory", path.rsplit("/", 1)[0] if "/" in path else ".")
         layout_files.append(LayoutFile(
             run_pk=run_pk,
@@ -2236,6 +2246,8 @@ def _get_tool_repository(conn, tool_name: str):
         DevskimRepository,
         DotcoverRepository,
         DependenseeRepository,
+        CoverageRepository,
+        GitBlameRepository,
     )
     repos = {
         "scc": SccRepository,
@@ -2252,6 +2264,8 @@ def _get_tool_repository(conn, tool_name: str):
         "devskim": DevskimRepository,
         "dotcover": DotcoverRepository,
         "dependensee": DependenseeRepository,
+        "coverage-ingest": CoverageRepository,
+        "git-blame-scanner": GitBlameRepository,
     }
     repo_cls = repos.get(tool_name)
     return repo_cls(conn) if repo_cls else None
@@ -2269,15 +2283,20 @@ def _check_adapter_integration(tool_root: Path, tool_name: str) -> CheckResult:
             evidence=[],
         )
 
-    module_name, class_name = adapter_rule
+    # Handle both dict and tuple formats for adapter
+    if isinstance(adapter_rule, dict):
+        module_name = adapter_rule.get("module", "")
+        class_name = adapter_rule.get("class", "")
+    else:
+        module_name, class_name = adapter_rule
     project_root = tool_root.parents[2]
 
     # Find fixture file - try multiple naming patterns
-    # Handle special case: layout-scanner uses "layout_output.json"
+    # Handle special case: layout-scanner uses "layout_output.json", coverage-ingest uses "coverage_output.json"
     base_names = [
-        tool_name.replace("-", "_"),  # layout_scanner
+        tool_name.replace("-", "_"),  # layout_scanner, coverage_ingest
         tool_name,  # layout-scanner
-        tool_name.replace("-scanner", "").replace("-analyzers", ""),  # layout, roslyn
+        tool_name.replace("-scanner", "").replace("-analyzers", "").replace("-ingest", "").replace("-", "_"),  # layout, roslyn, coverage
     ]
     fixture_paths = []
     for base in base_names:
@@ -2360,10 +2379,10 @@ def _check_adapter_quality_rules_coverage(tool_root: Path, tool_name: str) -> Ch
     project_root = tool_root.parents[2]
 
     # Find adapter source file - try multiple naming patterns
-    # Handles: layout-scanner -> layout_adapter.py, roslyn-analyzers -> roslyn_adapter.py
+    # Handles: layout-scanner -> layout_adapter.py, roslyn-analyzers -> roslyn_adapter.py, coverage-ingest -> coverage_adapter.py
     base_names = [
-        tool_name.replace("-", "_"),  # layout_scanner
-        tool_name.replace("-scanner", "").replace("-analyzers", "").replace("-", "_"),  # layout, roslyn
+        tool_name.replace("-", "_"),  # layout_scanner, coverage_ingest
+        tool_name.replace("-scanner", "").replace("-analyzers", "").replace("-ingest", "").replace("-", "_"),  # layout, roslyn, coverage
         tool_name,  # layout-scanner
     ]
     adapter_candidates = [
@@ -2480,15 +2499,21 @@ def _parse_rollup_names_from_eval_strategy(eval_strategy_path: Path) -> list[str
             in_rollups = True
             # Check for inline values
             value = line.split(":", 1)[1].strip()
-            if value:
-                rollups.extend([item.strip() for item in value.split(",") if item.strip()])
+            if value and value.lower() not in ("n/a", "none", "na", "-"):
+                rollups.extend([item.strip() for item in value.split(",") if item.strip() and item.strip().lower() not in ("n/a", "none", "na")])
             continue
         if line.lower().startswith("tests:"):
+            break
+        if line.lower().startswith("**invariants"):
             break
         if line.startswith(("#",)):
             break
         if in_rollups and line.startswith(("-", "*")):
             item = line[1:].strip()
+            # Strip markdown backticks and .sql extension
+            item = item.strip("`")
+            if item.endswith(".sql"):
+                item = item[:-4]
             if item:
                 rollups.append(item)
 
@@ -2722,7 +2747,12 @@ def _check_sot_adapter_registered(tool_root: Path, tool_name: str) -> CheckResul
             evidence=[],
         )
 
-    module_name, class_name = adapter_rule
+    # Handle both dict and tuple formats for adapter
+    if isinstance(adapter_rule, dict):
+        module_name = adapter_rule.get("module", "")
+        class_name = adapter_rule.get("class", "")
+    else:
+        module_name, class_name = adapter_rule
     project_root = tool_root.parents[2]
     init_path = project_root / "src" / "sot-engine" / "persistence" / "adapters" / "__init__.py"
 
@@ -2798,8 +2828,15 @@ def _check_sot_schema_table(tool_root: Path, tool_name: str) -> CheckResult:
 
     schema_content = schema_path.read_text()
 
+    # Check for table_prefix override in adapter rules
+    adapter_rule = TOOL_RULES.get(tool_name, {}).get("adapter", {})
+    table_prefix = adapter_rule.get("table_prefix") if isinstance(adapter_rule, dict) else None
+
     # Normalize tool name for table naming convention (e.g., roslyn-analyzers -> roslyn)
-    normalized_name = tool_name.replace("-", "_").replace("_scanner", "").replace("_analyzers", "")
+    if table_prefix:
+        normalized_name = table_prefix
+    else:
+        normalized_name = tool_name.replace("-", "_").replace("_scanner", "").replace("_analyzers", "")
 
     # Look for lz_ prefixed tables for this tool
     table_pattern = rf"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?lz_{normalized_name}"
@@ -2915,8 +2952,14 @@ def _check_sot_dbt_staging_model(tool_root: Path, tool_name: str) -> CheckResult
             evidence=[str(staging_dir)],
         )
 
+    # Check for table_prefix override in adapter rules
+    table_prefix = adapter_rule.get("table_prefix") if isinstance(adapter_rule, dict) else None
+
     # Normalize tool name for dbt naming convention
-    dbt_tool_name = _normalize_tool_name_for_dbt(tool_name)
+    if table_prefix:
+        dbt_tool_name = table_prefix
+    else:
+        dbt_tool_name = _normalize_tool_name_for_dbt(tool_name)
 
     # Look for staging models matching pattern stg_*<tool>*.sql
     staging_pattern = f"stg_*{dbt_tool_name}*.sql"
@@ -2960,7 +3003,13 @@ def _check_dbt_model_coverage(tool_root: Path, tool_name: str) -> CheckResult:
     project_root = tool_root.parents[2]
     dbt_models_dir = project_root / "src" / "sot-engine" / "dbt" / "models"
 
-    dbt_tool_name = _normalize_tool_name_for_dbt(tool_name)
+    # Check for table_prefix override in adapter rules
+    table_prefix = adapter.get("table_prefix") if isinstance(adapter, dict) else None
+
+    if table_prefix:
+        dbt_tool_name = table_prefix
+    else:
+        dbt_tool_name = _normalize_tool_name_for_dbt(tool_name)
     missing: list[str] = []
 
     # Check for staging models
@@ -2981,14 +3030,19 @@ def _check_dbt_model_coverage(tool_root: Path, tool_name: str) -> CheckResult:
     if declared_rollups:
         marts_dir = dbt_models_dir / "marts"
         for rollup_type in declared_rollups:
-            # Pattern: rollup_<tool>_<rollup_type>.sql
-            rollup_pattern = f"rollup_{dbt_tool_name}_{rollup_type}.sql"
+            # Handle case where rollup_type is a full filename like "rollup_git_blame_directory_ownership_direct"
+            if rollup_type.startswith("rollup_"):
+                # It's a full filename, just add .sql and check directly
+                rollup_pattern = f"{rollup_type}.sql"
+            else:
+                # Pattern: rollup_<tool>_<rollup_type>.sql
+                rollup_pattern = f"rollup_{dbt_tool_name}_{rollup_type}.sql"
             rollup_files = list(marts_dir.glob(rollup_pattern)) if marts_dir.exists() else []
             if not rollup_files:
                 # Also try with directory_ prefix already in rollup_type
                 alt_pattern = f"rollup_{dbt_tool_name}_*.sql"
                 all_rollups = list(marts_dir.glob(alt_pattern)) if marts_dir.exists() else []
-                matching = [f for f in all_rollups if rollup_type in f.name]
+                matching = [f for f in all_rollups if rollup_type.replace("rollup_", "") in f.name or rollup_type in f.name]
                 if not matching:
                     missing.append(f"Missing rollup model for {rollup_type}")
 
@@ -4960,6 +5014,25 @@ def main() -> int:
         if not single_tool.exists() or not single_tool.is_dir():
             print(f"Error: Tool path not found: {args.tool_path}", file=sys.stderr)
             return 1
+
+        # Check if this is a parent directory containing tools (not a tool itself)
+        if not (single_tool / "Makefile").exists():
+            # Check if it contains subdirectories with Makefiles
+            has_tool_subdirs = any(
+                (d / "Makefile").exists()
+                for d in single_tool.iterdir()
+                if d.is_dir()
+            )
+            if has_tool_subdirs:
+                # Treat as tools_root, not single_tool
+                tools_root = single_tool
+                single_tool = None
+            else:
+                print(
+                    f"Error: Not a valid tool directory (no Makefile): {args.tool_path}",
+                    file=sys.stderr,
+                )
+                return 1
 
     report = build_report(
         tools_root,

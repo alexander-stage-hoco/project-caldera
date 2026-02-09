@@ -509,10 +509,14 @@ def main() -> None:
     print(f"Scorecard written to: {scorecard_path}")
 
     # Write JSON results
-    json_path = output_dir / "evaluation_results.json"
+    from datetime import datetime, timezone
+    timestamp = datetime.now(timezone.utc).isoformat()
+
     json_results = {
+        "timestamp": timestamp,
         "score": score,
         "decision": decision,
+        "summary": f"{passed}/{total} checks passed ({score:.1f}%)",
         "passed": passed,
         "total": total,
         "checks": [
@@ -525,8 +529,12 @@ def main() -> None:
             for r in all_results
         ],
     }
-    json_path.write_text(json.dumps(json_results, indent=2))
-    print(f"JSON results written to: {json_path}")
+
+    # Write to both expected file names for compatibility
+    for filename in ["evaluation_results.json", "evaluation_report.json"]:
+        json_path = output_dir / filename
+        json_path.write_text(json.dumps(json_results, indent=2))
+        print(f"JSON results written to: {json_path}")
 
 
 if __name__ == "__main__":

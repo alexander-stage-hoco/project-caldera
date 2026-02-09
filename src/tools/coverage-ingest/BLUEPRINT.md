@@ -1,5 +1,9 @@
 # coverage-ingest Blueprint
 
+## Executive Summary
+
+coverage-ingest is a multi-format test coverage ingestion tool that normalizes coverage reports from LCOV, Cobertura, JaCoCo, and Istanbul formats into Caldera's unified landing zone. It enables cross-tool gap analysis by providing consistent file-level coverage metrics regardless of the original coverage tool or format.
+
 ## Purpose
 
 Ingest test coverage reports from multiple formats (LCOV, Cobertura, JaCoCo, Istanbul) and normalize them into Caldera's landing zone for cross-tool gap analysis.
@@ -45,6 +49,46 @@ Ingest test coverage reports from multiple formats (LCOV, Cobertura, JaCoCo, Ist
 └────────────────────────────────────────────────────────────────┘
 ```
 
+## Implementation Plan
+
+- [x] Phase 1: Core parser infrastructure
+  - [x] Base parser interface
+  - [x] LCOV parser implementation
+  - [x] Cobertura parser implementation
+  - [x] JaCoCo parser implementation
+  - [x] Istanbul parser implementation
+- [x] Phase 2: Output normalization
+  - [x] FileCoverage dataclass
+  - [x] Path normalization integration
+  - [x] Envelope output generation
+- [x] Phase 3: SoT Integration
+  - [x] CoverageAdapter implementation
+  - [x] CoverageSummary entity
+  - [x] CoverageRepository
+  - [x] dbt staging model
+- [x] Phase 4: Evaluation infrastructure
+  - [x] Ground truth files (all formats)
+  - [x] Programmatic checks
+  - [x] LLM judges
+
+## Configuration
+
+### CLI Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--input` | Path to coverage report file | Required |
+| `--format` | Override format detection | Auto-detect |
+| `--output` | Output JSON path | `outputs/<run-id>/output.json` |
+| `--repo-path` | Repository root for path normalization | Current directory |
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `COVERAGE_OUTPUT_DIR` | Default output directory | `outputs/` |
+| `COVERAGE_STRICT_PATHS` | Fail on non-repo-relative paths | `false` |
+
 ## Format Details
 
 ### LCOV
@@ -74,6 +118,34 @@ Ingest test coverage reports from multiple formats (LCOV, Cobertura, JaCoCo, Ist
 3. **Graceful Degradation**: Missing branch data is marked as `null`, not 0
 4. **Format Detection**: Auto-detection based on file content signatures
 5. **Safe XML Parsing**: Uses `defusedxml` to prevent XML attacks
+
+## Performance
+
+| Metric | Target | Actual |
+|--------|--------|--------|
+| Small file (<100 entries) | < 100ms | ~20ms |
+| Medium file (1K entries) | < 500ms | ~100ms |
+| Large file (10K entries) | < 5s | ~800ms |
+| Memory (10K files) | < 500MB | ~150MB |
+
+## Evaluation
+
+| Dimension | Weight | Method | Target |
+|-----------|--------|--------|--------|
+| Parser Accuracy | 35% | Programmatic | >= 99% |
+| Normalization Correctness | 25% | Programmatic | 100% |
+| Format Coverage | 20% | Programmatic | 100% |
+| Edge Case Handling | 10% | Programmatic | >= 95% |
+| Performance | 10% | Programmatic | < 5s for 10K |
+
+## Risk
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Format version incompatibility | Medium | Medium | Version detection, graceful degradation |
+| Path normalization edge cases | Low | High | Comprehensive test suite, common module |
+| XML parsing vulnerabilities | Low | High | Use defusedxml exclusively |
+| Memory exhaustion on large files | Low | Medium | Streaming parser consideration |
 
 ## Invariants
 

@@ -96,6 +96,11 @@ tool_entities:
   git-fame:
     - GitFameAuthor
     - GitFameSummary
+  coverage-ingest:
+    - CoverageSummary
+  git-blame-scanner:
+    - GitBlameFileSummary
+    - GitBlameAuthorStats
 
 entity_repository_map:
   SccFileMetric:
@@ -197,6 +202,15 @@ entity_repository_map:
   GitFameSummary:
     repository: GitFameRepository
     method: insert_summary
+  CoverageSummary:
+    repository: CoverageRepository
+    method: insert_summaries
+  GitBlameFileSummary:
+    repository: GitBlameRepository
+    method: insert_file_summaries
+  GitBlameAuthorStats:
+    repository: GitBlameRepository
+    method: insert_author_stats
 
 # Patterns for quality rule detection
 quality_rule_patterns:
@@ -297,6 +311,9 @@ data_completeness_rules:
       findings:
         - file_path
         - description  # gitleaks uses description not message
+    coverage-ingest:
+      files:
+        - relative_path  # coverage-ingest uses relative_path instead of path
 
 # Path consistency validation rules
 path_consistency_rules:

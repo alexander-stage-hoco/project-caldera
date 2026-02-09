@@ -156,10 +156,8 @@ def load_tool_rules(tool_name: str) -> dict[str, Any]:
     tool_path = RULES_DIR / f"{tool_name}.yaml"
     if tool_path.exists():
         config = load_yaml_file(tool_path)
-        # Convert adapter dict to tuple format expected by existing code
-        if "adapter" in config and isinstance(config["adapter"], dict):
-            adapter = config["adapter"]
-            config["adapter"] = (adapter.get("module", ""), adapter.get("class", ""))
+        # Keep adapter as dict for extended fields like table_prefix
+        # Legacy code may still work with tuple access via get("module") and get("class")
         return config
     return {}
 

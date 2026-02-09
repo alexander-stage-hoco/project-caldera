@@ -25,6 +25,7 @@ from .judges import (
     RiskTierQualityJudge,
     GapActionabilityJudge,
     CrossFormatConsistencyJudge,
+    ParserAccuracyJudge,
 )
 
 
@@ -63,6 +64,7 @@ def run_all_judges(
         "risk_tier_quality": RiskTierQualityJudge,
         "gap_actionability": GapActionabilityJudge,
         "cross_format_consistency": CrossFormatConsistencyJudge,
+        "parser_accuracy": ParserAccuracyJudge,
     }
 
     # Filter to specific judge if requested
@@ -242,7 +244,7 @@ def main() -> None:
     parser.add_argument(
         "--judge",
         help="Run specific judge only",
-        choices=["risk_tier_quality", "gap_actionability", "cross_format_consistency"],
+        choices=["risk_tier_quality", "gap_actionability", "cross_format_consistency", "parser_accuracy"],
     )
     parser.add_argument(
         "--json",
