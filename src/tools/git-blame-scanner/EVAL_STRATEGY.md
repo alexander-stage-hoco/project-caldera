@@ -128,8 +128,10 @@ See `evaluation/ground-truth/synthetic.json`.
 ## Rollup Validation
 
 Rollups:
-- `rollup_git_blame_directory_ownership_direct.sql`
-- `rollup_git_blame_directory_ownership_recursive.sql`
+- `rollup_git_blame_directory_counts_direct.sql`
+- `rollup_git_blame_directory_counts_recursive.sql`
+- `rollup_git_blame_directory_direct_distributions.sql`
+- `rollup_git_blame_directory_recursive_distributions.sql`
 
 **Invariants:**
 - recursive_count >= direct_count
@@ -137,7 +139,7 @@ Rollups:
 - Files with unique_authors=1 contribute to single_author_files
 
 Tests:
-- src/sot-engine/dbt/tests/test_rollup_git_blame_invariants.sql
+- src/sot-engine/dbt/tests/test_rollup_git_blame_direct_vs_recursive.sql
 - src/tools/git-blame-scanner/tests/unit/test_analyze.py
 
 ## Invariants

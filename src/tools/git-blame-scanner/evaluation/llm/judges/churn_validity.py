@@ -81,14 +81,19 @@ class ChurnValidityJudge(BaseJudge):
             )
             sample_files.extend(sorted_by_churn[:5])
 
+            # Calculate aggregated totals from file-level data
+            # (summary doesn't include total_churn fields - they must be computed)
+            total_churn_30d = sum(f.get("churn_30d", 0) for f in files)
+            total_churn_90d = sum(f.get("churn_90d", 0) for f in files)
+
             repo_summaries.append({
                 "repo": repo_name,
                 "file_count": len(files),
                 "active_30d_count": repo_active_30d,
                 "active_90d_count": repo_active_90d,
                 "stale_count": repo_stale,
-                "total_churn_30d": summary.get("total_churn_30d", 0),
-                "total_churn_90d": summary.get("total_churn_90d", 0),
+                "total_churn_30d": total_churn_30d,
+                "total_churn_90d": total_churn_90d,
                 "churn_valid": validation["valid"],
             })
 
@@ -113,12 +118,14 @@ class ChurnValidityJudge(BaseJudge):
                     continue
 
                 expected = gt.get("expected", {})
-                summary = self.extract_summary(all_results[repo_name])
+                repo_data = all_results[repo_name]
+                files = self.extract_files(repo_data)
 
                 exp_churn_30d = expected.get("total_churn_30d")
                 exp_churn_90d = expected.get("total_churn_90d")
-                actual_churn_30d = summary.get("total_churn_30d", 0)
-                actual_churn_90d = summary.get("total_churn_90d", 0)
+                # Calculate actual totals from file-level data
+                actual_churn_30d = sum(f.get("churn_30d", 0) for f in files)
+                actual_churn_90d = sum(f.get("churn_90d", 0) for f in files)
 
                 issues = []
                 if exp_churn_30d is not None and actual_churn_30d != exp_churn_30d:

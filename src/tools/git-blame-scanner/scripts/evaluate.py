@@ -6,6 +6,7 @@ import argparse
 import importlib
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -109,8 +110,11 @@ def main() -> int:
     results = run_checks(output, ground_truth)
     summary = compute_summary(results)
 
-    # Write report
+    # Write report with uniform schema fields at top level
     report = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "decision": summary["decision"],
+        "score": summary["score"],
         "summary": summary,
         "checks": results,
     }
