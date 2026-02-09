@@ -21,10 +21,10 @@ from ..entities import (
     DotcoverTypeCoverage,
 )
 from ..repositories import DotcoverRepository, LayoutRepository, ToolRunRepository
-from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import (
     check_non_negative,
     check_required,
+    validate_file_paths_in_entries,
 )
 
 # Path to the tool's JSON schema for validation
@@ -203,7 +203,18 @@ class DotcoverAdapter(BaseAdapter):
             entries: List of coverage entries to validate
             entry_type: Type name for error messages (assembly, type, method)
         """
-        errors = []
+        errors: list[str] = []
+
+        # For type entries, use shared path validation helper for entries with file_path
+        if entry_type == "type":
+            types_with_paths = [e for e in entries if e.get("file_path")]
+            errors.extend(validate_file_paths_in_entries(
+                types_with_paths,
+                path_field="file_path",
+                repo_root=self._repo_root,
+                entry_prefix="dotcover type",
+            ))
+
         for idx, entry in enumerate(entries):
             prefix = f"{entry_type}[{idx}]"
 
@@ -213,12 +224,6 @@ class DotcoverAdapter(BaseAdapter):
             elif entry_type == "type":
                 errors.extend(check_required(entry.get("assembly"), f"{prefix}.assembly"))
                 errors.extend(check_required(entry.get("name"), f"{prefix}.name"))
-                # Validate file path if present
-                file_path = entry.get("file_path")
-                if file_path:
-                    normalized = normalize_file_path(file_path, self._repo_root)
-                    if not is_repo_relative_path(normalized):
-                        errors.append(f"{prefix}.file_path invalid: {file_path} -> {normalized}")
             elif entry_type == "method":
                 errors.extend(check_required(entry.get("assembly"), f"{prefix}.assembly"))
                 errors.extend(check_required(entry.get("type_name"), f"{prefix}.type_name"))

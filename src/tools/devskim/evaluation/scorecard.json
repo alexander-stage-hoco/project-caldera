@@ -1,7 +1,7 @@
 {
   "tool": "devskim",
   "version": "1.0.0",
-  "generated_at": "2026-02-09T16:14:45.721794+00:00",
+  "generated_at": "2026-02-09T20:14:07.387618+00:00",
   "description": "Evaluation scorecard for DevSkim security analysis",
   "summary": {
     "total_checks": 30,

@@ -11,6 +11,7 @@ from shared.path_utils import is_repo_relative_path, normalize_dir_path, normali
 from ..validation import (
     check_non_negative,
     check_required,
+    validate_file_paths_in_entries,
 )
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "layout-scanner" / "schemas" / "output.schema.json"
@@ -130,15 +131,27 @@ class LayoutAdapter(BaseAdapter):
         if directories_map is None:
             directories_map = {}
 
-        errors = []
+        errors: list[str] = []
+
+        # Flatten files map to list for shared helper
+        flattened_files = [
+            {"path": entry.get("path", key)}
+            for key, entry in files_map.items()
+        ]
+        errors.extend(validate_file_paths_in_entries(
+            flattened_files,
+            path_field="path",
+            repo_root=self._repo_root,
+            entry_prefix="layout file",
+        ))
+
+        # Validate file-specific fields
         for idx, (path, entry) in enumerate(files_map.items()):
-            raw_path = entry.get("path", path)
-            normalized = normalize_file_path(raw_path, self._repo_root)
-            if not is_repo_relative_path(normalized):
-                errors.append(f"layout file[{idx}] path invalid: {raw_path} -> {normalized}")
             errors.extend(check_required(entry.get("id"), f"file[{idx}].id"))
             errors.extend(check_non_negative(entry.get("size_bytes", 0), f"file[{idx}].size_bytes"))
             errors.extend(check_non_negative(entry.get("line_count", 0), f"file[{idx}].line_count"))
+
+        # Keep inline validation for directories (uses normalize_dir_path and special root handling)
         for idx, (path, entry) in enumerate(directories_map.items()):
             raw_path = entry.get("path", path)
             normalized = normalize_dir_path(raw_path, self._repo_root)
@@ -148,6 +161,7 @@ class LayoutAdapter(BaseAdapter):
             errors.extend(check_non_negative(entry.get("depth", 0), f"dir[{idx}].depth"))
             errors.extend(check_non_negative(entry.get("recursive_file_count", 0), f"dir[{idx}].recursive_file_count"))
             errors.extend(check_non_negative(entry.get("recursive_size_bytes", 0), f"dir[{idx}].recursive_size_bytes"))
+
         if errors:
             for error in errors:
                 self._log(f"DATA_QUALITY_ERROR: {error}")

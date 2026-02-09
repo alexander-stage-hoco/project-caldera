@@ -7,7 +7,7 @@ from .base_adapter import BaseAdapter
 from ..entities import PmdCpdDuplication, PmdCpdFileMetric, PmdCpdOccurrence
 from ..repositories import LayoutRepository, PmdCpdRepository, ToolRunRepository
 from shared.path_utils import is_repo_relative_path, normalize_file_path
-from ..validation import check_required
+from ..validation import check_required, validate_file_paths_in_entries
 
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "pmd-cpd" / "schemas" / "output.schema.json"
@@ -151,16 +151,17 @@ class PmdCpdAdapter(BaseAdapter):
 
     def validate_quality(self, data: Any) -> None:
         """Validate data quality rules for pmd-cpd output."""
-        errors = []
+        errors: list[str] = []
         files = data.get("files", [])
         duplications = data.get("duplications", [])
 
-        # Validate file paths
-        for file_idx, file_entry in enumerate(files):
-            raw_path = file_entry.get("path", "")
-            normalized = normalize_file_path(raw_path, self._repo_root)
-            if not is_repo_relative_path(normalized):
-                errors.append(f"pmd-cpd file[{file_idx}] path invalid: {raw_path} -> {normalized}")
+        # Validate file paths using shared helper
+        errors.extend(validate_file_paths_in_entries(
+            files,
+            path_field="path",
+            repo_root=self._repo_root,
+            entry_prefix="pmd-cpd file",
+        ))
 
         # Validate duplications
         for dup_idx, dup in enumerate(duplications):
@@ -171,6 +172,7 @@ class PmdCpdAdapter(BaseAdapter):
             if len(occurrences) < 2:
                 errors.append(f"duplications[{dup_idx}] must have at least 2 occurrences")
 
+            # Keep inline validation for nested occurrences (too complex to flatten)
             for occ_idx, occ in enumerate(occurrences):
                 raw_path = occ.get("file", "")
                 normalized = normalize_file_path(raw_path, self._repo_root)

@@ -8,10 +8,10 @@ from typing import Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import CodeSymbol, SymbolCall, FileImport
 from ..repositories import LayoutRepository, SymbolScannerRepository, ToolRunRepository
-from shared.path_utils import is_repo_relative_path, normalize_file_path
 from ..validation import (
     check_non_negative,
     check_required,
+    validate_file_paths_in_entries,
 )
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "symbol-scanner" / "schemas" / "output.schema.json"
@@ -152,14 +152,18 @@ class SymbolScannerAdapter(BaseAdapter):
 
     def validate_quality(self, data: dict) -> None:
         """Validate data quality rules for symbol-scanner output."""
-        errors = []
+        errors: list[str] = []
 
-        # Validate symbols
+        # Validate symbol paths using shared helper
+        errors.extend(validate_file_paths_in_entries(
+            data.get("symbols", []),
+            path_field="path",
+            repo_root=self._repo_root,
+            entry_prefix="symbol",
+        ))
+
+        # Validate symbol-specific fields
         for idx, symbol in enumerate(data.get("symbols", [])):
-            raw_path = symbol.get("path", "")
-            normalized = normalize_file_path(raw_path, self._repo_root)
-            if not is_repo_relative_path(normalized):
-                errors.append(f"symbol[{idx}] path invalid: {raw_path} -> {normalized}")
             errors.extend(check_required(symbol.get("symbol_name"), f"symbol[{idx}].symbol_name"))
             errors.extend(check_required(symbol.get("symbol_type"), f"symbol[{idx}].symbol_type"))
             if symbol.get("symbol_type") not in ("function", "class", "method", "variable"):
@@ -169,23 +173,31 @@ class SymbolScannerAdapter(BaseAdapter):
                     errors.append(f"symbol[{idx}] line_start > line_end")
             errors.extend(check_non_negative(symbol.get("parameters"), f"symbol[{idx}].parameters"))
 
-        # Validate calls
+        # Validate call paths using shared helper
+        errors.extend(validate_file_paths_in_entries(
+            data.get("calls", []),
+            path_field="caller_file",
+            repo_root=self._repo_root,
+            entry_prefix="call",
+        ))
+
+        # Validate call-specific fields
         for idx, call in enumerate(data.get("calls", [])):
-            raw_path = call.get("caller_file", "")
-            normalized = normalize_file_path(raw_path, self._repo_root)
-            if not is_repo_relative_path(normalized):
-                errors.append(f"call[{idx}] caller_file invalid: {raw_path} -> {normalized}")
             errors.extend(check_required(call.get("caller_symbol"), f"call[{idx}].caller_symbol"))
             errors.extend(check_required(call.get("callee_symbol"), f"call[{idx}].callee_symbol"))
             if call.get("call_type") and call.get("call_type") not in ("direct", "dynamic", "async"):
                 errors.append(f"call[{idx}].call_type invalid: {call.get('call_type')}")
 
-        # Validate imports
+        # Validate import paths using shared helper
+        errors.extend(validate_file_paths_in_entries(
+            data.get("imports", []),
+            path_field="file",
+            repo_root=self._repo_root,
+            entry_prefix="import",
+        ))
+
+        # Validate import-specific fields
         for idx, imp in enumerate(data.get("imports", [])):
-            raw_path = imp.get("file", "")
-            normalized = normalize_file_path(raw_path, self._repo_root)
-            if not is_repo_relative_path(normalized):
-                errors.append(f"import[{idx}] file invalid: {raw_path} -> {normalized}")
             errors.extend(check_required(imp.get("imported_path"), f"import[{idx}].imported_path"))
             if imp.get("import_type") and imp.get("import_type") not in ("static", "dynamic", "type_checking", "side_effect"):
                 errors.append(f"import[{idx}].import_type invalid: {imp.get('import_type')}")
