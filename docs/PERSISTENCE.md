@@ -86,7 +86,8 @@ src/sot-engine/persistence/
 │   ├── roslyn_adapter.py     # .NET analyzer adapter
 │   ├── sonarqube_adapter.py  # Two-table adapter
 │   ├── trivy_adapter.py      # Multi-table adapter
-│   └── git_sizer_adapter.py  # Repository-level metrics
+│   ├── git_sizer_adapter.py  # Repository-level metrics
+│   └── git_blame_scanner_adapter.py  # Per-file authorship metrics
 ├── entities.py               # Frozen dataclasses with validation
 ├── repositories.py           # Database CRUD operations
 ├── validation.py             # Shared validation utilities

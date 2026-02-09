@@ -15,6 +15,8 @@ from .entities import (
     DotcoverMethodCoverage,
     DotcoverTypeCoverage,
     FileImport,
+    GitBlameAuthorStats,
+    GitBlameFileSummary,
     GitFameAuthor,
     GitFameSummary,
     GitSizerLfsCandidate,
@@ -43,6 +45,57 @@ from .entities import (
 )
 
 T = TypeVar("T")
+
+# Whitelist of valid landing zone table names that contain run_pk column.
+# This prevents SQL injection when table names are used in dynamic SQL.
+_VALID_LZ_TABLES = frozenset([
+    "lz_tool_runs",
+    "lz_layout_files",
+    "lz_layout_directories",
+    "lz_scc_file_metrics",
+    "lz_lizard_file_metrics",
+    "lz_lizard_function_metrics",
+    "lz_semgrep_smells",
+    "lz_gitleaks_secrets",
+    "lz_roslyn_violations",
+    "lz_devskim_findings",
+    "lz_sonarqube_issues",
+    "lz_sonarqube_metrics",
+    "lz_trivy_targets",
+    "lz_trivy_vulnerabilities",
+    "lz_trivy_iac_misconfigs",
+    "lz_git_sizer_metrics",
+    "lz_git_sizer_violations",
+    "lz_git_sizer_lfs_candidates",
+    "lz_code_symbols",
+    "lz_symbol_calls",
+    "lz_file_imports",
+    "lz_scancode_file_licenses",
+    "lz_scancode_summary",
+    "lz_pmd_cpd_file_metrics",
+    "lz_pmd_cpd_duplications",
+    "lz_pmd_cpd_occurrences",
+    "lz_dotcover_assembly_coverage",
+    "lz_dotcover_type_coverage",
+    "lz_dotcover_method_coverage",
+    "lz_dependensee_projects",
+    "lz_dependensee_project_refs",
+    "lz_dependensee_package_refs",
+    "lz_git_fame_authors",
+    "lz_git_fame_summary",
+    "lz_git_blame_summary",
+    "lz_git_blame_author_stats",
+])
+
+
+def _validate_table_name(table: str) -> None:
+    """Validate that a table name is in the allowed whitelist.
+
+    Raises:
+        ValueError: If the table name is not whitelisted.
+    """
+    if table not in _VALID_LZ_TABLES:
+        raise ValueError(f"Invalid table name: {table}")
 
 
 class BaseRepository:
@@ -168,12 +221,15 @@ class CollectionRunRepository:
                      AND c.table_schema = t.table_schema
                     WHERE c.column_name = 'run_pk'
                       AND t.table_type = 'BASE TABLE'
+                      AND c.table_name LIKE 'lz_%'
                     """
                 ).fetchall()
             ]
             for table in sorted(set(tables)):
                 if table == "lz_tool_runs":
                     continue
+                # Validate table name against whitelist to prevent SQL injection
+                _validate_table_name(table)
                 self._conn.execute(
                     f"DELETE FROM {table} WHERE run_pk IN ({placeholders})",
                     run_pks,
@@ -865,5 +921,43 @@ class GitFameRepository(BaseRepository):
             lambda r: (
                 r.run_pk, r.repo_id, r.author_count, r.total_loc,
                 r.hhi_index, r.bus_factor, r.top_author_pct, r.top_two_pct,
+            ),
+        )
+
+
+class GitBlameRepository(BaseRepository):
+    """Repository for git-blame-scanner analysis data."""
+
+    _SUMMARY_COLUMNS = (
+        "run_pk", "file_id", "directory_id", "relative_path",
+        "total_lines", "unique_authors", "top_author", "top_author_lines",
+        "top_author_pct", "last_modified", "churn_30d", "churn_90d",
+    )
+
+    _AUTHOR_COLUMNS = (
+        "run_pk", "author_email", "total_files", "total_lines",
+        "exclusive_files", "avg_ownership_pct",
+    )
+
+    def insert_file_summaries(self, rows: Iterable[GitBlameFileSummary]) -> None:
+        self._insert_bulk(
+            "lz_git_blame_summary",
+            self._SUMMARY_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.file_id, r.directory_id, r.relative_path,
+                r.total_lines, r.unique_authors, r.top_author, r.top_author_lines,
+                r.top_author_pct, r.last_modified, r.churn_30d, r.churn_90d,
+            ),
+        )
+
+    def insert_author_stats(self, rows: Iterable[GitBlameAuthorStats]) -> None:
+        self._insert_bulk(
+            "lz_git_blame_author_stats",
+            self._AUTHOR_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.author_email, r.total_files, r.total_lines,
+                r.exclusive_files, r.avg_ownership_pct,
             ),
         )

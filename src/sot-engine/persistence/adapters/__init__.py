@@ -2,6 +2,7 @@ from .base_adapter import BaseAdapter
 from .dependensee_adapter import DependenseeAdapter
 from .devskim_adapter import DevskimAdapter
 from .dotcover_adapter import DotcoverAdapter
+from .git_blame_scanner_adapter import GitBlameScannerAdapter
 from .git_fame_adapter import GitFameAdapter
 from .git_sizer_adapter import GitSizerAdapter
 from .gitleaks_adapter import GitleaksAdapter
@@ -21,6 +22,7 @@ __all__ = [
     "DependenseeAdapter",
     "DevskimAdapter",
     "DotcoverAdapter",
+    "GitBlameScannerAdapter",
     "GitFameAdapter",
     "GitSizerAdapter",
     "GitleaksAdapter",

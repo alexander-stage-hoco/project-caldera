@@ -33,6 +33,7 @@ from .sections.composite_risk import CompositeRiskSection
 from .sections.function_complexity import FunctionComplexitySection
 from .sections.coupling_analysis import CouplingAnalysisSection
 from .sections.authorship_risk import AuthorshipRiskSection
+from .sections.knowledge_risk import KnowledgeRiskSection
 from .sections.code_duplication import CodeDuplicationSection
 from .sections.dependency_health import DependencyHealthSection
 from .sections.license_compliance import LicenseComplianceSection
@@ -42,7 +43,9 @@ from .sections.code_size_hotspots import CodeSizeHotspotsSection
 from .sections.code_quality_rules import CodeQualityRulesSection
 from .sections.coverage_gap import CoverageGapSection
 from .sections.technical_debt_summary import TechnicalDebtSummarySection
+from .sections.coupling_debt import CouplingDebtSection
 from .sections.sonarqube_deep_dive import SonarQubeDeepDiveSection
+from .sections.component_inventory import ComponentInventorySection
 
 
 class InsightsGenerator:
@@ -54,10 +57,12 @@ class InsightsGenerator:
         "tool_coverage_dashboard": ToolCoverageDashboardSection,
         "executive_summary": ExecutiveSummarySection,
         "technical_debt_summary": TechnicalDebtSummarySection,
+        "coupling_debt": CouplingDebtSection,
         "composite_risk": CompositeRiskSection,
         "dependency_health": DependencyHealthSection,
         "function_complexity": FunctionComplexitySection,
         "coverage_gap": CoverageGapSection,
+        "component_inventory": ComponentInventorySection,
         "blast_radius": BlastRadiusSection,
         "code_size_hotspots": CodeSizeHotspotsSection,
         "repo_health": RepoHealthSection,
@@ -71,6 +76,7 @@ class InsightsGenerator:
         "sonarqube_deep_dive": SonarQubeDeepDiveSection,
         "coupling_analysis": CouplingAnalysisSection,
         "authorship_risk": AuthorshipRiskSection,
+        "knowledge_risk": KnowledgeRiskSection,
         "language_coverage": LanguageCoverageSection,
         "code_duplication": CodeDuplicationSection,
         "distribution_insights": DistributionInsightsSection,

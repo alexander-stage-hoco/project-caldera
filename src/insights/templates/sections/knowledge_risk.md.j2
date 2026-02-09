@@ -1,0 +1,86 @@
+## Knowledge Risk
+
+{% if not has_data %}
+*No knowledge risk data available for this run. The git-blame-scanner tool may not have run.*
+{% else %}
+
+### Summary
+
+File-level knowledge concentration analysis. Identifies files at risk due to single-author ownership, knowledge silos, or stale code.
+
+| Metric | Value |
+|--------|-------|
+| Files Analyzed | {{ summary.total_files_analyzed }} |
+| Critical Risk | {{ summary.critical_count }} ({{ risk_distribution.critical.pct }}%) |
+| High Risk | {{ summary.high_count }} ({{ risk_distribution.high.pct }}%) |
+| Medium Risk | {{ summary.medium_count }} ({{ risk_distribution.medium.pct }}%) |
+| Low Risk | {{ summary.low_count }} ({{ risk_distribution.low.pct }}%) |
+| Single Author Files | {{ summary.single_author_files }} |
+| Knowledge Silos | {{ summary.knowledge_silo_count }} |
+| Stale Files (90+ days) | {{ summary.stale_file_count }} |
+
+{% if is_critical %}
+### Critical Risk Warning
+
+**{{ summary.critical_count }} files have critical knowledge risk** and require immediate knowledge transfer planning.
+{% if summary.knowledge_silo_count > 0 %}
+{{ summary.knowledge_silo_count }} knowledge silos identified - single authors own significant code with no backup contributors.
+{% endif %}
+{% endif %}
+
+{% if hotspots %}
+### At-Risk Files
+
+Files ranked by knowledge risk score (0-100):
+
+| File | Risk | Level | Authors | Top Author | Ownership | Flags |
+|------|------|-------|---------|------------|-----------|-------|
+{% for file in hotspots[:15] %}
+| {{ file.relative_path | truncate(40) }} | {{ file.risk_score }} | {{ file.risk_level | capitalize }} | {{ file.unique_authors }} | {{ file.top_author | truncate(15) if file.top_author else '-' }} | {{ file.top_author_pct | round(0) }}% | {% if file.is_knowledge_silo %}Silo{% endif %}{% if file.is_stale %} Stale{% endif %}{% if file.is_single_author and not file.is_knowledge_silo %} 1-Author{% endif %} |
+{% endfor %}
+{% endif %}
+
+{% if knowledge_silos %}
+### Knowledge Silos
+
+Files with single author ownership and significant code (>100 LOC):
+
+| File | Author | LOC | Risk Score |
+|------|--------|-----|------------|
+{% for file in knowledge_silos[:10] %}
+| {{ file.relative_path | truncate(40) }} | {{ file.top_author | truncate(20) if file.top_author else '-' }} | {{ file.total_lines }} | {{ file.risk_score }} |
+{% endfor %}
+{% endif %}
+
+{% if stale_critical %}
+### Stale Critical Files
+
+Critical-risk files with no commits in 90+ days:
+
+| File | Author | LOC | Last Modified |
+|------|--------|-----|---------------|
+{% for file in stale_critical %}
+| {{ file.relative_path | truncate(40) }} | {{ file.top_author | truncate(20) if file.top_author else '-' }} | {{ file.total_lines }} | {{ file.last_modified[:10] if file.last_modified else '-' }} |
+{% endfor %}
+{% endif %}
+
+{% if remediation_priorities %}
+### Remediation Priorities
+
+| File | Risk Factors | Recommended Action |
+|------|--------------|-------------------|
+{% for item in remediation_priorities %}
+| {{ item.path | truncate(35) }} | {{ item.reason }} | {{ item.action }} |
+{% endfor %}
+{% endif %}
+
+### Risk Score Interpretation
+
+| Level | Score | Action |
+|-------|-------|--------|
+| **Critical** | 70+ | Immediate knowledge transfer needed |
+| **High** | 50-69 | Schedule knowledge sharing sessions |
+| **Medium** | 30-49 | Add to backlog for review |
+| **Low** | <30 | No immediate action required |
+
+{% endif %}

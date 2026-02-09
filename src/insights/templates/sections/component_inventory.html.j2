@@ -1,0 +1,268 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Component Inventory</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No component data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Overview</h3>
+        <p>Module-by-module analysis of {{ summary.total_components }} components (depth 1-2 directories).</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.healthy_count >= summary.total_components * 0.7 %}healthy{% elif summary.healthy_count >= summary.total_components * 0.5 %}warning{% else %}critical{% endif %}">
+                <div class="label">Healthy</div>
+                <div class="value">{{ summary.healthy_count }}</div>
+                <div class="sublabel">Grade A/B</div>
+            </div>
+            <div class="metric-card {% if summary.at_risk_count > 0 %}warning{% endif %}">
+                <div class="label">At Risk</div>
+                <div class="value">{{ summary.at_risk_count }}</div>
+                <div class="sublabel">Grade C/D</div>
+            </div>
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">Grade F</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Avg Health</div>
+                <div class="value">{{ summary.avg_health_score }}</div>
+                <div class="sublabel">out of 100</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Grade Distribution</h3>
+        <div class="grade-distribution">
+            <div class="grade-bar">
+                <span class="grade-label grade-a">A</span>
+                <div class="grade-fill grade-a-fill" style="width: {{ (grade_distribution.A / (summary.total_components or 1) * 100) | round }}%"></div>
+                <span class="grade-count">{{ grade_distribution.A }}</span>
+            </div>
+            <div class="grade-bar">
+                <span class="grade-label grade-b">B</span>
+                <div class="grade-fill grade-b-fill" style="width: {{ (grade_distribution.B / (summary.total_components or 1) * 100) | round }}%"></div>
+                <span class="grade-count">{{ grade_distribution.B }}</span>
+            </div>
+            <div class="grade-bar">
+                <span class="grade-label grade-c">C</span>
+                <div class="grade-fill grade-c-fill" style="width: {{ (grade_distribution.C / (summary.total_components or 1) * 100) | round }}%"></div>
+                <span class="grade-count">{{ grade_distribution.C }}</span>
+            </div>
+            <div class="grade-bar">
+                <span class="grade-label grade-d">D</span>
+                <div class="grade-fill grade-d-fill" style="width: {{ (grade_distribution.D / (summary.total_components or 1) * 100) | round }}%"></div>
+                <span class="grade-count">{{ grade_distribution.D }}</span>
+            </div>
+            <div class="grade-bar">
+                <span class="grade-label grade-f">F</span>
+                <div class="grade-fill grade-f-fill" style="width: {{ (grade_distribution.F / (summary.total_components or 1) * 100) | round }}%"></div>
+                <span class="grade-count">{{ grade_distribution.F }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if critical_components %}
+    <div class="subsection">
+        <h3>Critical Components (Grade F)</h3>
+        <p>Components requiring immediate attention:</p>
+        {% for comp in critical_components %}
+        <div class="component-card grade-f">
+            <div class="component-header">
+                <h4>
+                    <span class="component-name">{{ comp.display_name }}</span>
+                    <span class="health-grade grade-f">F</span>
+                    <span class="health-score">({{ comp.health_score }})</span>
+                </h4>
+                <span class="component-path">{{ comp.directory_path }}</span>
+            </div>
+            <div class="component-metrics">
+                <span class="metric">Files: {{ comp.file_count }}</span>
+                <span class="metric">LOC: {{ comp.loc | format_number }}</span>
+                <span class="metric">Avg CCN: {{ comp.avg_ccn }}</span>
+                <span class="metric">Coupling: {{ comp.total_coupling }}</span>
+                <span class="metric">Instability: {{ comp.instability }}</span>
+            </div>
+            {% if comp.risk_signals %}
+            <div class="risk-signals">
+                <strong>Risk Signals:</strong>
+                <ul>
+                {% for signal in comp.risk_signals %}
+                    <li>{{ signal }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% if comp.hotspots %}
+            <details class="component-details">
+                <summary>Hotspots ({{ comp.hotspots | length }})</summary>
+                <table class="compact-table">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th class="number">CCN</th>
+                            <th class="number">Max CCN</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for hs in comp.hotspots %}
+                        <tr>
+                            <td class="truncate" title="{{ hs.file_path }}">{{ hs.file_path | truncate_path }}</td>
+                            <td class="number">{{ hs.total_ccn }}</td>
+                            <td class="number">{{ hs.max_ccn }}</td>
+                            <td>{{ hs.hotspot_type | replace('_', ' ') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </details>
+            {% endif %}
+            {% if comp.outbound_dependencies or comp.inbound_dependencies %}
+            <details class="component-details">
+                <summary>Dependencies (out: {{ comp.outbound_dependencies | length }}, in: {{ comp.inbound_dependencies | length }})</summary>
+                {% if comp.outbound_dependencies %}
+                <p><strong>Outbound:</strong></p>
+                <ul class="dependency-list">
+                {% for dep in comp.outbound_dependencies[:5] %}
+                    <li>{{ dep.related_component }} ({{ dep.call_count }} calls)</li>
+                {% endfor %}
+                {% if comp.outbound_dependencies | length > 5 %}
+                    <li>... and {{ comp.outbound_dependencies | length - 5 }} more</li>
+                {% endif %}
+                </ul>
+                {% endif %}
+                {% if comp.inbound_dependencies %}
+                <p><strong>Inbound:</strong></p>
+                <ul class="dependency-list">
+                {% for dep in comp.inbound_dependencies[:5] %}
+                    <li>{{ dep.related_component }} ({{ dep.call_count }} calls)</li>
+                {% endfor %}
+                {% if comp.inbound_dependencies | length > 5 %}
+                    <li>... and {{ comp.inbound_dependencies | length - 5 }} more</li>
+                {% endif %}
+                </ul>
+                {% endif %}
+            </details>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if at_risk_components %}
+    <div class="subsection">
+        <h3>At-Risk Components (Grade C/D)</h3>
+        <p>Components that should be monitored:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th class="number">Score</th>
+                    <th class="number">Grade</th>
+                    <th class="number">Files</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Avg CCN</th>
+                    <th class="number">Coupling</th>
+                    <th>Risk Signals</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for comp in at_risk_components %}
+                <tr class="grade-{{ comp.health_grade | lower }}-row">
+                    <td class="truncate" title="{{ comp.directory_path }}">{{ comp.display_name }}</td>
+                    <td class="number">{{ comp.health_score }}</td>
+                    <td class="number grade-{{ comp.health_grade | lower }}">{{ comp.health_grade }}</td>
+                    <td class="number">{{ comp.file_count }}</td>
+                    <td class="number">{{ comp.loc | format_number }}</td>
+                    <td class="number">{{ comp.avg_ccn }}</td>
+                    <td class="number">{{ comp.total_coupling }}</td>
+                    <td class="risk-signals-cell">{{ comp.risk_signals | join('; ') or 'None' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if healthy_components %}
+    <div class="subsection">
+        <h3>Healthy Components (Grade A/B)</h3>
+        <p>Well-structured components:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th class="number">Score</th>
+                    <th class="number">Grade</th>
+                    <th class="number">Files</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Avg CCN</th>
+                    <th class="number">Coupling</th>
+                    <th class="number">Instability</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for comp in healthy_components %}
+                <tr class="grade-{{ comp.health_grade | lower }}-row">
+                    <td class="truncate" title="{{ comp.directory_path }}">{{ comp.display_name }}</td>
+                    <td class="number">{{ comp.health_score }}</td>
+                    <td class="number grade-{{ comp.health_grade | lower }}">{{ comp.health_grade }}</td>
+                    <td class="number">{{ comp.file_count }}</td>
+                    <td class="number">{{ comp.loc | format_number }}</td>
+                    <td class="number">{{ comp.avg_ccn }}</td>
+                    <td class="number">{{ comp.total_coupling }}</td>
+                    <td class="number">{{ comp.instability }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Health Score Methodology</h3>
+        <p>Component health scores (0-100) are calculated using five weighted factors:</p>
+        <table class="methodology-table">
+            <thead>
+                <tr>
+                    <th>Factor</th>
+                    <th>Weight</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Complexity</td>
+                    <td>30%</td>
+                    <td>Lower average CCN is healthier</td>
+                </tr>
+                <tr>
+                    <td>Coupling</td>
+                    <td>25%</td>
+                    <td>Lower total dependencies is healthier</td>
+                </tr>
+                <tr>
+                    <td>Stability</td>
+                    <td>15%</td>
+                    <td>Balanced instability (0.5) is ideal</td>
+                </tr>
+                <tr>
+                    <td>Knowledge</td>
+                    <td>15%</td>
+                    <td>Lower author concentration is healthier</td>
+                </tr>
+                <tr>
+                    <td>Size</td>
+                    <td>15%</td>
+                    <td>Moderate LOC is healthier</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% endif %}
+</section>

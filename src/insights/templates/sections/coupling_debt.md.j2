@@ -1,0 +1,68 @@
+## Coupling-Weighted Technical Debt
+
+{% if not has_data %}
+*No coupling-weighted debt data available. This section requires file metrics data from analysis tools.*
+{% else %}
+
+{% if not has_coupling_data %}
+> **Note:** No coupling data available - symbol-scanner tool may not have run. Debt scores shown without coupling weights.
+{% endif %}
+
+### Debt Impact Summary
+
+Technical debt weighted by architectural coupling. High fan-in files amplify debt impact.
+
+| Metric | Value |
+|--------|-------|
+| Critical-Coupled (P0) | **{{ summary.critical_coupled_count }}** files |
+| High-Isolated (P1) | {{ summary.high_isolated_count }} files |
+| Total Debt Impact | {{ summary.total_debt_impact }} |
+| Avg Coupling Factor | {{ summary.avg_coupling_factor }}x |
+{% if summary.run_avg_fan_in %}| Run Avg Fan-In | {{ summary.run_avg_fan_in }} |{% endif %}
+
+### Quadrant Distribution
+
+| Quadrant | Count | Total Impact | Priority | Action |
+|----------|-------|--------------|----------|--------|
+{% for quadrant, info in quadrant_definitions.items() %}
+{% set dist = quadrant_distribution[quadrant] %}
+| {{ info.label }} | {{ dist.count }} | {{ dist.total_impact | round(1) }} | {{ info.priority }} | {{ info.action }} |
+{% endfor %}
+
+{% if remediation_priorities %}
+### Remediation Priorities
+
+| # | File | Reason | Impact Reduction |
+|---|------|--------|------------------|
+{% for priority in remediation_priorities %}
+| {{ loop.index }} | {{ priority.path }} | {{ priority.reason }} | {{ priority.impact_reduction }} |
+{% endfor %}
+{% endif %}
+
+{% if hotspots %}
+### Top Impact Hotspots
+
+| File | Impact Score | Quadrant | Debt Score | Fan-In | Coupling Factor | CCN | LOC |
+|------|--------------|----------|------------|--------|-----------------|-----|-----|
+{% for file in hotspots %}
+| {{ file.relative_path }} | {{ file.debt_impact_score }} | {{ file.debt_quadrant | replace('-', ' ') }} | {{ file.debt_score }} | {{ file.coupling_fan_in or '-' }} | {{ file.coupling_factor }}x | {{ file.complexity_max or '-' }} | {{ file.loc_code }} |
+{% endfor %}
+{% endif %}
+
+### Understanding the Analysis
+
+**Debt Impact Score** = Debt Score x (1 + Coupling Factor x 0.5)
+
+**Coupling Factor** = File Fan-In / Run Average Fan-In
+
+Files with above-average fan-in have coupling factors > 1, amplifying their debt impact.
+
+#### Quadrant Classification
+
+- **Critical-Coupled (P0):** Debt >= 20, Fan-In >= 10 - Fix immediately
+- **High-Isolated (P1):** Debt >= 20, Fan-In < 10 - Safe quick wins
+- **Medium-Coupled (P2):** Debt >= 10, Fan-In >= 5 - Monitor closely
+- **Medium-Isolated (P3):** Debt >= 10, Fan-In < 5 - Backlog
+- **Low (P4):** Debt < 10 - No immediate action
+
+{% endif %}

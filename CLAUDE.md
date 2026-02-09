@@ -25,7 +25,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
 │                              TOOL LAYER                                     │
 │  layout-scanner │ scc │ lizard │ semgrep │ roslyn-analyzers │ sonarqube │  │
 │  trivy │ gitleaks │ symbol-scanner │ scancode │ pmd-cpd │ devskim │       │
-│  dotcover │ git-fame │ git-sizer │ dependensee │                          │
+│  dotcover │ git-fame │ git-sizer │ git-blame-scanner │ dependensee │        │
 └────────────────────────────────────┬────────────────────────────────────────┘
                                      │ JSON outputs
 ┌────────────────────────────────────▼────────────────────────────────────────┐
@@ -35,7 +35,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
                                      │
 ┌────────────────────────────────────▼────────────────────────────────────────┐
 │                         LANDING ZONE (DuckDB)                               │
-│  lz_collection_runs │ lz_tool_runs │ lz_<tool>_* (16 tool-specific tables) │
+│  lz_collection_runs │ lz_tool_runs │ lz_<tool>_* (17 tool-specific tables) │
 └────────────────────────────────────┬────────────────────────────────────────┘
                                      │ dbt run
 ┌────────────────────────────────────▼────────────────────────────────────────┐
@@ -54,7 +54,7 @@ src/
 │   ├── evaluation/          # LLM judge infrastructure (BaseJudge, JudgeResult)
 │   └── observability/       # LLM interaction logging and tracing
 ├── tool-compliance/         # Tool readiness verification scanner
-├── tools/                   # Individual analysis tools (16 total)
+├── tools/                   # Individual analysis tools (17 total)
 │   ├── layout-scanner/      # Repository file structure analysis
 │   ├── scc/                 # Size & LOC analysis
 │   ├── lizard/              # Function-level complexity (CCN, NLOC)
@@ -70,6 +70,7 @@ src/
 │   ├── dotcover/            # .NET code coverage (Coverlet)
 │   ├── git-fame/            # Git contributor statistics
 │   ├── git-sizer/           # Git repository size analysis
+│   ├── git-blame-scanner/   # Per-file authorship and knowledge risk
 │   └── dependensee/         # Dependency visualization
 └── sot-engine/              # Core engine
     ├── dbt/                 # Data transformation (staging → marts)

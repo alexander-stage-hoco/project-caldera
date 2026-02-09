@@ -1,0 +1,151 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Coupling-Weighted Technical Debt</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No coupling-weighted debt data available. This section requires file metrics data from analysis tools.</p>
+    </div>
+    {% else %}
+
+    {% if not has_coupling_data %}
+    <div class="warning-box">
+        <p><strong>Note:</strong> No coupling data available - symbol-scanner tool may not have run. Debt scores shown without coupling weights.</p>
+    </div>
+    {% endif %}
+
+    <div class="summary-box">
+        <h3>Debt Impact Summary</h3>
+        <p>Technical debt weighted by architectural coupling. High fan-in files amplify debt impact.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_coupled_count > 0 %}critical{% endif %}">
+                <div class="label">Critical-Coupled</div>
+                <div class="value">{{ summary.critical_coupled_count }}</div>
+                <div class="sublabel">P0 priority files</div>
+            </div>
+            <div class="metric-card {% if summary.high_isolated_count > 0 %}warning{% endif %}">
+                <div class="label">High-Isolated</div>
+                <div class="value">{{ summary.high_isolated_count }}</div>
+                <div class="sublabel">Safe to refactor</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Total Debt Impact</div>
+                <div class="value">{{ summary.total_debt_impact | format_number }}</div>
+                <div class="sublabel">Weighted score</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Avg Coupling Factor</div>
+                <div class="value">{{ summary.avg_coupling_factor }}x</div>
+                <div class="sublabel">{% if summary.run_avg_fan_in %}Run avg fan-in: {{ summary.run_avg_fan_in }}{% endif %}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Quadrant Distribution</h3>
+        <p>Files classified by debt level and coupling impact:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Quadrant</th>
+                    <th class="number">Count</th>
+                    <th class="number">Total Impact</th>
+                    <th>Priority</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for quadrant, info in quadrant_definitions.items() %}
+                {% set dist = quadrant_distribution[quadrant] %}
+                <tr class="{% if quadrant == 'critical-coupled' and dist.count > 0 %}critical-row{% elif quadrant == 'high-isolated' and dist.count > 0 %}warning-row{% endif %}">
+                    <td>{{ info.label }}</td>
+                    <td class="number">{{ dist.count }}</td>
+                    <td class="number">{{ dist.total_impact | round(1) }}</td>
+                    <td>{{ info.priority }}</td>
+                    <td>{{ info.action }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if remediation_priorities %}
+    <div class="subsection">
+        <h3>Remediation Priorities</h3>
+        <p>Recommended actions based on debt impact and coupling:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th class="number">#</th>
+                    <th>File</th>
+                    <th>Reason</th>
+                    <th class="number">Impact Reduction</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for priority in remediation_priorities %}
+                <tr class="{% if priority.quadrant == 'critical-coupled' %}critical-row{% elif priority.quadrant == 'high-isolated' %}warning-row{% elif priority.quadrant == 'systemic' %}info-row{% endif %}">
+                    <td class="number">{{ loop.index }}</td>
+                    <td class="truncate" title="{{ priority.path }}">{{ priority.path | truncate_path }}</td>
+                    <td>{{ priority.reason }}</td>
+                    <td class="number">{{ priority.impact_reduction }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if hotspots %}
+    <div class="subsection">
+        <h3>Top Impact Hotspots</h3>
+        <p>Files with highest coupling-weighted debt scores:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Impact Score</th>
+                    <th>Quadrant</th>
+                    <th class="number">Debt Score</th>
+                    <th class="number">Fan-In</th>
+                    <th class="number">Coupling Factor</th>
+                    <th class="number">CCN</th>
+                    <th class="number">LOC</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in hotspots %}
+                <tr class="{% if file.debt_quadrant == 'critical-coupled' %}critical-row{% elif file.debt_quadrant == 'high-isolated' %}warning-row{% elif file.debt_quadrant == 'medium-coupled' %}info-row{% endif %}">
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate_path }}</td>
+                    <td class="number">{{ file.debt_impact_score }}</td>
+                    <td>{{ file.debt_quadrant | replace('-', ' ') | title }}</td>
+                    <td class="number">{{ file.debt_score }}</td>
+                    <td class="number">{{ file.coupling_fan_in or '-' }}</td>
+                    <td class="number">{{ file.coupling_factor }}x</td>
+                    <td class="number">{{ file.complexity_max or '-' }}</td>
+                    <td class="number">{{ file.loc_code | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Understanding the Analysis</h3>
+        <div class="info-box">
+            <p><strong>Debt Impact Score</strong> = Debt Score &times; (1 + Coupling Factor &times; 0.5)</p>
+            <p><strong>Coupling Factor</strong> = File Fan-In / Run Average Fan-In</p>
+            <p>Files with above-average fan-in have coupling factors &gt; 1, amplifying their debt impact.</p>
+            <h4>Quadrant Classification</h4>
+            <ul>
+                <li><strong>Critical-Coupled (P0):</strong> Debt &ge; 20, Fan-In &ge; 10 - Fix immediately</li>
+                <li><strong>High-Isolated (P1):</strong> Debt &ge; 20, Fan-In &lt; 10 - Safe quick wins</li>
+                <li><strong>Medium-Coupled (P2):</strong> Debt &ge; 10, Fan-In &ge; 5 - Monitor closely</li>
+                <li><strong>Medium-Isolated (P3):</strong> Debt &ge; 10, Fan-In &lt; 5 - Backlog</li>
+                <li><strong>Low (P4):</strong> Debt &lt; 10 - No immediate action</li>
+            </ul>
+        </div>
+    </div>
+
+    {% endif %}
+</section>

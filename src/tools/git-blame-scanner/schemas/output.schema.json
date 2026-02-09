@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "git-blame-scanner Output",
+  "description": "Output schema for git-blame-scanner - per-file authorship metrics for knowledge concentration and bus factor analysis",
+  "type": "object",
+  "required": ["metadata", "data"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Standard Caldera envelope metadata",
+      "required": [
+        "tool_name",
+        "tool_version",
+        "run_id",
+        "repo_id",
+        "branch",
+        "commit",
+        "timestamp",
+        "schema_version"
+      ],
+      "properties": {
+        "tool_name": {"type": "string"},
+        "tool_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+        "run_id": {"type": "string", "format": "uuid"},
+        "repo_id": {"type": "string", "format": "uuid"},
+        "branch": {"type": "string"},
+        "commit": {"type": "string", "pattern": "^[0-9a-fA-F]{40}$"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "schema_version": {"const": "1.0.0"}
+      }
+    },
+    "data": {
+      "type": "object",
+      "description": "Per-file and per-author authorship analysis data",
+      "required": ["tool", "files", "authors", "summary"],
+      "properties": {
+        "tool": {"type": "string"},
+        "tool_version": {"type": "string"},
+        "files": {
+          "type": "array",
+          "description": "Per-file authorship metrics",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "total_lines",
+              "unique_authors",
+              "top_author",
+              "top_author_lines",
+              "top_author_pct",
+              "last_modified",
+              "churn_30d",
+              "churn_90d"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Repo-relative path (e.g., 'src/main.py')"
+              },
+              "total_lines": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Total number of lines attributed via git blame"
+              },
+              "unique_authors": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Number of distinct contributors to this file"
+              },
+              "top_author": {
+                "type": "string",
+                "description": "Email of the author with most lines"
+              },
+              "top_author_lines": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of lines attributed to top author"
+              },
+              "top_author_pct": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Percentage of lines owned by top author"
+              },
+              "last_modified": {
+                "type": "string",
+                "description": "Date of most recent commit (YYYY-MM-DD or 'unknown')"
+              },
+              "churn_30d": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of commits in the last 30 days"
+              },
+              "churn_90d": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of commits in the last 90 days"
+              }
+            }
+          }
+        },
+        "authors": {
+          "type": "array",
+          "description": "Per-author aggregate statistics",
+          "items": {
+            "type": "object",
+            "required": [
+              "author_email",
+              "total_files",
+              "total_lines",
+              "exclusive_files",
+              "avg_ownership_pct"
+            ],
+            "properties": {
+              "author_email": {
+                "type": "string",
+                "description": "Author's email address"
+              },
+              "total_files": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Number of files this author has contributed to"
+              },
+              "total_lines": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Total lines owned across all files"
+              },
+              "exclusive_files": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Files where this author is the sole contributor"
+              },
+              "avg_ownership_pct": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Average ownership percentage across files"
+              }
+            }
+          }
+        },
+        "summary": {
+          "type": "object",
+          "description": "Repository-level summary metrics",
+          "required": [
+            "total_files_analyzed",
+            "total_authors",
+            "single_author_files",
+            "single_author_pct",
+            "high_concentration_files",
+            "high_concentration_pct",
+            "stale_files_90d",
+            "knowledge_silo_count",
+            "avg_authors_per_file"
+          ],
+          "properties": {
+            "total_files_analyzed": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of files successfully analyzed"
+            },
+            "total_authors": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of unique authors across all files"
+            },
+            "single_author_files": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Files with only one contributor"
+            },
+            "single_author_pct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Percentage of files with single author"
+            },
+            "high_concentration_files": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Files where top author owns >=80% of lines"
+            },
+            "high_concentration_pct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Percentage of high-concentration files"
+            },
+            "stale_files_90d": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Files with no commits in the last 90 days"
+            },
+            "knowledge_silo_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Single-author files with >100 lines"
+            },
+            "avg_authors_per_file": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Average number of contributors per file"
+            }
+          }
+        },
+        "knowledge_silos": {
+          "type": "array",
+          "description": "Paths of files identified as knowledge silos",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}

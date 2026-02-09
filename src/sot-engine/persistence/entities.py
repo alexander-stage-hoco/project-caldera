@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 
 def _validate_identifier(value: str, field_name: str) -> None:
@@ -21,7 +20,7 @@ def _validate_relative_path(value: str, field_name: str) -> None:
         raise ValueError(f"{field_name} must use '/' separators")
 
 
-def _validate_non_negative(value: Optional[float], field_name: str) -> None:
+def _validate_non_negative(value: float | None, field_name: str) -> None:
     if value is None:
         return
     if value < 0:
@@ -101,7 +100,7 @@ class CollectionRun:
     branch: str
     commit: str
     started_at: datetime
-    completed_at: Optional[datetime]
+    completed_at: datetime | None
     status: str
 
     def __post_init__(self) -> None:
@@ -123,12 +122,12 @@ class LayoutFile:
     relative_path: str
     directory_id: str
     filename: str
-    extension: Optional[str]
-    language: Optional[str]
-    category: Optional[str]
-    size_bytes: Optional[int]
-    line_count: Optional[int]
-    is_binary: Optional[bool]
+    extension: str | None
+    language: str | None
+    category: str | None
+    size_bytes: int | None
+    line_count: int | None
+    is_binary: bool | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -140,10 +139,10 @@ class LayoutDirectory:
     run_pk: int
     directory_id: str
     relative_path: str
-    parent_id: Optional[str]
+    parent_id: str | None
     depth: int
-    file_count: Optional[int]
-    total_size_bytes: Optional[int]
+    file_count: int | None
+    total_size_bytes: int | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -157,26 +156,26 @@ class SccFileMetric:
     file_id: str
     directory_id: str
     relative_path: str
-    filename: Optional[str]
-    extension: Optional[str]
-    language: Optional[str]
-    lines_total: Optional[int]
-    code_lines: Optional[int]
-    comment_lines: Optional[int]
-    blank_lines: Optional[int]
-    bytes: Optional[int]
-    complexity: Optional[int]
-    uloc: Optional[int]
-    comment_ratio: Optional[float]
-    blank_ratio: Optional[float]
-    code_ratio: Optional[float]
-    complexity_density: Optional[float]
-    dryness: Optional[float]
-    bytes_per_loc: Optional[float]
-    is_minified: Optional[bool]
-    is_generated: Optional[bool]
-    is_binary: Optional[bool]
-    classification: Optional[str]
+    filename: str | None
+    extension: str | None
+    language: str | None
+    lines_total: int | None
+    code_lines: int | None
+    comment_lines: int | None
+    blank_lines: int | None
+    bytes: int | None
+    complexity: int | None
+    uloc: int | None
+    comment_ratio: float | None
+    blank_ratio: float | None
+    code_ratio: float | None
+    complexity_density: float | None
+    dryness: float | None
+    bytes_per_loc: float | None
+    is_minified: bool | None
+    is_generated: bool | None
+    is_binary: bool | None
+    classification: str | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -203,12 +202,12 @@ class LizardFileMetric:
     run_pk: int
     file_id: str
     relative_path: str
-    language: Optional[str]
-    nloc: Optional[int]
-    function_count: Optional[int]
-    total_ccn: Optional[int]
-    avg_ccn: Optional[float]
-    max_ccn: Optional[int]
+    language: str | None
+    nloc: int | None
+    function_count: int | None
+    total_ccn: int | None
+    avg_ccn: float | None
+    max_ccn: int | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -227,13 +226,13 @@ class LizardFunctionMetric:
     run_pk: int
     file_id: str
     function_name: str
-    long_name: Optional[str]
-    ccn: Optional[int]
-    nloc: Optional[int]
-    params: Optional[int]
-    token_count: Optional[int]
-    line_start: Optional[int]
-    line_end: Optional[int]
+    long_name: str | None
+    ccn: int | None
+    nloc: int | None
+    params: int | None
+    token_count: int | None
+    line_start: int | None
+    line_end: int | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -255,15 +254,15 @@ class SemgrepSmell:
     directory_id: str
     relative_path: str
     rule_id: str
-    dd_smell_id: Optional[str]
-    dd_category: Optional[str]
-    severity: Optional[str]
-    line_start: Optional[int]
-    line_end: Optional[int]
-    column_start: Optional[int]
-    column_end: Optional[int]
-    message: Optional[str]
-    code_snippet: Optional[str]
+    dd_smell_id: str | None
+    dd_category: str | None
+    severity: str | None
+    line_start: int | None
+    line_end: int | None
+    column_start: int | None
+    column_end: int | None
+    message: str | None
+    code_snippet: str | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -280,16 +279,16 @@ class GitleaksSecret:
     directory_id: str
     relative_path: str
     rule_id: str
-    secret_type: Optional[str]
-    severity: Optional[str]
-    line_number: Optional[int]
-    commit_hash: Optional[str]
-    commit_author: Optional[str]
-    commit_date: Optional[str]
-    fingerprint: Optional[str]
-    in_current_head: Optional[bool]
-    entropy: Optional[float]
-    description: Optional[str]
+    secret_type: str | None
+    severity: str | None
+    line_number: int | None
+    commit_hash: str | None
+    commit_author: str | None
+    commit_date: str | None
+    fingerprint: str | None
+    in_current_head: bool | None
+    entropy: float | None
+    description: str | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -315,11 +314,11 @@ class RoslynViolation:
     rule_id: str
     dd_category: str
     severity: str
-    message: Optional[str]
-    line_start: Optional[int]
-    line_end: Optional[int]
-    column_start: Optional[int]
-    column_end: Optional[int]
+    message: str | None
+    line_start: int | None
+    line_end: int | None
+    column_start: int | None
+    column_end: int | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -338,14 +337,14 @@ class DevskimFinding:
     directory_id: str
     relative_path: str
     rule_id: str
-    dd_category: Optional[str]
-    severity: Optional[str]
-    line_start: Optional[int]
-    line_end: Optional[int]
-    column_start: Optional[int]
-    column_end: Optional[int]
-    message: Optional[str]
-    code_snippet: Optional[str]
+    dd_category: str | None
+    severity: str | None
+    line_start: int | None
+    line_end: int | None
+    column_start: int | None
+    column_end: int | None
+    message: str | None
+    code_snippet: str | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -368,14 +367,14 @@ class SonarqubeIssue:
     relative_path: str
     issue_key: str
     rule_id: str
-    issue_type: Optional[str]      # BUG, VULNERABILITY, CODE_SMELL, SECURITY_HOTSPOT
-    severity: Optional[str]        # BLOCKER, CRITICAL, MAJOR, MINOR, INFO
-    message: Optional[str]
-    line_start: Optional[int]
-    line_end: Optional[int]
-    effort: Optional[str]
-    status: Optional[str]
-    tags: Optional[str]
+    issue_type: str | None      # BUG, VULNERABILITY, CODE_SMELL, SECURITY_HOTSPOT
+    severity: str | None        # BLOCKER, CRITICAL, MAJOR, MINOR, INFO
+    message: str | None
+    line_start: int | None
+    line_end: int | None
+    effort: str | None
+    status: str | None
+    tags: str | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -392,14 +391,14 @@ class SonarqubeMetric:
     file_id: str
     directory_id: str
     relative_path: str
-    ncloc: Optional[int]
-    complexity: Optional[int]
-    cognitive_complexity: Optional[int]
-    duplicated_lines: Optional[int]
-    duplicated_lines_density: Optional[float]
-    code_smells: Optional[int]
-    bugs: Optional[int]
-    vulnerabilities: Optional[int]
+    ncloc: int | None
+    complexity: int | None
+    cognitive_complexity: int | None
+    duplicated_lines: int | None
+    duplicated_lines_density: float | None
+    code_smells: int | None
+    bugs: int | None
+    vulnerabilities: int | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -425,14 +424,14 @@ class TrivyVulnerability:
     target_key: str
     vulnerability_id: str
     package_name: str
-    installed_version: Optional[str]
-    fixed_version: Optional[str]
-    severity: Optional[str]
-    cvss_score: Optional[float]
-    title: Optional[str]
-    published_date: Optional[str]
-    age_days: Optional[int]
-    fix_available: Optional[bool]
+    installed_version: str | None
+    fixed_version: str | None
+    severity: str | None
+    cvss_score: float | None
+    title: str | None
+    published_date: str | None
+    age_days: int | None
+    fix_available: bool | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -454,10 +453,10 @@ class TrivyTarget:
     """Scan target (lockfile, Dockerfile, etc.) from Trivy analysis."""
     run_pk: int
     target_key: str
-    file_id: Optional[str]
-    directory_id: Optional[str]
+    file_id: str | None
+    directory_id: str | None
     relative_path: str
-    target_type: Optional[str]
+    target_type: str | None
     vulnerability_count: int
     critical_count: int
     high_count: int
@@ -481,17 +480,17 @@ class TrivyTarget:
 class TrivyIacMisconfig:
     """Infrastructure as Code misconfiguration from Trivy analysis."""
     run_pk: int
-    file_id: Optional[str]
-    directory_id: Optional[str]
+    file_id: str | None
+    directory_id: str | None
     relative_path: str
     misconfig_id: str
-    severity: Optional[str]
-    title: Optional[str]
-    description: Optional[str]
-    resolution: Optional[str]
-    target_type: Optional[str]
-    start_line: Optional[int]
-    end_line: Optional[int]
+    severity: str | None
+    title: str | None
+    description: str | None
+    resolution: str | None
+    target_type: str | None
+    start_line: int | None
+    end_line: int | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -591,7 +590,7 @@ class GitSizerViolation:
     value_display: str
     raw_value: int
     level: int
-    object_ref: Optional[str]
+    object_ref: str | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -846,11 +845,11 @@ class DotcoverAssemblyCoverage:
 class DotcoverTypeCoverage:
     """Type (class) level coverage metrics from dotCover analysis."""
     run_pk: int
-    file_id: Optional[str]       # May be null if file mapping unavailable
-    directory_id: Optional[str]
-    relative_path: Optional[str]  # Source file path (from DetailedXML)
+    file_id: str | None       # May be null if file mapping unavailable
+    directory_id: str | None
+    relative_path: str | None  # Source file path (from DetailedXML)
     assembly_name: str
-    namespace: Optional[str]
+    namespace: str | None
     type_name: str
     covered_statements: int
     total_statements: int
@@ -908,7 +907,7 @@ class DependenseeProject:
     run_pk: int
     project_path: str
     project_name: str
-    target_framework: Optional[str]
+    target_framework: str | None
     project_reference_count: int
     package_reference_count: int
 
@@ -941,7 +940,7 @@ class DependenseePackageReference:
     run_pk: int
     project_path: str
     package_name: str
-    package_version: Optional[str]
+    package_version: str | None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -961,7 +960,7 @@ class GitFameAuthor:
     """
     run_pk: int
     author_name: str
-    author_email: Optional[str]
+    author_email: str | None
     surviving_loc: int
     ownership_pct: float
     insertions_total: int
@@ -1009,3 +1008,68 @@ class GitFameSummary:
             raise ValueError("top_author_pct must be between 0 and 100")
         if self.top_two_pct < 0 or self.top_two_pct > 100:
             raise ValueError("top_two_pct must be between 0 and 100")
+
+
+# =============================================================================
+# git-blame-scanner Entities
+# =============================================================================
+
+@dataclass(frozen=True)
+class GitBlameFileSummary:
+    """Per-file authorship metrics from git-blame-scanner analysis.
+
+    Provides knowledge concentration and bus factor analysis at the file level.
+    """
+    run_pk: int
+    file_id: str
+    directory_id: str
+    relative_path: str
+    total_lines: int
+    unique_authors: int
+    top_author: str
+    top_author_lines: int
+    top_author_pct: float
+    last_modified: str | None  # YYYY-MM-DD or None
+    churn_30d: int
+    churn_90d: int
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.relative_path, "relative_path")
+        _validate_fields_non_negative({
+            "total_lines": self.total_lines,
+            "unique_authors": self.unique_authors,
+            "top_author_lines": self.top_author_lines,
+            "churn_30d": self.churn_30d,
+            "churn_90d": self.churn_90d,
+        })
+        if self.unique_authors < 1:
+            raise ValueError("unique_authors must be >= 1")
+        if self.top_author_pct < 0 or self.top_author_pct > 100:
+            raise ValueError("top_author_pct must be between 0 and 100")
+        if self.churn_30d > self.churn_90d:
+            raise ValueError("churn_30d cannot exceed churn_90d")
+
+
+@dataclass(frozen=True)
+class GitBlameAuthorStats:
+    """Per-author aggregate statistics from git-blame-scanner analysis."""
+    run_pk: int
+    author_email: str
+    total_files: int
+    total_lines: int
+    exclusive_files: int
+    avg_ownership_pct: float
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_required_string(self.author_email, "author_email")
+        _validate_fields_non_negative({
+            "total_files": self.total_files,
+            "total_lines": self.total_lines,
+            "exclusive_files": self.exclusive_files,
+        })
+        if self.exclusive_files > self.total_files:
+            raise ValueError("exclusive_files cannot exceed total_files")
+        if self.avg_ownership_pct < 0 or self.avg_ownership_pct > 100:
+            raise ValueError("avg_ownership_pct must be between 0 and 100")

@@ -1,0 +1,128 @@
+{
+  "_comment": "Ground truth for git-blame-scanner evaluation",
+  "repos": {
+    "single-author": {
+      "description": "All files by one author - knowledge silos",
+      "expected_summary": {
+        "total_authors": 1,
+        "single_author_files": 4,
+        "single_author_pct": 100.0,
+        "knowledge_silo_count": 3
+      },
+      "files": {
+        "src/main.py": {
+          "unique_authors": 1,
+          "top_author": "alice@example.com",
+          "top_author_pct": 100.0,
+          "is_knowledge_silo": true
+        },
+        "src/utils.py": {
+          "unique_authors": 1,
+          "top_author": "alice@example.com",
+          "top_author_pct": 100.0,
+          "is_knowledge_silo": true
+        },
+        "src/config.py": {
+          "unique_authors": 1,
+          "top_author": "alice@example.com",
+          "top_author_pct": 100.0,
+          "is_knowledge_silo": false
+        },
+        "tests/test_main.py": {
+          "unique_authors": 1,
+          "top_author": "alice@example.com",
+          "top_author_pct": 100.0,
+          "is_knowledge_silo": false
+        }
+      }
+    },
+    "balanced": {
+      "description": "Equal contribution from 3 authors per file",
+      "expected_summary": {
+        "total_authors": 3,
+        "single_author_files": 0,
+        "high_concentration_files": 0
+      },
+      "files": {
+        "src/core.py": {
+          "unique_authors": 3,
+          "top_author_pct_range": [30, 40]
+        },
+        "src/api.py": {
+          "unique_authors": 3,
+          "top_author_pct_range": [30, 40]
+        },
+        "src/models.py": {
+          "unique_authors": 3,
+          "top_author_pct_range": [30, 40]
+        }
+      }
+    },
+    "concentrated": {
+      "description": "One author dominates (>80% ownership)",
+      "expected_summary": {
+        "total_authors": 3,
+        "high_concentration_files": 3,
+        "knowledge_silo_count": 1
+      },
+      "files": {
+        "src/engine.py": {
+          "unique_authors": 2,
+          "top_author": "alice@example.com",
+          "top_author_pct_range": [85, 95]
+        },
+        "src/processor.py": {
+          "unique_authors": 2,
+          "top_author": "alice@example.com",
+          "top_author_pct_range": [80, 90]
+        },
+        "tests/test_engine.py": {
+          "unique_authors": 1,
+          "top_author": "bob@example.com",
+          "top_author_pct": 100.0,
+          "is_knowledge_silo": true
+        },
+        "src/utils.py": {
+          "unique_authors": 3,
+          "top_author": "alice@example.com",
+          "top_author_pct": 80.0
+        }
+      }
+    },
+    "high-churn": {
+      "description": "Many recent commits for churn testing",
+      "expected_summary": {
+        "total_authors": 3,
+        "stale_files_90d": 1
+      },
+      "files": {
+        "src/active.py": {
+          "unique_authors": 2,
+          "churn_30d_range": [4, 6],
+          "churn_90d_range": [7, 9]
+        },
+        "src/stale.py": {
+          "unique_authors": 1,
+          "churn_30d": 0,
+          "churn_90d": 0
+        },
+        "src/moderate.py": {
+          "unique_authors": 2,
+          "churn_30d_range": [1, 3],
+          "churn_90d_range": [2, 4]
+        }
+      }
+    }
+  },
+  "invariants": {
+    "_comment": "Invariants that must hold for all repos",
+    "ownership_sums_100": "Sum of author ownership percentages equals 100 for each file",
+    "churn_monotonic": "churn_30d <= churn_90d for all files",
+    "unique_authors_positive": "unique_authors >= 1 for all files",
+    "top_author_bounded": "0 <= top_author_pct <= 100"
+  },
+  "tolerance": {
+    "_comment": "Acceptable variance for percentage comparisons",
+    "percentage": 5.0
+  }
+}

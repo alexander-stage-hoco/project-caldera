@@ -1,0 +1,109 @@
+## Component Inventory
+
+{% if not has_data %}
+*No component data available for this run.*
+{% else %}
+
+### Overview
+
+Module-by-module analysis of {{ summary.total_components }} components (depth 1-2 directories).
+
+| Metric | Value |
+|--------|-------|
+| Healthy (A/B) | {{ summary.healthy_count }} |
+| At Risk (C/D) | {{ summary.at_risk_count }} |
+| Critical (F) | {{ summary.critical_count }} |
+| Average Health Score | {{ summary.avg_health_score }} / 100 |
+| Total LOC | {{ summary.total_loc | format_number }} |
+| Total Files | {{ summary.total_files }} |
+
+### Grade Distribution
+
+| Grade | Count | Description |
+|-------|-------|-------------|
+| A | {{ grade_distribution.A }} | >= 90 |
+| B | {{ grade_distribution.B }} | >= 80 |
+| C | {{ grade_distribution.C }} | >= 70 |
+| D | {{ grade_distribution.D }} | >= 60 |
+| F | {{ grade_distribution.F }} | < 60 |
+
+{% if critical_components %}
+### Critical Components (Grade F)
+
+Components requiring immediate attention:
+
+{% for comp in critical_components %}
+#### {{ comp.display_name }} ({{ comp.health_score }})
+
+- **Path:** `{{ comp.directory_path }}`
+- **Files:** {{ comp.file_count }} | **LOC:** {{ comp.loc | format_number }} | **Avg CCN:** {{ comp.avg_ccn }}
+- **Coupling:** {{ comp.total_coupling }} (Fan-in: {{ comp.fan_in }}, Fan-out: {{ comp.fan_out }})
+- **Instability:** {{ comp.instability }}
+
+{% if comp.risk_signals %}
+**Risk Signals:**
+{% for signal in comp.risk_signals %}
+- {{ signal }}
+{% endfor %}
+{% endif %}
+
+{% if comp.hotspots %}
+**Hotspots:**
+
+| File | CCN | Max CCN | Type |
+|------|-----|---------|------|
+{% for hs in comp.hotspots %}
+| {{ hs.file_path }} | {{ hs.total_ccn }} | {{ hs.max_ccn }} | {{ hs.hotspot_type | replace('_', ' ') }} |
+{% endfor %}
+{% endif %}
+
+{% if comp.outbound_dependencies %}
+**Outbound Dependencies:**
+{% for dep in comp.outbound_dependencies[:5] %}
+- {{ dep.related_component }} ({{ dep.call_count }} calls)
+{% endfor %}
+{% if comp.outbound_dependencies | length > 5 %}
+- ... and {{ comp.outbound_dependencies | length - 5 }} more
+{% endif %}
+{% endif %}
+
+{% endfor %}
+{% endif %}
+
+{% if at_risk_components %}
+### At-Risk Components (Grade C/D)
+
+Components that should be monitored:
+
+| Component | Score | Grade | Files | LOC | Avg CCN | Coupling | Risk Signals |
+|-----------|-------|-------|-------|-----|---------|----------|--------------|
+{% for comp in at_risk_components %}
+| {{ comp.display_name }} | {{ comp.health_score }} | {{ comp.health_grade }} | {{ comp.file_count }} | {{ comp.loc | format_number }} | {{ comp.avg_ccn }} | {{ comp.total_coupling }} | {{ comp.risk_signals | join('; ') or 'None' }} |
+{% endfor %}
+{% endif %}
+
+{% if healthy_components %}
+### Healthy Components (Grade A/B)
+
+Well-structured components:
+
+| Component | Score | Grade | Files | LOC | Avg CCN | Coupling | Instability |
+|-----------|-------|-------|-------|-----|---------|----------|-------------|
+{% for comp in healthy_components %}
+| {{ comp.display_name }} | {{ comp.health_score }} | {{ comp.health_grade }} | {{ comp.file_count }} | {{ comp.loc | format_number }} | {{ comp.avg_ccn }} | {{ comp.total_coupling }} | {{ comp.instability }} |
+{% endfor %}
+{% endif %}
+
+### Health Score Methodology
+
+Component health scores (0-100) are calculated using five weighted factors:
+
+| Factor | Weight | Description |
+|--------|--------|-------------|
+| Complexity | 30% | Lower average CCN is healthier |
+| Coupling | 25% | Lower total dependencies is healthier |
+| Stability | 15% | Balanced instability (0.5) is ideal |
+| Knowledge | 15% | Lower author concentration is healthier |
+| Size | 15% | Moderate LOC is healthier |
+
+{% endif %}

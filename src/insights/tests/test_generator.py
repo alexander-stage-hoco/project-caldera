@@ -33,6 +33,7 @@ class TestInsightsGenerator:
             "function_complexity",
             "coupling_analysis",
             "authorship_risk",
+            "knowledge_risk",
             "code_duplication",
             "dependency_health",
             "license_compliance",
@@ -43,6 +44,8 @@ class TestInsightsGenerator:
             "sonarqube_deep_dive",
             "coverage_gap",
             "technical_debt_summary",
+            "coupling_debt",
+            "component_inventory",
         ]
 
         assert set(InsightsGenerator.SECTIONS.keys()) == set(expected_sections)
@@ -57,7 +60,7 @@ class TestInsightsGenerator:
 
             sections = generator.list_sections()
 
-            assert len(sections) == 29
+            assert len(sections) == len(InsightsGenerator.SECTIONS)
             assert all("name" in s for s in sections)
             assert all("title" in s for s in sections)
             assert all("description" in s for s in sections)
@@ -73,7 +76,7 @@ class TestInsightsGenerator:
         # All priorities should be valid numbers in range 0-11
         # Note: Some sections share priorities (e.g., secrets and cross_tool both use 5)
         assert all(0 <= p <= 11 for p in priorities)
-        assert len(priorities) == 29
+        assert len(priorities) == len(InsightsGenerator.SECTIONS)
 
     @pytest.mark.parametrize("format_type", ["html", "md"])
     def test_format_support(self, format_type: str):

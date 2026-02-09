@@ -39,6 +39,10 @@ sources:
       - name: lz_dependensee_package_refs
       - name: lz_git_fame_authors
       - name: lz_git_fame_summary
+      - name: lz_git_blame_summary
+        description: Per-file authorship metrics from git-blame-scanner
+      - name: lz_git_blame_author_stats
+        description: Per-author aggregate statistics from git-blame-scanner
 
 models:
   - name: stg_lz_tool_runs

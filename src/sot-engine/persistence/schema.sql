@@ -557,3 +557,35 @@ CREATE TABLE lz_git_fame_summary (
     top_two_pct DOUBLE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- =============================================================================
+-- git-blame-scanner: Per-file authorship metrics
+-- =============================================================================
+
+CREATE TABLE lz_git_blame_summary (
+    run_pk BIGINT NOT NULL,
+    file_id VARCHAR NOT NULL,
+    directory_id VARCHAR NOT NULL,
+    relative_path VARCHAR NOT NULL,
+    total_lines INTEGER NOT NULL,
+    unique_authors INTEGER NOT NULL,
+    top_author VARCHAR NOT NULL,
+    top_author_lines INTEGER NOT NULL,
+    top_author_pct DOUBLE NOT NULL,
+    last_modified DATE,
+    churn_30d INTEGER NOT NULL,
+    churn_90d INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, file_id)
+);
+
+CREATE TABLE lz_git_blame_author_stats (
+    run_pk BIGINT NOT NULL,
+    author_email VARCHAR NOT NULL,
+    total_files INTEGER NOT NULL,
+    total_lines INTEGER NOT NULL,
+    exclusive_files INTEGER NOT NULL,
+    avg_ownership_pct DOUBLE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, author_email)
+);

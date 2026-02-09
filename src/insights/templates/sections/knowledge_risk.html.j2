@@ -1,0 +1,212 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Knowledge Risk</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No knowledge risk data available for this run. The git-blame-scanner tool may not have run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>File-level knowledge concentration analysis. Identifies files at risk due to single-author ownership, knowledge silos, or stale code.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical Risk</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">{{ risk_distribution.critical.pct }}% of files</div>
+            </div>
+            <div class="metric-card {% if summary.high_count > 0 %}warning{% endif %}">
+                <div class="label">High Risk</div>
+                <div class="value">{{ summary.high_count }}</div>
+                <div class="sublabel">{{ risk_distribution.high.pct }}% of files</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Knowledge Silos</div>
+                <div class="value">{{ summary.knowledge_silo_count }}</div>
+                <div class="sublabel">Single author &gt;100 LOC</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Stale Files</div>
+                <div class="value">{{ summary.stale_file_count }}</div>
+                <div class="sublabel">No commits in 90 days</div>
+            </div>
+        </div>
+    </div>
+
+    {% if is_critical %}
+    <div class="alert critical">
+        <h4>Critical Risk: Knowledge Concentration</h4>
+        <p>{{ summary.critical_count }} files have critical knowledge risk and require immediate knowledge transfer planning.</p>
+        {% if summary.knowledge_silo_count > 0 %}
+        <p>{{ summary.knowledge_silo_count }} knowledge silos identified - single authors own significant code with no backup contributors.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Risk Distribution</h3>
+        <div class="metric-details">
+            <div class="metric-row">
+                <span class="label">Files Analyzed:</span>
+                <span class="value">{{ summary.total_files_analyzed }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Single Author Files:</span>
+                <span class="value">{{ summary.single_author_files }}</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Medium Risk:</span>
+                <span class="value">{{ summary.medium_count }} ({{ risk_distribution.medium.pct }}%)</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Low Risk:</span>
+                <span class="value">{{ summary.low_count }} ({{ risk_distribution.low.pct }}%)</span>
+            </div>
+        </div>
+    </div>
+
+    {% if hotspots %}
+    <div class="subsection">
+        <h3>At-Risk Files</h3>
+        <p>Files ranked by knowledge risk score (0-100):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Risk</th>
+                    <th>Level</th>
+                    <th class="number">Authors</th>
+                    <th>Top Author</th>
+                    <th class="number">Ownership</th>
+                    <th class="number">LOC</th>
+                    <th>Flags</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in hotspots[:15] %}
+                <tr class="{% if file.risk_level == 'critical' %}critical-row{% elif file.risk_level == 'high' %}warning-row{% endif %}">
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate(50) }}</td>
+                    <td class="number">{{ file.risk_score }}</td>
+                    <td class="{{ file.risk_level }}">{{ file.risk_level | capitalize }}</td>
+                    <td class="number">{{ file.unique_authors }}</td>
+                    <td class="truncate" title="{{ file.top_author }}">{{ file.top_author | truncate(20) if file.top_author else '-' }}</td>
+                    <td class="number">{{ file.top_author_pct | round(0) }}%</td>
+                    <td class="number">{{ file.total_lines | format_number }}</td>
+                    <td>
+                        {% if file.is_knowledge_silo %}<span class="badge critical">Silo</span>{% endif %}
+                        {% if file.is_stale %}<span class="badge warning">Stale</span>{% endif %}
+                        {% if file.is_single_author and not file.is_knowledge_silo %}<span class="badge">1-Author</span>{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if knowledge_silos %}
+    <div class="subsection">
+        <h3>Knowledge Silos</h3>
+        <p>Files with single author ownership and significant code (&gt;100 LOC). These represent concentrated knowledge that should be documented or shared:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Author</th>
+                    <th class="number">LOC</th>
+                    <th class="number">Risk Score</th>
+                    <th>Last Modified</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in knowledge_silos[:10] %}
+                <tr class="{% if file.is_stale %}warning-row{% endif %}">
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate(50) }}</td>
+                    <td class="truncate" title="{{ file.top_author }}">{{ file.top_author | truncate(25) if file.top_author else '-' }}</td>
+                    <td class="number">{{ file.total_lines | format_number }}</td>
+                    <td class="number">{{ file.risk_score }}</td>
+                    <td>{{ file.last_modified[:10] if file.last_modified else '-' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if stale_critical %}
+    <div class="subsection">
+        <h3>Stale Critical Files</h3>
+        <p>Critical-risk files with no commits in 90+ days. These require urgent attention:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Author</th>
+                    <th class="number">LOC</th>
+                    <th>Last Modified</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in stale_critical %}
+                <tr class="critical-row">
+                    <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate(50) }}</td>
+                    <td class="truncate" title="{{ file.top_author }}">{{ file.top_author | truncate(25) if file.top_author else '-' }}</td>
+                    <td class="number">{{ file.total_lines | format_number }}</td>
+                    <td>{{ file.last_modified[:10] if file.last_modified else '-' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if remediation_priorities %}
+    <div class="subsection">
+        <h3>Remediation Priorities</h3>
+        <p>Recommended actions for highest-risk files:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Risk Factors</th>
+                    <th>Recommended Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for item in remediation_priorities %}
+                <tr>
+                    <td class="truncate" title="{{ item.path }}">{{ item.path | truncate(40) }}</td>
+                    <td>{{ item.reason }}</td>
+                    <td>{{ item.action }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Risk Score Interpretation</h3>
+        <div class="metric-details">
+            <div class="metric-row">
+                <span class="label critical">Critical (70+):</span>
+                <span class="value">Immediate knowledge transfer needed</span>
+            </div>
+            <div class="metric-row">
+                <span class="label warning">High (50-69):</span>
+                <span class="value">Schedule knowledge sharing sessions</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Medium (30-49):</span>
+                <span class="value">Add to backlog for review</span>
+            </div>
+            <div class="metric-row">
+                <span class="label">Low (&lt;30):</span>
+                <span class="value">No immediate action required</span>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</section>

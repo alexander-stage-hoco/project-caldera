@@ -19,6 +19,7 @@ from .composite_risk import CompositeRiskSection
 from .function_complexity import FunctionComplexitySection
 from .coupling_analysis import CouplingAnalysisSection
 from .authorship_risk import AuthorshipRiskSection
+from .knowledge_risk import KnowledgeRiskSection
 from .code_duplication import CodeDuplicationSection
 from .dependency_health import DependencyHealthSection
 from .license_compliance import LicenseComplianceSection
@@ -28,10 +29,12 @@ from .code_size_hotspots import CodeSizeHotspotsSection
 from .code_quality_rules import CodeQualityRulesSection
 from .coverage_gap import CoverageGapSection
 from .technical_debt_summary import TechnicalDebtSummarySection
+from .coupling_debt import CouplingDebtSection
 from .sonarqube_deep_dive import SonarQubeDeepDiveSection
 from .secrets import SecretsSection
 from .tool_readiness import ToolReadinessSection
 from .tool_coverage_dashboard import ToolCoverageDashboardSection
+from .component_inventory import ComponentInventorySection
 
 __all__ = [
     "BaseSection",
@@ -53,6 +56,7 @@ __all__ = [
     "FunctionComplexitySection",
     "CouplingAnalysisSection",
     "AuthorshipRiskSection",
+    "KnowledgeRiskSection",
     "CodeDuplicationSection",
     "DependencyHealthSection",
     "LicenseComplianceSection",
@@ -62,8 +66,10 @@ __all__ = [
     "CodeQualityRulesSection",
     "CoverageGapSection",
     "TechnicalDebtSummarySection",
+    "CouplingDebtSection",
     "SonarQubeDeepDiveSection",
     "SecretsSection",
     "ToolReadinessSection",
     "ToolCoverageDashboardSection",
+    "ComponentInventorySection",
 ]
