@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "format": "cobertura",
+    "scenario": "high-gaps",
+    "description": "Files in 25-50% coverage range for HIGH gap tier testing",
+    "created": "2026-02-09"
+  },
+  "expected": {
+    "file_count": 3,
+    "files": [
+      {
+        "relative_path": "src/service_a.py",
+        "lines_total": 20,
+        "lines_covered": 5,
+        "lines_missed": 15,
+        "line_coverage_pct": 25.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      },
+      {
+        "relative_path": "src/service_b.py",
+        "lines_total": 20,
+        "lines_covered": 7,
+        "lines_missed": 13,
+        "line_coverage_pct": 35.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      },
+      {
+        "relative_path": "src/service_c.py",
+        "lines_total": 20,
+        "lines_covered": 9,
+        "lines_missed": 11,
+        "line_coverage_pct": 45.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "metadata": {
+    "format": "istanbul",
+    "scenario": "edge-cases",
+    "description": "Edge cases: empty file, 0% coverage, 100% coverage, unicode paths, special chars, deep nesting",
+    "created": "2026-02-09"
+  },
+  "expected": {
+    "file_count": 6,
+    "files": [
+      {
+        "relative_path": "src/empty_file.js",
+        "lines_total": 0,
+        "lines_covered": 0,
+        "lines_missed": 0,
+        "line_coverage_pct": null,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      },
+      {
+        "relative_path": "src/fully_covered.js",
+        "lines_total": 5,
+        "lines_covered": 5,
+        "lines_missed": 0,
+        "line_coverage_pct": 100.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      },
+      {
+        "relative_path": "src/no_coverage.js",
+        "lines_total": 8,
+        "lines_covered": 0,
+        "lines_missed": 8,
+        "line_coverage_pct": 0.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      },
+      {
+        "relative_path": "src/тест_unicode.js",
+        "lines_total": 4,
+        "lines_covered": 3,
+        "lines_missed": 1,
+        "line_coverage_pct": 75.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      },
+      {
+        "relative_path": "src/path with spaces/test file (1).js",
+        "lines_total": 3,
+        "lines_covered": 3,
+        "lines_missed": 0,
+        "line_coverage_pct": 100.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      },
+      {
+        "relative_path": "src/a/b/c/d/e/f/g/h/i/j/deep_nested.js",
+        "lines_total": 5,
+        "lines_covered": 3,
+        "lines_missed": 2,
+        "line_coverage_pct": 60.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      }
+    ]
+  }
+}

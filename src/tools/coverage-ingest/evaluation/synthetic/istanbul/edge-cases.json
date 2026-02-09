@@ -1,0 +1,96 @@
+{
+  "src/empty_file.js": {
+    "path": "src/empty_file.js",
+    "statementMap": {},
+    "fnMap": {},
+    "branchMap": {},
+    "s": {},
+    "f": {},
+    "b": {}
+  },
+  "src/fully_covered.js": {
+    "path": "src/fully_covered.js",
+    "statementMap": {
+      "0": { "start": { "line": 1, "column": 0 }, "end": { "line": 1, "column": 30 } },
+      "1": { "start": { "line": 2, "column": 0 }, "end": { "line": 2, "column": 30 } },
+      "2": { "start": { "line": 3, "column": 0 }, "end": { "line": 3, "column": 30 } },
+      "3": { "start": { "line": 4, "column": 0 }, "end": { "line": 4, "column": 30 } },
+      "4": { "start": { "line": 5, "column": 0 }, "end": { "line": 5, "column": 30 } }
+    },
+    "fnMap": {
+      "0": { "name": "complete", "decl": { "start": { "line": 1, "column": 9 }, "end": { "line": 1, "column": 17 } }, "loc": { "start": { "line": 1, "column": 20 }, "end": { "line": 5, "column": 1 } }, "line": 1 }
+    },
+    "branchMap": {},
+    "s": { "0": 100, "1": 100, "2": 100, "3": 100, "4": 100 },
+    "f": { "0": 100 },
+    "b": {}
+  },
+  "src/no_coverage.js": {
+    "path": "src/no_coverage.js",
+    "statementMap": {
+      "0": { "start": { "line": 1, "column": 0 }, "end": { "line": 1, "column": 30 } },
+      "1": { "start": { "line": 2, "column": 0 }, "end": { "line": 2, "column": 30 } },
+      "2": { "start": { "line": 3, "column": 0 }, "end": { "line": 3, "column": 30 } },
+      "3": { "start": { "line": 4, "column": 0 }, "end": { "line": 4, "column": 30 } },
+      "4": { "start": { "line": 5, "column": 0 }, "end": { "line": 5, "column": 30 } },
+      "5": { "start": { "line": 6, "column": 0 }, "end": { "line": 6, "column": 30 } },
+      "6": { "start": { "line": 7, "column": 0 }, "end": { "line": 7, "column": 30 } },
+      "7": { "start": { "line": 8, "column": 0 }, "end": { "line": 8, "column": 30 } }
+    },
+    "fnMap": {
+      "0": { "name": "untested", "decl": { "start": { "line": 1, "column": 9 }, "end": { "line": 1, "column": 17 } }, "loc": { "start": { "line": 1, "column": 20 }, "end": { "line": 8, "column": 1 } }, "line": 1 }
+    },
+    "branchMap": {},
+    "s": { "0": 0, "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0 },
+    "f": { "0": 0 },
+    "b": {}
+  },
+  "src/тест_unicode.js": {
+    "path": "src/тест_unicode.js",
+    "statementMap": {
+      "0": { "start": { "line": 1, "column": 0 }, "end": { "line": 1, "column": 30 } },
+      "1": { "start": { "line": 2, "column": 0 }, "end": { "line": 2, "column": 30 } },
+      "2": { "start": { "line": 3, "column": 0 }, "end": { "line": 3, "column": 30 } },
+      "3": { "start": { "line": 4, "column": 0 }, "end": { "line": 4, "column": 30 } }
+    },
+    "fnMap": {
+      "0": { "name": "тест_функция", "decl": { "start": { "line": 1, "column": 9 }, "end": { "line": 1, "column": 21 } }, "loc": { "start": { "line": 1, "column": 24 }, "end": { "line": 4, "column": 1 } }, "line": 1 }
+    },
+    "branchMap": {},
+    "s": { "0": 3, "1": 3, "2": 0, "3": 3 },
+    "f": { "0": 3 },
+    "b": {}
+  },
+  "src/path with spaces/test file (1).js": {
+    "path": "src/path with spaces/test file (1).js",
+    "statementMap": {
+      "0": { "start": { "line": 1, "column": 0 }, "end": { "line": 1, "column": 30 } },
+      "1": { "start": { "line": 2, "column": 0 }, "end": { "line": 2, "column": 30 } },
+      "2": { "start": { "line": 3, "column": 0 }, "end": { "line": 3, "column": 30 } }
+    },
+    "fnMap": {
+      "0": { "name": "spacedFunc", "decl": { "start": { "line": 1, "column": 9 }, "end": { "line": 1, "column": 19 } }, "loc": { "start": { "line": 1, "column": 22 }, "end": { "line": 3, "column": 1 } }, "line": 1 }
+    },
+    "branchMap": {},
+    "s": { "0": 2, "1": 2, "2": 2 },
+    "f": { "0": 2 },
+    "b": {}
+  },
+  "src/a/b/c/d/e/f/g/h/i/j/deep_nested.js": {
+    "path": "src/a/b/c/d/e/f/g/h/i/j/deep_nested.js",
+    "statementMap": {
+      "0": { "start": { "line": 1, "column": 0 }, "end": { "line": 1, "column": 30 } },
+      "1": { "start": { "line": 2, "column": 0 }, "end": { "line": 2, "column": 30 } },
+      "2": { "start": { "line": 3, "column": 0 }, "end": { "line": 3, "column": 30 } },
+      "3": { "start": { "line": 4, "column": 0 }, "end": { "line": 4, "column": 30 } },
+      "4": { "start": { "line": 5, "column": 0 }, "end": { "line": 5, "column": 30 } }
+    },
+    "fnMap": {
+      "0": { "name": "deepFunc", "decl": { "start": { "line": 1, "column": 9 }, "end": { "line": 1, "column": 17 } }, "loc": { "start": { "line": 1, "column": 20 }, "end": { "line": 5, "column": 1 } }, "line": 1 }
+    },
+    "branchMap": {},
+    "s": { "0": 1, "1": 1, "2": 0, "3": 0, "4": 1 },
+    "f": { "0": 1 },
+    "b": {}
+  }
+}

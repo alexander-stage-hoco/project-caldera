@@ -1073,3 +1073,54 @@ class GitBlameAuthorStats:
             raise ValueError("exclusive_files cannot exceed total_files")
         if self.avg_ownership_pct < 0 or self.avg_ownership_pct > 100:
             raise ValueError("avg_ownership_pct must be between 0 and 100")
+
+
+# =============================================================================
+# coverage-ingest Entities
+# =============================================================================
+
+@dataclass(frozen=True)
+class CoverageSummary:
+    """Per-file coverage metrics from coverage-ingest analysis.
+
+    Normalized coverage data from LCOV, Cobertura, JaCoCo, or Istanbul formats.
+    """
+    run_pk: int
+    file_id: str
+    directory_id: str
+    relative_path: str
+    line_coverage_pct: float | None
+    branch_coverage_pct: float | None
+    lines_total: int
+    lines_covered: int
+    lines_missed: int
+    branches_total: int | None
+    branches_covered: int | None
+    source_format: str
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.relative_path, "relative_path")
+        _validate_required_string(self.source_format, "source_format")
+        _validate_fields_non_negative({
+            "lines_total": self.lines_total,
+            "lines_covered": self.lines_covered,
+            "lines_missed": self.lines_missed,
+        })
+        if self.branches_total is not None:
+            _validate_non_negative(self.branches_total, "branches_total")
+        if self.branches_covered is not None:
+            _validate_non_negative(self.branches_covered, "branches_covered")
+        if self.lines_covered > self.lines_total:
+            raise ValueError("lines_covered cannot exceed lines_total")
+        if self.lines_missed != self.lines_total - self.lines_covered:
+            raise ValueError("lines_missed must equal lines_total - lines_covered")
+        if self.branches_total is not None and self.branches_covered is not None:
+            if self.branches_covered > self.branches_total:
+                raise ValueError("branches_covered cannot exceed branches_total")
+        if self.line_coverage_pct is not None:
+            if self.line_coverage_pct < 0 or self.line_coverage_pct > 100:
+                raise ValueError("line_coverage_pct must be between 0 and 100")
+        if self.branch_coverage_pct is not None:
+            if self.branch_coverage_pct < 0 or self.branch_coverage_pct > 100:
+                raise ValueError("branch_coverage_pct must be between 0 and 100")

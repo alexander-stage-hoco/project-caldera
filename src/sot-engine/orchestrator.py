@@ -17,12 +17,13 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitBlameScannerAdapter, GitFameAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
+from persistence.adapters import CoverageAdapter, DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitBlameScannerAdapter, GitFameAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
 from persistence.repositories import (
     BaseRepository,
     CollectionRunRepository,
+    CoverageRepository,
     DependenseeRepository,
     DevskimRepository,
     DotcoverRepository,
@@ -281,6 +282,7 @@ TOOL_INGESTION_CONFIGS = [
     ToolIngestionConfig("devskim", DevskimAdapter, DevskimRepository),
     ToolIngestionConfig("dotcover", DotcoverAdapter, DotcoverRepository),
     ToolIngestionConfig("dependensee", DependenseeAdapter, DependenseeRepository),
+    ToolIngestionConfig("coverage-ingest", CoverageAdapter, CoverageRepository),
 ]
 
 
@@ -309,6 +311,7 @@ def ingest_outputs(
     git_sizer_output: Path | None = None,
     git_blame_scanner_output: Path | None = None,
     dependensee_output: Path | None = None,
+    coverage_output: Path | None = None,
     schema_path: Path = None,
     logger: OrchestratorLogger | None = None,
 ) -> None:
@@ -342,6 +345,7 @@ def ingest_outputs(
         "git-blame-scanner": git_blame_scanner_output,
         "dependensee": dependensee_output,
         "git-sizer": git_sizer_output,
+        "coverage-ingest": coverage_output,
     }
 
     # Ingest each tool using its configuration
@@ -436,6 +440,7 @@ def main() -> int:
     parser.add_argument("--git-sizer-output", type=str)
     parser.add_argument("--git-blame-scanner-output", type=str)
     parser.add_argument("--dependensee-output", type=str)
+    parser.add_argument("--coverage-output", type=str)
     parser.add_argument("--run-tools", action="store_true")
     parser.add_argument("--run-dbt", action="store_true")
     parser.add_argument("--replace", action="store_true")
@@ -471,6 +476,7 @@ def main() -> int:
     git_sizer_output = Path(args.git_sizer_output) if args.git_sizer_output else None
     git_blame_scanner_output = Path(args.git_blame_scanner_output) if args.git_blame_scanner_output else None
     dependensee_output = Path(args.dependensee_output) if args.dependensee_output else None
+    coverage_output = Path(args.coverage_output) if args.coverage_output else None
 
     try:
         logger.info(f"Log file: {logger.log_path}")
@@ -561,6 +567,7 @@ def main() -> int:
             git_sizer_output,
             git_blame_scanner_output,
             dependensee_output,
+            coverage_output,
             schema_path,
             logger,
         )

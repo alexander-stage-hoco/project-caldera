@@ -43,6 +43,8 @@ sources:
         description: Per-file authorship metrics from git-blame-scanner
       - name: lz_git_blame_author_stats
         description: Per-author aggregate statistics from git-blame-scanner
+      - name: lz_coverage_summary
+        description: Per-file coverage metrics from coverage-ingest (LCOV, Cobertura, JaCoCo, Istanbul)
 
 models:
   - name: stg_lz_tool_runs
@@ -5079,6 +5081,62 @@ models:
               arguments:
                 values:
                   - file_size_bytes
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_git_blame_directory_direct_distributions
+    description: "Distribution statistics for git-blame-scanner authorship metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - total_lines
+                  - unique_authors
+                  - top_author_pct
+                  - churn_30d
+                  - churn_90d
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_git_blame_directory_recursive_distributions
+    description: "Distribution statistics for git-blame-scanner authorship metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - total_lines
+                  - unique_authors
+                  - top_author_pct
+                  - churn_30d
+                  - churn_90d
       - name: value_count
         tests:
           - not_null

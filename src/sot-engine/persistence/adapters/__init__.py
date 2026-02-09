@@ -1,4 +1,5 @@
 from .base_adapter import BaseAdapter
+from .coverage_adapter import CoverageAdapter
 from .dependensee_adapter import DependenseeAdapter
 from .devskim_adapter import DevskimAdapter
 from .dotcover_adapter import DotcoverAdapter
@@ -19,6 +20,7 @@ from .trivy_adapter import TrivyAdapter
 
 __all__ = [
     "BaseAdapter",
+    "CoverageAdapter",
     "DependenseeAdapter",
     "DevskimAdapter",
     "DotcoverAdapter",

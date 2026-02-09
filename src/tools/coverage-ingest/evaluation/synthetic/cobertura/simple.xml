@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
+<coverage line-rate="0.8" branch-rate="0" version="1.0" timestamp="1707494400000">
+    <sources>
+        <source>src</source>
+    </sources>
+    <packages>
+        <package name="src" line-rate="0.8" branch-rate="0" complexity="0">
+            <classes>
+                <class name="main.py" filename="src/main.py" line-rate="0.8" branch-rate="0" complexity="0">
+                    <methods/>
+                    <lines>
+                        <line number="1" hits="5"/>
+                        <line number="2" hits="5"/>
+                        <line number="3" hits="5"/>
+                        <line number="4" hits="5"/>
+                        <line number="5" hits="5"/>
+                        <line number="6" hits="5"/>
+                        <line number="7" hits="5"/>
+                        <line number="8" hits="5"/>
+                        <line number="9" hits="0"/>
+                        <line number="10" hits="0"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+    </packages>
+</coverage>

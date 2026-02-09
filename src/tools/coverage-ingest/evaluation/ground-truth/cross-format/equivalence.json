@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "format": "cross-format",
+    "scenario": "equivalence",
+    "description": "Tests that equivalent coverage data across formats produces consistent normalized output",
+    "created": "2026-02-09"
+  },
+  "test_cases": [
+    {
+      "name": "simple_file_equivalence",
+      "description": "Same file (src/main.*) should have identical coverage stats across all formats",
+      "scenarios": {
+        "lcov": "simple.lcov",
+        "cobertura": "simple.xml",
+        "jacoco": "simple.xml",
+        "istanbul": "simple.json"
+      },
+      "expected_common": {
+        "lines_total": 10,
+        "lines_covered": 8,
+        "lines_missed": 2,
+        "line_coverage_pct": 80.0
+      }
+    },
+    {
+      "name": "multi_file_equivalence",
+      "description": "Multi-file scenarios should produce same file counts and similar coverage distributions",
+      "scenarios": {
+        "lcov": "multi-file.lcov",
+        "cobertura": "multi-package.xml",
+        "jacoco": "multi-module.xml",
+        "istanbul": "multi-file.json"
+      },
+      "expected_common": {
+        "file_count": 3
+      }
+    },
+    {
+      "name": "branch_coverage_equivalence",
+      "description": "Branch coverage should be consistent across formats that support it",
+      "scenarios": {
+        "lcov": "branches.lcov",
+        "cobertura": "branches.xml",
+        "jacoco": "counters.xml",
+        "istanbul": "branches.json"
+      },
+      "expected_common": {
+        "branches_total": 8,
+        "branches_covered": 6,
+        "branch_coverage_pct": 75.0
+      }
+    },
+    {
+      "name": "zero_coverage_equivalence",
+      "description": "0% coverage files should be handled consistently",
+      "expected_common": {
+        "lines_covered": 0,
+        "line_coverage_pct": 0.0
+      }
+    },
+    {
+      "name": "full_coverage_equivalence",
+      "description": "100% coverage files should be handled consistently",
+      "expected_common": {
+        "line_coverage_pct": 100.0
+      }
+    }
+  ],
+  "validation_rules": [
+    {
+      "rule": "path_normalization",
+      "description": "All paths must be repo-relative (no leading /)",
+      "check": "path.startswith('/') == False"
+    },
+    {
+      "rule": "posix_separators",
+      "description": "All paths must use POSIX separators",
+      "check": "'\\\\' not in path"
+    },
+    {
+      "rule": "invariant_covered_le_total",
+      "description": "Covered lines must not exceed total lines",
+      "check": "lines_covered <= lines_total"
+    },
+    {
+      "rule": "invariant_missed_equals_diff",
+      "description": "Missed lines must equal total minus covered",
+      "check": "lines_missed == lines_total - lines_covered"
+    },
+    {
+      "rule": "percentage_range",
+      "description": "Coverage percentage must be 0-100 or null",
+      "check": "line_coverage_pct is None or 0 <= line_coverage_pct <= 100"
+    }
+  ]
+}

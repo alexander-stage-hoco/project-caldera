@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "format": "cobertura",
+    "scenario": "branches",
+    "description": "Class with branch coverage data",
+    "created": "2026-02-09"
+  },
+  "expected": {
+    "file_count": 1,
+    "files": [
+      {
+        "relative_path": "src/validators.py",
+        "lines_total": 25,
+        "lines_covered": 22,
+        "lines_missed": 3,
+        "line_coverage_pct": 88.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      }
+    ]
+  }
+}

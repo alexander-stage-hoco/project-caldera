@@ -7,6 +7,7 @@ import duckdb
 from .entities import (
     CodeSymbol,
     CollectionRun,
+    CoverageSummary,
     DependenseePackageReference,
     DependenseeProject,
     DependenseeProjectReference,
@@ -85,6 +86,7 @@ _VALID_LZ_TABLES = frozenset([
     "lz_git_fame_summary",
     "lz_git_blame_summary",
     "lz_git_blame_author_stats",
+    "lz_coverage_summary",
 ])
 
 
@@ -959,5 +961,30 @@ class GitBlameRepository(BaseRepository):
             lambda r: (
                 r.run_pk, r.author_email, r.total_files, r.total_lines,
                 r.exclusive_files, r.avg_ownership_pct,
+            ),
+        )
+
+
+class CoverageRepository(BaseRepository):
+    """Repository for coverage-ingest analysis data."""
+
+    _SUMMARY_COLUMNS = (
+        "run_pk", "file_id", "directory_id", "relative_path",
+        "line_coverage_pct", "branch_coverage_pct",
+        "lines_total", "lines_covered", "lines_missed",
+        "branches_total", "branches_covered", "source_format",
+    )
+
+    def insert_summaries(self, rows: Iterable[CoverageSummary]) -> None:
+        """Insert per-file coverage metrics."""
+        self._insert_bulk(
+            "lz_coverage_summary",
+            self._SUMMARY_COLUMNS,
+            rows,
+            lambda r: (
+                r.run_pk, r.file_id, r.directory_id, r.relative_path,
+                r.line_coverage_pct, r.branch_coverage_pct,
+                r.lines_total, r.lines_covered, r.lines_missed,
+                r.branches_total, r.branches_covered, r.source_format,
             ),
         )

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "format": "istanbul",
+    "scenario": "multi-file",
+    "description": "Multiple files across different directories",
+    "created": "2026-02-09"
+  },
+  "expected": {
+    "file_count": 3,
+    "files": [
+      {
+        "relative_path": "src/utils/helpers.js",
+        "lines_total": 5,
+        "lines_covered": 5,
+        "lines_missed": 0,
+        "line_coverage_pct": 100.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      },
+      {
+        "relative_path": "src/core/engine.js",
+        "lines_total": 20,
+        "lines_covered": 14,
+        "lines_missed": 6,
+        "line_coverage_pct": 70.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      },
+      {
+        "relative_path": "src/models/user.js",
+        "lines_total": 15,
+        "lines_covered": 8,
+        "lines_missed": 7,
+        "line_coverage_pct": 53.33,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      }
+    ]
+  }
+}

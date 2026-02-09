@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
+<coverage line-rate="0.44" branch-rate="0" version="1.0" timestamp="1707494400000">
+    <sources>
+        <source>src</source>
+    </sources>
+    <packages>
+        <package name="src.empty" line-rate="0" branch-rate="0" complexity="0">
+            <classes>
+                <class name="empty_file.py" filename="src/empty_file.py" line-rate="0" branch-rate="0" complexity="0">
+                    <methods/>
+                    <lines/>
+                </class>
+            </classes>
+        </package>
+        <package name="src.full" line-rate="1.0" branch-rate="0" complexity="0">
+            <classes>
+                <class name="fully_covered.py" filename="src/fully_covered.py" line-rate="1.0" branch-rate="0" complexity="0">
+                    <methods/>
+                    <lines>
+                        <line number="1" hits="100"/>
+                        <line number="2" hits="100"/>
+                        <line number="3" hits="100"/>
+                        <line number="4" hits="100"/>
+                        <line number="5" hits="100"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+        <package name="src.none" line-rate="0" branch-rate="0" complexity="0">
+            <classes>
+                <class name="no_coverage.py" filename="src/no_coverage.py" line-rate="0" branch-rate="0" complexity="0">
+                    <methods/>
+                    <lines>
+                        <line number="1" hits="0"/>
+                        <line number="2" hits="0"/>
+                        <line number="3" hits="0"/>
+                        <line number="4" hits="0"/>
+                        <line number="5" hits="0"/>
+                        <line number="6" hits="0"/>
+                        <line number="7" hits="0"/>
+                        <line number="8" hits="0"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+        <package name="src.unicode" line-rate="0.75" branch-rate="0" complexity="0">
+            <classes>
+                <class name="тест_unicode.py" filename="src/тест_unicode.py" line-rate="0.75" branch-rate="0" complexity="0">
+                    <methods/>
+                    <lines>
+                        <line number="1" hits="3"/>
+                        <line number="2" hits="3"/>
+                        <line number="3" hits="0"/>
+                        <line number="4" hits="3"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+        <package name="src.spaced" line-rate="1.0" branch-rate="0" complexity="0">
+            <classes>
+                <class name="test file (1).py" filename="src/path with spaces/test file (1).py" line-rate="1.0" branch-rate="0" complexity="0">
+                    <methods/>
+                    <lines>
+                        <line number="1" hits="2"/>
+                        <line number="2" hits="2"/>
+                        <line number="3" hits="2"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+        <package name="src.deep" line-rate="0.6" branch-rate="0" complexity="0">
+            <classes>
+                <class name="deep_nested.py" filename="src/a/b/c/d/e/f/g/h/i/j/deep_nested.py" line-rate="0.6" branch-rate="0" complexity="0">
+                    <methods/>
+                    <lines>
+                        <line number="1" hits="1"/>
+                        <line number="2" hits="1"/>
+                        <line number="3" hits="0"/>
+                        <line number="4" hits="0"/>
+                        <line number="5" hits="1"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+    </packages>
+</coverage>

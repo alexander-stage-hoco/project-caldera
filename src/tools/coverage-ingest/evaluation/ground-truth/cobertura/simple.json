@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "format": "cobertura",
+    "scenario": "simple",
+    "description": "Single class with basic line coverage",
+    "created": "2026-02-09"
+  },
+  "expected": {
+    "file_count": 1,
+    "files": [
+      {
+        "relative_path": "src/main.py",
+        "lines_total": 10,
+        "lines_covered": 8,
+        "lines_missed": 2,
+        "line_coverage_pct": 80.0,
+        "branches_total": null,
+        "branches_covered": null,
+        "branch_coverage_pct": null
+      }
+    ]
+  }
+}

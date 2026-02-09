@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Coverage-Ingest Tool Output Envelope",
+  "description": "Envelope schema for coverage-ingest multi-format coverage analysis",
+  "type": "object",
+  "required": ["metadata", "data"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": [
+        "tool_name",
+        "tool_version",
+        "run_id",
+        "repo_id",
+        "branch",
+        "commit",
+        "timestamp",
+        "schema_version"
+      ],
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "const": "coverage-ingest"
+        },
+        "tool_version": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "repo_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schema_version": {
+          "type": "string",
+          "const": "1.0.0"
+        }
+      }
+    },
+    "data": {
+      "$ref": "#/$defs/coverageData"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "file": { "type": "string" },
+          "message": { "type": "string" },
+          "recoverable": { "type": "boolean" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "coverageData": {
+      "type": "object",
+      "description": "Coverage analysis results",
+      "required": ["tool", "tool_version", "source_format", "files", "summary"],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "const": "coverage-ingest",
+          "description": "Tool identifier"
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Version of the tool"
+        },
+        "source_format": {
+          "type": "string",
+          "enum": ["lcov", "cobertura", "jacoco", "istanbul"],
+          "description": "Original coverage format"
+        },
+        "source_file": {
+          "type": "string",
+          "description": "Path to source coverage file"
+        },
+        "files": {
+          "type": "array",
+          "description": "Per-file coverage metrics",
+          "items": {
+            "$ref": "#/$defs/fileCoverage"
+          }
+        },
+        "summary": {
+          "$ref": "#/$defs/coverageSummary"
+        }
+      }
+    },
+    "fileCoverage": {
+      "type": "object",
+      "description": "Coverage metrics for a single file",
+      "required": [
+        "relative_path",
+        "lines_total",
+        "lines_covered",
+        "lines_missed"
+      ],
+      "properties": {
+        "relative_path": {
+          "type": "string",
+          "description": "Repo-relative file path",
+          "pattern": "^[^/].*",
+          "not": {
+            "pattern": "(^\\./|\\.\\.|^[A-Za-z]:|/$|\\\\)"
+          }
+        },
+        "line_coverage_pct": {
+          "type": ["number", "null"],
+          "description": "Line coverage percentage (0-100)",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "branch_coverage_pct": {
+          "type": ["number", "null"],
+          "description": "Branch coverage percentage (0-100)",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "lines_total": {
+          "type": "integer",
+          "description": "Total coverable lines",
+          "minimum": 0
+        },
+        "lines_covered": {
+          "type": "integer",
+          "description": "Lines covered by tests",
+          "minimum": 0
+        },
+        "lines_missed": {
+          "type": "integer",
+          "description": "Lines not covered by tests",
+          "minimum": 0
+        },
+        "branches_total": {
+          "type": ["integer", "null"],
+          "description": "Total branches (if tracked)",
+          "minimum": 0
+        },
+        "branches_covered": {
+          "type": ["integer", "null"],
+          "description": "Branches covered (if tracked)",
+          "minimum": 0
+        },
+        "uncovered_lines": {
+          "type": ["array", "null"],
+          "description": "List of uncovered line numbers (1-indexed), or null if not tracked",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "coverageSummary": {
+      "type": "object",
+      "description": "Overall coverage summary",
+      "properties": {
+        "total_files": {
+          "type": "integer",
+          "description": "Total files in report",
+          "minimum": 0
+        },
+        "files_with_coverage": {
+          "type": "integer",
+          "description": "Files with non-zero coverage data",
+          "minimum": 0
+        },
+        "overall_line_coverage_pct": {
+          "type": ["number", "null"],
+          "description": "Overall line coverage percentage",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "overall_branch_coverage_pct": {
+          "type": ["number", "null"],
+          "description": "Overall branch coverage percentage",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "total_lines": {
+          "type": "integer",
+          "description": "Total lines across all files",
+          "minimum": 0
+        },
+        "total_lines_covered": {
+          "type": "integer",
+          "description": "Total lines covered across all files",
+          "minimum": 0
+        },
+        "total_branches": {
+          "type": ["integer", "null"],
+          "description": "Total branches across all files",
+          "minimum": 0
+        },
+        "total_branches_covered": {
+          "type": ["integer", "null"],
+          "description": "Total branches covered",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "src/validators.js": {
+    "path": "src/validators.js",
+    "statementMap": {
+      "0": { "start": { "line": 1, "column": 0 }, "end": { "line": 1, "column": 30 } },
+      "1": { "start": { "line": 2, "column": 0 }, "end": { "line": 2, "column": 30 } },
+      "2": { "start": { "line": 3, "column": 0 }, "end": { "line": 3, "column": 30 } },
+      "3": { "start": { "line": 4, "column": 0 }, "end": { "line": 4, "column": 30 } },
+      "4": { "start": { "line": 5, "column": 0 }, "end": { "line": 5, "column": 30 } },
+      "5": { "start": { "line": 6, "column": 0 }, "end": { "line": 6, "column": 30 } },
+      "6": { "start": { "line": 7, "column": 0 }, "end": { "line": 7, "column": 30 } },
+      "7": { "start": { "line": 8, "column": 0 }, "end": { "line": 8, "column": 30 } },
+      "8": { "start": { "line": 9, "column": 0 }, "end": { "line": 9, "column": 30 } },
+      "9": { "start": { "line": 10, "column": 0 }, "end": { "line": 10, "column": 30 } },
+      "10": { "start": { "line": 11, "column": 0 }, "end": { "line": 11, "column": 30 } },
+      "11": { "start": { "line": 12, "column": 0 }, "end": { "line": 12, "column": 30 } },
+      "12": { "start": { "line": 13, "column": 0 }, "end": { "line": 13, "column": 30 } },
+      "13": { "start": { "line": 14, "column": 0 }, "end": { "line": 14, "column": 30 } },
+      "14": { "start": { "line": 15, "column": 0 }, "end": { "line": 15, "column": 30 } },
+      "15": { "start": { "line": 16, "column": 0 }, "end": { "line": 16, "column": 30 } },
+      "16": { "start": { "line": 17, "column": 0 }, "end": { "line": 17, "column": 30 } },
+      "17": { "start": { "line": 18, "column": 0 }, "end": { "line": 18, "column": 30 } },
+      "18": { "start": { "line": 19, "column": 0 }, "end": { "line": 19, "column": 30 } },
+      "19": { "start": { "line": 20, "column": 0 }, "end": { "line": 20, "column": 30 } },
+      "20": { "start": { "line": 21, "column": 0 }, "end": { "line": 21, "column": 30 } },
+      "21": { "start": { "line": 22, "column": 0 }, "end": { "line": 22, "column": 30 } },
+      "22": { "start": { "line": 23, "column": 0 }, "end": { "line": 23, "column": 30 } },
+      "23": { "start": { "line": 24, "column": 0 }, "end": { "line": 24, "column": 30 } },
+      "24": { "start": { "line": 25, "column": 0 }, "end": { "line": 25, "column": 30 } }
+    },
+    "fnMap": {
+      "0": { "name": "validateInput", "decl": { "start": { "line": 1, "column": 9 }, "end": { "line": 1, "column": 22 } }, "loc": { "start": { "line": 1, "column": 25 }, "end": { "line": 19, "column": 1 } }, "line": 1 },
+      "1": { "name": "checkRange", "decl": { "start": { "line": 20, "column": 9 }, "end": { "line": 20, "column": 19 } }, "loc": { "start": { "line": 20, "column": 22 }, "end": { "line": 25, "column": 1 } }, "line": 20 }
+    },
+    "branchMap": {
+      "0": { "loc": { "start": { "line": 3, "column": 0 }, "end": { "line": 5, "column": 1 } }, "type": "if", "locations": [ { "start": { "line": 3, "column": 0 }, "end": { "line": 5, "column": 1 } }, { "start": { "line": 3, "column": 0 }, "end": { "line": 5, "column": 1 } } ], "line": 3 },
+      "1": { "loc": { "start": { "line": 6, "column": 0 }, "end": { "line": 8, "column": 1 } }, "type": "if", "locations": [ { "start": { "line": 6, "column": 0 }, "end": { "line": 8, "column": 1 } }, { "start": { "line": 6, "column": 0 }, "end": { "line": 8, "column": 1 } } ], "line": 6 },
+      "2": { "loc": { "start": { "line": 12, "column": 0 }, "end": { "line": 15, "column": 1 } }, "type": "if", "locations": [ { "start": { "line": 12, "column": 0 }, "end": { "line": 15, "column": 1 } }, { "start": { "line": 12, "column": 0 }, "end": { "line": 15, "column": 1 } } ], "line": 12 },
+      "3": { "loc": { "start": { "line": 22, "column": 0 }, "end": { "line": 24, "column": 1 } }, "type": "if", "locations": [ { "start": { "line": 22, "column": 0 }, "end": { "line": 24, "column": 1 } }, { "start": { "line": 22, "column": 0 }, "end": { "line": 24, "column": 1 } } ], "line": 22 }
+    },
+    "s": { "0": 10, "1": 10, "2": 10, "3": 8, "4": 2, "5": 10, "6": 10, "7": 10, "8": 10, "9": 10, "10": 10, "11": 10, "12": 0, "13": 0, "14": 0, "15": 10, "16": 10, "17": 10, "18": 10, "19": 5, "20": 5, "21": 3, "22": 2, "23": 5, "24": 5 },
+    "f": { "0": 10, "1": 5 },
+    "b": { "0": [8, 2], "1": [10, 0], "2": [0, 10], "3": [3, 2] }
+  }
+}

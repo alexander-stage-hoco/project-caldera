@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd">
+<report name="counters">
+    <sessioninfo id="counters-session" start="1707494400000" dump="1707498000000"/>
+    <package name="src">
+        <sourcefile name="Validators.java">
+            <line nr="1" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="2" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="3" mi="0" ci="10" mb="0" cb="2"/>
+            <line nr="4" mi="0" ci="8" mb="0" cb="0"/>
+            <line nr="5" mi="0" ci="2" mb="0" cb="0"/>
+            <line nr="6" mi="0" ci="10" mb="1" cb="1"/>
+            <line nr="7" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="8" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="9" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="10" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="11" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="12" mi="0" ci="10" mb="1" cb="1"/>
+            <line nr="13" mi="1" ci="0" mb="0" cb="0"/>
+            <line nr="14" mi="1" ci="0" mb="0" cb="0"/>
+            <line nr="15" mi="1" ci="0" mb="0" cb="0"/>
+            <line nr="16" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="17" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="18" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="19" mi="0" ci="10" mb="0" cb="0"/>
+            <line nr="20" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="21" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="22" mi="0" ci="3" mb="0" cb="2"/>
+            <line nr="23" mi="0" ci="2" mb="0" cb="0"/>
+            <line nr="24" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="25" mi="0" ci="5" mb="0" cb="0"/>
+            <counter type="INSTRUCTION" missed="3" covered="175"/>
+            <counter type="BRANCH" missed="2" covered="6"/>
+            <counter type="LINE" missed="3" covered="22"/>
+            <counter type="COMPLEXITY" missed="1" covered="5"/>
+            <counter type="METHOD" missed="0" covered="2"/>
+            <counter type="CLASS" missed="0" covered="1"/>
+        </sourcefile>
+    </package>
+    <counter type="INSTRUCTION" missed="3" covered="175"/>
+    <counter type="BRANCH" missed="2" covered="6"/>
+    <counter type="LINE" missed="3" covered="22"/>
+    <counter type="COMPLEXITY" missed="1" covered="5"/>
+    <counter type="METHOD" missed="0" covered="2"/>
+    <counter type="CLASS" missed="0" covered="1"/>
+</report>

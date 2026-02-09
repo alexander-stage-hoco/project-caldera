@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
+<coverage line-rate="0.88" branch-rate="0.75" version="1.0" timestamp="1707494400000">
+    <sources>
+        <source>src</source>
+    </sources>
+    <packages>
+        <package name="src" line-rate="0.88" branch-rate="0.75" complexity="0">
+            <classes>
+                <class name="validators.py" filename="src/validators.py" line-rate="0.88" branch-rate="0.75" complexity="0">
+                    <methods/>
+                    <lines>
+                        <line number="1" hits="10"/>
+                        <line number="2" hits="10"/>
+                        <line number="3" hits="10" branch="true" condition-coverage="100% (2/2)"/>
+                        <line number="4" hits="8"/>
+                        <line number="5" hits="2"/>
+                        <line number="6" hits="10" branch="true" condition-coverage="50% (1/2)"/>
+                        <line number="7" hits="10"/>
+                        <line number="8" hits="10"/>
+                        <line number="9" hits="10"/>
+                        <line number="10" hits="10"/>
+                        <line number="11" hits="10"/>
+                        <line number="12" hits="10" branch="true" condition-coverage="50% (1/2)"/>
+                        <line number="13" hits="0"/>
+                        <line number="14" hits="0"/>
+                        <line number="15" hits="0"/>
+                        <line number="16" hits="10"/>
+                        <line number="17" hits="10"/>
+                        <line number="18" hits="10"/>
+                        <line number="19" hits="10"/>
+                        <line number="20" hits="5"/>
+                        <line number="21" hits="5"/>
+                        <line number="22" hits="3" branch="true" condition-coverage="100% (2/2)"/>
+                        <line number="23" hits="2"/>
+                        <line number="24" hits="5"/>
+                        <line number="25" hits="5"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+    </packages>
+</coverage>

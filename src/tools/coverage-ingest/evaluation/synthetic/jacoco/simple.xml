@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd">
+<report name="simple">
+    <sessioninfo id="simple-session" start="1707494400000" dump="1707498000000"/>
+    <package name="src">
+        <sourcefile name="Main.java">
+            <line nr="1" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="2" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="3" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="4" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="5" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="6" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="7" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="8" mi="0" ci="5" mb="0" cb="0"/>
+            <line nr="9" mi="1" ci="0" mb="0" cb="0"/>
+            <line nr="10" mi="1" ci="0" mb="0" cb="0"/>
+            <counter type="INSTRUCTION" missed="2" covered="8"/>
+            <counter type="LINE" missed="2" covered="8"/>
+            <counter type="COMPLEXITY" missed="0" covered="1"/>
+            <counter type="METHOD" missed="0" covered="1"/>
+            <counter type="CLASS" missed="0" covered="1"/>
+        </sourcefile>
+    </package>
+    <counter type="INSTRUCTION" missed="2" covered="8"/>
+    <counter type="LINE" missed="2" covered="8"/>
+    <counter type="COMPLEXITY" missed="0" covered="1"/>
+    <counter type="METHOD" missed="0" covered="1"/>
+    <counter type="CLASS" missed="0" covered="1"/>
+</report>

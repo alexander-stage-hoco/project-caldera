@@ -589,3 +589,24 @@ CREATE TABLE lz_git_blame_author_stats (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (run_pk, author_email)
 );
+
+-- =============================================================================
+-- coverage-ingest: Multi-format test coverage metrics
+-- =============================================================================
+
+CREATE TABLE lz_coverage_summary (
+    run_pk BIGINT NOT NULL,
+    file_id VARCHAR NOT NULL,
+    directory_id VARCHAR NOT NULL,
+    relative_path VARCHAR NOT NULL,
+    line_coverage_pct DOUBLE,
+    branch_coverage_pct DOUBLE,
+    lines_total INTEGER NOT NULL,
+    lines_covered INTEGER NOT NULL,
+    lines_missed INTEGER NOT NULL,
+    branches_total INTEGER,
+    branches_covered INTEGER,
+    source_format VARCHAR NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (run_pk, file_id)
+);
