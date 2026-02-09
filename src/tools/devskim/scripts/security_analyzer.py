@@ -21,7 +21,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from common.path_normalization import normalize_file_path, normalize_dir_path
+from shared.path_utils import normalize_file_path, normalize_dir_path
+from shared.severity import normalize_severity
 
 
 # =============================================================================
@@ -328,22 +329,15 @@ RULE_TO_CWE_MAP: dict[str, list[str]] = {
     "DS195456": ["CWE-327"],     # Outdated TLS version
 }
 
-# DevSkim severity to DD severity mapping
-SEVERITY_MAP = {
+# NOTE: Severity normalization now uses shared.severity.normalize_severity()
+
+# DevSkim severity mapping (for backward compatibility with tests)
+SEVERITY_MAP: dict[str, str] = {
     "Critical": "CRITICAL",
-    "critical": "CRITICAL",
     "Important": "HIGH",
-    "important": "HIGH",
     "Moderate": "MEDIUM",
-    "moderate": "MEDIUM",
     "BestPractice": "LOW",
-    "best-practice": "LOW",
     "ManualReview": "INFO",
-    "manual-review": "INFO",
-    "Low": "LOW",
-    "low": "LOW",
-    "Informational": "INFO",
-    "informational": "INFO",
 }
 
 # DD Security Categories
@@ -768,16 +762,14 @@ def parse_sarif_results(sarif: dict, target_path: str) -> list[SecurityFinding]:
             rule_id = result.get("ruleId", "unknown")
             message = result.get("message", {}).get("text", "")
 
-            # Get severity from rule metadata or result level
+            # Get severity from result level using shared severity normalization
             level = result.get("level", "warning")
+            # SARIF levels: error->HIGH, warning->MEDIUM, note->LOW in shared.severity
+            # DevSkim treats error as CRITICAL and warning as HIGH for security issues
             if level == "error":
                 severity = "CRITICAL"
-            elif level == "warning":
-                severity = "HIGH"
-            elif level == "note":
-                severity = "MEDIUM"
             else:
-                severity = "LOW"
+                severity = normalize_severity(level, default="MEDIUM")
 
             # Map rule to DD category (use message for disambiguation)
             dd_category = map_rule_to_category(rule_id, message)

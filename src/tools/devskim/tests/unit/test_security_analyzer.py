@@ -592,9 +592,11 @@ class TestParseSarifResults:
             }]}],
         }
 
+        # error -> CRITICAL (special case in security_analyzer)
+        # warning/note -> normalized via shared.severity (warning->MEDIUM, note->LOW)
         assert parse_sarif_results(sarif_error, "/tmp")[0].severity == "CRITICAL"
-        assert parse_sarif_results(sarif_warning, "/tmp")[0].severity == "HIGH"
-        assert parse_sarif_results(sarif_note, "/tmp")[0].severity == "MEDIUM"
+        assert parse_sarif_results(sarif_warning, "/tmp")[0].severity == "MEDIUM"
+        assert parse_sarif_results(sarif_note, "/tmp")[0].severity == "LOW"
 
 
 class TestBuildDirectoryEntries:

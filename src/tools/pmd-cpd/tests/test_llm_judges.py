@@ -761,7 +761,17 @@ class TestBaseJudge:
         """Test prompt building with evidence substitution."""
         judge = DuplicationAccuracyJudge(working_dir=tmp_path)
 
-        evidence = {"key": "value", "count": 42}
+        # Include required placeholder keys that the prompt template expects
+        evidence = {
+            "key": "value",
+            "count": 42,
+            "evaluation_mode": "synthetic",
+            "synthetic_baseline": "N/A - synthetic mode",
+            "interpretation_guidance": "Strict ground truth evaluation",
+            "analysis_summary": {},
+            "sample_duplications": [],
+            "file_metrics": [],
+        }
         prompt = judge.build_prompt(evidence)
 
         assert '"key": "value"' in prompt
@@ -827,25 +837,24 @@ Additional thoughts..."""
         assert ".hidden" not in results
         assert results["repo1"]["summary"]["total_clones"] == 5
 
-    def test_load_all_analysis_results_fallback_to_analysis_path(self, tmp_path):
-        """Test fallback to analysis_path when output_dir is empty."""
-        output_dir = tmp_path / "empty_output"
+    def test_load_all_analysis_results_with_output_dir(self, tmp_path):
+        """Test loading analysis results from output_dir."""
+        output_dir = tmp_path / "output"
         output_dir.mkdir(parents=True)
 
-        analysis_file = tmp_path / "fallback.json"
+        # Create analysis file in output_dir
+        analysis_file = output_dir / "analysis.json"
         analysis_file.write_text(json.dumps({"summary": {"total_clones": 7}}))
 
         judge = DuplicationAccuracyJudge(
             output_dir=output_dir,
-            analysis_path=analysis_file,
             working_dir=tmp_path,
         )
 
         results = judge.load_all_analysis_results()
 
         assert len(results) == 1
-        assert "default" in results
-        assert results["default"]["summary"]["total_clones"] == 7
+        assert results["analysis"]["summary"]["total_clones"] == 7
 
 
 # ============================================================================

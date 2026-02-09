@@ -39,7 +39,7 @@ def _seed_analysis_and_ground_truth(base: Path) -> None:
         "overall_risk": "low",
     }
 
-    _write_json(base / "output" / "runs" / "mit-only.json", analysis)
+    _write_json(base / "outputs" / "mit-only.json", analysis)
     _write_json(base / "evaluation" / "ground-truth" / "mit-only.json", ground_truth)
 
 
@@ -102,7 +102,7 @@ def test_risk_classification_judge_collects_evidence(tmp_path: Path) -> None:
         "licenses_found": ["MIT"],
         "overall_risk": "low",
     }
-    _write_json(tmp_path / "output" / "runs" / "mit-only.json", analysis)
+    _write_json(tmp_path / "outputs" / "mit-only.json", analysis)
     _write_json(tmp_path / "evaluation" / "ground-truth" / "mit-only.json", ground_truth)
 
     judge = RiskClassificationJudge(working_dir=tmp_path)

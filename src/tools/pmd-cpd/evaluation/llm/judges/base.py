@@ -92,6 +92,13 @@ class BaseJudge(SharedBaseJudge):
 
         return self.working_dir / "output"
 
+    def load_all_analysis_results(self) -> dict[str, Any]:
+        """Load all analysis results (alias for load_analysis_results).
+
+        This is an alias for backward compatibility with pmd-cpd judges.
+        """
+        return self.load_analysis_results()
+
     def invoke_claude(self, prompt: str) -> str:
         """Invoke Claude, with test mode support.
 
