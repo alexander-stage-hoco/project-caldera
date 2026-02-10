@@ -18,6 +18,10 @@ include ../Makefile.common
 TOOL_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 PROJECT_ROOT := $(abspath $(TOOL_ROOT)/../../..)
 
+# Performance tuning
+# Default to 4 threads; set LIZARD_THREADS to override
+LIZARD_THREADS ?= 4
+
 # Tool-specific defaults
 REPO_PATH ?= eval-repos/synthetic
 REPO_NAME ?= synthetic
@@ -88,6 +92,7 @@ analyze: $(VENV_READY)
 		--repo-id $(REPO_ID) \
 		--branch $(BRANCH) \
 		$(COMMIT_ARG) \
+		--threads $(LIZARD_THREADS) \
 		--no-color
 
 analyze-real: $(VENV_READY) init-submodules
@@ -120,6 +125,7 @@ evaluate: $(VENV_READY)
 		--repo-id $(REPO_ID) \
 		--branch $(BRANCH) \
 		$(COMMIT_ARG) \
+		--threads $(LIZARD_THREADS) \
 		--no-color
 	@$(PYTHON_VENV) -m scripts.evaluate \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \

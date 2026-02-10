@@ -527,6 +527,11 @@ def analyze_directories(
 ) -> tuple[List[DirectoryInfo], DirectoryStructure]:
     """Analyze directory structure with both direct and recursive stats.
 
+    Uses bottom-up aggregation for O(n) complexity instead of O(n × depth).
+    Directories are processed from leaves to root, with each directory's
+    recursive stats computed by aggregating its direct stats plus cached
+    child stats.
+
     Returns:
         Tuple of (list of DirectoryInfo, DirectoryStructure metadata)
     """
@@ -575,19 +580,30 @@ def analyze_directories(
             functions.extend(f.functions)
         return functions
 
-    # Helper to get all files and functions recursively
-    def get_recursive_data(dir_path: str) -> tuple[List[FileInfo], List[FunctionInfo]]:
-        all_files = list(dir_to_files.get(dir_path, []))
-        all_funcs = get_direct_functions(dir_path)
+    # Process directories bottom-up (leaves first) for O(n) aggregation
+    # Sort by depth descending so children are processed before parents
+    sorted_dirs = sorted(all_dirs, key=lambda d: d.count('/') if d != '.' else -1, reverse=True)
 
+    # Cache for recursive data: {dir_path: (files, functions)}
+    recursive_cache: Dict[str, tuple[List[FileInfo], List[FunctionInfo]]] = {}
+
+    for dir_path in sorted_dirs:
+        direct_files = dir_to_files.get(dir_path, [])
+        direct_functions = get_direct_functions(dir_path)
+
+        # Start with direct data
+        recursive_files = list(direct_files)
+        recursive_functions = list(direct_functions)
+
+        # Aggregate from already-computed children
         for child in dir_children.get(dir_path, []):
-            child_files, child_funcs = get_recursive_data(child)
-            all_files.extend(child_files)
-            all_funcs.extend(child_funcs)
+            child_files, child_funcs = recursive_cache[child]
+            recursive_files.extend(child_files)
+            recursive_functions.extend(child_funcs)
 
-        return all_files, all_funcs
+        recursive_cache[dir_path] = (recursive_files, recursive_functions)
 
-    # Compute stats for each directory
+    # Build DirectoryInfo objects
     directory_infos: List[DirectoryInfo] = []
     depths: List[int] = []
 
@@ -597,7 +613,7 @@ def analyze_directories(
 
         direct_files = dir_to_files.get(dir_path, [])
         direct_functions = get_direct_functions(dir_path)
-        recursive_files, recursive_functions = get_recursive_data(dir_path)
+        recursive_files, recursive_functions = recursive_cache[dir_path]
 
         children = dir_children.get(dir_path, [])
         is_leaf = len(children) == 0
@@ -690,9 +706,10 @@ def analyze_directory(
     # Get repo_name from environment or derive from path
     repo_name = os.environ.get("REPO_NAME", "") or target.name
 
-    # Default to CPU count for threads
+    # Default to half of logical CPU count (approximates physical cores), max 4
+    # This avoids thread thrashing on machines with hyperthreading
     if threads is None:
-        threads = multiprocessing.cpu_count()
+        threads = min(multiprocessing.cpu_count() // 2 or 1, 4)
 
     result = AnalysisResult(
         # Root-level fields per TOOL_REQUIREMENTS.md
@@ -710,6 +727,7 @@ def analyze_directory(
         'node_modules', 'vendor', '__pycache__', 'bin', 'obj',
         '.git', '.vs', '.idea', 'packages', 'TestResults',
         'wwwroot', 'dist', 'build', 'coverage', 'artifacts',
+        '.venv', 'venv', 'env', 'virtualenv',  # Virtual environments
     }
 
     # Optionally exclude test directories
