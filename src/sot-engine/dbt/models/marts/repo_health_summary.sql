@@ -26,6 +26,10 @@ lfs_candidates as (
 run_summary as (
     select *
     from {{ ref('unified_run_summary') }}
+    where run_pk in (
+        select run_pk from {{ source('lz', 'lz_tool_runs') }}
+        where tool_name = 'scc'
+    )
 )
 
 select

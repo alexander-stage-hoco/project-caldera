@@ -420,7 +420,7 @@ select
     combined.file_id,
     lf.relative_path,
     lf.directory_id,
-    combined.lines_total as loc_total,
+    coalesce(combined.lines_total, combined.nloc) as loc_total,
     combined.code_lines as loc_code,
     combined.comment_lines as loc_comment,
     combined.blank_lines as loc_blank,
