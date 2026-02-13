@@ -80,6 +80,35 @@ def compute_summary(results: list[dict]) -> dict:
     }
 
 
+def generate_scorecard(summary: dict, results: list[dict], output_dir: Path) -> None:
+    """Generate scorecard.md from evaluation results."""
+    status_icon = {"pass": "\u2713 Pass", "fail": "\u2717 Fail", "warn": "\u26a0 Warn", "error": "\u2717 Error"}
+
+    lines = [
+        "# dependensee Evaluation Scorecard",
+        "",
+        f"**Score:** {summary['score']:.1%}",
+        f"**Decision:** {summary['decision']}",
+        f"**Checks Passed:** {summary['passed']}/{summary['total']}",
+        "",
+        "## Check Details",
+        "",
+        "| ID | Status | Message |",
+        "|----|--------|---------|",
+    ]
+
+    for check in results:
+        cid = check.get("check_id", "unknown")
+        status = status_icon.get(check.get("status", ""), check.get("status", ""))
+        msg = check.get("message", "")
+        lines.append(f"| {cid} | {status} | {msg} |")
+
+    lines.append("")
+
+    scorecard_path = output_dir / "scorecard.md"
+    scorecard_path.write_text("\n".join(lines))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run programmatic evaluation")
     parser.add_argument("--results-dir", type=Path, required=True)
@@ -133,8 +162,12 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2))
 
+    # Generate scorecard
+    generate_scorecard(summary, results, args.output.parent)
+
     print(f"Evaluation complete. Decision: {summary['decision']}")
     print(f"Score: {summary['score']:.1%} ({summary['passed']}/{summary['total']} passed)")
+    print(f"Scorecard written to: {args.output.parent / 'scorecard.md'}")
 
     return 0 if summary["decision"] == "PASS" else 1
 
