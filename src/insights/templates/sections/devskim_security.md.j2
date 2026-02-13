@@ -1,0 +1,52 @@
+## DevSkim Security Findings
+
+{% if not has_data %}
+*No DevSkim security findings detected. Either DevSkim was not run or the codebase has no security linting issues.*
+{% else %}
+
+### Summary
+
+| Metric | Value |
+|--------|------:|
+| Total Issues | {{ summary.total_issues | format_number }} |
+| Critical | {{ summary.critical | format_number }} |
+| High | {{ summary.high | format_number }} |
+| Medium | {{ summary.medium | format_number }} |
+| Low | {{ summary.low | format_number }} |
+| Files Affected | {{ summary.total_files | format_number }} |
+
+{% if has_critical %}
+> **Critical security findings detected.** These represent high-confidence vulnerabilities that require immediate remediation.
+{% endif %}
+
+{% if by_category %}
+### By Security Category
+
+| Category | Count |
+|----------|------:|
+{% for cat in by_category %}
+| {{ cat.category }} | {{ cat.count | format_number }} |
+{% endfor %}
+{% endif %}
+
+{% if top_rules %}
+### Top Rules
+
+| Rule ID | Category | Message | Issues | Files | Risk |
+|---------|----------|---------|-------:|------:|------|
+{% for r in top_rules[:15] %}
+| `{{ r.rule_id }}` | {{ r.dd_category | replace("_", " ") | title }} | {{ r.sample_message | truncate(50) }} | {{ r.issue_count | format_number }} | {{ r.files_affected | format_number }} | {{ r.risk_level | upper }} |
+{% endfor %}
+{% endif %}
+
+{% if hotspot_files %}
+### Hotspot Files
+
+| File | Issues | Critical | High | Medium |
+|------|-------:|---------:|-----:|-------:|
+{% for f in hotspot_files[:10] %}
+| `{{ f.relative_path }}` | {{ f.issue_count | format_number }} | {{ f.severity_critical | format_number }} | {{ f.severity_high | format_number }} | {{ f.severity_medium | format_number }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

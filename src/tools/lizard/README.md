@@ -69,6 +69,18 @@ For CCN, NLOC, and parameter count distributions per directory:
 | Shape | skewness, kurtosis, cv, iqr |
 | Inequality | gini, theil, hoover, palma, top_10_pct_share, top_20_pct_share, bottom_50_pct_share |
 
+### Summary Exclusion Counts
+
+The summary includes counts of excluded files by reason:
+
+| Field | Description |
+|-------|-------------|
+| `excluded_count` | Total number of excluded files |
+| `excluded_by_pattern` | Files excluded by filename pattern |
+| `excluded_by_minified` | Files excluded by minification detection |
+| `excluded_by_size` | Files excluded by size limit |
+| `excluded_by_language` | Files excluded by unsupported language |
+
 ### Output with Traceability
 
 Each run emits a single envelope output plus metadata:
@@ -87,6 +99,76 @@ evaluation/results/
 ├── evaluation_report.json    # Programmatic evaluation report
 ├── scorecard.md              # Programmatic scorecard
 └── llm_evaluation.json       # LLM judge results (if run)
+```
+
+## Performance
+
+### Thread Configuration
+
+By default, lizard uses `min(cpu_count // 2, 4)` threads to avoid thrashing on hyperthreaded CPUs. Override via:
+
+```bash
+make analyze LIZARD_THREADS=8   # Use 8 threads
+```
+
+### O(n) Directory Aggregation
+
+Directory rollup uses bottom-up memoized aggregation for O(n) complexity instead of O(n × depth). Directories are processed from leaves to root, with each directory's recursive stats computed by aggregating its direct stats plus cached child stats. This dramatically improves performance for deeply nested directory structures.
+
+### Benchmarks
+
+| Repository Size | Files | Functions | Time | Memory |
+|-----------------|-------|-----------|------|--------|
+| Synthetic | 63 | 524 | 0.29s | ~45MB |
+| click | 62 | ~800 | 0.35s | ~50MB |
+| picocli/src | ~200 | ~2000 | 1.63s | ~80MB |
+
+## File Exclusions
+
+### Pattern-Based Exclusions
+
+The following files are automatically excluded based on filename patterns:
+
+| Category | Patterns |
+|----------|----------|
+| Minified | `*.min.js`, `*.min.css`, `*.min.ts` |
+| Bundled | `*.bundle.js`, `*.chunk.js`, `*.umd.js` |
+| Vendor Libraries | `jquery*.js`, `react*.js`, `vue*.js`, `angular*.js`, `lodash*.js`, `moment*.js`, `d3*.js` |
+| Generated Code | `*.designer.cs`, `*.g.cs`, `*.generated.*`, `*_pb2.py`, `*.pb.go`, `*_pb2_grpc.py`, `*.d.ts` |
+| Source Maps | `*.map` |
+
+### Content-Based Minification Detection
+
+For JavaScript and TypeScript files, content-based heuristics detect minified files:
+
+| Heuristic | Threshold |
+|-----------|-----------|
+| Average line length | > 500 characters |
+| Single line length | > 1000 characters (first 10 lines) |
+| Newline ratio | < 1 newline per 500 characters |
+
+### Directory Exclusions
+
+| Category | Directories |
+|----------|-------------|
+| Build artifacts | `bin`, `obj`, `dist`, `build`, `coverage`, `artifacts` |
+| IDE/VCS | `.git`, `.vs`, `.idea`, `TestResults` |
+| Virtual environments | `.venv`, `venv`, `env`, `virtualenv` |
+| Vendor (default excluded) | `node_modules`, `vendor`, `packages`, `bower_components`, `lib`, `third_party` |
+
+Use `--include-vendor` to include vendor directories in analysis.
+
+### Excluded Files Tracking
+
+Excluded files are tracked in the output with reason and details:
+
+```json
+{
+  "excluded_files": [
+    {"path": "vendor/jquery.min.js", "reason": "pattern", "language": "JavaScript", "details": "jquery*.js"},
+    {"path": "dist/bundle.js", "reason": "minified", "language": "JavaScript", "details": "avg_line_length=1200"}
+  ]
+}
 ```
 
 ## Make Targets

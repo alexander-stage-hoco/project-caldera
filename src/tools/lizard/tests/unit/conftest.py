@@ -29,6 +29,54 @@ def unequal_distribution_values():
 
 
 @pytest.fixture
+def sample_excluded_file_pattern():
+    """Sample ExcludedFile excluded by pattern (vendor library)."""
+    from function_analyzer import ExcludedFile
+    return ExcludedFile(
+        path="vendor/jquery.min.js",
+        reason="pattern",
+        language="JavaScript",
+        details="*.min.js"
+    )
+
+
+@pytest.fixture
+def sample_excluded_file_minified():
+    """Sample ExcludedFile excluded by content-based minification detection."""
+    from function_analyzer import ExcludedFile
+    return ExcludedFile(
+        path="dist/bundle.js",
+        reason="minified",
+        language="JavaScript",
+        details="content-based detection"
+    )
+
+
+@pytest.fixture
+def sample_excluded_file_large():
+    """Sample ExcludedFile excluded due to size."""
+    from function_analyzer import ExcludedFile
+    return ExcludedFile(
+        path="data/huge.json",
+        reason="large",
+        language="Unknown",
+        details="2.1MB > 500KB limit"
+    )
+
+
+@pytest.fixture
+def sample_excluded_file_language():
+    """Sample ExcludedFile excluded by language filter."""
+    from function_analyzer import ExcludedFile
+    return ExcludedFile(
+        path="src/main.py",
+        reason="language",
+        language="Python",
+        details="filtered (not in C#)"
+    )
+
+
+@pytest.fixture
 def sample_function_info():
     """Sample FunctionInfo for testing."""
     from function_analyzer import FunctionInfo

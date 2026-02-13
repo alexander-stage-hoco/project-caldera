@@ -1,7 +1,7 @@
 {
   "tool": "git-fame",
   "version": "3.1.1",
-  "generated_at": "2026-02-09T16:19:38.595801+00:00",
+  "generated_at": "2026-02-13T06:09:24.588781+00:00",
   "description": "Evaluation scorecard for git-fame git analytics",
   "summary": {
     "total_checks": 28,
@@ -45,7 +45,7 @@
           "check_id": "OQ-4",
           "name": "OQ-4",
           "passed": true,
-          "message": "All required fields present for 2 authors"
+          "message": "All required fields present for 1 authors"
         },
         {
           "check_id": "OQ-5",
@@ -117,7 +117,7 @@
           "check_id": "AA-8",
           "name": "AA-8",
           "passed": true,
-          "message": "Author-level attribution present (2 authors)"
+          "message": "Author-level attribution present (1 authors)"
         }
       ]
     },
@@ -189,7 +189,7 @@
           "check_id": "PF-4",
           "name": "PF-4",
           "passed": true,
-          "message": "Second run 1.0% faster (0.02s -> 0.02s)"
+          "message": "Second run 6.1% faster (0.02s -> 0.02s)"
         }
       ]
     },

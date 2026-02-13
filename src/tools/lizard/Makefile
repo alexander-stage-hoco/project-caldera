@@ -22,6 +22,10 @@ PROJECT_ROOT := $(abspath $(TOOL_ROOT)/../../..)
 # Default to 4 threads; set LIZARD_THREADS to override
 LIZARD_THREADS ?= 4
 
+# Output control
+# Set QUIET=1 to suppress progress output
+QUIET_FLAG := $(if $(QUIET),--quiet,)
+
 # Tool-specific defaults
 REPO_PATH ?= eval-repos/synthetic
 REPO_NAME ?= synthetic
@@ -93,7 +97,8 @@ analyze: $(VENV_READY)
 		--branch $(BRANCH) \
 		$(COMMIT_ARG) \
 		--threads $(LIZARD_THREADS) \
-		--no-color
+		--no-color \
+		$(QUIET_FLAG)
 
 analyze-real: $(VENV_READY) init-submodules
 	@echo "Analyzing real repositories..."

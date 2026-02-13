@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from .base_adapter import BaseAdapter
-from ..entities import LizardFileMetric, LizardFunctionMetric
+from ..entities import LizardExcludedFile, LizardFileMetric, LizardFunctionMetric
 from ..repositories import LayoutRepository, LizardRepository, ToolRunRepository
 from ..validation import (
     check_non_negative,
@@ -24,6 +24,10 @@ LZ_TABLES = {
         "file_id": "VARCHAR",
         "function_name": "VARCHAR",
         "line_start": "INTEGER",
+    },
+    "lz_lizard_excluded_files": {
+        "run_pk": "BIGINT",
+        "file_path": "VARCHAR",
     },
 }
 TABLE_DDL = {
@@ -54,6 +58,16 @@ TABLE_DDL = {
             line_start INTEGER,
             line_end INTEGER,
             PRIMARY KEY (run_pk, file_id, function_name, line_start)
+        )
+    """,
+    "lz_lizard_excluded_files": """
+        CREATE TABLE IF NOT EXISTS lz_lizard_excluded_files (
+            run_pk BIGINT NOT NULL,
+            file_path VARCHAR NOT NULL,
+            reason VARCHAR NOT NULL,
+            language VARCHAR,
+            details VARCHAR,
+            PRIMARY KEY (run_pk, file_path)
         )
     """,
 }
@@ -104,6 +118,11 @@ class LizardAdapter(BaseAdapter):
         )
         self._lizard_repo.insert_file_metrics(file_metrics)
         self._lizard_repo.insert_function_metrics(function_metrics)
+
+        # Persist excluded files
+        excluded_metrics = self._map_excluded_files(run_pk, data.get("excluded_files", []))
+        self._lizard_repo.insert_excluded_files(excluded_metrics)
+
         return run_pk
 
     def validate_quality(self, files: Any) -> None:
@@ -207,3 +226,18 @@ class LizardAdapter(BaseAdapter):
                 )
 
         return file_metrics, function_metrics
+
+    def _map_excluded_files(
+        self, run_pk: int, excluded_files: list[dict]
+    ) -> list[LizardExcludedFile]:
+        """Map excluded file entries to entities."""
+        return [
+            LizardExcludedFile(
+                run_pk=run_pk,
+                file_path=self._normalize_path(entry.get("path", "")),
+                reason=entry.get("reason", ""),
+                language=entry.get("language"),
+                details=entry.get("details"),
+            )
+            for entry in excluded_files
+        ]

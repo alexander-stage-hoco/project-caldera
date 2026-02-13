@@ -111,6 +111,15 @@ CREATE TABLE lz_lizard_function_metrics (
     PRIMARY KEY (run_pk, file_id, function_name, line_start)
 );
 
+CREATE TABLE lz_lizard_excluded_files (
+    run_pk BIGINT NOT NULL,
+    file_path VARCHAR NOT NULL,
+    reason VARCHAR NOT NULL,
+    language VARCHAR,
+    details VARCHAR,
+    PRIMARY KEY (run_pk, file_path)
+);
+
 CREATE TABLE lz_semgrep_smells (
     run_pk BIGINT NOT NULL,
     file_id VARCHAR NOT NULL,

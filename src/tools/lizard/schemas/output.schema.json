@@ -1,5 +1,30 @@
 {
   "$defs": {
+    "excludedFileEntry": {
+      "type": "object",
+      "description": "Information about an excluded file",
+      "required": ["path", "reason", "language"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Repo-relative file path"
+        },
+        "reason": {
+          "type": "string",
+          "enum": ["pattern", "minified", "large", "language"],
+          "description": "Reason for exclusion"
+        },
+        "language": {
+          "type": "string",
+          "description": "Detected programming language"
+        },
+        "details": {
+          "type": "string",
+          "default": "",
+          "description": "Additional details (e.g., matched pattern, file size)"
+        }
+      }
+    },
     "directoryEntry": {
       "description": "Directory entry with direct and recursive statistics",
       "properties": {
@@ -369,6 +394,13 @@
           },
           "type": "array"
         },
+        "excluded_files": {
+          "description": "Files excluded from analysis",
+          "items": {
+            "$ref": "#/$defs/excludedFileEntry"
+          },
+          "type": "array"
+        },
         "files": {
           "description": "Per-file function-level metrics",
           "items": {
@@ -402,6 +434,31 @@
             "ccn_threshold": {
               "description": "CCN threshold for flagging functions (default: 15)",
               "minimum": 1,
+              "type": "integer"
+            },
+            "excluded_count": {
+              "description": "Total number of files excluded from analysis",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "excluded_by_pattern": {
+              "description": "Files excluded by pattern matching (minified, vendor, generated)",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "excluded_by_minified": {
+              "description": "Files excluded by content-based minification detection",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "excluded_by_size": {
+              "description": "Files excluded due to size limit",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "excluded_by_language": {
+              "description": "Files excluded by language filter",
+              "minimum": 0,
               "type": "integer"
             },
             "functions_over_threshold": {

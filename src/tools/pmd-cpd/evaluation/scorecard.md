@@ -1,6 +1,6 @@
 # PMD CPD Evaluation Scorecard
 
-**Generated:** 2026-02-09T20:45:14.634530
+**Generated:** 2026-02-13T07:09:55.774673
 **Decision:** STRONG_PASS
 **Score:** 89.03%
 

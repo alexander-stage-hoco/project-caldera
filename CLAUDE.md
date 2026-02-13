@@ -17,6 +17,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
 | Understand technical specs | [docs/REFERENCE.md](docs/REFERENCE.md) |
 | Set up LLM judges | [docs/EVALUATION.md](docs/EVALUATION.md) |
 | Run reports | [docs/REPORTS.md](docs/REPORTS.md) |
+| Review tool architecture | [src/architecture-review/README.md](src/architecture-review/README.md) |
 
 ## Architecture
 
@@ -88,6 +89,7 @@ scripts/                     # Automation scripts
 
 ```bash
 make compliance              # Run tool compliance scanner
+make arch-review ARCH_REVIEW_TARGET=<tool>  # Run programmatic architecture review
 make tools-setup             # Run 'make setup' for tools
 make tools-analyze           # Run analysis for all tools
 make tools-evaluate          # Run programmatic evaluations
@@ -268,6 +270,43 @@ Groups tool runs for a single `(repo_id, commit)` pair. Tracks status: running â
 ### Distribution Statistics
 
 22 metrics per distribution: count, min, max, mean, median, stddev, percentiles (p25-p99), skewness, kurtosis, cv, iqr, gini, theil, hoover, palma, top/bottom shares.
+
+## Architecture Reviewer Sub-Agent
+
+An LLM-powered sub-agent that reviews tool implementations for architectural conformance. Complements the rule-based compliance scanner with deeper code pattern analysis.
+
+### Invocation
+
+Ask Claude Code to review a tool, and it will spawn a `general-purpose` sub-agent with the architecture reviewer prompt:
+
+| Command | Review type | Dimensions |
+|---------|------------|------------|
+| "Review the architecture of [tool]" | `tool_implementation` | D1-D4, D6 |
+| "Run a cross-tool architecture consistency check" | `cross_tool` | D5 |
+| "Check BLUEPRINT alignment for [tool]" | `blueprint_alignment` | D6 |
+
+### What It Checks (6 Dimensions)
+
+| # | Dimension | Weight | Examples |
+|---|-----------|--------|----------|
+| D1 | Entity & Persistence | 0.20 | Frozen dataclass, `__post_init__`, adapter constants, schema.sql match |
+| D2 | Output Schema & Envelope | 0.20 | Draft 2020-12, `const` schema_version, 8 metadata fields, path normalization |
+| D3 | Code Conventions | 0.15 | `__future__` annotations, PEP 604 unions, Makefile includes |
+| D4 | Evaluation Infrastructure | 0.15 | Shared BaseJudge, 4+ judges, `{{ evidence }}` placeholders |
+| D5 | Cross-Tool Consistency | 0.15 | Envelope drift, naming formula, adapter structure |
+| D6 | BLUEPRINT Alignment | 0.15 | Required sections, no placeholders, evaluation data |
+
+### Output
+
+Results written to `src/architecture-review/results/<tool>-<timestamp>.json`. Schema at `src/architecture-review/schemas/review_result.schema.json`.
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/architecture-review/agent_prompt.md` | Full agent prompt with all rules |
+| `src/architecture-review/schemas/review_result.schema.json` | Output JSON Schema |
+| `src/architecture-review/README.md` | Usage guide |
 
 ## Troubleshooting
 

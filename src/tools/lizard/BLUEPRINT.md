@@ -216,6 +216,165 @@ evaluation/results/
 
 ---
 
+## Recent Changes
+
+### Performance Optimizations
+
+#### O(n) Directory Aggregation
+
+Directory rollup was refactored from recursive traversal to bottom-up memoized aggregation:
+
+```python
+# Process directories bottom-up (leaves first)
+sorted_dirs = sorted(all_dirs, key=lambda d: d.count('/'), reverse=True)
+
+# Cache for recursive data: {dir_path: (files, functions)}
+recursive_cache: Dict[str, tuple[List[FileInfo], List[FunctionInfo]]] = {}
+
+for dir_path in sorted_dirs:
+    # Start with direct data
+    recursive_files = list(direct_files)
+    recursive_functions = list(direct_functions)
+
+    # Aggregate from already-computed children (O(1) lookup)
+    for child in dir_children.get(dir_path, []):
+        child_files, child_funcs = recursive_cache[child]
+        recursive_files.extend(child_files)
+        recursive_functions.extend(child_funcs)
+
+    recursive_cache[dir_path] = (recursive_files, recursive_functions)
+```
+
+This reduces complexity from O(n × depth) to O(n), dramatically improving performance for deeply nested directories.
+
+#### Thread Limiting
+
+Default thread count reduced from `cpu_count()` to `min(cpu_count() // 2, 4)` to avoid thrashing on hyperthreaded CPUs. Configurable via `LIZARD_THREADS` Makefile variable.
+
+### File Exclusion System
+
+#### Pattern-Based Exclusions
+
+Files matching these patterns are excluded from analysis:
+
+```python
+EXCLUDE_PATTERNS = [
+    # Minified files
+    '*.min.js', '*.min.css', '*.min.ts',
+    # Bundled/compiled output
+    '*.bundle.js', '*.chunk.js', '*.umd.js',
+    # Common vendor libraries
+    'jquery*.js', 'react*.js', 'vue*.js', 'angular*.js',
+    'lodash*.js', 'moment*.js', 'd3*.js',
+    # Generated code
+    '*.designer.cs', '*.g.cs', '*.generated.*',
+    '*_pb2.py', '*.pb.go', '*_pb2_grpc.py', '*.d.ts',
+    # Source maps
+    '*.map',
+]
+```
+
+#### Content-Based Minification Detection
+
+For JavaScript/TypeScript files, content heuristics detect minified code:
+
+```python
+def is_likely_minified(filepath: Path, sample_size: int = 8192) -> bool:
+    # Heuristic 1: Average line length > 500 chars
+    avg_line_length = len(content) / len(lines)
+    if avg_line_length > 500:
+        return True
+
+    # Heuristic 2: Single line > 1000 chars in first 10 lines
+    for line in lines[:10]:
+        if len(line) > 1000:
+            return True
+
+    # Heuristic 3: Very few newlines (< 1 per 500 chars)
+    newline_ratio = len(lines) / len(content) if content else 0
+    if newline_ratio < 0.002:
+        return True
+
+    return False
+```
+
+#### Excluded Files Tracking
+
+Excluded files are tracked via the `ExcludedFile` dataclass:
+
+```python
+@dataclass
+class ExcludedFile:
+    path: str       # Repo-relative path
+    reason: str     # 'pattern', 'minified', 'large', 'language'
+    language: str   # Detected language (if applicable)
+    details: str    # Additional info (matched pattern, file size)
+```
+
+### DuckDB Adapter Integration
+
+#### LizardExcludedFile Entity
+
+New frozen dataclass for excluded file records:
+
+```python
+@dataclass(frozen=True)
+class LizardExcludedFile:
+    run_pk: int
+    file_path: str        # Repo-relative path
+    reason: str           # 'pattern', 'minified', 'large', 'language'
+    language: str | None
+    details: str | None
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.file_path, "file_path")
+        _validate_required_string(self.reason, "reason")
+```
+
+#### Landing Zone Table
+
+```sql
+CREATE TABLE lz_lizard_excluded_files (
+    run_pk BIGINT NOT NULL,
+    file_path VARCHAR NOT NULL,
+    reason VARCHAR NOT NULL,
+    language VARCHAR,
+    details VARCHAR,
+    PRIMARY KEY (run_pk, file_path)
+);
+```
+
+#### Adapter Enhancements
+
+**Pseudo-Function Filtering**: Skips lizard artifacts like `*global*` with invalid line numbers:
+
+```python
+# Skip pseudo-functions like *global* with line_start < 1
+if line_start is not None and line_start < 1:
+    self._log(f"WARN: skipping pseudo-function {func.get('name')}")
+    continue
+```
+
+**Flexible Field Mapping**: Handles field name variations for backward compatibility:
+
+```python
+# Handle both naming conventions
+line_start = func.get("line_start") or func.get("start_line")
+line_end = func.get("line_end") or func.get("end_line")
+params = func.get("params") or func.get("parameter_count")
+```
+
+### Schema Changes
+
+The output schema (`schemas/output.schema.json`) now includes:
+
+1. **`excluded_files` array**: Top-level array tracking all excluded files
+2. **Summary exclusion counts**: `excluded_count`, `excluded_by_pattern`, `excluded_by_minified`, `excluded_by_size`, `excluded_by_language`
+3. **22-metric distributions**: count, min, max, mean, median, stddev, percentiles (p25-p99), skewness, kurtosis, cv, iqr, gini, theil, hoover, palma, share metrics
+
+---
+
 ## Architecture
 
 ### Component Overview
@@ -255,10 +414,14 @@ evaluation/results/
 ### Data Flow
 
 1. **Input**: Repository path passed to `function_analyzer.py`
-2. **Analysis**: Lizard CLI extracts per-function metrics
-3. **Statistics**: 22-metric distributions computed per file/directory
-4. **Rollups**: Direct and recursive aggregations calculated
-5. **Output**: Caldera envelope JSON with full metrics
+2. **File Discovery**: Walk directory tree, apply exclusion patterns
+3. **Minification Detection**: Content-based heuristics for JS/TS files
+4. **Exclusion Tracking**: Excluded files logged with reason/details
+5. **Analysis**: Lizard CLI extracts per-function metrics
+6. **Statistics**: 22-metric distributions computed per file/directory
+7. **Rollups**: Bottom-up O(n) directory aggregation with memoization
+8. **Output**: Caldera envelope JSON with files, functions, and excluded_files
+9. **Persistence**: Adapter maps to entities, inserts into DuckDB landing zone
 
 ---
 
@@ -287,6 +450,8 @@ evaluation/results/
 | `REPO_NAME` | `synthetic` | Output file naming |
 | `OUTPUT_DIR` | `outputs/$(RUN_ID)` | Output directory |
 | `LLM_MODEL` | `opus-4.5` | Model for LLM evaluation |
+| `LIZARD_THREADS` | `4` | Number of analysis threads |
+| `QUIET` | unset | Set to `1` to suppress progress output |
 
 ### CLI Options
 
@@ -308,6 +473,14 @@ evaluation/results/
 ---
 
 ## Performance
+
+### Optimizations
+
+| Optimization | Description |
+|--------------|-------------|
+| O(n) Directory Aggregation | Bottom-up memoized aggregation instead of O(n × depth) recursive traversal |
+| Thread Limiting | Default `min(cpu_count // 2, 4)` to avoid thrashing on hyperthreaded CPUs |
+| File Exclusions | Skip minified/bundled/generated files before parsing |
 
 ### Benchmarks
 
@@ -457,13 +630,23 @@ Use P90/P95 percentiles for benchmarking:
 | File | Purpose |
 |------|---------|
 | `scripts/function_analyzer.py` | Main analysis script (16-section dashboard) |
+| `scripts/analyze.py` | CLI wrapper with shared argument parsing |
 | `scripts/evaluate.py` | Programmatic evaluation runner |
 | `scripts/checks/*.py` | 76 evaluation checks |
+| `scripts/checks/exclusion.py` | Exclusion pattern validation checks |
 | `evaluation/ground-truth/*.json` | Expected CCN for 524 functions |
 | `evaluation/llm/judges/*.py` | 4 LLM judge implementations |
 | `evaluation/llm/prompts/*.md` | Judge prompt templates |
 | `schemas/output.schema.json` | Envelope JSON Schema v1.0.0 |
 | `tests/` | Test suite |
+
+### SoT Engine Integration Files
+
+| File | Purpose |
+|------|---------|
+| `src/sot-engine/persistence/entities.py` | `LizardExcludedFile` entity |
+| `src/sot-engine/persistence/schema.sql` | `lz_lizard_excluded_files` table DDL |
+| `src/sot-engine/persistence/adapters/lizard_adapter.py` | JSON → entity mapping |
 
 ---
 

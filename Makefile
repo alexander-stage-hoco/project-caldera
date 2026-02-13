@@ -1,10 +1,12 @@
 .PHONY: help compliance tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
-	orchestrate test pipeline-eval
+	orchestrate test pipeline-eval arch-review
 
 TOOLS_DIR := src/tools
 TOOL ?=
 TOOL_DIRS := $(shell find $(TOOLS_DIR) -maxdepth 1 -type d -not -path $(TOOLS_DIR) -exec test -f {}/Makefile ';' -print | sort)
+ARCH_REVIEW_TARGET ?=
+ARCH_REVIEW_TYPE ?= tool_implementation
 COMPLIANCE_OUT_JSON ?= docs/tool_compliance_report.json
 COMPLIANCE_OUT_MD ?= docs/tool_compliance_report.md
 COMPLIANCE_FLAGS ?= --run-analysis --run-evaluate --run-llm
@@ -69,6 +71,7 @@ help:
 	@echo "  dbt-test          Run dbt tests"
 	@echo "  dbt-test-reports  Run report-specific dbt tests"
 	@echo "  orchestrate       Run orchestrator (REPO_PATH, REPO_ID, RUN_ID, BRANCH, COMMIT)"
+	@echo "  arch-review       Run programmatic architecture review (ARCH_REVIEW_TARGET=<tool>)"
 	@echo "  pipeline-eval     Full E2E: orchestrate -> insights -> LLM eval -> top 3"
 	@echo ""
 	@echo "Variables:"
@@ -145,6 +148,12 @@ orchestrate:
 		--dbt-profiles-dir src/sot-engine/dbt \
 		$(if $(ORCH_LOG_PATH),--log-path $(ORCH_LOG_PATH),) \
 		$(if $(ORCH_REPLACE),--replace,)
+
+arch-review:
+	@test -n "$(ARCH_REVIEW_TARGET)" || (echo "ARCH_REVIEW_TARGET is required"; exit 1)
+	@.venv/bin/python src/architecture-review/reviewer.py \
+		--target $(ARCH_REVIEW_TARGET) \
+		--review-type $(ARCH_REVIEW_TYPE)
 
 test:
 	@.venv/bin/python -m pytest -q

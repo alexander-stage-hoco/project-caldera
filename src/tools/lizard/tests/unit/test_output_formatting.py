@@ -17,6 +17,7 @@ from function_analyzer import (
     DirectoryInfo,
     DirectoryStats,
     DirectoryStructure,
+    ExcludedFile,
     FunctionInfo,
     FileInfo,
     truncate_path_middle,
@@ -25,6 +26,7 @@ from function_analyzer import (
     c,
     Colors,
     set_color_enabled,
+    to_dict,
 )
 from shared.path_utils import normalize_file_path
 
@@ -299,3 +301,105 @@ class TestOutputJsonValidity:
                     check_values(v, f"{path}.{k}")
 
         check_values(sample_analysis_result)
+
+
+class TestExcludedFileSerialization:
+    """Tests for ExcludedFile dataclass serialization."""
+
+    def test_excluded_file_to_dict(self, sample_excluded_file_pattern):
+        """Test ExcludedFile can be converted to dict with all fields."""
+        excluded_dict = to_dict(sample_excluded_file_pattern)
+
+        assert excluded_dict["path"] == "vendor/jquery.min.js"
+        assert excluded_dict["reason"] == "pattern"
+        assert excluded_dict["language"] == "JavaScript"
+        assert excluded_dict["details"] == "*.min.js"
+
+    def test_excluded_file_with_empty_details(self):
+        """Test ExcludedFile with default empty details."""
+        excluded = ExcludedFile(
+            path="src/file.ts",
+            reason="pattern",
+            language="TypeScript",
+        )
+        excluded_dict = to_dict(excluded)
+
+        assert excluded_dict["path"] == "src/file.ts"
+        assert excluded_dict["details"] == ""
+
+    def test_excluded_files_list_serialization(
+        self,
+        sample_excluded_file_pattern,
+        sample_excluded_file_minified,
+        sample_excluded_file_large,
+        sample_excluded_file_language,
+    ):
+        """Test list of ExcludedFiles can be serialized to JSON."""
+        excluded_list = [
+            sample_excluded_file_pattern,
+            sample_excluded_file_minified,
+            sample_excluded_file_large,
+            sample_excluded_file_language,
+        ]
+
+        # Convert to dict list
+        excluded_dicts = [to_dict(e) for e in excluded_list]
+
+        # Should be JSON serializable
+        json_str = json.dumps(excluded_dicts)
+        loaded = json.loads(json_str)
+
+        assert len(loaded) == 4
+        assert loaded[0]["reason"] == "pattern"
+        assert loaded[1]["reason"] == "minified"
+        assert loaded[2]["reason"] == "large"
+        assert loaded[3]["reason"] == "language"
+
+    def test_analysis_result_includes_excluded_files(
+        self,
+        sample_file_info,
+        sample_excluded_file_pattern,
+        sample_excluded_file_minified,
+    ):
+        """Test AnalysisResult with excluded_files serializes correctly."""
+        result = AnalysisResult(
+            schema_version="2.0.0",
+            run_id="test-run-002",
+            timestamp="2026-01-20T12:00:00Z",
+            root_path="/test/repo",
+            files=[sample_file_info],
+            excluded_files=[
+                sample_excluded_file_pattern,
+                sample_excluded_file_minified,
+            ],
+            summary=AnalysisSummary(
+                total_files=1,
+                total_functions=2,
+                total_nloc=47,
+                total_ccn=12,
+                avg_ccn=6.0,
+                max_ccn=8,
+                excluded_count=2,
+                excluded_by_pattern=1,
+                excluded_by_minified=1,
+                excluded_by_size=0,
+                excluded_by_language=0,
+            ),
+        )
+
+        result_dict = to_dict(result)
+
+        # Should have excluded_files array
+        assert "excluded_files" in result_dict
+        assert len(result_dict["excluded_files"]) == 2
+
+        # Should have exclusion counts in summary
+        summary = result_dict["summary"]
+        assert summary["excluded_count"] == 2
+        assert summary["excluded_by_pattern"] == 1
+        assert summary["excluded_by_minified"] == 1
+
+        # Should be JSON serializable
+        json_str = json.dumps(result_dict, default=str)
+        loaded = json.loads(json_str)
+        assert loaded["excluded_files"][0]["reason"] == "pattern"

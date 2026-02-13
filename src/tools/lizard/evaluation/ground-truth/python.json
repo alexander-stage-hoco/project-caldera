@@ -22,6 +22,14 @@
   "total_files": 9,
   "total_functions": 60,
   "total_ccn": 227,
+  "excluded_files_expected": [],
+  "excluded_counts_expected": {
+    "total": 0,
+    "by_pattern": 0,
+    "by_minified": 0,
+    "by_size": 0,
+    "by_language": 0
+  },
   "files": {
     "complex.py": {
       "expected_functions": 9,

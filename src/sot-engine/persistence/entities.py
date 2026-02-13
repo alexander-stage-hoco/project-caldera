@@ -247,6 +247,21 @@ class LizardFunctionMetric:
 
 
 @dataclass(frozen=True)
+class LizardExcludedFile:
+    """File excluded from lizard analysis."""
+    run_pk: int
+    file_path: str        # Repo-relative path
+    reason: str           # 'pattern', 'minified', 'large', 'language'
+    language: str | None
+    details: str | None
+
+    def __post_init__(self) -> None:
+        _validate_positive_pk(self.run_pk)
+        _validate_relative_path(self.file_path, "file_path")
+        _validate_required_string(self.reason, "reason")
+
+
+@dataclass(frozen=True)
 class SemgrepSmell:
     """Individual code smell instance from semgrep analysis."""
     run_pk: int

@@ -46,6 +46,9 @@ from .sections.technical_debt_summary import TechnicalDebtSummarySection
 from .sections.coupling_debt import CouplingDebtSection
 from .sections.sonarqube_deep_dive import SonarQubeDeepDiveSection
 from .sections.component_inventory import ComponentInventorySection
+from .sections.devskim_security import DevskimSecuritySection
+from .sections.dotcover_coverage import DotcoverCoverageSection
+from .sections.git_sizer import GitSizerSection
 
 
 class InsightsGenerator:
@@ -62,9 +65,11 @@ class InsightsGenerator:
         "dependency_health": DependencyHealthSection,
         "function_complexity": FunctionComplexitySection,
         "coverage_gap": CoverageGapSection,
+        "dotcover_coverage": DotcoverCoverageSection,
         "component_inventory": ComponentInventorySection,
         "blast_radius": BlastRadiusSection,
         "code_size_hotspots": CodeSizeHotspotsSection,
+        "git_sizer": GitSizerSection,
         "repo_health": RepoHealthSection,
         "directory_structure": DirectoryStructureSection,
         "file_hotspots": FileHotspotsSection,
@@ -82,6 +87,7 @@ class InsightsGenerator:
         "distribution_insights": DistributionInsightsSection,
         "roslyn_violations": RoslynViolationsSection,
         "iac_misconfigs": IacMisconfigsSection,
+        "devskim_security": DevskimSecuritySection,
         "module_health": ModuleHealthSection,
         "code_inequality": CodeInequalitySection,
         "license_compliance": LicenseComplianceSection,
@@ -444,9 +450,17 @@ class InsightsGenerator:
                 # Check Roslyn violations
                 if self.fetcher.table_exists("stg_roslyn_file_metrics"):
                     roslyn_sql = """
+                    WITH run_map AS (
+                        SELECT tr_tool.run_pk AS roslyn_run_pk
+                        FROM lz_tool_runs tr_source
+                        LEFT JOIN lz_tool_runs tr_tool
+                            ON tr_tool.collection_run_id = tr_source.collection_run_id
+                            AND tr_tool.tool_name = 'roslyn-analyzers'
+                        WHERE tr_source.run_pk = {{ run_pk }}
+                    )
                     SELECT COUNT(*) as violation_count
                     FROM stg_roslyn_file_metrics
-                    WHERE run_pk = {{ run_pk }}
+                    WHERE run_pk = (SELECT roslyn_run_pk FROM run_map)
                     """
                     roslyn_result = self.fetcher.fetch_raw(roslyn_sql, run_pk=run_pk)
                     if roslyn_result and roslyn_result[0].get("violation_count", 0) == 0:

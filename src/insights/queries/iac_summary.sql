@@ -1,12 +1,20 @@
 -- IaC misconfiguration summary by severity for Caldera
--- Uses stg_trivy_iac_misconfigs
+-- Resolves trivy run_pk from any tool's collection
 
+WITH run_map AS (
+    SELECT tr_tool.run_pk AS trivy_run_pk
+    FROM lz_tool_runs tr_source
+    LEFT JOIN lz_tool_runs tr_tool
+        ON tr_tool.collection_run_id = tr_source.collection_run_id
+        AND tr_tool.tool_name = 'trivy'
+    WHERE tr_source.run_pk = {{ run_pk }}
+)
 SELECT
     severity,
     COUNT(*) AS count,
     COUNT(DISTINCT target_key) AS affected_files
 FROM stg_trivy_iac_misconfigs
-WHERE run_pk = {{ run_pk }}
+WHERE run_pk = (SELECT trivy_run_pk FROM run_map)
 GROUP BY severity
 ORDER BY
     CASE severity

@@ -14,6 +14,13 @@ from typing import Any, Callable
 
 import duckdb
 
+try:
+    from rich.console import Console
+    from rich.progress import Progress, SpinnerColumn, TextColumn
+    RICH_AVAILABLE = True
+except ImportError:
+    RICH_AVAILABLE = False
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -243,23 +250,56 @@ def _run_tools(
     commit: str,
     logger: OrchestratorLogger,
     output_root: Path | None,
+    show_progress: bool = True,
 ) -> dict[str, Path]:
     """Run all configured tools and return their output paths."""
     outputs: dict[str, Path] = {}
-    for tool in tool_configs:
+    total_tools = len(tool_configs)
+    use_rich = show_progress and RICH_AVAILABLE and sys.stdout.isatty()
+    console = Console() if use_rich else None
+
+    for idx, tool in enumerate(tool_configs, 1):
         output_path = _default_output_path(tool, run_id, output_root)
-        run_tool_make(
-            Path(tool.path),
-            repo_path,
-            repo_name,
-            run_id,
-            repo_id,
-            branch,
-            commit,
-            output_path.parent,
-            logger,
-            extra_env=tool.extra_env,
-        )
+        tool_start = time.perf_counter()
+
+        if use_rich and console:
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=console,
+                transient=True,
+            ) as progress:
+                progress.add_task(f"[{idx}/{total_tools}] {tool.name}...", total=None)
+                run_tool_make(
+                    Path(tool.path),
+                    repo_path,
+                    repo_name,
+                    run_id,
+                    repo_id,
+                    branch,
+                    commit,
+                    output_path.parent,
+                    logger,
+                    extra_env=tool.extra_env,
+                )
+            duration = time.perf_counter() - tool_start
+            console.print(f"[green]✓[/] [{idx}/{total_tools}] {tool.name} ({duration:.1f}s)")
+        else:
+            run_tool_make(
+                Path(tool.path),
+                repo_path,
+                repo_name,
+                run_id,
+                repo_id,
+                branch,
+                commit,
+                output_path.parent,
+                logger,
+                extra_env=tool.extra_env,
+            )
+            duration = time.perf_counter() - tool_start
+            logger.info(f"[{idx}/{total_tools}] {tool.name} ({duration:.1f}s)")
+
         outputs[tool.name] = output_path
     return outputs
 
@@ -444,6 +484,7 @@ def main() -> int:
     parser.add_argument("--run-tools", action="store_true")
     parser.add_argument("--run-dbt", action="store_true")
     parser.add_argument("--replace", action="store_true")
+    parser.add_argument("--no-progress", action="store_true", help="Disable rich progress display")
     parser.add_argument("--dbt-bin", default="src/sot-engine/.venv-dbt/bin/dbt")
     parser.add_argument("--dbt-project-dir", default="src/sot-engine/dbt")
     parser.add_argument("--dbt-profiles-dir", default="src/sot-engine/dbt")
@@ -518,6 +559,7 @@ def main() -> int:
                 args.commit,
                 logger,
                 output_root,
+                show_progress=not args.no_progress,
             )
             layout_output = outputs.get("layout-scanner", layout_output)
             scc_output = outputs.get("scc", scc_output)

@@ -5,7 +5,7 @@
 | Metric | Value |
 |--------|-------|
 | **Tool** | scancode |
-| **Last Evaluated** | 2026-02-09 |
+| **Last Evaluated** | 2026-02-13 |
 | **Overall Score** | 5.0/5.0 |
 | **Decision** | STRONG_PASS |
 

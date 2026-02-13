@@ -219,6 +219,7 @@ quality_rule_patterns:
     - normalize_file_path
     - path invalid
     - normalize_dir_path
+    - validate_file_paths_in_entries
   ranges:
     - check_non_negative
     - ">= 0"
@@ -237,6 +238,19 @@ quality_rule_patterns:
     - line_start
     - line_end
     - ">= 1"
+  coverage_invariants:
+    - lines_covered
+    - lines_total
+  ownership_valid:
+    - top_author_pct
+    - check_bounded
+  churn_monotonic:
+    - churn_30d
+    - churn_90d
+  authors_positive:
+    - unique_authors
+  confidence:
+    - confidence
 
 # Data completeness validation rules
 data_completeness_rules:

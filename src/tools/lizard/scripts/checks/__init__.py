@@ -84,7 +84,20 @@ class EvaluationReport:
         return [c for c in self.checks if c.category == category]
 
     def to_dict(self) -> Dict[str, Any]:
+        score = round(self.overall_score, 3)
+        normalized = 1 + (self.overall_score * 4)  # 0-1 → 1-5
+        if normalized >= 4.0:
+            decision = "STRONG_PASS"
+        elif normalized >= 3.5:
+            decision = "PASS"
+        elif normalized >= 3.0:
+            decision = "WEAK_PASS"
+        else:
+            decision = "FAIL"
+
         return {
+            "decision": decision,
+            "score": score,
             "timestamp": self.timestamp,
             "analysis_path": self.analysis_path,
             "ground_truth_path": self.ground_truth_path,

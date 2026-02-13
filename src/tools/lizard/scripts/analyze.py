@@ -58,6 +58,11 @@ def main() -> None:
         default=500,
         help="Skip files larger than N KB (default: 500)",
     )
+    parser.add_argument(
+        "-q", "--quiet",
+        action="store_true",
+        help="Suppress progress output during analysis",
+    )
     args = parser.parse_args()
 
     if args.no_color:
@@ -79,6 +84,7 @@ def main() -> None:
         exclude_tests=not args.include_tests,
         languages=args.languages,
         max_file_size_kb=args.max_file_size,
+        show_progress=not args.quiet,
     )
 
     # Override repo_name/repo_path from CLI if provided

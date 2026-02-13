@@ -1,0 +1,109 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Repository Size Health</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No git-sizer data available. Either git-sizer was not run or this is not a git repository.</p>
+    </div>
+    {% else %}
+
+    {% set grade = summary.health_grade or 'N/A' %}
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Health Grade</div>
+            <div class="value">
+                <span class="risk-indicator risk-{% if grade in ['A+', 'A'] %}low{% elif grade in ['B', 'B+'] %}low{% elif grade == 'C' %}medium{% elif grade == 'D' %}high{% else %}critical{% endif %}">{{ grade }}</span>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Commits</div>
+            <div class="value">{{ summary.commit_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Branches</div>
+            <div class="value">{{ summary.branch_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Max Blob Size</div>
+            <div class="value">{{ summary.max_blob_size | format_number }}</div>
+        </div>
+    </div>
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Violations</div>
+            <div class="value" style="color: {% if has_violations %}var(--color-high){% else %}var(--color-low){% endif %};">{{ summary.violation_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">LFS Candidates</div>
+            <div class="value">{{ summary.lfs_candidate_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Blob Count</div>
+            <div class="value">{{ summary.blob_count | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Tags</div>
+            <div class="value">{{ summary.tag_count | format_number }}</div>
+        </div>
+    </div>
+
+    {% if has_serious_violations %}
+    <div class="alert alert-high">
+        <strong>Serious repository size violations detected (level 3+).</strong> These may impact clone times, CI performance, and developer experience.
+    </div>
+    {% endif %}
+
+    {% if violations %}
+    <div class="subsection">
+        <h3>Violations</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th class="number">Count</th>
+                    <th class="number">Max Level</th>
+                    <th>Sample Value</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for v in violations %}
+                <tr>
+                    <td>{{ v.metric | replace("_", " ") | title }}</td>
+                    <td class="number">{{ v.violation_count | format_number }}</td>
+                    <td class="number">{{ v.max_level }}</td>
+                    <td><code>{{ v.sample_value_display or '-' }}</code></td>
+                    <td><span class="risk-indicator risk-{{ v.risk_level }}">{{ v.risk_level | upper }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if lfs_candidates %}
+    <div class="subsection">
+        <h3>LFS Candidates</h3>
+        <p>Files recommended for Git LFS to reduce repository size.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Size (bytes)</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in lfs_candidates %}
+                <tr>
+                    <td class="truncate" title="{{ f.file_path }}">{{ f.file_path | truncate_path }}</td>
+                    <td class="number">{{ f.file_size_bytes | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

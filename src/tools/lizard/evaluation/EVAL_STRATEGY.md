@@ -38,7 +38,7 @@ combined_score = (0.60 * programmatic_normalized) + (0.40 * llm_score)
 
 ---
 
-## Programmatic Checks (76 Total)
+## Programmatic Checks (82 Total)
 
 ### Overview by Category
 
@@ -48,6 +48,7 @@ combined_score = (0.60 * programmatic_normalized) + (0.40 * llm_score)
 | Coverage | 8 | 1 critical, 7 high | Language detection |
 | Edge Cases | 8 | 2 high, 3 medium, 3 low | Edge case handling |
 | Performance | 4 | 1 high, 2 medium, 1 low | Speed/memory |
+| Exclusion | 6 | 2 high, 3 medium, 1 low | File exclusion accuracy |
 
 ### Accuracy Checks (AC-1 to AC-8, per language)
 
@@ -107,6 +108,37 @@ def compute_accuracy_score(correct, total):
 | PF-2 | Real repo: click | Medium | < 5s | 0.35s |
 | PF-3 | Real repo: picocli | Medium | < 30s | 1.63s |
 | PF-4 | Memory usage | Low | < 500MB | 45.1MB |
+
+### Exclusion Checks (EX-1 to EX-6)
+
+These checks validate file exclusion accuracy, ensuring that vendor/generated/minified files are properly detected and excluded from analysis.
+
+| ID | Name | Severity | Pass Criteria |
+|----|------|----------|---------------|
+| EX-1 | excluded_files_present | High | excluded_files array exists in output |
+| EX-2 | exclusion_reasons_valid | Medium | All reasons in valid enum (pattern, minified, large, language) |
+| EX-3 | excluded_paths_normalized | Medium | Paths are repo-relative (no leading /, ./, .., or Windows paths) |
+| EX-4 | exclusion_counts_consistent | High | Summary counts match array: excluded_count = len(excluded_files), sum of by_* = total |
+| EX-5 | vendor_patterns_detected | Medium | Known patterns (*.min.js, *.d.ts) are caught by pattern matching |
+| EX-6 | minified_detection_works | Low | Content-based detection finds minified JS/TS (best-effort) |
+
+#### Purpose
+
+File exclusion is critical for accurate complexity analysis:
+
+1. **Vendor libraries** (jquery.min.js, node_modules) inflate metrics artificially
+2. **Generated code** (*.Designer.cs, *_pb2.py) shouldn't be counted
+3. **Minified files** have unrealistic complexity density
+4. **Large files** may be data files misclassified as code
+
+#### Valid Exclusion Reasons
+
+| Reason | Description | Examples |
+|--------|-------------|----------|
+| `pattern` | Matched exclusion pattern | jquery.min.js, bundle.js, *.d.ts |
+| `minified` | Content-based detection | Long lines, low newline ratio |
+| `large` | Exceeded size limit | Files > 500KB by default |
+| `language` | Language filter applied | Python files when --languages C# |
 
 ---
 

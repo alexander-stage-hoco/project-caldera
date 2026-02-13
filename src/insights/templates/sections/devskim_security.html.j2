@@ -1,0 +1,116 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>DevSkim Security Findings</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No DevSkim security findings detected. Either DevSkim was not run or the codebase has no security linting issues.</p>
+    </div>
+    {% else %}
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Issues</div>
+            <div class="value">{{ summary.total_issues | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Critical</div>
+            <div class="value" style="color: var(--color-critical);">{{ summary.critical | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">High</div>
+            <div class="value" style="color: var(--color-high);">{{ summary.high | format_number }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Files Affected</div>
+            <div class="value">{{ summary.total_files | format_number }}</div>
+        </div>
+    </div>
+
+    {% if has_critical %}
+    <div class="alert alert-critical">
+        <strong>Critical security findings detected.</strong> These represent high-confidence vulnerabilities that require immediate remediation.
+    </div>
+    {% endif %}
+
+    {% if by_category %}
+    <div class="subsection">
+        <h3>By Security Category</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th class="number">Count</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for cat in by_category %}
+                <tr>
+                    <td>{{ cat.category }}</td>
+                    <td class="number">{{ cat.count | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if top_rules %}
+    <div class="subsection">
+        <h3>Top Rules</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rule ID</th>
+                    <th>Category</th>
+                    <th>Message</th>
+                    <th class="number">Issues</th>
+                    <th class="number">Files</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for r in top_rules[:15] %}
+                <tr>
+                    <td><code>{{ r.rule_id }}</code></td>
+                    <td>{{ r.dd_category | replace("_", " ") | title }}</td>
+                    <td class="truncate" title="{{ r.sample_message }}">{{ r.sample_message | truncate(60) }}</td>
+                    <td class="number">{{ r.issue_count | format_number }}</td>
+                    <td class="number">{{ r.files_affected | format_number }}</td>
+                    <td><span class="risk-indicator risk-{{ r.risk_level }}">{{ r.risk_level | upper }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if hotspot_files %}
+    <div class="subsection">
+        <h3>Hotspot Files</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Issues</th>
+                    <th class="number">Critical</th>
+                    <th class="number">High</th>
+                    <th class="number">Medium</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in hotspot_files[:10] %}
+                <tr>
+                    <td class="truncate" title="{{ f.relative_path }}">{{ f.relative_path | truncate_path }}</td>
+                    <td class="number">{{ f.issue_count | format_number }}</td>
+                    <td class="number">{{ f.severity_critical | format_number }}</td>
+                    <td class="number">{{ f.severity_high | format_number }}</td>
+                    <td class="number">{{ f.severity_medium | format_number }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

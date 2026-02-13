@@ -1,0 +1,45 @@
+## Repository Size Health
+
+{% if not has_data %}
+*No git-sizer data available. Either git-sizer was not run or this is not a git repository.*
+{% else %}
+
+### Summary
+
+| Metric | Value |
+|--------|------:|
+| Health Grade | {{ summary.health_grade or 'N/A' }} |
+| Violations | {{ summary.violation_count | format_number }} |
+| LFS Candidates | {{ summary.lfs_candidate_count | format_number }} |
+| Commits | {{ summary.commit_count | format_number }} |
+| Blob Count | {{ summary.blob_count | format_number }} |
+| Blob Total Size | {{ summary.blob_total_size | format_number }} |
+| Max Blob Size | {{ summary.max_blob_size | format_number }} |
+| Branches | {{ summary.branch_count | format_number }} |
+| Tags | {{ summary.tag_count | format_number }} |
+
+{% if has_serious_violations %}
+> **Serious repository size violations detected (level 3+).** These may impact clone times, CI performance, and developer experience.
+{% endif %}
+
+{% if violations %}
+### Violations
+
+| Metric | Count | Max Level | Sample Value | Risk |
+|--------|------:|----------:|--------------|------|
+{% for v in violations %}
+| {{ v.metric | replace("_", " ") | title }} | {{ v.violation_count | format_number }} | {{ v.max_level }} | `{{ v.sample_value_display or '-' }}` | {{ v.risk_level | upper }} |
+{% endfor %}
+{% endif %}
+
+{% if lfs_candidates %}
+### LFS Candidates
+
+| File | Size (bytes) |
+|------|-------------:|
+{% for f in lfs_candidates %}
+| `{{ f.file_path }}` | {{ f.file_size_bytes | format_number }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

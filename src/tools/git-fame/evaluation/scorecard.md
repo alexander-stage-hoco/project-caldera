@@ -1,6 +1,6 @@
 # git-fame Evaluation Scorecard
 
-**Generated**: 2026-02-09T16:19:38.595801+00:00
+**Generated**: 2026-02-13T06:09:24.588781+00:00
 **Tool**: git-fame v3.1.1
 
 ## Overall Score
@@ -28,7 +28,7 @@
 | OQ-1 | PASS | schema_version present in all 1 analyses |
 | OQ-2 | PASS | Valid ISO8601 timestamps in all 1 analyses |
 | OQ-3 | PASS | All 5 required summary fields present |
-| OQ-4 | PASS | All required fields present for 2 authors |
+| OQ-4 | PASS | All required fields present for 1 authors |
 | OQ-5 | PASS | No file-level data present (author-level analysis only) |
 | OQ-6 | PASS | All 1 JSON files are valid |
 
@@ -43,7 +43,7 @@
 | AA-5 | PASS | No expected_bus_factor in ground truth (skipped) |
 | AA-6 | PASS | No expected_hhi in ground truth (skipped) |
 | AA-7 | PASS | No expected_top_two_pct in ground truth (skipped) |
-| AA-8 | PASS | Author-level attribution present (2 authors) |
+| AA-8 | PASS | Author-level attribution present (1 authors) |
 
 ### Reliability
 
@@ -61,7 +61,7 @@
 | PF-1 | PASS | Completed in 0.02s (threshold: 5.0s) |
 | PF-2 | PASS | Completed in 0.02s (threshold: 30.0s) |
 | PF-3 | FAIL | Execution failed: /Users/alexander.stage/Projects/2026-01-24... |
-| PF-4 | PASS | Second run 1.0% faster (0.02s -> 0.02s) |
+| PF-4 | PASS | Second run 6.1% faster (0.02s -> 0.02s) |
 
 ### Integration Fit
 

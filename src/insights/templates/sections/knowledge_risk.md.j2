@@ -60,7 +60,7 @@ Critical-risk files with no commits in 90+ days:
 | File | Author | LOC | Last Modified |
 |------|--------|-----|---------------|
 {% for file in stale_critical %}
-| {{ file.relative_path | truncate(40) }} | {{ file.top_author | truncate(20) if file.top_author else '-' }} | {{ file.total_lines }} | {{ file.last_modified[:10] if file.last_modified else '-' }} |
+| {{ file.relative_path | truncate(40) }} | {{ file.top_author | truncate(20) if file.top_author else '-' }} | {{ file.total_lines }} | {{ file.last_modified.isoformat() if file.last_modified is not string and file.last_modified else (file.last_modified[:10] if file.last_modified else '-') }} |
 {% endfor %}
 {% endif %}
 

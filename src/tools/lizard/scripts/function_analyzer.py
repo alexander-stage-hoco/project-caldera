@@ -6,11 +6,13 @@ token count, and parameter count. Includes 12-section dashboard visualization.
 """
 
 import argparse
+import fnmatch
 import json
 import os
 import shutil
 import statistics
 import sys
+import time
 from collections import defaultdict
 from dataclasses import dataclass, asdict, field
 from datetime import datetime, timezone
@@ -18,6 +20,99 @@ from pathlib import Path
 from typing import List, Dict, Optional, Any
 
 import lizard
+
+
+# =============================================================================
+# File Exclusion Patterns
+# =============================================================================
+
+# Path-based patterns for files to exclude (fnmatch syntax)
+EXCLUDE_PATTERNS = [
+    # Minified files
+    '*.min.js', '*.min.css', '*.min.ts',
+
+    # Bundled/compiled output
+    '*.bundle.js', '*.chunk.js', '*.umd.js',
+
+    # Common vendor libraries by name
+    'jquery*.js', 'jquery-ui*.js', 'bootstrap*.js',
+    'angular*.js', 'react*.js', 'vue*.js',
+    'lodash*.js', 'moment*.js', 'd3*.js',
+
+    # Generated code
+    '*.designer.cs', '*.Designer.cs', '*.g.cs', '*.generated.*',
+    '*_pb2.py', '*.pb.go', '*_pb2_grpc.py',
+    '*.d.ts',  # TypeScript declarations (often generated)
+
+    # Source maps (not code but often large)
+    '*.map',
+]
+
+# Languages where content-based minification detection should be applied
+MINIFICATION_CHECK_LANGUAGES = {'JavaScript', 'TypeScript'}
+
+
+def matches_exclude_pattern(filepath: Path, patterns: list[str]) -> str | None:
+    """Check if a filepath matches any of the exclusion patterns.
+
+    Args:
+        filepath: Path to the file
+        patterns: List of fnmatch-style patterns
+
+    Returns:
+        The matched pattern if file matches any exclusion pattern, None otherwise
+    """
+    filename = filepath.name
+    for pattern in patterns:
+        if fnmatch.fnmatch(filename, pattern):
+            return pattern
+    return None
+
+
+def is_likely_minified(filepath: Path, sample_size: int = 8192) -> bool:
+    """Detect minified files via content heuristics.
+
+    Minified files typically have:
+    - Very long lines (>500 chars average)
+    - Few newlines relative to file size
+    - Single lines >1000 chars in first few lines
+
+    Args:
+        filepath: Path to the file to check
+        sample_size: Number of bytes to read for analysis
+
+    Returns:
+        True if the file appears to be minified
+    """
+    try:
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read(sample_size)
+
+        if not content:
+            return False
+
+        lines = content.split('\n')
+        if not lines:
+            return False
+
+        # Heuristic 1: Average line length > 500 chars
+        avg_line_length = len(content) / len(lines)
+        if avg_line_length > 500:
+            return True
+
+        # Heuristic 2: Single line > 1000 chars in first 10 lines
+        for line in lines[:10]:
+            if len(line) > 1000:
+                return True
+
+        # Heuristic 3: Very few newlines (< 1 per 500 chars)
+        newline_ratio = len(lines) / len(content) if content else 0
+        if newline_ratio < 0.002:  # < 1 newline per 500 chars
+            return True
+
+        return False
+    except Exception:
+        return False  # If we can't read it, don't exclude
 
 # Add shared src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -115,6 +210,81 @@ HDR_BL = "╰"
 HDR_BR = "╯"
 
 
+# =============================================================================
+# Progress Reporter
+# =============================================================================
+
+class ProgressReporter:
+    """Simple progress reporter for terminal output."""
+
+    def __init__(self, enabled: bool = True, interval: float = 1.0):
+        """Initialize the progress reporter.
+
+        Args:
+            enabled: Whether to show progress output
+            interval: Minimum seconds between progress updates
+        """
+        self.enabled = enabled
+        self.interval = interval
+        self._last_update = 0.0
+        self._phase_start = 0.0
+        self._total_start = 0.0
+        self._phases: list[tuple[str, float]] = []
+        self._current_phase = ""
+
+    def start(self) -> None:
+        """Start the overall timer."""
+        self._total_start = time.perf_counter()
+
+    def phase(self, name: str) -> None:
+        """Start a new phase, recording the previous one's duration."""
+        now = time.perf_counter()
+        if self._current_phase:
+            self._phases.append((self._current_phase, now - self._phase_start))
+        self._phase_start = now
+        self._current_phase = name
+        if self.enabled:
+            print(f"  [{name}]", flush=True)
+
+    def progress(self, current: int, total: int) -> None:
+        """Show progress (rate-limited to self.interval)."""
+        if not self.enabled or total == 0:
+            return
+        now = time.perf_counter()
+        if now - self._last_update < self.interval:
+            return
+        self._last_update = now
+
+        elapsed = now - self._phase_start
+        rate = current / elapsed if elapsed > 0 else 0
+        remaining = total - current
+        eta = remaining / rate if rate > 0 else 0
+        pct = current / total * 100
+
+        # In-place update with carriage return
+        print(f"\r    {current:,}/{total:,} ({pct:.0f}%) | {rate:.1f} files/s | ETA: {eta:.0f}s   ", end="", flush=True)
+
+    def end_progress(self) -> None:
+        """End progress line (print newline)."""
+        if self.enabled:
+            print()  # Move to next line
+
+    def finish(self) -> None:
+        """Finish and print timing breakdown."""
+        now = time.perf_counter()
+        if self._current_phase:
+            self._phases.append((self._current_phase, now - self._phase_start))
+
+        total = now - self._total_start
+
+        if self.enabled and self._phases:
+            print(f"\n  Timing:")
+            for phase_name, duration in self._phases:
+                pct = duration / total * 100 if total > 0 else 0
+                print(f"    {phase_name}: {duration:.1f}s ({pct:.0f}%)")
+            print(f"    Total: {total:.1f}s")
+
+
 def print_header(title: str, width: int = 80):
     """Print a header box."""
     inner_width = width - 4
@@ -166,6 +336,15 @@ def print_empty_row(width: int = 80):
 # =============================================================================
 # Data Models
 # =============================================================================
+
+@dataclass
+class ExcludedFile:
+    """Information about an excluded file."""
+    path: str           # Repo-relative path
+    reason: str         # 'pattern', 'minified', 'large', 'language'
+    language: str       # Detected language (if applicable)
+    details: str = ""   # Additional info (e.g., matched pattern, file size)
+
 
 @dataclass
 class FunctionInfo:
@@ -279,6 +458,12 @@ class AnalysisSummary:
     functions_over_threshold: int = 0
     ccn_threshold: int = 10
     total_directories: int = 0
+    # Excluded file counts
+    excluded_count: int = 0
+    excluded_by_pattern: int = 0
+    excluded_by_minified: int = 0
+    excluded_by_size: int = 0
+    excluded_by_language: int = 0
     structure: Optional[DirectoryStructure] = None
     ccn_distribution: Optional[Distribution] = None
     nloc_distribution: Optional[Distribution] = None
@@ -301,6 +486,7 @@ class AnalysisResult:
     root_path: str = ""
     directories: List[DirectoryInfo] = field(default_factory=list)
     files: List[FileInfo] = field(default_factory=list)
+    excluded_files: List[ExcludedFile] = field(default_factory=list)
     summary: Optional[AnalysisSummary] = None
     by_language: Dict[str, Dict] = field(default_factory=dict)
 
@@ -687,6 +873,10 @@ def analyze_directory(
     exclude_tests: bool = True,
     languages: List[str] = None,
     max_file_size_kb: int = 500,
+    show_progress: bool = True,
+    extra_exclude_patterns: List[str] = None,
+    detect_minified: bool = True,
+    include_vendor: bool = False,
 ) -> AnalysisResult:
     """Analyze all files in a directory using Lizard.
 
@@ -696,6 +886,10 @@ def analyze_directory(
         exclude_tests: Exclude test directories (default: True)
         languages: List of languages to include (e.g., ['C#', 'Python'])
         max_file_size_kb: Skip files larger than this (default: 500KB)
+        show_progress: Show progress during analysis (default: True)
+        extra_exclude_patterns: Additional filename patterns to exclude (fnmatch syntax)
+        detect_minified: Enable content-based minified file detection (default: True)
+        include_vendor: Include vendor/library files (default: False)
     """
     import multiprocessing
     target = Path(target_path)
@@ -722,13 +916,28 @@ def analyze_directory(
         root_path=str(target),
     )
 
+    # Initialize progress reporter
+    reporter = ProgressReporter(enabled=show_progress)
+    reporter.start()
+    reporter.phase("Discovering files")
+
     # Directories to always exclude
     exclude_dirs = {
-        'node_modules', 'vendor', '__pycache__', 'bin', 'obj',
-        '.git', '.vs', '.idea', 'packages', 'TestResults',
+        '__pycache__', 'bin', 'obj',
+        '.git', '.vs', '.idea', 'TestResults',
         'wwwroot', 'dist', 'build', 'coverage', 'artifacts',
         '.venv', 'venv', 'env', 'virtualenv',  # Virtual environments
     }
+
+    # Vendor directories (excluded by default, can be included with --include-vendor)
+    vendor_dirs = {
+        'node_modules', 'vendor', 'packages', 'bower_components',
+        'jspm_packages', 'lib', 'libs', 'third_party', 'thirdparty',
+        'external', 'externals',
+    }
+
+    if not include_vendor:
+        exclude_dirs.update(vendor_dirs)
 
     # Optionally exclude test directories
     if exclude_tests:
@@ -737,6 +946,11 @@ def analyze_directory(
             'UnitTests', 'IntegrationTests', 'Benchmarks',
             '__tests__', 'spec', 'specs',
         })
+
+    # Build combined exclusion patterns list
+    all_exclude_patterns = list(EXCLUDE_PATTERNS)
+    if extra_exclude_patterns:
+        all_exclude_patterns.extend(extra_exclude_patterns)
 
     # Build language filter set (lowercase for comparison)
     lang_filter = None
@@ -756,11 +970,10 @@ def analyze_directory(
             print("  Incremental mode: no changed files to analyze")
             return result
 
-    # Collect all source files
+    # Collect all source files and track excluded files
     source_files = []
+    excluded_files: List[ExcludedFile] = []
     max_size_bytes = max_file_size_kb * 1024
-    skipped_large = 0
-    skipped_lang = 0
 
     for root, dirs, files in os.walk(target):
         # Skip excluded directories (in-place modification)
@@ -773,43 +986,97 @@ def analyze_directory(
             if lang == 'Unknown':
                 continue
 
+            # Get repo-relative path for tracking
+            try:
+                rel_path = str(filepath.relative_to(target))
+            except ValueError:
+                rel_path = str(filepath)
+
             # Filter by language if specified
             if lang_filter and lang.lower() not in lang_filter:
-                skipped_lang += 1
+                excluded_files.append(ExcludedFile(
+                    path=rel_path,
+                    reason='language',
+                    language=lang,
+                    details=f"filtered (not in {', '.join(languages)})"
+                ))
                 continue
+
+            # Skip files matching exclusion patterns (minified, vendor libs, generated)
+            matched_pattern = matches_exclude_pattern(filepath, all_exclude_patterns)
+            if matched_pattern:
+                excluded_files.append(ExcludedFile(
+                    path=rel_path,
+                    reason='pattern',
+                    language=lang,
+                    details=matched_pattern
+                ))
+                continue
+
+            # Content-based minification detection for JS/TS files
+            if detect_minified and lang in MINIFICATION_CHECK_LANGUAGES:
+                if is_likely_minified(filepath):
+                    excluded_files.append(ExcludedFile(
+                        path=rel_path,
+                        reason='minified',
+                        language=lang,
+                        details='content-based detection'
+                    ))
+                    continue
 
             # Skip very large files
             try:
-                if filepath.stat().st_size > max_size_bytes:
-                    skipped_large += 1
+                file_size = filepath.stat().st_size
+                if file_size > max_size_bytes:
+                    size_mb = file_size / (1024 * 1024)
+                    excluded_files.append(ExcludedFile(
+                        path=rel_path,
+                        reason='large',
+                        language=lang,
+                        details=f"{size_mb:.1f}MB > {max_file_size_kb}KB limit"
+                    ))
                     continue
             except OSError:
                 continue
 
             # Filter by changed files in incremental mode
             if incremental_mode and changed_files_set:
-                # Get relative path from target for comparison with changed files
-                try:
-                    rel_path = str(filepath.relative_to(target))
-                except ValueError:
-                    rel_path = str(filepath)
                 if rel_path not in changed_files_set:
                     continue
 
             source_files.append(str(filepath))
 
-    if skipped_large > 0:
-        print(f"  Skipped {skipped_large} files larger than {max_file_size_kb}KB")
-    if skipped_lang > 0:
-        print(f"  Skipped {skipped_lang} files (language filter)")
+    # Compute exclusion counts for progress reporting
+    excluded_by_pattern = sum(1 for e in excluded_files if e.reason == 'pattern')
+    excluded_by_minified = sum(1 for e in excluded_files if e.reason == 'minified')
+    excluded_by_size = sum(1 for e in excluded_files if e.reason == 'large')
+    excluded_by_language = sum(1 for e in excluded_files if e.reason == 'language')
+
+    # Report discovery results
+    if show_progress:
+        skip_info = []
+        if excluded_by_pattern > 0:
+            skip_info.append(f"{excluded_by_pattern} vendor/generated")
+        if excluded_by_minified > 0:
+            skip_info.append(f"{excluded_by_minified} minified")
+        if excluded_by_size > 0:
+            skip_info.append(f"{excluded_by_size} large")
+        if excluded_by_language > 0:
+            skip_info.append(f"{excluded_by_language} filtered")
+        skip_str = f" (skipped: {', '.join(skip_info)})" if skip_info else ""
+        print(f"    Found {len(source_files):,} source files{skip_str}")
 
     if not source_files:
+        reporter.finish()
         return result
 
-    print(f"  Analyzing {len(source_files)} files with {threads} threads...")
+    reporter.phase("Analyzing functions")
+    if show_progress:
+        print(f"    {len(source_files):,} files with {threads} threads...")
 
     # Analyze with Lizard
     analysis = lizard.analyze(source_files, threads=threads)
+    total_files = len(source_files)
 
     all_functions = []
     by_language = defaultdict(lambda: {
@@ -817,6 +1084,7 @@ def analyze_directory(
         'avg_ccn': 0.0, 'max_ccn': 0
     })
 
+    files_processed = 0
     for file_analysis in analysis:
         language = detect_language(file_analysis.filename)
 
@@ -861,12 +1129,20 @@ def analyze_directory(
         lang_stats['ccn'] += file_ccn
         lang_stats['max_ccn'] = max(lang_stats['max_ccn'], file_max_ccn)
 
+        # Update progress
+        files_processed += 1
+        reporter.progress(files_processed, total_files)
+
+    reporter.end_progress()
+
     # Compute language averages
     for lang, stats in by_language.items():
         if stats['functions'] > 0:
             stats['avg_ccn'] = stats['ccn'] / stats['functions']
 
     result.by_language = dict(by_language)
+
+    reporter.phase("Computing directory stats")
 
     # Compute summary
     ccn_values = [f.ccn for f in all_functions]
@@ -876,6 +1152,11 @@ def analyze_directory(
     # Analyze directory structure
     directories, dir_structure = analyze_directories(result.files, str(target), ccn_threshold)
     result.directories = directories
+
+    reporter.phase("Finalizing")
+
+    # Store excluded files in result
+    result.excluded_files = excluded_files
 
     result.summary = AnalysisSummary(
         total_files=len(result.files),
@@ -887,10 +1168,18 @@ def analyze_directory(
         functions_over_threshold=sum(1 for c in ccn_values if c > ccn_threshold),
         ccn_threshold=ccn_threshold,
         total_directories=len(directories),
+        # Excluded file counts
+        excluded_count=len(excluded_files),
+        excluded_by_pattern=excluded_by_pattern,
+        excluded_by_minified=excluded_by_minified,
+        excluded_by_size=excluded_by_size,
+        excluded_by_language=excluded_by_language,
         structure=dir_structure,
         ccn_distribution=compute_distribution(ccn_values) if ccn_values else Distribution(),
         nloc_distribution=compute_distribution(nloc_values) if nloc_values else Distribution(),
     )
+
+    reporter.finish()
 
     return result
 
@@ -1196,6 +1485,7 @@ def result_to_output(result: AnalysisResult) -> dict:
         "lizard_version": get_lizard_version(),
         "directories": [to_dict(d) for d in result.directories],
         "files": [to_dict(f) for f in result.files],
+        "excluded_files": [to_dict(e) for e in result.excluded_files],
         "summary": to_dict(result.summary),
         "by_language": result.by_language,
     }
@@ -1400,6 +1690,27 @@ def main():
         default=500,
         help="Skip files larger than N KB (default: 500)"
     )
+    parser.add_argument(
+        "--exclude-patterns",
+        nargs="+",
+        default=None,
+        help="Additional filename patterns to exclude (fnmatch syntax, e.g., '*.generated.js')"
+    )
+    parser.add_argument(
+        "--no-minified-detection",
+        action="store_true",
+        help="Disable content-based minified file detection"
+    )
+    parser.add_argument(
+        "--include-vendor",
+        action="store_true",
+        help="Include vendor/library files (normally excluded)"
+    )
+    parser.add_argument(
+        "-q", "--quiet",
+        action="store_true",
+        help="Suppress progress output during analysis"
+    )
 
     args = parser.parse_args()
 
@@ -1427,6 +1738,10 @@ def main():
             exclude_tests=not args.include_tests,
             languages=args.languages,
             max_file_size_kb=args.max_file_size,
+            show_progress=not args.quiet,
+            extra_exclude_patterns=args.exclude_patterns,
+            detect_minified=not args.no_minified_detection,
+            include_vendor=args.include_vendor,
         )
         print_dashboard(result, width)
         try:

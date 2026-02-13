@@ -26,6 +26,7 @@ from .entities import (
     GitleaksSecret,
     LayoutDirectory,
     LayoutFile,
+    LizardExcludedFile,
     LizardFileMetric,
     LizardFunctionMetric,
     PmdCpdDuplication,
@@ -56,6 +57,7 @@ _VALID_LZ_TABLES = frozenset([
     "lz_scc_file_metrics",
     "lz_lizard_file_metrics",
     "lz_lizard_function_metrics",
+    "lz_lizard_excluded_files",
     "lz_semgrep_smells",
     "lz_gitleaks_secrets",
     "lz_roslyn_violations",
@@ -379,6 +381,9 @@ class LizardRepository(BaseRepository):
         "run_pk", "file_id", "function_name", "long_name", "ccn", "nloc",
         "params", "token_count", "line_start", "line_end",
     )
+    _EXCLUDED_COLUMNS = (
+        "run_pk", "file_path", "reason", "language", "details",
+    )
 
     def insert_file_metrics(self, rows: Iterable[LizardFileMetric]) -> None:
         self._insert_bulk(
@@ -400,6 +405,14 @@ class LizardRepository(BaseRepository):
                 r.run_pk, r.file_id, r.function_name, r.long_name, r.ccn, r.nloc,
                 r.params, r.token_count, r.line_start, r.line_end,
             ),
+        )
+
+    def insert_excluded_files(self, rows: Iterable[LizardExcludedFile]) -> None:
+        self._insert_bulk(
+            "lz_lizard_excluded_files",
+            self._EXCLUDED_COLUMNS,
+            rows,
+            lambda r: (r.run_pk, r.file_path, r.reason, r.language, r.details),
         )
 
 

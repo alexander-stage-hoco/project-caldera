@@ -218,3 +218,119 @@ def test_lizard_adapter_maps_start_line_fields(
     ).fetchall()
 
     assert rows[0][0] is not None
+
+
+def test_lizard_adapter_inserts_excluded_files(
+    duckdb_conn,
+    tool_run_repo: ToolRunRepository,
+    layout_repo: LayoutRepository,
+    seed_layout,
+) -> None:
+    """Test that excluded files are persisted to the landing zone."""
+    fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "lizard_output.json"
+    payload = json.loads(fixture_path.read_text())
+
+    # Add excluded_files to payload
+    payload["data"]["excluded_files"] = [
+        {
+            "path": "src/vendor/lib.min.js",
+            "reason": "minified",
+            "language": "JavaScript",
+            "details": "Minified file detected: < 50 chars avg line length",
+        },
+        {
+            "path": "src/generated/parser.py",
+            "reason": "pattern",
+            "language": "Python",
+            "details": "Matched exclusion pattern: **/generated/**",
+        },
+        {
+            "path": "assets/data.bin",
+            "reason": "language",
+            "language": "unknown",
+            "details": "Unsupported language",
+        },
+    ]
+
+    repo_id = payload["metadata"]["repo_id"]
+    run_id = payload["metadata"]["run_id"]
+    seed_layout(
+        repo_id,
+        run_id,
+        [
+            ("f-000000000001", "d-000000000002", "src/app.py"),
+            ("f-000000000002", "d-000000000003", "src/utils/helpers.py"),
+        ],
+    )
+
+    from persistence.repositories import LizardRepository
+
+    adapter = LizardAdapter(tool_run_repo, layout_repo, LizardRepository(duckdb_conn))
+    run_pk = adapter.persist(payload)
+
+    excluded_rows = duckdb_conn.execute(
+        """
+        SELECT file_path, reason, language, details
+        FROM lz_lizard_excluded_files
+        WHERE run_pk = ?
+        ORDER BY file_path
+        """,
+        [run_pk],
+    ).fetchall()
+
+    assert len(excluded_rows) == 3
+    assert excluded_rows[0] == (
+        "assets/data.bin",
+        "language",
+        "unknown",
+        "Unsupported language",
+    )
+    assert excluded_rows[1] == (
+        "src/generated/parser.py",
+        "pattern",
+        "Python",
+        "Matched exclusion pattern: **/generated/**",
+    )
+    assert excluded_rows[2] == (
+        "src/vendor/lib.min.js",
+        "minified",
+        "JavaScript",
+        "Minified file detected: < 50 chars avg line length",
+    )
+
+
+def test_lizard_adapter_handles_empty_excluded_files(
+    duckdb_conn,
+    tool_run_repo: ToolRunRepository,
+    layout_repo: LayoutRepository,
+    seed_layout,
+) -> None:
+    """Test that adapter handles missing or empty excluded_files gracefully."""
+    fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "lizard_output.json"
+    payload = json.loads(fixture_path.read_text())
+
+    # Ensure no excluded_files key
+    assert "excluded_files" not in payload["data"]
+
+    repo_id = payload["metadata"]["repo_id"]
+    run_id = payload["metadata"]["run_id"]
+    seed_layout(
+        repo_id,
+        run_id,
+        [
+            ("f-000000000001", "d-000000000002", "src/app.py"),
+            ("f-000000000002", "d-000000000003", "src/utils/helpers.py"),
+        ],
+    )
+
+    from persistence.repositories import LizardRepository
+
+    adapter = LizardAdapter(tool_run_repo, layout_repo, LizardRepository(duckdb_conn))
+    run_pk = adapter.persist(payload)
+
+    excluded_rows = duckdb_conn.execute(
+        "SELECT COUNT(*) FROM lz_lizard_excluded_files WHERE run_pk = ?",
+        [run_pk],
+    ).fetchone()
+
+    assert excluded_rows[0] == 0

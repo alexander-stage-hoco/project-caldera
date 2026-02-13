@@ -126,7 +126,7 @@
                     <td class="truncate" title="{{ file.top_author }}">{{ file.top_author | truncate(25) if file.top_author else '-' }}</td>
                     <td class="number">{{ file.total_lines | format_number }}</td>
                     <td class="number">{{ file.risk_score }}</td>
-                    <td>{{ file.last_modified[:10] if file.last_modified else '-' }}</td>
+                    <td>{{ file.last_modified.isoformat() if file.last_modified is not string and file.last_modified else (file.last_modified[:10] if file.last_modified else '-') }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -153,7 +153,7 @@
                     <td class="truncate" title="{{ file.relative_path }}">{{ file.relative_path | truncate(50) }}</td>
                     <td class="truncate" title="{{ file.top_author }}">{{ file.top_author | truncate(25) if file.top_author else '-' }}</td>
                     <td class="number">{{ file.total_lines | format_number }}</td>
-                    <td>{{ file.last_modified[:10] if file.last_modified else '-' }}</td>
+                    <td>{{ file.last_modified.isoformat() if file.last_modified is not string and file.last_modified else (file.last_modified[:10] if file.last_modified else '-') }}</td>
                 </tr>
             {% endfor %}
             </tbody>

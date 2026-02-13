@@ -46,6 +46,9 @@ class TestInsightsGenerator:
             "technical_debt_summary",
             "coupling_debt",
             "component_inventory",
+            "devskim_security",
+            "dotcover_coverage",
+            "git_sizer",
         ]
 
         assert set(InsightsGenerator.SECTIONS.keys()) == set(expected_sections)

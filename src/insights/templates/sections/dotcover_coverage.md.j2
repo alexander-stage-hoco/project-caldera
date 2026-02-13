@@ -1,0 +1,51 @@
+## .NET Code Coverage
+
+{% if not has_data %}
+*No .NET coverage data available. Either dotCover was not run or no assemblies were analyzed.*
+{% else %}
+
+### Summary
+
+| Metric | Value |
+|--------|------:|
+| Overall Coverage | {{ summary.overall_coverage_pct | format_number }}% |
+| Coverage Grade | {{ coverage_grade }} |
+| Assemblies | {{ summary.assembly_count | format_number }} |
+| Total Statements | {{ summary.total_statements | format_number }} |
+| Covered Statements | {{ summary.total_covered | format_number }} |
+
+{% if summary.overall_coverage_pct is not none and summary.overall_coverage_pct < 60 %}
+> **Low overall coverage ({{ summary.overall_coverage_pct }}%).** Consider prioritizing coverage improvements for critical business logic.
+{% endif %}
+
+{% if assemblies %}
+### Assembly Coverage (Lowest First)
+
+| Assembly | Covered | Total | Coverage % |
+|----------|--------:|------:|-----------:|
+{% for a in assemblies %}
+| `{{ a.assembly_name }}` | {{ a.covered_statements | format_number }} | {{ a.total_statements | format_number }} | {{ a.statement_coverage_pct | format_number }}% |
+{% endfor %}
+{% endif %}
+
+{% if low_coverage_files %}
+### Low-Coverage File Hotspots
+
+| File | Types | Coverage % | Gap to 80% | Risk |
+|------|------:|-----------:|-----------:|------|
+{% for f in low_coverage_files %}
+| `{{ f.relative_path }}` | {{ f.type_count | format_number }} | {{ f.statement_coverage_pct | format_number }}% | {{ f.gap_to_target_pct | format_number }}% | {{ f.risk_level | upper }} |
+{% endfor %}
+{% endif %}
+
+{% if namespaces %}
+### Namespace Coverage (Lowest First)
+
+| Namespace | Types | Covered | Total | Coverage % |
+|-----------|------:|--------:|------:|-----------:|
+{% for ns in namespaces %}
+| `{{ ns.namespace or '(root)' }}` | {{ ns.type_count | format_number }} | {{ ns.covered_statements | format_number }} | {{ ns.total_statements | format_number }} | {{ ns.coverage_pct | format_number }}% |
+{% endfor %}
+{% endif %}
+
+{% endif %}

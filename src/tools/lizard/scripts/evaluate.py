@@ -29,6 +29,7 @@ from scripts.checks import (
 from scripts.checks.accuracy import run_accuracy_checks
 from scripts.checks.coverage import run_coverage_checks
 from scripts.checks.edge_cases import run_edge_case_checks
+from scripts.checks.exclusion import run_exclusion_checks
 from scripts.checks.performance import run_performance_checks
 
 
@@ -155,6 +156,9 @@ def run_evaluation(
 
     # Coverage checks
     all_checks.extend(run_coverage_checks(analysis))
+
+    # Exclusion checks
+    all_checks.extend(run_exclusion_checks(analysis, merged_ground_truth))
 
     # Edge case checks (merged ground truth)
     all_checks.extend(run_edge_case_checks(analysis, merged_ground_truth))
