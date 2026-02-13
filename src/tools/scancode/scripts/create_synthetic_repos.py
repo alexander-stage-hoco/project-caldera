@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Create synthetic repositories with various license configurations."""
+from __future__ import annotations
 
 import shutil
 import subprocess

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Evaluation orchestrator for license analysis PoC."""
+from __future__ import annotations
 
 import argparse
 import json

@@ -5,6 +5,7 @@ Detects security vulnerabilities using Microsoft's DevSkim regex-based analyzer.
 Works on non-compiling code - ideal for due diligence on partial codebases.
 Includes 16-section dashboard visualization.
 """
+from __future__ import annotations
 
 import argparse
 import json

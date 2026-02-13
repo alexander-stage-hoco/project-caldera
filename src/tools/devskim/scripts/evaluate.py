@@ -8,6 +8,7 @@ Runs 28 checks across 4 categories:
 - Edge Cases (EC-1 to EC-8): Edge case handling
 - Performance (PF-1 to PF-4): Speed and efficiency
 """
+from __future__ import annotations
 
 import argparse
 import json

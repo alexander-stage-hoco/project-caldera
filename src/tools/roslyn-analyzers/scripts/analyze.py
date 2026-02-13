@@ -8,6 +8,7 @@ Provides consistent CLI interface for Project Caldera orchestration:
 
 This wrapper invokes roslyn_analyzer.py and wraps the output in Caldera's envelope format.
 """
+from __future__ import annotations
 
 import argparse
 import json

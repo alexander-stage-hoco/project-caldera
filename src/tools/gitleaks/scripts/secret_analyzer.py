@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Secret analyzer using gitleaks for detection."""
+from __future__ import annotations
 
 import argparse
 import json

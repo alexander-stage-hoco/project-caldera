@@ -1,0 +1,63 @@
+{
+  "review_id": "3745411c-68b1-4cd7-8419-129c60f10118",
+  "timestamp": "2026-02-13T19:16:30.774552+00:00",
+  "target": "coverage-ingest",
+  "review_type": "tool_implementation",
+  "dimensions": [
+    {
+      "dimension": "entity_persistence_pattern",
+      "weight": 0.2,
+      "status": "pass",
+      "score": 5,
+      "findings": []
+    },
+    {
+      "dimension": "output_schema_envelope",
+      "weight": 0.2,
+      "status": "pass",
+      "score": 5,
+      "findings": []
+    },
+    {
+      "dimension": "code_conventions",
+      "weight": 0.15,
+      "status": "pass",
+      "score": 5,
+      "findings": []
+    },
+    {
+      "dimension": "evaluation_infrastructure",
+      "weight": 0.15,
+      "status": "pass",
+      "score": 4,
+      "findings": [
+        {
+          "severity": "info",
+          "rule_id": "PROMPT_EVIDENCE",
+          "message": "Prompts missing '{{ evidence }}' placeholder: ['parser_accuracy.md', 'gap_actionability.md', 'risk_tier_quality.md', 'cross_format_consistency.md']",
+          "category": "pattern_violation",
+          "file": "src/tools/coverage-ingest/evaluation/llm/prompts",
+          "recommendation": "Add {{ evidence }} placeholder to prompt templates"
+        }
+      ]
+    },
+    {
+      "dimension": "blueprint_alignment",
+      "weight": 0.15,
+      "status": "pass",
+      "score": 5,
+      "findings": []
+    }
+  ],
+  "summary": {
+    "total_findings": 1,
+    "by_severity": {
+      "error": 0,
+      "warning": 0,
+      "info": 1
+    },
+    "overall_status": "STRONG_PASS",
+    "overall_score": 4.82,
+    "dimensions_reviewed": 5
+  }
+}

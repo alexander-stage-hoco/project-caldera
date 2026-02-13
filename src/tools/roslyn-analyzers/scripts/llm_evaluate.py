@@ -10,6 +10,7 @@ Usage:
         --output output/runs/llm_evaluation.json \
         --model opus-4.5
 """
+from __future__ import annotations
 
 import sys
 from pathlib import Path

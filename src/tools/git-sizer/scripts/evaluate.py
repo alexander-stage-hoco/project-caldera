@@ -11,6 +11,7 @@ Runs 28 checks across 4 categories:
 Usage:
     python -m scripts.evaluate --results-dir evaluation/results --ground-truth-dir evaluation/ground-truth
 """
+from __future__ import annotations
 
 import argparse
 import json

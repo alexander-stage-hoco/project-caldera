@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Create synthetic repositories with planted secrets for gitleaks evaluation."""
+from __future__ import annotations
 
 import os
 import shutil
