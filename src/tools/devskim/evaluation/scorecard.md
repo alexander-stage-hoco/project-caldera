@@ -1,8 +1,8 @@
 # DevSkim Evaluation Scorecard
 
-**Generated:** 2026-02-13T06:07:10.285623+00:00
+**Generated:** 2026-02-13T16:25:38.485247+00:00
 **Decision:** STRONG_PASS
-**Score:** 94.47%
+**Score:** 91.13%
 
 ## Summary
 
@@ -11,8 +11,8 @@
 | Total Checks | 30 |
 | Passed | 29 |
 | Failed | 1 |
-| Raw Score | 0.945 |
-| Normalized Score | 4.72/5.0 |
+| Raw Score | 0.911 |
+| Normalized Score | 4.56/5.0 |
 
 ## Dimensions
 
@@ -20,10 +20,10 @@
 |-----------|--------|--------|-------|
 | Accuracy | 8 | 8/8 | 100.0% |
 | Coverage | 8 | 8/8 | 93.0% |
-| Edge Cases | 8 | 7/8 | 86.2% |
+| Edge Cases | 8 | 7/8 | 80.0% |
 | Integration Fit | 1 | 1/1 | 100.0% |
 | Output Quality | 1 | 1/1 | 100.0% |
-| Performance | 4 | 4/4 | 100.0% |
+| Performance | 4 | 4/4 | 87.6% |
 
 ## Detailed Results
 
@@ -37,32 +37,32 @@
 | AC-4 | PASS | Skipped: No path traversal expectations in ground ... |
 | AC-5 | PASS | Skipped: No XSS expectations in ground truth |
 | AC-6 | PASS | Skipped: No deserialization expectations in ground... |
-| AC-7 | PASS | Found 0 potential false positives out of 22917 tot... |
+| AC-7 | PASS | Found 0 potential false positives out of 50 total |
 | AC-8 | PASS | Precision: 1.00, Recall: 1.00, F1: 1.00 |
 
 ### Coverage
 
 | Check | Status | Message |
 |-------|--------|---------|
-| CV-1 | PASS | 2595 files, 411 issues, 8 categories |
+| CV-1 | PASS | 25 files, 50 issues, 8 categories |
 | CV-2 | PASS | Skipped: python not present in ground truth |
 | CV-3 | PASS | Skipped: javascript not present in ground truth |
 | CV-4 | PASS | Skipped: java not present in ground truth |
 | CV-5 | PASS | Skipped: go not present in ground truth |
 | CV-6 | PASS | Skipped: cpp not present in ground truth |
-| CV-7 | PASS | Analyzed 3 of 1 expected languages |
+| CV-7 | PASS | Analyzed 1 of 1 expected languages |
 | CV-8 | PASS | Covered 7/15 security categories |
 
 ### Edge Cases
 
 | Check | Status | Message |
 |-------|--------|---------|
-| EC-1 | PASS | Found 0 empty files, handled correctly |
-| EC-2 | PASS | Analyzed 548 large files (>1000 lines) |
-| EC-3 | PASS | Found 291 files with multiple issue types |
+| EC-1 | PASS | Found 16 empty files, handled correctly |
+| EC-2 | PASS | Analyzed 0 large files (>1000 lines) |
+| EC-3 | PASS | Found 4 files with multiple issue types |
 | EC-4 | PASS | Nested code structures handled |
 | EC-5 | PASS | Comments handled correctly |
-| EC-6 | FAIL | Found 189 potential false positives in string lite... |
+| EC-6 | FAIL | Found 6 potential false positives in string litera... |
 | EC-7 | PASS | Minified code handled |
 | EC-8 | PASS | Encoding variations handled gracefully |
 
@@ -70,7 +70,7 @@
 
 | Check | Status | Message |
 |-------|--------|---------|
-| IF-1 | PASS | 3407/3407 files have relative paths |
+| IF-1 | PASS | 25/25 files have relative paths |
 
 ### Output Quality
 
@@ -82,9 +82,9 @@
 
 | Check | Status | Message |
 |-------|--------|---------|
-| PF-1 | PASS | Completed in 57.9s (target: <300s) |
-| PF-2 | PASS | Throughput: 58.9 files/second |
-| PF-3 | PASS | Throughput: 154640 lines/second (waived) |
+| PF-1 | PASS | Completed in 1.0s (target: <30s) |
+| PF-2 | PASS | Throughput: 24.2 files/second |
+| PF-3 | PASS | Throughput: 727 lines/second (waived) |
 | PF-4 | PASS | Output completeness: 100% |
 
 ## Decision Thresholds

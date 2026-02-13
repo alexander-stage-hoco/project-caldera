@@ -60,7 +60,7 @@ analyze: $(VENV_READY)  ## Run analysis on a repository
 evaluate: $(VENV_READY)  ## Run programmatic evaluation
 	@mkdir -p $(EVAL_OUTPUT_DIR)
 	$(PYTHON_VENV) -m scripts.evaluate \
-		--results-dir $(OUTPUT_DIR) \
+		--results-dir evaluation/results \
 		--ground-truth-dir evaluation/ground-truth \
 		--output $(EVAL_OUTPUT_DIR)/evaluation_report.json
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/evaluation_report.json"
@@ -68,7 +68,7 @@ evaluate: $(VENV_READY)  ## Run programmatic evaluation
 evaluate-llm: $(VENV_READY)  ## Run LLM evaluation
 	@mkdir -p $(EVAL_OUTPUT_DIR)
 	$(PYTHON_VENV) -m evaluation.llm.orchestrator \
-		$(OUTPUT_DIR) \
+		evaluation/results \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
 		--model $(LLM_MODEL)
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"

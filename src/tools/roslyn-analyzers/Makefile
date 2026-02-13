@@ -86,7 +86,7 @@ init-submodules:
 
 build: $(SYNTHETIC_DIR)/SyntheticSmells.csproj
 	@echo "Building synthetic C# project..."
-	@mkdir -p output/runs
+	@mkdir -p $(OUTPUT_DIR)
 	@cd $(SYNTHETIC_DIR) && dotnet restore -v q
 	@cd $(SYNTHETIC_DIR) && dotnet build -v q /p:TreatWarningsAsErrors=false || true
 	@echo "Build complete (warnings expected for smell detection)"

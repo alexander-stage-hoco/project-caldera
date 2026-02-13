@@ -14,7 +14,7 @@ import uuid
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from scripts.checks import CheckResult, DimensionResult, EvaluationResult
-from scripts.analyze import _resolve_commit
+from common.git_utilities import resolve_commit as _resolve_commit
 from scripts.checks.output_quality import run_output_quality_checks
 from scripts.checks.integration_fit import run_integration_fit_checks
 from scripts.checks.reliability import run_reliability_checks

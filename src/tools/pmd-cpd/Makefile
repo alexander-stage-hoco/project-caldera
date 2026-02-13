@@ -181,7 +181,8 @@ evaluate-llm: $(VENV_READY) analyze
 	@$(PYTHON_VENV) scripts/llm_evaluate.py \
 		--analysis $(OUTPUT_DIR)/output.json \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
-		--model $(LLM_MODEL)
+		--model $(LLM_MODEL) \
+		--programmatic-results evaluation/results/evaluation_report.json
 	@echo ""
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"
 
@@ -191,7 +192,8 @@ evaluate-combined: $(VENV_READY) analyze evaluate
 	@$(PYTHON_VENV) scripts/llm_evaluate.py \
 		--analysis $(OUTPUT_DIR)/output.json \
 		--output $(EVAL_OUTPUT_DIR)/combined_evaluation.json \
-		--model $(LLM_MODEL)
+		--model $(LLM_MODEL) \
+		--programmatic-results evaluation/results/evaluation_report.json
 	@echo ""
 	@echo "Combined results saved to $(EVAL_OUTPUT_DIR)/combined_evaluation.json"
 

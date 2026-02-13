@@ -158,7 +158,7 @@ evaluate: $(VENV_READY)
 	@echo "Running programmatic evaluation..."
 	@mkdir -p $(EVAL_OUTPUT_DIR)
 	@$(PYTHON_VENV) -m scripts.evaluate \
-		--results-dir $(OUTPUT_DIR) \
+		--results-dir evaluation/results \
 		--ground-truth-dir $(GROUND_TRUTH_DIR) \
 		--output $(EVAL_OUTPUT_DIR)/evaluation_report.json
 	@echo ""
@@ -168,13 +168,15 @@ evaluate-llm: $(VENV_READY)
 	@echo "Running LLM evaluation..."
 	@mkdir -p $(EVAL_OUTPUT_DIR)
 	@$(PYTHON_VENV) -m evaluation.llm.orchestrator \
-		$(OUTPUT_DIR) \
+		evaluation/results \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
 		--model $(LLM_MODEL) \
 		--timeout $(LLM_TIMEOUT) \
 		--programmatic-results evaluation/results/evaluation_report.json
 	@mkdir -p evaluation/results
-	@cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json
+	@if [ "$(abspath $(EVAL_OUTPUT_DIR)/llm_evaluation.json)" != "$(abspath evaluation/results/llm_evaluation.json)" ]; then \
+		cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json; \
+	fi
 	@echo ""
 	@echo "Results saved to $(EVAL_OUTPUT_DIR)/llm_evaluation.json"
 

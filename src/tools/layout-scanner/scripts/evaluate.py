@@ -439,11 +439,22 @@ def evaluate_all(
     avg_score = sum(overall_scores) / len(overall_scores) if overall_scores else 0
     aggregate_decision = get_decision(avg_score)
 
+    # Aggregate check totals across all repos
+    total_checks = sum(r["summary"]["total_checks"] for r in results if "summary" in r)
+    passed_checks = sum(r["summary"]["passed_checks"] for r in results if "summary" in r)
+
     summary = {
         "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "evaluated_count": len(results),
         "average_score": round(avg_score, 2),
         "decision": aggregate_decision,
+        "score": round(avg_score / 5.0, 4),
+        "summary": {
+            "total": total_checks,
+            "passed": passed_checks,
+            "failed": total_checks - passed_checks,
+        },
+        "checks": [],
         "repositories": results,
     }
 

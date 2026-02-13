@@ -1,15 +1,15 @@
 {
   "tool": "devskim",
   "version": "1.0.0",
-  "generated_at": "2026-02-13T06:07:10.285623+00:00",
+  "generated_at": "2026-02-13T16:25:38.485247+00:00",
   "description": "Evaluation scorecard for DevSkim security analysis",
   "summary": {
     "total_checks": 30,
     "passed": 29,
     "failed": 1,
-    "score": 0.9447,
-    "score_percent": 94.47,
-    "normalized_score": 4.72,
+    "score": 0.9113,
+    "score_percent": 91.13,
+    "normalized_score": 4.56,
     "decision": "STRONG_PASS"
   },
   "dimensions": [
@@ -63,7 +63,7 @@
           "check_id": "AC-7",
           "name": "False positive rate",
           "passed": true,
-          "message": "Found 0 potential false positives out of 22917 total"
+          "message": "Found 0 potential false positives out of 50 total"
         },
         {
           "check_id": "AC-8",
@@ -87,7 +87,7 @@
           "check_id": "CV-1",
           "name": "C# coverage",
           "passed": true,
-          "message": "2595 files, 411 issues, 8 categories"
+          "message": "25 files, 50 issues, 8 categories"
         },
         {
           "check_id": "CV-2",
@@ -123,7 +123,7 @@
           "check_id": "CV-7",
           "name": "Multi-language support",
           "passed": true,
-          "message": "Analyzed 3 of 1 expected languages"
+          "message": "Analyzed 1 of 1 expected languages"
         },
         {
           "check_id": "CV-8",
@@ -140,26 +140,26 @@
       "total_checks": 8,
       "passed": 7,
       "failed": 1,
-      "score": 4.31,
-      "weighted_score": 0.72,
+      "score": 4.0,
+      "weighted_score": 0.67,
       "checks": [
         {
           "check_id": "EC-1",
           "name": "Empty files handling",
           "passed": true,
-          "message": "Found 0 empty files, handled correctly"
+          "message": "Found 16 empty files, handled correctly"
         },
         {
           "check_id": "EC-2",
           "name": "Large files handling",
           "passed": true,
-          "message": "Analyzed 548 large files (>1000 lines)"
+          "message": "Analyzed 0 large files (>1000 lines)"
         },
         {
           "check_id": "EC-3",
           "name": "Mixed content files",
           "passed": true,
-          "message": "Found 291 files with multiple issue types"
+          "message": "Found 4 files with multiple issue types"
         },
         {
           "check_id": "EC-4",
@@ -177,7 +177,7 @@
           "check_id": "EC-6",
           "name": "String literal handling",
           "passed": false,
-          "message": "Found 189 potential false positives in string literals"
+          "message": "Found 6 potential false positives in string literals"
         },
         {
           "check_id": "EC-7",
@@ -207,7 +207,7 @@
           "check_id": "IF-1",
           "name": "Relative file paths",
           "passed": true,
-          "message": "3407/3407 files have relative paths"
+          "message": "25/25 files have relative paths"
         }
       ]
     },
@@ -236,26 +236,26 @@
       "total_checks": 4,
       "passed": 4,
       "failed": 0,
-      "score": 5.0,
-      "weighted_score": 0.83,
+      "score": 4.38,
+      "weighted_score": 0.73,
       "checks": [
         {
           "check_id": "PF-1",
           "name": "Analysis duration",
           "passed": true,
-          "message": "Completed in 57.9s (target: <300s)"
+          "message": "Completed in 1.0s (target: <30s)"
         },
         {
           "check_id": "PF-2",
           "name": "Files per second throughput",
           "passed": true,
-          "message": "Throughput: 58.9 files/second"
+          "message": "Throughput: 24.2 files/second"
         },
         {
           "check_id": "PF-3",
           "name": "Lines per second throughput",
           "passed": true,
-          "message": "Throughput: 154640 lines/second (waived)"
+          "message": "Throughput: 727 lines/second (waived)"
         },
         {
           "check_id": "PF-4",

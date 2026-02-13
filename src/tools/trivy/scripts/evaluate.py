@@ -500,8 +500,13 @@ def main() -> None:
         output_path = Path(output_path)
         output_path.mkdir(parents=True, exist_ok=True)
         
+        agg = aggregate_scores(all_evaluations)
+        pass_rate = agg["overall"]["pass_rate"]
+
         summary = {
             "evaluated_at": datetime.now(timezone.utc).isoformat(),
+            "decision": "STRONG_PASS" if pass_rate >= 0.9 else "PASS" if pass_rate >= 0.7 else "FAIL",
+            "score": round(pass_rate, 4),
             "evaluations": all_evaluations,
         }
         

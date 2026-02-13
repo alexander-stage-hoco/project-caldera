@@ -104,7 +104,8 @@ evaluate-llm: $(VENV_READY)
 	@$(PYTHON_VENV) -m evaluation.llm.orchestrator \
 		$(OUTPUT_DIR) \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
-		--model $(LLM_MODEL)
+		--model $(LLM_MODEL) \
+		--programmatic-results evaluation/results/evaluation_report.json
 
 # =============================================================================
 # Testing

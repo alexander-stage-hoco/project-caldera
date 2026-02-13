@@ -183,7 +183,7 @@ evaluate: $(VENV_READY)
 	@echo "Running programmatic evaluation..."
 	@mkdir -p $(EVAL_OUTPUT_DIR)
 	EVAL_OUTPUT_DIR=$(EVAL_OUTPUT_DIR) $(PYTHON_VENV) -m scripts.evaluate \
-		--analysis $(OUTPUT_DIR)/output.json \
+		--analysis evaluation/results/output.json \
 		--ground-truth $(GROUND_TRUTH) \
 		--output $(EVAL_OUTPUT_DIR)/evaluation_report.json
 	@echo ""
@@ -191,14 +191,14 @@ evaluate: $(VENV_READY)
 
 evaluate-json: $(VENV_READY)
 	@$(PYTHON_VENV) -m scripts.evaluate \
-		--analysis $(OUTPUT_DIR)/output.json \
+		--analysis evaluation/results/output.json \
 		--ground-truth $(GROUND_TRUTH) \
 		--json
 
 evaluate-quick: $(VENV_READY)
 	@echo "Running quick evaluation (no performance checks)..."
 	@$(PYTHON_VENV) -m scripts.evaluate \
-		--analysis $(OUTPUT_DIR)/output.json \
+		--analysis evaluation/results/output.json \
 		--ground-truth $(GROUND_TRUTH) \
 		--quick
 
@@ -206,7 +206,7 @@ evaluate-quick: $(VENV_READY)
 evaluate-llm: $(VENV_READY)
 	@echo "Running LLM evaluation (3 judges)..."
 	$(PYTHON_VENV) -m scripts.llm_evaluate \
-		--analysis $(OUTPUT_DIR)/output.json \
+		--analysis evaluation/results/output.json \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
 		--model $(LLM_MODEL) \
 		--programmatic-results evaluation/results/evaluation_report.json

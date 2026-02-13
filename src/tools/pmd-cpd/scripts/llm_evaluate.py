@@ -93,25 +93,21 @@ def run_llm_evaluation(
         DuplicationAccuracyJudge(
             model=model,
             working_dir=working_dir,
-            analysis_path=Path(analysis_path),
             output_dir=output_dir,
         ),
         SemanticDetectionJudge(
             model=model,
             working_dir=working_dir,
-            analysis_path=Path(analysis_path),
             output_dir=output_dir,
         ),
         CrossFileDetectionJudge(
             model=model,
             working_dir=working_dir,
-            analysis_path=Path(analysis_path),
             output_dir=output_dir,
         ),
         ActionabilityJudge(
             model=model,
             working_dir=working_dir,
-            analysis_path=Path(analysis_path),
             output_dir=output_dir,
         ),
     ]

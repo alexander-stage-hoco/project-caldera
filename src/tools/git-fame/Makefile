@@ -103,11 +103,9 @@ seed-ground-truth: _common-seed-ground-truth  ## Seed ground truth from analysis
 # ============================================
 
 clean: _common-clean  ## Clean build artifacts
-	@rm -rf output/runs/*
 	@rm -rf evaluation/results/*
 	@rm -rf evaluation/llm/results/*
 
 clean-all: _common-clean-all  ## Clean all including venv
-	@rm -rf output/runs/*
 	@rm -rf evaluation/results/*
 	@rm -rf evaluation/llm/results/*

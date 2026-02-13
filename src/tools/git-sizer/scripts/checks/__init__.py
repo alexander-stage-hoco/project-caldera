@@ -110,15 +110,27 @@ class EvaluationReport:
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
+        score = round(self.score, 4)
+        normalized = score * 5.0
+        if normalized >= 4.0:
+            decision = "STRONG_PASS"
+        elif normalized >= 3.5:
+            decision = "PASS"
+        elif normalized >= 3.0:
+            decision = "WEAK_PASS"
+        else:
+            decision = "FAIL"
         return {
             "timestamp": self.timestamp,
             "analysis_path": self.analysis_path,
             "ground_truth_dir": self.ground_truth_dir,
+            "decision": decision,
+            "score": score,
             "summary": {
                 "passed": self.passed,
                 "failed": self.failed,
                 "total": self.total,
-                "score": round(self.score, 4),
+                "score": score,
                 "score_by_category": {
                     k: round(v, 4) for k, v in self.score_by_category.items()
                 },

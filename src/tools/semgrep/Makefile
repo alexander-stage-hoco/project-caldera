@@ -184,7 +184,7 @@ analyze-interactive: setup
 evaluate: setup
 	@echo "Running programmatic evaluation (~28 checks)..."
 	EVAL_OUTPUT_DIR=$(EVAL_OUTPUT_DIR) $(PYTHON_VENV) -m scripts.evaluate \
-		--analysis $(OUTPUT_DIR)/output.json \
+		--analysis evaluation/results/output.json \
 		--ground-truth $(GROUND_TRUTH) \
 		--output $(EVAL_OUTPUT_DIR)/evaluation_report.json
 	@echo ""
@@ -192,14 +192,14 @@ evaluate: setup
 
 evaluate-json: setup
 	@$(PYTHON_VENV) -m scripts.evaluate \
-		--analysis $(OUTPUT_DIR)/output.json \
+		--analysis evaluation/results/output.json \
 		--ground-truth $(GROUND_TRUTH) \
 		--json
 
 evaluate-quick: setup
 	@echo "Running quick evaluation (no performance checks)..."
 	@$(PYTHON_VENV) -m scripts.evaluate \
-		--analysis $(OUTPUT_DIR)/output.json \
+		--analysis evaluation/results/output.json \
 		--ground-truth $(GROUND_TRUTH) \
 		--quick
 

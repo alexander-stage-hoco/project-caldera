@@ -87,7 +87,8 @@ evaluate-llm: $(VENV_READY)  ## Run LLM evaluation on analysis outputs
 	@mkdir -p evaluation/results
 	$(PYTHON_VENV) -m evaluation.llm.orchestrator \
 		--analysis $(OUTPUT_DIR)/output.json \
-		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json
+		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
+		--programmatic-results evaluation/results/evaluation_report.json
 	@if [ "$(EVAL_OUTPUT_DIR)" != "evaluation/results" ] && [ -w evaluation/results ]; then cp $(EVAL_OUTPUT_DIR)/llm_evaluation.json evaluation/results/llm_evaluation.json; fi
 
 evaluate-single: $(VENV_READY)  ## Evaluate a single analysis output
