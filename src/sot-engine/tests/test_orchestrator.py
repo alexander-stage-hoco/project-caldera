@@ -12,12 +12,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from orchestrator import (
     OrchestratorLogger,
     ToolConfig,
+    _compute_content_hash,
     _default_output_path,
     _format_duration,
+    _is_fallback_commit,
     _resolve_dbt_cmd,
     ingest_outputs,
     ensure_schema,
     run_dbt,
+    validate_payload,
 )
 from persistence.adapters import LayoutAdapter
 from persistence.repositories import LayoutRepository, ToolRunRepository
@@ -131,13 +134,16 @@ def test_ingest_outputs_writes_expected_rows(tmp_path: Path) -> None:
 
     repo_id = "55555555-5555-5555-5555-555555555555"
     run_id = "66666666-6666-6666-6666-666666666666"
+    commit = "a" * 40
     for payload in (scc_payload, lizard_payload, semgrep_payload):
         payload["metadata"]["repo_id"] = repo_id
         payload["metadata"]["run_id"] = run_id
+        payload["metadata"]["commit"] = commit
     lizard_payload["data"]["run_id"] = run_id
     layout_payload = json.loads(layout_fixture.read_text())
     layout_payload["metadata"]["repo_id"] = repo_id
     layout_payload["metadata"]["run_id"] = run_id
+    layout_payload["metadata"]["commit"] = commit
 
     scc_path = tmp_path / "scc.json"
     lizard_path = tmp_path / "lizard.json"
@@ -333,3 +339,72 @@ def test_orchestrator_closes_connection_before_dbt(monkeypatch, tmp_path: Path) 
 
     orchestrator_main()
     assert dbt_ran["value"] is True
+
+
+# =============================================================================
+# Fix 2: validate_payload commit/tool checks
+# =============================================================================
+
+
+def test_validate_payload_rejects_commit_mismatch() -> None:
+    metadata = {"repo_id": "r1", "run_id": "run1", "commit": "a" * 40}
+    with pytest.raises(ValueError, match="commit mismatch"):
+        validate_payload(metadata, "r1", "run1", expected_commit="b" * 40)
+
+
+def test_validate_payload_skips_fallback_commit() -> None:
+    metadata = {"repo_id": "r1", "run_id": "run1", "commit": "0" * 40}
+    # Should not raise — both sides are fallback
+    validate_payload(metadata, "r1", "run1", expected_commit="0" * 40)
+    # Orchestrator fallback, payload has real commit — still skip
+    validate_payload(metadata, "r1", "run1", expected_commit="0" * 40)
+
+
+def test_validate_payload_rejects_tool_name_mismatch() -> None:
+    metadata = {"repo_id": "r1", "run_id": "run1", "tool_name": "scc"}
+    with pytest.raises(ValueError, match="tool_name mismatch"):
+        validate_payload(metadata, "r1", "run1", expected_tool="lizard")
+
+
+def test_validate_payload_ignores_empty_tool_name() -> None:
+    metadata = {"repo_id": "r1", "run_id": "run1"}
+    # Missing tool_name in payload should not raise
+    validate_payload(metadata, "r1", "run1", expected_tool="scc")
+
+
+def test_validate_payload_skips_commit_when_payload_is_fallback() -> None:
+    metadata = {"repo_id": "r1", "run_id": "run1", "commit": "0" * 40}
+    # Payload has fallback commit, orchestrator has real — should not raise
+    validate_payload(metadata, "r1", "run1", expected_commit="a" * 40)
+
+
+# =============================================================================
+# Fix 7: _compute_content_hash tests
+# =============================================================================
+
+
+def test_compute_content_hash_deterministic(tmp_path: Path) -> None:
+    (tmp_path / "a.txt").write_text("hello")
+    (tmp_path / "b.txt").write_text("world")
+    h1 = _compute_content_hash(tmp_path)
+    h2 = _compute_content_hash(tmp_path)
+    assert h1 == h2
+    assert len(h1) == 40
+
+
+def test_compute_content_hash_changes_with_content(tmp_path: Path) -> None:
+    d1 = tmp_path / "d1"
+    d2 = tmp_path / "d2"
+    d1.mkdir()
+    d2.mkdir()
+    (d1 / "a.txt").write_text("hello")
+    (d2 / "a.txt").write_text("hello world")  # different size
+    assert _compute_content_hash(d1) != _compute_content_hash(d2)
+
+
+def test_compute_content_hash_empty_dir(tmp_path: Path) -> None:
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    h = _compute_content_hash(empty)
+    assert len(h) == 40
+    assert all(c in "0123456789abcdef" for c in h)

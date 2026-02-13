@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import logging
 import os
 import subprocess
 import sys
@@ -11,6 +13,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
+
+_log = logging.getLogger(__name__)
 
 import duckdb
 
@@ -96,11 +100,33 @@ def load_payload(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
-def validate_payload(metadata: dict, repo_id: str, run_id: str) -> None:
+def validate_payload(
+    metadata: dict,
+    repo_id: str,
+    run_id: str,
+    *,
+    expected_commit: str | None = None,
+    expected_tool: str | None = None,
+) -> None:
     if metadata.get("repo_id") != repo_id:
         raise ValueError("repo_id mismatch between orchestrator and payload")
     if metadata.get("run_id") != run_id:
         raise ValueError("run_id mismatch between orchestrator and payload")
+    if expected_commit and not _is_fallback_commit(expected_commit):
+        payload_commit = metadata.get("commit", "")
+        if payload_commit and not _is_fallback_commit(payload_commit):
+            if payload_commit != expected_commit:
+                raise ValueError(
+                    f"commit mismatch: orchestrator={expected_commit[:8]}… "
+                    f"payload={payload_commit[:8]}…"
+                )
+    if expected_tool:
+        payload_tool = metadata.get("tool_name", "")
+        if payload_tool and payload_tool != expected_tool:
+            raise ValueError(
+                f"tool_name mismatch: expected={expected_tool} "
+                f"payload={payload_tool}"
+            )
 
 
 def _format_duration(seconds: float) -> str:
@@ -131,6 +157,16 @@ class OrchestratorLogger:
 def _is_fallback_commit(commit: str) -> bool:
     """Check if commit is a fallback value (all zeros or empty)."""
     return not commit or commit == "0" * 40
+
+
+def _compute_content_hash(repo_path: Path) -> str:
+    """Compute a deterministic 40-hex hash from repo file listing and sizes."""
+    h = hashlib.sha1(usedforsecurity=False)
+    for f in sorted(repo_path.rglob("*")):
+        if f.is_file():
+            rel = f.relative_to(repo_path).as_posix()
+            h.update(f"{rel}:{f.stat().st_size}\n".encode())
+    return h.hexdigest()
 
 
 def run_tool_make(
@@ -364,7 +400,10 @@ def ingest_outputs(
     if not layout_output:
         raise ValueError("layout output is required for ingestion")
     payload = load_payload(layout_output)
-    validate_payload(payload.get("metadata", {}), repo_id, run_id)
+    validate_payload(
+        payload.get("metadata", {}), repo_id, run_id,
+        expected_commit=commit,
+    )
     LayoutAdapter(run_repo, layout_repo, repo_path, log_fn).persist(payload)
 
     # Map tool names to output paths
@@ -396,7 +435,11 @@ def ingest_outputs(
 
         payload = load_payload(output_path)
         if config.validate_metadata:
-            validate_payload(payload.get("metadata", {}), repo_id, run_id)
+            validate_payload(
+                payload.get("metadata", {}), repo_id, run_id,
+                expected_commit=commit,
+                expected_tool=config.name,
+            )
 
         # Create adapter with appropriate repository
         tool_repo = config.repo_class(conn) if config.repo_class else None
@@ -492,6 +535,9 @@ def main() -> int:
     args = parser.parse_args()
 
     repo_path = Path(args.repo_path)
+    if _is_fallback_commit(args.commit):
+        args.commit = _compute_content_hash(repo_path)
+        _log.info("Non-git repo: computed content hash %s…", args.commit[:12])
     repo_name = args.repo_id
     schema_path = Path(args.schema_path)
     repo_root = Path(__file__).resolve().parents[2]

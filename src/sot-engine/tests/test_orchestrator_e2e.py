@@ -103,9 +103,11 @@ def test_orchestrator_end_to_end(tmp_path: Path) -> None:  # noqa: PLR0915
         dotcover_payload, dependensee_payload, git_sizer_payload, roslyn_payload,
         symbol_scanner_payload, scancode_payload, pmd_cpd_payload, devskim_payload,
     ]
+    commit = "a" * 40
     for payload in all_payloads:
         payload["metadata"]["repo_id"] = repo_id
         payload["metadata"]["run_id"] = run_id
+        payload["metadata"]["commit"] = commit
 
     # Lizard has additional run_id in data section
     lizard_payload["data"]["run_id"] = run_id
