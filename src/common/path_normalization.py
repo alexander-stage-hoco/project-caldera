@@ -60,6 +60,10 @@ def is_repo_relative_path(raw_path: str) -> bool:
         return False
     if "\\" in raw_path:
         return False
+    if ".." in raw_path.split("/"):
+        return False
+    if raw_path.startswith("~"):
+        return False
     if raw_path.startswith("tmp/") or raw_path.startswith("private/"):
         return False
     return True

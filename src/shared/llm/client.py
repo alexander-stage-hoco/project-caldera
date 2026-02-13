@@ -164,6 +164,9 @@ class LLMClient:
                 "--system-prompt", effective_system_prompt,
             ]
 
+            # Remove nesting-detection env vars so CLI can run from within Claude Code
+            env = {k: v for k, v in os.environ.items() if k not in ("CLAUDECODE", "CLAUDE_CODE")}
+
             result = subprocess.run(
                 cmd,
                 input=prompt,
@@ -171,6 +174,7 @@ class LLMClient:
                 text=True,
                 timeout=self.timeout,
                 cwd=str(self.working_dir),
+                env=env,
             )
 
             if result.returncode != 0:
