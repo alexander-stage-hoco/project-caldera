@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "repo": "js-simple-functions",
+    "created": "2026-02-13",
+    "version": "1.0",
+    "language": "javascript"
+  },
+  "expected": {
+    "symbols": [
+      {"path": "main.js", "symbol_name": "main", "symbol_type": "function", "is_exported": false, "parameters": 0},
+      {"path": "math.js", "symbol_name": "add", "symbol_type": "function", "is_exported": true, "parameters": 2},
+      {"path": "math.js", "symbol_name": "multiply", "symbol_type": "function", "is_exported": true, "parameters": 2},
+      {"path": "utils.js", "symbol_name": "greet", "symbol_type": "function", "is_exported": true, "parameters": 1},
+      {"path": "utils.js", "symbol_name": "capitalize", "symbol_type": "function", "is_exported": true, "parameters": 1},
+      {"path": "utils.js", "symbol_name": "VERSION", "symbol_type": "variable", "is_exported": true, "parameters": null},
+      {"path": "utils.js", "symbol_name": "_internal", "symbol_type": "function", "is_exported": false, "parameters": 0}
+    ],
+    "calls": [
+      {"caller_file": "main.js", "caller_symbol": "main", "callee_symbol": "capitalize", "call_type": "direct"},
+      {"caller_file": "main.js", "caller_symbol": "main", "callee_symbol": "greet", "call_type": "direct"},
+      {"caller_file": "main.js", "caller_symbol": "main", "callee_symbol": "add", "call_type": "direct"},
+      {"caller_file": "main.js", "caller_symbol": "main", "callee_symbol": "multiply", "call_type": "direct"},
+      {"caller_file": "main.js", "caller_symbol": "<module>", "callee_symbol": "main", "call_type": "direct"}
+    ],
+    "imports": [
+      {"file": "main.js", "imported_path": "./utils", "imported_symbols": "greet,capitalize", "import_type": "static"},
+      {"file": "main.js", "imported_path": "./math", "imported_symbols": "add,multiply", "import_type": "static"}
+    ],
+    "summary": {
+      "total_files": 3,
+      "total_symbols": 7,
+      "total_imports": 2
+    }
+  },
+  "notes": {
+    "description": "Basic JavaScript module with ES module imports, exported functions, arrow functions, and JSDoc comments."
+  }
+}

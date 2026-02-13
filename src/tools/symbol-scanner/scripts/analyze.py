@@ -22,6 +22,8 @@ from extractors import (
     CSharpTreeSitterExtractor,
     CSharpRoslynExtractor,
     CSharpHybridExtractor,
+    JavaScriptTreeSitterExtractor,
+    TypeScriptTreeSitterExtractor,
 )
 
 TOOL_NAME = "symbol-scanner"
@@ -118,7 +120,7 @@ def build_output_envelope(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Extract symbols, calls, and imports from source code (Python and C#)"
+        description="Extract symbols, calls, and imports from source code (Python, C#, JavaScript, TypeScript)"
     )
     add_common_args(parser, default_repo_path="eval-repos/synthetic/simple-functions")
     parser.add_argument(
@@ -128,15 +130,15 @@ def main() -> None:
     )
     parser.add_argument(
         "--language",
-        choices=["python", "csharp"],
+        choices=["python", "csharp", "javascript", "typescript"],
         default="python",
-        help="Language to analyze: python (default) or csharp",
+        help="Language to analyze: python (default), csharp, javascript, or typescript",
     )
     parser.add_argument(
         "--strategy",
         choices=["ast", "treesitter", "roslyn", "hybrid"],
         default="ast",
-        help="Extraction strategy. Python: ast (default), treesitter. C#: treesitter, roslyn, hybrid (default for csharp)",
+        help="Extraction strategy. Python: ast (default), treesitter. C#: treesitter, roslyn, hybrid (default for csharp). JS/TS: treesitter only.",
     )
     args = parser.parse_args()
 
@@ -146,6 +148,9 @@ def main() -> None:
     if args.language == "csharp" and args.strategy == "ast":
         # Default to hybrid for C# if ast was specified (the default)
         args.strategy = "hybrid"
+    if args.language in ("javascript", "typescript") and args.strategy != "treesitter":
+        # JS/TS only supports treesitter
+        args.strategy = "treesitter"
 
     # Handle fallback commits specially - try to get real HEAD first
     if args.commit and is_fallback_commit(args.commit):
@@ -174,6 +179,10 @@ def main() -> None:
             extractor = CSharpRoslynExtractor()
         else:  # hybrid (default for C#)
             extractor = CSharpHybridExtractor()
+    elif args.language == "javascript":
+        extractor = JavaScriptTreeSitterExtractor()
+    elif args.language == "typescript":
+        extractor = TypeScriptTreeSitterExtractor()
     resolve_calls = not args.no_resolve_calls
     repo_root = common.repo_path.resolve()
     result = extractor.extract_directory(

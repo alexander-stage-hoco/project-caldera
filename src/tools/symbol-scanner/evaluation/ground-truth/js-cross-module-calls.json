@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "repo": "js-cross-module-calls",
+    "created": "2026-02-13",
+    "version": "1.0",
+    "language": "javascript"
+  },
+  "expected": {
+    "symbols": [
+      {"path": "index.js", "symbol_name": "main", "symbol_type": "function", "is_exported": false},
+      {"path": "handlers/user.js", "symbol_name": "userCache", "symbol_type": "variable", "is_exported": false},
+      {"path": "handlers/user.js", "symbol_name": "getUser", "symbol_type": "function", "is_exported": true},
+      {"path": "handlers/user.js", "symbol_name": "listUsers", "symbol_type": "function", "is_exported": true},
+      {"path": "services/cache.js", "symbol_name": "Cache", "symbol_type": "class", "is_exported": true},
+      {"path": "services/cache.js", "symbol_name": "constructor", "symbol_type": "method", "parent_symbol": "Cache"},
+      {"path": "services/cache.js", "symbol_name": "get", "symbol_type": "method", "parent_symbol": "Cache"},
+      {"path": "services/cache.js", "symbol_name": "set", "symbol_type": "method", "parent_symbol": "Cache"},
+      {"path": "services/cache.js", "symbol_name": "clear", "symbol_type": "method", "parent_symbol": "Cache"},
+      {"path": "services/api.js", "symbol_name": "fetchUser", "symbol_type": "function", "is_exported": true},
+      {"path": "services/api.js", "symbol_name": "fetchAllUsers", "symbol_type": "function", "is_exported": true}
+    ],
+    "calls": [
+      {"caller_file": "index.js", "caller_symbol": "main", "callee_symbol": "listUsers", "call_type": "async"},
+      {"caller_file": "index.js", "caller_symbol": "main", "callee_symbol": "getUser", "call_type": "async"},
+      {"caller_file": "handlers/user.js", "caller_symbol": "getUser", "callee_symbol": "fetchUser", "call_type": "async"},
+      {"caller_file": "handlers/user.js", "caller_symbol": "listUsers", "callee_symbol": "fetchAllUsers", "call_type": "direct"}
+    ],
+    "imports": [
+      {"file": "index.js", "imported_path": "./handlers/user", "imported_symbols": "getUser,listUsers", "import_type": "static"},
+      {"file": "handlers/user.js", "imported_path": "../services/api", "imported_symbols": "fetchUser,fetchAllUsers", "import_type": "static"},
+      {"file": "handlers/user.js", "imported_path": "../services/cache", "imported_symbols": "Cache", "import_type": "static"}
+    ],
+    "summary": {
+      "total_files": 4,
+      "total_symbols": 11,
+      "total_imports": 3
+    }
+  },
+  "notes": {
+    "description": "Cross-module JavaScript with async functions, classes, constructor calls, and relative imports."
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "repo": "ts-class-hierarchy",
+    "created": "2026-02-13",
+    "version": "1.0",
+    "language": "typescript"
+  },
+  "expected": {
+    "symbols": [
+      {"path": "index.ts", "symbol_name": "main", "symbol_type": "function", "is_exported": false},
+      {"path": "models/base.ts", "symbol_name": "Entity", "symbol_type": "class", "is_exported": true},
+      {"path": "models/base.ts", "symbol_name": "Serializable", "symbol_type": "class", "is_exported": true},
+      {"path": "models/base.ts", "symbol_name": "BaseModel", "symbol_type": "class", "is_exported": true},
+      {"path": "models/base.ts", "symbol_name": "constructor", "symbol_type": "method", "parent_symbol": "BaseModel"},
+      {"path": "models/base.ts", "symbol_name": "validate", "symbol_type": "method", "parent_symbol": "BaseModel"},
+      {"path": "models/base.ts", "symbol_name": "toJSON", "symbol_type": "method", "parent_symbol": "BaseModel"},
+      {"path": "models/user.ts", "symbol_name": "UserRole", "symbol_type": "variable", "is_exported": true},
+      {"path": "models/user.ts", "symbol_name": "Status", "symbol_type": "class", "is_exported": true},
+      {"path": "models/user.ts", "symbol_name": "User", "symbol_type": "class", "is_exported": true},
+      {"path": "models/user.ts", "symbol_name": "constructor", "symbol_type": "method", "parent_symbol": "User"},
+      {"path": "models/user.ts", "symbol_name": "validate", "symbol_type": "method", "parent_symbol": "User"},
+      {"path": "models/user.ts", "symbol_name": "toJSON", "symbol_type": "method", "parent_symbol": "User"},
+      {"path": "services/repo.ts", "symbol_name": "Repository", "symbol_type": "class", "is_exported": true},
+      {"path": "services/repo.ts", "symbol_name": "items", "symbol_type": "variable", "is_exported": false, "parent_symbol": "Repository"},
+      {"path": "services/repo.ts", "symbol_name": "find", "symbol_type": "method", "parent_symbol": "Repository"},
+      {"path": "services/repo.ts", "symbol_name": "findAll", "symbol_type": "method", "parent_symbol": "Repository"},
+      {"path": "services/repo.ts", "symbol_name": "save", "symbol_type": "method", "parent_symbol": "Repository"},
+      {"path": "services/repo.ts", "symbol_name": "delete", "symbol_type": "method", "parent_symbol": "Repository"}
+    ],
+    "calls": [
+      {"caller_file": "index.ts", "caller_symbol": "main", "callee_symbol": "Repository", "call_type": "constructor"},
+      {"caller_file": "index.ts", "caller_symbol": "main", "callee_symbol": "User", "call_type": "constructor"},
+      {"caller_file": "index.ts", "caller_symbol": "<module>", "callee_symbol": "main", "call_type": "direct"}
+    ],
+    "imports": [
+      {"file": "index.ts", "imported_path": "./models/user", "imported_symbols": "User,Status", "import_type": "static"},
+      {"file": "index.ts", "imported_path": "./services/repo", "imported_symbols": "Repository", "import_type": "static"},
+      {"file": "models/user.ts", "imported_path": "./base", "imported_symbols": "Entity", "import_type": "type_checking"},
+      {"file": "models/user.ts", "imported_path": "./base", "imported_symbols": "BaseModel", "import_type": "static"},
+      {"file": "services/repo.ts", "imported_path": "../models/base", "imported_symbols": "Entity", "import_type": "type_checking"}
+    ],
+    "summary": {
+      "total_files": 4,
+      "total_imports": 5
+    }
+  },
+  "notes": {
+    "description": "TypeScript class hierarchy with interfaces, enums, type aliases, abstract classes, generics, and type-only imports."
+  }
+}

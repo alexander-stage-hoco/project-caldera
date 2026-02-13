@@ -171,9 +171,14 @@ class BaseExtractor(ABC):
 
         # Phase 2: Resolve cross-module calls
         if resolve_calls and result.calls:
-            from .call_resolver import CallResolver
+            if self.language in ("javascript", "typescript"):
+                from .js_call_resolver import JSCallResolver
 
-            resolver = CallResolver(repo_root, result.symbols, result.imports)
+                resolver = JSCallResolver(repo_root, result.symbols, result.imports)
+            else:
+                from .call_resolver import CallResolver
+
+                resolver = CallResolver(repo_root, result.symbols, result.imports)
             result.calls = resolver.resolve(result.calls)
             result.resolution_stats = resolver.stats.to_dict()
 

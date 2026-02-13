@@ -1,5 +1,6 @@
-# Symbol Scanner: Python symbol extraction tool
+# Symbol Scanner: Multi-language symbol extraction tool
 # Extracts function/class definitions, call relationships, and imports
+# Supports: Python, C#, JavaScript, TypeScript
 #
 # Quick start:
 #   make setup    - Install dependencies (one-time)
@@ -7,7 +8,7 @@
 #   make evaluate - Run programmatic evaluation
 #   make test     - Run all tests
 
-.PHONY: all setup analyze evaluate evaluate-llm test clean clean-all help
+.PHONY: all setup analyze analyze-js analyze-ts evaluate evaluate-llm test clean clean-all help
 
 # Include shared configuration (provides VENV, RUN_ID, REPO_ID, OUTPUT_DIR, etc.)
 include ../Makefile.common
@@ -27,7 +28,7 @@ COMMIT_ARG := $(if $(COMMIT),--commit $(COMMIT),)
 # =============================================================================
 
 help:
-	@echo "Symbol Scanner: Python symbol extraction tool"
+	@echo "Symbol Scanner: Multi-language symbol extraction tool"
 	@echo ""
 	@echo "Quick start:"
 	@echo "  make setup        - Install Python dependencies"
@@ -36,8 +37,10 @@ help:
 	@echo "  make test         - Run all tests"
 	@echo ""
 	@echo "Analysis targets:"
-	@echo "  make analyze             - Analyze default repo (simple-functions)"
+	@echo "  make analyze             - Analyze default repo (simple-functions, Python)"
 	@echo "  make analyze REPO_PATH=. - Analyze custom repo"
+	@echo "  make analyze-js          - Analyze JS eval repo (js-simple-functions)"
+	@echo "  make analyze-ts          - Analyze TS eval repo (ts-class-hierarchy)"
 	@echo ""
 	@echo "Evaluation targets:"
 	@echo "  make evaluate       - Full evaluation with verbose output"
@@ -77,6 +80,32 @@ analyze: $(VENV_READY)
 		--branch $(BRANCH) \
 		$(COMMIT_ARG)
 
+analyze-js: $(VENV_READY)
+	@echo "Running JavaScript symbol extraction..."
+	@mkdir -p $(OUTPUT_DIR)
+	@$(PYTHON_VENV) scripts/analyze.py \
+		--repo-path $(or $(REPO_PATH),eval-repos/synthetic/js-simple-functions) \
+		--repo-name $(or $(REPO_NAME),js-simple-functions) \
+		--output-dir $(OUTPUT_DIR) \
+		--run-id $(RUN_ID) \
+		--repo-id $(REPO_ID) \
+		--branch $(BRANCH) \
+		--language javascript \
+		$(COMMIT_ARG)
+
+analyze-ts: $(VENV_READY)
+	@echo "Running TypeScript symbol extraction..."
+	@mkdir -p $(OUTPUT_DIR)
+	@$(PYTHON_VENV) scripts/analyze.py \
+		--repo-path $(or $(REPO_PATH),eval-repos/synthetic/ts-class-hierarchy) \
+		--repo-name $(or $(REPO_NAME),ts-class-hierarchy) \
+		--output-dir $(OUTPUT_DIR) \
+		--run-id $(RUN_ID) \
+		--repo-id $(REPO_ID) \
+		--branch $(BRANCH) \
+		--language typescript \
+		$(COMMIT_ARG)
+
 # =============================================================================
 # Evaluation
 # =============================================================================
@@ -104,7 +133,6 @@ evaluate: $(VENV_READY)
 evaluate-llm: $(VENV_READY)
 	@echo "Running LLM evaluation (4 judges)..."
 	@$(PYTHON_VENV) -m evaluation.llm.orchestrator \
-		--working-dir . \
 		--analysis $(EVAL_OUTPUT_DIR)/output.json \
 		--output $(EVAL_OUTPUT_DIR)/llm_evaluation.json \
 		--programmatic-results evaluation/results/evaluation_report.json \

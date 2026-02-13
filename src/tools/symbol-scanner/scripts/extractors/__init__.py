@@ -5,6 +5,8 @@ from .treesitter_extractor import TreeSitterExtractor
 from .csharp_treesitter_extractor import CSharpTreeSitterExtractor
 from .csharp_roslyn_extractor import CSharpRoslynExtractor
 from .csharp_hybrid_extractor import CSharpHybridExtractor
+from .javascript_treesitter_extractor import JavaScriptTreeSitterExtractor
+from .typescript_treesitter_extractor import TypeScriptTreeSitterExtractor
 
 __all__ = [
     "BaseExtractor",
@@ -18,4 +20,7 @@ __all__ = [
     "CSharpTreeSitterExtractor",
     "CSharpRoslynExtractor",
     "CSharpHybridExtractor",
+    # JavaScript/TypeScript extractors
+    "JavaScriptTreeSitterExtractor",
+    "TypeScriptTreeSitterExtractor",
 ]
