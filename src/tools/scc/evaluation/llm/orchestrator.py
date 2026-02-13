@@ -13,6 +13,7 @@ from shared.evaluation import (
     DimensionResult,
     ProgrammaticInput,
     EvaluationResult,
+    require_observability,
 )
 
 from .judges.base import BaseJudge, JudgeResult
@@ -32,6 +33,7 @@ class LLMEvaluator(LLMEvaluatorBase):
         results_dir: Path | None = None,
         timeout: int = 120,
     ):
+        require_observability()
         super().__init__(working_dir=working_dir, model=model, results_dir=results_dir)
         self.timeout = timeout
 

@@ -60,6 +60,7 @@ class LLMEvaluator(LLMEvaluatorBase):
 
 def main():
     """Main entry point for LLM evaluation."""
+    require_observability()
     import argparse
 
     parser = argparse.ArgumentParser(description="Run LLM evaluation for poc-semgrep")

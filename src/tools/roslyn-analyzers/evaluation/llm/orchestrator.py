@@ -13,6 +13,7 @@ from pathlib import Path
 from shared.evaluation import (
     LLMEvaluatorBase,
     ProgrammaticInput,
+    require_observability,
 )
 
 from .judges.base import BaseJudge, JudgeResult
@@ -104,6 +105,7 @@ class LLMEvaluator(LLMEvaluatorBase):
 
 def main():
     """CLI entry point for LLM evaluation."""
+    require_observability()
     parser = argparse.ArgumentParser(
         description="Run LLM evaluation on Roslyn Analyzers outputs"
     )

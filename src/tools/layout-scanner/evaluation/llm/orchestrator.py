@@ -94,6 +94,7 @@ class LLMEvaluator(LLMEvaluatorBase):
 
 def main(args: list[str] | None = None) -> int:
     """Main entry point for LLM evaluation."""
+    require_observability()
     parser = argparse.ArgumentParser(
         description="Run LLM evaluation for Layout Scanner",
         formatter_class=argparse.RawDescriptionHelpFormatter,

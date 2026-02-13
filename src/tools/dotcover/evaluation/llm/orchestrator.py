@@ -5,11 +5,14 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+
+from shared.evaluation import require_observability
 from datetime import datetime, timezone
 from pathlib import Path
 
 
 def main() -> int:
+    require_observability()
     parser = argparse.ArgumentParser(description="Run LLM evaluation")
     parser.add_argument("results_dir", type=Path)
     parser.add_argument("--output", type=Path, required=True)

@@ -18,6 +18,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from shared.evaluation import require_observability
+
 from .judges import (
     OwnershipAccuracyJudge,
     ChurnValidityJudge,
@@ -43,6 +45,7 @@ def run_all_judges(
     working_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Run all judges and return combined results."""
+    require_observability()
     # Derive working_dir from this file's location (evaluation/llm/orchestrator.py)
     if working_dir is None:
         working_dir = Path(__file__).parent.parent.parent

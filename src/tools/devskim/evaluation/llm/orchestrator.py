@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from shared.evaluation import require_observability
 from .judges.base import BaseJudge, JudgeResult
 
 
@@ -384,6 +385,7 @@ def load_programmatic_results(working_dir: Path) -> dict[str, Any] | None:
 
 def main():
     """Main entry point for LLM evaluation."""
+    require_observability()
     import argparse
 
     parser = argparse.ArgumentParser(description="Run LLM evaluation for DevSkim")

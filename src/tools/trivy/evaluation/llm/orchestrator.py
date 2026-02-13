@@ -92,6 +92,7 @@ class LLMEvaluator(LLMEvaluatorBase):
 
 def main() -> None:
     """Run LLM evaluation on Trivy analysis output."""
+    require_observability()
     parser = argparse.ArgumentParser(
         description="Run LLM evaluation on Trivy analysis output."
     )
