@@ -136,11 +136,17 @@ def _parse_simple_yaml(content: str) -> dict[str, Any]:
 
 
 def load_yaml_file(path: Path) -> dict[str, Any]:
-    """Load a YAML file, using PyYAML if available."""
+    """Load a YAML file, using PyYAML.
+
+    Raises ImportError if PyYAML is not installed.
+    """
     content = path.read_text()
     if HAS_YAML:
         return yaml.safe_load(content) or {}
-    return _parse_simple_yaml(content)
+    raise ImportError(
+        "PyYAML is required for tool-compliance. "
+        "Install it with: pip install pyyaml"
+    )
 
 
 def load_common_config() -> dict[str, Any]:

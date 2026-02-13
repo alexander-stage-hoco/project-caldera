@@ -4048,6 +4048,93 @@ def _check_output_filename_convention(tool_root: Path) -> CheckResult:
     )
 
 
+def _check_evaluate_input_valid(tool_root: Path) -> CheckResult:
+    """Check that evaluate target's input path is not a stale OUTPUT_DIR reference.
+
+    The evaluate target should point at pre-populated evaluation data (e.g.
+    ``evaluation/results``) or depend on ``analyze`` so that fresh outputs
+    exist in ``$(OUTPUT_DIR)``.  Using ``$(OUTPUT_DIR)`` without an ``analyze``
+    dependency causes evaluation to run against an empty/random UUID directory.
+    """
+    makefile = tool_root / "Makefile"
+    if not makefile.exists():
+        return CheckResult(
+            check_id="make.evaluate_input_valid",
+            status="fail",
+            severity="high",
+            message="Makefile missing",
+            evidence=["Makefile"],
+        )
+    content = makefile.read_text()
+
+    # Find the evaluate: target line and its body
+    eval_match = re.search(
+        r"^evaluate:(.*)\n((?:\t.*\n)*)",
+        content,
+        re.MULTILINE,
+    )
+    if not eval_match:
+        return CheckResult(
+            check_id="make.evaluate_input_valid",
+            status="skip",
+            severity="high",
+            message="No evaluate target found in Makefile",
+            evidence=[],
+        )
+
+    prerequisites = eval_match.group(1)
+    body = eval_match.group(2)
+
+    # Search for input-path arguments in the body
+    input_arg_match = re.search(
+        r"--(?:results-dir|analysis-dir|analysis)\s+(\S+)",
+        body,
+    )
+
+    if not input_arg_match:
+        # Some tools use positional args or env vars — can't validate statically
+        return CheckResult(
+            check_id="make.evaluate_input_valid",
+            status="skip",
+            severity="high",
+            message="No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
+            evidence=[],
+        )
+
+    input_arg = input_arg_match.group(1)
+
+    # Check if the argument references $(OUTPUT_DIR) or ${OUTPUT_DIR}
+    if re.search(r"\$[\({]OUTPUT_DIR[\)}]", input_arg):
+        # Check if 'analyze' is listed as a prerequisite
+        if re.search(r"\banalyze\b", prerequisites):
+            return CheckResult(
+                check_id="make.evaluate_input_valid",
+                status="pass",
+                severity="high",
+                message="evaluate uses $(OUTPUT_DIR) but depends on analyze",
+                evidence=[f"prerequisites: {prerequisites.strip()}"],
+            )
+        return CheckResult(
+            check_id="make.evaluate_input_valid",
+            status="fail",
+            severity="high",
+            message="evaluate target uses $(OUTPUT_DIR) without analyze dependency",
+            evidence=[
+                f"Found: --results-dir/--analysis {input_arg}",
+                "$(OUTPUT_DIR) resolves to outputs/<random-UUID> which is empty without a prior analyze run",
+                "Fix: use 'evaluation/results' or add 'analyze' as a prerequisite",
+            ],
+        )
+
+    return CheckResult(
+        check_id="make.evaluate_input_valid",
+        status="pass",
+        severity="high",
+        message="evaluate target input path is valid",
+        evidence=[f"input: {input_arg}"],
+    )
+
+
 def _extract_markdown_sections(content: str) -> list[str]:
     """Extract section headings from markdown content."""
     sections = []
@@ -4274,6 +4361,7 @@ def preflight_scan(tool_root: Path) -> ToolResult:
         _time_check(_check_makefile_uses_common, tool_root),
         _time_check(_check_output_dir_convention, tool_root),
         _time_check(_check_output_filename_convention, tool_root),
+        _time_check(_check_evaluate_input_valid, tool_root),
         _time_check(_check_schema_valid_json, tool_root),
         _time_check(_check_schema_contract, tool_root),
         _time_check(_check_blueprint_structure, tool_root),
@@ -4719,6 +4807,7 @@ def scan_tool(
             _time_check(_check_makefile_uses_common, tool_root),
             _time_check(_check_output_dir_convention, tool_root),
             _time_check(_check_output_filename_convention, tool_root),
+            _time_check(_check_evaluate_input_valid, tool_root),
             _time_check(_check_schema_valid_json, tool_root),
             _time_check(_check_schema_contract, tool_root),
             _time_check(_check_blueprint_structure, tool_root),

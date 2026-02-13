@@ -160,6 +160,20 @@ OUTPUT_DIR ?= outputs/$(RUN_ID)
 output_path = Path(args.output_dir) / "output.json"
 ```
 
+#### make.evaluate_input_valid (high)
+
+**Validates:** evaluate target's input path argument (`--results-dir`, `--analysis-dir`, `--analysis`)
+does not reference `$(OUTPUT_DIR)` without an `analyze` dependency.
+
+**Common failures:**
+- `--results-dir $(OUTPUT_DIR)` in evaluate target without `evaluate: analyze` dependency
+- Causes evaluation to run against empty/stale UUID directory instead of synthetic test data
+
+**Fix action:**
+Point evaluate at the correct input directory:
+- For synthetic test data: `--results-dir evaluation/results`
+- For fresh analysis: add `analyze` as a dependency: `evaluate: analyze $(VENV_READY)`
+
 #### make.permissions (low)
 
 **Validates:** Makefile has correct file permissions (readable).
@@ -829,7 +843,7 @@ TOOL_INGESTION_CONFIGS = [
 | Severity | Checks |
 |----------|--------|
 | **critical** | output.schema_validate, run.analyze |
-| **high** | structure.paths, make.targets, schema.contract, schema.version_alignment, output.load, output.paths, output.required_fields, output.data_completeness, evaluation.ground_truth, evaluation.rollup_validation, evaluation.synthetic_context, docs.eval_strategy_structure, adapter.compliance, adapter.schema_alignment, adapter.integration, sot.schema_table, sot.orchestrator_wired, sot.dbt_staging_model, dbt.model_coverage, entity.repository_alignment, run.evaluate, test.coverage_threshold |
+| **high** | structure.paths, make.targets, make.evaluate_input_valid, schema.contract, schema.version_alignment, output.load, output.paths, output.required_fields, output.data_completeness, evaluation.ground_truth, evaluation.rollup_validation, evaluation.synthetic_context, docs.eval_strategy_structure, adapter.compliance, adapter.schema_alignment, adapter.integration, sot.schema_table, sot.orchestrator_wired, sot.dbt_staging_model, dbt.model_coverage, entity.repository_alignment, run.evaluate, test.coverage_threshold |
 | **medium** | schema.valid_json, schema.draft, output.schema_version, output.metadata_consistency, output.path_consistency, make.uses_common, make.output_filename, docs.blueprint_structure, evaluation.check_modules, evaluation.llm_prompts, evaluation.llm_judge_count, adapter.quality_rules_coverage, sot.adapter_registered, test.structure_naming, run.evaluate_llm |
 | **low** | make.output_dir_convention, make.permissions, output.tool_name_match, evaluation.scorecard |
 
@@ -843,6 +857,7 @@ TOOL_INGESTION_CONFIGS = [
 | make.uses_common | medium | Makefile includes Makefile.common |
 | make.output_dir_convention | low | OUTPUT_DIR uses outputs/$(RUN_ID) |
 | make.output_filename | medium | analyze produces output.json |
+| make.evaluate_input_valid | high | evaluate input path not stale OUTPUT_DIR |
 | make.permissions | low | Makefile is readable |
 | **Schema** | | |
 | schema.valid_json | medium | Schema parses as valid JSON |
@@ -909,6 +924,7 @@ python src/tool-compliance/tool_compliance.py src/tools/<tool> --preflight
 - make.uses_common
 - make.output_dir_convention
 - make.output_filename
+- make.evaluate_input_valid
 - schema.valid_json (draft check)
 - schema.contract
 - docs.blueprint_structure
