@@ -145,11 +145,13 @@ def _check_envelope_8_fields(content: str, tf: ToolFiles) -> list[Finding]:
 
 def _check_analyze_path_norm(content: str, tf: ToolFiles) -> list[Finding]:
     findings: list[Finding] = []
-    has_shared = "from shared.path_utils import" in content or "from shared.path_utils import" in content
+    has_shared = "from shared.path_utils import" in content
     has_common = "from common.path_normalization import" in content
     if not has_shared and not has_common:
+        # Downgrade to info if tool uses common modules (normalization may be elsewhere)
+        uses_common = "from common." in content
         findings.append(Finding(
-            severity="warning",
+            severity="info" if uses_common else "warning",
             rule_id="ANALYZE_PATH_NORM",
             message="analyze.py does not import path normalization utilities",
             category="missing_requirement",
@@ -179,7 +181,8 @@ def _check_analyze_envelope(content: str, tf: ToolFiles) -> list[Finding]:
     findings: list[Finding] = []
     has_envelope = "create_envelope" in content
     has_manual = "schema_version" in content and "tool_name" in content
-    if not has_envelope and not has_manual:
+    has_delegated = "result_to_output" in content or "to_envelope" in content
+    if not has_envelope and not has_manual and not has_delegated:
         findings.append(Finding(
             severity="warning",
             rule_id="ANALYZE_ENVELOPE",

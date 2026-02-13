@@ -1,6 +1,6 @@
 {
-  "review_id": "ca93997f-a53a-4ad8-80f5-c44979c2cc76",
-  "timestamp": "2026-02-13T18:05:57.265628+00:00",
+  "review_id": "9a294ecd-8e67-4927-9724-eaf971328cc6",
+  "timestamp": "2026-02-13T18:51:51.986140+00:00",
   "target": "sonarqube",
   "review_type": "tool_implementation",
   "dimensions": [
@@ -14,11 +14,11 @@
     {
       "dimension": "output_schema_envelope",
       "weight": 0.2,
-      "status": "warn",
-      "score": 3,
+      "status": "pass",
+      "score": 4,
       "findings": [
         {
-          "severity": "warning",
+          "severity": "info",
           "rule_id": "ANALYZE_PATH_NORM",
           "message": "analyze.py does not import path normalization utilities",
           "category": "missing_requirement",
@@ -127,11 +127,11 @@
     "total_findings": 10,
     "by_severity": {
       "error": 0,
-      "warning": 1,
-      "info": 9
+      "warning": 0,
+      "info": 10
     },
     "overall_status": "STRONG_PASS",
-    "overall_score": 4.0,
+    "overall_score": 4.24,
     "dimensions_reviewed": 5
   }
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Validate scc output against JSON schema."""
+from __future__ import annotations
 
 import json
 from pathlib import Path

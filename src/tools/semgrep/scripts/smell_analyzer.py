@@ -4,6 +4,7 @@
 Detects code smells and quality issues using Semgrep static analysis.
 Includes 16-section dashboard visualization.
 """
+from __future__ import annotations
 
 import argparse
 import json

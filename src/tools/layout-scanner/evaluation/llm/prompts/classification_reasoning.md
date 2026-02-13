@@ -70,6 +70,8 @@ This dimension assesses how well the layout scanner classifies files and explain
 
 ## Evidence
 
+{{ evidence }}
+
 ### Scanner Output Sample
 {{ sample_files }}
 

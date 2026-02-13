@@ -18,6 +18,10 @@ Evaluate how actionable the vulnerability report is for security teams.
 | 2 | Difficult to prioritize remediation |
 | 1 | Output is not actionable |
 
+## Evidence
+
+{{ evidence }}
+
 ## Response Format
 
 Provide your evaluation as JSON:

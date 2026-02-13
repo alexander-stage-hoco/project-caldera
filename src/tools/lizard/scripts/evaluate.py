@@ -10,12 +10,14 @@ Usage:
     python scripts/evaluate.py --analysis evaluation/results/output.json --output evaluation/results/evaluation_report.json
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -41,7 +43,7 @@ def load_json(path: Path) -> Dict[str, Any]:
 
 def load_ground_truth_for_language(
     ground_truth_dir: Path, language: str
-) -> Optional[Dict[str, Any]]:
+) -> Dict[str, Any] | None:
     """Load ground truth for a specific language."""
     gt_path = ground_truth_dir / f"{language}.json"
     if gt_path.exists():
@@ -123,7 +125,7 @@ def _normalize_analysis(raw_analysis: Dict[str, Any]) -> Dict[str, Any]:
 def run_evaluation(
     analysis_path: Path,
     ground_truth_dir: Path,
-    eval_repos_path: Optional[Path] = None,
+    eval_repos_path: Path | None = None,
 ) -> EvaluationReport:
     """Run all evaluation checks and return report.
 

@@ -18,6 +18,7 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from common.cli_parser import add_common_args, validate_common_args
 from common.envelope_formatter import create_envelope, get_current_timestamp
+from common.path_normalization import normalize_file_path, normalize_dir_path
 
 from .security_analyzer import (
     AnalysisResult,
@@ -33,7 +34,7 @@ TOOL_VERSION = "1.0.0"
 SCHEMA_VERSION = "1.0.0"
 
 
-def result_to_data_dict(result: AnalysisResult) -> dict[str, Any]:
+def result_to_data_dict(result: AnalysisResult, repo_root: Path | None = None) -> dict[str, Any]:
     """Convert AnalysisResult to the 'data' portion of envelope format.
 
     This produces the inner data structure without the envelope wrapper.
@@ -56,7 +57,7 @@ def result_to_data_dict(result: AnalysisResult) -> dict[str, Any]:
                 "code_snippet": issue.code_snippet,
             })
         files.append({
-            "path": f.path,
+            "path": normalize_file_path(f.path, repo_root),
             "language": f.language,
             "lines": f.lines,
             "issue_count": f.issue_count,
@@ -70,7 +71,7 @@ def result_to_data_dict(result: AnalysisResult) -> dict[str, Any]:
     directories = []
     for d in result.directories:
         directories.append({
-            "path": d.path,
+            "path": normalize_dir_path(d.path, repo_root),
             "name": d.name,
             "depth": d.depth,
             "is_leaf": d.is_leaf,
@@ -196,7 +197,7 @@ def main() -> None:
     print(f"Duration: {result.analysis_duration_ms}ms")
 
     # Convert result to data dict
-    data = result_to_data_dict(result)
+    data = result_to_data_dict(result, repo_root=common.repo_path)
 
     # Convert to envelope format
     timestamp = get_current_timestamp()

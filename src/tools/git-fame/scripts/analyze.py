@@ -28,6 +28,9 @@ try:
 except Exception:  # pragma: no cover - environment dependent
     gitfame = None
 
+# Add shared src to path for imports
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from common.envelope_formatter import create_envelope
 
 # Schema version for this output format
 SCHEMA_VERSION = "1.0.0"
@@ -233,22 +236,9 @@ def transform_output(
     data_rows = raw_output.get("data", [])
     columns = raw_output.get("columns", [])
 
-    # Build metadata section (required by Caldera envelope)
-    metadata = {
-        "tool_name": "git-fame",
-        "tool_version": tool_version,
-        "run_id": run_id,
-        "repo_id": repo_id,
-        "branch": branch,
-        "commit": commit,
-        "timestamp": timestamp,
-        "schema_version": SCHEMA_VERSION,
-    }
-
     if not data_rows:
-        return {
-            "metadata": metadata,
-            "data": {
+        return create_envelope(
+            {
                 "tool": "git-fame",
                 "tool_version": tool_version,
                 "repo_name": repo_name,
@@ -271,7 +261,15 @@ def transform_output(
                 },
                 "authors": [],
             },
-        }
+            tool_name="git-fame",
+            tool_version=tool_version,
+            run_id=run_id,
+            repo_id=repo_id,
+            branch=branch,
+            commit=commit,
+            schema_version=SCHEMA_VERSION,
+            timestamp=timestamp,
+        )
 
     # Map columns to indices
     col_idx = {col: i for i, col in enumerate(columns)}
@@ -319,9 +317,8 @@ def transform_output(
     hhi = compute_hhi(ownership_pcts)
     bus_factor = compute_bus_factor(ownership_pcts)
 
-    return {
-        "metadata": metadata,
-        "data": {
+    return create_envelope(
+        {
             "tool": "git-fame",
             "tool_version": tool_version,
             "repo_name": repo_name,
@@ -343,7 +340,15 @@ def transform_output(
             },
             "authors": authors,
         },
-    }
+        tool_name="git-fame",
+        tool_version=tool_version,
+        run_id=run_id,
+        repo_id=repo_id,
+        branch=branch,
+        commit=commit,
+        schema_version=SCHEMA_VERSION,
+        timestamp=timestamp,
+    )
 
 
 def analyze_repo(

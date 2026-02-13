@@ -7,10 +7,10 @@ Supports standard .gitignore syntax including wildcards and negations.
 Uses the pathspec library for correct gitignore semantics including
 proper handling of ** for recursive matching.
 """
+from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import List, Optional
 
 import pathspec
 
@@ -31,8 +31,8 @@ class IgnoreFilter:
 
     def __init__(self):
         """Initialize an empty ignore filter."""
-        self._patterns: List[str] = []
-        self._spec: Optional[pathspec.PathSpec] = None
+        self._patterns: list[str] = []
+        self._spec: pathspec.PathSpec | None = None
 
     @classmethod
     def from_gitignore(cls, gitignore_path: Path) -> "IgnoreFilter":
@@ -59,7 +59,7 @@ class IgnoreFilter:
         return filter_obj
 
     @classmethod
-    def from_patterns(cls, patterns: List[str]) -> "IgnoreFilter":
+    def from_patterns(cls, patterns: list[str]) -> "IgnoreFilter":
         """
         Create an IgnoreFilter from a list of patterns.
 
@@ -134,9 +134,9 @@ class IgnoreFilter:
 
     def filter_entries(
         self,
-        entries: List[os.DirEntry],
+        entries: list[os.DirEntry],
         base_path: str = ""
-    ) -> List[os.DirEntry]:
+    ) -> list[os.DirEntry]:
         """
         Filter directory entries based on ignore patterns.
 
@@ -161,7 +161,7 @@ class IgnoreFilter:
 
 def load_ignore_filter(
     repo_root: Path,
-    additional_patterns: Optional[List[str]] = None,
+    additional_patterns: list[str] | None = None,
     respect_gitignore: bool = True
 ) -> IgnoreFilter:
     """

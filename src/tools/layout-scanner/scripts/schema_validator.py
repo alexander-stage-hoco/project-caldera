@@ -6,13 +6,14 @@ Provides three-level validation:
 2. Referential: All parent_directory_id references exist
 3. Consistency: Statistics match actual file/directory counts
 """
+from __future__ import annotations
 
 import argparse
 import json
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import jsonschema
 
@@ -22,8 +23,8 @@ class ValidationResult:
     """Result of a validation check."""
 
     valid: bool
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     level: str = "unknown"
 
     def __bool__(self) -> bool:
@@ -41,7 +42,7 @@ class FullValidationResult:
     consistency_result: ValidationResult
 
     @property
-    def all_errors(self) -> List[str]:
+    def all_errors(self) -> list[str]:
         """Get all errors from all levels."""
         return (
             self.schema_result.errors
@@ -50,7 +51,7 @@ class FullValidationResult:
         )
 
     @property
-    def all_warnings(self) -> List[str]:
+    def all_warnings(self) -> list[str]:
         """Get all warnings from all levels."""
         return (
             self.schema_result.warnings
@@ -71,7 +72,7 @@ class SchemaValidator:
 
     DEFAULT_SCHEMA_PATH = Path(__file__).parent.parent / "schemas" / "layout.json"
 
-    def __init__(self, schema_path: Optional[Path] = None):
+    def __init__(self, schema_path: Path | None = None):
         """
         Initialize validator.
 
@@ -79,16 +80,16 @@ class SchemaValidator:
             schema_path: Path to JSON schema file. Uses default if not provided.
         """
         self.schema_path = schema_path or self.DEFAULT_SCHEMA_PATH
-        self._schema: Optional[Dict[str, Any]] = None
+        self._schema: dict[str, Any] | None = None
 
     @property
-    def schema(self) -> Dict[str, Any]:
+    def schema(self) -> dict[str, Any]:
         """Load and cache the JSON schema."""
         if self._schema is None:
             self._schema = self._load_schema()
         return self._schema
 
-    def _load_schema(self) -> Dict[str, Any]:
+    def _load_schema(self) -> dict[str, Any]:
         """Load JSON schema from file."""
         if not self.schema_path.exists():
             raise FileNotFoundError(f"Schema file not found: {self.schema_path}")
@@ -96,7 +97,7 @@ class SchemaValidator:
         with open(self.schema_path) as f:
             return json.load(f)
 
-    def validate(self, output: Dict[str, Any]) -> FullValidationResult:
+    def validate(self, output: dict[str, Any]) -> FullValidationResult:
         """
         Run all validation levels.
 
@@ -124,7 +125,7 @@ class SchemaValidator:
             consistency_result=consistency_result,
         )
 
-    def validate_schema(self, output: Dict[str, Any]) -> ValidationResult:
+    def validate_schema(self, output: dict[str, Any]) -> ValidationResult:
         """
         Level 1: JSON Schema validation using jsonschema library.
 
@@ -134,8 +135,8 @@ class SchemaValidator:
         - Values match patterns (IDs, timestamps)
         - Enums have valid values
         """
-        errors: List[str] = []
-        warnings: List[str] = []
+        errors: list[str] = []
+        warnings: list[str] = []
 
         try:
             jsonschema.validate(output, self.schema)
@@ -164,7 +165,7 @@ class SchemaValidator:
             level="schema",
         )
 
-    def validate_referential(self, output: Dict[str, Any]) -> ValidationResult:
+    def validate_referential(self, output: dict[str, Any]) -> ValidationResult:
         """
         Level 2: Referential integrity validation.
 
@@ -175,8 +176,8 @@ class SchemaValidator:
         - hierarchy.parents map references valid IDs
         - hierarchy.children map references valid IDs
         """
-        errors: List[str] = []
-        warnings: List[str] = []
+        errors: list[str] = []
+        warnings: list[str] = []
 
         files = output.get("files", {})
         directories = output.get("directories", {})
@@ -275,7 +276,7 @@ class SchemaValidator:
             level="referential",
         )
 
-    def validate_consistency(self, output: Dict[str, Any]) -> ValidationResult:
+    def validate_consistency(self, output: dict[str, Any]) -> ValidationResult:
         """
         Level 3: Consistency validation.
 
@@ -287,8 +288,8 @@ class SchemaValidator:
         - hierarchy.total_files == len(files)
         - hierarchy.total_directories == len(directories)
         """
-        errors: List[str] = []
-        warnings: List[str] = []
+        errors: list[str] = []
+        warnings: list[str] = []
 
         files = output.get("files", {})
         directories = output.get("directories", {})
@@ -369,7 +370,7 @@ class SchemaValidator:
 
 def validate_file(
     file_path: Path,
-    schema_path: Optional[Path] = None,
+    schema_path: Path | None = None,
     verbose: bool = False,
 ) -> FullValidationResult:
     """
@@ -408,7 +409,7 @@ def validate_file(
     return result
 
 
-def main(args: Optional[List[str]] = None) -> int:
+def main(args: list[str] | None = None) -> int:
     """CLI entry point for standalone validation."""
     parser = argparse.ArgumentParser(
         description="Validate Layout Scanner output files",

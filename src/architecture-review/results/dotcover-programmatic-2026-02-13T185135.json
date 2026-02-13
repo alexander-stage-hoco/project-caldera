@@ -1,7 +1,7 @@
 {
-  "review_id": "f5ef39d3-a92e-4a8e-aaf2-12a5e8e13be4",
-  "timestamp": "2026-02-13T18:05:56.752359+00:00",
-  "target": "roslyn-analyzers",
+  "review_id": "109f10f4-37d9-4e6f-abcd-710d21e738dd",
+  "timestamp": "2026-02-13T18:51:35.167826+00:00",
+  "target": "dotcover",
   "review_type": "tool_implementation",
   "dimensions": [
     {
@@ -29,15 +29,7 @@
           "rule_id": "FUTURE_ANNOTATIONS",
           "message": "Missing 'from __future__ import annotations'",
           "category": "pattern_violation",
-          "file": "src/tools/roslyn-analyzers/scripts/llm_evaluate.py",
-          "recommendation": "Add 'from __future__ import annotations' at top of file"
-        },
-        {
-          "severity": "info",
-          "rule_id": "FUTURE_ANNOTATIONS",
-          "message": "Missing 'from __future__ import annotations'",
-          "category": "pattern_violation",
-          "file": "src/tools/roslyn-analyzers/scripts/analyze.py",
+          "file": "src/tools/dotcover/scripts/__init__.py",
           "recommendation": "Add 'from __future__ import annotations' at top of file"
         }
       ]
@@ -51,9 +43,9 @@
         {
           "severity": "info",
           "rule_id": "PROMPT_EVIDENCE",
-          "message": "Prompts missing '{{ evidence }}' placeholder: ['security_coverage.md', 'design_analysis.legacy.md', 'false_positive_rate.md', 'detection_accuracy.md', 'security_detection.md', 'resource_management.legacy.md', 'actionability.md', 'overall_quality.legacy.md', 'security_detection.legacy.md']",
+          "message": "Prompts missing '{{ evidence }}' placeholder: ['integration.md', 'accuracy.md', 'false_positive.md', 'actionability.md']",
           "category": "pattern_violation",
-          "file": "src/tools/roslyn-analyzers/evaluation/llm/prompts",
+          "file": "src/tools/dotcover/evaluation/llm/prompts",
           "recommendation": "Add {{ evidence }} placeholder to prompt templates"
         },
         {
@@ -61,7 +53,7 @@
           "rule_id": "OBSERVABILITY_ENFORCED",
           "message": "Evaluation orchestrator does not reference observability/tracing",
           "category": "pattern_violation",
-          "file": "src/tools/roslyn-analyzers/evaluation/llm/orchestrator.py",
+          "file": "src/tools/dotcover/evaluation/llm/orchestrator.py",
           "recommendation": "Integrate shared.observability for LLM interaction logging"
         }
       ]
@@ -77,18 +69,18 @@
           "rule_id": "BLUEPRINT_HAS_EVAL_DATA",
           "message": "BLUEPRINT Evaluation section has no numeric data (scores, percentages)",
           "category": "placeholder_content",
-          "file": "src/tools/roslyn-analyzers/BLUEPRINT.md",
+          "file": "src/tools/dotcover/BLUEPRINT.md",
           "recommendation": "Populate Evaluation section with actual metric data"
         }
       ]
     }
   ],
   "summary": {
-    "total_findings": 5,
+    "total_findings": 4,
     "by_severity": {
       "error": 0,
       "warning": 0,
-      "info": 5
+      "info": 4
     },
     "overall_status": "STRONG_PASS",
     "overall_score": 4.47,

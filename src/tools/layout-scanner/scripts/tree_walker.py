@@ -4,12 +4,13 @@ Tree Walker for Layout Scanner.
 Fast filesystem traversal using os.scandir for efficient directory walking.
 Collects file and directory metadata without reading file contents.
 """
+from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Tuple
+from collections.abc import Iterator
 
 from .id_generator import generate_id, generate_root_id
 from .ignore_filter import IgnoreFilter, load_ignore_filter
@@ -37,22 +38,22 @@ class DirectoryInfo:
     name: str
     modified_time: str  # ISO 8601 format
     is_symlink: bool
-    parent_directory_id: Optional[str]  # None for root
+    parent_directory_id: str | None  # None for root
     depth: int
-    child_file_ids: List[str] = field(default_factory=list)
-    child_directory_ids: List[str] = field(default_factory=list)
+    child_file_ids: list[str] = field(default_factory=list)
+    child_directory_ids: list[str] = field(default_factory=list)
 
 
 @dataclass
 class WalkResult:
     """Result of walking a repository."""
-    files: Dict[str, FileInfo]  # path -> FileInfo
-    directories: Dict[str, DirectoryInfo]  # path -> DirectoryInfo
+    files: dict[str, FileInfo]  # path -> FileInfo
+    directories: dict[str, DirectoryInfo]  # path -> DirectoryInfo
     root_path: str
     max_depth: int = 0
     total_size_bytes: int = 0
-    skipped_paths: List[str] = field(default_factory=list)  # Paths that couldn't be accessed
-    skipped_reasons: Dict[str, str] = field(default_factory=dict)  # path -> reason
+    skipped_paths: list[str] = field(default_factory=list)  # Paths that couldn't be accessed
+    skipped_reasons: dict[str, str] = field(default_factory=dict)  # path -> reason
 
 
 def get_extension(filename: str) -> str:
@@ -73,8 +74,8 @@ def format_mtime(stat_result: os.stat_result) -> str:
 
 def walk_repository(
     repo_path: Path,
-    ignore_filter: Optional[IgnoreFilter] = None,
-    additional_ignores: Optional[List[str]] = None,
+    ignore_filter: IgnoreFilter | None = None,
+    additional_ignores: list[str] | None = None,
     respect_gitignore: bool = True
 ) -> WalkResult:
     """
@@ -107,12 +108,12 @@ def walk_repository(
         for pattern in additional_ignores:
             ignore_filter.add_pattern(pattern)
 
-    files: Dict[str, FileInfo] = {}
-    directories: Dict[str, DirectoryInfo] = {}
+    files: dict[str, FileInfo] = {}
+    directories: dict[str, DirectoryInfo] = {}
     max_depth = 0
     total_size = 0
-    skipped_paths: List[str] = []
-    skipped_reasons: Dict[str, str] = {}
+    skipped_paths: list[str] = []
+    skipped_reasons: dict[str, str] = {}
 
     # Create root directory entry
     root_stat = repo_path.stat()
@@ -130,7 +131,7 @@ def walk_repository(
 
     # Walk the tree using iterative approach with stack
     # Stack contains: (dir_path, relative_path, depth, parent_id)
-    stack: List[Tuple[Path, str, int, str]] = [(repo_path, "", 0, root_id)]
+    stack: list[tuple[Path, str, int, str]] = [(repo_path, "", 0, root_id)]
 
     while stack:
         current_path, rel_path, depth, parent_id = stack.pop()

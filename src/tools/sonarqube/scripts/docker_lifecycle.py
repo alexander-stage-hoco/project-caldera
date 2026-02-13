@@ -1,4 +1,5 @@
 """Docker lifecycle management for SonarQube container."""
+from __future__ import annotations
 
 import json
 import os

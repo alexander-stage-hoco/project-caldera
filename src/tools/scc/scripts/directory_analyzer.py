@@ -5,6 +5,8 @@ Outputs raw metrics per directory (recursive + direct) and per file.
 No scores or thresholds - just data for downstream analysis.
 """
 
+from __future__ import annotations
+
 import fnmatch
 import json
 import math
@@ -17,7 +19,7 @@ from collections import defaultdict
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Dict, Optional, Any
+from typing import Any, Dict, List
 
 
 # =============================================================================
@@ -1730,7 +1732,7 @@ def compute_cocomo(kloc: float, params: dict) -> dict:
 # =============================================================================
 
 
-def classify_file(path: str, filename: str, extension: str) -> Optional[str]:
+def classify_file(path: str, filename: str, extension: str) -> str | None:
     """Classify a file into a category based on name/path patterns.
 
     Args:
@@ -2575,7 +2577,7 @@ def discover_repos(eval_repos_path: str) -> List[Dict[str, Any]]:
     return repos
 
 
-def show_repo_menu(repos: List[Dict[str, Any]], width: int) -> Optional[Dict[str, Any]]:
+def show_repo_menu(repos: List[Dict[str, Any]], width: int) -> Dict[str, Any] | None:
     """Display interactive repository selection menu.
 
     Args:

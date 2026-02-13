@@ -1,7 +1,7 @@
 {
-  "review_id": "157d81bf-4f84-4f50-a695-1c110709bbaa",
-  "timestamp": "2026-02-13T18:05:57.955265+00:00",
-  "target": "scancode",
+  "review_id": "97c4615c-9fac-4744-a541-42f4c31f9a2e",
+  "timestamp": "2026-02-13T19:13:50.316047+00:00",
+  "target": "git-fame",
   "review_type": "tool_implementation",
   "dimensions": [
     {
@@ -15,8 +15,25 @@
       "dimension": "output_schema_envelope",
       "weight": 0.2,
       "status": "pass",
-      "score": 5,
-      "findings": []
+      "score": 4,
+      "findings": [
+        {
+          "severity": "info",
+          "rule_id": "ANALYZE_PATH_NORM",
+          "message": "analyze.py does not import path normalization utilities",
+          "category": "missing_requirement",
+          "file": "src/tools/git-fame/scripts/analyze.py",
+          "recommendation": "Import from shared.path_utils or common.path_normalization"
+        },
+        {
+          "severity": "info",
+          "rule_id": "ANALYZE_CLI_ARGS",
+          "message": "analyze.py does not use add_common_args or define sufficient CLI arguments",
+          "category": "pattern_violation",
+          "file": "src/tools/git-fame/scripts/analyze.py",
+          "recommendation": "Use common.cli_parser.add_common_args for standard CLI arguments"
+        }
+      ]
     },
     {
       "dimension": "code_conventions",
@@ -29,23 +46,7 @@
           "rule_id": "FUTURE_ANNOTATIONS",
           "message": "Missing 'from __future__ import annotations'",
           "category": "pattern_violation",
-          "file": "src/tools/scancode/scripts/create_synthetic_repos.py",
-          "recommendation": "Add 'from __future__ import annotations' at top of file"
-        },
-        {
-          "severity": "info",
-          "rule_id": "FUTURE_ANNOTATIONS",
-          "message": "Missing 'from __future__ import annotations'",
-          "category": "pattern_violation",
-          "file": "src/tools/scancode/scripts/license_analyzer.py",
-          "recommendation": "Add 'from __future__ import annotations' at top of file"
-        },
-        {
-          "severity": "info",
-          "rule_id": "FUTURE_ANNOTATIONS",
-          "message": "Missing 'from __future__ import annotations'",
-          "category": "pattern_violation",
-          "file": "src/tools/scancode/scripts/evaluate.py",
+          "file": "src/tools/git-fame/scripts/__init__.py",
           "recommendation": "Add 'from __future__ import annotations' at top of file"
         }
       ]
@@ -59,9 +60,9 @@
         {
           "severity": "info",
           "rule_id": "PROMPT_EVIDENCE",
-          "message": "Prompts missing '{{ evidence }}' placeholder: ['accuracy.md', 'coverage.md', 'actionability.md', 'risk_classification.md']",
+          "message": "Prompts missing '{{ evidence }}' placeholder: ['accuracy.md', 'actionability.md']",
           "category": "pattern_violation",
-          "file": "src/tools/scancode/evaluation/llm/prompts",
+          "file": "src/tools/git-fame/evaluation/llm/prompts",
           "recommendation": "Add {{ evidence }} placeholder to prompt templates"
         },
         {
@@ -69,7 +70,7 @@
           "rule_id": "OBSERVABILITY_ENFORCED",
           "message": "Evaluation orchestrator does not reference observability/tracing",
           "category": "pattern_violation",
-          "file": "src/tools/scancode/evaluation/llm/orchestrator.py",
+          "file": "src/tools/git-fame/evaluation/llm/orchestrator.py",
           "recommendation": "Integrate shared.observability for LLM interaction logging"
         }
       ]
@@ -85,7 +86,7 @@
           "rule_id": "BLUEPRINT_HAS_EVAL_DATA",
           "message": "BLUEPRINT Evaluation section has no numeric data (scores, percentages)",
           "category": "placeholder_content",
-          "file": "src/tools/scancode/BLUEPRINT.md",
+          "file": "src/tools/git-fame/BLUEPRINT.md",
           "recommendation": "Populate Evaluation section with actual metric data"
         }
       ]
@@ -99,7 +100,7 @@
       "info": 6
     },
     "overall_status": "STRONG_PASS",
-    "overall_score": 4.47,
+    "overall_score": 4.24,
     "dimensions_reviewed": 5
   }
 }

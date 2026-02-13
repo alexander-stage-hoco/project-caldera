@@ -584,6 +584,8 @@ semgrep --config auto --exclude-rule "*info*"
 
 ## Evaluation Results
 
+Overall score: 69.0% with 96.4% pass rate (27/28 checks). 34 programmatic checks across 6 dimensions, plus 4 LLM judges at 35%/25%/20%/20% weights.
+
 ### Programmatic Evaluation
 
 | Category | Score | Passed |

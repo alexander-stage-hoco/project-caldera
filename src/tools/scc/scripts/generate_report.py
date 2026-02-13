@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Generate evaluation scorecard from PoC results."""
+from __future__ import annotations
 
 import json
 from pathlib import Path

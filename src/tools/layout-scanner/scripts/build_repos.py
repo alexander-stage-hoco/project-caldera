@@ -5,6 +5,7 @@ Build Synthetic Test Repositories for Layout Scanner Evaluation.
 Creates a set of test repositories with controlled characteristics
 for evaluating classification accuracy, performance, and edge case handling.
 """
+from __future__ import annotations
 
 import json
 import os

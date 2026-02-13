@@ -6,13 +6,13 @@ This module analyzes file contents to populate:
 - is_binary: Whether the file is binary or text
 - content_hash: SHA-256 hash of file contents
 """
+from __future__ import annotations
 
 import hashlib
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -44,23 +44,23 @@ BUFFER_SIZE = 65536  # 64KB
 class ContentFileMetadata:
     """Content metadata for a single file."""
 
-    line_count: Optional[int] = None
+    line_count: int | None = None
     is_binary: bool = False
-    content_hash: Optional[str] = None
+    content_hash: str | None = None
 
 
 @dataclass
 class ContentEnrichmentResult:
     """Result of content enrichment pass."""
 
-    file_metadata: Dict[str, ContentFileMetadata] = field(default_factory=dict)
+    file_metadata: dict[str, ContentFileMetadata] = field(default_factory=dict)
     enriched_file_count: int = 0
     binary_file_count: int = 0
     text_file_count: int = 0
     skipped_file_count: int = 0
     total_lines: int = 0
     duration_ms: int = 0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 def detect_binary(file_path: Path, sample_size: int = 8192) -> bool:
@@ -157,7 +157,7 @@ def count_lines(file_path: Path) -> int:
         return 0
 
 
-def compute_hash(file_path: Path, algorithm: str = "sha256") -> Optional[str]:
+def compute_hash(file_path: Path, algorithm: str = "sha256") -> str | None:
     """
     Compute hash of file contents.
 
@@ -231,7 +231,7 @@ def enrich_file(
 
 def enrich_files(
     repo_path: Path,
-    file_paths: List[str],
+    file_paths: list[str],
     max_size_bytes: int = 104857600,
     hash_algorithm: str = "sha256",
 ) -> ContentEnrichmentResult:

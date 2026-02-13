@@ -1,7 +1,7 @@
 {
-  "review_id": "17cf3e01-3d30-4a9a-9817-85b19f8a13f0",
-  "timestamp": "2026-02-13T18:05:56.575843+00:00",
-  "target": "semgrep",
+  "review_id": "f215311c-bab5-4e08-a7a1-81823f999c47",
+  "timestamp": "2026-02-13T18:51:41.977498+00:00",
+  "target": "gitleaks",
   "review_type": "tool_implementation",
   "dimensions": [
     {
@@ -14,31 +14,22 @@
     {
       "dimension": "output_schema_envelope",
       "weight": 0.2,
-      "status": "warn",
-      "score": 3,
-      "findings": [
-        {
-          "severity": "warning",
-          "rule_id": "ANALYZE_PATH_NORM",
-          "message": "analyze.py does not import path normalization utilities",
-          "category": "missing_requirement",
-          "file": "src/tools/semgrep/scripts/analyze.py",
-          "recommendation": "Import from shared.path_utils or common.path_normalization"
-        }
-      ]
+      "status": "pass",
+      "score": 5,
+      "findings": []
     },
     {
       "dimension": "code_conventions",
       "weight": 0.15,
-      "status": "warn",
-      "score": 3,
+      "status": "pass",
+      "score": 4,
       "findings": [
         {
           "severity": "info",
           "rule_id": "FUTURE_ANNOTATIONS",
           "message": "Missing 'from __future__ import annotations'",
           "category": "pattern_violation",
-          "file": "src/tools/semgrep/scripts/llm_evaluate.py",
+          "file": "src/tools/gitleaks/scripts/secret_analyzer.py",
           "recommendation": "Add 'from __future__ import annotations' at top of file"
         },
         {
@@ -46,7 +37,7 @@
           "rule_id": "FUTURE_ANNOTATIONS",
           "message": "Missing 'from __future__ import annotations'",
           "category": "pattern_violation",
-          "file": "src/tools/semgrep/scripts/smell_analyzer.py",
+          "file": "src/tools/gitleaks/scripts/__init__.py",
           "recommendation": "Add 'from __future__ import annotations' at top of file"
         },
         {
@@ -54,15 +45,7 @@
           "rule_id": "FUTURE_ANNOTATIONS",
           "message": "Missing 'from __future__ import annotations'",
           "category": "pattern_violation",
-          "file": "src/tools/semgrep/scripts/__init__.py",
-          "recommendation": "Add 'from __future__ import annotations' at top of file"
-        },
-        {
-          "severity": "info",
-          "rule_id": "FUTURE_ANNOTATIONS",
-          "message": "Missing 'from __future__ import annotations'",
-          "category": "pattern_violation",
-          "file": "src/tools/semgrep/scripts/evaluate.py",
+          "file": "src/tools/gitleaks/scripts/create_synthetic_repos.py",
           "recommendation": "Add 'from __future__ import annotations' at top of file"
         }
       ]
@@ -78,7 +61,7 @@
           "rule_id": "OBSERVABILITY_ENFORCED",
           "message": "Evaluation orchestrator does not reference observability/tracing",
           "category": "pattern_violation",
-          "file": "src/tools/semgrep/evaluation/llm/orchestrator.py",
+          "file": "src/tools/gitleaks/evaluation/llm/orchestrator.py",
           "recommendation": "Integrate shared.observability for LLM interaction logging"
         }
       ]
@@ -94,21 +77,21 @@
           "rule_id": "BLUEPRINT_HAS_EVAL_DATA",
           "message": "BLUEPRINT Evaluation section has no numeric data (scores, percentages)",
           "category": "placeholder_content",
-          "file": "src/tools/semgrep/BLUEPRINT.md",
+          "file": "src/tools/gitleaks/BLUEPRINT.md",
           "recommendation": "Populate Evaluation section with actual metric data"
         }
       ]
     }
   ],
   "summary": {
-    "total_findings": 7,
+    "total_findings": 5,
     "by_severity": {
       "error": 0,
-      "warning": 1,
-      "info": 6
+      "warning": 0,
+      "info": 5
     },
-    "overall_status": "PASS",
-    "overall_score": 3.82,
+    "overall_status": "STRONG_PASS",
+    "overall_score": 4.47,
     "dimensions_reviewed": 5
   }
 }

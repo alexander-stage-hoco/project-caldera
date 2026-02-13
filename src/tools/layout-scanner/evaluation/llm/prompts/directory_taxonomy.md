@@ -67,6 +67,8 @@ This dimension assesses how well directories are classified based on their conte
 
 ## Evidence
 
+{{ evidence }}
+
 ### Directory Sample
 {{ sample_directories }}
 

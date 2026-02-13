@@ -18,6 +18,10 @@ Evaluate the completeness of the vulnerability scan coverage.
 | 2 | Significant coverage gaps |
 | 1 | Critical files not scanned |
 
+## Evidence
+
+{{ evidence }}
+
 ## Response Format
 
 Provide your evaluation as JSON:

@@ -1,7 +1,7 @@
 {
-  "review_id": "ed3cd189-c861-445b-ab7f-24d67b64c76e",
-  "timestamp": "2026-02-13T18:05:57.789783+00:00",
-  "target": "symbol-scanner",
+  "review_id": "69b2afbb-a25a-4f23-83b1-7766476d7934",
+  "timestamp": "2026-02-13T18:51:44.399951+00:00",
+  "target": "pmd-cpd",
   "review_type": "tool_implementation",
   "dimensions": [
     {
@@ -22,17 +22,8 @@
       "dimension": "code_conventions",
       "weight": 0.15,
       "status": "pass",
-      "score": 4,
-      "findings": [
-        {
-          "severity": "info",
-          "rule_id": "FUTURE_ANNOTATIONS",
-          "message": "Missing 'from __future__ import annotations'",
-          "category": "pattern_violation",
-          "file": "src/tools/symbol-scanner/scripts/__init__.py",
-          "recommendation": "Add 'from __future__ import annotations' at top of file"
-        }
-      ]
+      "score": 5,
+      "findings": []
     },
     {
       "dimension": "evaluation_infrastructure",
@@ -42,18 +33,10 @@
       "findings": [
         {
           "severity": "info",
-          "rule_id": "PROMPT_EVIDENCE",
-          "message": "Prompts missing '{{ evidence }}' placeholder: ['integration.md', 'symbol_accuracy.md', 'import_completeness.md', 'call_relationship.md']",
-          "category": "pattern_violation",
-          "file": "src/tools/symbol-scanner/evaluation/llm/prompts",
-          "recommendation": "Add {{ evidence }} placeholder to prompt templates"
-        },
-        {
-          "severity": "info",
           "rule_id": "OBSERVABILITY_ENFORCED",
           "message": "Evaluation orchestrator does not reference observability/tracing",
           "category": "pattern_violation",
-          "file": "src/tools/symbol-scanner/evaluation/llm/orchestrator.py",
+          "file": "src/tools/pmd-cpd/evaluation/llm/orchestrator.py",
           "recommendation": "Integrate shared.observability for LLM interaction logging"
         }
       ]
@@ -69,28 +52,28 @@
           "rule_id": "BLUEPRINT_HAS_EVAL_DATA",
           "message": "BLUEPRINT Evaluation section has no numeric data (scores, percentages)",
           "category": "placeholder_content",
-          "file": "src/tools/symbol-scanner/BLUEPRINT.md",
+          "file": "src/tools/pmd-cpd/BLUEPRINT.md",
           "recommendation": "Populate Evaluation section with actual metric data"
         },
         {
           "severity": "info",
           "rule_id": "BLUEPRINT_TOOL_REFERENCED",
-          "message": "BLUEPRINT.md does not reference tool name 'symbol-scanner'",
+          "message": "BLUEPRINT.md does not reference tool name 'pmd-cpd'",
           "category": "inconsistency",
-          "file": "src/tools/symbol-scanner/BLUEPRINT.md"
+          "file": "src/tools/pmd-cpd/BLUEPRINT.md"
         }
       ]
     }
   ],
   "summary": {
-    "total_findings": 5,
+    "total_findings": 3,
     "by_severity": {
       "error": 0,
       "warning": 0,
-      "info": 5
+      "info": 3
     },
     "overall_status": "STRONG_PASS",
-    "overall_score": 4.47,
+    "overall_score": 4.65,
     "dimensions_reviewed": 5
   }
 }

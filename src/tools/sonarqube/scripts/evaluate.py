@@ -5,6 +5,8 @@ Evaluation orchestrator for SonarQube analysis outputs.
 Runs programmatic checks against analysis outputs and generates scorecards.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import os

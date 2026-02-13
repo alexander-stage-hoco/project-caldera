@@ -14,6 +14,7 @@ from shared.evaluation import (
     DimensionResult,
     ProgrammaticInput,
     EvaluationResult,
+    require_observability,
 )
 
 from .judges.base import BaseJudge, JudgeResult

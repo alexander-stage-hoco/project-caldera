@@ -1,4 +1,5 @@
 """Sonar Scanner wrapper for running SonarQube analysis."""
+from __future__ import annotations
 
 import os
 import shutil

@@ -1,7 +1,7 @@
 {
-  "review_id": "4607f325-b3f8-4df8-97b3-032259190d1c",
-  "timestamp": "2026-02-13T18:05:58.826498+00:00",
-  "target": "coverage-ingest",
+  "review_id": "ab2499a1-f114-4551-a82a-a0423bf423b4",
+  "timestamp": "2026-02-13T19:13:51.631173+00:00",
+  "target": "lizard",
   "review_type": "tool_implementation",
   "dimensions": [
     {
@@ -22,17 +22,8 @@
       "dimension": "code_conventions",
       "weight": 0.15,
       "status": "pass",
-      "score": 4,
-      "findings": [
-        {
-          "severity": "info",
-          "rule_id": "FUTURE_ANNOTATIONS",
-          "message": "Missing 'from __future__ import annotations'",
-          "category": "pattern_violation",
-          "file": "src/tools/coverage-ingest/scripts/__init__.py",
-          "recommendation": "Add 'from __future__ import annotations' at top of file"
-        }
-      ]
+      "score": 5,
+      "findings": []
     },
     {
       "dimension": "evaluation_infrastructure",
@@ -43,10 +34,18 @@
         {
           "severity": "info",
           "rule_id": "PROMPT_EVIDENCE",
-          "message": "Prompts missing '{{ evidence }}' placeholder: ['parser_accuracy.md', 'gap_actionability.md', 'risk_tier_quality.md', 'cross_format_consistency.md']",
+          "message": "Prompts missing '{{ evidence }}' placeholder: ['function_detection.md', 'statistics.md', 'hotspot_ranking.md', 'ccn_accuracy.md']",
           "category": "pattern_violation",
-          "file": "src/tools/coverage-ingest/evaluation/llm/prompts",
+          "file": "src/tools/lizard/evaluation/llm/prompts",
           "recommendation": "Add {{ evidence }} placeholder to prompt templates"
+        },
+        {
+          "severity": "info",
+          "rule_id": "OBSERVABILITY_ENFORCED",
+          "message": "Evaluation orchestrator does not reference observability/tracing",
+          "category": "pattern_violation",
+          "file": "src/tools/lizard/evaluation/llm/orchestrator.py",
+          "recommendation": "Integrate shared.observability for LLM interaction logging"
         }
       ]
     },
@@ -66,7 +65,7 @@
       "info": 2
     },
     "overall_status": "STRONG_PASS",
-    "overall_score": 4.65,
+    "overall_score": 4.82,
     "dimensions_reviewed": 5
   }
 }

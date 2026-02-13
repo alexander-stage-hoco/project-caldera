@@ -4,6 +4,8 @@
 Adapted for Caldera envelope output format.
 """
 
+from __future__ import annotations
+
 import json
 import signal
 import subprocess

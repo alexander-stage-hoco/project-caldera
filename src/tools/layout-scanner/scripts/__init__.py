@@ -4,6 +4,7 @@ Layout Scanner - Fast filesystem-based repository layout scanner.
 A tool for creating canonical file and directory registries with
 sophisticated file classification.
 """
+from __future__ import annotations
 
 from .classifier import (
     ClassificationResult,

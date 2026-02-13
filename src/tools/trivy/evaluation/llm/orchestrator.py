@@ -15,6 +15,7 @@ from pathlib import Path
 from shared.evaluation import (
     LLMEvaluatorBase,
     ProgrammaticInput,
+    require_observability,
 )
 
 from .judges.base import BaseJudge, JudgeResult

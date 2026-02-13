@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from common.cli_parser import add_common_args, validate_common_args, CommitResolutionConfig
 from common.envelope_formatter import create_envelope
 from common.git_utilities import resolve_commit, is_fallback_commit
+from common.path_normalization import normalize_file_path, normalize_dir_path
 
 from secret_analyzer import analyze_repository, get_gitleaks_version
 
@@ -50,7 +51,7 @@ def _compute_content_hash(repo_path: Path) -> str:
     return sha1.hexdigest()
 
 
-def build_analysis_data(analysis, tool_version: str) -> dict:
+def build_analysis_data(analysis, tool_version: str, repo_root: Path | None = None) -> dict:
     """Build the data section from SecretAnalysis results.
 
     Args:
@@ -73,7 +74,7 @@ def build_analysis_data(analysis, tool_version: str) -> dict:
         "secrets_by_severity": analysis.secrets_by_severity,
         "findings": [
             {
-                "file_path": f.file_path,
+                "file_path": normalize_file_path(f.file_path, repo_root),
                 "line_number": f.line_number,
                 "rule_id": f.rule_id,
                 "secret_type": f.secret_type,
@@ -90,8 +91,8 @@ def build_analysis_data(analysis, tool_version: str) -> dict:
             for f in analysis.findings
         ],
         "files": {
-            k: {
-                "file_path": v.file_path,
+            normalize_file_path(k, repo_root): {
+                "file_path": normalize_file_path(v.file_path, repo_root),
                 "secret_count": v.secret_count,
                 "rule_ids": v.rule_ids,
                 "earliest_commit": v.earliest_commit,
@@ -100,7 +101,7 @@ def build_analysis_data(analysis, tool_version: str) -> dict:
             for k, v in analysis.files.items()
         },
         "directories": {
-            k: {
+            normalize_dir_path(k, repo_root): {
                 "direct_secret_count": v.direct_secret_count,
                 "recursive_secret_count": v.recursive_secret_count,
                 "direct_file_count": v.direct_file_count,
@@ -166,7 +167,7 @@ def main() -> int:
     tool_version = get_gitleaks_version(gitleaks_path)
 
     # Build data and create envelope
-    data = build_analysis_data(analysis, tool_version)
+    data = build_analysis_data(analysis, tool_version, repo_root=common.repo_path)
     envelope = create_envelope(
         data,
         tool_name=TOOL_NAME,

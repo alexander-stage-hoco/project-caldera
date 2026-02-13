@@ -7,28 +7,250 @@
   },
   "expected": {
     "symbols": [
-      {"path": "index.js", "symbol_name": "main", "symbol_type": "function", "is_exported": false},
-      {"path": "handlers/user.js", "symbol_name": "userCache", "symbol_type": "variable", "is_exported": false},
-      {"path": "handlers/user.js", "symbol_name": "getUser", "symbol_type": "function", "is_exported": true},
-      {"path": "handlers/user.js", "symbol_name": "listUsers", "symbol_type": "function", "is_exported": true},
-      {"path": "services/cache.js", "symbol_name": "Cache", "symbol_type": "class", "is_exported": true},
-      {"path": "services/cache.js", "symbol_name": "constructor", "symbol_type": "method", "parent_symbol": "Cache"},
-      {"path": "services/cache.js", "symbol_name": "get", "symbol_type": "method", "parent_symbol": "Cache"},
-      {"path": "services/cache.js", "symbol_name": "set", "symbol_type": "method", "parent_symbol": "Cache"},
-      {"path": "services/cache.js", "symbol_name": "clear", "symbol_type": "method", "parent_symbol": "Cache"},
-      {"path": "services/api.js", "symbol_name": "fetchUser", "symbol_type": "function", "is_exported": true},
-      {"path": "services/api.js", "symbol_name": "fetchAllUsers", "symbol_type": "function", "is_exported": true}
+      {
+        "path": "index.js",
+        "symbol_name": "main",
+        "symbol_type": "function",
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "handlers/user.js",
+        "symbol_name": "userCache",
+        "symbol_type": "variable",
+        "is_exported": false
+      },
+      {
+        "path": "handlers/user.js",
+        "symbol_name": "getUser",
+        "symbol_type": "function",
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "handlers/user.js",
+        "symbol_name": "listUsers",
+        "symbol_type": "function",
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "services/cache.js",
+        "symbol_name": "Cache",
+        "symbol_type": "class",
+        "is_exported": true
+      },
+      {
+        "path": "services/cache.js",
+        "symbol_name": "constructor",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "services/cache.js",
+        "symbol_name": "get",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "services/cache.js",
+        "symbol_name": "set",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 2
+      },
+      {
+        "path": "services/cache.js",
+        "symbol_name": "clear",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "services/api.js",
+        "symbol_name": "fetchUser",
+        "symbol_type": "function",
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "services/api.js",
+        "symbol_name": "fetchAllUsers",
+        "symbol_type": "function",
+        "is_exported": true,
+        "parameters": 0
+      }
     ],
     "calls": [
-      {"caller_file": "index.js", "caller_symbol": "main", "callee_symbol": "listUsers", "call_type": "async"},
-      {"caller_file": "index.js", "caller_symbol": "main", "callee_symbol": "getUser", "call_type": "async"},
-      {"caller_file": "handlers/user.js", "caller_symbol": "getUser", "callee_symbol": "fetchUser", "call_type": "async"},
-      {"caller_file": "handlers/user.js", "caller_symbol": "listUsers", "callee_symbol": "fetchAllUsers", "call_type": "direct"}
+      {
+        "caller_file": "index.js",
+        "caller_symbol": "main",
+        "callee_symbol": "listUsers",
+        "callee_file": "handlers/user.js",
+        "call_type": "async"
+      },
+      {
+        "caller_file": "index.js",
+        "caller_symbol": "main",
+        "callee_symbol": "log",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "index.js",
+        "caller_symbol": "main",
+        "callee_symbol": "getUser",
+        "callee_file": "handlers/user.js",
+        "call_type": "async"
+      },
+      {
+        "caller_file": "index.js",
+        "caller_symbol": "main",
+        "callee_symbol": "log",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "index.js",
+        "caller_symbol": "<module>",
+        "callee_symbol": "main",
+        "callee_file": "index.js",
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "handlers/user.js",
+        "caller_symbol": "<module>",
+        "callee_symbol": "Cache",
+        "callee_file": "services/cache.js",
+        "call_type": "constructor"
+      },
+      {
+        "caller_file": "handlers/user.js",
+        "caller_symbol": "getUser",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "handlers/user.js",
+        "caller_symbol": "getUser",
+        "callee_symbol": "fetchUser",
+        "callee_file": "services/api.js",
+        "call_type": "async"
+      },
+      {
+        "caller_file": "handlers/user.js",
+        "caller_symbol": "getUser",
+        "callee_symbol": "set",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "handlers/user.js",
+        "caller_symbol": "listUsers",
+        "callee_symbol": "fetchAllUsers",
+        "callee_file": "services/api.js",
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "services/cache.js",
+        "caller_symbol": "constructor",
+        "callee_symbol": "Map",
+        "callee_file": null,
+        "call_type": "constructor"
+      },
+      {
+        "caller_file": "services/cache.js",
+        "caller_symbol": "get",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/cache.js",
+        "caller_symbol": "get",
+        "callee_symbol": "now",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/cache.js",
+        "caller_symbol": "get",
+        "callee_symbol": "delete",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/cache.js",
+        "caller_symbol": "set",
+        "callee_symbol": "set",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/cache.js",
+        "caller_symbol": "set",
+        "callee_symbol": "now",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/cache.js",
+        "caller_symbol": "clear",
+        "callee_symbol": "clear",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/api.js",
+        "caller_symbol": "fetchUser",
+        "callee_symbol": "fetch",
+        "callee_file": null,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "services/api.js",
+        "caller_symbol": "fetchUser",
+        "callee_symbol": "json",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/api.js",
+        "caller_symbol": "fetchAllUsers",
+        "callee_symbol": "fetch",
+        "callee_file": null,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "services/api.js",
+        "caller_symbol": "fetchAllUsers",
+        "callee_symbol": "json",
+        "callee_file": null,
+        "call_type": "dynamic"
+      }
     ],
     "imports": [
-      {"file": "index.js", "imported_path": "./handlers/user", "imported_symbols": "getUser,listUsers", "import_type": "static"},
-      {"file": "handlers/user.js", "imported_path": "../services/api", "imported_symbols": "fetchUser,fetchAllUsers", "import_type": "static"},
-      {"file": "handlers/user.js", "imported_path": "../services/cache", "imported_symbols": "Cache", "import_type": "static"}
+      {
+        "file": "index.js",
+        "imported_path": "./handlers/user",
+        "import_type": "static",
+        "imported_symbols": "getUser,listUsers"
+      },
+      {
+        "file": "handlers/user.js",
+        "imported_path": "../services/api",
+        "import_type": "static",
+        "imported_symbols": "fetchUser,fetchAllUsers"
+      },
+      {
+        "file": "handlers/user.js",
+        "imported_path": "../services/cache",
+        "import_type": "static",
+        "imported_symbols": "Cache"
+      }
     ],
     "summary": {
       "total_files": 4,

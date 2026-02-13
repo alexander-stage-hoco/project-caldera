@@ -1,7 +1,8 @@
 """LLM-based error analysis for failing checks."""
+from __future__ import annotations
 
 import json
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List
 from pathlib import Path
 
 from scripts.checks import CheckResult
@@ -37,7 +38,7 @@ Be concise and actionable.
 """
 
 
-def get_provider() -> Optional[Any]:
+def get_provider() -> Any | None:
     """Get observable LLM provider if available."""
     if not PROVIDER_AVAILABLE:
         return None

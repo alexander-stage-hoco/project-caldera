@@ -58,7 +58,7 @@ This document captures what was built, key decisions made, and provides a templa
 ### Primary Goal
 Establish a reliable file registry and classification system that serves as the foundation for all subsequent analysis tools.
 
-### Evaluation Criteria
+### Success Criteria
 1. **Output Quality** - Does the tool produce valid, complete file registry?
 2. **Accuracy** - Are file counts, sizes, and metrics correct?
 3. **Classification** - Are files correctly categorized?
@@ -113,7 +113,7 @@ Establish a reliable file registry and classification system that serves as the 
 | Hierarchy | Root ID, max depth, depth distribution |
 | Statistics | Total files/dirs, size totals, language breakdown |
 
-### Evaluation Framework
+### Check Dimensions
 
 | Dimension | Checks | Focus |
 |-----------|--------|-------|
@@ -379,6 +379,8 @@ test_files = [
 ---
 
 ## 10. LLM Evaluation
+
+The layout-scanner evaluation combines 51 programmatic checks (8 categories) with 4 LLM judges. Programmatic pass rate: 98.0% with overall confidence of 0.85 across evaluation dimensions.
 
 ### Judge Roster
 

@@ -92,6 +92,8 @@ This dimension assesses how accurately the scanner identifies programming langua
 
 ## Evidence
 
+{{ evidence }}
+
 ### File Language Samples
 {{ language_samples }}
 

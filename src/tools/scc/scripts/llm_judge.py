@@ -1,7 +1,8 @@
 """LLM-as-Judge for qualitative evaluation dimensions."""
+from __future__ import annotations
 
 import json
-from typing import Optional, Dict, Any
+from typing import Any, Dict
 from pathlib import Path
 
 
@@ -41,7 +42,7 @@ Respond in JSON format:
 """
 
 
-def get_provider() -> Optional[Any]:
+def get_provider() -> Any | None:
     """Get observable LLM provider if available."""
     if not PROVIDER_AVAILABLE:
         return None

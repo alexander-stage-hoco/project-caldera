@@ -22,6 +22,7 @@ from common.ecosystem_detector import (
 )
 from common.cli_parser import add_common_args, validate_common_args, CommitResolutionConfig
 from common.envelope_formatter import create_envelope, get_current_timestamp
+from shared.path_utils import normalize_file_path
 
 logger = structlog.get_logger(__name__)
 

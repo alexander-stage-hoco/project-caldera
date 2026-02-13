@@ -75,6 +75,8 @@ This dimension assesses the correctness and consistency of parent-child relation
 
 ## Evidence
 
+{{ evidence }}
+
 ### Hierarchy Sample
 {{ hierarchy_sample }}
 

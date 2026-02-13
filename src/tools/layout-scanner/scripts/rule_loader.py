@@ -8,10 +8,11 @@ Loads classification rules from YAML files, supporting:
 
 Provides rule merging and default rule management.
 """
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -37,7 +38,7 @@ DEFAULT_CATEGORIES = [
 ]
 
 # Default subcategories
-DEFAULT_SUBCATEGORIES: Dict[str, List[str]] = {
+DEFAULT_SUBCATEGORIES: dict[str, list[str]] = {
     "test": ["unit", "integration", "e2e"],
     "config": ["build", "lint", "ci"],
 }
@@ -47,15 +48,15 @@ DEFAULT_SUBCATEGORIES: Dict[str, List[str]] = {
 class RuleSet:
     """A complete set of classification rules."""
 
-    path_rules: Dict[str, List[str]] = field(default_factory=dict)
-    filename_rules: Dict[str, List[str]] = field(default_factory=dict)
-    extension_rules: Dict[str, List[str]] = field(default_factory=dict)
-    weights: Dict[str, float] = field(default_factory=lambda: DEFAULT_WEIGHTS.copy())
-    categories: List[str] = field(default_factory=lambda: DEFAULT_CATEGORIES.copy())
-    subcategories: Dict[str, List[str]] = field(default_factory=dict)
+    path_rules: dict[str, list[str]] = field(default_factory=dict)
+    filename_rules: dict[str, list[str]] = field(default_factory=dict)
+    extension_rules: dict[str, list[str]] = field(default_factory=dict)
+    weights: dict[str, float] = field(default_factory=lambda: DEFAULT_WEIGHTS.copy())
+    categories: list[str] = field(default_factory=lambda: DEFAULT_CATEGORIES.copy())
+    subcategories: dict[str, list[str]] = field(default_factory=dict)
     version: str = "1.0"
 
-    def get_all_categories(self) -> List[str]:
+    def get_all_categories(self) -> list[str]:
         """Get all valid categories including subcategories."""
         result = list(self.categories)
         for parent, subs in self.subcategories.items():
@@ -117,7 +118,7 @@ def load_rules(rules_path: Path) -> RuleSet:
     return _parse_rules(data)
 
 
-def _parse_rules(data: Dict[str, Any]) -> RuleSet:
+def _parse_rules(data: dict[str, Any]) -> RuleSet:
     """Parse a rules dictionary into a RuleSet."""
     rules = RuleSet()
 
@@ -277,7 +278,7 @@ def _get_hardcoded_defaults() -> RuleSet:
     )
 
 
-def find_rules_file(repo_path: Path) -> Optional[Path]:
+def find_rules_file(repo_path: Path) -> Path | None:
     """
     Find a rules file in a repository.
 

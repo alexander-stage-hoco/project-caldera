@@ -4,6 +4,7 @@ Hierarchy Builder for Layout Scanner.
 Computes tree relationships, recursive counts, and aggregated metrics
 for directories based on their contents.
 """
+from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, field

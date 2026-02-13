@@ -7,40 +7,324 @@
   },
   "expected": {
     "symbols": [
-      {"path": "index.ts", "symbol_name": "main", "symbol_type": "function", "is_exported": false},
-      {"path": "models/base.ts", "symbol_name": "Entity", "symbol_type": "class", "is_exported": true},
-      {"path": "models/base.ts", "symbol_name": "Serializable", "symbol_type": "class", "is_exported": true},
-      {"path": "models/base.ts", "symbol_name": "BaseModel", "symbol_type": "class", "is_exported": true},
-      {"path": "models/base.ts", "symbol_name": "constructor", "symbol_type": "method", "parent_symbol": "BaseModel"},
-      {"path": "models/base.ts", "symbol_name": "validate", "symbol_type": "method", "parent_symbol": "BaseModel"},
-      {"path": "models/base.ts", "symbol_name": "toJSON", "symbol_type": "method", "parent_symbol": "BaseModel"},
-      {"path": "models/user.ts", "symbol_name": "UserRole", "symbol_type": "variable", "is_exported": true},
-      {"path": "models/user.ts", "symbol_name": "Status", "symbol_type": "class", "is_exported": true},
-      {"path": "models/user.ts", "symbol_name": "User", "symbol_type": "class", "is_exported": true},
-      {"path": "models/user.ts", "symbol_name": "constructor", "symbol_type": "method", "parent_symbol": "User"},
-      {"path": "models/user.ts", "symbol_name": "validate", "symbol_type": "method", "parent_symbol": "User"},
-      {"path": "models/user.ts", "symbol_name": "toJSON", "symbol_type": "method", "parent_symbol": "User"},
-      {"path": "services/repo.ts", "symbol_name": "Repository", "symbol_type": "class", "is_exported": true},
-      {"path": "services/repo.ts", "symbol_name": "items", "symbol_type": "variable", "is_exported": false, "parent_symbol": "Repository"},
-      {"path": "services/repo.ts", "symbol_name": "find", "symbol_type": "method", "parent_symbol": "Repository"},
-      {"path": "services/repo.ts", "symbol_name": "findAll", "symbol_type": "method", "parent_symbol": "Repository"},
-      {"path": "services/repo.ts", "symbol_name": "save", "symbol_type": "method", "parent_symbol": "Repository"},
-      {"path": "services/repo.ts", "symbol_name": "delete", "symbol_type": "method", "parent_symbol": "Repository"}
+      {
+        "path": "index.ts",
+        "symbol_name": "main",
+        "symbol_type": "function",
+        "is_exported": false,
+        "parameters": 0
+      },
+      {
+        "path": "models/base.ts",
+        "symbol_name": "Entity",
+        "symbol_type": "class",
+        "is_exported": true
+      },
+      {
+        "path": "models/base.ts",
+        "symbol_name": "Serializable",
+        "symbol_type": "class",
+        "is_exported": true
+      },
+      {
+        "path": "models/base.ts",
+        "symbol_name": "BaseModel",
+        "symbol_type": "class",
+        "is_exported": true
+      },
+      {
+        "path": "models/base.ts",
+        "symbol_name": "id",
+        "symbol_type": "variable",
+        "is_exported": true
+      },
+      {
+        "path": "models/base.ts",
+        "symbol_name": "createdAt",
+        "symbol_type": "variable",
+        "is_exported": true
+      },
+      {
+        "path": "models/base.ts",
+        "symbol_name": "constructor",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "models/base.ts",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models/base.ts",
+        "symbol_name": "toJSON",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models/user.ts",
+        "symbol_name": "UserRole",
+        "symbol_type": "variable",
+        "is_exported": true
+      },
+      {
+        "path": "models/user.ts",
+        "symbol_name": "Status",
+        "symbol_type": "class",
+        "is_exported": true
+      },
+      {
+        "path": "models/user.ts",
+        "symbol_name": "User",
+        "symbol_type": "class",
+        "is_exported": true
+      },
+      {
+        "path": "models/user.ts",
+        "symbol_name": "name",
+        "symbol_type": "variable",
+        "is_exported": true
+      },
+      {
+        "path": "models/user.ts",
+        "symbol_name": "email",
+        "symbol_type": "variable",
+        "is_exported": true
+      },
+      {
+        "path": "models/user.ts",
+        "symbol_name": "role",
+        "symbol_type": "variable",
+        "is_exported": true
+      },
+      {
+        "path": "models/user.ts",
+        "symbol_name": "status",
+        "symbol_type": "variable",
+        "is_exported": true
+      },
+      {
+        "path": "models/user.ts",
+        "symbol_name": "constructor",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 3
+      },
+      {
+        "path": "models/user.ts",
+        "symbol_name": "validate",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "models/user.ts",
+        "symbol_name": "toJSON",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "services/repo.ts",
+        "symbol_name": "Repository",
+        "symbol_type": "class",
+        "is_exported": true
+      },
+      {
+        "path": "services/repo.ts",
+        "symbol_name": "items",
+        "symbol_type": "variable",
+        "is_exported": false
+      },
+      {
+        "path": "services/repo.ts",
+        "symbol_name": "find",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "services/repo.ts",
+        "symbol_name": "findAll",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 0
+      },
+      {
+        "path": "services/repo.ts",
+        "symbol_name": "save",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 1
+      },
+      {
+        "path": "services/repo.ts",
+        "symbol_name": "delete",
+        "symbol_type": "method",
+        "is_exported": true,
+        "parameters": 1
+      }
     ],
     "calls": [
-      {"caller_file": "index.ts", "caller_symbol": "main", "callee_symbol": "Repository", "call_type": "constructor"},
-      {"caller_file": "index.ts", "caller_symbol": "main", "callee_symbol": "User", "call_type": "constructor"},
-      {"caller_file": "index.ts", "caller_symbol": "<module>", "callee_symbol": "main", "call_type": "direct"}
+      {
+        "caller_file": "index.ts",
+        "caller_symbol": "main",
+        "callee_symbol": "Repository",
+        "callee_file": "services/repo.ts",
+        "call_type": "constructor"
+      },
+      {
+        "caller_file": "index.ts",
+        "caller_symbol": "main",
+        "callee_symbol": "User",
+        "callee_file": "models/user.ts",
+        "call_type": "constructor"
+      },
+      {
+        "caller_file": "index.ts",
+        "caller_symbol": "main",
+        "callee_symbol": "log",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "index.ts",
+        "caller_symbol": "main",
+        "callee_symbol": "validate",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "index.ts",
+        "caller_symbol": "main",
+        "callee_symbol": "save",
+        "callee_file": null,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "index.ts",
+        "caller_symbol": "main",
+        "callee_symbol": "find",
+        "callee_file": null,
+        "call_type": "async"
+      },
+      {
+        "caller_file": "index.ts",
+        "caller_symbol": "main",
+        "callee_symbol": "log",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "index.ts",
+        "caller_symbol": "main",
+        "callee_symbol": "toJSON",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "index.ts",
+        "caller_symbol": "<module>",
+        "callee_symbol": "main",
+        "callee_file": "index.ts",
+        "call_type": "direct"
+      },
+      {
+        "caller_file": "models/base.ts",
+        "caller_symbol": "constructor",
+        "callee_symbol": "Date",
+        "callee_file": null,
+        "call_type": "constructor"
+      },
+      {
+        "caller_file": "models/user.ts",
+        "caller_symbol": "validate",
+        "callee_symbol": "includes",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "models/user.ts",
+        "caller_symbol": "toJSON",
+        "callee_symbol": "toJSON",
+        "callee_file": "models/user.ts",
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/repo.ts",
+        "caller_symbol": "find",
+        "callee_symbol": "get",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/repo.ts",
+        "caller_symbol": "findAll",
+        "callee_symbol": "from",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/repo.ts",
+        "caller_symbol": "findAll",
+        "callee_symbol": "values",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/repo.ts",
+        "caller_symbol": "save",
+        "callee_symbol": "set",
+        "callee_file": null,
+        "call_type": "dynamic"
+      },
+      {
+        "caller_file": "services/repo.ts",
+        "caller_symbol": "delete",
+        "callee_symbol": "delete",
+        "callee_file": null,
+        "call_type": "dynamic"
+      }
     ],
     "imports": [
-      {"file": "index.ts", "imported_path": "./models/user", "imported_symbols": "User,Status", "import_type": "static"},
-      {"file": "index.ts", "imported_path": "./services/repo", "imported_symbols": "Repository", "import_type": "static"},
-      {"file": "models/user.ts", "imported_path": "./base", "imported_symbols": "Entity", "import_type": "type_checking"},
-      {"file": "models/user.ts", "imported_path": "./base", "imported_symbols": "BaseModel", "import_type": "static"},
-      {"file": "services/repo.ts", "imported_path": "../models/base", "imported_symbols": "Entity", "import_type": "type_checking"}
+      {
+        "file": "index.ts",
+        "imported_path": "./models/user",
+        "import_type": "static",
+        "imported_symbols": "User,Status"
+      },
+      {
+        "file": "index.ts",
+        "imported_path": "./services/repo",
+        "import_type": "static",
+        "imported_symbols": "Repository"
+      },
+      {
+        "file": "models/user.ts",
+        "imported_path": "./base",
+        "import_type": "type_checking",
+        "imported_symbols": "Entity"
+      },
+      {
+        "file": "models/user.ts",
+        "imported_path": "./base",
+        "import_type": "static",
+        "imported_symbols": "BaseModel"
+      },
+      {
+        "file": "services/repo.ts",
+        "imported_path": "../models/base",
+        "import_type": "type_checking",
+        "imported_symbols": "Entity"
+      }
     ],
     "summary": {
       "total_files": 4,
+      "total_symbols": 25,
       "total_imports": 5
     }
   },

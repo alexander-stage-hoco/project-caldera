@@ -157,9 +157,10 @@ def run_extractor(strategy: str, repo_path: Path, language: str = "python") -> d
 
     Args:
         strategy: Extractor strategy (python: "ast", "treesitter", "hybrid";
-                  csharp: "treesitter", "roslyn", "hybrid")
+                  csharp: "treesitter", "roslyn", "hybrid";
+                  javascript/typescript: "treesitter" only, strategy param ignored)
         repo_path: Path to the repository
-        language: Language to extract ("python" or "csharp")
+        language: Language to extract ("python", "csharp", "javascript", or "typescript")
 
     Returns:
         Extraction result as dict
@@ -183,6 +184,14 @@ def run_extractor(strategy: str, repo_path: Path, language: str = "python") -> d
             extractor = CSharpHybridExtractor()
         else:
             raise ValueError(f"Unknown C# strategy: {strategy}. Use: treesitter, roslyn, hybrid")
+    elif language == "javascript":
+        from scripts.extractors.javascript_treesitter_extractor import JavaScriptTreeSitterExtractor
+
+        extractor = JavaScriptTreeSitterExtractor()
+    elif language == "typescript":
+        from scripts.extractors.typescript_treesitter_extractor import TypeScriptTreeSitterExtractor
+
+        extractor = TypeScriptTreeSitterExtractor()
     else:  # python
         if strategy == "ast":
             from scripts.extractors.python_extractor import PythonExtractor
@@ -306,7 +315,7 @@ def _find_matching_symbol(
     if fuzzy_key not in actual_map:
         return None
 
-    exp_line = expected.get("line_start", 0)
+    exp_line = expected.get("line_start")
     candidates = actual_map[fuzzy_key]
 
     # Find best match: closest line within tolerance, not already matched
@@ -536,8 +545,17 @@ def compare_calls(
     metrics = CategoryMetrics()
     details = DetailedResult()
 
-    expected_map = {_call_key(c): c for c in expected}
-    actual_map = {_call_key(c): c for c in actual}
+    # Only use line_number in keys when ground truth provides it
+    gt_has_line = any("line_number" in c for c in expected)
+
+    def call_key(c: dict) -> tuple:
+        base = (c["caller_file"], c["caller_symbol"], c["callee_symbol"])
+        if gt_has_line and "line_number" in c:
+            return base + (c["line_number"],)
+        return base
+
+    expected_map = {call_key(c): c for c in expected}
+    actual_map = {call_key(c): c for c in actual}
 
     # Group by call type
     type_expected: dict[str, list[dict]] = {}
@@ -557,8 +575,8 @@ def compare_calls(
         exp_list = type_expected.get(call_type, [])
         act_list = type_actual.get(call_type, [])
 
-        exp_keys = {_call_key(c) for c in exp_list}
-        act_keys = {_call_key(c) for c in act_list}
+        exp_keys = {call_key(c) for c in exp_list}
+        act_keys = {call_key(c) for c in act_list}
 
         tp = len(exp_keys & act_keys)
         fp = len(act_keys - exp_keys)
@@ -595,8 +613,17 @@ def compare_imports(
     metrics = CategoryMetrics()
     details = DetailedResult()
 
-    expected_map = {_import_key(i): i for i in expected}
-    actual_map = {_import_key(i): i for i in actual}
+    # Only use line_number in keys when ground truth provides it
+    gt_has_line = any("line_number" in i for i in expected)
+
+    def import_key(i: dict) -> tuple:
+        base = (i["file"], i["imported_path"])
+        if gt_has_line and "line_number" in i:
+            return base + (i["line_number"],)
+        return base
+
+    expected_map = {import_key(i): i for i in expected}
+    actual_map = {import_key(i): i for i in actual}
 
     # Group by import type
     type_expected: dict[str, list[dict]] = {}
@@ -616,8 +643,8 @@ def compare_imports(
         exp_list = type_expected.get(import_type, [])
         act_list = type_actual.get(import_type, [])
 
-        exp_keys = {_import_key(i) for i in exp_list}
-        act_keys = {_import_key(i) for i in act_list}
+        exp_keys = {import_key(i) for i in exp_list}
+        act_keys = {import_key(i) for i in act_list}
 
         tp = len(exp_keys & act_keys)
         fp = len(act_keys - exp_keys)
@@ -1284,7 +1311,7 @@ def evaluate_from_analysis(
         ground_truth_dir: Path to ground truth directory
         repos_dir: Path to synthetic repos directory
         verbose: Whether to print verbose output
-        language: Language to extract ("python" or "csharp")
+        language: Default language to extract (auto-detected from ground truth metadata when available)
 
     Returns:
         Tuple of (list of EvaluationResult, metadata dict)
@@ -1304,7 +1331,9 @@ def evaluate_from_analysis(
             print(f"Warning: Repository {repo_name} not found at {repo_path}", file=sys.stderr)
             continue
 
-        result = evaluate_repo(strategy, repo_name, repo_path, gt_data, language)
+        # Infer language from ground truth metadata, fall back to function parameter
+        repo_language = gt_data.get("metadata", {}).get("language", language)
+        result = evaluate_repo(strategy, repo_name, repo_path, gt_data, repo_language)
         results.append(result)
 
         if verbose:
@@ -1554,9 +1583,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--language",
-        choices=["python", "csharp"],
+        choices=["python", "csharp", "javascript", "typescript"],
         default="python",
-        help="Language to evaluate: python (default) or csharp",
+        help="Default language to evaluate (auto-detected from ground truth metadata when available)",
     )
     args = parser.parse_args()
 

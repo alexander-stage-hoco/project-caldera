@@ -3,13 +3,14 @@ Output Writer for Layout Scanner.
 
 Serializes scan results to JSON format matching the defined schema.
 """
+from __future__ import annotations
 
 import json
 import sys
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .classifier import ClassificationResult, LanguageResult
 from .hierarchy_builder import DirectoryMetrics, HierarchyInfo
@@ -43,9 +44,9 @@ def format_file_object(
     file_info: FileInfo,
     classification: ClassificationResult,
     language: LanguageResult,
-    git_metadata: Optional[Any] = None,
-    content_metadata: Optional[Any] = None,
-) -> Dict[str, Any]:
+    git_metadata: Any | None = None,
+    content_metadata: Any | None = None,
+) -> dict[str, Any]:
     """
     Format a file object for JSON output.
 
@@ -87,7 +88,7 @@ def format_directory_object(
     metrics: DirectoryMetrics,
     classification: str,
     classification_reason: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Format a directory object for JSON output."""
     return {
         "id": dir_info.id,
@@ -112,7 +113,7 @@ def format_directory_object(
     }
 
 
-def format_hierarchy_section(hierarchy: HierarchyInfo) -> Dict[str, Any]:
+def format_hierarchy_section(hierarchy: HierarchyInfo) -> dict[str, Any]:
     """Format the hierarchy section for JSON output."""
     return {
         "root_id": hierarchy.root_id,
@@ -130,13 +131,13 @@ def format_hierarchy_section(hierarchy: HierarchyInfo) -> Dict[str, Any]:
 
 def format_statistics(
     walk_result: WalkResult,
-    file_classifications: Dict[str, str],
-    file_languages: Dict[str, str],
+    file_classifications: dict[str, str],
+    file_languages: dict[str, str],
     scan_duration_ms: int,
-    hierarchy: Optional[HierarchyInfo] = None,
-    dir_metrics: Optional[Dict[str, DirectoryMetrics]] = None,
-    ecosystem_result: Optional[EcosystemDetectionResult] = None,
-) -> Dict[str, Any]:
+    hierarchy: HierarchyInfo | None = None,
+    dir_metrics: dict[str, DirectoryMetrics] | None = None,
+    ecosystem_result: EcosystemDetectionResult | None = None,
+) -> dict[str, Any]:
     """Format the statistics section for JSON output.
 
     Args:
@@ -152,12 +153,12 @@ def format_statistics(
         Statistics dictionary for JSON output.
     """
     # Count by classification
-    by_classification: Dict[str, int] = {}
+    by_classification: dict[str, int] = {}
     for path, classification in file_classifications.items():
         by_classification[classification] = by_classification.get(classification, 0) + 1
 
     # Count by language (include "unknown" for consistency with total count)
-    by_language: Dict[str, int] = {}
+    by_language: dict[str, int] = {}
     for path, language in file_languages.items():
         by_language[language] = by_language.get(language, 0) + 1
 
@@ -230,18 +231,18 @@ def format_statistics(
 
 def build_output(
     walk_result: WalkResult,
-    file_classifications: Dict[str, ClassificationResult],
-    file_languages: Dict[str, LanguageResult],
-    dir_classifications: Dict[str, tuple[str, str]],  # path -> (category, reason)
-    dir_metrics: Dict[str, DirectoryMetrics],
+    file_classifications: dict[str, ClassificationResult],
+    file_languages: dict[str, LanguageResult],
+    dir_classifications: dict[str, tuple[str, str]],  # path -> (category, reason)
+    dir_metrics: dict[str, DirectoryMetrics],
     hierarchy: HierarchyInfo,
     repo_name: str,
     repo_path: str,
     scan_duration_ms: int,
-    git_metadata: Optional[Dict[str, Any]] = None,
-    content_metadata: Optional[Dict[str, Any]] = None,
-    ecosystem_result: Optional[EcosystemDetectionResult] = None,
-) -> Dict[str, Any]:
+    git_metadata: dict[str, Any] | None = None,
+    content_metadata: dict[str, Any] | None = None,
+    ecosystem_result: EcosystemDetectionResult | None = None,
+) -> dict[str, Any]:
     """
     Build the complete output structure.
 
@@ -263,7 +264,7 @@ def build_output(
         Complete output dictionary ready for JSON serialization
     """
     # Build files section
-    files: Dict[str, Any] = {}
+    files: dict[str, Any] = {}
     for path, file_info in walk_result.files.items():
         classification = file_classifications.get(
             path,
@@ -280,7 +281,7 @@ def build_output(
         )
 
     # Build directories section
-    directories: Dict[str, Any] = {}
+    directories: dict[str, Any] = {}
     for path, dir_info in walk_result.directories.items():
         metrics = dir_metrics.get(path, DirectoryMetrics())
         classification, reason = dir_classifications.get(path, ("other", "unknown"))
@@ -324,7 +325,7 @@ def build_output(
 
 
 def write_output(
-    output: Dict[str, Any],
+    output: dict[str, Any],
     output_path: Path,
     indent: int = 2,
 ) -> None:
@@ -342,6 +343,6 @@ def write_output(
         json.dump(output, f, indent=indent, ensure_ascii=False)
 
 
-def output_to_json(output: Dict[str, Any], indent: int = 2) -> str:
+def output_to_json(output: dict[str, Any], indent: int = 2) -> str:
     """Convert output to JSON string."""
     return json.dumps(output, indent=indent, ensure_ascii=False)

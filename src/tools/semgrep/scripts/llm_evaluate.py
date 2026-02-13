@@ -12,6 +12,7 @@ Combined scoring with programmatic evaluation:
 - Programmatic: 60%
 - LLM: 40%
 """
+from __future__ import annotations
 
 import argparse
 import json

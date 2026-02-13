@@ -3,6 +3,7 @@
 Provides functions to query PyPI, npm, and other package registries
 to determine the latest available versions for dependency analysis.
 """
+from __future__ import annotations
 
 import concurrent.futures
 import logging

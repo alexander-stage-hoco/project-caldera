@@ -10,11 +10,12 @@ Multi-signal classification engine that categorizes files based on:
 Provides confidence scores and human-readable explanations.
 Supports configurable rules via YAML files.
 """
+from __future__ import annotations
 
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .rule_loader import RuleSet
@@ -64,7 +65,7 @@ CLASSIFICATIONS = [
 # Signal 1: Path-based rules (highest priority, weight 0.9)
 # Note: Source patterns are matched at path start only to avoid conflicts
 # with paths like "vendor/github.com/pkg/" or "third_party/protobuf/src/"
-PATH_RULES: Dict[str, List[str]] = {
+PATH_RULES: dict[str, list[str]] = {
     "source": [
         "src/", "app/", "internal/", "cmd/",
     ],
@@ -100,7 +101,7 @@ PATH_RULES: Dict[str, List[str]] = {
 }
 
 # Signal 2: Filename pattern rules (weight 0.8)
-FILENAME_RULES: Dict[str, List[str]] = {
+FILENAME_RULES: dict[str, list[str]] = {
     "test": [
         r"^test_.*\.py$",           # Python: test_*.py
         r".*_test\.py$",            # Python: *_test.py
@@ -207,7 +208,7 @@ FILENAME_RULES: Dict[str, List[str]] = {
 }
 
 # Signal 3: Extension rules (weight 0.5)
-EXTENSION_RULES: Dict[str, List[str]] = {
+EXTENSION_RULES: dict[str, list[str]] = {
     "source": [
         # Python
         ".py", ".pyw", ".pyi", ".pyx",
@@ -260,7 +261,7 @@ EXTENSION_RULES: Dict[str, List[str]] = {
 }
 
 # Language detection from extensions
-LANGUAGE_MAP: Dict[str, str] = {
+LANGUAGE_MAP: dict[str, str] = {
     # Python
     ".py": "python",
     ".pyw": "python",
@@ -435,7 +436,7 @@ class ClassificationResult:
     category: str                      # Primary classification
     confidence: float                  # 0.0 to 1.0
     reason: str                        # Human-readable explanation
-    signals: Dict[str, str] = field(default_factory=dict)  # All signals that fired
+    signals: dict[str, str] = field(default_factory=dict)  # All signals that fired
 
 
 @dataclass
@@ -449,12 +450,12 @@ def classify_file(
     path: str,
     name: str,
     extension: str,
-    custom_path_rules: Optional[Dict[str, List[str]]] = None,
-    custom_filename_rules: Optional[Dict[str, List[str]]] = None,
-    custom_extension_rules: Optional[Dict[str, List[str]]] = None,
-    overrides: Optional[Dict[str, str]] = None,
-    rules: Optional["RuleSet"] = None,
-    weights: Optional[Dict[str, float]] = None,
+    custom_path_rules: dict[str, list[str]] | None = None,
+    custom_filename_rules: dict[str, list[str]] | None = None,
+    custom_extension_rules: dict[str, list[str]] | None = None,
+    overrides: dict[str, str] | None = None,
+    rules: "RuleSet" | None = None,
+    weights: dict[str, float] | None = None,
 ) -> ClassificationResult:
     """
     Classify a file using multi-signal approach.
@@ -473,8 +474,8 @@ def classify_file(
     Returns:
         ClassificationResult with category, confidence, and explanation
     """
-    scores: Dict[str, float] = defaultdict(float)
-    signals: Dict[str, str] = {}
+    scores: dict[str, float] = defaultdict(float)
+    signals: dict[str, str] = {}
 
     # Determine signal weights
     if rules and rules.weights:
@@ -645,7 +646,7 @@ def classify_file(
 def detect_language(
     name: str,
     extension: str,
-    content: Optional[bytes] = None,
+    content: bytes | None = None,
     validate: bool = False,
 ) -> LanguageResult:
     """
@@ -711,7 +712,7 @@ def detect_language(
 
 # Directory name patterns that override content-based classification
 # These well-known directory names have strong semantic meaning
-DIRECTORY_NAME_RULES: Dict[str, List[str]] = {
+DIRECTORY_NAME_RULES: dict[str, list[str]] = {
     "source": ["src", "source", "lib", "pkg", "app", "internal", "cmd"],
     "test": ["test", "tests", "spec", "__tests__", "testing"],
     "docs": ["docs", "doc", "documentation"],
@@ -722,8 +723,8 @@ DIRECTORY_NAME_RULES: Dict[str, List[str]] = {
 
 
 def classify_directory(
-    file_classifications: List[str],
-) -> Tuple[str, str]:
+    file_classifications: list[str],
+) -> tuple[str, str]:
     """
     Classify a directory based on its contents.
 
@@ -739,7 +740,7 @@ def classify_directory(
         return "other", "empty directory"
 
     # Count classifications
-    counts: Dict[str, int] = defaultdict(int)
+    counts: dict[str, int] = defaultdict(int)
     for cat in file_classifications:
         counts[cat] += 1
 
@@ -754,8 +755,8 @@ def classify_directory(
 
 def classify_directory_by_name(
     directory_name: str,
-    file_classifications: List[str],
-) -> Tuple[str, str]:
+    file_classifications: list[str],
+) -> tuple[str, str]:
     """
     Classify directory using name heuristics first, then majority vote.
 
@@ -784,18 +785,18 @@ def classify_directory_by_name(
 
 
 def get_classification_distribution(
-    file_classifications: List[str]
-) -> Dict[str, int]:
+    file_classifications: list[str]
+) -> dict[str, int]:
     """Get distribution of classifications."""
-    counts: Dict[str, int] = defaultdict(int)
+    counts: dict[str, int] = defaultdict(int)
     for cat in file_classifications:
         counts[cat] += 1
     return dict(counts)
 
 
-def get_language_distribution(languages: List[str]) -> Dict[str, int]:
+def get_language_distribution(languages: list[str]) -> dict[str, int]:
     """Get distribution of languages."""
-    counts: Dict[str, int] = defaultdict(int)
+    counts: dict[str, int] = defaultdict(int)
     for lang in languages:
         if lang != "unknown":
             counts[lang] += 1

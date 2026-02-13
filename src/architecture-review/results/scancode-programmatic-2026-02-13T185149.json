@@ -1,7 +1,7 @@
 {
-  "review_id": "94288f25-cd16-4f39-87eb-a092551af2be",
-  "timestamp": "2026-02-13T18:05:56.382918+00:00",
-  "target": "lizard",
+  "review_id": "18312555-f34f-4ad4-9661-a089dacafda8",
+  "timestamp": "2026-02-13T18:51:49.525345+00:00",
+  "target": "scancode",
   "review_type": "tool_implementation",
   "dimensions": [
     {
@@ -14,31 +14,22 @@
     {
       "dimension": "output_schema_envelope",
       "weight": 0.2,
-      "status": "warn",
-      "score": 3,
-      "findings": [
-        {
-          "severity": "warning",
-          "rule_id": "ANALYZE_ENVELOPE",
-          "message": "analyze.py does not use create_envelope or manually build envelope",
-          "category": "missing_requirement",
-          "file": "src/tools/lizard/scripts/analyze.py",
-          "recommendation": "Use common.envelope_formatter.create_envelope"
-        }
-      ]
+      "status": "pass",
+      "score": 5,
+      "findings": []
     },
     {
       "dimension": "code_conventions",
       "weight": 0.15,
-      "status": "warn",
-      "score": 3,
+      "status": "pass",
+      "score": 4,
       "findings": [
         {
           "severity": "info",
           "rule_id": "FUTURE_ANNOTATIONS",
           "message": "Missing 'from __future__ import annotations'",
           "category": "pattern_violation",
-          "file": "src/tools/lizard/scripts/__init__.py",
+          "file": "src/tools/scancode/scripts/create_synthetic_repos.py",
           "recommendation": "Add 'from __future__ import annotations' at top of file"
         },
         {
@@ -46,32 +37,16 @@
           "rule_id": "FUTURE_ANNOTATIONS",
           "message": "Missing 'from __future__ import annotations'",
           "category": "pattern_violation",
-          "file": "src/tools/lizard/scripts/function_analyzer.py",
+          "file": "src/tools/scancode/scripts/license_analyzer.py",
           "recommendation": "Add 'from __future__ import annotations' at top of file"
-        },
-        {
-          "severity": "info",
-          "rule_id": "PEP604_UNIONS",
-          "message": "Uses Optional[X] instead of PEP 604 'X | None' syntax",
-          "category": "pattern_violation",
-          "file": "src/tools/lizard/scripts/function_analyzer.py",
-          "recommendation": "Replace Optional[X] with X | None"
         },
         {
           "severity": "info",
           "rule_id": "FUTURE_ANNOTATIONS",
           "message": "Missing 'from __future__ import annotations'",
           "category": "pattern_violation",
-          "file": "src/tools/lizard/scripts/evaluate.py",
+          "file": "src/tools/scancode/scripts/evaluate.py",
           "recommendation": "Add 'from __future__ import annotations' at top of file"
-        },
-        {
-          "severity": "info",
-          "rule_id": "PEP604_UNIONS",
-          "message": "Uses Optional[X] instead of PEP 604 'X | None' syntax",
-          "category": "pattern_violation",
-          "file": "src/tools/lizard/scripts/evaluate.py",
-          "recommendation": "Replace Optional[X] with X | None"
         }
       ]
     },
@@ -84,9 +59,9 @@
         {
           "severity": "info",
           "rule_id": "PROMPT_EVIDENCE",
-          "message": "Prompts missing '{{ evidence }}' placeholder: ['function_detection.md', 'statistics.md', 'hotspot_ranking.md', 'ccn_accuracy.md']",
+          "message": "Prompts missing '{{ evidence }}' placeholder: ['accuracy.md', 'coverage.md', 'actionability.md', 'risk_classification.md']",
           "category": "pattern_violation",
-          "file": "src/tools/lizard/evaluation/llm/prompts",
+          "file": "src/tools/scancode/evaluation/llm/prompts",
           "recommendation": "Add {{ evidence }} placeholder to prompt templates"
         },
         {
@@ -94,7 +69,7 @@
           "rule_id": "OBSERVABILITY_ENFORCED",
           "message": "Evaluation orchestrator does not reference observability/tracing",
           "category": "pattern_violation",
-          "file": "src/tools/lizard/evaluation/llm/orchestrator.py",
+          "file": "src/tools/scancode/evaluation/llm/orchestrator.py",
           "recommendation": "Integrate shared.observability for LLM interaction logging"
         }
       ]
@@ -103,19 +78,28 @@
       "dimension": "blueprint_alignment",
       "weight": 0.15,
       "status": "pass",
-      "score": 5,
-      "findings": []
+      "score": 4,
+      "findings": [
+        {
+          "severity": "info",
+          "rule_id": "BLUEPRINT_HAS_EVAL_DATA",
+          "message": "BLUEPRINT Evaluation section has no numeric data (scores, percentages)",
+          "category": "placeholder_content",
+          "file": "src/tools/scancode/BLUEPRINT.md",
+          "recommendation": "Populate Evaluation section with actual metric data"
+        }
+      ]
     }
   ],
   "summary": {
-    "total_findings": 8,
+    "total_findings": 6,
     "by_severity": {
       "error": 0,
-      "warning": 1,
-      "info": 7
+      "warning": 0,
+      "info": 6
     },
     "overall_status": "STRONG_PASS",
-    "overall_score": 4.0,
+    "overall_score": 4.47,
     "dimensions_reviewed": 5
   }
 }

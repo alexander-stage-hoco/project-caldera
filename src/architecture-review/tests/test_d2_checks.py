@@ -141,12 +141,22 @@ class TestAnalyzePathNorm:
         findings = _check_analyze_path_norm(content, tf)
         assert len(findings) == 0
 
-    def test_missing(self) -> None:
+    def test_missing_warning(self) -> None:
         content = "import json\nimport sys\n"
         tf = _mock_tf()
         findings = _check_analyze_path_norm(content, tf)
         assert len(findings) == 1
         assert findings[0].rule_id == "ANALYZE_PATH_NORM"
+        assert findings[0].severity == "warning"
+
+    def test_downgrade_with_common_imports(self) -> None:
+        """When tool imports from common.* but not path_normalization, downgrade to info."""
+        content = "from common.envelope_formatter import create_envelope\n"
+        tf = _mock_tf()
+        findings = _check_analyze_path_norm(content, tf)
+        assert len(findings) == 1
+        assert findings[0].rule_id == "ANALYZE_PATH_NORM"
+        assert findings[0].severity == "info"
 
 
 class TestAnalyzeCliArgs:
@@ -168,6 +178,41 @@ class TestAnalyzeCliArgs:
         findings = _check_analyze_cli_args(content, tf)
         assert len(findings) == 1
         assert findings[0].rule_id == "ANALYZE_CLI_ARGS"
+
+
+class TestAnalyzeEnvelope:
+    def test_create_envelope(self) -> None:
+        content = "output = create_envelope(data, tool_name='test')\n"
+        tf = _mock_tf()
+        findings = _check_analyze_envelope(content, tf)
+        assert len(findings) == 0
+
+    def test_manual_envelope(self) -> None:
+        content = 'metadata = {"schema_version": "1.0.0", "tool_name": "test"}\n'
+        tf = _mock_tf()
+        findings = _check_analyze_envelope(content, tf)
+        assert len(findings) == 0
+
+    def test_delegated_result_to_output(self) -> None:
+        """Recognize result_to_output pattern as delegated envelope creation."""
+        content = "output = result_to_output(result)\n"
+        tf = _mock_tf()
+        findings = _check_analyze_envelope(content, tf)
+        assert len(findings) == 0
+
+    def test_delegated_to_envelope(self) -> None:
+        """Recognize to_envelope pattern as delegated envelope creation."""
+        content = "output = to_envelope(data)\n"
+        tf = _mock_tf()
+        findings = _check_analyze_envelope(content, tf)
+        assert len(findings) == 0
+
+    def test_missing(self) -> None:
+        content = "import json\ndata = {}\n"
+        tf = _mock_tf()
+        findings = _check_analyze_envelope(content, tf)
+        assert len(findings) == 1
+        assert findings[0].rule_id == "ANALYZE_ENVELOPE"
 
 
 class TestIntegration:

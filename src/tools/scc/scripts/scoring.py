@@ -1,6 +1,7 @@
 """Scoring module for scc PoC evaluation."""
+from __future__ import annotations
 
-from typing import List, Dict
+from typing import Dict, List
 from scripts.checks import CheckResult, DimensionResult
 
 

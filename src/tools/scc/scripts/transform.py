@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Transform scc JSON output to evidence schema format."""
+from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List
 
 
 def load_scc_output(path: Path) -> list:

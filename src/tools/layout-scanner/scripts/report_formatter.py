@@ -7,10 +7,11 @@ Provides multiple output formats for evaluation results:
 - markdown: Markdown formatted report
 - json: JSON output (default behavior)
 """
+from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .checks import CheckCategory, CheckResult, DimensionResult
 
@@ -69,12 +70,12 @@ class EvaluationResult:
     timestamp: str
     overall_score: float
     decision: str
-    dimensions: List[DimensionResult]
+    dimensions: list[DimensionResult]
     total_checks: int
     passed_checks: int
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "EvaluationResult":
+    def from_dict(cls, data: dict[str, Any]) -> "EvaluationResult":
         """Create from evaluation output dictionary."""
         dimensions = []
         for dim_data in data.get("dimensions", []):
@@ -158,7 +159,7 @@ class ReportFormatter:
         self,
         result: EvaluationResult,
         format_type: str = "table",
-        category_filter: Optional[str] = None,
+        category_filter: str | None = None,
         status_filter: str = "all",
         verbose: bool = False,
     ) -> str:
@@ -287,7 +288,7 @@ class ReportFormatter:
 
     def _format_dimension_table(
         self, dim: DimensionResult, verbose: bool
-    ) -> List[str]:
+    ) -> list[str]:
         """Format a single dimension as a table section."""
         lines = []
         width = 70
@@ -454,7 +455,7 @@ class ReportFormatter:
         return json.dumps(data, indent=2)
 
 
-def get_recommendations(failed_checks: List[CheckResult]) -> List[str]:
+def get_recommendations(failed_checks: list[CheckResult]) -> list[str]:
     """
     Generate recommendations based on failed checks.
 

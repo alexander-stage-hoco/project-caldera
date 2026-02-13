@@ -5,6 +5,7 @@ Evaluation Orchestrator for Layout Scanner.
 Runs all evaluation checks against scanner output and produces
 a comprehensive evaluation report.
 """
+from __future__ import annotations
 
 import argparse
 import json
@@ -12,7 +13,7 @@ import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .checks import (
     CheckCategory,
@@ -32,12 +33,12 @@ from .checks.performance import run_performance_checks
 from .report_formatter import EvaluationResult, ReportFormatter
 
 
-def generate_scorecard_json(summary: Dict[str, Any], results: List[Dict[str, Any]]) -> Dict[str, Any]:
+def generate_scorecard_json(summary: dict[str, Any], results: list[dict[str, Any]]) -> dict[str, Any]:
     """Generate structured scorecard JSON data from evaluation results."""
     from datetime import datetime, timezone
 
     # Group checks by dimension/category
-    dimension_data: Dict[str, Dict] = {}
+    dimension_data: dict[str, dict] = {}
     for repo_result in results:
         for dim in repo_result.get("dimensions", []):
             cat_name = dim.get("category", "unknown")
@@ -119,7 +120,7 @@ def generate_scorecard_json(summary: Dict[str, Any], results: List[Dict[str, Any
     }
 
 
-def generate_scorecard_md(scorecard: Dict[str, Any]) -> str:
+def generate_scorecard_md(scorecard: dict[str, Any]) -> str:
     """Generate comprehensive markdown scorecard."""
     summary = scorecard.get("summary", {})
     dimensions = scorecard.get("dimensions", [])
@@ -201,7 +202,7 @@ def generate_scorecard_md(scorecard: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def load_output(path: Path) -> Dict[str, Any]:
+def load_output(path: Path) -> dict[str, Any]:
     """Load scanner output from JSON file."""
     with open(path) as f:
         payload = json.load(f)
@@ -269,7 +270,7 @@ def load_output(path: Path) -> Dict[str, Any]:
     return payload
 
 
-def load_ground_truth(name: str, ground_truth_dir: Path) -> Optional[Dict[str, Any]]:
+def load_ground_truth(name: str, ground_truth_dir: Path) -> dict[str, Any] | None:
     """Load ground truth for a repository."""
     path = ground_truth_dir / f"{name}.json"
     if path.exists():
@@ -279,16 +280,16 @@ def load_ground_truth(name: str, ground_truth_dir: Path) -> Optional[Dict[str, A
 
 
 def run_all_checks(
-    output: Dict[str, Any],
-    ground_truth: Optional[Dict[str, Any]] = None,
-    schema_path: Optional[Path] = None,
-) -> Dict[CheckCategory, List[CheckResult]]:
+    output: dict[str, Any],
+    ground_truth: dict[str, Any] | None = None,
+    schema_path: Path | None = None,
+) -> dict[CheckCategory, list[CheckResult]]:
     """
     Run all evaluation checks.
 
     Returns dict of category -> list of check results.
     """
-    results: Dict[CheckCategory, List[CheckResult]] = {}
+    results: dict[CheckCategory, list[CheckResult]] = {}
 
     # Output Quality checks
     results[CheckCategory.OUTPUT_QUALITY] = run_output_quality_checks(
@@ -322,8 +323,8 @@ def run_all_checks(
 
 
 def compute_dimension_results(
-    check_results: Dict[CheckCategory, List[CheckResult]]
-) -> List[DimensionResult]:
+    check_results: dict[CheckCategory, list[CheckResult]]
+) -> list[DimensionResult]:
     """Compute dimension-level results from check results."""
     dimensions = []
 
@@ -345,9 +346,9 @@ def compute_dimension_results(
 
 def evaluate_output(
     output_path: Path,
-    ground_truth_dir: Optional[Path] = None,
-    schema_path: Optional[Path] = None,
-) -> Dict[str, Any]:
+    ground_truth_dir: Path | None = None,
+    schema_path: Path | None = None,
+) -> dict[str, Any]:
     """
     Evaluate a single scanner output file.
 
@@ -399,8 +400,8 @@ def evaluate_all(
     output_dir: Path,
     ground_truth_dir: Path,
     results_dir: Path,
-    schema_path: Optional[Path] = None,
-) -> Dict[str, Any]:
+    schema_path: Path | None = None,
+) -> dict[str, Any]:
     """
     Evaluate all scanner outputs in a directory.
 
@@ -482,7 +483,7 @@ def evaluate_all(
     return summary
 
 
-def main(args: Optional[List[str]] = None) -> int:
+def main(args: list[str] | None = None) -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Evaluate Layout Scanner output",

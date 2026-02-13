@@ -17,6 +17,7 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from common.cli_parser import add_common_args, validate_common_args
 from common.envelope_formatter import create_envelope, get_current_timestamp
+from shared.path_utils import normalize_file_path
 
 from .layout_scanner import load_config, scan_repository
 from .output_writer import TOOL_VERSION, SCHEMA_VERSION

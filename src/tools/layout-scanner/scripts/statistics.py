@@ -4,11 +4,12 @@ Statistical Utilities for Layout Scanner.
 Provides functions to compute distribution statistics including
 percentiles, mean, standard deviation, skewness, and kurtosis.
 """
+from __future__ import annotations
 
 import math
 import statistics
 from dataclasses import dataclass, asdict
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Sequence, Union
 
 # Try to import scipy for skewness/kurtosis
 try:
@@ -30,15 +31,15 @@ class DistributionStats:
     p25: float  # 25th percentile
     p50: float  # 50th percentile (median)
     p75: float  # 75th percentile
-    skewness: Optional[float] = None  # None if scipy not available or insufficient data
-    kurtosis: Optional[float] = None  # None if scipy not available or insufficient data
+    skewness: float | None = None  # None if scipy not available or insufficient data
+    kurtosis: float | None = None  # None if scipy not available or insufficient data
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return asdict(self)
 
 
-def compute_percentile(sorted_values: List[float], percentile: float) -> float:
+def compute_percentile(sorted_values: list[float], percentile: float) -> float:
     """Compute percentile using linear interpolation.
 
     Args:
@@ -64,7 +65,7 @@ def compute_percentile(sorted_values: List[float], percentile: float) -> float:
     return sorted_values[lower_idx] + fraction * (sorted_values[upper_idx] - sorted_values[lower_idx])
 
 
-def compute_skewness(values: List[float], mean: float, std_dev: float) -> Optional[float]:
+def compute_skewness(values: list[float], mean: float, std_dev: float) -> float | None:
     """Compute Fisher-Pearson skewness coefficient.
 
     Uses scipy if available, otherwise computes manually.
@@ -93,7 +94,7 @@ def compute_skewness(values: List[float], mean: float, std_dev: float) -> Option
     return m3 / (std_dev ** 3)
 
 
-def compute_kurtosis(values: List[float], mean: float, std_dev: float) -> Optional[float]:
+def compute_kurtosis(values: list[float], mean: float, std_dev: float) -> float | None:
     """Compute excess kurtosis.
 
     Uses scipy if available, otherwise computes manually.
@@ -195,7 +196,7 @@ def compute_stats(values: Sequence[Union[int, float]]) -> DistributionStats:
 
 
 def compute_depth_distribution_stats(
-    depth_distribution: Dict[int, int]
+    depth_distribution: dict[int, int]
 ) -> DistributionStats:
     """Compute statistics from a depth distribution map.
 
@@ -241,7 +242,7 @@ def compute_file_size_stats(
     return compute_stats(file_sizes)
 
 
-def get_statistics_capabilities() -> Dict[str, bool]:
+def get_statistics_capabilities() -> dict[str, bool]:
     """Get information about available statistics capabilities.
 
     Returns:

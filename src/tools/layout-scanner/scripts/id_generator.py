@@ -4,6 +4,7 @@ ID Generator for Layout Scanner.
 Generates stable, deterministic IDs for files and directories using SHA-256 hashing.
 IDs are prefixed with 'f-' for files and 'd-' for directories.
 """
+from __future__ import annotations
 
 import hashlib
 from typing import Literal

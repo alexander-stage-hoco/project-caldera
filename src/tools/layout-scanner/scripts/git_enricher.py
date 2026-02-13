@@ -5,13 +5,13 @@ This module collects git history metadata for files in a repository,
 populating fields like first_commit_date, last_commit_date, commit_count,
 and author_count.
 """
+from __future__ import annotations
 
 import subprocess
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 class GitFileMetadata:
     """Git metadata for a single file."""
 
-    first_commit_date: Optional[str] = None
-    last_commit_date: Optional[str] = None
+    first_commit_date: str | None = None
+    last_commit_date: str | None = None
     commit_count: int = 0
     author_count: int = 0
 
@@ -31,11 +31,11 @@ class GitEnrichmentResult:
     """Result of git enrichment pass."""
 
     is_git_repo: bool
-    file_metadata: Dict[str, GitFileMetadata] = field(default_factory=dict)
+    file_metadata: dict[str, GitFileMetadata] = field(default_factory=dict)
     tracked_file_count: int = 0
     enriched_file_count: int = 0
     duration_ms: int = 0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 def is_git_repository(repo_path: Path) -> bool:
@@ -61,7 +61,7 @@ def is_git_repository(repo_path: Path) -> bool:
         return False
 
 
-def get_tracked_files(repo_path: Path) -> Set[str]:
+def get_tracked_files(repo_path: Path) -> set[str]:
     """
     Get set of files tracked by git.
 
@@ -89,7 +89,7 @@ def get_tracked_files(repo_path: Path) -> Set[str]:
         return set()
 
 
-def _parse_git_log_output(output: str) -> Dict[str, List[Tuple[str, str]]]:
+def _parse_git_log_output(output: str) -> dict[str, list[tuple[str, str]]]:
     """
     Parse git log output with commit info and file names.
 
@@ -105,7 +105,7 @@ def _parse_git_log_output(output: str) -> Dict[str, List[Tuple[str, str]]]:
     Returns:
         Dict mapping file paths to list of (author_email, iso_date) tuples
     """
-    file_commits: Dict[str, List[Tuple[str, str]]] = {}
+    file_commits: dict[str, list[tuple[str, str]]] = {}
 
     if not output.strip():
         return file_commits
@@ -137,9 +137,9 @@ def _parse_git_log_output(output: str) -> Dict[str, List[Tuple[str, str]]]:
 
 def get_file_git_metadata(
     repo_path: Path,
-    file_paths: List[str],
+    file_paths: list[str],
     timeout_seconds: int = 120,
-) -> Dict[str, GitFileMetadata]:
+) -> dict[str, GitFileMetadata]:
     """
     Get git metadata for multiple files in a single batch operation.
 
@@ -191,7 +191,7 @@ def get_file_git_metadata(
         file_commits = _parse_git_log_output(result.stdout)
 
         # Convert to GitFileMetadata
-        metadata: Dict[str, GitFileMetadata] = {}
+        metadata: dict[str, GitFileMetadata] = {}
 
         for file_path, commits in file_commits.items():
             if not commits:
@@ -223,7 +223,7 @@ def get_file_git_metadata(
 
 def enrich_files(
     repo_path: Path,
-    file_paths: List[str],
+    file_paths: list[str],
     timeout_seconds: int = 120,
 ) -> GitEnrichmentResult:
     """

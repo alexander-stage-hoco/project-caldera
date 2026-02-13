@@ -30,6 +30,7 @@ from typing import Any
 
 # Add shared src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from common.path_normalization import normalize_file_path
 
 TOOL_NAME = "git-blame-scanner"
 TOOL_VERSION = "1.0.0"
@@ -303,7 +304,7 @@ def analyze_repo(repo_path: Path) -> dict:
         "tool_version": TOOL_VERSION,
         "files": [
             {
-                "path": fs.relative_path,
+                "path": normalize_file_path(fs.relative_path, repo_path),
                 "total_lines": fs.total_lines,
                 "unique_authors": fs.unique_authors,
                 "top_author": fs.top_author,

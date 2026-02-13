@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Main evaluation orchestrator for scc PoC."""
+from __future__ import annotations
 
 import json
 import os

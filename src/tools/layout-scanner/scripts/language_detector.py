@@ -15,11 +15,11 @@ Detection strategies (in order of priority):
 
 Optionally validates language detection using tree-sitter parsing.
 """
+from __future__ import annotations
 
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, List
 
 # Try to import enry (optional - has build requirements)
 try:
@@ -69,7 +69,7 @@ class LanguageResult:
     language: str           # Detected language or "unknown"
     confidence: float       # 0.0 to 1.0
     method: str             # Detection method used
-    alternatives: List[str] # Alternative language candidates
+    alternatives: list[str] # Alternative language candidates
 
 
 # Extension-based language mapping (fallback)
@@ -299,7 +299,7 @@ def normalize_language(lang: str) -> str:
     return ENRY_LANGUAGE_MAP.get(lang.lower(), lang)
 
 
-def detect_language_by_shebang(content: bytes) -> Optional[str]:
+def detect_language_by_shebang(content: bytes) -> str | None:
     """
     Detect language from shebang line in file content.
 
@@ -355,7 +355,7 @@ def detect_language_by_shebang(content: bytes) -> Optional[str]:
     return SHEBANG_MAP.get(interpreter)
 
 
-def detect_language_by_extension(filename: str, content: Optional[bytes] = None) -> LanguageResult:
+def detect_language_by_extension(filename: str, content: bytes | None = None) -> LanguageResult:
     """Detect language using extension-based mapping with optional shebang detection.
 
     Args:
@@ -415,7 +415,7 @@ def detect_language_by_extension(filename: str, content: Optional[bytes] = None)
     )
 
 
-def detect_language_with_enry(filename: str, content: Optional[bytes] = None) -> LanguageResult:
+def detect_language_with_enry(filename: str, content: bytes | None = None) -> LanguageResult:
     """Detect language using go-enry (primary method) or fallback to enhanced extension detection."""
     if not ENRY_AVAILABLE:
         return detect_language_by_extension(filename, content)
@@ -511,7 +511,7 @@ def count_parse_errors(node) -> int:
 
 def detect_language(
     filename: str,
-    content: Optional[bytes] = None,
+    content: bytes | None = None,
     validate: bool = False
 ) -> LanguageResult:
     """
@@ -547,7 +547,7 @@ def detect_language(
     return result
 
 
-def is_binary_file(filename: str, content: Optional[bytes] = None) -> bool:
+def is_binary_file(filename: str, content: bytes | None = None) -> bool:
     """Check if a file is binary (not text)."""
     if ENRY_AVAILABLE and content:
         try:
@@ -601,7 +601,7 @@ def is_vendor_file(filename: str) -> bool:
     return any(p in filename_lower for p in vendor_patterns)
 
 
-def is_generated_file(filename: str, content: Optional[bytes] = None) -> bool:
+def is_generated_file(filename: str, content: bytes | None = None) -> bool:
     """Check if a file is auto-generated."""
     if ENRY_AVAILABLE and content:
         try:

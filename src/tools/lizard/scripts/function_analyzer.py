@@ -5,6 +5,8 @@ Outputs per-function metrics including cyclomatic complexity (CCN), NLOC,
 token count, and parameter count. Includes 12-section dashboard visualization.
 """
 
+from __future__ import annotations
+
 import argparse
 import fnmatch
 import json
@@ -17,7 +19,7 @@ from collections import defaultdict
 from dataclasses import dataclass, asdict, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Dict, Optional, Any
+from typing import Any, Dict, List
 
 import lizard
 
@@ -419,9 +421,9 @@ class DirectoryStats:
     avg_params: float = 0.0
     max_params: int = 0
     functions_over_threshold: int = 0
-    ccn_distribution: Optional[Distribution] = None
-    nloc_distribution: Optional[Distribution] = None
-    params_distribution: Optional[Distribution] = None
+    ccn_distribution: Distribution | None = None
+    nloc_distribution: Distribution | None = None
+    params_distribution: Distribution | None = None
 
 
 @dataclass
@@ -464,9 +466,9 @@ class AnalysisSummary:
     excluded_by_minified: int = 0
     excluded_by_size: int = 0
     excluded_by_language: int = 0
-    structure: Optional[DirectoryStructure] = None
-    ccn_distribution: Optional[Distribution] = None
-    nloc_distribution: Optional[Distribution] = None
+    structure: DirectoryStructure | None = None
+    ccn_distribution: Distribution | None = None
+    nloc_distribution: Distribution | None = None
 
 
 @dataclass
@@ -487,7 +489,7 @@ class AnalysisResult:
     directories: List[DirectoryInfo] = field(default_factory=list)
     files: List[FileInfo] = field(default_factory=list)
     excluded_files: List[ExcludedFile] = field(default_factory=list)
-    summary: Optional[AnalysisSummary] = None
+    summary: AnalysisSummary | None = None
     by_language: Dict[str, Dict] = field(default_factory=dict)
 
 

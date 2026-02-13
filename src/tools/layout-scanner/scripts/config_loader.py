@@ -7,30 +7,31 @@ Loads configuration from:
 3. ~/.config/layout-scanner/config.json (user default)
 4. Built-in defaults (lowest priority)
 """
+from __future__ import annotations
 
 import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
 class ClassificationConfig:
     """Configuration for file classification."""
     confidence_threshold: float = 0.5
-    rules_path: Optional[Path] = None  # Path to YAML rules file
-    custom_path_rules: Dict[str, List[str]] = field(default_factory=dict)
-    custom_filename_rules: Dict[str, List[str]] = field(default_factory=dict)
-    custom_extension_rules: Dict[str, List[str]] = field(default_factory=dict)
-    overrides: Dict[str, str] = field(default_factory=dict)
-    weights: Optional[Dict[str, float]] = None  # Override signal weights
+    rules_path: Path | None = None  # Path to YAML rules file
+    custom_path_rules: dict[str, list[str]] = field(default_factory=dict)
+    custom_filename_rules: dict[str, list[str]] = field(default_factory=dict)
+    custom_extension_rules: dict[str, list[str]] = field(default_factory=dict)
+    overrides: dict[str, str] = field(default_factory=dict)
+    weights: dict[str, float] | None = None  # Override signal weights
 
 
 @dataclass
 class IgnoreConfig:
     """Configuration for file/directory ignoring."""
-    additional_patterns: List[str] = field(default_factory=list)
+    additional_patterns: list[str] = field(default_factory=list)
     respect_gitignore: bool = True
 
 
@@ -67,7 +68,7 @@ class ScannerConfig:
     content: ContentConfig = field(default_factory=ContentConfig)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ScannerConfig":
+    def from_dict(cls, data: dict[str, Any]) -> "ScannerConfig":
         """Create config from dictionary."""
         config = cls()
 
@@ -116,9 +117,9 @@ class ScannerConfig:
 
         return config
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert config to dictionary."""
-        classification_dict: Dict[str, Any] = {
+        classification_dict: dict[str, Any] = {
             "confidence_threshold": self.classification.confidence_threshold,
             "custom_rules": {
                 "path": self.classification.custom_path_rules,
@@ -155,7 +156,7 @@ class ScannerConfig:
         }
 
 
-def validate_config(data: Dict[str, Any]) -> List[str]:
+def validate_config(data: dict[str, Any]) -> list[str]:
     """
     Validate configuration structure and return list of errors.
 
@@ -165,7 +166,7 @@ def validate_config(data: Dict[str, Any]) -> List[str]:
     Returns:
         List of error messages (empty if valid)
     """
-    errors: List[str] = []
+    errors: list[str] = []
 
     # Validate classification section
     if "classification" in data:
@@ -231,7 +232,7 @@ def validate_config(data: Dict[str, Any]) -> List[str]:
     return errors
 
 
-def load_config_file(path: Path) -> Optional[Dict[str, Any]]:
+def load_config_file(path: Path) -> dict[str, Any] | None:
     """
     Load configuration from a JSON file.
 
@@ -252,7 +253,7 @@ def load_config_file(path: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
-def merge_configs(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+def merge_configs(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     """
     Deep merge two config dictionaries.
 
@@ -270,9 +271,9 @@ def merge_configs(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, A
 
 
 def load_config(
-    repo_path: Optional[Path] = None,
-    config_path: Optional[Path] = None,
-    cli_overrides: Optional[Dict[str, Any]] = None,
+    repo_path: Path | None = None,
+    config_path: Path | None = None,
+    cli_overrides: dict[str, Any] | None = None,
 ) -> ScannerConfig:
     """
     Load configuration with proper priority ordering.
@@ -292,7 +293,7 @@ def load_config(
     Returns:
         Merged ScannerConfig
     """
-    config_data: Dict[str, Any] = {}
+    config_data: dict[str, Any] = {}
 
     # Load user default config
     user_config_path = Path.home() / ".config" / "layout-scanner" / "config.json"

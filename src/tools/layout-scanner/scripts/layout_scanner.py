@@ -9,12 +9,13 @@ Usage:
     python layout_scanner.py /path/to/repo -o output.json
     python layout_scanner.py /path/to/repo --config config.json
 """
+from __future__ import annotations
 
 import argparse
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 from .classifier import (
     ClassificationResult,
@@ -34,11 +35,11 @@ from .tree_walker import WalkResult, walk_repository
 
 def scan_repository(
     repo_path: Path,
-    config: Optional[ScannerConfig] = None,
+    config: ScannerConfig | None = None,
     enable_git: bool = False,
     enable_content: bool = False,
-    rules: Optional[RuleSet] = None,
-) -> Tuple[Dict[str, Any], int]:
+    rules: RuleSet | None = None,
+) -> tuple[dict[str, Any], int]:
     """
     Scan a repository and produce structured output.
 
@@ -75,8 +76,8 @@ def scan_repository(
     walk_result = walk_repository(repo_path, ignore_filter=ignore_filter)
 
     # Classify files
-    file_classifications: Dict[str, ClassificationResult] = {}
-    file_languages: Dict[str, LanguageResult] = {}
+    file_classifications: dict[str, ClassificationResult] = {}
+    file_languages: dict[str, LanguageResult] = {}
 
     for path, file_info in walk_result.files.items():
         # Classify file
@@ -106,7 +107,7 @@ def scan_repository(
     )
 
     # Classify directories based on their contents
-    dir_classifications: Dict[str, Tuple[str, str]] = {}
+    dir_classifications: dict[str, tuple[str, str]] = {}
     for path, dir_info in walk_result.directories.items():
         metrics = dir_metrics.get(path)
         # Build list of classifications from distribution (empty if no files)
@@ -161,7 +162,7 @@ def scan_repository(
     return output, scan_duration_ms
 
 
-def main(args: Optional[list] = None) -> int:
+def main(args: list | None = None) -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Fast filesystem-based repository layout scanner",
@@ -257,7 +258,7 @@ Examples:
     parsed_args = parser.parse_args(args)
 
     # Build CLI overrides
-    cli_overrides: Dict[str, Any] = {}
+    cli_overrides: dict[str, Any] = {}
 
     if parsed_args.ignore:
         cli_overrides.setdefault("ignore", {})["additional_patterns"] = parsed_args.ignore
@@ -273,8 +274,8 @@ Examples:
     )
 
     # Load classification rules
-    rules: Optional[RuleSet] = None
-    rules_source: Optional[str] = None
+    rules: RuleSet | None = None
+    rules_source: str | None = None
 
     if parsed_args.rules:
         # CLI-specified rules file
