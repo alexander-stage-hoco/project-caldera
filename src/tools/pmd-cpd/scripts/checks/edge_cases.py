@@ -4,6 +4,8 @@ Edge case checks (EC-1 to EC-8) for PMD CPD evaluation.
 These checks validate handling of edge cases and unusual inputs.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 from . import (
     CheckResult,

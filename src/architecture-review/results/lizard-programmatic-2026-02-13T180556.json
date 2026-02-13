@@ -1,0 +1,121 @@
+{
+  "review_id": "94288f25-cd16-4f39-87eb-a092551af2be",
+  "timestamp": "2026-02-13T18:05:56.382918+00:00",
+  "target": "lizard",
+  "review_type": "tool_implementation",
+  "dimensions": [
+    {
+      "dimension": "entity_persistence_pattern",
+      "weight": 0.2,
+      "status": "pass",
+      "score": 5,
+      "findings": []
+    },
+    {
+      "dimension": "output_schema_envelope",
+      "weight": 0.2,
+      "status": "warn",
+      "score": 3,
+      "findings": [
+        {
+          "severity": "warning",
+          "rule_id": "ANALYZE_ENVELOPE",
+          "message": "analyze.py does not use create_envelope or manually build envelope",
+          "category": "missing_requirement",
+          "file": "src/tools/lizard/scripts/analyze.py",
+          "recommendation": "Use common.envelope_formatter.create_envelope"
+        }
+      ]
+    },
+    {
+      "dimension": "code_conventions",
+      "weight": 0.15,
+      "status": "warn",
+      "score": 3,
+      "findings": [
+        {
+          "severity": "info",
+          "rule_id": "FUTURE_ANNOTATIONS",
+          "message": "Missing 'from __future__ import annotations'",
+          "category": "pattern_violation",
+          "file": "src/tools/lizard/scripts/__init__.py",
+          "recommendation": "Add 'from __future__ import annotations' at top of file"
+        },
+        {
+          "severity": "info",
+          "rule_id": "FUTURE_ANNOTATIONS",
+          "message": "Missing 'from __future__ import annotations'",
+          "category": "pattern_violation",
+          "file": "src/tools/lizard/scripts/function_analyzer.py",
+          "recommendation": "Add 'from __future__ import annotations' at top of file"
+        },
+        {
+          "severity": "info",
+          "rule_id": "PEP604_UNIONS",
+          "message": "Uses Optional[X] instead of PEP 604 'X | None' syntax",
+          "category": "pattern_violation",
+          "file": "src/tools/lizard/scripts/function_analyzer.py",
+          "recommendation": "Replace Optional[X] with X | None"
+        },
+        {
+          "severity": "info",
+          "rule_id": "FUTURE_ANNOTATIONS",
+          "message": "Missing 'from __future__ import annotations'",
+          "category": "pattern_violation",
+          "file": "src/tools/lizard/scripts/evaluate.py",
+          "recommendation": "Add 'from __future__ import annotations' at top of file"
+        },
+        {
+          "severity": "info",
+          "rule_id": "PEP604_UNIONS",
+          "message": "Uses Optional[X] instead of PEP 604 'X | None' syntax",
+          "category": "pattern_violation",
+          "file": "src/tools/lizard/scripts/evaluate.py",
+          "recommendation": "Replace Optional[X] with X | None"
+        }
+      ]
+    },
+    {
+      "dimension": "evaluation_infrastructure",
+      "weight": 0.15,
+      "status": "pass",
+      "score": 4,
+      "findings": [
+        {
+          "severity": "info",
+          "rule_id": "PROMPT_EVIDENCE",
+          "message": "Prompts missing '{{ evidence }}' placeholder: ['function_detection.md', 'statistics.md', 'hotspot_ranking.md', 'ccn_accuracy.md']",
+          "category": "pattern_violation",
+          "file": "src/tools/lizard/evaluation/llm/prompts",
+          "recommendation": "Add {{ evidence }} placeholder to prompt templates"
+        },
+        {
+          "severity": "info",
+          "rule_id": "OBSERVABILITY_ENFORCED",
+          "message": "Evaluation orchestrator does not reference observability/tracing",
+          "category": "pattern_violation",
+          "file": "src/tools/lizard/evaluation/llm/orchestrator.py",
+          "recommendation": "Integrate shared.observability for LLM interaction logging"
+        }
+      ]
+    },
+    {
+      "dimension": "blueprint_alignment",
+      "weight": 0.15,
+      "status": "pass",
+      "score": 5,
+      "findings": []
+    }
+  ],
+  "summary": {
+    "total_findings": 8,
+    "by_severity": {
+      "error": 0,
+      "warning": 1,
+      "info": 7
+    },
+    "overall_status": "STRONG_PASS",
+    "overall_score": 4.0,
+    "dimensions_reviewed": 5
+  }
+}

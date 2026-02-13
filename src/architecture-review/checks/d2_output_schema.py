@@ -18,7 +18,7 @@ WEIGHT = 0.20
 
 REQUIRED_ENVELOPE_FIELDS = {
     "schema_version", "tool_name", "tool_version", "repo_id",
-    "repo_root", "branch", "commit", "timestamp",
+    "run_id", "branch", "commit", "timestamp",
 }
 
 
@@ -90,9 +90,16 @@ def _check_schema_version_const(content: str, tf: ToolFiles) -> list[Finding]:
     except json.JSONDecodeError:
         return findings
 
-    # Navigate to properties.schema_version
-    props = schema.get("properties", {})
-    sv = props.get("schema_version", {})
+    # Navigate to properties.metadata.properties.schema_version (envelope nesting)
+    metadata_props = (
+        schema.get("properties", {})
+        .get("metadata", {})
+        .get("properties", {})
+    )
+    sv = metadata_props.get("schema_version", {})
+    if not sv:
+        # Fallback: check top-level properties (flat schema)
+        sv = schema.get("properties", {}).get("schema_version", {})
     if "const" not in sv:
         findings.append(Finding(
             severity="warning",
@@ -112,9 +119,16 @@ def _check_envelope_8_fields(content: str, tf: ToolFiles) -> list[Finding]:
     except json.JSONDecodeError:
         return findings
 
-    required = set(schema.get("required", []))
-    props = set(schema.get("properties", {}).keys())
+    # Envelope fields live inside properties.metadata (nested structure)
+    metadata_schema = schema.get("properties", {}).get("metadata", {})
+    required = set(metadata_schema.get("required", []))
+    props = set(metadata_schema.get("properties", {}).keys())
     all_fields = required | props
+    if not all_fields:
+        # Fallback: check top-level (flat schema)
+        required = set(schema.get("required", []))
+        props = set(schema.get("properties", {}).keys())
+        all_fields = required | props
 
     missing = REQUIRED_ENVELOPE_FIELDS - all_fields
     if missing:

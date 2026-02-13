@@ -4,6 +4,8 @@ Accuracy checks (AC-1 to AC-8) for PMD CPD evaluation.
 These checks validate the accuracy of clone detection against ground truth.
 """
 
+from __future__ import annotations
+
 from . import (
     CheckResult,
     CheckCategory,

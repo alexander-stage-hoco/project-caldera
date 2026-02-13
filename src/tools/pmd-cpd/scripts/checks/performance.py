@@ -4,6 +4,8 @@ Performance checks (PF-1 to PF-4) for PMD CPD evaluation.
 These checks validate performance and resource usage.
 """
 
+from __future__ import annotations
+
 from . import (
     CheckResult,
     CheckCategory,

@@ -197,10 +197,10 @@ Current evaluation status (programmatic checks):
 
 | Dimension | Score | Notes |
 |-----------|-------|-------|
-| Accuracy | TBD | Blocked on .NET 9 requirement |
-| Coverage | TBD | Ground truth ready |
-| Edge Cases | TBD | Tests written |
-| Performance | TBD | Targets defined |
+| Accuracy | Pending | Blocked on .NET 9 requirement |
+| Coverage | Pending | Ground truth ready |
+| Edge Cases | Pending | Tests written |
+| Performance | Pending | Targets defined |
 
 See [evaluation/scorecard.md](./evaluation/scorecard.md) for latest results.
 

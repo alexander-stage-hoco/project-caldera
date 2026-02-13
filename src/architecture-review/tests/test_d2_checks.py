@@ -61,7 +61,21 @@ class TestSchemaDraft2020:
 
 
 class TestSchemaVersionConst:
-    def test_pass(self) -> None:
+    def test_pass_nested(self) -> None:
+        """schema_version with const inside metadata properties (standard envelope)."""
+        content = json.dumps({
+            "properties": {
+                "metadata": {
+                    "properties": {"schema_version": {"const": "1.0.0"}}
+                }
+            }
+        })
+        tf = _mock_tf()
+        findings = _check_schema_version_const(content, tf)
+        assert len(findings) == 0
+
+    def test_pass_flat(self) -> None:
+        """schema_version with const at top level (flat schema fallback)."""
         content = json.dumps({
             "properties": {"schema_version": {"const": "1.0.0"}}
         })
@@ -71,7 +85,11 @@ class TestSchemaVersionConst:
 
     def test_fail(self) -> None:
         content = json.dumps({
-            "properties": {"schema_version": {"pattern": "^\\d+\\.\\d+\\.\\d+$"}}
+            "properties": {
+                "metadata": {
+                    "properties": {"schema_version": {"pattern": "^\\d+\\.\\d+\\.\\d+$"}}
+                }
+            }
         })
         tf = _mock_tf()
         findings = _check_schema_version_const(content, tf)
@@ -81,10 +99,15 @@ class TestSchemaVersionConst:
 
 class TestEnvelope8Fields:
     def test_pass(self) -> None:
+        """All 8 fields present inside metadata (standard envelope)."""
         content = json.dumps({
-            "required": ["schema_version", "tool_name", "tool_version", "repo_id",
-                         "repo_root", "branch", "commit", "timestamp"],
-            "properties": {},
+            "properties": {
+                "metadata": {
+                    "required": ["schema_version", "tool_name", "tool_version", "repo_id",
+                                 "run_id", "branch", "commit", "timestamp"],
+                    "properties": {},
+                }
+            }
         })
         tf = _mock_tf()
         findings = _check_envelope_8_fields(content, tf)
@@ -92,8 +115,12 @@ class TestEnvelope8Fields:
 
     def test_missing_some(self) -> None:
         content = json.dumps({
-            "required": ["schema_version", "tool_name", "tool_version"],
-            "properties": {"repo_id": {}, "repo_root": {}},
+            "properties": {
+                "metadata": {
+                    "required": ["schema_version", "tool_name", "tool_version"],
+                    "properties": {"repo_id": {}, "run_id": {}},
+                }
+            }
         })
         tf = _mock_tf()
         findings = _check_envelope_8_fields(content, tf)

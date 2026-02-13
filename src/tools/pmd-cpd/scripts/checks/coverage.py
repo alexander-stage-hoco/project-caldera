@@ -4,6 +4,8 @@ Coverage checks (CV-1 to CV-8) for PMD CPD evaluation.
 These checks validate language and file coverage.
 """
 
+from __future__ import annotations
+
 from . import (
     CheckResult,
     CheckCategory,
