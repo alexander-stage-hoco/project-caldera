@@ -18,7 +18,7 @@ import pytest
 
 # Try to import LLM judge components
 try:
-    from evaluation.llm.judges.base import HAS_ANTHROPIC_SDK
+    from shared.evaluation.base_judge import HAS_ANTHROPIC_SDK
 except ImportError:
     HAS_ANTHROPIC_SDK = False
 

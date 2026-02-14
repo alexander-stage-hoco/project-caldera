@@ -128,7 +128,10 @@ def resolve_commit(
         # Lenient mode (trusts orchestrator)
         commit = resolve_commit(repo, args.commit, strict=False)
     """
-    if commit_arg:
+    # Treat the all-zeros placeholder as "no commit provided" so strict tools
+    # can still run against non-git repos (or repos where the orchestrator
+    # intentionally passed a fallback sentinel).
+    if commit_arg and not is_fallback_commit(commit_arg):
         if commit_exists(repo_path, commit_arg):
             return commit_arg
         if fallback_repo and commit_exists(fallback_repo, commit_arg):

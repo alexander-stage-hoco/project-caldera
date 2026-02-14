@@ -234,6 +234,21 @@ class TestResolveCommit:
             resolve_commit(Path("/repo"), "abc123", strict=True)
 
     @patch("subprocess.run")
+    def test_fallback_commit_is_treated_as_no_commit(self, mock_run: MagicMock):
+        """Fallback commit sentinel should trigger HEAD auto-detection in strict mode."""
+        sha = "def456abc123def456abc123def456abc123def4"
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout=f"{sha}\n",
+            stderr="",
+        )
+
+        result = resolve_commit(Path("/repo"), FALLBACK_COMMIT, strict=True)
+
+        assert result == sha
+
+    @patch("subprocess.run")
     def test_returns_commit_arg_when_not_strict(self, mock_run: MagicMock):
         """Should return commit_arg as-is in non-strict mode."""
         mock_run.return_value = subprocess.CompletedProcess(

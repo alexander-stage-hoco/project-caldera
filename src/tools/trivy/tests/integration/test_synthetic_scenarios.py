@@ -208,7 +208,7 @@ class TestSyntheticOutputValidation:
     @pytest.fixture
     def output_dir(self, trivy_root) -> Path:
         """Return the output runs directory."""
-        return trivy_root / "output" / "runs"
+        return trivy_root / "outputs"
 
     @pytest.fixture
     def ground_truth_dir(self, trivy_root) -> Path:
@@ -223,22 +223,35 @@ class TestSyntheticOutputValidation:
             return expected_spec, expected_spec
         return 0, float("inf")
 
+    def _load_output_by_id(self, output_dir: Path, output_id: str) -> dict | None:
+        """Load a tool output.json by its scenario id (stored in top-level 'id')."""
+        for output_file in output_dir.glob("*/output.json"):
+            try:
+                data = json.loads(output_file.read_text())
+            except json.JSONDecodeError:
+                continue
+            if data.get("id") == output_id:
+                return data
+        return None
+
     def test_critical_cves_output_matches_ground_truth(
         self, output_dir, ground_truth_dir
     ):
         """Test that critical-cves output matches ground truth expectations."""
-        output_path = output_dir / "critical-cves.json"
         gt_path = ground_truth_dir / "critical-cves.json"
 
-        if not output_path.exists():
+        if not output_dir.exists():
+            pytest.skip("No outputs directory")
+
+        output = self._load_output_by_id(output_dir, "critical-cves")
+        if output is None:
             pytest.skip("No output for critical-cves")
 
-        output = json.loads(output_path.read_text())
         gt = json.loads(gt_path.read_text())
         expected = gt.get("expected", gt)
 
-        results = output.get("results", {})
-        summary = results.get("summary", {})
+        results = output.get("data", {})
+        summary = results.get("findings_summary", {})
 
         # Check vulnerability count is in expected range
         expected_vulns = expected.get("expected_vulnerabilities")
@@ -253,7 +266,7 @@ class TestSyntheticOutputValidation:
         expected_critical = expected.get("expected_critical")
         if expected_critical:
             min_c, max_c = self._get_expected_value(expected_critical)
-            actual = summary.get("critical_count", 0)
+            actual = (summary.get("by_severity") or {}).get("CRITICAL", 0)
             assert (
                 min_c <= actual <= max_c
             ), f"Critical count {actual} not in [{min_c}, {max_c}]"
@@ -271,14 +284,15 @@ class TestSyntheticOutputValidation:
 
     def test_no_vulnerabilities_output_is_clean(self, output_dir, ground_truth_dir):
         """Test that no-vulnerabilities output shows zero vulns."""
-        output_path = output_dir / "no-vulnerabilities.json"
+        if not output_dir.exists():
+            pytest.skip("No outputs directory")
 
-        if not output_path.exists():
+        output = self._load_output_by_id(output_dir, "no-vulnerabilities")
+        if output is None:
             pytest.skip("No output for no-vulnerabilities")
 
-        output = json.loads(output_path.read_text())
-        results = output.get("results", {})
-        summary = results.get("summary", {})
+        results = output.get("data", {})
+        summary = results.get("findings_summary", {})
 
         # Should have 0 or very few vulnerabilities
         total_vulns = summary.get("total_vulnerabilities", 0)
@@ -289,14 +303,20 @@ class TestSyntheticOutputValidation:
         if not output_dir.exists():
             pytest.skip("No output directory")
 
-        for output_file in output_dir.glob("*.json"):
+        output_files = list(output_dir.glob("*/output.json"))
+        if not output_files:
+            pytest.skip("No output files found")
+
+        for output_file in output_files:
             output = json.loads(output_file.read_text())
 
-            # Basic structure checks
-            assert "schema_version" in output, f"{output_file.name} missing schema_version"
-            assert "results" in output, f"{output_file.name} missing results"
+            assert "metadata" in output, f"{output_file.name} missing metadata"
+            assert "data" in output, f"{output_file.name} missing data"
 
-            results = output["results"]
-            assert "tool" in results, f"{output_file.name} missing tool"
-            assert results["tool"] == "trivy"
-            assert "summary" in results, f"{output_file.name} missing summary"
+            metadata = output["metadata"]
+            assert metadata.get("tool_name") == "trivy"
+            assert "schema_version" in metadata
+
+            data = output["data"]
+            assert data.get("tool") == "trivy"
+            assert "findings_summary" in data
