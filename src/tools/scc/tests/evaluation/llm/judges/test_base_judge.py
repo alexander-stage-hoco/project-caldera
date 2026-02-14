@@ -163,12 +163,11 @@ class TestBaseJudge:
         assert "value" in prompt
 
     def test_build_prompt_preserves_unmatched(self, concrete_judge):
-        """Placeholders not in evidence are preserved."""
+        """Unresolved placeholders raise ValueError."""
         concrete_judge._prompt_template = "Has {{ known }} and {{ unknown }}"
         evidence = {"known": "value"}
-        prompt = concrete_judge.build_prompt(evidence)
-        assert "value" in prompt
-        assert "{{ unknown }}" in prompt  # Preserved
+        with pytest.raises(ValueError, match="Unresolved prompt placeholders"):
+            concrete_judge.build_prompt(evidence)
 
     def test_parse_response_extracts_json(self, concrete_judge, sample_llm_response_valid_json):
         """Extracts valid JSON from response with surrounding text."""
@@ -195,7 +194,7 @@ class TestBaseJudge:
         """Falls back when JSON lacks a valid score field."""
         response = '{"error": "rate limit"}'
         result = concrete_judge.parse_response(response)
-        assert result.score == 3
+        assert result.score == 0
         assert result.raw_response == response
 
     def test_parse_response_extracts_score_variations(self, concrete_judge):

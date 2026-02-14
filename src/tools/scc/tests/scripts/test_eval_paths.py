@@ -18,9 +18,11 @@ def test_resolve_results_dir_env_override(tmp_path: Path) -> None:
 
 
 def test_resolve_commit_fallback_hash(tmp_path: Path) -> None:
+    """Non-git directory returns the standard fallback commit (all zeros)."""
+    from common.git_utilities import resolve_commit, FALLBACK_COMMIT
     target = tmp_path / "repo"
     target.mkdir()
     (target / "file.txt").write_text("alpha")
-    commit = analyze._resolve_commit(target, "", None)
+    commit = resolve_commit(target, None)
+    assert commit == FALLBACK_COMMIT
     assert len(commit) == 40
-    assert commit == analyze._resolve_commit(target, "", None)

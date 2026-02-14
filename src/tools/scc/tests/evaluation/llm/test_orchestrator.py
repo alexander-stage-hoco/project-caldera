@@ -85,9 +85,9 @@ class TestLLMEvaluatorInit:
         assert evaluator.working_dir == poc_root
 
     def test_default_model(self):
-        """Default model is opus."""
+        """Default model is opus-4.5."""
         evaluator = LLMEvaluator()
-        assert evaluator.model == "opus"
+        assert evaluator.model == "opus-4.5"
 
     def test_custom_model(self):
         """Can specify custom model."""
