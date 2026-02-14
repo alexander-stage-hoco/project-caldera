@@ -1,0 +1,131 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Import Dependencies</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No import dependency data available for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>File-level import pattern analysis. Identifies heavy importers, dynamic import usage, and most-depended-upon files.</p>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="label">Files with Imports</div>
+                <div class="value">{{ summary.total_files }}</div>
+                <div class="sublabel">Analyzed</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Avg Imports/File</div>
+                <div class="value">{{ summary.avg_imports_per_file }}</div>
+                <div class="sublabel">Mean count</div>
+            </div>
+            <div class="metric-card {% if summary.total_dynamic_imports > 0 %}warning{% endif %}">
+                <div class="label">Dynamic Imports</div>
+                <div class="value">{{ summary.total_dynamic_imports }}</div>
+                <div class="sublabel">Risk signal</div>
+            </div>
+            <div class="metric-card {% if summary.files_over_20_imports > 0 %}warning{% endif %}">
+                <div class="label">Heavy Importers</div>
+                <div class="value">{{ summary.files_over_20_imports }}</div>
+                <div class="sublabel">&gt;20 imports</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Analysis Overview</h3>
+        <div class="stat-grid">
+            <div class="stat-item"><span class="label">Max Import Count:</span> {{ summary.max_import_count }}</div>
+            <div class="stat-item"><span class="label">Side-Effect Imports:</span> {{ summary.total_side_effect_imports }}</div>
+            <div class="stat-item"><span class="label">Dynamic Import Files:</span> {{ summary.files_with_dynamic_imports }}</div>
+            <div class="stat-item"><span class="label">High-Dependency Targets:</span> {{ summary.most_depended_upon_count }}</div>
+        </div>
+    </div>
+
+    {% if has_dynamic_imports and files_with_dynamic %}
+    <div class="subsection">
+        <h3>Dynamic Import Usage</h3>
+        <p>Files using dynamic imports (runtime-resolved dependencies that complicate static analysis and bundling):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Dynamic</th>
+                    <th class="number">Static</th>
+                    <th class="number">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in files_with_dynamic[:15] %}
+                <tr class="warning-row">
+                    <td class="truncate" title="{{ f.relative_path }}">{{ f.relative_path | truncate_path }}</td>
+                    <td class="number">{{ f.dynamic_import_count }}</td>
+                    <td class="number">{{ f.static_import_count }}</td>
+                    <td class="number">{{ f.import_count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if top_importers %}
+    <div class="subsection">
+        <h3>Top Importers</h3>
+        <p>Files with the most import statements:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Imports</th>
+                    <th class="number">Unique</th>
+                    <th class="number">Static</th>
+                    <th class="number">Dynamic</th>
+                    <th class="number">Side-Effect</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in top_importers[:15] %}
+                <tr class="{% if f.import_count > 20 %}warning-row{% endif %}">
+                    <td class="truncate" title="{{ f.relative_path }}">{{ f.relative_path | truncate_path }}</td>
+                    <td class="number">{{ f.import_count }}</td>
+                    <td class="number">{{ f.unique_imports }}</td>
+                    <td class="number">{{ f.static_import_count }}</td>
+                    <td class="number">{{ f.dynamic_import_count }}</td>
+                    <td class="number">{{ f.side_effect_import_count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if most_imported_targets %}
+    <div class="subsection">
+        <h3>Most-Imported Targets</h3>
+        <p>Files imported by the most other files. Breaking changes here ripple widely:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Imported File</th>
+                    <th class="number">Importing Files</th>
+                    <th class="number">Total References</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for t in most_imported_targets[:15] %}
+                <tr class="{% if t.importing_files >= 10 %}warning-row{% elif t.importing_files >= 5 %}info-row{% endif %}">
+                    <td class="truncate" title="{{ t.imported_path }}">{{ t.imported_path | truncate_path }}</td>
+                    <td class="number">{{ t.importing_files }}</td>
+                    <td class="number">{{ t.reference_count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</section>

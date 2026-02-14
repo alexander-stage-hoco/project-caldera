@@ -1,0 +1,96 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Circular Dependencies</h2>
+
+    {% if not has_data %}
+    <div class="empty-state">
+        <p>No circular dependencies detected for this run.</p>
+    </div>
+    {% else %}
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p>File-level import cycle detection. Cycles indicate tight coupling that prevents clean module extraction.</p>
+        <div class="metric-grid">
+            <div class="metric-card {% if summary.critical_count > 0 %}critical{% endif %}">
+                <div class="label">Critical</div>
+                <div class="value">{{ summary.critical_count }}</div>
+                <div class="sublabel">Direct bidirectional</div>
+            </div>
+            <div class="metric-card {% if summary.high_count > 0 %}warning{% endif %}">
+                <div class="label">High</div>
+                <div class="value">{{ summary.high_count }}</div>
+                <div class="sublabel">Short cycles</div>
+            </div>
+            <div class="metric-card {% if summary.medium_count > 0 %}info{% endif %}">
+                <div class="label">Medium</div>
+                <div class="value">{{ summary.medium_count }}</div>
+                <div class="sublabel">Moderate cycles</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Total Cycles</div>
+                <div class="value">{{ summary.total_cycles }}</div>
+                <div class="sublabel">{{ summary.files_involved }} files</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Analysis Overview</h3>
+        <div class="stat-grid">
+            <div class="stat-item"><span class="label">Low Severity:</span> {{ summary.low_count }}</div>
+            <div class="stat-item"><span class="label">Avg Cycle Length:</span> {{ summary.avg_cycle_length }}</div>
+            <div class="stat-item"><span class="label">Files Involved:</span> {{ summary.files_involved }}</div>
+            <div class="stat-item"><span class="label">Multi-Cycle Files:</span> {{ summary.multi_cycle_file_count }}</div>
+        </div>
+    </div>
+
+    {% if has_multi_cycle_files and multi_cycle_files %}
+    <div class="subsection">
+        <h3>Multi-Cycle Files</h3>
+        <p>Files appearing in multiple import cycles - key targets for decoupling:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Cycles Involved</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file_path, count in multi_cycle_files[:15] %}
+                <tr class="warning-row">
+                    <td class="truncate" title="{{ file_path }}">{{ file_path | truncate_path }}</td>
+                    <td class="number">{{ count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Import Cycles</h3>
+        <p>Detected circular import chains ordered by severity:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Start File</th>
+                    <th>Cycle Path</th>
+                    <th class="number">Length</th>
+                    <th>Severity</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for c in cycles[:30] %}
+                <tr class="{% if c.severity == 'critical' %}critical-row{% elif c.severity == 'high' %}warning-row{% elif c.severity == 'medium' %}info-row{% endif %}">
+                    <td class="truncate" title="{{ c.start_file }}">{{ c.start_file | truncate_path }}</td>
+                    <td class="truncate" title="{{ c.cycle_path }}">{{ c.cycle_path }}</td>
+                    <td class="number">{{ c.cycle_length }}</td>
+                    <td><span class="badge badge-{{ c.severity }}">{{ c.severity }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% endif %}
+</section>

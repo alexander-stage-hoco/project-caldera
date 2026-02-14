@@ -46,6 +46,8 @@ class TestInsightsGenerator:
             "technical_debt_summary",
             "coupling_debt",
             "component_inventory",
+            "import_dependencies",
+            "circular_dependencies",
             "devskim_security",
             "dotcover_coverage",
             "git_sizer",

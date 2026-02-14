@@ -1,0 +1,44 @@
+## Circular Dependencies
+
+{% if not has_data %}
+*No circular dependencies detected for this run.*
+{% else %}
+
+### Summary
+
+File-level import cycle detection. Cycles indicate tight coupling that prevents clean module extraction.
+
+| Metric | Value |
+|--------|-------|
+| Total Cycles | {{ summary.total_cycles }} |
+| Critical | {{ summary.critical_count }} |
+| High | {{ summary.high_count }} |
+| Medium | {{ summary.medium_count }} |
+| Low | {{ summary.low_count }} |
+| Files Involved | {{ summary.files_involved }} |
+| Avg Cycle Length | {{ summary.avg_cycle_length }} |
+| Multi-Cycle Files | {{ summary.multi_cycle_file_count }} |
+
+{% if has_multi_cycle_files and multi_cycle_files %}
+### Multi-Cycle Files
+
+Files appearing in multiple import cycles - key targets for decoupling:
+
+| File | Cycles Involved |
+|------|-----------------|
+{% for file_path, count in multi_cycle_files[:15] %}
+| {{ file_path }} | {{ count }} |
+{% endfor %}
+{% endif %}
+
+### Import Cycles
+
+Detected circular import chains ordered by severity:
+
+| Start File | Cycle Path | Length | Severity |
+|------------|------------|--------|----------|
+{% for c in cycles[:30] %}
+| {{ c.start_file }} | {{ c.cycle_path }} | {{ c.cycle_length }} | {{ c.severity }} |
+{% endfor %}
+
+{% endif %}

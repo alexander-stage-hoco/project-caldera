@@ -35,6 +35,8 @@ from .secrets import SecretsSection
 from .tool_readiness import ToolReadinessSection
 from .tool_coverage_dashboard import ToolCoverageDashboardSection
 from .component_inventory import ComponentInventorySection
+from .import_dependencies import ImportDependenciesSection
+from .circular_dependencies import CircularDependenciesSection
 
 __all__ = [
     "BaseSection",
@@ -72,4 +74,6 @@ __all__ = [
     "ToolReadinessSection",
     "ToolCoverageDashboardSection",
     "ComponentInventorySection",
+    "ImportDependenciesSection",
+    "CircularDependenciesSection",
 ]

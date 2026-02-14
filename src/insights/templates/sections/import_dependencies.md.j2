@@ -1,0 +1,58 @@
+## Import Dependencies
+
+{% if not has_data %}
+*No import dependency data available for this run.*
+{% else %}
+
+### Summary
+
+File-level import pattern analysis. Identifies heavy importers, dynamic import usage, and most-depended-upon files.
+
+| Metric | Value |
+|--------|-------|
+| Files with Imports | {{ summary.total_files }} |
+| Avg Imports/File | {{ summary.avg_imports_per_file }} |
+| Max Import Count | {{ summary.max_import_count }} |
+| Dynamic Imports | {{ summary.total_dynamic_imports }} |
+| Side-Effect Imports | {{ summary.total_side_effect_imports }} |
+| Heavy Importers (>20) | {{ summary.files_over_20_imports }} |
+| Dynamic Import Files | {{ summary.files_with_dynamic_imports }} |
+| High-Dependency Targets | {{ summary.most_depended_upon_count }} |
+
+{% if has_dynamic_imports and files_with_dynamic %}
+### Dynamic Import Usage
+
+Files using dynamic imports (runtime-resolved dependencies):
+
+| File | Dynamic | Static | Total |
+|------|---------|--------|-------|
+{% for f in files_with_dynamic[:15] %}
+| {{ f.relative_path }} | {{ f.dynamic_import_count }} | {{ f.static_import_count }} | {{ f.import_count }} |
+{% endfor %}
+{% endif %}
+
+{% if top_importers %}
+### Top Importers
+
+Files with the most import statements:
+
+| File | Imports | Unique | Static | Dynamic | Side-Effect |
+|------|---------|--------|--------|---------|-------------|
+{% for f in top_importers[:15] %}
+| {{ f.relative_path }} | {{ f.import_count }} | {{ f.unique_imports }} | {{ f.static_import_count }} | {{ f.dynamic_import_count }} | {{ f.side_effect_import_count }} |
+{% endfor %}
+{% endif %}
+
+{% if most_imported_targets %}
+### Most-Imported Targets
+
+Files imported by the most other files. Breaking changes here ripple widely:
+
+| Imported File | Importing Files | Total References |
+|---------------|-----------------|------------------|
+{% for t in most_imported_targets[:15] %}
+| {{ t.imported_path }} | {{ t.importing_files }} | {{ t.reference_count }} |
+{% endfor %}
+{% endif %}
+
+{% endif %}

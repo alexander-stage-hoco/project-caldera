@@ -49,6 +49,8 @@ from .sections.component_inventory import ComponentInventorySection
 from .sections.devskim_security import DevskimSecuritySection
 from .sections.dotcover_coverage import DotcoverCoverageSection
 from .sections.git_sizer import GitSizerSection
+from .sections.import_dependencies import ImportDependenciesSection
+from .sections.circular_dependencies import CircularDependenciesSection
 
 
 class InsightsGenerator:
@@ -67,6 +69,8 @@ class InsightsGenerator:
         "coverage_gap": CoverageGapSection,
         "dotcover_coverage": DotcoverCoverageSection,
         "component_inventory": ComponentInventorySection,
+        "import_dependencies": ImportDependenciesSection,
+        "circular_dependencies": CircularDependenciesSection,
         "blast_radius": BlastRadiusSection,
         "code_size_hotspots": CodeSizeHotspotsSection,
         "git_sizer": GitSizerSection,
