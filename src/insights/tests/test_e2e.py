@@ -603,3 +603,163 @@ class TestE2ESectionFallbacks:
         report = generator.generate(run_pk=1, format="html")
         assert report is not None
         assert len(report) > 0
+
+
+# =============================================================================
+# Import / Circular Dependency E2E Tests
+# =============================================================================
+
+
+@pytest.fixture
+def seeded_db_with_imports(seeded_db_with_marts: Path) -> Path:
+    """
+    Extend seeded_db_with_marts with symbol-scanner data for import
+    dependency and circular dependency section testing.
+    """
+    conn = duckdb.connect(str(seeded_db_with_marts))
+
+    # Add symbol-scanner tool run (run_pk=4, same collection)
+    conn.execute("""
+        INSERT INTO lz_tool_runs VALUES (
+            4, 'coll-001', 'test-repo', 'run-001', 'symbol-scanner',
+            '1.0.0', '1.0', 'main', 'abc123def456',
+            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+        )
+    """)
+
+    # Create lz_file_imports table (landing zone for symbol-scanner imports)
+    conn.execute("""
+        CREATE TABLE lz_file_imports (
+            run_pk BIGINT NOT NULL,
+            file_id VARCHAR NOT NULL,
+            relative_path VARCHAR NOT NULL,
+            imported_path VARCHAR,
+            import_type VARCHAR,
+            import_name VARCHAR
+        )
+    """)
+
+    # Insert sample import data:
+    # - src/main.py imports 4 things (2 static, 1 dynamic, 1 side_effect)
+    # - src/utils.py imports 2 things (both static)
+    # - src/models/user.py imports 1 thing (static) — creates a circular ref with main
+    conn.execute("""
+        INSERT INTO lz_file_imports VALUES
+            (4, 'f001', 'src/main.py', 'src/utils.py', 'static', 'utils'),
+            (4, 'f001', 'src/main.py', 'src/models/user.py', 'static', 'User'),
+            (4, 'f001', 'src/main.py', 'src/config.py', 'dynamic', 'load_config'),
+            (4, 'f001', 'src/main.py', NULL, 'side_effect', 'logging_setup'),
+            (4, 'f002', 'src/utils.py', 'src/config.py', 'static', 'CONFIG'),
+            (4, 'f002', 'src/utils.py', 'src/models/user.py', 'static', 'User'),
+            (4, 'f003', 'src/models/user.py', 'src/main.py', 'static', 'app')
+    """)
+
+    # Create stg_lz_file_imports view (staging pass-through)
+    conn.execute("""
+        CREATE VIEW stg_lz_file_imports AS
+        SELECT * FROM lz_file_imports
+    """)
+
+    # Create stg_file_imports_file_metrics view (aggregated per-file)
+    conn.execute("""
+        CREATE VIEW stg_file_imports_file_metrics AS
+        SELECT
+            run_pk,
+            relative_path,
+            COUNT(*) AS import_count,
+            COUNT(DISTINCT imported_path) AS unique_imports,
+            COUNT(CASE WHEN import_type = 'static' THEN 1 END) AS static_import_count,
+            COUNT(CASE WHEN import_type = 'dynamic' THEN 1 END) AS dynamic_import_count,
+            COUNT(CASE WHEN import_type = 'side_effect' THEN 1 END) AS side_effect_import_count
+        FROM lz_file_imports
+        GROUP BY run_pk, relative_path
+    """)
+
+    # Create mart_circular_dependencies table with sample cycles
+    conn.execute("""
+        CREATE TABLE mart_circular_dependencies (
+            run_pk BIGINT NOT NULL,
+            start_file VARCHAR NOT NULL,
+            cycle_path VARCHAR NOT NULL,
+            cycle_length INTEGER NOT NULL,
+            severity VARCHAR NOT NULL
+        )
+    """)
+
+    conn.execute("""
+        INSERT INTO mart_circular_dependencies VALUES
+            (4, 'src/main.py', 'src/main.py -> src/models/user.py -> src/main.py', 2, 'critical'),
+            (4, 'src/main.py', 'src/main.py -> src/utils.py -> src/models/user.py -> src/main.py', 3, 'high')
+    """)
+
+    conn.close()
+
+    return seeded_db_with_marts
+
+
+class TestE2EImportSections:
+    """End-to-end tests for import dependency and circular dependency sections."""
+
+    def test_import_dependencies_section_renders(self, seeded_db_with_imports: Path) -> None:
+        """Test import dependencies section renders with seeded data."""
+        generator = InsightsGenerator(db_path=seeded_db_with_imports)
+
+        content = generator.generate_section(
+            section_name="import_dependencies",
+            run_pk=2,  # scc run_pk — query resolves symbol-scanner via collection
+            format="html",
+        )
+
+        assert content is not None
+        assert len(content) > 0
+        assert "Import Dependencies" in content
+        # Should contain file paths from seeded data
+        assert "main.py" in content
+        assert "utils.py" in content
+
+    def test_circular_dependencies_section_renders(self, seeded_db_with_imports: Path) -> None:
+        """Test circular dependencies section renders with seeded data."""
+        generator = InsightsGenerator(db_path=seeded_db_with_imports)
+
+        content = generator.generate_section(
+            section_name="circular_dependencies",
+            run_pk=2,
+            format="html",
+        )
+
+        assert content is not None
+        assert len(content) > 0
+        assert "Circular Dependencies" in content
+        # Should contain cycle data
+        assert "critical" in content or "Critical" in content
+
+    def test_import_dependencies_markdown(self, seeded_db_with_imports: Path) -> None:
+        """Test import dependencies section renders in markdown format."""
+        generator = InsightsGenerator(db_path=seeded_db_with_imports)
+
+        content = generator.generate_section(
+            section_name="import_dependencies",
+            run_pk=2,
+            format="md",
+        )
+
+        assert content is not None
+        assert len(content) > 0
+        # Markdown should have table structure
+        assert "Import Dependencies" in content
+        assert "|" in content  # table separators
+
+    def test_circular_dependencies_markdown(self, seeded_db_with_imports: Path) -> None:
+        """Test circular dependencies section renders in markdown format."""
+        generator = InsightsGenerator(db_path=seeded_db_with_imports)
+
+        content = generator.generate_section(
+            section_name="circular_dependencies",
+            run_pk=2,
+            format="md",
+        )
+
+        assert content is not None
+        assert len(content) > 0
+        assert "Circular Dependencies" in content
+        assert "|" in content  # table separators

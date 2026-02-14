@@ -11,6 +11,8 @@ from insights.sections.cross_tool import CrossToolSection
 from insights.sections.language_coverage import LanguageCoverageSection
 from insights.sections.coverage_gap import CoverageGapSection
 from insights.sections.technical_debt_summary import TechnicalDebtSummarySection
+from insights.sections.import_dependencies import ImportDependenciesSection
+from insights.sections.circular_dependencies import CircularDependenciesSection
 
 
 class TestRepoHealthSection:
@@ -360,3 +362,119 @@ class TestTechnicalDebtSummarySection:
         # Unknown category
         action = section._get_remediation_action("unknown", {})
         assert "review" in action.lower()
+
+
+class TestImportDependenciesSection:
+    """Tests for ImportDependenciesSection."""
+
+    def test_config(self):
+        """Test section configuration."""
+        section = ImportDependenciesSection()
+
+        assert section.config.name == "import_dependencies"
+        assert section.config.title == "Import Dependencies"
+        assert section.config.priority == 6.8
+        assert "import" in section.config.description.lower()
+
+    def test_get_template_name(self):
+        """Test template name."""
+        section = ImportDependenciesSection()
+        assert section.get_template_name() == "import_dependencies.html.j2"
+
+    def test_get_fallback_data(self):
+        """Test fallback data structure."""
+        section = ImportDependenciesSection()
+        fallback = section.get_fallback_data()
+
+        # Check top-level keys
+        assert "top_importers" in fallback
+        assert "most_imported_targets" in fallback
+        assert "summary" in fallback
+        assert "has_data" in fallback
+
+        # Check fallback values
+        assert fallback["top_importers"] == []
+        assert fallback["most_imported_targets"] == []
+        assert fallback["has_data"] is False
+
+        # Check summary structure
+        summary = fallback["summary"]
+        assert summary["total_files"] == 0
+        assert summary["avg_imports_per_file"] == 0
+        assert summary["max_import_count"] == 0
+
+    def test_validate_data_no_data(self):
+        """Test validation returns error when no data available."""
+        section = ImportDependenciesSection()
+        errors = section.validate_data({"has_data": False})
+
+        assert len(errors) == 1
+        assert "import" in errors[0].lower() or "symbol-scanner" in errors[0].lower()
+
+    def test_validate_data_with_data(self):
+        """Test validation passes when data is available."""
+        section = ImportDependenciesSection()
+        errors = section.validate_data({"has_data": True})
+
+        assert len(errors) == 0
+
+
+class TestCircularDependenciesSection:
+    """Tests for CircularDependenciesSection."""
+
+    def test_config(self):
+        """Test section configuration."""
+        section = CircularDependenciesSection()
+
+        assert section.config.name == "circular_dependencies"
+        assert section.config.title == "Circular Dependencies"
+        assert section.config.priority == 6.9
+        assert "circular" in section.config.description.lower() or "cycle" in section.config.description.lower()
+
+    def test_get_template_name(self):
+        """Test template name."""
+        section = CircularDependenciesSection()
+        assert section.get_template_name() == "circular_dependencies.html.j2"
+
+    def test_get_fallback_data(self):
+        """Test fallback data structure."""
+        section = CircularDependenciesSection()
+        fallback = section.get_fallback_data()
+
+        # Check top-level keys
+        assert "cycles" in fallback
+        assert "severity_counts" in fallback
+        assert "summary" in fallback
+        assert "has_data" in fallback
+
+        # Check fallback values
+        assert fallback["cycles"] == []
+        assert fallback["has_data"] is False
+
+        # Check severity counts
+        assert fallback["severity_counts"]["critical"] == 0
+        assert fallback["severity_counts"]["high"] == 0
+        assert fallback["severity_counts"]["medium"] == 0
+        assert fallback["severity_counts"]["low"] == 0
+
+        # Check summary structure
+        summary = fallback["summary"]
+        assert summary["total_cycles"] == 0
+        assert summary["critical_count"] == 0
+        assert summary["files_involved"] == 0
+        assert summary["avg_cycle_length"] == 0
+
+    def test_validate_data_no_data(self):
+        """Test validation returns error when no data available."""
+        section = CircularDependenciesSection()
+        errors = section.validate_data({"has_data": False})
+
+        assert len(errors) == 1
+        assert "circular" in errors[0].lower() or "symbol-scanner" in errors[0].lower()
+
+    def test_validate_data_with_data(self):
+        """Test validation passes when data is available."""
+        section = CircularDependenciesSection()
+        errors = section.validate_data({"has_data": True})
+
+        assert len(errors) == 0
