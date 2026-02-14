@@ -5,7 +5,7 @@ Markdown formatter for report output.
 from pathlib import Path
 from typing import Any
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, Undefined
 
 from .base import BaseFormatter
 from ..sections.base import SectionData
@@ -41,7 +41,7 @@ class MarkdownFormatter(BaseFormatter):
     @staticmethod
     def _format_number(value: int | float | None) -> str:
         """Format a number with thousands separator."""
-        if value is None:
+        if value is None or isinstance(value, Undefined):
             return "N/A"
         if isinstance(value, float):
             return f"{value:,.2f}"
@@ -50,7 +50,7 @@ class MarkdownFormatter(BaseFormatter):
     @staticmethod
     def _format_percent(value: float | None) -> str:
         """Format a percentage value."""
-        if value is None:
+        if value is None or isinstance(value, Undefined):
             return "N/A"
         return f"{value:.1f}%"
 

@@ -81,7 +81,6 @@
                     <th>Directory</th>
                     <th class="number">Smell Count</th>
                     <th class="number">Files Affected</th>
-                    <th class="number">Unique Rules</th>
                 </tr>
             </thead>
             <tbody>
@@ -90,7 +89,6 @@
                     <td class="truncate" title="{{ dir.directory_path }}">{{ dir.directory_path | truncate_path(50) }}</td>
                     <td class="number">{{ dir.smell_count | format_number }}</td>
                     <td class="number">{{ dir.files_with_smells | format_number }}</td>
-                    <td class="number">{{ dir.unique_rules | format_number }}</td>
                 </tr>
             {% endfor %}
             </tbody>

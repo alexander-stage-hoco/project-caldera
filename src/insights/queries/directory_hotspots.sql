@@ -15,6 +15,7 @@ SELECT
     rl.total_nloc AS total_lines,
     rl.total_ccn,
     CASE WHEN rl.file_count > 0 THEN rl.total_ccn::FLOAT / rl.file_count ELSE 0 END AS avg_ccn,
+    rl.max_ccn,
     rl.total_function_count AS total_functions
 FROM rollup_lizard_directory_counts_recursive rl
 WHERE rl.run_pk = (SELECT lizard_run_pk FROM run_map)

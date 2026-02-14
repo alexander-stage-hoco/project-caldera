@@ -29,10 +29,10 @@
 {% if has_smelliest %}
 ### Top Directories by Code Smells
 
-| Directory | Smell Count | Files Affected | Unique Rules |
-|-----------|------------:|---------------:|-------------:|
+| Directory | Smell Count | Files Affected |
+|-----------|------------:|---------------:|
 {% for dir in smelliest[:12] %}
-| {{ dir.directory_path }} | {{ dir.smell_count | format_number }} | {{ dir.files_with_smells | format_number }} | {{ dir.unique_rules | format_number }} |
+| {{ dir.directory_path }} | {{ dir.smell_count | format_number }} | {{ dir.files_with_smells | format_number }} |
 {% endfor %}
 
 {% endif %}
