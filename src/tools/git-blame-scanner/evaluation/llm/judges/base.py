@@ -9,8 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from shared.evaluation.base_judge import BaseJudge as SharedBaseJudge
-from shared.evaluation.base_judge import JudgeResult
+from shared.evaluation import BaseJudge as SharedBaseJudge, JudgeResult
 from shared.output_management import unwrap_envelope
 
 

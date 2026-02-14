@@ -49,6 +49,7 @@ def check_direct_anthropic_calls(files: list[Path], verbose: bool = False) -> li
     # Allowed locations for direct API calls (infrastructure layer)
     allowed_paths = [
         "shared/evaluation/base_judge.py",  # Shared judge base
+        "shared/llm/client.py",  # LLM client infrastructure (wrapped by BaseJudge)
         "insights/evaluation/llm/providers/",  # Provider infrastructure
         "insights/evaluation/llm/observable_provider.py",  # Observable wrapper
     ]
