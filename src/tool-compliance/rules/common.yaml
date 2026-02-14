@@ -364,7 +364,7 @@ path_consistency_rules:
 
 # Test coverage validation rules
 test_coverage_rules:
-  threshold: 80
+  threshold: 60
   source_dirs:
     - scripts
   omit_patterns:

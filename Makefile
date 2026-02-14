@@ -1,5 +1,6 @@
 .PHONY: help setup analyze status list-runs report clean-db \
-	compliance tools-setup tools-analyze tools-evaluate \
+	compliance compliance-preflight compliance-full \
+	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
 	orchestrate test pipeline-eval arch-review
 
@@ -11,16 +12,16 @@ ARCH_REVIEW_TARGET ?=
 ARCH_REVIEW_TYPE ?= tool_implementation
 COMPLIANCE_OUT_JSON ?= docs/tool_compliance_report.json
 COMPLIANCE_OUT_MD ?= docs/tool_compliance_report.md
-COMPLIANCE_FLAGS ?= --run-analysis --run-evaluate --run-llm
 DBT_BIN ?= .venv/bin/dbt
 DBT_PROFILES_DIR ?= src/sot-engine/dbt
 DBT_PROJECT_DIR ?= src/sot-engine/dbt
+DB_PATH ?= /tmp/caldera_sot.duckdb
 ORCH_REPO_PATH ?=
 ORCH_REPO_ID ?=
 ORCH_RUN_ID ?=
 ORCH_BRANCH ?=
 ORCH_COMMIT ?=
-ORCH_DB_PATH ?= /tmp/caldera_sot.duckdb
+ORCH_DB_PATH ?= $(DB_PATH)
 ORCH_LAYOUT_OUTPUT ?=
 ORCH_SCC_OUTPUT ?=
 ORCH_LIZARD_OUTPUT ?=
@@ -72,7 +73,9 @@ help:
 	@echo "  Advanced:"
 	@echo "    make orchestrate            Run orchestrator (requires ORCH_* variables)"
 	@echo "    make pipeline-eval          Full E2E with LLM evaluation"
-	@echo "    make compliance             Run tool compliance scanner"
+	@echo "    make compliance             Structural compliance checks (all tools)"
+	@echo "    make compliance-preflight   Fast structure checks only (~100ms)"
+	@echo "    make compliance-full        Full compliance with tool execution"
 	@echo "    make arch-review            Architecture review (ARCH_REVIEW_TARGET=<tool>)"
 	@echo "    make dbt-run / dbt-test     Run dbt models / tests"
 	@echo "    make tools-setup / analyze / evaluate / test / clean"
@@ -167,8 +170,19 @@ compliance:
 	@.venv/bin/python src/tool-compliance/tool_compliance.py \
 		--root $(CURDIR) \
 		--out-json $(COMPLIANCE_OUT_JSON) \
+		--out-md $(COMPLIANCE_OUT_MD)
+
+compliance-preflight:
+	@.venv/bin/python src/tool-compliance/tool_compliance.py \
+		--root $(CURDIR) \
+		--preflight
+
+compliance-full:
+	@.venv/bin/python src/tool-compliance/tool_compliance.py \
+		--root $(CURDIR) \
+		--out-json $(COMPLIANCE_OUT_JSON) \
 		--out-md $(COMPLIANCE_OUT_MD) \
-		$(COMPLIANCE_FLAGS)
+		--run-analysis --run-evaluate --run-llm --run-coverage
 
 tools-setup:
 	$(call run_tools,setup)
@@ -241,7 +255,7 @@ test:
 # Usage: make pipeline-eval ORCH_REPO_PATH=/path/to/repo
 #
 # This target runs the complete analysis pipeline:
-# 1. Orchestrate: Run 7 tools + dbt transforms
+# 1. Orchestrate: Run tools + dbt transforms
 # 2. Generate: Create insights report from dbt marts
 # 3. Evaluate: LLM evaluation with InsightQualityJudge
 # 4. Extract: Top 3 insights with improvement proposals

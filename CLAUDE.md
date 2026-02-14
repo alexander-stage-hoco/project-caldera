@@ -100,7 +100,9 @@ make clean-db                # Remove database, start fresh
 ### Advanced (from project root)
 
 ```bash
-make compliance              # Run tool compliance scanner
+make compliance              # Structural compliance checks (all tools, ~10s)
+make compliance-preflight   # Fast structure checks only (~100ms)
+make compliance-full        # Full compliance with tool execution (~30min)
 make arch-review ARCH_REVIEW_TARGET=<tool>  # Run programmatic architecture review
 make tools-setup             # Run 'make setup' for tools
 make tools-analyze           # Run analysis for all tools
@@ -359,12 +361,18 @@ dbt test --profiles-dir .
 ### Running compliance scanner
 
 ```bash
-# Single tool (fast)
+# All tools — structural checks (~10s)
+make compliance
+
+# Fast structure checks only (~100ms)
+make compliance-preflight
+
+# Full compliance with tool execution (~30min)
+make compliance-full
+
+# Single tool (direct Python)
 python src/tool-compliance/tool_compliance.py src/tools/<name>
 
-# Preflight mode (~100ms)
+# Single tool preflight
 python src/tool-compliance/tool_compliance.py src/tools/<name> --preflight
-
-# All tools
-make compliance
 ```

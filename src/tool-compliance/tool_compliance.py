@@ -3288,6 +3288,16 @@ def _run_coverage_test(
     Returns:
         Tuple of (returncode, coverage_percent, stdout, stderr, duration_ms)
     """
+    # Set PYTHONPATH so tests can import shared modules (mirrors Makefile.common behavior)
+    src_root = tool_root.parents[1]  # tool_root = src/tools/<tool>, parents[1] = src/
+    env = env.copy()
+    existing_pythonpath = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = (
+        str(src_root)
+        if not existing_pythonpath
+        else f"{src_root}{os.pathsep}{existing_pythonpath}"
+    )
+
     coverage_rules = get_test_coverage_rules()
     source_dirs = coverage_rules.get("source_dirs", ["scripts"])
     omit_patterns = coverage_rules.get("omit_patterns", [])
@@ -3309,9 +3319,13 @@ def _run_coverage_test(
         cov_args.extend(["--cov-report", "json:coverage.json", "--cov-fail-under=0"])
 
     # Construct pytest command
-    venv_python = env.get("PYTHON", ".venv/bin/python")
-    if not Path(tool_root / ".venv" / "bin" / "python").exists():
-        # Try project-level venv
+    # Prefer tool's own .venv (has pytest-cov installed) over project-level venv
+    tool_python = tool_root / ".venv" / "bin" / "python"
+    if tool_python.exists():
+        venv_python = str(tool_python)
+    else:
+        venv_python = env.get("PYTHON", ".venv/bin/python")
+        # Fall back to project-level venv
         project_venv = tool_root.parents[2] / ".venv" / "bin" / "python"
         if project_venv.exists():
             venv_python = str(project_venv)
@@ -3324,7 +3338,16 @@ def _run_coverage_test(
         "-v",
         "--tb=short",
         "-q",
-    ] + cov_args
+        "--rootdir", str(tool_root),
+        "-o", "cache_dir=/tmp/pytest-cache-compliance",
+    ]
+
+    # Use the tool's own pytest.ini if present (provides pythonpath, markers, etc.)
+    tool_pytest_ini = tool_root / "pytest.ini"
+    if tool_pytest_ini.exists():
+        cmd.extend(["-c", str(tool_pytest_ini)])
+
+    cmd += cov_args
 
     start = time.perf_counter()
     result = subprocess.run(
@@ -4087,7 +4110,7 @@ def _check_evaluate_input_valid(tool_root: Path) -> CheckResult:
 
     # Search for input-path arguments in the body
     input_arg_match = re.search(
-        r"--(?:results-dir|analysis-dir|analysis)\s+(\S+)",
+        r'--(?:results-dir|analysis-dir|analysis)(?:\s+|=)(?:"([^"]+)"|(\S+))',
         body,
     )
 
@@ -4101,7 +4124,7 @@ def _check_evaluate_input_valid(tool_root: Path) -> CheckResult:
             evidence=[],
         )
 
-    input_arg = input_arg_match.group(1)
+    input_arg = input_arg_match.group(1) or input_arg_match.group(2)
 
     # Check if the argument references $(OUTPUT_DIR) or ${OUTPUT_DIR}
     if re.search(r"\$[\({]OUTPUT_DIR[\)}]", input_arg):

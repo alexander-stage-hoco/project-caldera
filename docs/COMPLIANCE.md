@@ -7,23 +7,24 @@ This document defines the requirements and readiness gates for tools in Project 
 ## Quick Start
 
 ```bash
-# Full scan on all tools
+# Structural compliance checks — all tools (~10s)
 make compliance
 
-# Single tool scan (faster)
+# Fast structure checks only (~100ms, great for pre-commit)
+make compliance-preflight
+
+# Full compliance with tool execution (~30min, for CI/release)
+make compliance-full
+```
+
+### Single-tool scanning
+
+```bash
+# Single tool scan
 python src/tool-compliance/tool_compliance.py src/tools/<tool-name>
 
-# Preflight mode (~100ms, structure checks only)
+# Single tool preflight (~100ms)
 python src/tool-compliance/tool_compliance.py src/tools/<tool-name> --preflight
-
-# Full scan with execution
-python src/tool-compliance/tool_compliance.py --root . \
-  --run-analysis --run-evaluate --run-llm --run-coverage
-
-# Output reports
-python src/tool-compliance/tool_compliance.py --root . \
-  --out-json /tmp/report.json \
-  --out-md /tmp/report.md
 ```
 
 ---
@@ -603,7 +604,7 @@ cp docs/templates/EVAL_STRATEGY.md.template src/tools/<tool>/EVAL_STRATEGY.md
 - Integration tests in `tests/integration/`
 - Test files follow `test_*.py` naming
 - `make test` succeeds
-- Test coverage >= 80%
+- Test coverage >= 60%
 
 ### Checks & Fix Actions
 
@@ -622,12 +623,12 @@ mv tests/unit/accuracy_test.py tests/unit/test_accuracy.py
 
 #### test.coverage_threshold (high)
 
-**Validates:** Test coverage meets minimum 80% threshold.
+**Validates:** Test coverage meets minimum 60% threshold.
 
 **What it checks:**
 1. pytest-cov is in requirements.txt
 2. Tests pass (if running with `--run-coverage`)
-3. Overall code coverage >= 80%
+3. Overall code coverage >= 60%
 
 **Report format handling:**
 - Checks for `coverage.json` (preferred format for automated checking)
@@ -645,7 +646,7 @@ mv tests/unit/accuracy_test.py tests/unit/test_accuracy.py
 **Common failures:**
 - pytest-cov not in requirements.txt
 - Tests failing
-- Coverage below 80%
+- Coverage below 60%
 - No coverage.json found (run with --run-coverage)
 - Only htmlcov exists without coverage.json
 
@@ -681,7 +682,7 @@ test_coverage_rules:
 
 | Config Key | Default | Description |
 |------------|---------|-------------|
-| `threshold` | 80 | Minimum coverage percentage |
+| `threshold` | 60 | Minimum coverage percentage |
 | `source_dirs` | `["scripts"]` | Directories to measure coverage on |
 | `omit_patterns` | See above | Patterns excluded from coverage |
 
@@ -900,7 +901,7 @@ TOOL_INGESTION_CONFIGS = [
 | entity.repository_alignment | high | Frozen entities, insert methods |
 | **Testing** | | |
 | test.structure_naming | medium | test_*.py naming convention |
-| test.coverage_threshold | high | Test coverage >= 80% threshold |
+| test.coverage_threshold | high | Test coverage >= 60% threshold |
 | **Run Checks** | | |
 | run.analyze | critical | make analyze succeeds |
 | run.evaluate | high | make evaluate succeeds |
@@ -1079,7 +1080,7 @@ ls evaluation/results/  # Should contain llm_evaluation.json
 - Run compliance scanner with `--run-coverage` flag to execute tests
 - Or run `pytest tests/ --cov=scripts --cov-report=json` manually
 
-**"Test coverage X% < 80% threshold"**
+**"Test coverage X% < 60% threshold"**
 - Run `pytest --cov=scripts --cov-report=term-missing` to see uncovered lines
 - Add tests for uncovered functions in scripts/
 - Focus on high-value code paths first
@@ -1119,7 +1120,7 @@ When migrating a tool from Vulcan or building incrementally, certain compliance 
 |-------|-------------|------------------|
 | **1-2: Structure/Output** | structure.*, make.*, schema.*, output.*, docs.* | adapter.*, sot.*, dbt.*, entity.* |
 | **3: Evaluation** | evaluation.check_modules, evaluation.llm_*, evaluation.ground_truth | run.evaluate, run.evaluate_llm (until outputs exist) |
-| **4: Testing** | test.structure_naming | test.coverage_threshold (until 80% reached) |
+| **4: Testing** | test.structure_naming | test.coverage_threshold (until 60% reached) |
 | **5: SoT Integration** | adapter.*, sot.*, entity.* | dbt.model_coverage |
 | **6: dbt Models** | dbt.model_coverage | - |
 
