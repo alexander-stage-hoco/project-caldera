@@ -244,6 +244,21 @@
         "classification_confidence": 0.9,
         "parent_directory_id": "d-000000000002",
         "depth": 1
+      },
+      "src/config.py": {
+        "id": "f-000000000015",
+        "path": "src/config.py",
+        "name": "config.py",
+        "extension": ".py",
+        "size_bytes": 80,
+        "modified_time": "2026-01-26T12:00:00Z",
+        "is_symlink": false,
+        "language": "Python",
+        "classification": "source",
+        "classification_reason": "path",
+        "classification_confidence": 0.9,
+        "parent_directory_id": "d-000000000002",
+        "depth": 1
       }
     },
     "directories": {

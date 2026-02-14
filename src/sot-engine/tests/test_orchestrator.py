@@ -53,7 +53,7 @@ def test_layout_adapter_persists_files(tmp_path: Path) -> None:
         [run_pk],
     ).fetchall()
 
-    # Fixture includes 14 files for various tool testing scenarios
+    # Fixture includes 15 files for various tool testing scenarios
     assert rows == [
         ("f-000000000006", "d-000000000001", ".env"),
         ("f-000000000005", "d-000000000001", "Dockerfile"),
@@ -62,6 +62,7 @@ def test_layout_adapter_persists_files(tmp_path: Path) -> None:
         ("f-000000000003", "d-000000000001", "package-lock.json"),
         ("f-000000000004", "d-000000000001", "requirements.txt"),
         ("f-000000000001", "d-000000000002", "src/app.py"),
+        ("f-000000000015", "d-000000000002", "src/config.py"),
         ("f-000000000012", "d-000000000002", "src/crypto.cs"),
         ("f-000000000011", "d-000000000002", "src/helpers.py"),
         ("f-000000000008", "d-000000000002", "src/main.py"),
