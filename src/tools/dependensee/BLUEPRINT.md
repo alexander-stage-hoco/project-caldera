@@ -235,6 +235,14 @@ No environment variables required. DependenSee dotnet tool is auto-installed if 
 3. **output_quality.py** - Schema validation and data quality
 4. **performance.py** - Execution time and resource usage
 
+### Scores
+
+| Metric | Score | Detail |
+|--------|-------|--------|
+| Programmatic | 5.0/5.0 | 16/16 checks passed |
+| LLM | 3.60/5.0 | 2 judges |
+| **Combined** | **4.44/5.0** | **STRONG_PASS** |
+
 ---
 
 ## Risk Assessment

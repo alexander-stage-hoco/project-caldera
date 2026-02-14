@@ -53,6 +53,8 @@ For each metric, the distribution should include:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Distribution Statistics Sample
 ```json
 {{ distribution_sample }}

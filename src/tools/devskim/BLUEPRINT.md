@@ -204,6 +204,14 @@ Current evaluation status (programmatic checks):
 
 See [evaluation/scorecard.md](./evaluation/scorecard.md) for latest results.
 
+### Scores
+
+| Metric | Score | Detail |
+|--------|-------|--------|
+| Programmatic | 4.72/5.0 | 29/30 checks passed |
+| LLM | 3.85/5.0 | 4 judges |
+| **Combined** | **4.37/5.0** | **STRONG_PASS** |
+
 ## Risk Assessment
 
 ### Known Limitations

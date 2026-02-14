@@ -321,6 +321,13 @@ Combined Score:               = 4.57/5.0 (STRONG_PASS)
 | Performance | 4/4 | 0 | 100% |
 | **Total** | **27/28** | **1** | **96.4%** |
 
+### Scores
+
+| Metric | Score | Detail |
+|--------|-------|--------|
+| Programmatic | 4.45/5.0 | 27/28 checks passed |
+| LLM | 3.50/5.0 | 4 judges |
+
 ---
 
 ## Risk Assessment

@@ -8,6 +8,8 @@ This evaluation assesses whether the tool produces reliable results suitable for
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Clean File Results
 {{ clean_file_violations }}
 

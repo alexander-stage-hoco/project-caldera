@@ -1,10 +1,12 @@
-.PHONY: help compliance tools-setup tools-analyze tools-evaluate \
+.PHONY: help setup analyze status list-runs report clean-db \
+	compliance tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
 	orchestrate test pipeline-eval arch-review
 
 TOOLS_DIR := src/tools
 TOOL ?=
 TOOL_DIRS := $(shell find $(TOOLS_DIR) -maxdepth 1 -type d -not -path $(TOOLS_DIR) -exec test -f {}/Makefile ';' -print | sort)
+REPO ?=
 ARCH_REVIEW_TARGET ?=
 ARCH_REVIEW_TYPE ?= tool_implementation
 COMPLIANCE_OUT_JSON ?= docs/tool_compliance_report.json
@@ -58,36 +60,108 @@ done
 endef
 
 help:
-	@echo "Caldera top-level targets:"
-	@echo "  compliance         Run tool compliance scanner"
-	@echo "  tools-setup        Run 'make setup' for tools"
-	@echo "  tools-analyze      Run 'make analyze' for tools"
-	@echo "  tools-evaluate     Run 'make evaluate' for tools"
-	@echo "  tools-evaluate-llm Run 'make evaluate-llm' for tools"
-	@echo "  tools-test         Run 'make test' for tools"
-	@echo "  tools-clean        Run 'make clean' for tools"
-	@echo "  test              Run all project tests"
-	@echo "  dbt-run           Run dbt models (staging + marts)"
-	@echo "  dbt-test          Run dbt tests"
-	@echo "  dbt-test-reports  Run report-specific dbt tests"
-	@echo "  orchestrate       Run orchestrator (REPO_PATH, REPO_ID, RUN_ID, BRANCH, COMMIT)"
-	@echo "  arch-review       Run programmatic architecture review (ARCH_REVIEW_TARGET=<tool>)"
-	@echo "  pipeline-eval     Full E2E: orchestrate -> insights -> LLM eval -> top 3"
+	@echo "Caldera — Code Analysis Pipeline"
 	@echo ""
-	@echo "Variables:"
-	@echo "  TOOL=<name>        Limit to a single tool directory"
-	@echo "  VENV=<path>        Pass through to tool Makefiles"
-	@echo "  REPO_PATH, REPO_NAME, OUTPUT_DIR, EVAL_OUTPUT_DIR, RUN_ID, REPO_ID, BRANCH, COMMIT"
-	@echo "  COMPLIANCE_FLAGS=\"--run-analysis --run-evaluate --run-llm\""
-	@echo "  DBT_BIN, DBT_PROFILES_DIR, DBT_PROJECT_DIR"
-	@echo "  ORCH_REPO_PATH, ORCH_REPO_ID, ORCH_RUN_ID, ORCH_BRANCH, ORCH_COMMIT, ORCH_DB_PATH"
-	@echo "  ORCH_LAYOUT_OUTPUT (optional, override layout output path)"
-	@echo "  ORCH_SCC_OUTPUT (optional, override scc output path)"
-	@echo "  ORCH_LIZARD_OUTPUT (optional, override lizard output path)"
-	@echo "  ORCH_LOG_PATH (optional, defaults to /tmp/caldera_orchestrator_<run_id>.log)"
-	@echo "  ORCH_REPLACE=1 (optional, replace existing repo+commit run)"
-	@echo "  ORCH_OUTPUT_ROOT (optional, override tool output root)"
-	@echo "  ORCH_SKIP_TOOLS (optional, comma-separated tool names to skip)"
+	@echo "  Quick start:"
+	@echo "    make setup                  One-time project setup"
+	@echo "    make analyze REPO=<path>    Analyze a repository (local path or GitHub URL)"
+	@echo "    make report                 Regenerate report from last run"
+	@echo "    make list-runs              Show all analysis runs"
+	@echo "    make status                 Check prerequisites and health"
+	@echo ""
+	@echo "  Advanced:"
+	@echo "    make orchestrate            Run orchestrator (requires ORCH_* variables)"
+	@echo "    make pipeline-eval          Full E2E with LLM evaluation"
+	@echo "    make compliance             Run tool compliance scanner"
+	@echo "    make arch-review            Architecture review (ARCH_REVIEW_TARGET=<tool>)"
+	@echo "    make dbt-run / dbt-test     Run dbt models / tests"
+	@echo "    make tools-setup / analyze / evaluate / test / clean"
+	@echo "    make clean-db               Remove database and start fresh"
+	@echo "    make test                   Run all project tests"
+	@echo ""
+	@echo "  Variables:"
+	@echo "    REPO=<path|url>   Repository to analyze (for 'analyze' target)"
+	@echo "    REPLACE=1         Replace existing run for same repo+commit"
+	@echo "    DB_PATH=<path>    Database path (default: /tmp/caldera_sot.duckdb)"
+	@echo "    RUN_PK=<id>       Specific run to report on (for 'report' target)"
+	@echo "    TOOL=<name>       Limit tools-* targets to a single tool"
+
+# =============================================================================
+# User-Facing Targets
+# =============================================================================
+
+setup:
+	@echo "=== Setting up Project Caldera ==="
+	@python3 -c "import sys; assert sys.version_info >= (3, 12), f'Python 3.12+ required, got {sys.version}'"
+	@if [ ! -f .venv/bin/activate ]; then python3 -m venv .venv; fi
+	@.venv/bin/pip install --upgrade pip -q
+	@.venv/bin/pip install -r requirements.txt -q
+	@echo "Project venv ready. Setting up tools..."
+	@$(MAKE) tools-setup
+	@echo ""
+	@echo "Setup complete! Run: make analyze REPO=/path/to/repo"
+
+analyze:
+	@test -n "$(REPO)" || (echo "Usage: make analyze REPO=/path/to/repo"; echo "       make analyze REPO=https://github.com/user/project"; exit 1)
+	@if echo "$(REPO)" | grep -qE '^https?://'; then \
+	  CLONE_DIR=$$(mktemp -d /tmp/caldera-repo-XXXXXX); \
+	  echo "Cloning $(REPO) to $$CLONE_DIR ..."; \
+	  git clone --depth 1 "$(REPO)" "$$CLONE_DIR" || (rm -rf "$$CLONE_DIR"; exit 1); \
+	  $(MAKE) _analyze-local REPO_DIR="$$CLONE_DIR" $(if $(REPLACE),ORCH_REPLACE=1,); \
+	  echo "Cleaning up clone..."; \
+	  rm -rf "$$CLONE_DIR"; \
+	else \
+	  $(MAKE) _analyze-local REPO_DIR="$(REPO)" $(if $(REPLACE),ORCH_REPLACE=1,); \
+	fi
+
+_analyze-local:
+	@$(MAKE) pipeline-eval \
+		ORCH_REPO_PATH=$(REPO_DIR) \
+		ORCH_DB_PATH=$(ORCH_DB_PATH) \
+		$(if $(ORCH_REPLACE),ORCH_REPLACE=1,)
+
+report:
+	$(eval RUN_PK ?= $(shell duckdb $(ORCH_DB_PATH) -csv -noheader \
+	  "SELECT run_pk FROM lz_tool_runs ORDER BY run_pk DESC LIMIT 1" 2>/dev/null))
+	@test -n "$(RUN_PK)" || (echo "No runs found in database. Run 'make analyze' first."; exit 1)
+	@echo "Generating report for run_pk=$(RUN_PK)..."
+	@mkdir -p $(PIPELINE_OUTPUT_DIR)
+	cd src/insights && $(PYTHON_VENV) -m insights generate $(RUN_PK) \
+		--db $(ORCH_DB_PATH) \
+		--format html \
+		--output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html
+	@echo "Report: $(PIPELINE_OUTPUT_DIR)/report.html"
+
+list-runs:
+	@duckdb $(ORCH_DB_PATH) -markdown \
+	  "SELECT cr.collection_run_id, cr.repo_id, cr.commit, cr.status, \
+	   cr.started_at, count(tr.run_pk) as tool_count \
+	   FROM lz_collection_runs cr \
+	   LEFT JOIN lz_tool_runs tr ON tr.collection_run_id = cr.collection_run_id \
+	   GROUP BY 1,2,3,4,5 \
+	   ORDER BY cr.started_at DESC" 2>/dev/null \
+	  || echo "No database found at $(ORCH_DB_PATH). Run 'make analyze' first."
+
+status:
+	@echo "=== Caldera Status ==="
+	@printf "Python 3.12+:  "; python3 -c "import sys; v=sys.version_info; print(f'OK ({v.major}.{v.minor}.{v.micro})')" 2>/dev/null || echo "MISSING"
+	@printf "Project venv:  "; test -f .venv/bin/activate && echo "OK" || echo "MISSING (run: make setup)"
+	@printf "duckdb CLI:    "; command -v duckdb >/dev/null && echo "OK" || echo "MISSING (brew install duckdb)"
+	@printf "git:           "; command -v git >/dev/null && echo "OK" || echo "MISSING"
+	@printf "Database:      "; test -f $(ORCH_DB_PATH) && echo "OK ($(ORCH_DB_PATH))" || echo "No database yet"
+	@if test -f $(ORCH_DB_PATH); then \
+	  printf "Runs:          "; \
+	  duckdb $(ORCH_DB_PATH) -csv -noheader "SELECT count(*) FROM lz_collection_runs" 2>/dev/null || echo "0"; \
+	fi
+
+clean-db:
+	@echo "Removing database at $(ORCH_DB_PATH)..."
+	@rm -f $(ORCH_DB_PATH)
+	@echo "Database removed. Next 'make analyze' will create a fresh one."
+
+# =============================================================================
+# Tool and Infrastructure Targets
+# =============================================================================
 
 compliance:
 	@.venv/bin/python src/tool-compliance/tool_compliance.py \

@@ -556,6 +556,14 @@ make help               # Show all targets
 9. **risk** - Identifies potential risks and limitations
 10. **statistics** - Validates statistical accuracy of metrics
 
+### Scores
+
+| Metric | Score | Detail |
+|--------|-------|--------|
+| Programmatic | 5.0/5.0 | 62/66 checks passed |
+| LLM | 3.78/5.0 | 10 judges |
+| **Combined** | **4.51/5.0** | **STRONG_PASS** |
+
 ---
 
 ## Lessons Learned

@@ -14,6 +14,8 @@ This evaluation focuses on how well the analyzers detect design issues in C# cod
 
 ## Evidence
 
+{{ evidence }}
+
 ### Programmatic Evaluation Results
 {{ evaluation_results }}
 

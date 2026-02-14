@@ -28,6 +28,8 @@ You are evaluating scc **against alternative tools** (cloc, tokei, loc).
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### scc Performance
 ```json
 {{ scc_results }}

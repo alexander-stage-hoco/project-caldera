@@ -8,6 +8,8 @@ This evaluation is part of a due diligence technical assessment. The tool should
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Tool Output Sample
 {{ detection_sample }}
 

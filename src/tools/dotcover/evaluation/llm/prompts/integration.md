@@ -16,6 +16,8 @@ You are evaluating the integration quality of dotCover output with the Caldera S
 
 ## Evidence to Review
 
+{{ evidence }}
+
 ### Envelope Structure
 {{ envelope_structure }}
 

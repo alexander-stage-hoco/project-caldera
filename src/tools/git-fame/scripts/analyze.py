@@ -30,7 +30,9 @@ except Exception:  # pragma: no cover - environment dependent
 
 # Add shared src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from common.cli_parser import add_common_args, validate_common_args, CommitResolutionConfig
 from common.envelope_formatter import create_envelope
+from shared.path_utils import normalize_file_path
 
 # Schema version for this output format
 SCHEMA_VERSION = "1.0.0"
@@ -359,6 +361,8 @@ def analyze_repo(
     until: str | None = None,
     run_id: str | None = None,
     repo_id: str | None = None,
+    branch: str | None = None,
+    commit: str | None = None,
 ) -> dict[str, Any]:
     """Analyze a single repository.
 
@@ -370,11 +374,16 @@ def analyze_repo(
         until: Date up to which to check
         run_id: Optional run ID (from orchestrator)
         repo_id: Optional repo ID (from orchestrator)
+        branch: Optional branch name (auto-detected if not provided)
+        commit: Optional commit SHA (auto-detected if not provided)
     """
     repo_name = repo_path.name
 
-    # Get git info from repo
-    branch, commit = get_git_info(repo_path)
+    # Use provided branch/commit or auto-detect from repo
+    if not branch or not commit:
+        detected_branch, detected_commit = get_git_info(repo_path)
+        branch = branch or detected_branch
+        commit = commit or detected_commit
 
     # Use provided IDs or generate new ones
     if not run_id:
@@ -461,8 +470,7 @@ def analyze_repo(
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Run git-fame authorship analysis")
-    parser.add_argument("repo_path", type=Path, help="Path to repository or directory of repos")
-    parser.add_argument("-o", "--output", type=Path, default=None, help="Output directory")
+    add_common_args(parser, default_repo_path=None)
     parser.add_argument(
         "--by-extension",
         action="store_true",
@@ -482,21 +490,13 @@ def main():
     )
     args = parser.parse_args()
 
-    # Determine output path - can be file (.json) or directory
-    base_dir = Path(__file__).parent.parent
-    output_path = args.output or base_dir / "output"
-
-    # Check if output is a file path (.json) or directory
-    is_file_output = str(output_path).endswith('.json')
-
-    if is_file_output:
-        # File output - create parent directory
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-    else:
-        # Directory output - create the directory
-        output_path.mkdir(parents=True, exist_ok=True)
-
-    repo_path = args.repo_path.resolve()
+    common = validate_common_args(
+        args,
+        commit_config=CommitResolutionConfig.lenient(),
+        create_output_dir=True,
+    )
+    repo_path = common.repo_path.resolve()
+    output_path = common.output_path
 
     print("=" * 60)
     print("git-fame Authorship Analysis")
@@ -506,7 +506,9 @@ def main():
     if (repo_path / ".git").exists():
         # Single repository
         analyze_repo(
-            repo_path, output_path, args.by_extension, args.since, args.until
+            repo_path, output_path, args.by_extension, args.since, args.until,
+            run_id=common.run_id, repo_id=common.repo_id,
+            branch=common.branch, commit=common.commit,
         )
     else:
         # Directory of repositories
@@ -521,18 +523,16 @@ def main():
         all_results = {}
         for repo in sorted(repos):
             result = analyze_repo(
-                repo, output_path, args.by_extension, args.since, args.until
+                repo, output_path, args.by_extension, args.since, args.until,
+                run_id=common.run_id, repo_id=common.repo_id,
+                branch=common.branch, commit=common.commit,
             )
             if result:
                 all_results[repo.name] = result
             print()
 
         # Save combined results
-        if is_file_output:
-            # If output_path is a file, put combined next to it
-            combined_file = output_path.parent / "combined_analysis.json"
-        else:
-            combined_file = output_path / "combined_analysis.json"
+        combined_file = common.output_dir / "combined_analysis.json"
         combined_file.write_text(json.dumps(all_results, indent=2))
         print(f"Combined results: {combined_file}")
 

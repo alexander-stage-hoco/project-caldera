@@ -15,6 +15,8 @@ This evaluation focuses on how well the analyzers detect security issues in C# c
 
 ## Evidence
 
+{{ evidence }}
+
 ### Programmatic Evaluation Results
 {{ evaluation_results }}
 

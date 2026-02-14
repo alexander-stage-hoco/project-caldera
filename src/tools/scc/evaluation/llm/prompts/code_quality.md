@@ -40,6 +40,8 @@ You are evaluating the **output richness and expressiveness** of scc (Sloc Cloc 
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Raw scc JSON Output
 ```json
 {{ raw_output }}

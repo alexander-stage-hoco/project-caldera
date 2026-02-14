@@ -18,6 +18,8 @@ You are evaluating the **documentation quality** of scc for integration into the
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### README Content
 {{ readme_content }}
 

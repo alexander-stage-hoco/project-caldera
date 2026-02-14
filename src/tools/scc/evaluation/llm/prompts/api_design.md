@@ -18,6 +18,8 @@ You are evaluating the **CLI API design** of scc for usability in automation pip
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### CLI Help Output
 ```
 {{ help_output }}

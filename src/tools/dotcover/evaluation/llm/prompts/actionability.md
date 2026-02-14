@@ -16,6 +16,8 @@ You are evaluating how actionable the dotCover coverage output is for improving 
 
 ## Evidence to Review
 
+{{ evidence }}
+
 ### Coverage Summary
 {{ coverage_summary }}
 

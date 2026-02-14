@@ -100,3 +100,9 @@ src/sot-engine/dbt/target/
 src/tools/roslyn-analyzers/eval-repos/synthetic/**/bin/
 src/tools/roslyn-analyzers/eval-repos/synthetic/**/obj/
 src/tools/roslyn-analyzers/eval-repos/synthetic/**/.vs/
+src/tools/sonarqube/eval-repos/synthetic/**/bin/
+src/tools/sonarqube/eval-repos/synthetic/**/obj/
+src/tools/roslyn-analyzers/obj/
+
+# Architecture review output (regenerated)
+src/architecture-review/results/

@@ -8,6 +8,8 @@ This evaluation assesses whether the tool's output is useful for remediation pla
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Sample Violation Messages
 {{ message_samples }}
 

@@ -56,6 +56,8 @@ Good actionability means a developer can:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Top Coverage Gaps (Lowest Coverage Files)
 ```json
 {{ top_coverage_gaps }}

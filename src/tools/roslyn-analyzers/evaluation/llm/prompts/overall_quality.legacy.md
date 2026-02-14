@@ -13,6 +13,8 @@ This evaluation assesses the holistic quality of the analysis:
 
 ## Evidence
 
+{{ evidence }}
+
 ### Programmatic Evaluation Summary
 {{ evaluation_summary }}
 

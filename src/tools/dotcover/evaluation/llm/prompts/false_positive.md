@@ -16,6 +16,8 @@ You are evaluating the false positive rate in dotCover's coverage detection.
 
 ## Evidence to Review
 
+{{ evidence }}
+
 ### Coverage Summary
 {{ coverage_summary }}
 

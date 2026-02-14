@@ -79,6 +79,8 @@ Expected CCN ranges:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Sample Functions from Analysis
 ```json
 {{ sample_functions }}

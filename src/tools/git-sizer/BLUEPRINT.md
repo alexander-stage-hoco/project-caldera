@@ -212,6 +212,15 @@ THRESHOLDS = {
 | Per-repo average | ~120ms | Well under 2s threshold |
 | Memory usage | Low | Single-pass analysis |
 
+## Evaluation
+
+### Scores
+
+| Metric | Score | Detail |
+|--------|-------|--------|
+| Programmatic | 4.97/5.0 | 28/28 checks passed |
+| LLM | 4.55/5.0 | 4 judges |
+
 ## Risk Assessment
 
 | Risk | Likelihood | Impact | Mitigation |

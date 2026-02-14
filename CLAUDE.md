@@ -10,6 +10,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
 
 | Goal | Document |
 |------|----------|
+| Get started as a new user | [docs/USER_GUIDE.md](docs/USER_GUIDE.md) |
 | Create or integrate a new tool | [docs/TOOL_INTEGRATION_CHECKLIST.md](docs/TOOL_INTEGRATION_CHECKLIST.md) |
 | Migrate from Vulcan | [docs/TOOL_INTEGRATION_CHECKLIST.md](docs/TOOL_INTEGRATION_CHECKLIST.md#appendix-a-migrating-from-vulcan) |
 | Create a new adapter | [docs/PERSISTENCE.md](docs/PERSISTENCE.md) |
@@ -85,7 +86,18 @@ scripts/                     # Automation scripts
 
 ## Key Commands
 
-### Top-Level (from project root)
+### User-Facing (from project root)
+
+```bash
+make setup                   # One-time project + tool setup
+make analyze REPO=<path>     # Full E2E pipeline (local path or GitHub URL)
+make report                  # Regenerate report (optionally RUN_PK=N)
+make list-runs               # Show all collection runs
+make status                  # Check prerequisites and health
+make clean-db                # Remove database, start fresh
+```
+
+### Advanced (from project root)
 
 ```bash
 make compliance              # Run tool compliance scanner
@@ -220,6 +232,7 @@ class SccFileMetric:
 
 | File | Purpose |
 |------|---------|
+| `docs/USER_GUIDE.md` | Getting started guide for new users |
 | `docs/TOOL_INTEGRATION_CHECKLIST.md` | Creating, migrating, and integrating tools |
 | `docs/PERSISTENCE.md` | Adapter pattern, entities, repositories |
 | `docs/COMPLIANCE.md` | Compliance requirements and checks |
@@ -313,7 +326,7 @@ Results written to `src/architecture-review/results/<tool>-<timestamp>.json`. Sc
 | Problem | Solution |
 |---------|----------|
 | Path validation errors | Ensure paths are repo-relative (no leading `/` or `./`) |
-| Collection run exists | Use `--replace` flag with orchestrator |
+| Collection run exists | Use `REPLACE=1`: `make analyze REPO=... REPLACE=1` |
 | dbt test failures | Check rollup invariant: `recursive >= direct` |
 | Schema validation errors | Compare output against `schemas/output.schema.json` |
 | Compliance failures | See [docs/COMPLIANCE.md](docs/COMPLIANCE.md) for fix actions |

@@ -34,6 +34,8 @@ git-sizer should:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Schema Compatibility Check
 ```json
 {{ schema_check }}

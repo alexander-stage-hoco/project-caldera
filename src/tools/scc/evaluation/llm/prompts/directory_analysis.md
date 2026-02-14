@@ -107,6 +107,8 @@ Each directory has: `is_leaf`, `child_count`, `depth`
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Directory Analysis Output
 ```json
 {{ directory_analysis }}

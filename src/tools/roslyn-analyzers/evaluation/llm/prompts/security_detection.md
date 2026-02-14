@@ -31,6 +31,8 @@ This evaluation focuses on how well the analyzers detect security issues in C# c
 
 ## Evidence
 
+{{ evidence }}
+
 ### Security Summary
 {{ security_summary }}
 

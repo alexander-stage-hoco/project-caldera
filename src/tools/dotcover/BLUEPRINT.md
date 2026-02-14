@@ -188,6 +188,13 @@ Key data structures:
 
 See [evaluation/scorecard.md](./evaluation/scorecard.md) for results.
 
+### Scores
+
+| Metric | Score | Detail |
+|--------|-------|--------|
+| Programmatic | 5.0/5.0 | 19/19 checks passed |
+| LLM | 4.0/5.0 | 4 judges |
+
 ---
 
 ## Risk Assessment

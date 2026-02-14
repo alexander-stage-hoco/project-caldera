@@ -55,6 +55,8 @@ Accurate parsing is critical for:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Format Accuracy Breakdown
 ```json
 {{ format_accuracy }}

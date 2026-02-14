@@ -25,6 +25,10 @@ Return a JSON object with:
   "sub_scores": {"detection": 1-5, "risk": 1-5}
 }
 
+## Evidence
+
+{{ evidence }}
+
 analysis_results:
 {{ analysis_results }}
 

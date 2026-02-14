@@ -10,6 +10,10 @@ You will receive:
 1. The tool's JSON output
 2. Repository context
 
+## Evidence
+
+{{ evidence }}
+
 ## Evaluation Criteria
 
 Rate on a scale of 1-5:

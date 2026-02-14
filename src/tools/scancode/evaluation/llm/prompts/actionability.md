@@ -17,5 +17,9 @@ Return a JSON object with:
   "sub_scores": {"clarity": 1-5, "guidance": 1-5}
 }
 
+## Evidence
+
+{{ evidence }}
+
 analysis_results:
 {{ analysis_results }}

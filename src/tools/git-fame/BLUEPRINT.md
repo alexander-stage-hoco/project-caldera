@@ -149,6 +149,14 @@ Options:
 | bus-factor-1 | 3 | 90/5/5 | ~0.82 | 1 |
 | balanced | 4 | 25/25/25/25 | 0.25 | 2 |
 
+### Scores
+
+| Metric | Score | Detail |
+|--------|-------|--------|
+| Programmatic | 5.0/5.0 | 28/28 checks passed |
+| LLM | 4.30/5.0 | 2 judges |
+| **Combined** | **4.72/5.0** | **STRONG_PASS** |
+
 ## Risk
 
 ### Technical Risks

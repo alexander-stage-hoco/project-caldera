@@ -55,6 +55,8 @@ Lizard should detect various function types across 7 supported languages:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Detection Summary
 - Total functions detected: {{ total_detected }}
 - Files with functions: {{ files_with_functions }}

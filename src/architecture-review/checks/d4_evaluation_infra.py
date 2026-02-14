@@ -137,7 +137,12 @@ def _check_observability_enforced(tf: ToolFiles) -> list[Finding]:
         return findings
 
     content = tf.eval_orchestrator.read_text()
-    has_observability = "observability" in content or "trace" in content or "log_interaction" in content
+    has_observability = (
+        "observability" in content
+        or "trace" in content
+        or "log_interaction" in content
+        or "LLMEvaluatorBase" in content
+    )
     if not has_observability:
         findings.append(Finding(
             severity="info",

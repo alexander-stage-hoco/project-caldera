@@ -40,6 +40,8 @@ You are evaluating the **integration quality** of symbol-scanner for code analys
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Metadata
 ```json
 {{ metadata }}

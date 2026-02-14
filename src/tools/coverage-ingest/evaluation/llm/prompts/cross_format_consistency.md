@@ -56,6 +56,8 @@ Consistency is critical because:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Cross-Format Test Results
 ```json
 {{ consistency_results }}

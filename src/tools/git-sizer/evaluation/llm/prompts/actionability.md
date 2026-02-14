@@ -37,6 +37,8 @@ Poor actionability:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### LFS Candidates Summary
 ```json
 {{ lfs_candidates_summary }}

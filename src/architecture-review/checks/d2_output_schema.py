@@ -164,7 +164,7 @@ def _check_analyze_path_norm(content: str, tf: ToolFiles) -> list[Finding]:
 def _check_analyze_cli_args(content: str, tf: ToolFiles) -> list[Finding]:
     findings: list[Finding] = []
     has_common_args = "add_common_args" in content
-    has_many_args = len(re.findall(r"add_argument", content)) >= 7
+    has_many_args = len(re.findall(r"add_argument|click\.option|click\.argument", content)) >= 7
     if not has_common_args and not has_many_args:
         findings.append(Finding(
             severity="info",

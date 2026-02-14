@@ -21,6 +21,7 @@ include ../Makefile.common
 # Tool-specific defaults
 REPO_PATH ?= eval-repos/synthetic
 REPO_NAME ?= synthetic
+COMMIT ?= $(shell git -C $(REPO_PATH) rev-parse HEAD 2>/dev/null || echo "0000000000000000000000000000000000000000")
 
 help:  ## Show this help message
 	@echo "git-fame - Authorship Attribution Analysis"
@@ -55,13 +56,20 @@ build-repos: $(VENV_READY)  ## Build synthetic test repositories
 analyze: $(VENV_READY)  ## Run analysis on eval-repos
 	@echo "Running authorship analysis on $(REPO_NAME)..."
 	@mkdir -p $(OUTPUT_DIR)
-	$(PYTHON_VENV) scripts/analyze.py $(REPO_PATH) --output $(OUTPUT_DIR)/output.json
+	$(PYTHON_VENV) -m scripts.analyze \
+		--repo-path "$(REPO_PATH)" \
+		--repo-name "$(REPO_NAME)" \
+		--output-dir "$(OUTPUT_DIR)" \
+		--run-id "$(RUN_ID)" \
+		--repo-id "$(REPO_ID)" \
+		--branch "$(BRANCH)" \
+		--commit "$(COMMIT)"
 	@echo "Analysis complete. Results in $(OUTPUT_DIR)/"
 
 # Run analysis on specific repo
 analyze-%: $(VENV_READY)
 	@echo "Running analysis on eval-repos/synthetic/$*..."
-	$(PYTHON_VENV) scripts/analyze.py eval-repos/synthetic/$*
+	$(MAKE) analyze REPO_PATH=eval-repos/synthetic/$* REPO_NAME=$*
 
 # ============================================
 # Evaluation targets

@@ -50,6 +50,8 @@ The DD Platform expects evidence in this format:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### scc Output Structure
 ```json
 {{ scc_output }}

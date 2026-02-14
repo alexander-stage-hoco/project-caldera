@@ -26,6 +26,8 @@ You are evaluating **production risks** of using scc in the DD Platform.
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Project Health
 - GitHub stars: {{ github_stars }}
 - Last release: {{ last_release }}

@@ -14,6 +14,8 @@ This evaluation focuses on how well the analyzers detect resource management iss
 
 ## Evidence
 
+{{ evidence }}
+
 ### Programmatic Evaluation Results
 {{ evaluation_results }}
 

@@ -190,6 +190,13 @@ The license analyzer supports these patterns:
 
 See [evaluation/scorecard.md](./evaluation/scorecard.md) for full results.
 
+### Scores
+
+| Metric | Score | Detail |
+|--------|-------|--------|
+| Programmatic | 5.0/5.0 | 192/192 checks passed |
+| LLM | 4.05/5.0 | 4 judges |
+
 ## Risk Assessment
 
 ### Known Limitations

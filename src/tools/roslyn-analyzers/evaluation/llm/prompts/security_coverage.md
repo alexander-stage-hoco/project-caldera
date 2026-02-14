@@ -8,6 +8,8 @@ This evaluation assesses whether the tool provides adequate security coverage fo
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Security Rules Triggered
 {{ security_rules_triggered }}
 

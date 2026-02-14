@@ -187,6 +187,14 @@ Evaluation dimensions:
 - Import completeness
 - Integration quality
 
+### Scores
+
+| Metric | Score | Detail |
+|--------|-------|--------|
+| Programmatic | 4.98/5.0 | 25/25 checks passed |
+| LLM | 4.40/5.0 | 4 judges |
+| **Combined** | **4.75/5.0** | **STRONG_PASS** |
+
 ## Risk
 
 | Risk | Mitigation |

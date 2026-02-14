@@ -59,6 +59,8 @@ Complexity can concentrate in certain directories:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Top Functions by CCN (Primary Hotspots)
 ```json
 {{ top_functions_by_ccn }}

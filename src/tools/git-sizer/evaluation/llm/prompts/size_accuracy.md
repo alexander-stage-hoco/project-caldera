@@ -54,6 +54,8 @@ Accurate measurements are critical for:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Repository Metrics
 ```json
 {{ repo_metrics }}

@@ -55,6 +55,8 @@ Accurate risk tier classification is critical for:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Tier Definitions
 ```json
 {{ tier_definitions }}

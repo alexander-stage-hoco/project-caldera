@@ -18,6 +18,8 @@ You are evaluating the **quality of error messages** produced by scc.
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Error Scenarios Tested
 {{ error_scenarios }}
 

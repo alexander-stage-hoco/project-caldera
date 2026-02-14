@@ -30,6 +30,8 @@ You are evaluating how well scc **handles edge cases** encountered in real-world
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Edge Case Test Results
 ```json
 {{ edge_case_results }}

@@ -19,6 +19,8 @@ You are evaluating the accuracy of dotCover code coverage measurements.
 
 ## Evidence to Review
 
+{{ evidence }}
+
 ### Coverage Summary
 {{ coverage_summary }}
 

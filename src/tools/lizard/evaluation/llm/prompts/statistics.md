@@ -71,6 +71,8 @@ These MUST hold for valid statistics:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Summary-Level CCN Distribution
 ```json
 {{ ccn_distribution }}

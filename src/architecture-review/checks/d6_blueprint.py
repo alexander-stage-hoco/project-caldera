@@ -96,16 +96,21 @@ def _check_blueprint_no_placeholders(content: str, tf: ToolFiles) -> list[Findin
 
 def _check_blueprint_has_eval_data(content: str, tf: ToolFiles) -> list[Finding]:
     findings: list[Finding] = []
-    # Look for the Evaluation section and check for numeric data
-    eval_match = re.search(r"^#+\s+.*Evaluation.*$", content, re.MULTILINE | re.IGNORECASE)
-    if not eval_match:
+    # Look for the Evaluation section and check for numeric data.
+    # Prefer the most prominent (fewest #) header to avoid matching
+    # subsections like "### Phase 2: Evaluation Framework" under Implementation Plan.
+    matches = list(re.finditer(r"^(#+)\s+.*Evaluation.*$", content, re.MULTILINE | re.IGNORECASE))
+    if not matches:
         return findings
+    eval_match = min(matches, key=lambda m: len(m.group(1)))
 
+    level = len(eval_match.group(1))
     eval_section = content[eval_match.start():]
-    # Find next top-level header to delimit the section
-    next_header = re.search(r"^#+\s+", eval_section[len(eval_match.group()):], re.MULTILINE)
+    rest = eval_section[len(eval_match.group()):]
+    # Only stop at same-or-higher level headers (not subsections)
+    next_header = re.search(rf"^#{{1,{level}}}\s+", rest, re.MULTILINE)
     if next_header:
-        eval_section = eval_section[:eval_match.end() - eval_match.start() + next_header.start()]
+        eval_section = eval_section[:len(eval_match.group()) + next_header.start()]
 
     # Check for numeric data (percentages, decimals)
     has_numbers = bool(re.search(r"\d+\.\d+", eval_section)) or bool(re.search(r"\d+%", eval_section))
@@ -123,7 +128,12 @@ def _check_blueprint_has_eval_data(content: str, tf: ToolFiles) -> list[Finding]
 
 def _check_blueprint_tool_referenced(content: str, tf: ToolFiles) -> list[Finding]:
     findings: list[Finding] = []
-    if tf.tool_name not in content.lower():
+    lower_content = content.lower()
+    name_found = (
+        tf.tool_name in lower_content
+        or tf.tool_name.replace("-", " ") in lower_content
+    )
+    if not name_found:
         findings.append(Finding(
             severity="info",
             rule_id="BLUEPRINT_TOOL_REFERENCED",

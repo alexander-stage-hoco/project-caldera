@@ -40,6 +40,8 @@ You are evaluating the **symbol extraction accuracy** of symbol-scanner for code
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Extracted Symbols
 ```json
 {{ symbols }}

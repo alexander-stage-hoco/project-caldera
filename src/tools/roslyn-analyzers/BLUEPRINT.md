@@ -191,6 +191,14 @@ Evaluate built-in Roslyn Analyzers for comprehensive .NET code quality assessmen
 | WEAK_PASS | >= 0.60 |
 | FAIL | < 0.60 |
 
+### Scores
+
+| Metric | Score | Detail |
+|--------|-------|--------|
+| Programmatic | 5.0/5.0 | 34/34 checks passed |
+| LLM | 3.17/5.0 | 7 judges |
+| **Combined** | **4.27/5.0** | **STRONG_PASS** |
+
 ---
 
 ## 8. Implementation Plan

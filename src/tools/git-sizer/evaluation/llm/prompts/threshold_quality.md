@@ -34,6 +34,8 @@ Good thresholds should:
 
 ## Evidence to Evaluate
 
+{{ evidence }}
+
 ### Violation Summary
 ```json
 {{ violation_summary }}

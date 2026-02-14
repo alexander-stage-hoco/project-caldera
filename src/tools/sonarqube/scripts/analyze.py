@@ -43,6 +43,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from common.git_utilities import resolve_commit
 from common.envelope_formatter import create_envelope, get_current_timestamp
+from common.path_normalization import normalize_file_path
 
 logger = structlog.get_logger(__name__)
 
