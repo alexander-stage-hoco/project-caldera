@@ -14,66 +14,12 @@ scripts_path = Path(__file__).parent.parent.parent / "scripts"
 sys.path.insert(0, str(scripts_path))
 
 import analyze
-from analyze import to_standard_output, _resolve_commit
-
-
-class DummyResult:
-    """Minimal subprocess result stub for git commands."""
-
-    def __init__(self, returncode: int, stdout: str = ""):
-        self.returncode = returncode
-        self.stdout = stdout
-
-
-def test_resolve_commit_uses_provided_when_valid(monkeypatch, tmp_path):
-    """Provided commit is accepted when it exists."""
-    def fake_git_run(repo_path, args):
-        if args[:2] == ["cat-file", "-e"]:
-            return DummyResult(0)
-        return DummyResult(1)
-
-    monkeypatch.setattr("analyze._git_run", fake_git_run)
-    commit = _resolve_commit(tmp_path, "a" * 40, None)
-    assert commit == "a" * 40
-
-
-def test_resolve_commit_falls_back_to_head(monkeypatch, tmp_path):
-    """Missing commit uses HEAD from repo."""
-    def fake_git_run(repo_path, args):
-        if args[:2] == ["rev-parse", "HEAD"]:
-            return DummyResult(0, "b" * 40)
-        return DummyResult(1)
-
-    monkeypatch.setattr("analyze._git_run", fake_git_run)
-    commit = _resolve_commit(tmp_path, "", None)
-    assert commit == "b" * 40
-
-
-def test_resolve_commit_unversioned_when_missing_head(monkeypatch, tmp_path):
-    """Missing git metadata falls back to standard zero hash."""
-    def fake_git_run(repo_path, args):
-        return DummyResult(1)
-
-    monkeypatch.setattr("analyze._git_run", fake_git_run)
-    commit = _resolve_commit(tmp_path, "", None)
-    assert commit == "0" * 40
-
-
-def test_resolve_commit_errors_when_missing(monkeypatch, tmp_path):
-    """Invalid commit raises a ValueError."""
-    def fake_git_run(repo_path, args):
-        return DummyResult(1)
-
-    monkeypatch.setattr("analyze._git_run", fake_git_run)
-    with pytest.raises(ValueError):
-        _resolve_commit(tmp_path, "deadbeef", None)
+from analyze import to_standard_output
 
 
 def build_output(result: dict) -> dict:
     return to_standard_output(
         result,
-        "test-repo",
-        "/path/to/repo",
         run_id="11111111-1111-1111-1111-111111111111",
         repo_id="22222222-2222-2222-2222-222222222222",
         branch="main",

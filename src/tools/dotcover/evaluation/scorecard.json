@@ -1,7 +1,7 @@
 {
   "tool": "dotcover",
   "version": "1.0.0",
-  "generated_at": "2026-02-13T19:17:54.593726+00:00",
+  "generated_at": "2026-02-14T19:01:46.921452+00:00",
   "description": "Evaluation scorecard for dotCover code coverage analysis",
   "summary": {
     "total_checks": 19,
@@ -27,13 +27,13 @@
           "check_id": "accuracy.assembly_detected",
           "name": "accuracy.assembly_detected",
           "passed": true,
-          "message": "All expected assemblies found: {'CoverageDemo'}"
+          "message": "All expected assemblies found: {'Demo'}"
         },
         {
           "check_id": "accuracy.overall_coverage",
           "name": "accuracy.overall_coverage",
           "passed": true,
-          "message": "Coverage 70.8% within range [50.0-75.0]"
+          "message": "Coverage 75.0% within range [50-90]"
         }
       ]
     },
@@ -51,7 +51,7 @@
           "check_id": "coverage.files_analyzed",
           "name": "coverage.files_analyzed",
           "passed": true,
-          "message": "3 types analyzed"
+          "message": "1 types analyzed"
         }
       ]
     },
@@ -69,7 +69,7 @@
           "check_id": "invariants.covered_lte_total.summary",
           "name": "invariants.covered_lte_total.summary",
           "passed": true,
-          "message": "Summary: covered (17) <= total (24)"
+          "message": "Summary: covered (15) <= total (20)"
         },
         {
           "check_id": "invariants.covered_lte_total.assemblies",
@@ -81,37 +81,37 @@
           "check_id": "invariants.covered_lte_total.types",
           "name": "invariants.covered_lte_total.types",
           "passed": true,
-          "message": "All 3 types have covered <= total"
+          "message": "All 1 types have covered <= total"
         },
         {
           "check_id": "invariants.covered_lte_total.methods",
           "name": "invariants.covered_lte_total.methods",
           "passed": true,
-          "message": "All 10 methods have covered <= total"
+          "message": "All 1 methods have covered <= total"
         },
         {
           "check_id": "invariants.hierarchy_consistency.types_to_assemblies",
           "name": "invariants.hierarchy_consistency.types_to_assemblies",
           "passed": true,
-          "message": "All 3 types reference valid assemblies"
+          "message": "All 1 types reference valid assemblies"
         },
         {
           "check_id": "invariants.hierarchy_consistency.methods_to_types",
           "name": "invariants.hierarchy_consistency.methods_to_types",
           "passed": true,
-          "message": "All 10 methods reference valid types"
+          "message": "All 1 methods reference valid types"
         },
         {
           "check_id": "invariants.hierarchy_consistency.methods_to_assemblies",
           "name": "invariants.hierarchy_consistency.methods_to_assemblies",
           "passed": true,
-          "message": "All 10 methods reference valid assemblies"
+          "message": "All 1 methods reference valid assemblies"
         },
         {
           "check_id": "invariants.non_negative_counts.summary",
           "name": "invariants.non_negative_counts.summary",
           "passed": true,
-          "message": "Summary counts non-negative: covered=17, total=24"
+          "message": "Summary counts non-negative: covered=15, total=20"
         },
         {
           "check_id": "invariants.non_negative_counts.assemblies",
@@ -123,19 +123,19 @@
           "check_id": "invariants.non_negative_counts.types",
           "name": "invariants.non_negative_counts.types",
           "passed": true,
-          "message": "All 3 types have non-negative counts"
+          "message": "All 1 types have non-negative counts"
         },
         {
           "check_id": "invariants.non_negative_counts.methods",
           "name": "invariants.non_negative_counts.methods",
           "passed": true,
-          "message": "All 10 methods have non-negative counts"
+          "message": "All 1 methods have non-negative counts"
         },
         {
           "check_id": "invariants.percentage_bounds.summary",
           "name": "invariants.percentage_bounds.summary",
           "passed": true,
-          "message": "Summary coverage percentage valid: 70.83%"
+          "message": "Summary coverage percentage valid: 75.0%"
         },
         {
           "check_id": "invariants.percentage_bounds.assemblies",
@@ -147,13 +147,13 @@
           "check_id": "invariants.percentage_bounds.types",
           "name": "invariants.percentage_bounds.types",
           "passed": true,
-          "message": "All 3 types have valid percentage bounds"
+          "message": "All 1 types have valid percentage bounds"
         },
         {
           "check_id": "invariants.percentage_bounds.methods",
           "name": "invariants.percentage_bounds.methods",
           "passed": true,
-          "message": "All 10 methods have valid percentage bounds"
+          "message": "All 1 methods have valid percentage bounds"
         }
       ]
     },

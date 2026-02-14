@@ -1,7 +1,7 @@
 {
   "tool": "pmd-cpd",
   "version": "1.0.0",
-  "generated_at": "2026-02-13T20:24:04.503513",
+  "generated_at": "2026-02-14T15:16:10.375751",
   "description": "Evaluation scorecard for PMD CPD duplication analysis",
   "summary": {
     "total_checks": 28,

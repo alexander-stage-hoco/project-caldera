@@ -1,6 +1,6 @@
 # dotCover Evaluation Scorecard
 
-**Generated:** 2026-02-13T19:17:54.593726+00:00
+**Generated:** 2026-02-14T19:01:46.921452+00:00
 **Decision:** STRONG_PASS
 **Score:** 100.0%
 
@@ -29,34 +29,34 @@
 
 | Check | Status | Message |
 |-------|--------|---------|
-| accuracy.assembly_detected | PASS | All expected assemblies found: {'CoverageDemo'} |
-| accuracy.overall_coverage | PASS | Coverage 70.8% within range [50.0-75.0] |
+| accuracy.assembly_detected | PASS | All expected assemblies found: {'Demo'} |
+| accuracy.overall_coverage | PASS | Coverage 75.0% within range [50-90] |
 
 ### Coverage
 
 | Check | Status | Message |
 |-------|--------|---------|
-| coverage.files_analyzed | PASS | 3 types analyzed |
+| coverage.files_analyzed | PASS | 1 types analyzed |
 
 ### Invariants
 
 | Check | Status | Message |
 |-------|--------|---------|
-| invariants.covered_lte_total.summary | PASS | Summary: covered (17) <= total (24) |
+| invariants.covered_lte_total.summary | PASS | Summary: covered (15) <= total (20) |
 | invariants.covered_lte_total.assemblies | PASS | All 1 assemblies have covered <= total |
-| invariants.covered_lte_total.types | PASS | All 3 types have covered <= total |
-| invariants.covered_lte_total.methods | PASS | All 10 methods have covered <= total |
-| invariants.hierarchy_consistency.types_to_assemblies | PASS | All 3 types reference valid assemblies |
-| invariants.hierarchy_consistency.methods_to_types | PASS | All 10 methods reference valid types |
-| invariants.hierarchy_consistency.methods_to_assemblies | PASS | All 10 methods reference valid assemblies |
-| invariants.non_negative_counts.summary | PASS | Summary counts non-negative: covered=17, total=24 |
+| invariants.covered_lte_total.types | PASS | All 1 types have covered <= total |
+| invariants.covered_lte_total.methods | PASS | All 1 methods have covered <= total |
+| invariants.hierarchy_consistency.types_to_assemblies | PASS | All 1 types reference valid assemblies |
+| invariants.hierarchy_consistency.methods_to_types | PASS | All 1 methods reference valid types |
+| invariants.hierarchy_consistency.methods_to_assemblies | PASS | All 1 methods reference valid assemblies |
+| invariants.non_negative_counts.summary | PASS | Summary counts non-negative: covered=15, total=20 |
 | invariants.non_negative_counts.assemblies | PASS | All 1 assemblies have non-negative counts |
-| invariants.non_negative_counts.types | PASS | All 3 types have non-negative counts |
-| invariants.non_negative_counts.methods | PASS | All 10 methods have non-negative counts |
-| invariants.percentage_bounds.summary | PASS | Summary coverage percentage valid: 70.83% |
+| invariants.non_negative_counts.types | PASS | All 1 types have non-negative counts |
+| invariants.non_negative_counts.methods | PASS | All 1 methods have non-negative counts |
+| invariants.percentage_bounds.summary | PASS | Summary coverage percentage valid: 75.0% |
 | invariants.percentage_bounds.assemblies | PASS | All 1 assemblies have valid percentage bounds |
-| invariants.percentage_bounds.types | PASS | All 3 types have valid percentage bounds |
-| invariants.percentage_bounds.methods | PASS | All 10 methods have valid percentage bounds |
+| invariants.percentage_bounds.types | PASS | All 1 types have valid percentage bounds |
+| invariants.percentage_bounds.methods | PASS | All 1 methods have valid percentage bounds |
 
 ### Performance
 

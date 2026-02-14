@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from evaluation.llm.judges.base import BaseJudge, JudgeResult, HAS_ANTHROPIC_SDK
+from evaluation.llm.judges.base import BaseJudge, JudgeResult
 from evaluation.llm.judges import (
     SmellAccuracyJudge,
     RuleCoverageJudge,
@@ -214,6 +214,9 @@ class TestBaseJudge:
         evidence = {
             "sample_smells": [{"rule_id": "test-rule", "severity": "WARNING"}],
             "total_smells": 5,
+            "interpretation_guidance": "Test guidance",
+            "synthetic_baseline": "Test baseline",
+            "evaluation_mode": "synthetic",
         }
 
         prompt = smell_accuracy_judge.build_prompt(evidence)
@@ -348,113 +351,43 @@ class TestJudgeWeights:
 
 
 class TestInvokeClaude:
-    """Tests for Claude invocation methods."""
+    """Tests for Claude invocation via LLMClient."""
 
-    def test_invoke_via_sdk_returns_none_when_no_sdk(self):
-        """Test SDK invocation returns None when SDK not available."""
+    def test_invoke_claude_uses_llm_client(self):
+        """Test that invoke_claude delegates to _llm_client.invoke()."""
         judge = SmellAccuracyJudge()
+        judge._llm_client = MagicMock()
+        judge._llm_client.invoke.return_value = "LLM response"
+        judge._llm_client.is_error_response.return_value = False
+        judge._logger = None
 
-        with patch('evaluation.llm.judges.base.HAS_ANTHROPIC_SDK', False):
-            result = judge._invoke_via_sdk("test prompt")
+        result = judge.invoke_claude("test prompt")
 
-        assert result is None
+        assert result == "LLM response"
+        judge._llm_client.invoke.assert_called_once_with("test prompt")
 
-    def test_invoke_via_sdk_returns_none_when_no_api_key(self):
-        """Test SDK invocation returns None when API key not set."""
+    def test_invoke_claude_handles_error_response(self):
+        """Test that invoke_claude handles error responses from LLMClient."""
         judge = SmellAccuracyJudge()
+        judge._llm_client = MagicMock()
+        judge._llm_client.invoke.return_value = "Error: connection failed"
+        judge._llm_client.is_error_response.return_value = True
+        judge._llm_client.is_timeout_error.return_value = False
+        judge._logger = None
 
-        with patch.dict('os.environ', {}, clear=True):
-            result = judge._invoke_via_sdk("test prompt")
+        result = judge.invoke_claude("test prompt")
 
-        assert result is None
+        assert result == "Error: connection failed"
 
-    @patch('evaluation.llm.judges.base.HAS_ANTHROPIC_SDK', True)
-    @patch('evaluation.llm.judges.base.anthropic')
-    def test_invoke_via_sdk_calls_api(self, mock_anthropic):
-        """Test SDK invocation calls Anthropic API correctly."""
-        mock_client = MagicMock()
-        mock_response = MagicMock()
-        mock_response.content = [MagicMock(text="API response")]
-        mock_client.messages.create.return_value = mock_response
-        mock_anthropic.Anthropic.return_value = mock_client
-
-        judge = SmellAccuracyJudge(model="sonnet")
-
-        with patch.dict('os.environ', {'ANTHROPIC_API_KEY': 'test-key'}):
-            result = judge._invoke_via_sdk("test prompt")
-
-        assert result == "API response"
-        mock_client.messages.create.assert_called_once()
-
-    @patch('shutil.which')
-    def test_invoke_via_cli_returns_error_when_not_installed(self, mock_which):
-        """Test CLI invocation returns error when claude not installed."""
-        mock_which.return_value = None
-
+    def test_invoke_claude_handles_timeout_error(self):
+        """Test that invoke_claude handles timeout errors from LLMClient."""
         judge = SmellAccuracyJudge()
-        result = judge._invoke_via_cli("test prompt")
+        judge._llm_client = MagicMock()
+        judge._llm_client.invoke.return_value = "Error: timed out after 120s"
+        judge._llm_client.is_error_response.return_value = True
+        judge._llm_client.is_timeout_error.return_value = True
+        judge._logger = None
 
-        assert "Error" in result
-        assert "Neither" in result or "not" in result.lower()
-
-    @patch('shutil.which')
-    @patch('subprocess.run')
-    def test_invoke_via_cli_calls_subprocess(self, mock_run, mock_which):
-        """Test CLI invocation calls subprocess correctly."""
-        mock_which.return_value = "/usr/bin/claude"
-        mock_run.return_value = MagicMock(
-            returncode=0,
-            stdout="CLI response",
-            stderr="",
-        )
-
-        judge = SmellAccuracyJudge(model="opus", timeout=60)
-        result = judge._invoke_via_cli("test prompt")
-
-        assert result == "CLI response"
-        mock_run.assert_called_once()
-
-        # Verify command structure
-        call_args = mock_run.call_args
-        cmd = call_args[0][0]
-        assert "claude" in cmd
-        assert "-p" in cmd
-        assert "opus" in cmd
-
-    @patch('shutil.which')
-    @patch('subprocess.run')
-    def test_invoke_via_cli_handles_timeout(self, mock_run, mock_which):
-        """Test CLI invocation handles timeout."""
-        import subprocess
-
-        mock_which.return_value = "/usr/bin/claude"
-        mock_run.side_effect = subprocess.TimeoutExpired("claude", 120)
-
-        judge = SmellAccuracyJudge()
-        result = judge._invoke_via_cli("test prompt")
+        result = judge.invoke_claude("test prompt")
 
         assert "timed out" in result.lower()
-
-    def test_invoke_claude_tries_sdk_first(self):
-        """Test that invoke_claude tries SDK before CLI."""
-        judge = SmellAccuracyJudge()
-
-        with patch.object(judge, '_invoke_via_sdk', return_value="SDK result") as mock_sdk:
-            with patch.object(judge, '_invoke_via_cli') as mock_cli:
-                result = judge.invoke_claude("test prompt")
-
-        assert result == "SDK result"
-        mock_sdk.assert_called_once_with("test prompt")
-        mock_cli.assert_not_called()
-
-    def test_invoke_claude_falls_back_to_cli(self):
-        """Test that invoke_claude falls back to CLI when SDK returns None."""
-        judge = SmellAccuracyJudge()
-
-        with patch.object(judge, '_invoke_via_sdk', return_value=None) as mock_sdk:
-            with patch.object(judge, '_invoke_via_cli', return_value="CLI result") as mock_cli:
-                result = judge.invoke_claude("test prompt")
-
-        assert result == "CLI result"
-        mock_sdk.assert_called_once()
-        mock_cli.assert_called_once_with("test prompt")
