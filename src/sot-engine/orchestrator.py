@@ -169,6 +169,18 @@ def _compute_content_hash(repo_path: Path) -> str:
     return h.hexdigest()
 
 
+def _commit_is_git_commit(repo_path: Path, commit: str) -> bool:
+    """Return True only if commit resolves as a git commit in repo_path."""
+    if _is_fallback_commit(commit):
+        return False
+    result = subprocess.run(
+        ["git", "-C", str(repo_path), "cat-file", "-e", f"{commit}^{{commit}}"],
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0
+
+
 def run_tool_make(
     tool_root: Path,
     repo_path: Path,
@@ -192,9 +204,10 @@ def run_tool_make(
             "OUTPUT_DIR": str(output_dir),
         }
     )
-    # Only set COMMIT if it's a real git commit (not fallback all-zeros)
-    # This allows tools to compute their own fallback hash for non-git repos
-    if not _is_fallback_commit(commit):
+    # Only set COMMIT if it resolves as a git commit in the target repo.
+    # This avoids passing non-git "content hash" commits into strict tools,
+    # while still allowing tools to resolve HEAD or fallback internally.
+    if _commit_is_git_commit(repo_path, commit):
         env["COMMIT"] = commit
     if extra_env:
         env.update(extra_env)
@@ -347,7 +360,7 @@ TOOL_INGESTION_CONFIGS = [
     ToolIngestionConfig("roslyn-analyzers", RoslynAdapter, RoslynRepository),
     ToolIngestionConfig("semgrep", SemgrepAdapter, SemgrepRepository),
     ToolIngestionConfig("sonarqube", SonarqubeAdapter, SonarqubeRepository, validate_metadata=False),
-    ToolIngestionConfig("trivy", TrivyAdapter, TrivyRepository, validate_metadata=False),
+    ToolIngestionConfig("trivy", TrivyAdapter, TrivyRepository),
     ToolIngestionConfig("git-sizer", GitSizerAdapter, GitSizerRepository),
     ToolIngestionConfig("git-fame", GitFameAdapter, GitFameRepository),
     ToolIngestionConfig("git-blame-scanner", GitBlameScannerAdapter, GitBlameRepository),
