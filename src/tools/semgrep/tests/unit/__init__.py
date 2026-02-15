@@ -1,1 +1,0 @@
-# Semgrep Unit Tests

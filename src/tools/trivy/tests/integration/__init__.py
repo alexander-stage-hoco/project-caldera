@@ -1,1 +1,0 @@
-"""Trivy integration tests."""

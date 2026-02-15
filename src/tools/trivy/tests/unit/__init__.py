@@ -1,1 +1,0 @@
-"""Trivy unit tests."""
