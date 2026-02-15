@@ -77,7 +77,7 @@ Tool outputs are written to `src/tools/<tool>/outputs/`.
 
 The orchestrator validates each tool's JSON output and loads it into the DuckDB landing zone. Adapters enforce schema validation, path normalization, and quality rules.
 
-Database location: `/tmp/caldera_sot.duckdb` (override with `DB_PATH`).
+Database location: `~/.caldera/caldera_sot.duckdb` (override with `DB_PATH`).
 
 ### Phase 3 — Data Transformation (dbt)
 
@@ -132,6 +132,20 @@ make compliance   # run tool compliance scanner
 make test         # run all tests (pytest + tool tests + dbt)
 ```
 
+### Artifact bundle workflow (optional)
+
+Collect tool artifacts (JSON + logs) without DuckDB/dbt:
+
+```bash
+make collect REPO=/path/to/repo
+```
+
+Then ingest and generate a report on another machine:
+
+```bash
+make analyze-bundle REPO=/path/to/repo BUNDLE=artifacts/<repo_id>/<run_id>
+```
+
 ### Reset the database
 
 ```bash
@@ -146,9 +160,11 @@ Removes the DuckDB database. The next `make analyze` creates a fresh one.
 |----------|---------|---------|
 | `REPO` | (required) | Path or URL to analyze |
 | `REPLACE` | unset | Set to `1` to overwrite an existing run |
-| `DB_PATH` | `/tmp/caldera_sot.duckdb` | DuckDB database location |
+| `DB_PATH` | `~/.caldera/caldera_sot.duckdb` | DuckDB database location |
 | `RUN_PK` | latest | Specific run for `make report` |
 | `TOOL` | all | Limit `tools-*` targets to one tool |
+| `SKIP_TOOLS` | unset | Comma-separated tool names to skip |
+| `PIPELINE_LLM` | `1` | Set to `0` to skip LLM evaluation + top3 extraction |
 
 ## Troubleshooting
 

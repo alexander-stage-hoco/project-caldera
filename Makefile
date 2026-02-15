@@ -2,7 +2,8 @@
 	compliance compliance-preflight compliance-full \
 	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
-	orchestrate test pipeline-eval arch-review
+	orchestrate test pipeline-eval arch-review \
+	collect analyze-bundle prune-outputs
 
 TOOLS_DIR := src/tools
 TOOL ?=
@@ -15,7 +16,12 @@ COMPLIANCE_OUT_MD ?= docs/tool_compliance_report.md
 DBT_BIN ?= .venv/bin/dbt
 DBT_PROFILES_DIR ?= src/sot-engine/dbt
 DBT_PROJECT_DIR ?= src/sot-engine/dbt
-DB_PATH ?= /tmp/caldera_sot.duckdb
+DB_PATH ?= $(HOME)/.caldera/caldera_sot.duckdb
+SKIP_TOOLS ?=
+PIPELINE_LLM ?= 1
+BUNDLE ?=
+BUNDLE_DIR ?= artifacts
+BUNDLE_TAR ?= 1
 ORCH_REPO_PATH ?=
 ORCH_REPO_ID ?=
 ORCH_RUN_ID ?=
@@ -79,15 +85,22 @@ help:
 	@echo "    make arch-review            Architecture review (ARCH_REVIEW_TARGET=<tool>)"
 	@echo "    make dbt-run / dbt-test     Run dbt models / tests"
 	@echo "    make tools-setup / analyze / evaluate / test / clean"
+	@echo "    make collect REPO=<path|url>            Collect tool artifacts bundle only"
+	@echo "    make analyze-bundle REPO=<path> BUNDLE=<bundle>  Ingest + report from bundle"
+	@echo "    make prune-outputs CONFIRM=1            Delete generated tool/report outputs"
 	@echo "    make clean-db               Remove database and start fresh"
 	@echo "    make test                   Run all project tests"
 	@echo ""
 	@echo "  Variables:"
 	@echo "    REPO=<path|url>   Repository to analyze (for 'analyze' target)"
 	@echo "    REPLACE=1         Replace existing run for same repo+commit"
-	@echo "    DB_PATH=<path>    Database path (default: /tmp/caldera_sot.duckdb)"
+	@echo "    DB_PATH=<path>    Database path (default: $$HOME/.caldera/caldera_sot.duckdb)"
 	@echo "    RUN_PK=<id>       Specific run to report on (for 'report' target)"
 	@echo "    TOOL=<name>       Limit tools-* targets to a single tool"
+	@echo "    SKIP_TOOLS=a,b    Skip tools in orchestrator (comma-separated)"
+	@echo "    PIPELINE_LLM=0    Skip LLM eval + top3 extraction"
+	@echo "    BUNDLE_DIR=<dir>  Bundle output dir (default: artifacts)"
+	@echo "    BUNDLE_TAR=0      Do not create .tar.gz bundle"
 
 # =============================================================================
 # User-Facing Targets
@@ -110,7 +123,8 @@ analyze:
 	  CLONE_DIR=$$(mktemp -d /tmp/caldera-repo-XXXXXX); \
 	  echo "Cloning $(REPO) to $$CLONE_DIR ..."; \
 	  git clone --depth 1 "$(REPO)" "$$CLONE_DIR" || (rm -rf "$$CLONE_DIR"; exit 1); \
-	  $(MAKE) _analyze-local REPO_DIR="$$CLONE_DIR" $(if $(REPLACE),ORCH_REPLACE=1,); \
+	  REPO_ID=$$(python3 -c 'import sys,hashlib,urllib.parse; u=sys.argv[1]; p=urllib.parse.urlparse(u); name=p.path.rstrip("/").split("/")[-1]; name=name[:-4] if name.endswith(".git") else name; h=hashlib.sha1(u.encode()).hexdigest()[:10]; print(f"{name}-{h}")' "$(REPO)" 2>/dev/null || echo "remote-repo"); \
+	  $(MAKE) _analyze-local REPO_DIR="$$CLONE_DIR" ORCH_REPO_ID="$$REPO_ID" $(if $(REPLACE),ORCH_REPLACE=1,); \
 	  echo "Cleaning up clone..."; \
 	  rm -rf "$$CLONE_DIR"; \
 	else \
@@ -121,6 +135,7 @@ _analyze-local:
 	@$(MAKE) pipeline-eval \
 		ORCH_REPO_PATH=$(REPO_DIR) \
 		ORCH_DB_PATH=$(ORCH_DB_PATH) \
+		$(if $(ORCH_REPO_ID),ORCH_REPO_ID=$(ORCH_REPO_ID),) \
 		$(if $(ORCH_REPLACE),ORCH_REPLACE=1,)
 
 report:
@@ -161,6 +176,13 @@ clean-db:
 	@echo "Removing database at $(ORCH_DB_PATH)..."
 	@rm -f $(ORCH_DB_PATH)
 	@echo "Database removed. Next 'make analyze' will create a fresh one."
+
+prune-outputs:
+	@test "$(CONFIRM)" = "1" || (echo "Refusing to delete outputs without CONFIRM=1"; exit 1)
+	@echo "Pruning generated outputs..."
+	@rm -rf src/insights/output/pipeline/*
+	@find src/tools -maxdepth 2 -type d -name outputs -exec rm -rf {}/\* ';'
+	@echo "Done."
 
 # =============================================================================
 # Tool and Infrastructure Targets
@@ -277,11 +299,11 @@ PYTHON_VENV := .venv/bin/python
 
 pipeline-eval:
 	@test -n "$(ORCH_REPO_PATH)" || (echo "ORCH_REPO_PATH is required"; exit 1)
-	$(eval REPO_NAME := $(shell basename $(ORCH_REPO_PATH)))
-	$(eval AUTO_REPO_ID := $(or $(ORCH_REPO_ID),$(REPO_NAME)))
-	$(eval AUTO_RUN_ID := $(or $(ORCH_RUN_ID),$(shell date +%Y%m%d_%H%M%S)))
+	$(eval AUTO_REPO_ID := $(or $(ORCH_REPO_ID),$(shell python3 -c 'import sys,hashlib,pathlib; p=str(pathlib.Path(sys.argv[1]).resolve()); h=hashlib.sha1(p.encode()).hexdigest()[:10]; print(f"{pathlib.Path(p).name}-{h}")' "$(ORCH_REPO_PATH)" 2>/dev/null || basename "$(ORCH_REPO_PATH)")))
+	$(eval AUTO_RUN_ID := $(or $(ORCH_RUN_ID),$(shell python3 -c 'import uuid; print(uuid.uuid4())' 2>/dev/null || date +%Y%m%d_%H%M%S)))
 	$(eval AUTO_BRANCH := $(or $(ORCH_BRANCH),$(shell cd $(ORCH_REPO_PATH) && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")))
 	$(eval AUTO_COMMIT := $(or $(ORCH_COMMIT),$(shell cd $(ORCH_REPO_PATH) && git rev-parse HEAD 2>/dev/null || echo "0000000000000000000000000000000000000000")))
+	@mkdir -p $(dir $(ORCH_DB_PATH))
 	@echo ""
 	@echo "=============================================="
 	@echo "PIPELINE EVALUATION"
@@ -302,6 +324,7 @@ pipeline-eval:
 		ORCH_BRANCH=$(AUTO_BRANCH) \
 		ORCH_COMMIT=$(AUTO_COMMIT) \
 		ORCH_DB_PATH=$(ORCH_DB_PATH) \
+		$(if $(SKIP_TOOLS),ORCH_SKIP_TOOLS=$(SKIP_TOOLS),) \
 		$(if $(ORCH_REPLACE),ORCH_REPLACE=1,)
 	$(eval RUN_PK := $(shell duckdb $(ORCH_DB_PATH) -csv -noheader "SELECT run_pk FROM lz_tool_runs WHERE run_id='$(AUTO_RUN_ID)' LIMIT 1" 2>/dev/null || echo "1"))
 	@echo ""
@@ -311,25 +334,61 @@ pipeline-eval:
 		--db $(ORCH_DB_PATH) \
 		--format html \
 		--output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html
-	@echo ""
-	@echo "=== Phase 3: LLM Evaluation with InsightQualityJudge ==="
-	cd src/insights && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \
-		$(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html \
-		--db $(ORCH_DB_PATH) \
-		--run-pk $(RUN_PK) \
-		--include-insight-quality \
-		--output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json
-	@echo ""
-	@echo "=== Phase 4: Extract Top 3 Insights ==="
-	cd src/insights && $(PYTHON_VENV) -m insights.scripts.extract_top_insights extract \
-		$(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json \
-		--output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/top3_insights.json \
-		--format rich
+	@if [ "$(PIPELINE_LLM)" = "1" ]; then \
+	  echo ""; \
+	  echo "=== Phase 3: LLM Evaluation with InsightQualityJudge ==="; \
+	  cd src/insights && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \
+	    $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html \
+	    --db $(ORCH_DB_PATH) \
+	    --run-pk $(RUN_PK) \
+	    --include-insight-quality \
+	    --output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json; \
+	  echo ""; \
+	  echo "=== Phase 4: Extract Top 3 Insights ==="; \
+	  cd src/insights && $(PYTHON_VENV) -m insights.scripts.extract_top_insights extract \
+	    $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json \
+	    --output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/top3_insights.json \
+	    --format rich; \
+	else \
+	  echo ""; \
+	  echo "=== Skipping LLM phases (PIPELINE_LLM=$(PIPELINE_LLM)) ==="; \
+	fi
 	@echo ""
 	@echo "=============================================="
 	@echo "PIPELINE COMPLETE"
 	@echo "=============================================="
 	@echo "Report:     $(PIPELINE_OUTPUT_DIR)/report.html"
-	@echo "Evaluation: $(PIPELINE_OUTPUT_DIR)/evaluation.json"
-	@echo "Top 3:      $(PIPELINE_OUTPUT_DIR)/top3_insights.json"
+	@if [ "$(PIPELINE_LLM)" = "1" ]; then \
+	  echo "Evaluation: $(PIPELINE_OUTPUT_DIR)/evaluation.json"; \
+	  echo "Top 3:      $(PIPELINE_OUTPUT_DIR)/top3_insights.json"; \
+	fi
 	@echo "=============================================="
+
+# =============================================================================
+# Artifact Bundle Workflow (Artifacts-only collection + later ingest)
+# =============================================================================
+
+collect:
+	@test -n "$(REPO)" || (echo "Usage: make collect REPO=/path/to/repo"; echo "       make collect REPO=https://github.com/user/project"; exit 1)
+	@if echo "$(REPO)" | grep -qE '^https?://'; then \
+	  CLONE_DIR=$$(mktemp -d /tmp/caldera-repo-XXXXXX); \
+	  echo "Cloning $(REPO) to $$CLONE_DIR ..."; \
+	  git clone --depth 1 "$(REPO)" "$$CLONE_DIR" || (rm -rf "$$CLONE_DIR"; exit 1); \
+	  REPO_ID=$$(python3 -c 'import sys,hashlib,urllib.parse; u=sys.argv[1]; p=urllib.parse.urlparse(u); name=p.path.rstrip("/").split("/")[-1]; name=name[:-4] if name.endswith(".git") else name; h=hashlib.sha1(u.encode()).hexdigest()[:10]; print(f"{name}-{h}")' "$(REPO)" 2>/dev/null || echo "remote-repo"); \
+	  .venv/bin/python scripts/collect_artifacts.py --repo-path "$$CLONE_DIR" --repo-id "$$REPO_ID" --output-dir "$(BUNDLE_DIR)" $(if $(filter 1,$(BUNDLE_TAR)),--tar,) $(if $(SKIP_TOOLS),--skip-tools "$(SKIP_TOOLS)",); \
+	  echo "Cleaning up clone..."; \
+	  rm -rf "$$CLONE_DIR"; \
+	else \
+	  .venv/bin/python scripts/collect_artifacts.py --repo-path "$(REPO)" --output-dir "$(BUNDLE_DIR)" $(if $(filter 1,$(BUNDLE_TAR)),--tar,) $(if $(SKIP_TOOLS),--skip-tools "$(SKIP_TOOLS)",); \
+	fi
+
+analyze-bundle:
+	@test -n "$(REPO)" || (echo "Usage: make analyze-bundle REPO=/path/to/repo BUNDLE=/path/to/bundle"; exit 1)
+	@test -n "$(BUNDLE)" || (echo "BUNDLE is required (directory or .tar.gz)"; exit 1)
+	@mkdir -p $(dir $(ORCH_DB_PATH))
+	@.venv/bin/python scripts/analyze_bundle.py \
+		--repo-path "$(REPO)" \
+		--bundle "$(BUNDLE)" \
+		--db-path "$(ORCH_DB_PATH)" \
+		--report-out "$(PIPELINE_OUTPUT_DIR)/report.html" \
+		--llm $(PIPELINE_LLM)

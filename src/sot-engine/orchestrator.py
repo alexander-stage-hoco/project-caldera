@@ -204,11 +204,15 @@ def run_tool_make(
             "OUTPUT_DIR": str(output_dir),
         }
     )
-    # Only set COMMIT if it resolves as a git commit in the target repo.
-    # This avoids passing non-git "content hash" commits into strict tools,
-    # while still allowing tools to resolve HEAD or fallback internally.
-    if _commit_is_git_commit(repo_path, commit):
-        env["COMMIT"] = commit
+    # Export COMMIT only when it is a real git commit in the target repo.
+    #
+    # When analyzing a non-git directory, the orchestrator may compute a
+    # deterministic "content hash" commit for run grouping. Many tool Makefiles
+    # otherwise fall back to using the Project Caldera repo's git SHA, which
+    # then causes ingest commit mismatches. Setting COMMIT to the standard
+    # all-zeros sentinel prevents those Makefile fallbacks while still allowing
+    # tools to resolve HEAD/fallback internally.
+    env["COMMIT"] = commit if _commit_is_git_commit(repo_path, commit) else ("0" * 40)
     if extra_env:
         env.update(extra_env)
     subprocess.run(
@@ -225,6 +229,17 @@ def _default_output_path(tool: ToolConfig, run_id: str, output_root: Path | None
     if output_root:
         return (output_root / tool.name / run_id / "output.json").resolve()
     return (Path(tool.path) / "outputs" / run_id / "output.json").resolve()
+
+
+def _discover_outputs(output_root: Path, run_id: str) -> dict[str, Path]:
+    """Discover tool output.json files under a standard output_root layout."""
+    known_tools = {t.name for t in TOOL_CONFIGS} | {"coverage-ingest"}
+    outputs: dict[str, Path] = {}
+    for tool_name in sorted(known_tools):
+        candidate = (output_root / tool_name / run_id / "output.json").resolve()
+        if candidate.exists():
+            outputs[tool_name] = candidate
+    return outputs
 
 
 # Tool configurations for the orchestrator
@@ -640,6 +655,28 @@ def main() -> int:
             logger.info(f"Completed tools in {_format_duration(time.perf_counter() - start)}")
             for name, path in outputs.items():
                 logger.info(f"{name} output: {path}")
+        elif output_root:
+            # Bundle/ingest mode: discover outputs under output_root when tools
+            # were executed elsewhere (e.g. another machine or container).
+            discovered = _discover_outputs(output_root, args.run_id)
+            layout_output = discovered.get("layout-scanner", layout_output)
+            scc_output = discovered.get("scc", scc_output)
+            lizard_output = discovered.get("lizard", lizard_output)
+            roslyn_output = discovered.get("roslyn-analyzers", roslyn_output)
+            semgrep_output = discovered.get("semgrep", semgrep_output)
+            sonarqube_output = discovered.get("sonarqube", sonarqube_output)
+            trivy_output = discovered.get("trivy", trivy_output)
+            gitleaks_output = discovered.get("gitleaks", gitleaks_output)
+            symbol_scanner_output = discovered.get("symbol-scanner", symbol_scanner_output)
+            scancode_output = discovered.get("scancode", scancode_output)
+            pmd_cpd_output = discovered.get("pmd-cpd", pmd_cpd_output)
+            devskim_output = discovered.get("devskim", devskim_output)
+            dotcover_output = discovered.get("dotcover", dotcover_output)
+            git_fame_output = discovered.get("git-fame", git_fame_output)
+            git_sizer_output = discovered.get("git-sizer", git_sizer_output)
+            git_blame_scanner_output = discovered.get("git-blame-scanner", git_blame_scanner_output)
+            dependensee_output = discovered.get("dependensee", dependensee_output)
+            coverage_output = discovered.get("coverage-ingest", coverage_output)
 
         start = time.perf_counter()
         logger.info("Step 2/3: Ingest outputs into DuckDB")

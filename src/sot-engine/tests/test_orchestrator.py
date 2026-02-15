@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from orchestrator import (
     _resolve_dbt_cmd,
     ingest_outputs,
     ensure_schema,
+    run_tool_make,
     run_dbt,
     validate_payload,
 )
@@ -377,6 +379,45 @@ def test_validate_payload_skips_commit_when_payload_is_fallback() -> None:
     metadata = {"repo_id": "r1", "run_id": "run1", "commit": "0" * 40}
     # Payload has fallback commit, orchestrator has real — should not raise
     validate_payload(metadata, "r1", "run1", expected_commit="a" * 40)
+
+
+def test_run_tool_make_does_not_export_non_git_commit(monkeypatch, tmp_path: Path) -> None:
+    tool_root = tmp_path / "tool"
+    tool_root.mkdir()
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+
+    captured_env: dict[str, str] = {}
+
+    def fake_run(cmd, **kwargs):
+        # git cat-file -e check should fail (non-git repo)
+        if cmd[:2] == ["git", "-C"]:
+            return subprocess.CompletedProcess(args=cmd, returncode=128, stdout="", stderr="")
+        # make analyze should run without COMMIT exported
+        if cmd[:2] == ["make", "analyze"]:
+            captured_env.update(kwargs.get("env", {}))
+            return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="", stderr="")
+        raise AssertionError(f"Unexpected subprocess call: {cmd}")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    logger = OrchestratorLogger(tmp_path / "log.txt")
+    try:
+        run_tool_make(
+            tool_root=tool_root,
+            repo_path=repo_path,
+            repo_name="repo",
+            run_id="run1",
+            repo_id="repo",
+            branch="main",
+            commit="a" * 40,  # Not a real commit in this repo
+            output_dir=tmp_path / "out",
+            logger=logger,
+        )
+    finally:
+        logger.close()
+
+    assert captured_env.get("COMMIT") == "0" * 40
 
 
 # =============================================================================

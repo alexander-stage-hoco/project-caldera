@@ -8,6 +8,10 @@ Run 18 code analysis tools against any repository, persist results to a DuckDB w
 make setup                                          # one-time setup
 make analyze REPO=/path/to/repo                     # analyze a local repository
 make analyze REPO=https://github.com/user/project   # or a remote one
+make analyze REPO=/path/to/repo PIPELINE_LLM=0      # skip LLM eval + top3 extraction
+make analyze REPO=/path/to/repo SKIP_TOOLS=a,b      # skip tools (comma-separated)
+make collect REPO=/path/to/repo                     # artifacts-only bundle (manifest + outputs + logs)
+make analyze-bundle REPO=/path/to/repo BUNDLE=artifacts/<repo_id>/<run_id>  # ingest + report from bundle
 ```
 
 See [docs/USER_GUIDE.md](docs/USER_GUIDE.md) for the full getting-started guide, or run `make help` for all available targets.
