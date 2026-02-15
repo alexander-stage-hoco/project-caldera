@@ -99,8 +99,8 @@ Purpose: comprehensive directory analysis with all metrics.
    - `make dbt-run`
 2. Run via the insights CLI (recommended). This repo does not ship a separate
    explorer CLI; the insights component is the supported reporting entrypoint:
-   - `cd src/insights && .venv/bin/python -m insights generate 1 --db /tmp/caldera_sot.duckdb --format html -o output/report.html`
-   - `cd src/insights && .venv/bin/python -m insights generate 1 --db /tmp/caldera_sot.duckdb --format md -o output/report.md`
+   - `cd src/insights && .venv/bin/python -m insights generate 1 --db ~/.caldera/caldera_sot.duckdb --format html -o output/report.html`
+   - `cd src/insights && .venv/bin/python -m insights generate 1 --db ~/.caldera/caldera_sot.duckdb --format md -o output/report.md`
 
 Make targets are available in `src/insights/`:
 - `make generate RUN_PK=1`

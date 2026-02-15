@@ -95,6 +95,9 @@ make report                  # Regenerate report (optionally RUN_PK=N)
 make list-runs               # Show all collection runs
 make status                  # Check prerequisites and health
 make clean-db                # Remove database, start fresh
+make collect REPO=<path>     # Collect tool artifacts into a portable bundle
+make analyze-bundle REPO=<path> BUNDLE=<dir>  # Ingest bundle + generate report
+make prune-outputs           # Delete generated tool outputs (requires CONFIRM=1)
 ```
 
 ### Advanced (from project root)
@@ -117,6 +120,16 @@ make dbt-test-reports        # Run report-specific dbt tests
 make orchestrate             # Full end-to-end pipeline
 make pipeline-eval           # Full E2E: orchestrate -> insights -> LLM eval -> top 3
 ```
+
+### Pipeline Variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `DB_PATH` | `~/.caldera/caldera_sot.duckdb` | Database location |
+| `SKIP_TOOLS` | unset | Comma-separated tool names to skip |
+| `PIPELINE_LLM` | `1` | Set to `0` to skip LLM evaluation |
+| `BUNDLE_DIR` | `artifacts` | Bundle output directory for `make collect` |
+| `BUNDLE_TAR` | `1` | Create `.tar.gz` from bundle |
 
 ### Orchestrator
 
@@ -269,6 +282,8 @@ class SccFileMetric:
 | `scripts/seed_ground_truth.py` | Ground truth auto-seeding |
 | `scripts/generate_dbt_models.py` | dbt model generator |
 | `scripts/check_observability_compliance.py` | CI compliance checker |
+| `scripts/collect_artifacts.py` | Artifact bundle collector |
+| `scripts/analyze_bundle.py` | Bundle ingest + report generator |
 
 ## Data Model Concepts
 
@@ -340,7 +355,7 @@ Results written to `src/architecture-review/results/<tool>-<timestamp>.json`. Sc
 ### Investigating a failed run
 
 ```bash
-duckdb /tmp/caldera_sot.duckdb "SELECT * FROM lz_collection_runs WHERE status = 'failed'"
+duckdb ~/.caldera/caldera_sot.duckdb "SELECT * FROM lz_collection_runs WHERE status = 'failed'"
 ```
 
 ### Checking tool output validity
