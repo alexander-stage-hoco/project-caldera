@@ -3,7 +3,8 @@
 	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
 	orchestrate test pipeline-eval arch-review \
-	collect analyze-bundle prune-outputs
+	collect analyze-bundle prune-outputs \
+	cloud-setup cloud-run cloud-destroy
 
 TOOLS_DIR := src/tools
 TOOL ?=
@@ -19,6 +20,7 @@ DBT_PROJECT_DIR ?= src/sot-engine/dbt
 DB_PATH ?= $(HOME)/.caldera/caldera_sot.duckdb
 SKIP_TOOLS ?=
 PIPELINE_LLM ?= 1
+CONTINUE_ON_TOOL_FAILURE ?= 0
 BUNDLE ?=
 BUNDLE_DIR ?= artifacts
 BUNDLE_TAR ?= 1
@@ -32,6 +34,8 @@ ORCH_LAYOUT_OUTPUT ?=
 ORCH_SCC_OUTPUT ?=
 ORCH_LIZARD_OUTPUT ?=
 ORCH_LOG_PATH ?=
+ORCH_DBT_TARGET_PATH ?=
+ORCH_DBT_LOG_PATH ?=
 ORCH_REPLACE ?=
 
 define pass_var
@@ -99,8 +103,19 @@ help:
 	@echo "    TOOL=<name>       Limit tools-* targets to a single tool"
 	@echo "    SKIP_TOOLS=a,b    Skip tools in orchestrator (comma-separated)"
 	@echo "    PIPELINE_LLM=0    Skip LLM eval + top3 extraction"
+	@echo "    CONTINUE_ON_TOOL_FAILURE=1  Continue running tools after a failure (partial results)"
 	@echo "    BUNDLE_DIR=<dir>  Bundle output dir (default: artifacts)"
 	@echo "    BUNDLE_TAR=0      Do not create .tar.gz bundle"
+	@echo ""
+	@echo "  Cloud (Hetzner):"
+	@echo "    make cloud-setup              One-time: terraform init"
+	@echo "    make cloud-run REPO=<url>     Spin up VM, analyze, download results, destroy"
+	@echo "    make cloud-destroy            Destroy cloud server (if --keep-server was used)"
+	@echo "    CLOUD_SERVER=cx42             Override server type (default: cx33)"
+
+# Cloud variables
+CLOUD_SERVER ?= cx33
+CLOUD_RESULTS ?= infra/results
 
 # =============================================================================
 # User-Facing Targets
@@ -136,40 +151,37 @@ _analyze-local:
 		ORCH_REPO_PATH=$(REPO_DIR) \
 		ORCH_DB_PATH=$(ORCH_DB_PATH) \
 		$(if $(ORCH_REPO_ID),ORCH_REPO_ID=$(ORCH_REPO_ID),) \
-		$(if $(ORCH_REPLACE),ORCH_REPLACE=1,)
+		$(if $(ORCH_REPLACE),ORCH_REPLACE=1,) \
+		$(if $(filter 1,$(CONTINUE_ON_TOOL_FAILURE)),CONTINUE_ON_TOOL_FAILURE=1,)
 
 report:
-	$(eval RUN_PK ?= $(shell duckdb $(ORCH_DB_PATH) -csv -noheader \
-	  "SELECT run_pk FROM lz_tool_runs ORDER BY run_pk DESC LIMIT 1" 2>/dev/null))
-	@test -n "$(RUN_PK)" || (echo "No runs found in database. Run 'make analyze' first."; exit 1)
-	@echo "Generating report for run_pk=$(RUN_PK)..."
-	@mkdir -p $(PIPELINE_OUTPUT_DIR)
-	cd src/insights && $(PYTHON_VENV) -m insights generate $(RUN_PK) \
-		--db $(ORCH_DB_PATH) \
-		--format html \
-		--output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html
-	@echo "Report: $(PIPELINE_OUTPUT_DIR)/report.html"
+	@RUN_PK="$(RUN_PK)"; \
+	  if [ -z "$$RUN_PK" ]; then \
+	    RUN_PK=$$(.venv/bin/python scripts/get_latest_run_pk.py --db "$(ORCH_DB_PATH)"); \
+	  fi; \
+	  test -n "$$RUN_PK" || (echo "No runs found in database. Run 'make analyze' first."; exit 1); \
+	  echo "Generating report for run_pk=$$RUN_PK..."; \
+	  mkdir -p $(PIPELINE_OUTPUT_DIR); \
+	  cd src/insights && $(PYTHON_VENV) -m insights generate $$RUN_PK \
+	    --db $(ORCH_DB_PATH) \
+	    --format html \
+	    --output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html; \
+	  echo "Report: $(PIPELINE_OUTPUT_DIR)/report.html"
 
 list-runs:
-	@duckdb $(ORCH_DB_PATH) -markdown \
-	  "SELECT cr.collection_run_id, cr.repo_id, cr.commit, cr.status, \
-	   cr.started_at, count(tr.run_pk) as tool_count \
-	   FROM lz_collection_runs cr \
-	   LEFT JOIN lz_tool_runs tr ON tr.collection_run_id = cr.collection_run_id \
-	   GROUP BY 1,2,3,4,5 \
-	   ORDER BY cr.started_at DESC" 2>/dev/null \
-	  || echo "No database found at $(ORCH_DB_PATH). Run 'make analyze' first."
+	@.venv/bin/python scripts/list_runs.py --db "$(ORCH_DB_PATH)"
 
 status:
 	@echo "=== Caldera Status ==="
 	@printf "Python 3.12+:  "; python3 -c "import sys; v=sys.version_info; print(f'OK ({v.major}.{v.minor}.{v.micro})')" 2>/dev/null || echo "MISSING"
 	@printf "Project venv:  "; test -f .venv/bin/activate && echo "OK" || echo "MISSING (run: make setup)"
-	@printf "duckdb CLI:    "; command -v duckdb >/dev/null && echo "OK" || echo "MISSING (brew install duckdb)"
+	@printf "duckdb (py):   "; test -f .venv/bin/python && .venv/bin/python -c "import duckdb" >/dev/null 2>&1 && echo "OK" || echo "MISSING (run: make setup)"
+	@printf "duckdb CLI:    "; command -v duckdb >/dev/null && echo "OK (optional)" || echo "MISSING (optional)"
 	@printf "git:           "; command -v git >/dev/null && echo "OK" || echo "MISSING"
 	@printf "Database:      "; test -f $(ORCH_DB_PATH) && echo "OK ($(ORCH_DB_PATH))" || echo "No database yet"
 	@if test -f $(ORCH_DB_PATH); then \
 	  printf "Runs:          "; \
-	  duckdb $(ORCH_DB_PATH) -csv -noheader "SELECT count(*) FROM lz_collection_runs" 2>/dev/null || echo "0"; \
+	  .venv/bin/python scripts/count_collection_runs.py --db "$(ORCH_DB_PATH)" 2>/dev/null || echo "0"; \
 	fi
 
 clean-db:
@@ -255,9 +267,12 @@ orchestrate:
 		--run-tools --run-dbt \
 		--dbt-bin .venv/bin/dbt \
 		--dbt-project-dir src/sot-engine/dbt \
-		--dbt-profiles-dir src/sot-engine/dbt \
-		$(if $(ORCH_LOG_PATH),--log-path $(ORCH_LOG_PATH),) \
-		$(if $(ORCH_REPLACE),--replace,)
+			--dbt-profiles-dir src/sot-engine/dbt \
+			$(if $(ORCH_DBT_TARGET_PATH),--dbt-target-path $(ORCH_DBT_TARGET_PATH),) \
+			$(if $(ORCH_DBT_LOG_PATH),--dbt-log-path $(ORCH_DBT_LOG_PATH),) \
+			$(if $(ORCH_LOG_PATH),--log-path $(ORCH_LOG_PATH),) \
+			$(if $(filter 1,$(CONTINUE_ON_TOOL_FAILURE)),--continue-on-tool-failure,) \
+			$(if $(ORCH_REPLACE),--replace,)
 
 arch-review:
 	@test -n "$(ARCH_REVIEW_TARGET)" || (echo "ARCH_REVIEW_TARGET is required"; exit 1)
@@ -304,6 +319,8 @@ pipeline-eval:
 	$(eval AUTO_BRANCH := $(or $(ORCH_BRANCH),$(shell cd $(ORCH_REPO_PATH) && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")))
 	$(eval AUTO_COMMIT := $(or $(ORCH_COMMIT),$(shell cd $(ORCH_REPO_PATH) && git rev-parse HEAD 2>/dev/null || echo "0000000000000000000000000000000000000000")))
 	@mkdir -p $(dir $(ORCH_DB_PATH))
+	$(eval PIPELINE_RUN_DIR := $(PIPELINE_OUTPUT_DIR)/runs/$(AUTO_REPO_ID)/$(AUTO_RUN_ID))
+	@mkdir -p $(PIPELINE_RUN_DIR)
 	@echo ""
 	@echo "=============================================="
 	@echo "PIPELINE EVALUATION"
@@ -314,6 +331,7 @@ pipeline-eval:
 	@echo "Branch:     $(AUTO_BRANCH)"
 	@echo "Commit:     $(AUTO_COMMIT)"
 	@echo "Database:   $(ORCH_DB_PATH)"
+	@echo "Artifacts:  $(PIPELINE_RUN_DIR)"
 	@echo "=============================================="
 	@echo ""
 	@echo "=== Phase 1: Orchestrate (Tools + dbt) ==="
@@ -324,44 +342,59 @@ pipeline-eval:
 		ORCH_BRANCH=$(AUTO_BRANCH) \
 		ORCH_COMMIT=$(AUTO_COMMIT) \
 		ORCH_DB_PATH=$(ORCH_DB_PATH) \
+		ORCH_LOG_PATH=$(PIPELINE_RUN_DIR)/orchestrator.log \
+		ORCH_DBT_TARGET_PATH=$(PIPELINE_RUN_DIR)/dbt_target \
+		ORCH_DBT_LOG_PATH=$(PIPELINE_RUN_DIR)/dbt_logs \
 		$(if $(SKIP_TOOLS),ORCH_SKIP_TOOLS=$(SKIP_TOOLS),) \
-		$(if $(ORCH_REPLACE),ORCH_REPLACE=1,)
-	$(eval RUN_PK := $(shell duckdb $(ORCH_DB_PATH) -csv -noheader "SELECT run_pk FROM lz_tool_runs WHERE run_id='$(AUTO_RUN_ID)' LIMIT 1" 2>/dev/null || echo "1"))
-	@echo ""
-	@echo "=== Phase 2: Generate Insights Report ==="
-	@mkdir -p $(PIPELINE_OUTPUT_DIR)
-	cd src/insights && $(PYTHON_VENV) -m insights generate $(RUN_PK) \
-		--db $(ORCH_DB_PATH) \
-		--format html \
-		--output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html
-	@if [ "$(PIPELINE_LLM)" = "1" ]; then \
+		$(if $(ORCH_REPLACE),ORCH_REPLACE=1,) \
+		$(if $(filter 1,$(CONTINUE_ON_TOOL_FAILURE)),CONTINUE_ON_TOOL_FAILURE=1,)
+	@RUN_PK=$$(.venv/bin/python scripts/get_run_pk.py --db "$(ORCH_DB_PATH)" --run-id "$(AUTO_RUN_ID)"); \
+	  echo "Run PK:    $$RUN_PK"; \
 	  echo ""; \
-	  echo "=== Phase 3: LLM Evaluation with InsightQualityJudge ==="; \
-	  cd src/insights && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \
-	    $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html \
+	  echo "=== Phase 2: Generate Insights Report ==="; \
+	  cd src/insights && $(PYTHON_VENV) -m insights generate $$RUN_PK \
 	    --db $(ORCH_DB_PATH) \
-	    --run-pk $(RUN_PK) \
-	    --include-insight-quality \
-	    --output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json; \
-	  echo ""; \
-	  echo "=== Phase 4: Extract Top 3 Insights ==="; \
-	  cd src/insights && $(PYTHON_VENV) -m insights.scripts.extract_top_insights extract \
-	    $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json \
-	    --output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/top3_insights.json \
-	    --format rich; \
-	else \
-	  echo ""; \
-	  echo "=== Skipping LLM phases (PIPELINE_LLM=$(PIPELINE_LLM)) ==="; \
-	fi
+	    --format html \
+	    --output $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html; \
+	  cp -f $(PIPELINE_RUN_DIR)/report.html $(PIPELINE_OUTPUT_DIR)/report.html; \
+	  if [ "$(PIPELINE_LLM)" = "1" ]; then \
+	    echo ""; \
+	    echo "=== Phase 3: LLM Evaluation with InsightQualityJudge ==="; \
+	    cd src/insights && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \
+	      $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html \
+	      --db $(ORCH_DB_PATH) \
+	      --run-pk $$RUN_PK \
+	      --include-insight-quality \
+	      --output $(CURDIR)/$(PIPELINE_RUN_DIR)/evaluation.json; \
+	    cp -f $(PIPELINE_RUN_DIR)/evaluation.json $(PIPELINE_OUTPUT_DIR)/evaluation.json; \
+	    echo ""; \
+	    echo "=== Phase 4: Extract Top 3 Insights ==="; \
+	    cd src/insights && $(PYTHON_VENV) -m insights.scripts.extract_top_insights extract \
+	      $(CURDIR)/$(PIPELINE_RUN_DIR)/evaluation.json \
+	      --output $(CURDIR)/$(PIPELINE_RUN_DIR)/top3_insights.json \
+	      --format rich; \
+	    cp -f $(PIPELINE_RUN_DIR)/top3_insights.json $(PIPELINE_OUTPUT_DIR)/top3_insights.json; \
+	  else \
+	    echo ""; \
+	    echo "=== Skipping LLM phases (PIPELINE_LLM=$(PIPELINE_LLM)) ==="; \
+	  fi; \
+	  .venv/bin/python scripts/write_run_manifest.py \
+	    --db "$(ORCH_DB_PATH)" \
+	    --collection-run-id "$(AUTO_RUN_ID)" \
+	    --out "$(PIPELINE_RUN_DIR)/run_manifest.json" \
+	    --report "$(PIPELINE_RUN_DIR)/report.html"; \
+	  cp -f $(PIPELINE_RUN_DIR)/run_manifest.json $(PIPELINE_OUTPUT_DIR)/run_manifest.json
 	@echo ""
 	@echo "=============================================="
 	@echo "PIPELINE COMPLETE"
 	@echo "=============================================="
-	@echo "Report:     $(PIPELINE_OUTPUT_DIR)/report.html"
+	@echo "Report (this run): $(PIPELINE_RUN_DIR)/report.html"
+	@echo "Report (latest):   $(PIPELINE_OUTPUT_DIR)/report.html"
 	@if [ "$(PIPELINE_LLM)" = "1" ]; then \
-	  echo "Evaluation: $(PIPELINE_OUTPUT_DIR)/evaluation.json"; \
-	  echo "Top 3:      $(PIPELINE_OUTPUT_DIR)/top3_insights.json"; \
+	  echo "Evaluation (this run): $(PIPELINE_RUN_DIR)/evaluation.json"; \
+	  echo "Top 3 (this run):      $(PIPELINE_RUN_DIR)/top3_insights.json"; \
 	fi
+	@echo "Manifest (this run): $(PIPELINE_RUN_DIR)/run_manifest.json"
 	@echo "=============================================="
 
 # =============================================================================
@@ -392,3 +425,26 @@ analyze-bundle:
 		--db-path "$(ORCH_DB_PATH)" \
 		--report-out "$(PIPELINE_OUTPUT_DIR)/report.html" \
 		--llm $(PIPELINE_LLM)
+
+# =============================================================================
+# Cloud Targets (Hetzner + Terraform)
+# =============================================================================
+
+cloud-setup:
+	@command -v terraform >/dev/null 2>&1 || (echo "ERROR: terraform not installed. Run: brew install terraform"; exit 1)
+	@test -f infra/terraform.tfvars || (echo "ERROR: infra/terraform.tfvars not found."; echo "  cp infra/terraform.tfvars.example infra/terraform.tfvars"; echo "  # Then fill in your Hetzner API token and caldera_repo_url"; exit 1)
+	cd infra && terraform init
+
+cloud-run:
+	@test -n "$(REPO)" || (echo "Usage: make cloud-run REPO=https://github.com/org/repo"; exit 1)
+	bash scripts/cloud-run.sh "$(REPO)" \
+		--server "$(CLOUD_SERVER)" \
+		--results "$(CLOUD_RESULTS)" \
+		$(if $(SKIP_TOOLS),--skip "$(SKIP_TOOLS)",) \
+		$(if $(filter 1,$(PIPELINE_LLM)),--llm,) \
+		$(if $(KEEP_SERVER),--keep-server,)
+
+cloud-destroy:
+	cd infra && terraform destroy -auto-approve \
+		-var="repo_url=placeholder" \
+		-var="server_type=$(CLOUD_SERVER)"

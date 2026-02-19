@@ -81,6 +81,7 @@ def _run_tool(
     branch: str,
     commit: str,
     bundle_root: Path,
+    extra_env: dict[str, str] | None = None,
 ) -> ToolResult:
     output_dir = bundle_root / tool_name / run_id
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -100,6 +101,8 @@ def _run_tool(
             "COMMIT": commit,
         }
     )
+    if extra_env:
+        env.update(extra_env)
 
     start = time.perf_counter()
     with log_path.open("w", encoding="utf-8") as log:
@@ -133,6 +136,21 @@ def main() -> int:
     parser.add_argument("--output-dir", default="artifacts", help="Directory to write bundles into")
     parser.add_argument("--tools-root", default="src/tools")
     parser.add_argument("--skip-tools", default="", help="Comma-separated tool names to skip")
+    parser.add_argument(
+        "--include-coverage-ingest",
+        action="store_true",
+        help="Include coverage-ingest tool (requires --coverage-file)",
+    )
+    parser.add_argument(
+        "--coverage-file",
+        default=None,
+        help="Coverage file path for coverage-ingest (required if --include-coverage-ingest)",
+    )
+    parser.add_argument(
+        "--coverage-format",
+        default="auto",
+        help="Coverage format for coverage-ingest (lcov, cobertura, jacoco, istanbul, auto)",
+    )
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--repo-id", default=None)
     parser.add_argument("--tar", action="store_true", help="Also produce a .tar.gz bundle")
@@ -151,6 +169,12 @@ def main() -> int:
     commit = _git_commit(repo_path) if is_git else ("0" * 40)
 
     skip = {t.strip() for t in args.skip_tools.split(",") if t.strip()}
+    # coverage-ingest requires an explicit coverage file input; exclude it by
+    # default so `collect` produces a useful bundle without extra args.
+    if not args.include_coverage_ingest:
+        skip.add("coverage-ingest")
+    elif not args.coverage_file:
+        raise SystemExit("--include-coverage-ingest requires --coverage-file")
     tools = [t for t in _find_tools(tools_root) if t not in skip]
 
     bundle_root = out_dir / repo_id / run_id
@@ -162,6 +186,12 @@ def main() -> int:
     for idx, tool_name in enumerate(tools, 1):
         print(f"[{idx}/{len(tools)}] {tool_name}")
         tool_root = tools_root / tool_name
+        extra_env = None
+        if tool_name == "coverage-ingest":
+            extra_env = {
+                "COVERAGE_FILE": str(Path(args.coverage_file).resolve()),
+                "FORMAT": str(args.coverage_format),
+            }
         results.append(
             _run_tool(
                 tool_root,
@@ -172,6 +202,7 @@ def main() -> int:
                 branch=branch,
                 commit=commit,
                 bundle_root=bundle_root,
+                extra_env=extra_env,
             )
         )
 
@@ -222,4 +253,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

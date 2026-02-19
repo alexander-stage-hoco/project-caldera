@@ -13,11 +13,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from orchestrator import (
     OrchestratorLogger,
     ToolConfig,
+    ToolPhaseError,
     _compute_content_hash,
+    _run_tools,
     _default_output_path,
     _format_duration,
     _is_fallback_commit,
     _resolve_dbt_cmd,
+    main,
     ingest_outputs,
     ensure_schema,
     run_tool_make,
@@ -238,6 +241,121 @@ def test_ensure_schema_migrates_tool_run_ids() -> None:
             ensure_schema(conn, schema_path)
     finally:
         conn.close()
+
+
+def test_orchestrator_writes_summary_on_tool_failure(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir(parents=True)
+    (repo_root / "README.md").write_text("hello\n", encoding="utf-8")
+
+    tool_root = tmp_path / "fake-tool"
+    tool_root.mkdir(parents=True)
+    (tool_root / "Makefile").write_text(
+        "analyze:\n\t@echo 'boom' 1>&2\n\t@exit 2\n",
+        encoding="utf-8",
+    )
+
+    import orchestrator as orch
+
+    monkeypatch.setattr(orch, "TOOL_CONFIGS", [ToolConfig("fake-tool", str(tool_root))])
+
+    db_path = tmp_path / "caldera.duckdb"
+    log_path = tmp_path / "orchestrator.log"
+    summary_path = tmp_path / "tool_run_summary.json"
+    output_root = tmp_path / "outputs"
+    schema_path = Path(__file__).resolve().parents[1] / "persistence" / "schema.sql"
+
+    argv = [
+        "orchestrator.py",
+        "--repo-path",
+        str(repo_root),
+        "--repo-id",
+        "repo-1",
+        "--run-id",
+        "11111111-1111-1111-1111-111111111111",
+        "--branch",
+        "main",
+        "--commit",
+        "0" * 40,
+        "--db-path",
+        str(db_path),
+        "--schema-path",
+        str(schema_path),
+        "--output-root",
+        str(output_root),
+        "--log-path",
+        str(log_path),
+        "--summary-path",
+        str(summary_path),
+        "--run-tools",
+        "--no-progress",
+    ]
+
+    monkeypatch.setattr(sys, "argv", argv)
+    with pytest.raises(ToolPhaseError):
+        main()
+
+    assert summary_path.exists()
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert summary["status"] == "failed"
+    assert summary["steps"]["tools"]["status"] == "failed"
+    tools = summary["steps"]["tools"]["tools"]
+    assert tools and tools[-1]["tool_name"] == "fake-tool"
+    assert tools[-1]["status"] == "failed"
+
+
+def test_run_tools_continue_on_failure(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir(parents=True)
+    (repo_root / "README.md").write_text("hello\n", encoding="utf-8")
+
+    fail_tool = tmp_path / "tool-fail"
+    fail_tool.mkdir()
+    (fail_tool / "Makefile").write_text(
+        "analyze:\n\t@echo 'boom' 1>&2\n\t@exit 2\n",
+        encoding="utf-8",
+    )
+
+    ok_tool = tmp_path / "tool-ok"
+    ok_tool.mkdir()
+    (ok_tool / "Makefile").write_text(
+        "\n".join(
+            [
+                "analyze:",
+                "\t@mkdir -p \"$(OUTPUT_DIR)\"",
+                "\t@printf '{\"metadata\":{\"repo_id\":\"%s\",\"run_id\":\"%s\",\"tool_name\":\"tool-ok\"},\"data\":{}}\\n' \"$(REPO_ID)\" \"$(RUN_ID)\" > \"$(OUTPUT_DIR)/output.json\"",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    logger = OrchestratorLogger(tmp_path / "orchestrator.log")
+    try:
+        outputs, summaries = _run_tools(
+            [
+                ToolConfig("tool-fail", str(fail_tool)),
+                ToolConfig("tool-ok", str(ok_tool)),
+            ],
+            repo_root,
+            "repo-1",
+            "11111111-1111-1111-1111-111111111111",
+            "repo-1",
+            "main",
+            "0" * 40,
+            logger,
+            tmp_path / "outputs",
+            continue_on_failure=True,
+            show_progress=False,
+        )
+    finally:
+        logger.close()
+
+    assert summaries[0]["tool_name"] == "tool-fail"
+    assert summaries[0]["status"] == "failed"
+    assert summaries[1]["tool_name"] == "tool-ok"
+    assert summaries[1]["status"] == "success"
+    assert "tool-ok" in outputs
 
 
 def test_default_output_path_is_absolute(tmp_path: Path) -> None:

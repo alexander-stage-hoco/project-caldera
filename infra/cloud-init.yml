@@ -1,0 +1,32 @@
+#cloud-config
+# Cloud-init for Caldera runner VM
+# Installs prerequisites and clones the Caldera project
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - git
+  - python3
+  - python3-pip
+  - python3-venv
+  - make
+  - curl
+  - jq
+
+runcmd:
+  # Docker is pre-installed on the "docker-ce" image, just ensure it's running
+  - systemctl enable docker
+  - systemctl start docker
+
+  # Clone Caldera (or use a tarball upload — see run-analysis.sh)
+  - mkdir -p /opt/caldera
+  %{ if caldera_repo_url != "" }
+  - git clone --depth 1 --branch ${caldera_branch} "${caldera_repo_url}" /opt/caldera/project
+  %{ endif }
+
+  # Create results directory
+  - mkdir -p /opt/caldera/results
+
+  # Signal ready
+  - touch /opt/caldera/.cloud-init-done

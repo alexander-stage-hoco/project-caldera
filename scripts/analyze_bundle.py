@@ -96,6 +96,12 @@ def main() -> int:
                 str(bundle_root),
                 "--run-dbt",
                 "--no-progress",
+                "--dbt-target-path",
+                str(report_out.parent / "dbt_target"),
+                "--dbt-log-path",
+                str(report_out.parent / "dbt_logs"),
+                "--log-path",
+                str(report_out.parent / "orchestrator.log"),
             ],
             check=True,
         )
@@ -158,6 +164,22 @@ def main() -> int:
                 check=True,
             )
 
+        subprocess.run(
+            [
+                ".venv/bin/python",
+                "scripts/write_run_manifest.py",
+                "--db",
+                str(db_path),
+                "--collection-run-id",
+                str(run_id),
+                "--out",
+                str(report_out.parent / "run_manifest.json"),
+                "--report",
+                str(report_out),
+            ],
+            check=True,
+        )
+
         print(f"Report: {report_out}")
         return 0
     finally:
@@ -167,4 +189,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

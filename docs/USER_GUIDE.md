@@ -9,7 +9,7 @@ Project Caldera analyzes codebases by running 18 analysis tools, persisting resu
 | Python 3.12+ | `python3 --version` | [python.org](https://www.python.org/downloads/) |
 | git | `git --version` | `brew install git` |
 | make | `make --version` | Included with Xcode CLI tools |
-| duckdb CLI | `duckdb --version` | `brew install duckdb` (optional, for `make list-runs`) |
+| duckdb CLI (optional) | `duckdb --version` | `brew install duckdb` (optional, for ad-hoc inspection) |
 
 Run `make status` to verify all prerequisites at once.
 
@@ -50,6 +50,13 @@ The pipeline produces three output files:
 | `src/insights/output/pipeline/top3_insights.json` | Top 3 actionable insights |
 
 Open the HTML report in a browser to see the full analysis.
+
+Each run is also archived under `src/insights/output/pipeline/runs/<repo_id>/<run_id>/` with:
+- `orchestrator.log` (tool + dbt logs)
+- `tool_run_summary.json` (written even on failure)
+- `dbt_summary.json` (dbt run/test status + durations)
+- `dbt_logs/` and `dbt_target/`
+- `run_manifest.json` (machine-readable summary)
 
 ## What Happens During Analysis
 
@@ -114,6 +121,14 @@ make report RUN_PK=5       # from a specific run
 
 ```bash
 make list-runs
+```
+
+### Continue even if a tool fails (partial results)
+
+By default, the orchestrator stops at the first tool failure. To continue running the remaining tools (and still ingest/dbt), use:
+
+```bash
+make analyze REPO=/path/to/repo CONTINUE_ON_TOOL_FAILURE=1
 ```
 
 Shows all collection runs with repo ID, commit, status, and tool count.

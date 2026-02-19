@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 import time
+import traceback
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -242,6 +243,26 @@ def _discover_outputs(output_root: Path, run_id: str) -> dict[str, Path]:
     return outputs
 
 
+def _safe_write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    tmp.replace(path)
+
+
+class ToolPhaseError(RuntimeError):
+    def __init__(
+        self,
+        message: str,
+        *,
+        outputs: dict[str, Path],
+        tool_summaries: list[dict[str, Any]],
+    ) -> None:
+        super().__init__(message)
+        self.outputs = outputs
+        self.tool_summaries = tool_summaries
+
+
 # Tool configurations for the orchestrator
 TOOL_CONFIGS = [
     ToolConfig("layout-scanner", "src/tools/layout-scanner", {"NO_GITIGNORE": "1"}),
@@ -314,10 +335,12 @@ def _run_tools(
     commit: str,
     logger: OrchestratorLogger,
     output_root: Path | None,
+    continue_on_failure: bool = False,
     show_progress: bool = True,
-) -> dict[str, Path]:
-    """Run all configured tools and return their output paths."""
+) -> tuple[dict[str, Path], list[dict[str, Any]]]:
+    """Run all configured tools and return (outputs, per-tool summaries)."""
     outputs: dict[str, Path] = {}
+    tool_summaries: list[dict[str, Any]] = []
     total_tools = len(tool_configs)
     use_rich = show_progress and RICH_AVAILABLE and sys.stdout.isatty()
     console = Console() if use_rich else None
@@ -326,14 +349,30 @@ def _run_tools(
         output_path = _default_output_path(tool, run_id, output_root)
         tool_start = time.perf_counter()
 
-        if use_rich and console:
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                console=console,
-                transient=True,
-            ) as progress:
-                progress.add_task(f"[{idx}/{total_tools}] {tool.name}...", total=None)
+        try:
+            if use_rich and console:
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    console=console,
+                    transient=True,
+                ) as progress:
+                    progress.add_task(f"[{idx}/{total_tools}] {tool.name}...", total=None)
+                    run_tool_make(
+                        Path(tool.path),
+                        repo_path,
+                        repo_name,
+                        run_id,
+                        repo_id,
+                        branch,
+                        commit,
+                        output_path.parent,
+                        logger,
+                        extra_env=tool.extra_env,
+                    )
+                duration = time.perf_counter() - tool_start
+                console.print(f"[green]✓[/] [{idx}/{total_tools}] {tool.name} ({duration:.1f}s)")
+            else:
                 run_tool_make(
                     Path(tool.path),
                     repo_path,
@@ -346,26 +385,59 @@ def _run_tools(
                     logger,
                     extra_env=tool.extra_env,
                 )
-            duration = time.perf_counter() - tool_start
-            console.print(f"[green]✓[/] [{idx}/{total_tools}] {tool.name} ({duration:.1f}s)")
-        else:
-            run_tool_make(
-                Path(tool.path),
-                repo_path,
-                repo_name,
-                run_id,
-                repo_id,
-                branch,
-                commit,
-                output_path.parent,
-                logger,
-                extra_env=tool.extra_env,
-            )
-            duration = time.perf_counter() - tool_start
-            logger.info(f"[{idx}/{total_tools}] {tool.name} ({duration:.1f}s)")
+                duration = time.perf_counter() - tool_start
+                logger.info(f"[{idx}/{total_tools}] {tool.name} ({duration:.1f}s)")
 
-        outputs[tool.name] = output_path
-    return outputs
+            if not output_path.exists():
+                raise FileNotFoundError(
+                    f"{tool.name} did not write expected output.json at {output_path}"
+                )
+            try:
+                json.loads(output_path.read_text(encoding="utf-8"))
+            except Exception as exc:
+                raise ValueError(
+                    f"{tool.name} wrote invalid JSON at {output_path}: {exc!r}"
+                ) from exc
+
+            outputs[tool.name] = output_path
+            tool_summaries.append(
+                {
+                    "tool_name": tool.name,
+                    "status": "success",
+                    "duration_seconds": round(duration, 3),
+                    "output_path": str(output_path),
+                    "output_exists": True,
+                    "output_bytes": output_path.stat().st_size,
+                    "error": None,
+                }
+            )
+        except Exception as exc:
+            duration = time.perf_counter() - tool_start
+            returncode = getattr(exc, "returncode", None)
+            cmd = getattr(exc, "cmd", None)
+            tool_summaries.append(
+                {
+                    "tool_name": tool.name,
+                    "status": "failed",
+                    "duration_seconds": round(duration, 3),
+                    "output_path": str(output_path),
+                    "output_exists": output_path.exists(),
+                    "output_bytes": (output_path.stat().st_size if output_path.exists() else None),
+                    "returncode": returncode,
+                    "cmd": cmd,
+                    "error": repr(exc),
+                }
+            )
+            if not continue_on_failure:
+                raise ToolPhaseError(
+                    f"Tool failed: {tool.name}",
+                    outputs=outputs,
+                    tool_summaries=tool_summaries,
+                ) from exc
+            logger.info(f"[{idx}/{total_tools}] {tool.name} FAILED: {exc!r}")
+            continue
+
+    return outputs, tool_summaries
 
 
 # Tool ingestion configurations for tools with standard adapter pattern
@@ -464,10 +536,24 @@ def ingest_outputs(
         payload = load_payload(output_path)
         if config.validate_metadata:
             validate_payload(
-                payload.get("metadata", {}), repo_id, run_id,
+                payload.get("metadata", {}),
+                repo_id,
+                run_id,
                 expected_commit=commit,
                 expected_tool=config.name,
             )
+        else:
+            # Best-effort validation: do not fail the run, but surface contract drift.
+            try:
+                validate_payload(
+                    payload.get("metadata", {}),
+                    repo_id,
+                    run_id,
+                    expected_commit=commit,
+                    expected_tool=config.name,
+                )
+            except Exception as exc:
+                log_fn(f"WARNING: metadata validation skipped for {config.name}: {exc}")
 
         # Create adapter with appropriate repository
         tool_repo = config.repo_class(conn) if config.repo_class else None
@@ -496,6 +582,7 @@ def run_dbt(
     logger: OrchestratorLogger,
     target_path: str = "/tmp/dbt_target",
     log_path: str = "/tmp/dbt_logs",
+    dbt_summary: dict[str, Any] | None = None,
 ) -> None:
     repo_root = Path(__file__).resolve().parents[2]
     if not dbt_project_dir.is_absolute():
@@ -505,22 +592,53 @@ def run_dbt(
     env = os.environ.copy()
     env["DBT_PROFILES_DIR"] = str(profiles_dir)
     dbt_cmd = _resolve_dbt_cmd(dbt_bin, repo_root)
-    subprocess.run(
-        [*dbt_cmd, "run", "--target-path", target_path, "--log-path", log_path],
-        cwd=str(dbt_project_dir),
-        env=env,
-        stdout=logger.log_pipe(),
-        stderr=logger.log_pipe(),
-        check=True,
-    )
-    subprocess.run(
-        [*dbt_cmd, "test", "--target-path", target_path, "--log-path", log_path],
-        cwd=str(dbt_project_dir),
-        env=env,
-        stdout=logger.log_pipe(),
-        stderr=logger.log_pipe(),
-        check=True,
-    )
+    phases = [
+        ("run", [*dbt_cmd, "run", "--target-path", target_path, "--log-path", log_path]),
+        ("test", [*dbt_cmd, "test", "--target-path", target_path, "--log-path", log_path]),
+    ]
+    for phase_name, cmd in phases:
+        start = time.perf_counter()
+        if dbt_summary is not None:
+            dbt_summary.setdefault("phases", [])
+            dbt_summary["phases"].append(
+                {
+                    "phase": phase_name,
+                    "status": "running",
+                    "duration_seconds": None,
+                    "returncode": None,
+                    "cmd": cmd,
+                }
+            )
+        try:
+            subprocess.run(
+                cmd,
+                cwd=str(dbt_project_dir),
+                env=env,
+                stdout=logger.log_pipe(),
+                stderr=logger.log_pipe(),
+                check=True,
+            )
+        except subprocess.CalledProcessError as exc:
+            duration = time.perf_counter() - start
+            if dbt_summary is not None:
+                dbt_summary["phases"][-1].update(
+                    {
+                        "status": "failed",
+                        "duration_seconds": round(duration, 3),
+                        "returncode": exc.returncode,
+                    }
+                )
+            raise
+        else:
+            duration = time.perf_counter() - start
+            if dbt_summary is not None:
+                dbt_summary["phases"][-1].update(
+                    {
+                        "status": "success",
+                        "duration_seconds": round(duration, 3),
+                        "returncode": 0,
+                    }
+                )
 
 
 def main() -> int:
@@ -559,7 +677,16 @@ def main() -> int:
     parser.add_argument("--dbt-bin", default="src/sot-engine/.venv-dbt/bin/dbt")
     parser.add_argument("--dbt-project-dir", default="src/sot-engine/dbt")
     parser.add_argument("--dbt-profiles-dir", default="src/sot-engine/dbt")
+    parser.add_argument("--dbt-target-path", default="/tmp/dbt_target")
+    parser.add_argument("--dbt-log-path", default="/tmp/dbt_logs")
     parser.add_argument("--log-path", default=None)
+    parser.add_argument("--summary-path", default=None, help="Write a JSON run summary for debugging")
+    parser.add_argument("--dbt-summary-path", default=None, help="Write a JSON dbt summary for debugging")
+    parser.add_argument(
+        "--continue-on-tool-failure",
+        action="store_true",
+        help="Run remaining tools even if one fails (ingest/dbt still run; status becomes partial_success)",
+    )
     args = parser.parse_args()
 
     repo_path = Path(args.repo_path)
@@ -567,12 +694,67 @@ def main() -> int:
         args.commit = _compute_content_hash(repo_path)
         _log.info("Non-git repo: computed content hash %s…", args.commit[:12])
     repo_name = args.repo_id
-    schema_path = Path(args.schema_path)
     repo_root = Path(__file__).resolve().parents[2]
+    schema_path = Path(args.schema_path)
+    if not schema_path.is_absolute():
+        schema_path = repo_root / schema_path
+    schema_path = schema_path.resolve()
+    db_path = Path(args.db_path).expanduser()
+    if not db_path.is_absolute():
+        db_path = (repo_root / db_path).resolve()
+    else:
+        db_path = db_path.resolve()
     log_path = Path(args.log_path) if args.log_path else Path("/tmp") / f"caldera_orchestrator_{args.run_id}.log"
     if not log_path.is_absolute():
         log_path = repo_root / log_path
     logger = OrchestratorLogger(log_path)
+    summary_path = Path(args.summary_path) if args.summary_path else logger.log_path.parent / "tool_run_summary.json"
+    if not summary_path.is_absolute():
+        summary_path = repo_root / summary_path
+    dbt_summary_path = (
+        Path(args.dbt_summary_path)
+        if args.dbt_summary_path
+        else logger.log_path.parent / "dbt_summary.json"
+    )
+    if not dbt_summary_path.is_absolute():
+        dbt_summary_path = repo_root / dbt_summary_path
+    dbt_summary_path = dbt_summary_path.resolve()
+
+    summary: dict[str, Any] = {
+        "schema_version": 1,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "repo": {
+            "repo_path": str(repo_path.resolve()),
+            "repo_id": args.repo_id,
+            "branch": args.branch,
+            "commit": args.commit,
+        },
+        "run_id": args.run_id,
+        "db_path": str(db_path),
+        "log_path": str(logger.log_path),
+        "summary_path": str(summary_path),
+        "status": "running",
+        "error": None,
+        "steps": {
+            "tools": {"status": "pending", "duration_seconds": None, "error": None, "tools": []},
+            "ingest": {"status": "pending", "duration_seconds": None, "error": None},
+            "dbt": {"status": "pending", "duration_seconds": None, "error": None},
+        },
+    }
+    dbt_summary: dict[str, Any] = {
+        "schema_version": 1,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "run_id": args.run_id,
+        "dbt": {
+            "status": "pending",
+            "project_dir": str(Path(args.dbt_project_dir)),
+            "profiles_dir": str(Path(args.dbt_profiles_dir)),
+            "target_path": str(Path(args.dbt_target_path)),
+            "log_path": str(Path(args.dbt_log_path)),
+        },
+        "phases": [],
+        "error": None,
+    }
 
     layout_output = Path(args.layout_output) if args.layout_output else None
     scc_output = Path(args.scc_output) if args.scc_output else None
@@ -596,7 +778,7 @@ def main() -> int:
     try:
         logger.info(f"Log file: {logger.log_path}")
         logger.info(f"Repo: {repo_path} (repo_id={args.repo_id})")
-        conn = duckdb.connect(args.db_path)
+        conn = duckdb.connect(str(db_path))
         ensure_schema(conn, schema_path)
         collection_repo = CollectionRunRepository(conn)
 
@@ -616,6 +798,7 @@ def main() -> int:
             )
 
         if args.run_tools:
+            summary["steps"]["tools"]["status"] = "running"
             start = time.perf_counter()
             logger.info("Step 1/3: Run tools (layout, scc, lizard, roslyn-analyzers, semgrep, sonarqube, trivy, gitleaks)")
             skip_tools = {
@@ -623,18 +806,47 @@ def main() -> int:
                 for name in (args.skip_tools.split(",") if args.skip_tools else [])
                 if name.strip()
             }
-            outputs = _run_tools(
-                [tool for tool in TOOL_CONFIGS if tool.name not in skip_tools],
-                repo_path,
-                repo_name,
-                args.run_id,
-                args.repo_id,
-                args.branch,
-                args.commit,
-                logger,
-                output_root,
-                show_progress=not args.no_progress,
-            )
+            try:
+                outputs, tool_summaries = _run_tools(
+                    [tool for tool in TOOL_CONFIGS if tool.name not in skip_tools],
+                    repo_path,
+                    repo_name,
+                    args.run_id,
+                    args.repo_id,
+                    args.branch,
+                    args.commit,
+                    logger,
+                    output_root,
+                    continue_on_failure=args.continue_on_tool_failure,
+                    show_progress=not args.no_progress,
+                )
+            except ToolPhaseError as exc:
+                summary["steps"]["tools"]["status"] = "failed"
+                summary["steps"]["tools"]["duration_seconds"] = round(
+                    time.perf_counter() - start, 3
+                )
+                summary["steps"]["tools"]["error"] = str(exc)
+                summary["steps"]["tools"]["tools"] = exc.tool_summaries
+                raise
+            else:
+                summary["steps"]["tools"]["duration_seconds"] = round(
+                    time.perf_counter() - start, 3
+                )
+                summary["steps"]["tools"]["tools"] = tool_summaries
+                failed = [t for t in tool_summaries if t.get("status") != "success"]
+                if failed:
+                    summary["steps"]["tools"]["status"] = "failed"
+                    summary["steps"]["tools"]["error"] = f"{len(failed)} tool(s) failed"
+                else:
+                    summary["steps"]["tools"]["status"] = "success"
+                if "layout-scanner" not in outputs:
+                    summary["steps"]["tools"]["status"] = "failed"
+                    summary["steps"]["tools"]["error"] = "layout-scanner is required but failed"
+                    raise ToolPhaseError(
+                        "Required tool failed: layout-scanner",
+                        outputs=outputs,
+                        tool_summaries=tool_summaries,
+                    )
             layout_output = outputs.get("layout-scanner", layout_output)
             scc_output = outputs.get("scc", scc_output)
             lizard_output = outputs.get("lizard", lizard_output)
@@ -659,6 +871,12 @@ def main() -> int:
             # Bundle/ingest mode: discover outputs under output_root when tools
             # were executed elsewhere (e.g. another machine or container).
             discovered = _discover_outputs(output_root, args.run_id)
+            if "layout-scanner" not in discovered:
+                summary["steps"]["tools"]["status"] = "failed"
+                summary["steps"]["tools"]["error"] = (
+                    f"layout-scanner output missing under output_root={output_root}"
+                )
+                raise FileNotFoundError(summary["steps"]["tools"]["error"])
             layout_output = discovered.get("layout-scanner", layout_output)
             scc_output = discovered.get("scc", scc_output)
             lizard_output = discovered.get("lizard", lizard_output)
@@ -677,9 +895,17 @@ def main() -> int:
             git_blame_scanner_output = discovered.get("git-blame-scanner", git_blame_scanner_output)
             dependensee_output = discovered.get("dependensee", dependensee_output)
             coverage_output = discovered.get("coverage-ingest", coverage_output)
+            summary["steps"]["tools"]["status"] = "skipped"
+            summary["steps"]["tools"]["tools"] = [
+                {"tool_name": k, "status": "provided", "output_path": str(v)}
+                for k, v in sorted(discovered.items())
+            ]
+        else:
+            summary["steps"]["tools"]["status"] = "skipped"
 
         start = time.perf_counter()
         logger.info("Step 2/3: Ingest outputs into DuckDB")
+        summary["steps"]["ingest"]["status"] = "running"
         ingest_outputs(
             conn,
             args.repo_id,
@@ -709,6 +935,8 @@ def main() -> int:
             schema_path,
             logger,
         )
+        summary["steps"]["ingest"]["status"] = "success"
+        summary["steps"]["ingest"]["duration_seconds"] = round(time.perf_counter() - start, 3)
         logger.info(
             f"Ingested into {args.db_path} in {_format_duration(time.perf_counter() - start)}"
         )
@@ -718,33 +946,69 @@ def main() -> int:
         if args.run_dbt:
             start = time.perf_counter()
             logger.info("Step 3/3: Build marts (dbt run/test)")
+            summary["steps"]["dbt"]["status"] = "running"
+            dbt_summary["dbt"]["status"] = "running"
             run_dbt(
                 Path(args.dbt_bin),
                 Path(args.dbt_project_dir),
                 Path(args.dbt_profiles_dir),
                 logger,
+                target_path=args.dbt_target_path,
+                log_path=args.dbt_log_path,
+                dbt_summary=dbt_summary,
             )
+            summary["steps"]["dbt"]["status"] = "success"
+            summary["steps"]["dbt"]["duration_seconds"] = round(time.perf_counter() - start, 3)
+            dbt_summary["dbt"]["status"] = "success"
             logger.info(
                 f"dbt completed in {_format_duration(time.perf_counter() - start)}"
             )
+        else:
+            summary["steps"]["dbt"]["status"] = "skipped"
+            dbt_summary["dbt"]["status"] = "skipped"
 
-        conn = duckdb.connect(args.db_path)
+        conn = duckdb.connect(str(db_path))
         collection_repo = CollectionRunRepository(conn)
         collection_repo.mark_status(
             collection_run_id, "completed", datetime.now(timezone.utc)
         )
+        tools_failed = summary["steps"]["tools"]["status"] == "failed"
+        summary["status"] = "partial_success" if tools_failed and args.continue_on_tool_failure else "success"
+        summary["completed_at"] = datetime.now(timezone.utc).isoformat()
         logger.info("Done.")
         return 0
     except Exception:
+        summary["status"] = "failed"
+        summary["completed_at"] = datetime.now(timezone.utc).isoformat()
+        summary["error"] = traceback.format_exc(limit=20)
+        if summary["steps"]["tools"]["status"] == "running":
+            summary["steps"]["tools"]["status"] = "failed"
+            summary["steps"]["tools"]["error"] = "See error"
+        if summary["steps"]["ingest"]["status"] == "running":
+            summary["steps"]["ingest"]["status"] = "failed"
+            summary["steps"]["ingest"]["error"] = "See error"
+        if summary["steps"]["dbt"]["status"] == "running":
+            summary["steps"]["dbt"]["status"] = "failed"
+            summary["steps"]["dbt"]["error"] = "See error"
+            dbt_summary["dbt"]["status"] = "failed"
+            dbt_summary["error"] = summary["error"]
         try:
             if "collection_run_id" in locals():
-                conn = duckdb.connect(args.db_path)
+                conn = duckdb.connect(str(db_path))
                 CollectionRunRepository(conn).mark_status(
                     collection_run_id, "failed", datetime.now(timezone.utc)
                 )
         finally:
             raise
     finally:
+        try:
+            _safe_write_json(summary_path, summary)
+        except Exception:
+            pass
+        try:
+            _safe_write_json(dbt_summary_path, dbt_summary)
+        except Exception:
+            pass
         if "conn" in locals() and conn:
             conn.close()
         logger.close()

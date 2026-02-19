@@ -1,0 +1,16 @@
+# Terraform state (contains server IPs, resource IDs — not secret but ephemeral)
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Variables with secrets
+terraform.tfvars
+*.auto.tfvars
+
+# Results downloaded from cloud runs
+results/
+
+# Crash logs
+crash.log
+crash.*.log

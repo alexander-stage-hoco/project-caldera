@@ -1,0 +1,21 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored — never commit secrets.
+
+# Required: Your Hetzner Cloud API token
+# Get it from: https://console.hetzner.cloud → Project → Security → API Tokens
+hcloud_token = "your-hetzner-api-token-here"
+
+# Required: Git URL of the Caldera project itself (so the VM can clone it)
+# This should be the URL of YOUR fork/copy of this repository.
+caldera_repo_url = "https://github.com/yourorg/caldera.git"
+
+# Optional: Override defaults
+# server_type          = "cx32"         # cx22=2vCPU/4GB, cx32=4/8, cx42=8/16
+# location             = "fsn1"         # fsn1, nbg1, hel1, ash
+# ssh_public_key_path  = "~/.ssh/id_ed25519.pub"
+# ssh_private_key_path = "~/.ssh/id_ed25519"
+# caldera_branch       = "main"
+# skip_tools           = ""
+# pipeline_llm         = 0
+# max_parallel         = 4
+# results_dir          = "./results"
