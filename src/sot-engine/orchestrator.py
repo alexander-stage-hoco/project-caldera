@@ -584,6 +584,7 @@ def run_dbt(
     log_path: str = "/tmp/dbt_logs",
     dbt_summary: dict[str, Any] | None = None,
     db_path: Path | None = None,
+    continue_on_test_failure: bool = False,
 ) -> None:
     repo_root = Path(__file__).resolve().parents[2]
     if not dbt_project_dir.is_absolute():
@@ -631,7 +632,10 @@ def run_dbt(
                         "returncode": exc.returncode,
                     }
                 )
-            raise
+            if continue_on_test_failure and phase_name == "test":
+                logger.info(f"WARNING: dbt test failed (exit {exc.returncode}) but continuing (continue_on_test_failure=True)")
+            else:
+                raise
         else:
             duration = time.perf_counter() - start
             if dbt_summary is not None:
@@ -960,6 +964,7 @@ def main() -> int:
                 log_path=args.dbt_log_path,
                 dbt_summary=dbt_summary,
                 db_path=db_path,
+                continue_on_test_failure=args.continue_on_tool_failure,
             )
             summary["steps"]["dbt"]["status"] = "success"
             summary["steps"]["dbt"]["duration_seconds"] = round(time.perf_counter() - start, 3)
