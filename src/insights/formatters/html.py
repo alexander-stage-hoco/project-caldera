@@ -69,8 +69,10 @@ class HtmlFormatter(BaseFormatter):
         return f"grade-{grade.lower()}"
 
     @staticmethod
-    def _truncate_path(path: str, max_length: int = 60) -> str:
+    def _truncate_path(path: str | None, max_length: int = 60) -> str:
         """Truncate a file path for display."""
+        if not path:
+            return ""
         if len(path) <= max_length:
             return path
         return "..." + path[-(max_length - 3):]
