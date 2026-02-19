@@ -161,6 +161,44 @@ Then ingest and generate a report on another machine:
 make analyze-bundle REPO=/path/to/repo BUNDLE=artifacts/<repo_id>/<run_id>
 ```
 
+### Cloud analysis (Hetzner)
+
+Run the full pipeline on an ephemeral Hetzner Cloud VM. The server is created, runs the analysis, downloads results, and is destroyed automatically.
+
+**Prerequisites:**
+
+1. Install Terraform: `brew install terraform`
+2. Configure credentials: `cp infra/terraform.tfvars.example infra/terraform.tfvars` and fill in your Hetzner API token and Caldera repo URL
+3. One-time init: `make cloud-setup`
+
+**Run a cloud analysis:**
+
+```bash
+make cloud-run REPO=https://github.com/pallets/flask
+```
+
+Options:
+
+```bash
+make cloud-run REPO=https://github.com/org/repo CLOUD_SERVER=cx43   # Larger server (8 vCPU / 16 GB)
+make cloud-run REPO=https://github.com/org/repo SKIP_TOOLS=sonarqube,trivy
+make cloud-run REPO=https://github.com/org/repo KEEP_SERVER=1       # Don't destroy (for debugging)
+```
+
+Results are downloaded to `infra/results/<repo-id>/<run-id>/` containing the DuckDB database, HTML report, and a `manifest.json`. Open the report:
+
+```bash
+open infra/results/<repo-id>/<run-id>/reports/report.html
+```
+
+If you used `KEEP_SERVER=1`, destroy the server when done:
+
+```bash
+make cloud-destroy
+```
+
+See [infra/README.md](../infra/README.md) for the full infrastructure reference.
+
 ### Reset the database
 
 ```bash

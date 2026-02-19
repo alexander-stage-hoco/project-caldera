@@ -19,6 +19,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
 | Set up LLM judges | [docs/EVALUATION.md](docs/EVALUATION.md) |
 | Run reports | [docs/REPORTS.md](docs/REPORTS.md) |
 | Review tool architecture | [src/architecture-review/README.md](src/architecture-review/README.md) |
+| Run cloud analysis | [infra/README.md](infra/README.md) |
 
 ## Architecture
 
@@ -98,6 +99,9 @@ make clean-db                # Remove database, start fresh
 make collect REPO=<path>     # Collect tool artifacts into a portable bundle
 make analyze-bundle REPO=<path> BUNDLE=<dir>  # Ingest bundle + generate report
 make prune-outputs           # Delete generated tool outputs (requires CONFIRM=1)
+make cloud-setup             # One-time: terraform init for cloud runs
+make cloud-run REPO=<url>    # Spin up Hetzner VM, analyze, download results, destroy
+make cloud-destroy           # Destroy cloud server (if KEEP_SERVER=1 was used)
 ```
 
 ### Advanced (from project root)
@@ -130,6 +134,9 @@ make pipeline-eval           # Full E2E: orchestrate -> insights -> LLM eval -> 
 | `PIPELINE_LLM` | `1` | Set to `0` to skip LLM evaluation |
 | `BUNDLE_DIR` | `artifacts` | Bundle output directory for `make collect` |
 | `BUNDLE_TAR` | `1` | Create `.tar.gz` from bundle |
+| `CLOUD_SERVER` | `cx33` | Hetzner server type for `make cloud-run` |
+| `CLOUD_RESULTS` | `infra/results` | Local directory for cloud run results |
+| `KEEP_SERVER` | unset | Set to `1` to keep VM alive after cloud run |
 
 ### Orchestrator
 
@@ -338,6 +345,22 @@ Results written to `src/architecture-review/results/<tool>-<timestamp>.json`. Sc
 | `src/architecture-review/schemas/review_result.schema.json` | Output JSON Schema |
 | `src/architecture-review/README.md` | Usage guide |
 
+## Cloud Infrastructure
+
+Cloud analysis (`make cloud-run`) creates an ephemeral Hetzner VM via Terraform, runs the full pipeline remotely, and downloads results:
+
+```
+Local machine                          Hetzner Cloud VM
+─────────────                          ─────────────────
+terraform apply ──────────────────────► create VM (cloud-init: git, python, docker)
+                                        clone Caldera + target repo
+                                        make analyze (tools → adapters → dbt → report)
+scp results ◄─────────────────────────  export DuckDB + reports + manifest.json
+terraform destroy ────────────────────► destroy VM
+```
+
+Key files: `scripts/cloud-run.sh` (local orchestrator), `infra/main.tf` (Terraform config), `infra/run-analysis.sh` (remote runner), `infra/cloud-init.yml` (VM bootstrap). See [infra/README.md](infra/README.md) for the full reference.
+
 ## Troubleshooting
 
 | Problem | Solution |
@@ -349,6 +372,10 @@ Results written to `src/architecture-review/results/<tool>-<timestamp>.json`. Sc
 | Compliance failures | See [docs/COMPLIANCE.md](docs/COMPLIANCE.md) for fix actions |
 | "No module named 'duckdb'" | Use `.venv/bin/python` not system `python` |
 | Import errors for shared modules | Check PYTHONPATH includes `src/` |
+| Cloud run: `terraform.tfvars not found` | `cp infra/terraform.tfvars.example infra/terraform.tfvars` and fill in values |
+| Cloud run: SSH timeout | Check Hetzner API token is valid and SSH key path is correct in tfvars |
+| Cloud run: .NET tools skipped | Expected — dotnet is not installed on the VM; devskim, dotcover, roslyn-analyzers auto-skip |
+| Cloud run: server still running | Run `make cloud-destroy` or `cd infra && terraform destroy` |
 
 ## Common Tasks
 
