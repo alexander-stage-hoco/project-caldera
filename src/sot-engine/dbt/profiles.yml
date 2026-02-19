@@ -3,5 +3,5 @@ caldera_sot:
   outputs:
     dev:
       type: duckdb
-      path: /tmp/caldera_sot.duckdb
+      path: "{{ env_var('CALDERA_DB_PATH', '/tmp/caldera_sot.duckdb') }}"
       threads: 4

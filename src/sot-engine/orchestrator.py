@@ -583,6 +583,7 @@ def run_dbt(
     target_path: str = "/tmp/dbt_target",
     log_path: str = "/tmp/dbt_logs",
     dbt_summary: dict[str, Any] | None = None,
+    db_path: Path | None = None,
 ) -> None:
     repo_root = Path(__file__).resolve().parents[2]
     if not dbt_project_dir.is_absolute():
@@ -591,6 +592,8 @@ def run_dbt(
         profiles_dir = repo_root / profiles_dir
     env = os.environ.copy()
     env["DBT_PROFILES_DIR"] = str(profiles_dir)
+    if db_path is not None:
+        env["CALDERA_DB_PATH"] = str(db_path)
     dbt_cmd = _resolve_dbt_cmd(dbt_bin, repo_root)
     phases = [
         ("run", [*dbt_cmd, "run", "--target-path", target_path, "--log-path", log_path]),
@@ -956,6 +959,7 @@ def main() -> int:
                 target_path=args.dbt_target_path,
                 log_path=args.dbt_log_path,
                 dbt_summary=dbt_summary,
+                db_path=db_path,
             )
             summary["steps"]["dbt"]["status"] = "success"
             summary["steps"]["dbt"]["duration_seconds"] = round(time.perf_counter() - start, 3)
