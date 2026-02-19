@@ -692,8 +692,10 @@ class FileImport:
     relative_path: str
     imported_path: str
     imported_symbols: str | None  # comma-separated or NULL for module import
-    import_type: str | None  # static, dynamic, side_effect
+    import_type: str | None  # static, dynamic, side_effect, type_checking, global, extern
     line_number: int | None
+
+    _VALID_IMPORT_TYPES = frozenset({"static", "dynamic", "side_effect", "type_checking", "global", "extern"})
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
@@ -701,8 +703,8 @@ class FileImport:
         _validate_required_string(self.imported_path, "imported_path")
         if self.line_number is not None and self.line_number < 1:
             raise ValueError("line_number must be >= 1")
-        if self.import_type is not None and self.import_type not in ("static", "dynamic", "side_effect"):
-            raise ValueError(f"import_type must be static, dynamic, or side_effect, got {self.import_type}")
+        if self.import_type is not None and self.import_type not in self._VALID_IMPORT_TYPES:
+            raise ValueError(f"import_type must be one of {sorted(self._VALID_IMPORT_TYPES)}, got {self.import_type}")
 
 
 # =============================================================================
