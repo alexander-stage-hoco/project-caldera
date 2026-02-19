@@ -157,15 +157,15 @@ _analyze-local:
 report:
 	@RUN_PK="$(RUN_PK)"; \
 	  if [ -z "$$RUN_PK" ]; then \
-	    RUN_PK=$$(.venv/bin/python scripts/get_latest_run_pk.py --db "$(ORCH_DB_PATH)"); \
+	    RUN_PK=$$($(PYTHON_VENV) scripts/get_latest_run_pk.py --db "$(ORCH_DB_PATH)"); \
 	  fi; \
 	  test -n "$$RUN_PK" || (echo "No runs found in database. Run 'make analyze' first."; exit 1); \
 	  echo "Generating report for run_pk=$$RUN_PK..."; \
-	  mkdir -p $(PIPELINE_OUTPUT_DIR); \
-	  cd src/insights && $(PYTHON_VENV) -m insights generate $$RUN_PK \
+	  mkdir -p $(CURDIR)/$(PIPELINE_OUTPUT_DIR); \
+	  (cd src/insights && $(PYTHON_VENV) -m insights generate $$RUN_PK \
 	    --db $(ORCH_DB_PATH) \
 	    --format html \
-	    --output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html; \
+	    --output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html); \
 	  echo "Report: $(PIPELINE_OUTPUT_DIR)/report.html"
 
 list-runs:
@@ -310,7 +310,7 @@ test:
 # =============================================================================
 
 PIPELINE_OUTPUT_DIR ?= src/insights/output/pipeline
-PYTHON_VENV := .venv/bin/python
+PYTHON_VENV := $(CURDIR)/.venv/bin/python
 
 pipeline-eval:
 	@test -n "$(ORCH_REPO_PATH)" || (echo "ORCH_REPO_PATH is required"; exit 1)
@@ -348,42 +348,42 @@ pipeline-eval:
 		$(if $(SKIP_TOOLS),ORCH_SKIP_TOOLS=$(SKIP_TOOLS),) \
 		$(if $(ORCH_REPLACE),ORCH_REPLACE=1,) \
 		$(if $(filter 1,$(CONTINUE_ON_TOOL_FAILURE)),CONTINUE_ON_TOOL_FAILURE=1,)
-	@RUN_PK=$$(.venv/bin/python scripts/get_run_pk.py --db "$(ORCH_DB_PATH)" --run-id "$(AUTO_RUN_ID)"); \
+	@RUN_PK=$$($(PYTHON_VENV) scripts/get_run_pk.py --db "$(ORCH_DB_PATH)" --run-id "$(AUTO_RUN_ID)"); \
 	  echo "Run PK:    $$RUN_PK"; \
 	  echo ""; \
 	  echo "=== Phase 2: Generate Insights Report ==="; \
-	  cd src/insights && $(PYTHON_VENV) -m insights generate $$RUN_PK \
+	  (cd src/insights && $(PYTHON_VENV) -m insights generate $$RUN_PK \
 	    --db $(ORCH_DB_PATH) \
 	    --format html \
-	    --output $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html; \
-	  cp -f $(PIPELINE_RUN_DIR)/report.html $(PIPELINE_OUTPUT_DIR)/report.html; \
+	    --output $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html); \
+	  cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html; \
 	  if [ "$(PIPELINE_LLM)" = "1" ]; then \
 	    echo ""; \
 	    echo "=== Phase 3: LLM Evaluation with InsightQualityJudge ==="; \
-	    cd src/insights && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \
+	    (cd src/insights && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \
 	      $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html \
 	      --db $(ORCH_DB_PATH) \
 	      --run-pk $$RUN_PK \
 	      --include-insight-quality \
-	      --output $(CURDIR)/$(PIPELINE_RUN_DIR)/evaluation.json; \
-	    cp -f $(PIPELINE_RUN_DIR)/evaluation.json $(PIPELINE_OUTPUT_DIR)/evaluation.json; \
+	      --output $(CURDIR)/$(PIPELINE_RUN_DIR)/evaluation.json); \
+	    cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/evaluation.json $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json; \
 	    echo ""; \
 	    echo "=== Phase 4: Extract Top 3 Insights ==="; \
-	    cd src/insights && $(PYTHON_VENV) -m insights.scripts.extract_top_insights extract \
+	    (cd src/insights && $(PYTHON_VENV) -m insights.scripts.extract_top_insights extract \
 	      $(CURDIR)/$(PIPELINE_RUN_DIR)/evaluation.json \
 	      --output $(CURDIR)/$(PIPELINE_RUN_DIR)/top3_insights.json \
-	      --format rich; \
-	    cp -f $(PIPELINE_RUN_DIR)/top3_insights.json $(PIPELINE_OUTPUT_DIR)/top3_insights.json; \
+	      --format rich); \
+	    cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/top3_insights.json $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/top3_insights.json; \
 	  else \
 	    echo ""; \
 	    echo "=== Skipping LLM phases (PIPELINE_LLM=$(PIPELINE_LLM)) ==="; \
 	  fi; \
-	  .venv/bin/python scripts/write_run_manifest.py \
+	  $(PYTHON_VENV) scripts/write_run_manifest.py \
 	    --db "$(ORCH_DB_PATH)" \
 	    --collection-run-id "$(AUTO_RUN_ID)" \
-	    --out "$(PIPELINE_RUN_DIR)/run_manifest.json" \
-	    --report "$(PIPELINE_RUN_DIR)/report.html"; \
-	  cp -f $(PIPELINE_RUN_DIR)/run_manifest.json $(PIPELINE_OUTPUT_DIR)/run_manifest.json
+	    --out "$(CURDIR)/$(PIPELINE_RUN_DIR)/run_manifest.json" \
+	    --report "$(CURDIR)/$(PIPELINE_RUN_DIR)/report.html"; \
+	  cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/run_manifest.json $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/run_manifest.json
 	@echo ""
 	@echo "=============================================="
 	@echo "PIPELINE COMPLETE"
