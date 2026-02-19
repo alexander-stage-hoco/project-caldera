@@ -13,6 +13,11 @@ dotcover_runs as (
     from {{ source('lz', 'lz_tool_runs') }}
     where tool_name = 'dotcover'
 ),
+coverage_ingest_runs as (
+    select run_pk, collection_run_id
+    from {{ source('lz', 'lz_tool_runs') }}
+    where tool_name = 'coverage-ingest'
+),
 roslyn_runs as (
     select run_pk, collection_run_id
     from {{ source('lz', 'lz_tool_runs') }}
@@ -100,6 +105,14 @@ dotcover_map as (
         lr.run_pk as layout_run_pk
     from dotcover_runs dr
     join layout_runs lr on lr.collection_run_id = dr.collection_run_id
+),
+coverage_ingest_map as (
+    select
+        cr.run_pk as tool_run_pk,
+        cr.collection_run_id,
+        lr.run_pk as layout_run_pk
+    from coverage_ingest_runs cr
+    join layout_runs lr on lr.collection_run_id = cr.collection_run_id
 ),
 roslyn_map as (
     select
@@ -213,6 +226,20 @@ dotcover_files as (
         dcf.statement_coverage_pct
     from {{ ref('stg_dotcover_file_metrics') }} dcf
     join dotcover_map dm on dm.tool_run_pk = dcf.run_pk
+),
+coverage_ingest_files as (
+    select
+        cif.run_pk,
+        cim.collection_run_id,
+        cim.layout_run_pk,
+        cif.file_id,
+        cif.line_coverage_pct,
+        cif.branch_coverage_pct,
+        cif.lines_total,
+        cif.lines_covered,
+        cif.source_format
+    from {{ ref('stg_lz_coverage_summary') }} cif
+    join coverage_ingest_map cim on cim.tool_run_pk = cif.run_pk
 ),
 roslyn_files as (
     select
@@ -416,6 +443,7 @@ select
     combined.semgrep_run_pk,
     combined.symbol_run_pk as symbol_run_pk,
     dc.run_pk as dotcover_run_pk,
+    ci.run_pk as coverage_ingest_run_pk,
     combined.layout_run_pk,
     combined.file_id,
     lf.relative_path,
@@ -442,9 +470,12 @@ select
     cpl.avg_instability as coupling_avg_instability,
     cpl.max_instability as coupling_max_instability,
     dc.type_count as coverage_type_count,
-    dc.covered_statements as coverage_covered_statements,
-    dc.total_statements as coverage_total_statements,
-    dc.statement_coverage_pct as coverage_statement_pct,
+    coalesce(dc.covered_statements, ci.lines_covered) as coverage_covered_statements,
+    coalesce(dc.total_statements, ci.lines_total) as coverage_total_statements,
+    coalesce(dc.statement_coverage_pct, ci.line_coverage_pct) as coverage_statement_pct,
+    ci.line_coverage_pct as coverage_line_pct,
+    ci.branch_coverage_pct as coverage_branch_pct,
+    ci.source_format as coverage_source_format,
     ros.run_pk as roslyn_run_pk,
     ros.violation_count as roslyn_violation_count,
     ros.severity_critical as roslyn_severity_critical,
@@ -537,7 +568,8 @@ select
         case when gl.run_pk is not null then 'gitleaks' end,
         case when tv.run_pk is not null then 'trivy' end,
         case when sc.run_pk is not null then 'scancode' end,
-        case when pmd.run_pk is not null then 'pmd-cpd' end
+        case when pmd.run_pk is not null then 'pmd-cpd' end,
+        case when ci.run_pk is not null then 'coverage-ingest' end
     ) as sources
 from combined
 join {{ source('lz', 'lz_layout_files') }} lf
@@ -558,6 +590,9 @@ left join coupling_files cpl
 left join dotcover_files dc
     on dc.layout_run_pk = combined.layout_run_pk
    and dc.file_id = combined.file_id
+left join coverage_ingest_files ci
+    on ci.layout_run_pk = combined.layout_run_pk
+   and ci.file_id = combined.file_id
 left join roslyn_files ros
     on ros.layout_run_pk = combined.layout_run_pk
    and ros.file_id = combined.file_id
