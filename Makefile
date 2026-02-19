@@ -115,7 +115,7 @@ help:
 
 # Cloud variables
 CLOUD_SERVER ?= cx33
-CLOUD_RESULTS ?= infra/results
+CLOUD_RESULTS ?= $(CURDIR)/infra/results
 
 # =============================================================================
 # User-Facing Targets
@@ -162,7 +162,7 @@ report:
 	  test -n "$$RUN_PK" || (echo "No runs found in database. Run 'make analyze' first."; exit 1); \
 	  echo "Generating report for run_pk=$$RUN_PK..."; \
 	  mkdir -p $(CURDIR)/$(PIPELINE_OUTPUT_DIR); \
-	  (cd src/insights && $(PYTHON_VENV) -m insights generate $$RUN_PK \
+	  (cd src && $(PYTHON_VENV) -m insights generate $$RUN_PK \
 	    --db $(ORCH_DB_PATH) \
 	    --format html \
 	    --output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html); \
@@ -352,7 +352,7 @@ pipeline-eval:
 	  echo "Run PK:    $$RUN_PK"; \
 	  echo ""; \
 	  echo "=== Phase 2: Generate Insights Report ==="; \
-	  (cd src/insights && $(PYTHON_VENV) -m insights generate $$RUN_PK \
+	  (cd src && $(PYTHON_VENV) -m insights generate $$RUN_PK \
 	    --db $(ORCH_DB_PATH) \
 	    --format html \
 	    --output $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html); \
@@ -360,7 +360,7 @@ pipeline-eval:
 	  if [ "$(PIPELINE_LLM)" = "1" ]; then \
 	    echo ""; \
 	    echo "=== Phase 3: LLM Evaluation with InsightQualityJudge ==="; \
-	    (cd src/insights && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \
+	    (cd src && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \
 	      $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html \
 	      --db $(ORCH_DB_PATH) \
 	      --run-pk $$RUN_PK \
@@ -369,7 +369,7 @@ pipeline-eval:
 	    cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/evaluation.json $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json; \
 	    echo ""; \
 	    echo "=== Phase 4: Extract Top 3 Insights ==="; \
-	    (cd src/insights && $(PYTHON_VENV) -m insights.scripts.extract_top_insights extract \
+	    (cd src && $(PYTHON_VENV) -m insights.scripts.extract_top_insights extract \
 	      $(CURDIR)/$(PIPELINE_RUN_DIR)/evaluation.json \
 	      --output $(CURDIR)/$(PIPELINE_RUN_DIR)/top3_insights.json \
 	      --format rich); \
