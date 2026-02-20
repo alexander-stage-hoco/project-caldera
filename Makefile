@@ -4,7 +4,7 @@
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
 	orchestrate test pipeline-eval arch-review \
 	collect analyze-bundle prune-outputs \
-	cloud-setup cloud-run cloud-destroy
+	cloud-setup cloud-run cloud-status cloud-destroy
 
 TOOLS_DIR := src/tools
 TOOL ?=
@@ -110,6 +110,7 @@ help:
 	@echo "  Cloud (Hetzner):"
 	@echo "    make cloud-setup              One-time: terraform init"
 	@echo "    make cloud-run REPO=<url>     Spin up VM, analyze, download results, destroy"
+	@echo "    make cloud-status             Check status of cloud servers and results"
 	@echo "    make cloud-destroy            Destroy cloud server (if --keep-server was used)"
 	@echo "    CLOUD_SERVER=cx42             Override server type (default: cx33)"
 
@@ -443,6 +444,33 @@ cloud-run:
 		$(if $(SKIP_TOOLS),--skip "$(SKIP_TOOLS)",) \
 		$(if $(filter 1,$(PIPELINE_LLM)),--llm,) \
 		$(if $(KEEP_SERVER),--keep-server,)
+
+cloud-status:  ## Check status of cloud servers
+	@cd $(CURDIR)/infra && \
+	if [ ! -f terraform.tfstate ] || [ ! -s terraform.tfstate ]; then \
+		echo "No Terraform state found. No cloud servers have been created."; \
+	else \
+		TF_JSON=$$(terraform output -json 2>/dev/null); \
+		SERVER_IP=$$(echo "$$TF_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('server_ip',{}).get('value',''))" 2>/dev/null); \
+		if [ -z "$$SERVER_IP" ]; then \
+			echo "No active cloud servers."; \
+		else \
+			SERVER_NAME=$$(echo "$$TF_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('server_name',{}).get('value','unknown'))" 2>/dev/null); \
+			echo "Active cloud server:"; \
+			echo "  Name:   $$SERVER_NAME"; \
+			echo "  IP:     $$SERVER_IP"; \
+			echo "  SSH:    ssh root@$$SERVER_IP"; \
+			echo "  Destroy: make cloud-destroy"; \
+		fi; \
+	fi; \
+	echo ""; \
+	RESULTS="$(CLOUD_RESULTS)"; \
+	MANIFEST=$$(find "$$RESULTS" -name manifest.json -maxdepth 4 2>/dev/null | head -1); \
+	if [ -n "$$MANIFEST" ]; then \
+		echo "Latest results: $$MANIFEST"; \
+	else \
+		echo "No results downloaded yet."; \
+	fi
 
 cloud-destroy:
 	@if [ ! -f infra/terraform.tfvars ]; then \
