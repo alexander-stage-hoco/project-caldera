@@ -64,6 +64,8 @@ htmlcov/
 # Tool binaries (downloaded by make setup)
 bin/git-sizer
 bin/git-sizer-*
+src/tools/git-sizer/bin/
+src/tools/gitleaks/bin/
 src/tools/trivy/bin/trivy
 
 # Database files
