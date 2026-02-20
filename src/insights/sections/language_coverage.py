@@ -29,10 +29,7 @@ class LanguageCoverageSection(BaseSection):
         - total_loc: Total lines of code
         - language_count: Number of distinct languages
         """
-        try:
-            languages = fetcher.fetch("language_coverage", run_pk)
-        except Exception:
-            languages = []
+        languages = self._safe_fetch(fetcher, "language_coverage", run_pk)
 
         # Calculate totals and percentages
         total_files = sum(lang.get("file_count", 0) for lang in languages)

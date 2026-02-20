@@ -31,25 +31,10 @@ class IacMisconfigsSection(BaseSection):
         - by_type: Misconfigs grouped by IaC type (terraform, k8s, docker)
         - affected_files: Files with misconfigurations
         """
-        try:
-            summary = fetcher.fetch("iac_summary", run_pk)
-        except Exception:
-            summary = []
-
-        try:
-            top_misconfigs = fetcher.fetch("iac_top_misconfigs", run_pk, limit=20)
-        except Exception:
-            top_misconfigs = []
-
-        try:
-            by_type = fetcher.fetch("iac_by_type", run_pk)
-        except Exception:
-            by_type = []
-
-        try:
-            affected_files = fetcher.fetch("iac_affected_files", run_pk, limit=15)
-        except Exception:
-            affected_files = []
+        summary = self._safe_fetch(fetcher, "iac_summary", run_pk)
+        top_misconfigs = self._safe_fetch(fetcher, "iac_top_misconfigs", run_pk, limit=20)
+        by_type = self._safe_fetch(fetcher, "iac_by_type", run_pk)
+        affected_files = self._safe_fetch(fetcher, "iac_affected_files", run_pk, limit=15)
 
         # Calculate totals
         total_count = sum(s.get("count", 0) for s in summary)

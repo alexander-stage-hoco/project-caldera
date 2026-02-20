@@ -33,10 +33,7 @@ class DirectoryStructureSection(BaseSection):
         - summary: Overall statistics
         - risk_distribution: Count by risk level
         """
-        try:
-            directories = fetcher.fetch("layout_structure_hotspots", run_pk, limit=100)
-        except Exception:
-            directories = []
+        directories = self._safe_fetch(fetcher, "layout_structure_hotspots", run_pk, limit=100)
 
         # Filter by issues
         deeply_nested = [d for d in directories if d.get("is_deeply_nested")]

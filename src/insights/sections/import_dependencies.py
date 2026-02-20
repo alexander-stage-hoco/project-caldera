@@ -32,15 +32,8 @@ class ImportDependenciesSection(BaseSection):
         - summary: Total files, avg imports, dynamic count, max imports
         - risk flags for template rendering
         """
-        try:
-            top_importers = fetcher.fetch("import_dependencies", run_pk, limit=30)
-        except Exception:
-            top_importers = []
-
-        try:
-            most_imported = fetcher.fetch("import_dependencies_targets", run_pk, limit=30)
-        except Exception:
-            most_imported = []
+        top_importers = self._safe_fetch(fetcher, "import_dependencies", run_pk, limit=30)
+        most_imported = self._safe_fetch(fetcher, "import_dependencies_targets", run_pk, limit=30)
 
         # Calculate summary statistics
         total_files = len(top_importers)

@@ -29,20 +29,9 @@ class GitSizerSection(BaseSection):
         - violations: Violation details by metric
         - lfs_candidates: Files recommended for LFS
         """
-        try:
-            summary_rows = fetcher.fetch("git_sizer_summary", run_pk)
-        except Exception:
-            summary_rows = []
-
-        try:
-            violations = fetcher.fetch("git_sizer_violations", run_pk, limit=20)
-        except Exception:
-            violations = []
-
-        try:
-            lfs_candidates = fetcher.fetch("git_sizer_lfs_candidates", run_pk, limit=20)
-        except Exception:
-            lfs_candidates = []
+        summary_rows = self._safe_fetch(fetcher, "git_sizer_summary", run_pk)
+        violations = self._safe_fetch(fetcher, "git_sizer_violations", run_pk, limit=20)
+        lfs_candidates = self._safe_fetch(fetcher, "git_sizer_lfs_candidates", run_pk, limit=20)
 
         # Extract summary (single row)
         row = summary_rows[0] if summary_rows else {}

@@ -33,20 +33,9 @@ class SecretsSection(BaseSection):
         - hotspot_files: Files with most secrets
         - total_count: Total secret count
         """
-        try:
-            summary = fetcher.fetch("gitleaks_summary", run_pk)
-        except Exception:
-            summary = []
-
-        try:
-            by_rule = fetcher.fetch("gitleaks_by_rule", run_pk, limit=15)
-        except Exception:
-            by_rule = []
-
-        try:
-            hotspot_files = fetcher.fetch("gitleaks_hotspot_files", run_pk, limit=10)
-        except Exception:
-            hotspot_files = []
+        summary = self._safe_fetch(fetcher, "gitleaks_summary", run_pk)
+        by_rule = self._safe_fetch(fetcher, "gitleaks_by_rule", run_pk, limit=15)
+        hotspot_files = self._safe_fetch(fetcher, "gitleaks_hotspot_files", run_pk, limit=10)
 
         # Calculate totals
         total_count = sum(row.get("count", 0) for row in summary)

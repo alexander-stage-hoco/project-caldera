@@ -28,25 +28,10 @@ class DistributionInsightsSection(BaseSection):
         - smell_distribution: Distribution stats for code smells
         - concentration: Top 20% file concentration metrics
         """
-        try:
-            complexity_dist = fetcher.fetch("distribution_complexity", run_pk)
-        except Exception:
-            complexity_dist = []
-
-        try:
-            loc_dist = fetcher.fetch("distribution_loc", run_pk)
-        except Exception:
-            loc_dist = []
-
-        try:
-            smell_dist = fetcher.fetch("distribution_smells", run_pk)
-        except Exception:
-            smell_dist = []
-
-        try:
-            concentration = fetcher.fetch("distribution_concentration", run_pk)
-        except Exception:
-            concentration = []
+        complexity_dist = self._safe_fetch(fetcher, "distribution_complexity", run_pk)
+        loc_dist = self._safe_fetch(fetcher, "distribution_loc", run_pk)
+        smell_dist = self._safe_fetch(fetcher, "distribution_smells", run_pk)
+        concentration = self._safe_fetch(fetcher, "distribution_concentration", run_pk)
 
         return {
             "complexity_distribution": complexity_dist,

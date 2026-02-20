@@ -2,6 +2,8 @@
 Repository health overview section.
 """
 
+import warnings
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig
@@ -40,14 +42,12 @@ class RepoHealthSection(BaseSection):
                 result = health_data[0]
             else:
                 result = self.get_fallback_data()
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Query 'repo_health' failed: {exc}", stacklevel=2)
             result = self.get_fallback_data()
 
         # Fetch language breakdown
-        try:
-            languages = fetcher.fetch("language_summary", run_pk, limit=10)
-        except Exception:
-            languages = []
+        languages = self._safe_fetch(fetcher, "language_summary", run_pk, limit=10)
 
         result["languages"] = languages
         result["has_health_grade"] = result.get("health_grade") is not None

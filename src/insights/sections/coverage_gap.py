@@ -20,10 +20,7 @@ class CoverageGapSection(BaseSection):
 
     def fetch_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
         """Fetch coverage gap data."""
-        try:
-            hotspots = fetcher.fetch("coverage_gap_hotspots", run_pk, limit=30)
-        except Exception:
-            hotspots = []
+        hotspots = self._safe_fetch(fetcher, "coverage_gap_hotspots", run_pk, limit=30)
 
         # Calculate summary
         risk_levels = {"critical": 0, "high": 0, "medium": 0, "low": 0}

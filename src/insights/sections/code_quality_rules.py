@@ -33,10 +33,7 @@ class CodeQualityRulesSection(BaseSection):
         - category_breakdown: Rules grouped by category
         - severity_distribution: Violation counts by severity
         """
-        try:
-            rules = fetcher.fetch("semgrep_rule_hotspots", run_pk, limit=30)
-        except Exception:
-            rules = []
+        rules = self._safe_fetch(fetcher, "semgrep_rule_hotspots", run_pk, limit=30)
 
         # Calculate summary statistics
         risk_levels: dict[str, int] = {"critical": 0, "high": 0, "medium": 0, "low": 0}

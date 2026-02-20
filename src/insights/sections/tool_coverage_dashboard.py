@@ -66,10 +66,7 @@ class ToolCoverageDashboardSection(BaseSection):
         - confidence_level: Assessment of analysis completeness
         - missing_critical: List of missing critical tools
         """
-        try:
-            tools = fetcher.fetch("tool_coverage_summary", run_pk)
-        except Exception:
-            tools = []
+        tools = self._safe_fetch(fetcher, "tool_coverage_summary", run_pk)
 
         # Enrich tools with purpose
         for tool in tools:

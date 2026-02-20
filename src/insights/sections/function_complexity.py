@@ -31,10 +31,7 @@ class FunctionComplexitySection(BaseSection):
         - files_with_complex_functions: Grouped by file
         - run_statistics: Repository-wide CCN statistics
         """
-        try:
-            functions = fetcher.fetch("function_complexity_hotspots", run_pk, limit=30)
-        except Exception:
-            functions = []
+        functions = self._safe_fetch(fetcher, "function_complexity_hotspots", run_pk, limit=30)
 
         # Calculate summary statistics
         risk_levels = {"critical": 0, "high": 0, "medium": 0, "low": 0}

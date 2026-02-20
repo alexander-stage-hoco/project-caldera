@@ -31,25 +31,10 @@ class RoslynViolationsSection(BaseSection):
         - by_category: Violations grouped by category
         - hotspot_files: Files with most violations
         """
-        try:
-            summary = fetcher.fetch("roslyn_summary", run_pk)
-        except Exception:
-            summary = []
-
-        try:
-            top_violations = fetcher.fetch("roslyn_top_violations", run_pk, limit=20)
-        except Exception:
-            top_violations = []
-
-        try:
-            by_category = fetcher.fetch("roslyn_by_category", run_pk)
-        except Exception:
-            by_category = []
-
-        try:
-            hotspot_files = fetcher.fetch("roslyn_hotspot_files", run_pk, limit=15)
-        except Exception:
-            hotspot_files = []
+        summary = self._safe_fetch(fetcher, "roslyn_summary", run_pk)
+        top_violations = self._safe_fetch(fetcher, "roslyn_top_violations", run_pk, limit=20)
+        by_category = self._safe_fetch(fetcher, "roslyn_by_category", run_pk)
+        hotspot_files = self._safe_fetch(fetcher, "roslyn_hotspot_files", run_pk, limit=15)
 
         # Calculate totals
         total_count = sum(s.get("count", 0) for s in summary)

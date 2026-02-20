@@ -45,25 +45,10 @@ class DotcoverCoverageSection(BaseSection):
         - low_coverage_files: File hotspots with risk levels
         - namespaces: Namespace-level coverage
         """
-        try:
-            summary_rows = fetcher.fetch("dotcover_summary", run_pk)
-        except Exception:
-            summary_rows = []
-
-        try:
-            assemblies = fetcher.fetch("dotcover_assemblies", run_pk, limit=20)
-        except Exception:
-            assemblies = []
-
-        try:
-            low_coverage_files = fetcher.fetch("dotcover_low_coverage_files", run_pk, limit=15)
-        except Exception:
-            low_coverage_files = []
-
-        try:
-            namespaces = fetcher.fetch("dotcover_namespaces", run_pk, limit=15)
-        except Exception:
-            namespaces = []
+        summary_rows = self._safe_fetch(fetcher, "dotcover_summary", run_pk)
+        assemblies = self._safe_fetch(fetcher, "dotcover_assemblies", run_pk, limit=20)
+        low_coverage_files = self._safe_fetch(fetcher, "dotcover_low_coverage_files", run_pk, limit=15)
+        namespaces = self._safe_fetch(fetcher, "dotcover_namespaces", run_pk, limit=15)
 
         # Extract summary (single row)
         row = summary_rows[0] if summary_rows else {}

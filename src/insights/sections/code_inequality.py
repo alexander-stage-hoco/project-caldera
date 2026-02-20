@@ -33,28 +33,16 @@ class CodeInequalitySection(BaseSection):
         - summary: Aggregate statistics
         """
         # Fetch high Gini directories
-        try:
-            high_gini = fetcher.fetch("inequality_by_gini", run_pk)
-        except Exception:
-            high_gini = []
+        high_gini = self._safe_fetch(fetcher, "inequality_by_gini", run_pk)
 
         # Fetch high Palma directories
-        try:
-            high_palma = fetcher.fetch("inequality_by_palma", run_pk)
-        except Exception:
-            high_palma = []
+        high_palma = self._safe_fetch(fetcher, "inequality_by_palma", run_pk)
 
         # Fetch concentration analysis
-        try:
-            concentration = fetcher.fetch("inequality_concentration", run_pk)
-        except Exception:
-            concentration = []
+        concentration = self._safe_fetch(fetcher, "inequality_concentration", run_pk)
 
         # Fetch cross-tool correlation
-        try:
-            cross_tool = fetcher.fetch("inequality_cross_tool", run_pk)
-        except Exception:
-            cross_tool = []
+        cross_tool = self._safe_fetch(fetcher, "inequality_cross_tool", run_pk)
 
         # Classify directories by severity
         critical_dirs = [d for d in high_gini if d.get("classification") == "critical"]

@@ -27,15 +27,9 @@ class CrossToolSection(BaseSection):
         - complex_and_vulnerable: Files in packages with vulnerabilities
         - risk_summary: Summary of compound risks
         """
-        try:
-            complex_and_smelly = fetcher.fetch("cross_tool_complex_smelly", run_pk, limit=15)
-        except Exception:
-            complex_and_smelly = []
+        complex_and_smelly = self._safe_fetch(fetcher, "cross_tool_complex_smelly", run_pk, limit=15)
 
-        try:
-            complex_and_vulnerable = fetcher.fetch("cross_tool_complex_vulnerable", run_pk, limit=15)
-        except Exception:
-            complex_and_vulnerable = []
+        complex_and_vulnerable = self._safe_fetch(fetcher, "cross_tool_complex_vulnerable", run_pk, limit=15)
 
         # Calculate risk summary
         risk_summary = self._calculate_risk_summary(

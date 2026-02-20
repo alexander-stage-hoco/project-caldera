@@ -10,6 +10,8 @@ Focuses on SonarQube-unique capabilities not covered by other tools:
 
 from __future__ import annotations
 
+import warnings
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig
@@ -48,32 +50,21 @@ class SonarQubeDeepDiveSection(BaseSection):
         try:
             summary_results = fetcher.fetch("sonarqube_summary", run_pk)
             summary = summary_results[0] if summary_results else {}
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Query 'sonarqube_summary' failed: {exc}", stacklevel=2)
             summary = {}
 
         # Fetch hotspot files
-        try:
-            hotspot_files = fetcher.fetch("sonarqube_hotspot_files", run_pk, limit=25)
-        except Exception:
-            hotspot_files = []
+        hotspot_files = self._safe_fetch(fetcher, "sonarqube_hotspot_files", run_pk, limit=25)
 
         # Fetch cognitive complexity hotspots
-        try:
-            cognitive_hotspots = fetcher.fetch("sonarqube_cognitive_hotspots", run_pk, limit=25)
-        except Exception:
-            cognitive_hotspots = []
+        cognitive_hotspots = self._safe_fetch(fetcher, "sonarqube_cognitive_hotspots", run_pk, limit=25)
 
         # Fetch rule hotspots
-        try:
-            rule_hotspots = fetcher.fetch("sonarqube_rule_hotspots", run_pk, limit=30)
-        except Exception:
-            rule_hotspots = []
+        rule_hotspots = self._safe_fetch(fetcher, "sonarqube_rule_hotspots", run_pk, limit=30)
 
         # Fetch type breakdown
-        try:
-            type_breakdown = fetcher.fetch("sonarqube_type_breakdown", run_pk)
-        except Exception:
-            type_breakdown = []
+        type_breakdown = self._safe_fetch(fetcher, "sonarqube_type_breakdown", run_pk)
 
         # Calculate health score
         health_score = self._calculate_health_score(summary)

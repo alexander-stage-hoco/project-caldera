@@ -31,10 +31,7 @@ class CodeDuplicationSection(BaseSection):
         - cross_file_clones: Clones spanning multiple files
         - risk_distribution: Clones by risk level
         """
-        try:
-            clones = fetcher.fetch("duplication_hotspots", run_pk, limit=20)
-        except Exception:
-            clones = []
+        clones = self._safe_fetch(fetcher, "duplication_hotspots", run_pk, limit=20)
 
         # Calculate summary statistics
         total_duplicated_lines = 0

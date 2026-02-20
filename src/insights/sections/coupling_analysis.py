@@ -31,10 +31,7 @@ class CouplingAnalysisSection(BaseSection):
         - patterns: Count of coupling patterns
         - instability_analysis: Symbols by instability zone
         """
-        try:
-            symbols = fetcher.fetch("coupling_hotspots", run_pk, limit=25)
-        except Exception:
-            symbols = []
+        symbols = self._safe_fetch(fetcher, "coupling_hotspots", run_pk, limit=25)
 
         # Calculate summary statistics
         risk_levels = {"critical": 0, "high": 0, "medium": 0, "low": 0}

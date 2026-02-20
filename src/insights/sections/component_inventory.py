@@ -43,22 +43,13 @@ class ComponentInventorySection(BaseSection):
         - has_data: Whether any components were found
         """
         # 1. Fetch component list with metrics
-        try:
-            components = fetcher.fetch("component_inventory", run_pk)
-        except Exception:
-            components = []
+        components = self._safe_fetch(fetcher, "component_inventory", run_pk)
 
         # 2. Fetch inter-component dependencies
-        try:
-            dependencies = fetcher.fetch("component_dependencies", run_pk)
-        except Exception:
-            dependencies = []
+        dependencies = self._safe_fetch(fetcher, "component_dependencies", run_pk)
 
         # 3. Fetch component hotspots
-        try:
-            hotspots = fetcher.fetch("component_hotspots", run_pk)
-        except Exception:
-            hotspots = []
+        hotspots = self._safe_fetch(fetcher, "component_hotspots", run_pk)
 
         # 4. Build dependency maps and hotspot maps
         outbound_deps: dict[str, list[dict]] = {}

@@ -4,6 +4,8 @@ Executive summary section - top 3 prioritized insights with remediation guidance
 
 from __future__ import annotations
 
+import warnings
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -124,7 +126,8 @@ class ExecutiveSummarySection(BaseSection):
                 "top_cves": top_cves,
                 "scan_ran": scan_ran,
             }
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Fetching vulnerability data failed: {exc}", stacklevel=2)
             return {
                 "summary": [],
                 "total_count": 0,
@@ -171,7 +174,8 @@ class ExecutiveSummarySection(BaseSection):
                 "max_function_ccn": function_hotspots[0].get("max_ccn") if function_hotspots else 0,
                 "max_function_file": function_hotspots[0].get("relative_path") if function_hotspots else None,
             }
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Fetching complexity data failed: {exc}", stacklevel=2)
             return {
                 "hotspots": [],
                 "critical_complexity_count": 0,
@@ -230,7 +234,8 @@ class ExecutiveSummarySection(BaseSection):
                 "top_file": hotspots[0].get("relative_path") if hotspots else None,
                 "large_files": [h.get("relative_path", "") for h in large_files[:5]],
             }
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Fetching size data failed: {exc}", stacklevel=2)
             return {
                 "hotspots": [],
                 "large_file_count": 0,
@@ -247,7 +252,8 @@ class ExecutiveSummarySection(BaseSection):
             if health:
                 return health[0]
             return {}
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Fetching health data failed: {exc}", stacklevel=2)
             return {}
 
     def _fetch_smell_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
@@ -262,7 +268,8 @@ class ExecutiveSummarySection(BaseSection):
                 "top_file": hotspots[0].get("relative_path") if hotspots else None,
                 "top_smell_count": hotspots[0].get("smell_count", 0) if hotspots else 0,
             }
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Fetching smell data failed: {exc}", stacklevel=2)
             return {
                 "hotspots": [],
                 "total_smells": 0,

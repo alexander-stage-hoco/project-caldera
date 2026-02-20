@@ -35,10 +35,7 @@ class CodeSizeHotspotsSection(BaseSection):
         - language_breakdown: Size distribution by language
         - run_statistics: Avg lines, percentiles across all files
         """
-        try:
-            files = fetcher.fetch("scc_size_hotspots", run_pk, limit=30)
-        except Exception:
-            files = []
+        files = self._safe_fetch(fetcher, "scc_size_hotspots", run_pk, limit=30)
 
         # Calculate summary statistics
         risk_levels = {"critical": 0, "high": 0, "medium": 0}

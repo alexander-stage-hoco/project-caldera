@@ -76,35 +76,11 @@ class FileHotspotsSection(BaseSection):
         - compound_hotspots: Files that appear in multiple categories
         - remediation_guidance: Guidance for each category
         """
-        try:
-            complexity_hotspots = fetcher.fetch(
-                "file_hotspots",
-                run_pk,
-                order_by="complexity",
-                limit=20,
-            )
-        except Exception:
-            complexity_hotspots = []
+        complexity_hotspots = self._safe_fetch(fetcher, "file_hotspots", run_pk, order_by="complexity", limit=20)
 
-        try:
-            size_hotspots = fetcher.fetch(
-                "file_hotspots",
-                run_pk,
-                order_by="loc",
-                limit=20,
-            )
-        except Exception:
-            size_hotspots = []
+        size_hotspots = self._safe_fetch(fetcher, "file_hotspots", run_pk, order_by="loc", limit=20)
 
-        try:
-            smell_hotspots = fetcher.fetch(
-                "file_hotspots",
-                run_pk,
-                order_by="smells",
-                limit=20,
-            )
-        except Exception:
-            smell_hotspots = []
+        smell_hotspots = self._safe_fetch(fetcher, "file_hotspots", run_pk, order_by="smells", limit=20)
 
         # Find compound hotspots (files in multiple categories)
         compound_hotspots = self._find_compound_hotspots(

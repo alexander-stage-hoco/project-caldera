@@ -5,6 +5,8 @@ Combines multiple distribution metrics into a single health score (0-100)
 with letter grades (A-F) for easy interpretation.
 """
 
+import warnings
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig
@@ -34,22 +36,17 @@ class ModuleHealthSection(BaseSection):
         - grade_distribution: {"A": n, "B": n, ...}
         """
         # Fetch all scored directories
-        try:
-            all_scores = fetcher.fetch("module_health_scores", run_pk)
-        except Exception:
-            all_scores = []
+        all_scores = self._safe_fetch(fetcher, "module_health_scores", run_pk)
 
         # Fetch risk factors for unhealthy directories
-        try:
-            risk_factors = fetcher.fetch("module_risk_factors", run_pk)
-        except Exception:
-            risk_factors = []
+        risk_factors = self._safe_fetch(fetcher, "module_risk_factors", run_pk)
 
         # Fetch aggregate summary
         try:
             summary_results = fetcher.fetch("module_health_summary", run_pk)
             summary = summary_results[0] if summary_results else {}
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Query 'module_health_summary' failed: {exc}", stacklevel=2)
             summary = {}
 
         # Sort for healthy (top) and unhealthy (bottom) directories

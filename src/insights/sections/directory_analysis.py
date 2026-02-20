@@ -28,20 +28,9 @@ class DirectoryAnalysisSection(BaseSection):
         - smelliest: Top directories by code smell density
         - tree: Directory tree structure with metrics
         """
-        try:
-            hotspots = fetcher.fetch("directory_hotspots", run_pk, limit=15)
-        except Exception:
-            hotspots = []
-
-        try:
-            largest = fetcher.fetch("directory_largest", run_pk, limit=15)
-        except Exception:
-            largest = []
-
-        try:
-            smelliest = fetcher.fetch("directory_smelliest", run_pk, limit=15)
-        except Exception:
-            smelliest = []
+        hotspots = self._safe_fetch(fetcher, "directory_hotspots", run_pk, limit=15)
+        largest = self._safe_fetch(fetcher, "directory_largest", run_pk, limit=15)
+        smelliest = self._safe_fetch(fetcher, "directory_smelliest", run_pk, limit=15)
 
         # Calculate directory tree depth stats
         tree_stats = self._calculate_tree_stats(hotspots + largest)

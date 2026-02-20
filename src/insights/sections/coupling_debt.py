@@ -61,10 +61,7 @@ class CouplingDebtSection(BaseSection):
     def fetch_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
         """Fetch coupling-weighted debt data."""
         # Fetch hotspots with coupling weights
-        try:
-            hotspots = fetcher.fetch("coupling_weighted_debt", run_pk, limit=30)
-        except Exception:
-            hotspots = []
+        hotspots = self._safe_fetch(fetcher, "coupling_weighted_debt", run_pk, limit=30)
 
         # Check if we have coupling data at all
         has_coupling_data = any(

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import warnings
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig
@@ -24,14 +26,12 @@ class TechnicalDebtSummarySection(BaseSection):
         try:
             summary_results = fetcher.fetch("technical_debt_summary", run_pk)
             summary = summary_results[0] if summary_results else {}
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Query 'technical_debt_summary' failed: {exc}", stacklevel=2)
             summary = {}
 
         # Get debt hotspots
-        try:
-            hotspots = fetcher.fetch("technical_debt_hotspots", run_pk, limit=25)
-        except Exception:
-            hotspots = []
+        hotspots = self._safe_fetch(fetcher, "technical_debt_hotspots", run_pk, limit=25)
 
         # Calculate category scores (0-100 scale)
         categories = self._calculate_category_scores(summary)

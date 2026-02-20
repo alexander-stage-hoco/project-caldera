@@ -30,25 +30,10 @@ class DevskimSecuritySection(BaseSection):
         - top_rules: Top rules by severity score
         - hotspot_files: Files with most findings
         """
-        try:
-            summary_rows = fetcher.fetch("devskim_summary", run_pk)
-        except Exception:
-            summary_rows = []
-
-        try:
-            by_category = fetcher.fetch("devskim_by_category", run_pk)
-        except Exception:
-            by_category = []
-
-        try:
-            top_rules = fetcher.fetch("devskim_top_rules", run_pk, limit=20)
-        except Exception:
-            top_rules = []
-
-        try:
-            hotspot_files = fetcher.fetch("devskim_hotspot_files", run_pk, limit=15)
-        except Exception:
-            hotspot_files = []
+        summary_rows = self._safe_fetch(fetcher, "devskim_summary", run_pk)
+        by_category = self._safe_fetch(fetcher, "devskim_by_category", run_pk)
+        top_rules = self._safe_fetch(fetcher, "devskim_top_rules", run_pk, limit=20)
+        hotspot_files = self._safe_fetch(fetcher, "devskim_hotspot_files", run_pk, limit=15)
 
         # Extract summary (single row)
         row = summary_rows[0] if summary_rows else {}

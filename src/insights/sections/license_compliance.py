@@ -32,10 +32,7 @@ class LicenseComplianceSection(BaseSection):
         - summary: Counts by category
         - compliance_status: OK or REVIEW NEEDED
         """
-        try:
-            licenses = fetcher.fetch("license_compliance_summary", run_pk)
-        except Exception:
-            licenses = []
+        licenses = self._safe_fetch(fetcher, "license_compliance_summary", run_pk)
 
         # Organize by category
         by_category: dict[str, list[dict[str, Any]]] = {

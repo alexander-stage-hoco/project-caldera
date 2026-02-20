@@ -31,20 +31,9 @@ class VulnerabilitiesSection(BaseSection):
         - affected_packages: Packages with vulnerabilities
         - total_count: Total vulnerability count
         """
-        try:
-            summary = fetcher.fetch("vulnerability_summary", run_pk)
-        except Exception:
-            summary = []
-
-        try:
-            top_cves = fetcher.fetch("vulnerability_top_cves", run_pk, limit=20)
-        except Exception:
-            top_cves = []
-
-        try:
-            affected_packages = fetcher.fetch("vulnerability_packages", run_pk, limit=15)
-        except Exception:
-            affected_packages = []
+        summary = self._safe_fetch(fetcher, "vulnerability_summary", run_pk)
+        top_cves = self._safe_fetch(fetcher, "vulnerability_top_cves", run_pk, limit=20)
+        affected_packages = self._safe_fetch(fetcher, "vulnerability_packages", run_pk, limit=15)
 
         # Calculate totals
         total_count = sum(s.get("count", 0) for s in summary)

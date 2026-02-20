@@ -33,10 +33,7 @@ class BlastRadiusSection(BaseSection):
         - risk_distribution: Count per risk level
         - files_with_high_impact: Files containing high-impact symbols
         """
-        try:
-            symbols = fetcher.fetch("symbol_blast_radius", run_pk, limit=30)
-        except Exception:
-            symbols = []
+        symbols = self._safe_fetch(fetcher, "symbol_blast_radius", run_pk, limit=30)
 
         # Calculate summary statistics
         risk_levels = {"critical": 0, "high": 0, "medium": 0, "low": 0}

@@ -5,6 +5,8 @@ Uses mart_authorship_summary and mart_git_fame_contributor_hotspots to identify
 knowledge concentration risks and single points of failure.
 """
 
+import warnings
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig
@@ -34,13 +36,11 @@ class AuthorshipRiskSection(BaseSection):
         try:
             summary_results = fetcher.fetch("authorship_summary", run_pk)
             summary = summary_results[0] if summary_results else {}
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Query 'authorship_summary' failed: {exc}", stacklevel=2)
             summary = {}
 
-        try:
-            contributors = fetcher.fetch("contributor_hotspots", run_pk, limit=15)
-        except Exception:
-            contributors = []
+        contributors = self._safe_fetch(fetcher, "contributor_hotspots", run_pk, limit=15)
 
         # Determine risk level from bus factor
         bus_factor = summary.get("bus_factor", 0)

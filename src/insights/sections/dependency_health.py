@@ -5,6 +5,8 @@ Uses mart_dependency_health_summary and mart_project_blast_radius to assess
 overall health grade, blast radius, circular dependencies, and version conflicts.
 """
 
+import warnings
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig
@@ -33,13 +35,11 @@ class DependencyHealthSection(BaseSection):
         try:
             summary_results = fetcher.fetch("dependency_health_summary", run_pk)
             summary = summary_results[0] if summary_results else {}
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Query 'dependency_health_summary' failed: {exc}", stacklevel=2)
             summary = {}
 
-        try:
-            blast_radius_items = fetcher.fetch("blast_radius_hotspots", run_pk, limit=20)
-        except Exception:
-            blast_radius_items = []
+        blast_radius_items = self._safe_fetch(fetcher, "blast_radius_hotspots", run_pk, limit=20)
 
         # Extract health grade and recommendations
         health_grade = summary.get("health_grade", "N/A")

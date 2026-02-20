@@ -31,10 +31,7 @@ class CompositeRiskSection(BaseSection):
         - risk_patterns: Distribution of risk patterns
         - dimension_coverage: Which dimensions have data
         """
-        try:
-            hotspots = fetcher.fetch("composite_risk_hotspots", run_pk, limit=25)
-        except Exception:
-            hotspots = []
+        hotspots = self._safe_fetch(fetcher, "composite_risk_hotspots", run_pk, limit=25)
 
         # Calculate summary statistics
         risk_levels = {"critical": 0, "high": 0, "medium": 0, "low": 0}

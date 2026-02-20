@@ -33,10 +33,7 @@ class CircularDependenciesSection(BaseSection):
         - multi_cycle_files: Files appearing in multiple cycles
         - summary: Total cycles, files involved, avg cycle length
         """
-        try:
-            cycles = fetcher.fetch("circular_dependencies", run_pk)
-        except Exception:
-            cycles = []
+        cycles = self._safe_fetch(fetcher, "circular_dependencies", run_pk)
 
         # Count by severity
         severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}

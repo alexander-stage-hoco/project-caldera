@@ -12,6 +12,8 @@ Answers PE due diligence question: "Which files need knowledge transfer before k
 
 from __future__ import annotations
 
+import warnings
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig
@@ -42,7 +44,8 @@ class KnowledgeRiskSection(BaseSection):
         # Fetch hotspots from the mart
         try:
             hotspots = fetcher.fetch("knowledge_risk_hotspots", run_pk, limit=100)
-        except Exception:
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Query 'knowledge_risk_hotspots' failed: {exc}", stacklevel=2)
             # Mart may not exist if git-blame-scanner hasn't run
             return self.get_fallback_data()
 

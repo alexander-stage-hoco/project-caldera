@@ -2,6 +2,9 @@
 Base classes for report sections.
 """
 
+from __future__ import annotations
+
+import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
@@ -68,6 +71,35 @@ class BaseSection(ABC):
         # Default: derive from HTML template name
         html_name = self.get_template_name()
         return html_name.replace(".html.j2", ".md.j2")
+
+    def _safe_fetch(
+        self,
+        fetcher: DataFetcher,
+        query_name: str,
+        run_pk: int,
+        fallback: Any = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Fetch data with graceful degradation and a warning on failure.
+
+        Args:
+            fetcher: DataFetcher instance for database queries.
+            query_name: The query name to execute.
+            run_pk: The collection run primary key.
+            fallback: Value to return on failure (defaults to ``[]``).
+            **kwargs: Additional keyword arguments forwarded to ``fetcher.fetch``.
+
+        Returns:
+            The fetched data, or *fallback* if the query raised an exception.
+        """
+        try:
+            return fetcher.fetch(query_name, run_pk, **kwargs)
+        except Exception as exc:
+            warnings.warn(
+                f"[{self.config.name}] Query '{query_name}' failed: {exc}",
+                stacklevel=2,
+            )
+            return fallback if fallback is not None else []
 
     def validate_data(self, data: dict[str, Any]) -> list[str]:
         """
