@@ -68,7 +68,7 @@ After the basic flow works, improve reliability and UX.
 | 2.3 | ~~Better error reporting: capture tool-level failures in manifest~~ | ~~Medium~~ | **Done** |
 | 2.4 | Retry logic for transient cloud-init/SSH failures | Low | 1 hr |
 | 2.5 | ~~Add `make cloud-status` to check running servers~~ | ~~Low~~ | **Done** |
-| 2.6 | Add timing breakdown to manifest (per-tool durations from DuckDB) | Low | 1 hr |
+| 2.6 | ~~Add timing breakdown to manifest (per-tool durations from DuckDB)~~ | ~~Low~~ | **Done** |
 
 ---
 

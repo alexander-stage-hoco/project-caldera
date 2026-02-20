@@ -216,9 +216,12 @@ python3 -c "
 import json, datetime, os
 
 # Read per-tool status from orchestrator summary (if available)
+import glob as _glob
 tools_list = []
 try:
-    with open('/tmp/tool_run_summary.json') as f:
+    _candidates = _glob.glob('${CALDERA_DIR}/${REPORT_DIR}/runs/*/*/tool_run_summary.json')
+    _candidates.sort(key=lambda p: os.path.getmtime(p), reverse=True)
+    with open(_candidates[0]) as f:
         summary = json.load(f)
     raw_tools = summary.get('steps', {}).get('tools', {}).get('tools', [])
     for t in raw_tools:
@@ -228,15 +231,17 @@ try:
             'duration_seconds': t.get('duration_seconds'),
             'error': t.get('error'),
         })
-except (FileNotFoundError, json.JSONDecodeError, KeyError):
+except (FileNotFoundError, json.JSONDecodeError, KeyError, IndexError):
     pass  # Fall back to empty list
 
 # Read dbt summary (if available)
 dbt_info = None
 try:
-    with open('/tmp/dbt_summary.json') as f:
+    _candidates = _glob.glob('${CALDERA_DIR}/${REPORT_DIR}/runs/*/*/dbt_summary.json')
+    _candidates.sort(key=lambda p: os.path.getmtime(p), reverse=True)
+    with open(_candidates[0]) as f:
         dbt_info = json.load(f)
-except (FileNotFoundError, json.JSONDecodeError):
+except (FileNotFoundError, json.JSONDecodeError, IndexError):
     pass
 
 cloud_section = {
