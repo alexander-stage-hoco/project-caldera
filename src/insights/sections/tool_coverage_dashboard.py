@@ -52,6 +52,8 @@ class ToolCoverageDashboardSection(BaseSection):
         "git-fame": "Git contributor statistics",
         "git-sizer": "Git repository size analysis",
         "dependensee": "Dependency visualization",
+        "coverage-ingest": "Multi-format test coverage (LCOV, Cobertura, JaCoCo, Istanbul)",
+        "git-blame-scanner": "Per-file authorship and knowledge risk",
     }
 
     def fetch_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:

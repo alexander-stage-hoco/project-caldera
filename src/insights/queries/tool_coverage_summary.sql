@@ -9,11 +9,12 @@ WITH collection AS (
     WHERE run_pk = {{ run_pk }}
 ),
 all_tools AS (
-    -- List of expected tools (16 total)
+    -- List of expected tools (18 total)
     SELECT unnest([
         'layout-scanner', 'scc', 'lizard', 'semgrep', 'roslyn-analyzers',
         'sonarqube', 'trivy', 'gitleaks', 'symbol-scanner', 'scancode',
-        'pmd-cpd', 'devskim', 'dotcover', 'git-fame', 'git-sizer', 'dependensee'
+        'pmd-cpd', 'devskim', 'dotcover', 'git-fame', 'git-sizer', 'dependensee',
+        'coverage-ingest', 'git-blame-scanner'
     ]) AS tool_name
 ),
 tool_runs AS (

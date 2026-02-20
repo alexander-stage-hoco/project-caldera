@@ -80,7 +80,7 @@ class CoverageGapSection(BaseSection):
         errors = []
         if not data.get("has_data"):
             errors.append(
-                "No coverage gap data available - requires both lizard (complexity) and dotcover (coverage) data"
+                "No coverage gap data available - requires both lizard (complexity) and coverage (dotcover or coverage-ingest) data"
             )
         return errors
 

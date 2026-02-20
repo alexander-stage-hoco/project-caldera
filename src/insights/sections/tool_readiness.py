@@ -56,6 +56,8 @@ class ToolReadinessSection(BaseSection):
         "dependensee": ".NET dependency graph analysis",
         "dotcover": "Code coverage analysis",
         "git-fame": "Git authorship/ownership metrics",
+        "coverage-ingest": "Multi-format test coverage (LCOV, Cobertura, JaCoCo, Istanbul)",
+        "git-blame-scanner": "Per-file authorship and knowledge risk",
     }
 
     def __init__(self, tools_dir: Path | None = None):

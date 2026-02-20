@@ -364,7 +364,7 @@ models:
           - not_null
 
   - name: unified_file_metrics
-    description: "Unified file-level metrics combining scc, lizard, and symbol-scanner"
+    description: "Unified file-level metrics combining data from all tool adapters including scc, lizard, symbol-scanner, dotcover, coverage-ingest, semgrep, sonarqube, roslyn-analyzers, devskim, and pmd-cpd"
     columns:
       - name: run_pk
         tests:
@@ -2750,6 +2750,16 @@ models:
       - name: lines_covered
         tests:
           - not_null
+      - name: line_coverage_pct
+        description: "Line coverage percentage (0-100)"
+      - name: branch_coverage_pct
+        description: "Branch coverage percentage (0-100), null if branch data unavailable"
+      - name: lines_missed
+        description: "Number of lines not covered (lines_total - lines_covered)"
+      - name: branches_total
+        description: "Total number of branches, null if branch data unavailable"
+      - name: branches_covered
+        description: "Number of branches covered, null if branch data unavailable"
       - name: source_format
         tests:
           - not_null
@@ -2775,6 +2785,10 @@ models:
       - name: total_lines_covered
         tests:
           - not_null
+      - name: total_lines_total
+        description: "Sum of lines_total across files in directory"
+      - name: total_lines_missed
+        description: "Sum of lines_missed across files in directory"
 
   - name: rollup_coverage_directory_counts_recursive
     description: "Coverage-ingest line counts per directory (recursive scope - includes subtree)"
@@ -2797,6 +2811,10 @@ models:
       - name: total_lines_covered
         tests:
           - not_null
+      - name: total_lines_total
+        description: "Sum of lines_total across files in directory"
+      - name: total_lines_missed
+        description: "Sum of lines_missed across files in directory"
 
   - name: rollup_coverage_directory_direct_distributions
     description: "Distribution statistics for coverage-ingest metrics (direct scope)"
@@ -5691,7 +5709,7 @@ models:
           - not_null
 
   - name: mart_composite_file_hotspots
-    description: "Cross-tool composite file hotspots identifying files with multiple overlapping risk factors from 5 dimensions: complexity (lizard), size (scc), issues (semgrep/sonarqube/roslyn/devskim), coverage (dotcover), and coupling (symbol-scanner). Only includes files with 2+ medium or higher risk factors."
+    description: "Cross-tool composite file hotspots identifying files with multiple overlapping risk factors from 5 dimensions: complexity (lizard), size (scc), issues (semgrep/sonarqube/roslyn/devskim), coverage (dotcover/coverage-ingest), and coupling (symbol-scanner). Only includes files with 2+ medium or higher risk factors."
     columns:
       - name: collection_run_id
         description: "Collection run identifier"
@@ -5815,9 +5833,9 @@ models:
       - name: issues_score
         description: "Issues dimension score (1-4)"
       - name: coverage_statement_pct
-        description: "Statement coverage percentage (from dotcover)"
+        description: "Statement/line coverage percentage (from dotcover or coverage-ingest, dotcover takes priority)"
       - name: coverage_total_statements
-        description: "Total statements in file (from dotcover)"
+        description: "Total statements/lines in file (from dotcover or coverage-ingest)"
       - name: coverage_risk
         description: "Coverage risk level: critical (<20%), high (<40%), medium (<60%), low"
         tests:
@@ -5830,6 +5848,8 @@ models:
                   - critical
       - name: coverage_score
         description: "Coverage dimension score (1-4)"
+      - name: coverage_source_format
+        description: "Coverage data source format: null if from dotcover, otherwise lcov/cobertura/jacoco/istanbul from coverage-ingest"
       - name: total_coupling
         description: "Total coupling (fan_in + fan_out) from symbol-scanner"
       - name: coupling_risk
@@ -5857,7 +5877,7 @@ models:
         tests:
           - not_null
       - name: has_coverage_data
-        description: "True if coverage data is available from dotcover"
+        description: "True if coverage data is available from dotcover or coverage-ingest"
         tests:
           - not_null
       - name: has_coupling_data

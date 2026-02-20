@@ -13,9 +13,10 @@ with file_metrics as (
         loc_code,
         -- Complexity metrics (from Lizard)
         complexity_max as max_ccn,
-        -- Coverage metrics (from dotCover)
+        -- Coverage metrics (from dotcover or coverage-ingest)
         coverage_statement_pct,
         coverage_total_statements,
+        coverage_source_format,
         -- Coupling metrics (from symbol-scanner)
         total_coupling,
         -- Issue counts - aggregate high+ severity from all issue tools
@@ -242,6 +243,7 @@ select
     coverage_total_statements,
     coverage_risk,
     coverage_score,
+    coverage_source_format,
     -- Coupling dimension
     total_coupling,
     coupling_risk,

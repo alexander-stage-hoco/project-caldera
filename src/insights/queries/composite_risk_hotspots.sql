@@ -31,6 +31,7 @@ SELECT
     issues_risk,
     issues_score,
     coverage_statement_pct,
+    coverage_source_format,
     coverage_risk,
     coverage_score,
     total_coupling,
