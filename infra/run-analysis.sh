@@ -76,9 +76,9 @@ echo ">>> Cloning target repository..."
 rm -rf "${CLONE_DIR}"
 
 if echo "${REPO_URL}" | grep -qE '^https?://'; then
-    git clone --depth 1 "${REPO_URL}" "${CLONE_DIR}"
+    git clone "${REPO_URL}" "${CLONE_DIR}"
 elif echo "${REPO_URL}" | grep -qE '^git@'; then
-    git clone --depth 1 "${REPO_URL}" "${CLONE_DIR}"
+    git clone "${REPO_URL}" "${CLONE_DIR}"
 else
     echo "ERROR: REPO_URL must be a git URL (https:// or git@)"
     echo "Local paths are not supported in cloud mode."
@@ -144,6 +144,13 @@ done
 # ---------------------------------------------------------------------------
 # 5. Run the analysis pipeline
 # ---------------------------------------------------------------------------
+
+# On cloud VMs, let sonarqube manage its own Docker containers.
+# The orchestrator hardcodes SONARQUBE_SKIP_DOCKER=1 assuming a local dev
+# setup with SonarQube already running, but cloud VMs have no pre-running
+# SonarQube — the tool needs to start/stop its own containers.
+unset SONARQUBE_SKIP_DOCKER
+unset SONARQUBE_CONTAINER_RUNNING
 
 echo ""
 echo ">>> Running analysis pipeline..."
