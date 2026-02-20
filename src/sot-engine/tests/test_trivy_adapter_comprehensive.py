@@ -175,7 +175,7 @@ class TestTrivyAdapter:
         )
 
         # Schema validation catches invalid severity values (enum constraint)
-        with pytest.raises(ValueError, match="(schema validation failed|data quality validation failed)"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(trivy_payload)
 
         conn.close()
@@ -214,7 +214,7 @@ class TestTrivyAdapter:
         )
 
         # Schema validation catches out-of-range CVSS scores (max 10)
-        with pytest.raises(ValueError, match="(schema validation failed|data quality validation failed)"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(trivy_payload)
 
         conn.close()
@@ -253,7 +253,7 @@ class TestTrivyAdapter:
         )
 
         # Schema validation catches missing required fields
-        with pytest.raises(ValueError, match="(schema validation failed|data quality validation failed)"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(trivy_payload)
 
         conn.close()

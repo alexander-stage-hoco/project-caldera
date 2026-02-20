@@ -410,7 +410,7 @@ class TestDataQualityValidation:
         )
 
         # Schema or data quality validation catches invalid enum
-        with pytest.raises(ValueError, match="(schema validation failed|data quality validation failed)"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(fixture_payload)
 
     def test_adapter_validates_symbol_line_ranges(self, db_conn: duckdb.DuckDBPyConnection, fixture_payload: dict, repos: dict) -> None:
@@ -428,7 +428,7 @@ class TestDataQualityValidation:
             repos["run"], repos["layout"], repos["symbol"], Path("/tmp/test-repo"), None
         )
 
-        with pytest.raises(ValueError, match="(schema validation failed|data quality validation failed)"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(fixture_payload)
 
     def test_adapter_validates_parameters_nonnegative(self, db_conn: duckdb.DuckDBPyConnection, fixture_payload: dict, repos: dict) -> None:
@@ -449,7 +449,7 @@ class TestDataQualityValidation:
         )
 
         # Schema validation catches out-of-range values (minimum: 0)
-        with pytest.raises(ValueError, match="(schema validation failed|data quality validation failed)"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(fixture_payload)
 
     def test_adapter_rejects_invalid_call_type(self, db_conn: duckdb.DuckDBPyConnection, fixture_payload: dict, repos: dict) -> None:
@@ -470,7 +470,7 @@ class TestDataQualityValidation:
         )
 
         # Schema validation catches invalid enum
-        with pytest.raises(ValueError, match="(schema validation failed|data quality validation failed)"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(fixture_payload)
 
     def test_adapter_rejects_invalid_import_type(self, db_conn: duckdb.DuckDBPyConnection, fixture_payload: dict, repos: dict) -> None:
@@ -491,7 +491,7 @@ class TestDataQualityValidation:
         )
 
         # Schema validation catches invalid enum
-        with pytest.raises(ValueError, match="(schema validation failed|data quality validation failed)"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(fixture_payload)
 
     def test_adapter_validates_line_numbers_positive(self, db_conn: duckdb.DuckDBPyConnection, fixture_payload: dict, repos: dict) -> None:

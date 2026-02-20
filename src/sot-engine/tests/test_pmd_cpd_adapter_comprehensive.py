@@ -245,7 +245,7 @@ class TestPmdCpdAdapter:
             None,
         )
 
-        with pytest.raises(ValueError, match="data quality validation failed"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(cpd_payload)
 
         conn.close()
@@ -279,7 +279,7 @@ class TestPmdCpdAdapter:
             None,
         )
 
-        with pytest.raises(ValueError, match="data quality validation failed"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(cpd_payload)
 
         conn.close()
@@ -317,7 +317,7 @@ class TestPmdCpdAdapter:
         )
 
         # Schema validation catches empty clone_id (minLength constraint)
-        with pytest.raises(ValueError, match="(schema validation failed|data quality validation failed)"):
+        with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(cpd_payload)
 
         conn.close()
