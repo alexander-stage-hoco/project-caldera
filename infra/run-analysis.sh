@@ -145,13 +145,6 @@ done
 # 5. Run the analysis pipeline
 # ---------------------------------------------------------------------------
 
-# On cloud VMs, let sonarqube manage its own Docker containers.
-# The orchestrator hardcodes SONARQUBE_SKIP_DOCKER=1 assuming a local dev
-# setup with SonarQube already running, but cloud VMs have no pre-running
-# SonarQube — the tool needs to start/stop its own containers.
-unset SONARQUBE_SKIP_DOCKER
-unset SONARQUBE_CONTAINER_RUNNING
-
 echo ""
 echo ">>> Running analysis pipeline..."
 START_TIME=$(date +%s)

@@ -270,16 +270,7 @@ TOOL_CONFIGS = [
     ToolConfig("lizard", "src/tools/lizard"),
     ToolConfig("roslyn-analyzers", "src/tools/roslyn-analyzers"),
     ToolConfig("semgrep", "src/tools/semgrep"),
-    ToolConfig(
-        "sonarqube",
-        "src/tools/sonarqube",
-        {
-            "SONARQUBE_SKIP_DOCKER": "1",
-            "SONARQUBE_CONTAINER_RUNNING": "1",
-            "SONARQUBE_URL": "http://localhost:9000",
-            "NATIVE_SCANNER": "1",
-        },
-    ),
+    ToolConfig("sonarqube", "src/tools/sonarqube"),
     ToolConfig("trivy", "src/tools/trivy"),
     ToolConfig("gitleaks", "src/tools/gitleaks"),
     ToolConfig("symbol-scanner", "src/tools/symbol-scanner"),
