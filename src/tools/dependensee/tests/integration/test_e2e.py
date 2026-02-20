@@ -1,24 +1,18 @@
 """End-to-end integration tests for dependensee.
 
-Integration tests verify the complete pipeline works:
-1. analyze.py produces valid output
-2. evaluate.py scores the output
-3. Output matches schema
-
-For examples, see:
-- src/tools/scc/tests/integration/test_e2e.py
-- src/tools/git-sizer/tests/integration/test_e2e.py
+Tests the fallback parser path against the synthetic .NET repo
+(no dotnet CLI required).
 """
 
 from __future__ import annotations
 
-import json
-import os
-import subprocess
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
+
+from scripts.analyze import analyze_repo, find_project_files, parse_project_file
 
 
 @pytest.fixture
@@ -30,94 +24,87 @@ def tool_root() -> Path:
 @pytest.fixture
 def synthetic_repo(tool_root: Path) -> Path:
     """Return the synthetic test repository path."""
-    return tool_root / "eval-repos" / "synthetic"
-
-
-def test_full_pipeline(tool_root: Path, synthetic_repo: Path):
-    """Test complete analysis and evaluation pipeline.
-
-    This test runs:
-    1. make analyze on synthetic repo
-    2. Verifies output.json is created
-    3. Verifies output validates against schema
-
-    TODO: Implement once analyze.py is complete
-    """
-    # Skip if synthetic repo is empty
-    if not synthetic_repo.exists() or not any(synthetic_repo.iterdir()):
+    repo = tool_root / "eval-repos" / "synthetic"
+    if not repo.exists() or not any(repo.iterdir()):
         pytest.skip("Synthetic repo is empty - add test files first")
+    return repo
 
-    # Create temp output directory
+
+@pytest.mark.integration
+def test_fallback_analysis_produces_envelope(synthetic_repo: Path):
+    """Test that fallback parser produces a valid Caldera envelope."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        output_dir = Path(tmpdir)
+        temp_dir = Path(tmpdir)
 
-        # Run analysis
-        env = os.environ.copy()
-        env.update({
-            "REPO_PATH": str(synthetic_repo),
-            "REPO_NAME": "synthetic",
-            "OUTPUT_DIR": str(output_dir),
-            "RUN_ID": "test-integration",
-            "REPO_ID": "test-repo",
-            "BRANCH": "main",
-            "SKIP_SETUP": "1",
-        })
+        with patch("scripts.analyze.check_dotnet_available", return_value=False):
+            result = analyze_repo(synthetic_repo.resolve(), temp_dir)
 
-        # Run make analyze
-        result = subprocess.run(
-            ["make", "analyze"],
-            cwd=tool_root,
-            env=env,
-            capture_output=True,
-            text=True,
-        )
+    # Envelope structure
+    assert result["tool"] == "dependensee"
+    assert result["tool_version"] == "fallback-parser"
 
-        # Check analysis succeeded
-        assert result.returncode == 0, f"make analyze failed: {result.stderr}"
+    # Summary
+    summary = result["summary"]
+    assert summary["project_count"] >= 3  # MyApp, MyApp.Core, MyApp.Data at minimum
+    assert summary["package_count"] >= 0
+    assert summary["circular_dependency_count"] >= 0
 
-        # Check output file was created
-        output_path = output_dir / "output.json"
-        assert output_path.exists(), "output.json not created"
-
-        # Load and validate structure
-        output = json.loads(output_path.read_text())
-        assert "metadata" in output
-        assert "data" in output
-        assert output["metadata"]["tool_name"] == "dependensee"
+    # Projects
+    assert len(result["projects"]) == summary["project_count"]
+    project_names = {p["name"] for p in result["projects"]}
+    assert "MyApp" in project_names
+    assert "MyApp.Core" in project_names
 
 
-def test_schema_validation(tool_root: Path):
-    """Test that existing output validates against schema.
+@pytest.mark.integration
+def test_dependency_graph_structure(synthetic_repo: Path):
+    """Test that the dependency graph has correct nodes and edges."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_dir = Path(tmpdir)
 
-    Loads the most recent output and validates it against the schema.
-    """
-    # Find most recent output
-    outputs_dir = tool_root / "outputs"
-    if not outputs_dir.exists():
-        pytest.skip("No outputs directory - run make analyze first")
+        with patch("scripts.analyze.check_dotnet_available", return_value=False):
+            result = analyze_repo(synthetic_repo.resolve(), temp_dir)
 
-    output_dirs = sorted(
-        [d for d in outputs_dir.iterdir() if d.is_dir()],
-        key=lambda d: d.stat().st_mtime,
-        reverse=True,
-    )
-    if not output_dirs:
-        pytest.skip("No output directories found")
+    graph = result["dependency_graph"]
+    assert "nodes" in graph
+    assert "edges" in graph
 
-    output_path = output_dirs[0] / "output.json"
-    if not output_path.exists():
-        pytest.skip("No output.json in latest output directory")
+    # Should have project nodes
+    project_nodes = [n for n in graph["nodes"] if n["type"] == "project"]
+    assert len(project_nodes) >= 3
 
-    # Load schema
-    schema_path = tool_root / "schemas" / "output.schema.json"
-    assert schema_path.exists(), "Schema file missing"
+    # Check node structure
+    for node in graph["nodes"]:
+        assert "id" in node
+        assert "name" in node
+        assert "type" in node
+        assert node["type"] in ("project", "package")
 
-    # Validate
-    try:
-        import jsonschema
-    except ImportError:
-        pytest.skip("jsonschema not installed")
+    # Check edge structure
+    for edge in graph["edges"]:
+        assert "source" in edge
+        assert "target" in edge
+        assert "type" in edge
+        assert edge["type"] in ("project_reference", "package_reference")
 
-    schema = json.loads(schema_path.read_text())
-    output = json.loads(output_path.read_text())
-    jsonschema.validate(output, schema)
+
+@pytest.mark.integration
+def test_project_references_resolved(synthetic_repo: Path):
+    """Test that project references are resolved to repo-relative paths."""
+    project_files = find_project_files(synthetic_repo)
+    assert len(project_files) >= 3
+
+    projects = []
+    for pf in project_files:
+        info = parse_project_file(pf, synthetic_repo.resolve())
+        if info:
+            projects.append(info)
+
+    # At least one project should have project references
+    all_refs = [ref for p in projects for ref in p.project_references]
+    assert len(all_refs) > 0, "Expected at least one project reference in synthetic repo"
+
+    # All refs should be repo-relative (no leading / or ..)
+    for ref in all_refs:
+        assert not ref.startswith("/"), f"Absolute path in reference: {ref}"
+        assert ".." not in ref.split("/"), f"Parent traversal in reference: {ref}"

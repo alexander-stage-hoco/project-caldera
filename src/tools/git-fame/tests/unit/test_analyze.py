@@ -1,109 +1,198 @@
-"""Unit tests for git-fame analyze script.
+"""Unit tests for git-fame analyze script pure functions.
 
-For implementation examples, see:
-- src/tools/scc/tests/unit/test_analyze.py
-- src/tools/lizard/tests/unit/test_analyze.py
+Tests compute_hhi, compute_bus_factor, extract_author_metric,
+transform_output, and fallback_commit_hash from scripts/analyze.py.
 """
 
 from __future__ import annotations
 
-import json
-import subprocess
 import tempfile
 from pathlib import Path
 
 import pytest
 
+from scripts.analyze import (
+    compute_bus_factor,
+    compute_hhi,
+    extract_author_metric,
+    fallback_commit_hash,
+    transform_output,
+)
 
-# Fixture: sample analysis output
-@pytest.fixture
-def sample_output() -> dict:
-    """Load a sample output.json for testing.
 
-    TODO: Replace with actual output from your tool.
-    Option 1: Load from evaluation/results/output.json
-    Option 2: Create minimal valid output inline
-    """
-    return {
-        "metadata": {
-            "tool_name": "git-fame",
-            "tool_version": "1.0.0",
-            "run_id": "test-run-id",
-            "repo_id": "test-repo-id",
-            "branch": "main",
-            "commit": "a" * 40,
-            "timestamp": "2025-01-01T00:00:00Z",
-            "schema_version": "1.0.0",
-        },
-        "data": {
-            "tool": "git-fame",
-            "tool_version": "1.0.0",
-            "files": [
-                {"path": "src/main.py", "size_bytes": 100},
+# =============================================================================
+# compute_hhi
+# =============================================================================
+
+
+class TestComputeHhi:
+    def test_empty_list_returns_zero(self):
+        assert compute_hhi([]) == 0.0
+
+    def test_single_author_full_ownership(self):
+        assert compute_hhi([100.0]) == pytest.approx(1.0)
+
+    def test_two_equal_authors(self):
+        # Each 50% → (0.5)^2 + (0.5)^2 = 0.5
+        assert compute_hhi([50.0, 50.0]) == pytest.approx(0.5)
+
+    def test_realistic_distribution(self):
+        # 60/30/10 → 0.36 + 0.09 + 0.01 = 0.46
+        assert compute_hhi([60.0, 30.0, 10.0]) == pytest.approx(0.46)
+
+
+# =============================================================================
+# compute_bus_factor
+# =============================================================================
+
+
+class TestComputeBusFactor:
+    def test_empty_returns_zero(self):
+        assert compute_bus_factor([]) == 0
+
+    def test_single_author(self):
+        assert compute_bus_factor([100.0]) == 1
+
+    def test_two_equal_authors(self):
+        # 50+50=100 → need both to reach 50% threshold? No — first author hits 50.
+        assert compute_bus_factor([50.0, 50.0]) == 1
+
+    def test_needs_two_for_threshold(self):
+        # 40+35+25 → need 2 authors (40+35=75 >= 50)
+        assert compute_bus_factor([40.0, 35.0, 25.0]) == 2
+
+    def test_custom_threshold(self):
+        # 30/30/20/20 with threshold=80 → need 3 (30+30+20=80)
+        assert compute_bus_factor([30.0, 30.0, 20.0, 20.0], threshold=80.0) == 3
+
+    def test_sorts_descending_internally(self):
+        # Pass unsorted — function should sort
+        assert compute_bus_factor([10.0, 60.0, 30.0]) == 1
+
+
+# =============================================================================
+# extract_author_metric
+# =============================================================================
+
+
+class TestExtractAuthorMetric:
+    def test_normal_output(self):
+        raw = {
+            "columns": ["Author", "loc", "coms", "fils"],
+            "data": [
+                ["Alice", 500, 20, 10],
+                ["Bob", 300, 15, 8],
             ],
-            "summary": {
-                "file_count": 1,
-                "total_bytes": 100,
-            },
-        },
-    }
+        }
+        result = extract_author_metric(raw, "loc")
+        assert result == {"Alice": 500, "Bob": 300}
+
+    def test_empty_data(self):
+        raw = {"columns": ["Author", "loc"], "data": []}
+        result = extract_author_metric(raw)
+        assert result == {}
+
+    def test_missing_column_falls_back(self):
+        raw = {
+            "columns": ["Author", "loc"],
+            "data": [["Alice", 100]],
+        }
+        # Request a column that doesn't exist — falls back to "loc" index
+        result = extract_author_metric(raw, "nonexistent")
+        assert result == {"Alice": 100}
 
 
-def test_analyze_output_structure(sample_output: dict):
-    """Test that analyze produces valid output structure."""
-    # Verify top-level structure
-    assert "metadata" in sample_output
-    assert "data" in sample_output
-
-    # Verify data structure
-    data = sample_output["data"]
-    assert "tool" in data
-    assert "files" in data
-    assert isinstance(data["files"], list)
+# =============================================================================
+# transform_output
+# =============================================================================
 
 
-def test_analyze_metadata_fields(sample_output: dict):
-    """Test that all required metadata fields are present."""
-    required_fields = [
-        "tool_name", "tool_version", "run_id", "repo_id",
-        "branch", "commit", "timestamp", "schema_version"
-    ]
-    metadata = sample_output["metadata"]
+class TestTransformOutput:
+    def test_normal_multi_author(self, tmp_path: Path):
+        raw = {
+            "columns": ["Author", "loc", "coms", "fils"],
+            "data": [
+                ["Alice", 600, 20, 10],
+                ["Bob", 400, 15, 8],
+            ],
+        }
+        ins = {"Alice": 700, "Bob": 450}
+        dels = {"Alice": 100, "Bob": 50}
 
-    for field in required_fields:
-        assert field in metadata, f"Missing required field: {field}"
-        assert metadata[field], f"Field is empty: {field}"
+        result = transform_output(
+            raw, ins, dels, tmp_path,
+            run_id="test-run", repo_id="test-repo",
+            branch="main", commit="a" * 40,
+        )
+
+        assert "metadata" in result
+        assert "data" in result
+        assert result["metadata"]["tool_name"] == "git-fame"
+
+        data = result["data"]
+        assert data["summary"]["author_count"] == 2
+        assert data["summary"]["total_loc"] == 1000
+        assert data["summary"]["bus_factor"] >= 1
+        assert len(data["authors"]) == 2
+
+        # Authors sorted by ownership descending
+        assert data["authors"][0]["name"] == "Alice"
+        assert data["authors"][0]["ownership_pct"] == 60.0
+        assert data["authors"][0]["insertions_total"] == 700
+        assert data["authors"][0]["deletions_total"] == 100
+
+    def test_empty_data_returns_error_envelope(self, tmp_path: Path):
+        raw = {"columns": [], "data": []}
+        result = transform_output(
+            raw, {}, {}, tmp_path,
+            run_id="test-run", repo_id="test-repo",
+            branch="main", commit="a" * 40,
+        )
+
+        assert result["metadata"]["tool_name"] == "git-fame"
+        data = result["data"]
+        assert data["summary"]["author_count"] == 0
+        assert data["summary"]["total_loc"] == 0
+        assert data["authors"] == []
+
+    def test_single_author(self, tmp_path: Path):
+        raw = {
+            "columns": ["Author", "loc", "coms", "fils"],
+            "data": [["Solo", 500, 30, 15]],
+        }
+        result = transform_output(
+            raw, {"Solo": 600}, {"Solo": 100}, tmp_path,
+            run_id="test-run", repo_id="test-repo",
+            branch="main", commit="b" * 40,
+        )
+
+        data = result["data"]
+        assert data["summary"]["author_count"] == 1
+        assert data["summary"]["hhi_index"] == pytest.approx(1.0)
+        assert data["summary"]["bus_factor"] == 1
+        assert data["authors"][0]["ownership_pct"] == 100.0
 
 
-def test_path_normalization(sample_output: dict):
-    """Test that all paths are repo-relative.
-
-    Paths MUST be repo-relative (no leading /, ./, or ..)
-    See docs/TOOL_REQUIREMENTS.md for path requirements.
-    """
-    data = sample_output["data"]
-
-    for file_entry in data.get("files", []):
-        path = file_entry.get("path", "")
-        # Must not be absolute
-        assert not path.startswith("/"), f"Absolute path found: {path}"
-        # Must not have ./ prefix
-        assert not path.startswith("./"), f"Path has ./ prefix: {path}"
-        # Must not contain .. segments
-        assert ".." not in path.split("/"), f"Path has .. segment: {path}"
-        # Must use forward slashes
-        assert "\\" not in path, f"Path has backslash: {path}"
+# =============================================================================
+# fallback_commit_hash
+# =============================================================================
 
 
-# TODO: Add tool-specific tests below
-#
-# def test_metric_values_in_range(sample_output: dict):
-#     """Test that metric values are within expected ranges."""
-#     ...
-#
-# def test_schema_validation():
-#     """Test that output validates against schemas/output.schema.json."""
-#     import jsonschema
-#     schema_path = Path(__file__).parents[2] / "schemas" / "output.schema.json"
-#     schema = json.loads(schema_path.read_text())
-#     jsonschema.validate(sample_output, schema)
+class TestFallbackCommitHash:
+    def test_returns_40_char_hex(self, tmp_path: Path):
+        (tmp_path / "file.txt").write_text("hello")
+        result = fallback_commit_hash(tmp_path)
+        assert len(result) == 40
+        assert all(c in "0123456789abcdef" for c in result)
+
+    def test_deterministic_for_same_content(self, tmp_path: Path):
+        (tmp_path / "file.txt").write_text("hello")
+        hash1 = fallback_commit_hash(tmp_path)
+
+        # Create identical content in a different directory
+        with tempfile.TemporaryDirectory() as other:
+            other_path = Path(other)
+            (other_path / "file.txt").write_text("hello")
+            hash2 = fallback_commit_hash(other_path)
+
+        assert hash1 == hash2

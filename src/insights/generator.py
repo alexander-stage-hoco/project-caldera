@@ -435,8 +435,8 @@ class InsightsGenerator:
                         f"Total LOC is 0 for run_pk={run_pk} despite {file_count} files. "
                         f"This may indicate a data issue."
                     )
-        except Exception:
-            pass  # Don't fail validation if query errors
+        except Exception as exc:
+            warnings.warn(f"Validation query failed: {exc}", stacklevel=2)
 
         # Check if this is a .NET project with 0 Roslyn violations
         try:
@@ -473,8 +473,8 @@ class InsightsGenerator:
                                 f"Found {csharp_loc} LOC of C# code but 0 Roslyn violations. "
                                 f"This may indicate Roslyn analyzers weren't run or produced no output."
                             )
-        except Exception:
-            pass  # Don't fail validation if query errors
+        except Exception as exc:
+            warnings.warn(f"Validation query failed: {exc}", stacklevel=2)
 
         return warnings_list
 
