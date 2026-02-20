@@ -203,6 +203,44 @@ TARGET_COMMIT=$(cd "${CLONE_DIR}" 2>/dev/null && git rev-parse HEAD 2>/dev/null 
 # canonical schema; cloud-specific metadata lives under the `cloud` extension key.
 python3 -c "
 import json, datetime, os
+
+# Read per-tool status from orchestrator summary (if available)
+tools_list = []
+try:
+    with open('/tmp/tool_run_summary.json') as f:
+        summary = json.load(f)
+    raw_tools = summary.get('steps', {}).get('tools', {}).get('tools', [])
+    for t in raw_tools:
+        tools_list.append({
+            'tool_name': t.get('tool_name', ''),
+            'status': t.get('status', 'unknown'),
+            'duration_seconds': t.get('duration_seconds'),
+            'error': t.get('error'),
+        })
+except (FileNotFoundError, json.JSONDecodeError, KeyError):
+    pass  # Fall back to empty list
+
+# Read dbt summary (if available)
+dbt_info = None
+try:
+    with open('/tmp/dbt_summary.json') as f:
+        dbt_info = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    pass
+
+cloud_section = {
+    'mode': 'cloud-hetzner',
+    'server_type': '${SERVER_TYPE}',
+    'started_at': datetime.datetime.fromtimestamp(${START_TIME}, tz=datetime.timezone.utc).isoformat(),
+    'completed_at': datetime.datetime.fromtimestamp(${END_TIME}, tz=datetime.timezone.utc).isoformat(),
+    'duration_seconds': ${DURATION},
+    'skip_tools': '${SKIP_TOOLS}'.split(',') if '${SKIP_TOOLS}' else [],
+    'pipeline_llm': bool(int('${PIPELINE_LLM}')),
+    'run_pk': int('${RUN_PK}') if '${RUN_PK}' else None,
+}
+if dbt_info is not None:
+    cloud_section['dbt'] = dbt_info
+
 manifest = {
     'schema_version': 1,
     'created_at': datetime.datetime.fromtimestamp(${END_TIME}, tz=datetime.timezone.utc).isoformat(),
@@ -215,17 +253,8 @@ manifest = {
         'commit': '${TARGET_COMMIT}',
     },
     'run_id': '${RUN_ID}' if '${RUN_ID}' else None,
-    'tools': [],
-    'cloud': {
-        'mode': 'cloud-hetzner',
-        'server_type': '${SERVER_TYPE}',
-        'started_at': datetime.datetime.fromtimestamp(${START_TIME}, tz=datetime.timezone.utc).isoformat(),
-        'completed_at': datetime.datetime.fromtimestamp(${END_TIME}, tz=datetime.timezone.utc).isoformat(),
-        'duration_seconds': ${DURATION},
-        'skip_tools': '${SKIP_TOOLS}'.split(',') if '${SKIP_TOOLS}' else [],
-        'pipeline_llm': bool(int('${PIPELINE_LLM}')),
-        'run_pk': int('${RUN_PK}') if '${RUN_PK}' else None,
-    },
+    'tools': tools_list,
+    'cloud': cloud_section,
     'exports': {
         'database': 'database/caldera_sot.duckdb' if os.path.isdir('${EXPORT_DIR}/database') else None,
         'reports': 'reports/' if os.path.isdir('${EXPORT_DIR}/reports') else None,

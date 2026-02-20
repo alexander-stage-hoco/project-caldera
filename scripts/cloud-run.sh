@@ -209,6 +209,55 @@ if [ -d "${RESULTS_DIR}" ]; then
         echo ""
         echo "Manifest:"
         python3 -m json.tool "${MANIFEST}" 2>/dev/null || cat "${MANIFEST}"
+
+        # Display tool status summary
+        python3 -c "
+import json, sys
+
+try:
+    with open('${MANIFEST}') as f:
+        m = json.load(f)
+except Exception:
+    sys.exit(0)
+
+tools = m.get('tools', [])
+if not tools:
+    sys.exit(0)
+
+print()
+print('Tool Status Summary')
+print('=' * 58)
+print(f\"{'Tool':<28} {'Status':<12} {'Duration':>10}\")
+print('-' * 58)
+
+success = 0
+failed = 0
+for t in sorted(tools, key=lambda x: x.get('tool_name', '')):
+    name = t.get('tool_name', '?')
+    status = t.get('status', 'unknown')
+    dur = t.get('duration_seconds')
+    dur_str = f'{dur:.1f}s' if dur is not None else '—'
+
+    if status == 'success':
+        indicator = '\033[32m✓ success\033[0m'
+        success += 1
+    elif status == 'failed':
+        indicator = '\033[31m✗ failed\033[0m'
+        failed += 1
+    else:
+        indicator = f'  {status}'
+
+    print(f'  {name:<26} {indicator:<21} {dur_str:>10}')
+
+print('-' * 58)
+total = len(tools)
+print(f'  Total: {total}   Success: {success}   Failed: {failed}')
+
+if failed > 0:
+    fail_names = [t['tool_name'] for t in tools if t.get('status') == 'failed']
+    print(f\"  \033[31mFailed tools: {', '.join(fail_names)}\033[0m\")
+print('=' * 58)
+" 2>/dev/null || true
     fi
 
     # Find DuckDB
