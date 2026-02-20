@@ -105,6 +105,102 @@ models:
         tests:
           - not_null
 
+  - name: rollup_layout_directory_counts_direct
+    description: "Layout file counts per directory (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_size_bytes
+        tests:
+          - not_null
+
+  - name: rollup_layout_directory_counts_recursive
+    description: "Layout file counts per directory (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_size_bytes
+        tests:
+          - not_null
+
+  - name: rollup_layout_directory_direct_distributions
+    description: "Distribution statistics for layout metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - size_bytes
+                  - line_count
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_layout_directory_recursive_distributions
+    description: "Distribution statistics for layout metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - size_bytes
+                  - line_count
+      - name: value_count
+        tests:
+          - not_null
+
   - name: stg_lz_scc_file_metrics
     columns:
       - name: run_pk
@@ -1289,6 +1385,56 @@ models:
         tests:
           - not_null
 
+  - name: rollup_trivy_directory_direct_distributions
+    description: "Distribution statistics for trivy metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - vulnerability_count
+                  - severity_weighted_score
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_trivy_directory_recursive_distributions
+    description: "Distribution statistics for trivy metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - vulnerability_count
+                  - severity_weighted_score
+      - name: value_count
+        tests:
+          - not_null
+
   - name: stg_lz_git_sizer_metrics
     description: Repository-level health metrics from git-sizer
     columns:
@@ -1363,6 +1509,134 @@ models:
         tests:
           - not_null
       - name: severity
+        tests:
+          - not_null
+
+  - name: stg_gitleaks_secrets
+    description: "File-level aggregation of gitleaks secret findings"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: secret_count
+        tests:
+          - not_null
+      - name: severity_high_plus
+        tests:
+          - not_null
+
+  - name: rollup_gitleaks_directory_counts_direct
+    description: "Gitleaks secret counts per directory (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_secret_count
+        tests:
+          - not_null
+      - name: severity_high_plus
+        tests:
+          - not_null
+
+  - name: rollup_gitleaks_directory_counts_recursive
+    description: "Gitleaks secret counts per directory (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_secret_count
+        tests:
+          - not_null
+      - name: severity_high_plus
+        tests:
+          - not_null
+
+  - name: rollup_gitleaks_directory_direct_distributions
+    description: "Distribution statistics for gitleaks metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - secret_count
+                  - severity_high_plus
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_gitleaks_directory_recursive_distributions
+    description: "Distribution statistics for gitleaks metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - secret_count
+                  - severity_high_plus
+      - name: value_count
         tests:
           - not_null
 
@@ -4838,6 +5112,78 @@ models:
       - name: run_total_files
         description: "Total files with coverage data in run"
 
+  - name: mart_coverage_gap_analysis
+    description: "Coverage gap analysis: joins coverage with complexity metrics to identify high-risk files with low test coverage. Risk score formula: (normalized_ccn * 0.6) + (coverage_deficit * 0.4)."
+    columns:
+      - name: run_pk
+        description: "Tool run primary key"
+        tests:
+          - not_null
+      - name: file_id
+        description: "File identifier"
+        tests:
+          - not_null
+      - name: directory_id
+        description: "Directory identifier for file location"
+        tests:
+          - not_null
+      - name: relative_path
+        description: "Repository-relative file path"
+        tests:
+          - not_null
+      - name: line_coverage_pct
+        description: "Percentage of lines covered (0-100, null if no coverage data)"
+      - name: branch_coverage_pct
+        description: "Percentage of branches covered (0-100, null if no branch data)"
+      - name: lines_total
+        description: "Total number of coverable lines in the file"
+        tests:
+          - not_null
+      - name: lines_covered
+        description: "Number of lines covered by tests (null if no coverage data)"
+      - name: lines_missed
+        description: "Number of lines not covered by tests (null if no coverage data)"
+      - name: source_format
+        description: "Coverage report format (lcov, cobertura, jacoco, istanbul)"
+      - name: nloc
+        description: "Non-comment lines of code from lizard (null if no complexity data)"
+      - name: function_count
+        description: "Number of functions from lizard (null if no complexity data)"
+      - name: total_ccn
+        description: "Total cyclomatic complexity from lizard (null if no complexity data)"
+      - name: avg_ccn
+        description: "Average cyclomatic complexity per function (null if no complexity data)"
+      - name: max_ccn
+        description: "Maximum cyclomatic complexity of any function (null if no complexity data)"
+      - name: ccn_normalized
+        description: "Cyclomatic complexity normalized to 0-100 scale (0 if no complexity data)"
+        tests:
+          - not_null
+      - name: coverage_deficit
+        description: "100 minus line_coverage_pct (100 if no coverage data)"
+        tests:
+          - not_null
+      - name: risk_score
+        description: "Weighted risk score 0-100: (ccn_normalized * 0.6) + (coverage_deficit * 0.4)"
+        tests:
+          - not_null
+      - name: risk_tier
+        description: "Risk classification: CRITICAL (>=80), HIGH (60-80), MEDIUM (40-60), LOW (20-40), MINIMAL (<20)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - CRITICAL
+                  - HIGH
+                  - MEDIUM
+                  - LOW
+                  - MINIMAL
+      - name: risk_rank
+        description: "Row number ranking by risk_score descending within each run"
+        tests:
+          - not_null
+
   - name: mart_git_fame_contributor_hotspots
     description: "Author concentration hotspots for bus factor and knowledge risk analysis. Identifies contributors with high ownership concentration."
     columns:
@@ -5343,6 +5689,111 @@ models:
                 values:
                   - file_size_bytes
       - name: value_count
+        tests:
+          - not_null
+
+  - name: stg_git_blame_summary
+    description: "Per-file authorship metrics from git-blame-scanner"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: total_lines
+        tests:
+          - not_null
+      - name: unique_authors
+        tests:
+          - not_null
+      - name: top_author_pct
+        tests:
+          - not_null
+
+  - name: stg_git_blame_author_stats
+    description: "Per-author aggregate statistics from git-blame-scanner"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: author_email
+        tests:
+          - not_null
+      - name: total_files
+        tests:
+          - not_null
+      - name: total_lines
+        tests:
+          - not_null
+      - name: contributor_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - sole_contributor
+                  - dominant
+                  - major
+                  - minor
+
+  - name: rollup_git_blame_directory_counts_direct
+    description: "Git-blame authorship counts per directory (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_lines
+        tests:
+          - not_null
+
+  - name: rollup_git_blame_directory_counts_recursive
+    description: "Git-blame authorship counts per directory (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_lines
         tests:
           - not_null
 
@@ -5884,3 +6335,77 @@ models:
         description: "True if coupling data is available from symbol-scanner"
         tests:
           - not_null
+
+  - name: mart_git_blame_knowledge_risk
+    description: "Per-file knowledge concentration risk analysis from git-blame-scanner. Identifies files at risk due to single-author ownership, high concentration, or staleness."
+    columns:
+      - name: run_pk
+        description: "Tool run primary key (git-blame-scanner)"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_lz_tool_runs')
+              field: run_pk
+      - name: file_id
+        description: "File identifier from layout-scanner"
+        tests:
+          - not_null
+      - name: relative_path
+        description: "Repository-relative file path"
+        tests:
+          - not_null
+      - name: directory_id
+        description: "Directory identifier for file location"
+      - name: total_lines
+        description: "Total lines in the file"
+        tests:
+          - not_null
+      - name: unique_authors
+        description: "Number of distinct authors who have contributed to the file"
+        tests:
+          - not_null
+      - name: top_author
+        description: "Author with the highest line ownership percentage"
+      - name: top_author_pct
+        description: "Percentage of lines owned by the top author (0-100)"
+        tests:
+          - not_null
+      - name: churn_30d
+        description: "Number of commits touching this file in the last 30 days"
+        tests:
+          - not_null
+      - name: churn_90d
+        description: "Number of commits touching this file in the last 90 days"
+        tests:
+          - not_null
+      - name: is_single_author
+        description: "True if only one author has contributed to the file"
+        tests:
+          - not_null
+      - name: is_high_concentration
+        description: "True if top author owns >= 80% of lines"
+        tests:
+          - not_null
+      - name: is_knowledge_silo
+        description: "True if single author and file has > 100 lines"
+        tests:
+          - not_null
+      - name: is_stale
+        description: "True if no commits in the last 90 days (churn_90d = 0)"
+        tests:
+          - not_null
+      - name: risk_score
+        description: "Composite risk score (0-100) based on author concentration, file size, and staleness"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk classification: critical (>=70), high (50-69), medium (30-49), low (<30)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - critical
+                  - high
+                  - medium
+                  - low
