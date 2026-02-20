@@ -12,10 +12,18 @@ caldera_repo_url = "https://github.com/yourorg/caldera.git"
 # Optional: Override defaults
 # server_type          = "cx32"         # cx22=2vCPU/4GB, cx32=4/8, cx42=8/16
 # location             = "fsn1"         # fsn1, nbg1, hel1, ash
-# ssh_public_key_path  = "~/.ssh/id_ed25519.pub"
-# ssh_private_key_path = "~/.ssh/id_ed25519"
 # caldera_branch       = "main"
 # skip_tools           = ""
 # pipeline_llm         = 0
 # max_parallel         = 4
 # results_dir          = "./results"
+
+# SSH key paths — defaults to ed25519. If you use RSA or another key type,
+# uncomment and set these to match your key:
+#   ls ~/.ssh/id_*  # to see your available keys
+# ssh_public_key_path  = "~/.ssh/id_ed25519.pub"
+# ssh_private_key_path = "~/.ssh/id_ed25519"
+#
+# Examples for RSA keys:
+# ssh_public_key_path  = "~/.ssh/id_rsa.pub"
+# ssh_private_key_path = "~/.ssh/id_rsa"

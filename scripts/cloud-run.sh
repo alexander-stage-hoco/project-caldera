@@ -91,6 +91,23 @@ if [ ! -f "${INFRA_DIR}/terraform.tfvars" ]; then
     exit 1
 fi
 
+# Check SSH key exists (read path from tfvars or use default)
+SSH_KEY_PATH=$(grep -E '^\s*ssh_private_key_path\s*=' "${INFRA_DIR}/terraform.tfvars" 2>/dev/null \
+    | sed 's/.*=\s*"\(.*\)"/\1/' | sed "s|~|${HOME}|" || true)
+SSH_KEY_PATH="${SSH_KEY_PATH:-${HOME}/.ssh/id_ed25519}"
+
+if [ ! -f "${SSH_KEY_PATH}" ]; then
+    echo "ERROR: SSH private key not found at: ${SSH_KEY_PATH}"
+    echo ""
+    echo "Either:"
+    echo "  1. Generate a key:  ssh-keygen -t ed25519"
+    echo "  2. Or set ssh_private_key_path in infra/terraform.tfvars to your existing key"
+    echo ""
+    echo "Common key locations:"
+    ls -1 "${HOME}/.ssh/id_"* 2>/dev/null | sed 's/^/    /' || echo "    (no keys found in ~/.ssh/)"
+    exit 1
+fi
+
 # ---------------------------------------------------------------------------
 # Run Terraform
 # ---------------------------------------------------------------------------
@@ -154,6 +171,26 @@ fi
 # ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Verify results were downloaded
+# ---------------------------------------------------------------------------
+
+if [ ! -d "${RESULTS_DIR}" ] || [ -z "$(ls -A "${RESULTS_DIR}" 2>/dev/null)" ]; then
+    echo ""
+    echo "ERROR: Results directory is empty or missing: ${RESULTS_DIR}"
+    echo "The analysis may have failed or SCP download was incomplete."
+    echo "Use KEEP_SERVER=1 to debug on the VM."
+    exit 1
+fi
+
+MANIFEST=$(find "${RESULTS_DIR}" -name "manifest.json" -maxdepth 4 2>/dev/null | head -1)
+if [ -z "${MANIFEST}" ]; then
+    echo ""
+    echo "ERROR: No manifest.json found in ${RESULTS_DIR}"
+    echo "Results download may be incomplete."
+    exit 1
+fi
 
 echo ""
 echo "=============================================="

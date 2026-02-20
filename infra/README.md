@@ -173,11 +173,16 @@ cd infra && terraform destroy -auto-approve -var="repo_url=placeholder"
 | Problem | Solution |
 |---------|----------|
 | `terraform.tfvars not found` | `cp infra/terraform.tfvars.example infra/terraform.tfvars` and fill in values |
-| SSH connection timeout | Verify SSH key path in tfvars matches your actual key |
+| SSH key not found | The pre-flight check shows your available keys. Set `ssh_private_key_path` / `ssh_public_key_path` in `terraform.tfvars` to match your key (e.g. `~/.ssh/id_rsa` for RSA) |
+| SSH connection timeout | Verify SSH key path in tfvars matches your actual key (`ls ~/.ssh/id_*`) |
+| Cloud-init error | Caldera clone failed — check that `caldera_repo_url` is a public URL or the VM has access. Use `KEEP_SERVER=1` and `journalctl -u cloud-init` to debug |
+| `Caldera project missing Makefile` | Wrong repo was cloned — check `caldera_repo_url` in tfvars points to your Caldera fork |
 | Hetzner auth error | Regenerate API token at console.hetzner.cloud |
 | .NET tools skipped | Expected — dotnet is not on the VM. These auto-skip gracefully |
 | Analysis takes too long | Use a larger `CLOUD_SERVER` type or add slow tools to `SKIP_TOOLS` |
 | Results directory empty | Check `terraform apply` output for errors; use `KEEP_SERVER=1` to debug on the VM |
+| No manifest.json after download | SCP may have failed — check network connectivity. Use `KEEP_SERVER=1` and verify results exist on the VM at `/opt/caldera/results/` |
+| `cloud-destroy` fails (no tfvars) | Delete the server manually via [Hetzner console](https://console.hetzner.cloud) or `hcloud server list && hcloud server delete <id>` |
 
 ## File Reference
 

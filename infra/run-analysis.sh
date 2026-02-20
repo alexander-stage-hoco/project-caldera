@@ -7,6 +7,7 @@
 #   SKIP_TOOLS      — Comma-separated tools to skip (optional)
 #   PIPELINE_LLM    — 0 or 1 (default: 0)
 #   MAX_PARALLEL    — Max parallel tools (default: 4)
+#   SERVER_TYPE     — Hetzner server type (for manifest metadata)
 #   ANTHROPIC_API_KEY — Required if PIPELINE_LLM=1
 #
 # This script is uploaded to the VM by Terraform and executed via SSH.
@@ -17,6 +18,7 @@ REPO_URL="${REPO_URL:?REPO_URL is required}"
 SKIP_TOOLS="${SKIP_TOOLS:-}"
 PIPELINE_LLM="${PIPELINE_LLM:-0}"
 MAX_PARALLEL="${MAX_PARALLEL:-4}"
+SERVER_TYPE="${SERVER_TYPE:-unknown}"
 
 WORK_DIR="/opt/caldera"
 RESULTS_DIR="${WORK_DIR}/results"
@@ -27,6 +29,7 @@ echo "=============================================="
 echo "Caldera Cloud Runner"
 echo "=============================================="
 echo "Target repo:    ${REPO_URL}"
+echo "Server type:    ${SERVER_TYPE}"
 echo "Skip tools:     ${SKIP_TOOLS:-none}"
 echo "LLM eval:       ${PIPELINE_LLM}"
 echo "Max parallel:   ${MAX_PARALLEL}"
@@ -38,7 +41,15 @@ echo "=============================================="
 
 if [ ! -d "${CALDERA_DIR}" ]; then
     echo "ERROR: Caldera project not found at ${CALDERA_DIR}"
-    echo "Set caldera_repo_url in Terraform variables to clone it during cloud-init."
+    echo "Cloud-init may have failed to clone the repo."
+    echo "Set caldera_repo_url in Terraform variables to a valid, accessible Git URL."
+    exit 1
+fi
+
+if [ ! -f "${CALDERA_DIR}/Makefile" ]; then
+    echo "ERROR: Caldera project at ${CALDERA_DIR} is missing Makefile."
+    echo "The clone may be incomplete or the wrong repository was specified."
+    echo "Check caldera_repo_url in terraform.tfvars."
     exit 1
 fi
 
@@ -207,7 +218,7 @@ manifest = {
     'tools': [],
     'cloud': {
         'mode': 'cloud-hetzner',
-        'server_type': os.environ.get('SERVER_TYPE', 'cx33'),
+        'server_type': '${SERVER_TYPE}',
         'started_at': datetime.datetime.fromtimestamp(${START_TIME}, tz=datetime.timezone.utc).isoformat(),
         'completed_at': datetime.datetime.fromtimestamp(${END_TIME}, tz=datetime.timezone.utc).isoformat(),
         'duration_seconds': ${DURATION},
@@ -225,6 +236,35 @@ with open('${EXPORT_DIR}/manifest.json', 'w') as f:
     json.dump(manifest, f, indent=2)
 print('  Wrote manifest.json')
 "
+
+# ---------------------------------------------------------------------------
+# 7. Validate results
+# ---------------------------------------------------------------------------
+
+echo ""
+echo ">>> Validating results..."
+
+VALIDATION_ERRORS=0
+
+if [ ! -f "${EXPORT_DIR}/manifest.json" ]; then
+    echo "ERROR: manifest.json not found in ${EXPORT_DIR}"
+    VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+fi
+
+if [ ! -f "${EXPORT_DIR}/database/caldera_sot.duckdb" ]; then
+    echo "WARNING: DuckDB database not found in results"
+fi
+
+if [ ! -d "${EXPORT_DIR}/reports" ] || [ -z "$(ls -A "${EXPORT_DIR}/reports" 2>/dev/null)" ]; then
+    echo "WARNING: No reports found in results"
+fi
+
+if [ "${VALIDATION_ERRORS}" -gt 0 ]; then
+    echo "ERROR: Results validation failed with ${VALIDATION_ERRORS} error(s)."
+    exit 1
+fi
+
+echo "  Results validation passed."
 
 echo ""
 echo "=============================================="

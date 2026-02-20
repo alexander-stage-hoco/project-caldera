@@ -151,11 +151,14 @@ resource "hcloud_server" "runner" {
     timeout     = "5m"
   }
 
-  # Wait for cloud-init to complete
+  # Wait for cloud-init to complete and verify success
   provisioner "remote-exec" {
     inline = [
       "echo 'Waiting for cloud-init to finish...'",
-      "cloud-init status --wait || true",
+      "cloud-init status --wait",
+      "if cloud-init status | grep -q 'error'; then echo 'ERROR: cloud-init finished with errors:'; cat /var/log/cloud-init-output.log | tail -30; exit 1; fi",
+      "echo 'Verifying Caldera project was cloned...'",
+      "test -d /opt/caldera/project && test -f /opt/caldera/project/Makefile || (echo 'ERROR: /opt/caldera/project not found or missing Makefile. Check caldera_repo_url in terraform.tfvars.'; exit 1)",
       "echo 'Cloud-init done. Docker version:'",
       "docker --version",
       "echo 'Python version:'",
@@ -196,18 +199,24 @@ resource "null_resource" "run_analysis" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /opt/caldera/run-analysis.sh",
-      "REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' /opt/caldera/run-analysis.sh",
+      "REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' /opt/caldera/run-analysis.sh",
     ]
   }
 
   # Download results to local machine
   provisioner "local-exec" {
     command = <<-EOT
+      set -e
       mkdir -p "${var.results_dir}"
       scp -o StrictHostKeyChecking=no \
           -i ${pathexpand(var.ssh_private_key_path)} \
           -r root@${hcloud_server.runner.ipv4_address}:/opt/caldera/results/* \
           "${var.results_dir}/"
+      # Verify at least one manifest.json was downloaded
+      if ! find "${var.results_dir}" -name "manifest.json" -maxdepth 4 | grep -q .; then
+        echo "ERROR: No manifest.json found in downloaded results. SCP may have failed silently."
+        exit 1
+      fi
       echo ""
       echo "========================================"
       echo "Results downloaded to: ${var.results_dir}"

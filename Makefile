@@ -445,6 +445,15 @@ cloud-run:
 		$(if $(KEEP_SERVER),--keep-server,)
 
 cloud-destroy:
+	@if [ ! -f infra/terraform.tfvars ]; then \
+		echo "WARNING: infra/terraform.tfvars not found."; \
+		echo "Terraform destroy needs tfvars. If a server is still running,"; \
+		echo "delete it manually via the Hetzner console: https://console.hetzner.cloud"; \
+		echo "Or install hcloud CLI: brew install hcloud"; \
+		echo "  hcloud server list"; \
+		echo "  hcloud server delete <id>"; \
+		exit 1; \
+	fi
 	cd infra && terraform destroy -auto-approve \
 		-var="repo_url=placeholder" \
 		-var="server_type=$(CLOUD_SERVER)"

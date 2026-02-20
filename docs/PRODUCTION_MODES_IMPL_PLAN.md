@@ -13,9 +13,9 @@
 |------|--------|-------|
 | LOCAL mode (Mode 1) | **Working** | `orchestrator.py`, `Makefile` (`make analyze`) |
 | BUNDLE mode (Mode 2) | **Working** | `scripts/collect_artifacts.py`, `scripts/analyze_bundle.py`, `Makefile` (`make collect`, `make analyze-bundle`) |
-| Hetzner Terraform infra | **Built, untested** | `infra/main.tf`, `infra/cloud-init.yml`, `infra/run-analysis.sh` |
-| Cloud wrapper script | **Built, untested** | `scripts/cloud-run.sh` |
-| Makefile cloud targets | **Built, untested** | `Makefile` (`cloud-setup`, `cloud-run`, `cloud-destroy`) |
+| Hetzner Terraform infra | **Built + hardened** | `infra/main.tf`, `infra/cloud-init.yml`, `infra/run-analysis.sh` |
+| Cloud wrapper script | **Built + hardened** | `scripts/cloud-run.sh` |
+| Makefile cloud targets | **Built + hardened** | `Makefile` (`cloud-setup`, `cloud-run`, `cloud-destroy`) |
 | Terraform config template | **Done** | `infra/terraform.tfvars.example`, `infra/.gitignore` |
 | DOCKERIZED mode (Mode 3) | **Design only** | `docs/PRODUCTION_MODES.md` (bundle-first architecture) |
 | Tool Dockerfiles (18) | **Not started** | — |
@@ -63,7 +63,7 @@ After the basic flow works, improve reliability and UX.
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
-| 2.1 | Add `--skip` passthrough for `SKIP_TOOLS` in cloud-run.sh | Medium | 30 min |
+| 2.1 | ~~Add `--skip` passthrough for `SKIP_TOOLS` in cloud-run.sh~~ | ~~Medium~~ | **Done** |
 | 2.2 | Add `ANTHROPIC_API_KEY` passthrough for LLM eval on VM | Medium | 30 min |
 | 2.3 | Better error reporting: capture tool-level failures in manifest | Medium | 1 hr |
 | 2.4 | Retry logic for transient cloud-init/SSH failures | Low | 1 hr |
@@ -199,8 +199,8 @@ All costs are Hetzner CX-series (shared vCPU). Billing is per-hour, minimum 1 ho
 
 | Phase | What | Status | Effort |
 |-------|------|--------|--------|
-| **1** | Validate Hetzner cloud path | **Ready to test** | 1 hr (mostly waiting) |
-| **2** | Harden cloud path | Next | 1 day |
+| **1** | Validate Hetzner cloud path | **Tested (Flask, Feb 19)** | 1 hr (mostly waiting) |
+| **2** | Harden cloud path | **Hardened (8 fixes)** | 1 day |
 | **3** | Tool Dockerfiles | Future | 2 days |
 | **4** | Dockerized compose stack | Future | 2 days |
 | **5** | Results repository | Future | 0.5 day |
