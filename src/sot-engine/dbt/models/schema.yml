@@ -2726,6 +2726,136 @@ models:
         tests:
           - not_null
 
+  - name: stg_lz_coverage_summary
+    description: "File-level coverage metrics from coverage-ingest (LCOV, Cobertura, JaCoCo, Istanbul)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_lz_tool_runs')
+              field: run_pk
+      - name: file_id
+        tests:
+          - not_null
+      - name: directory_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: lines_total
+        tests:
+          - not_null
+      - name: lines_covered
+        tests:
+          - not_null
+      - name: source_format
+        tests:
+          - not_null
+
+  - name: rollup_coverage_directory_counts_direct
+    description: "Coverage-ingest line counts per directory (direct scope - files in directory only)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_lz_tool_runs')
+              field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_lines_covered
+        tests:
+          - not_null
+
+  - name: rollup_coverage_directory_counts_recursive
+    description: "Coverage-ingest line counts per directory (recursive scope - includes subtree)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_lz_tool_runs')
+              field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: file_count
+        tests:
+          - not_null
+      - name: total_lines_covered
+        tests:
+          - not_null
+
+  - name: rollup_coverage_directory_direct_distributions
+    description: "Distribution statistics for coverage-ingest metrics (direct scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_lz_tool_runs')
+              field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - line_coverage_pct
+                  - branch_coverage_pct
+                  - lines_covered
+                  - lines_total
+      - name: value_count
+        tests:
+          - not_null
+
+  - name: rollup_coverage_directory_recursive_distributions
+    description: "Distribution statistics for coverage-ingest metrics (recursive scope)"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_lz_tool_runs')
+              field: run_pk
+      - name: directory_id
+        tests:
+          - not_null
+      - name: directory_path
+        tests:
+          - not_null
+      - name: metric
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - line_coverage_pct
+                  - branch_coverage_pct
+                  - lines_covered
+                  - lines_total
+      - name: value_count
+        tests:
+          - not_null
+
   - name: stg_symbol_coupling_metrics
     description: "Per-symbol coupling metrics: fan-in, fan-out, and instability"
     columns:
