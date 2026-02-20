@@ -19,7 +19,28 @@ include ../Makefile.common
 
 # Tool-specific variables
 GITLEAKS_VERSION := 8.18.4
-GITLEAKS_URL := https://github.com/gitleaks/gitleaks/releases/download/v$(GITLEAKS_VERSION)/gitleaks_$(GITLEAKS_VERSION)_darwin_arm64.tar.gz
+
+# Platform detection for binary download
+UNAME_S := $(shell uname -s)
+UNAME_M := $(shell uname -m)
+
+ifeq ($(UNAME_S),Darwin)
+    ifeq ($(UNAME_M),arm64)
+        GITLEAKS_PLATFORM := darwin_arm64
+    else
+        GITLEAKS_PLATFORM := darwin_x64
+    endif
+else
+    ifeq ($(UNAME_M),x86_64)
+        GITLEAKS_PLATFORM := linux_x64
+    else ifeq ($(UNAME_M),aarch64)
+        GITLEAKS_PLATFORM := linux_arm64
+    else
+        GITLEAKS_PLATFORM := linux_x32
+    endif
+endif
+
+GITLEAKS_URL := https://github.com/gitleaks/gitleaks/releases/download/v$(GITLEAKS_VERSION)/gitleaks_$(GITLEAKS_VERSION)_$(GITLEAKS_PLATFORM).tar.gz
 
 REPO_PATH ?= eval-repos/synthetic
 REPO_NAME ?= synthetic

@@ -13,6 +13,8 @@ packages:
   - make
   - curl
   - jq
+  - unzip
+  - openjdk-17-jre-headless
 
 runcmd:
   # Docker is pre-installed on the "docker-ce" image, just ensure it's running

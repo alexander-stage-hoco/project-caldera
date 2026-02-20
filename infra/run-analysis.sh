@@ -115,6 +115,17 @@ if ! command -v dotnet &>/dev/null; then
     fi
 fi
 
+# SonarQube requires Docker Compose to run its containers.
+# Auto-skip if neither 'docker compose' nor 'docker-compose' is available.
+if ! docker compose version &>/dev/null && ! command -v docker-compose &>/dev/null; then
+    echo ">>> Docker Compose not found — auto-skipping sonarqube"
+    if [ -n "${SKIP_TOOLS}" ]; then
+        SKIP_TOOLS="${SKIP_TOOLS},sonarqube"
+    else
+        SKIP_TOOLS="sonarqube"
+    fi
+fi
+
 echo ""
 echo ">>> Setting up tools (best-effort, failures are non-fatal)..."
 # Run setup for each tool individually so one failure doesn't block others.
