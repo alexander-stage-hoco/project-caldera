@@ -92,7 +92,7 @@ scripts/                     # Automation scripts
 ```bash
 make setup                   # One-time project + tool setup
 make analyze REPO=<path>     # Full E2E pipeline (local path or GitHub URL)
-make report                  # Regenerate report (optionally RUN_PK=N)
+make report                  # Regenerate report (optionally COLLECTION_RUN_ID=<uuid>)
 make list-runs               # Show all collection runs
 make status                  # Check prerequisites and health
 make clean-db                # Remove database, start fresh
@@ -134,6 +134,7 @@ make pipeline-eval           # Full E2E: orchestrate -> insights -> LLM eval -> 
 | `PIPELINE_LLM` | `1` | Set to `0` to skip LLM evaluation |
 | `BUNDLE_DIR` | `artifacts` | Bundle output directory for `make collect` |
 | `BUNDLE_TAR` | `1` | Create `.tar.gz` from bundle |
+| `CLONE_DEPTH` | unset | Clone depth for remote URLs (empty = full clone) |
 | `CLOUD_SERVER` | `cx33` | Hetzner server type for `make cloud-run` |
 | `CLOUD_RESULTS` | `infra/results` | Local directory for cloud run results |
 | `KEEP_SERVER` | unset | Set to `1` to keep VM alive after cloud run |

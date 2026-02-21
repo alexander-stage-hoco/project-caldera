@@ -25,6 +25,7 @@ COLLECTION_RUN_ID ?=
 BUNDLE ?=
 BUNDLE_DIR ?= artifacts
 BUNDLE_TAR ?= 1
+CLONE_DEPTH ?=
 ORCH_REPO_PATH ?=
 ORCH_REPO_ID ?=
 ORCH_RUN_ID ?=
@@ -100,7 +101,8 @@ help:
 	@echo "    REPO=<path|url>   Repository to analyze (for 'analyze' target)"
 	@echo "    REPLACE=1         Replace existing run for same repo+commit"
 	@echo "    DB_PATH=<path>    Database path (default: $$HOME/.caldera/caldera_sot.duckdb)"
-	@echo "    RUN_PK=<id>       Specific run to report on (for 'report' target)"
+	@echo "    COLLECTION_RUN_ID=<uuid>  Specific collection run for 'report' target"
+	@echo "    CLONE_DEPTH=N     Shallow clone depth for remote URLs (default: full clone)"
 	@echo "    TOOL=<name>       Limit tools-* targets to a single tool"
 	@echo "    SKIP_TOOLS=a,b    Skip tools in orchestrator (comma-separated)"
 	@echo "    PIPELINE_LLM=0    Skip LLM eval + top3 extraction"
@@ -139,7 +141,7 @@ analyze:
 	@if echo "$(REPO)" | grep -qE '^https?://'; then \
 	  CLONE_DIR=$$(mktemp -d /tmp/caldera-repo-XXXXXX); \
 	  echo "Cloning $(REPO) to $$CLONE_DIR ..."; \
-	  git clone --depth 1 "$(REPO)" "$$CLONE_DIR" || (rm -rf "$$CLONE_DIR"; exit 1); \
+	  git clone $(if $(CLONE_DEPTH),--depth $(CLONE_DEPTH)) "$(REPO)" "$$CLONE_DIR" || (rm -rf "$$CLONE_DIR"; exit 1); \
 	  REPO_ID=$$(python3 -c 'import sys,hashlib,urllib.parse; u=sys.argv[1]; p=urllib.parse.urlparse(u); name=p.path.rstrip("/").split("/")[-1]; name=name[:-4] if name.endswith(".git") else name; h=hashlib.sha1(u.encode()).hexdigest()[:10]; print(f"{name}-{h}")' "$(REPO)" 2>/dev/null || echo "remote-repo"); \
 	  $(MAKE) _analyze-local REPO_DIR="$$CLONE_DIR" ORCH_REPO_ID="$$REPO_ID" $(if $(REPLACE),ORCH_REPLACE=1,); \
 	  echo "Cleaning up clone..."; \
@@ -427,7 +429,7 @@ collect:
 	@if echo "$(REPO)" | grep -qE '^https?://'; then \
 	  CLONE_DIR=$$(mktemp -d /tmp/caldera-repo-XXXXXX); \
 	  echo "Cloning $(REPO) to $$CLONE_DIR ..."; \
-	  git clone --depth 1 "$(REPO)" "$$CLONE_DIR" || (rm -rf "$$CLONE_DIR"; exit 1); \
+	  git clone $(if $(CLONE_DEPTH),--depth $(CLONE_DEPTH)) "$(REPO)" "$$CLONE_DIR" || (rm -rf "$$CLONE_DIR"; exit 1); \
 	  REPO_ID=$$(python3 -c 'import sys,hashlib,urllib.parse; u=sys.argv[1]; p=urllib.parse.urlparse(u); name=p.path.rstrip("/").split("/")[-1]; name=name[:-4] if name.endswith(".git") else name; h=hashlib.sha1(u.encode()).hexdigest()[:10]; print(f"{name}-{h}")' "$(REPO)" 2>/dev/null || echo "remote-repo"); \
 	  .venv/bin/python scripts/collect_artifacts.py --repo-path "$$CLONE_DIR" --repo-id "$$REPO_ID" --output-dir "$(BUNDLE_DIR)" $(if $(filter 1,$(BUNDLE_TAR)),--tar,) $(if $(SKIP_TOOLS),--skip-tools "$(SKIP_TOOLS)",); \
 	  echo "Cleaning up clone..."; \

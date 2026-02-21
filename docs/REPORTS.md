@@ -1,7 +1,8 @@
 # Reports
 
-This repo includes simple dbt analyses for the current marts. Each report expects
-`run_pk` as the primary selector.
+This repo includes simple dbt analyses for the current marts. Reports are
+generated via `make report`, which resolves the collection run to the SCC
+tool's `run_pk` as the anchor for unified metrics.
 
 ## Repo Health Snapshot
 

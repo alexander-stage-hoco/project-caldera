@@ -37,7 +37,7 @@ make analyze REPO=/path/to/your/repo
 make analyze REPO=https://github.com/user/project
 ```
 
-Remote URLs are cloned with `--depth 1` to a temporary directory, analyzed, then cleaned up.
+Remote URLs are cloned (full history by default) to a temporary directory, analyzed, then cleaned up. Pass `CLONE_DEPTH=1` for a shallow clone if you don't need history-based tools (git-fame, git-blame-scanner, gitleaks).
 
 ### 3. View results
 
@@ -113,8 +113,8 @@ make analyze REPO=/path/to/repo REPLACE=1
 ### Regenerate report without re-running tools
 
 ```bash
-make report                # from the latest run
-make report RUN_PK=5       # from a specific run
+make report                              # from the latest collection run
+make report COLLECTION_RUN_ID=<uuid>     # from a specific collection run
 ```
 
 ### Check what runs exist
@@ -214,7 +214,8 @@ Removes the DuckDB database. The next `make analyze` creates a fresh one.
 | `REPO` | (required) | Path or URL to analyze |
 | `REPLACE` | unset | Set to `1` to overwrite an existing run |
 | `DB_PATH` | `~/.caldera/caldera_sot.duckdb` | DuckDB database location |
-| `RUN_PK` | latest | Specific run for `make report` |
+| `COLLECTION_RUN_ID` | latest | Specific collection run UUID for `make report` |
+| `CLONE_DEPTH` | (full) | Set to `N` for `--depth N` shallow clone of remote URLs |
 | `TOOL` | all | Limit `tools-*` targets to one tool |
 | `SKIP_TOOLS` | unset | Comma-separated tool names to skip |
 | `PIPELINE_LLM` | `1` | Set to `0` to skip LLM evaluation + top3 extraction |

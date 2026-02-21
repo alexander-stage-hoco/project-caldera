@@ -5,6 +5,7 @@ import argparse
 import json
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -35,11 +36,18 @@ def _get_run_pk(db_path: Path, run_id: str) -> int:
     conn = duckdb.connect(str(db_path))
     try:
         row = conn.execute(
-            "SELECT run_pk FROM lz_tool_runs WHERE run_id = ? ORDER BY run_pk DESC LIMIT 1",
+            "SELECT run_pk FROM lz_tool_runs WHERE run_id = ? AND tool_name = 'scc' ORDER BY run_pk DESC LIMIT 1",
             [run_id],
         ).fetchone()
         if not row:
-            raise RuntimeError(f"run_id not found in DB: {run_id}")
+            # Fallback: any tool (SCC may have been skipped)
+            row = conn.execute(
+                "SELECT run_pk FROM lz_tool_runs WHERE run_id = ? ORDER BY run_pk DESC LIMIT 1",
+                [run_id],
+            ).fetchone()
+            if not row:
+                raise RuntimeError(f"run_id not found in DB: {run_id}")
+            print(f"Warning: SCC tool run not found for run_id={run_id}; using fallback run_pk", file=sys.stderr)
         return int(row[0])
     finally:
         conn.close()
