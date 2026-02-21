@@ -1127,9 +1127,30 @@ class GitSizerAdapter(BaseAdapter):
 | `lz_trivy_targets` | `(run_pk, target_key)` | trivy | Scan targets |
 | `lz_trivy_vulnerabilities` | `(run_pk, target_key, vulnerability_id, package_name)` | trivy | CVE findings |
 | `lz_trivy_iac_misconfigs` | `(run_pk, relative_path, misconfig_id, start_line)` | trivy | IaC issues |
+| `lz_devskim_findings` | `(run_pk, file_id, rule_id, line_start)` | devskim | Security lint findings |
 | `lz_git_sizer_metrics` | `run_pk` | git-sizer | Repository health |
 | `lz_git_sizer_violations` | `(run_pk, metric)` | git-sizer | Threshold violations |
 | `lz_git_sizer_lfs_candidates` | `(run_pk, file_path)` | git-sizer | LFS migration targets |
+| `lz_code_symbols` | `(run_pk, file_id, symbol_name, line_start)` | symbol-scanner | Code symbols |
+| `lz_symbol_calls` | `(run_pk, caller_file_id, caller_symbol, callee_symbol, line_number)` | symbol-scanner | Call graph edges |
+| `lz_file_imports` | `(run_pk, file_id, imported_path, line_number)` | symbol-scanner | Import statements |
+| `lz_scancode_file_licenses` | `(run_pk, file_id, spdx_id, line_number)` | scancode | License detections |
+| `lz_scancode_summary` | `run_pk` | scancode | License summary stats |
+| `lz_pmd_cpd_file_metrics` | `(run_pk, file_id)` | pmd-cpd | Per-file duplication metrics |
+| `lz_pmd_cpd_duplications` | `(run_pk, clone_id)` | pmd-cpd | Duplicate code blocks |
+| `lz_pmd_cpd_occurrences` | `(run_pk, clone_id, file_id, line_start)` | pmd-cpd | Clone occurrence locations |
+| `lz_dotcover_assembly_coverage` | `(run_pk, assembly_name)` | dotcover | Assembly-level coverage |
+| `lz_dotcover_type_coverage` | `(run_pk, assembly_name, type_name)` | dotcover | Type-level coverage |
+| `lz_dotcover_method_coverage` | `(run_pk, assembly_name, type_name, method_name)` | dotcover | Method-level coverage |
+| `lz_dependensee_projects` | `(run_pk, project_path)` | dependensee | .NET projects |
+| `lz_dependensee_project_refs` | `(run_pk, source_project_path, target_project_path)` | dependensee | Project references |
+| `lz_dependensee_package_refs` | `(run_pk, project_path, package_name)` | dependensee | Package references |
+| `lz_git_fame_authors` | `(run_pk, author_name)` | git-fame | Author contribution stats |
+| `lz_git_fame_summary` | `run_pk` | git-fame | Repository authorship summary |
+| `lz_git_blame_summary` | `(run_pk, file_id)` | git-blame-scanner | Per-file authorship |
+| `lz_git_blame_author_stats` | `(run_pk, author_email)` | git-blame-scanner | Author-level stats |
+| `lz_coverage_summary` | `(run_pk, file_id)` | coverage-ingest | Test coverage per file |
+| `lz_lizard_excluded_files` | `(run_pk, file_path)` | lizard | Files excluded from analysis |
 
 ---
 

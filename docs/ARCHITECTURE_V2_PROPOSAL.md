@@ -1,7 +1,7 @@
 # Architecture V2 Proposal: SoT-Centered Tool Architecture
 
-**Version:** 1.4 Draft
-**Status:** Draft for Review
+**Version:** 1.4
+**Status:** Implemented (core architecture adopted as of 2026-02)
 **Author:** Architecture Discussion
 **Date:** 2026-01-24
 

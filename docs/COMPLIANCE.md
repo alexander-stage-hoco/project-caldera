@@ -837,7 +837,7 @@ TOOL_INGESTION_CONFIGS = [
 
 ---
 
-## Complete Check Reference (45 Checks)
+## Complete Check Reference (47 Checks)
 
 ### Quick Reference by Severity
 

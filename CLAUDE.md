@@ -20,6 +20,8 @@ Project Caldera is a tool-first workspace for building and validating code analy
 | Run reports | [docs/REPORTS.md](docs/REPORTS.md) |
 | Review tool architecture | [src/architecture-review/README.md](src/architecture-review/README.md) |
 | Run cloud analysis | [infra/README.md](infra/README.md) |
+| Compare cloud hosting options | [docs/CLOUD_HOSTING_COMPARISON.md](docs/CLOUD_HOSTING_COMPARISON.md) |
+| Understand production modes | [docs/PRODUCTION_MODES.md](docs/PRODUCTION_MODES.md) |
 
 ## Architecture
 
@@ -263,8 +265,10 @@ class SccFileMetric:
 | `docs/EVALUATION.md` | LLM judge infrastructure and observability |
 | `docs/REPORTS.md` | dbt analyses and reports |
 | `docs/INSIGHTS_PRODUCT_SPEC.md` | Insights component product specification |
-| `docs/ARCHITECTURE_V2_PROPOSAL.md` | Proposed architecture improvements |
-| `docs/PLAN.md` | Current development plan and roadmap |
+| `docs/ARCHITECTURE_V2_PROPOSAL.md` | Implemented SoT-centered architecture |
+| `docs/PLAN.md` | LLM standardization plan (completed) |
+| `docs/CLOUD_HOSTING_COMPARISON.md` | Cloud hosting provider comparison |
+| `docs/PRODUCTION_MODES.md` | Production deployment modes |
 | `docs/templates/BLUEPRINT.md.template` | Architecture document template |
 | `docs/templates/EVAL_STRATEGY.md.template` | Evaluation strategy template |
 

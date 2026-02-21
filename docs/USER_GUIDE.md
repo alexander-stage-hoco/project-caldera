@@ -131,8 +131,6 @@ By default, the orchestrator stops at the first tool failure. To continue runnin
 make analyze REPO=/path/to/repo CONTINUE_ON_TOOL_FAILURE=1
 ```
 
-Shows all collection runs with repo ID, commit, status, and tool count.
-
 ### Run a single tool manually
 
 ```bash
@@ -143,6 +141,7 @@ cd src/tools/scc && make analyze REPO_PATH=/path/to/repo
 
 ```bash
 make status       # verify prerequisites
+make doctor       # detailed system diagnostics (Python, tools, DB, dbt)
 make compliance   # run tool compliance scanner
 make test         # run all tests (pytest + tool tests + dbt)
 ```
@@ -191,6 +190,12 @@ Results are downloaded to `infra/results/<repo-id>/<run-id>/` containing the Duc
 open infra/results/<repo-id>/<run-id>/reports/report.html
 ```
 
+Check cloud server status and download progress:
+
+```bash
+make cloud-status
+```
+
 If you used `KEEP_SERVER=1`, destroy the server when done:
 
 ```bash
@@ -219,6 +224,12 @@ Removes the DuckDB database. The next `make analyze` creates a fresh one.
 | `TOOL` | all | Limit `tools-*` targets to one tool |
 | `SKIP_TOOLS` | unset | Comma-separated tool names to skip |
 | `PIPELINE_LLM` | `1` | Set to `0` to skip LLM evaluation + top3 extraction |
+| `BUNDLE_DIR` | `artifacts` | Bundle output directory for `make collect` |
+| `BUNDLE_TAR` | `1` | Create `.tar.gz` from bundle |
+| `CLOUD_SERVER` | `cx33` | Hetzner server type for `make cloud-run` |
+| `CLOUD_RESULTS` | `infra/results` | Local directory for cloud run results |
+| `KEEP_SERVER` | unset | Set to `1` to keep VM alive after cloud run |
+| `CONTINUE_ON_TOOL_FAILURE` | unset | Set to `1` to continue past tool failures |
 
 ## Troubleshooting
 

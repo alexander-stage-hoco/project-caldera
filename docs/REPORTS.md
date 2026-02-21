@@ -139,16 +139,24 @@ Data sources (in order of precedence):
 
 ## Insights Component
 
-The `src/insights/` component generates consolidated HTML/Markdown reports with multiple sections:
-- Tool Readiness (meta-report, no database required)
-- Repository Health Overview
-- File Hotspots
-- Directory Analysis
-- Vulnerabilities
-- Cross-Tool Insights
-- Language Coverage
-- Distribution Insights
-- Roslyn Violations
-- IaC Misconfigurations
+The `src/insights/` component generates consolidated HTML/Markdown reports with 37 sections:
 
+| Category | Sections |
+|----------|----------|
+| **Meta** | tool_readiness, tool_coverage_dashboard |
+| **Summary** | executive_summary, repo_health, composite_risk |
+| **Structure** | directory_structure, directory_analysis, component_inventory |
+| **Size & Complexity** | file_hotspots, code_size_hotspots, function_complexity |
+| **Code Quality** | code_quality_rules, sonarqube_deep_dive, roslyn_violations, devskim_security |
+| **Security** | vulnerabilities, secrets, iac_misconfigs |
+| **Duplication** | code_duplication, technical_debt_summary |
+| **Dependencies** | dependency_health, import_dependencies, circular_dependencies, blast_radius, coupling_analysis, coupling_debt |
+| **Coverage** | coverage_gap, dotcover_coverage |
+| **Authorship** | authorship_risk, knowledge_risk |
+| **Licensing** | license_compliance |
+| **Statistics** | language_coverage, distribution_insights, code_inequality, module_health |
+| **Cross-Tool** | cross_tool |
+| **Git** | git_sizer |
+
+Sections are registered in `src/insights/generator.py` and implemented in `src/insights/sections/`.
 See `src/insights/README.md` for full documentation.
