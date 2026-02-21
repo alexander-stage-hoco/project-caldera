@@ -162,18 +162,15 @@ class LizardAdapter(BaseAdapter):
         """
         file_metrics: list[LizardFileMetric] = []
         function_metrics: list[LizardFunctionMetric] = []
-        seen_files: set[str] = set()
-        seen_functions: set[tuple[str, str, int | None]] = set()
+        file_tracker = self._dedup_tracker("file")
+        func_tracker = self._dedup_tracker("function")
 
         for entry in files:
             relative_path = self._normalize_path(entry.get("path", ""))
             file_id, _ = self._layout_repo.get_file_record(layout_run_pk, relative_path)
 
-            # Deduplicate files by file_id
-            if file_id in seen_files:
-                self._log(f"WARN: skipping duplicate file: {relative_path}")
+            if file_tracker.is_duplicate(file_id, label=relative_path):
                 continue
-            seen_files.add(file_id)
 
             file_metrics.append(
                 LizardFileMetric(
@@ -201,14 +198,9 @@ class LizardAdapter(BaseAdapter):
                     self._log(f"WARN: skipping pseudo-function {func.get('name')} with line_start={line_start}")
                     continue
 
-                # Deduplicate functions by (file_id, function_name, line_start)
                 func_key = (file_id, func.get("name", ""), line_start)
-                if func_key in seen_functions:
-                    self._log(
-                        f"WARN: skipping duplicate function {func_key[1]} at {relative_path}:{line_start}"
-                    )
+                if func_tracker.is_duplicate(func_key, label=f"{func_key[1]} at {relative_path}:{line_start}"):
                     continue
-                seen_functions.add(func_key)
 
                 function_metrics.append(
                     LizardFunctionMetric(

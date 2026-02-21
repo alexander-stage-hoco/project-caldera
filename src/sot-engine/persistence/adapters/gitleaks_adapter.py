@@ -129,7 +129,7 @@ class GitleaksAdapter(BaseAdapter):
         self, run_pk: int, layout_run_pk: int, findings: Iterable[dict]
     ) -> Iterable[GitleaksSecret]:
         """Map findings to GitleaksSecret entities."""
-        seen: set[tuple[str, str, int | None, str | None]] = set()
+        tracker = self._dedup_tracker("secret")
         for finding in findings:
             relative_path = self._normalize_path(finding.get("file_path", ""))
 
@@ -148,12 +148,8 @@ class GitleaksAdapter(BaseAdapter):
                 continue
 
             key = (file_id, finding.get("rule_id", ""), finding.get("line_number"), finding.get("fingerprint"))
-            if key in seen:
-                self._log(
-                    f"WARN: skipping duplicate secret {key[1]} at {relative_path}:{key[2]}"
-                )
+            if tracker.is_duplicate(key, label=f"{key[1]} at {relative_path}:{key[2]}"):
                 continue
-            seen.add(key)
             yield GitleaksSecret(
                 run_pk=run_pk,
                 file_id=file_id,

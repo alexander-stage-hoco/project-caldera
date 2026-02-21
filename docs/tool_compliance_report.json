@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-14T20:28:47.400882+00:00",
+  "generated_at": "2026-02-21T08:35:53.162506+00:00",
   "summary": {
     "failed": 0,
     "passed": 18,
@@ -10,7 +10,7 @@
       "checks": [
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.19,
+          "duration_ms": 0.21,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -20,7 +20,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.37,
+          "duration_ms": 0.54,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -30,7 +30,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.04,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -40,7 +40,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.14,
+          "duration_ms": 0.48,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -50,7 +50,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.47,
+          "duration_ms": 0.48,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -62,7 +62,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.31,
+          "duration_ms": 0.44,
           "evidence": [],
           "message": "analyze target output pattern acceptable",
           "severity": "medium",
@@ -72,7 +72,7 @@
         },
         {
           "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.55,
+          "duration_ms": 0.46,
           "evidence": [],
           "message": "No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
           "severity": "high",
@@ -82,7 +82,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.62,
+          "duration_ms": 0.74,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -92,7 +92,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.15,
+          "duration_ms": 0.31,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -102,7 +102,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.52,
+          "duration_ms": 0.96,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -112,7 +112,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.36,
+          "duration_ms": 0.42,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -122,7 +122,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 1.31,
+          "duration_ms": 3.66,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -138,7 +138,137 @@
       "checks": [
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.19,
+          "duration_ms": 0.52,
+          "evidence": [],
+          "message": "All required paths present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.targets",
+          "duration_ms": 0.77,
+          "evidence": [],
+          "message": "Makefile targets present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.permissions",
+          "duration_ms": 0.11,
+          "evidence": [],
+          "message": "Makefile has correct permissions",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.uses_common",
+          "duration_ms": 0.18,
+          "evidence": [],
+          "message": "Makefile includes ../Makefile.common",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_dir_convention",
+          "duration_ms": 0.32,
+          "evidence": [
+            "outputs/$(RUN_ID)"
+          ],
+          "message": "OUTPUT_DIR inherited from Makefile.common",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_filename",
+          "duration_ms": 0.12,
+          "evidence": [],
+          "message": "analyze target uses output directory argument",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.evaluate_input_valid",
+          "duration_ms": 0.18,
+          "evidence": [
+            "input: $(LATEST_OUTPUT)"
+          ],
+          "message": "evaluate target input path is valid",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.draft",
+          "duration_ms": 0.44,
+          "evidence": [],
+          "message": "Schema draft is 2020-12",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.contract",
+          "duration_ms": 0.13,
+          "evidence": [],
+          "message": "Schema requires metadata and data fields",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.blueprint_structure",
+          "duration_ms": 0.68,
+          "evidence": [],
+          "message": "BLUEPRINT.md has required sections",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.eval_strategy_structure",
+          "duration_ms": 0.57,
+          "evidence": [],
+          "message": "EVAL_STRATEGY.md has required sections",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.structure_naming",
+          "duration_ms": 1.4,
+          "evidence": [],
+          "message": "Test structure and naming conventions followed",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        }
+      ],
+      "name": "dependensee",
+      "status": "pass"
+    },
+    {
+      "checks": [
+        {
+          "check_id": "structure.paths",
+          "duration_ms": 0.23,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -158,7 +288,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.03,
+          "duration_ms": 0.02,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -178,7 +308,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.07,
+          "duration_ms": 0.18,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -190,9 +320,9 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.07,
+          "duration_ms": 0.19,
           "evidence": [],
-          "message": "analyze target uses output directory argument",
+          "message": "analyze target output pattern acceptable",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -200,19 +330,17 @@
         },
         {
           "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.16,
-          "evidence": [
-            "input: $(LATEST_OUTPUT)"
-          ],
-          "message": "evaluate target input path is valid",
+          "duration_ms": 0.3,
+          "evidence": [],
+          "message": "No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
           "severity": "high",
-          "status": "pass",
+          "status": "skip",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.31,
+          "duration_ms": 0.66,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -222,7 +350,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.26,
+          "duration_ms": 0.3,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -232,7 +360,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 1.33,
+          "duration_ms": 0.72,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -242,7 +370,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.76,
+          "duration_ms": 0.93,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -252,7 +380,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 0.95,
+          "duration_ms": 1.6,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -261,14 +389,274 @@
           "stdout_summary": null
         }
       ],
-      "name": "dependensee",
+      "name": "devskim",
       "status": "pass"
     },
     {
       "checks": [
         {
           "check_id": "structure.paths",
+          "duration_ms": 0.42,
+          "evidence": [],
+          "message": "All required paths present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.targets",
+          "duration_ms": 0.75,
+          "evidence": [],
+          "message": "Makefile targets present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.permissions",
+          "duration_ms": 0.06,
+          "evidence": [],
+          "message": "Makefile has correct permissions",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.uses_common",
+          "duration_ms": 0.19,
+          "evidence": [],
+          "message": "Makefile includes ../Makefile.common",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_dir_convention",
+          "duration_ms": 0.42,
+          "evidence": [
+            "outputs/$(RUN_ID)"
+          ],
+          "message": "OUTPUT_DIR inherited from Makefile.common",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_filename",
           "duration_ms": 0.18,
+          "evidence": [],
+          "message": "analyze target uses output directory argument",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.evaluate_input_valid",
+          "duration_ms": 0.27,
+          "evidence": [
+            "input: $(SYNTHETIC_OUTPUT_DIR)"
+          ],
+          "message": "evaluate target input path is valid",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.draft",
+          "duration_ms": 1.34,
+          "evidence": [],
+          "message": "Schema draft is 2020-12",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.contract",
+          "duration_ms": 0.38,
+          "evidence": [],
+          "message": "Schema requires metadata and data fields",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.blueprint_structure",
+          "duration_ms": 0.7,
+          "evidence": [],
+          "message": "BLUEPRINT.md has required sections",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.eval_strategy_structure",
+          "duration_ms": 0.64,
+          "evidence": [],
+          "message": "EVAL_STRATEGY.md has required sections",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.structure_naming",
+          "duration_ms": 1.09,
+          "evidence": [],
+          "message": "Test structure and naming conventions followed",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        }
+      ],
+      "name": "dotcover",
+      "status": "pass"
+    },
+    {
+      "checks": [
+        {
+          "check_id": "structure.paths",
+          "duration_ms": 0.36,
+          "evidence": [],
+          "message": "All required paths present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.targets",
+          "duration_ms": 0.48,
+          "evidence": [],
+          "message": "Makefile targets present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.permissions",
+          "duration_ms": 0.03,
+          "evidence": [],
+          "message": "Makefile has correct permissions",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.uses_common",
+          "duration_ms": 0.07,
+          "evidence": [],
+          "message": "Makefile includes ../Makefile.common",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_dir_convention",
+          "duration_ms": 0.08,
+          "evidence": [
+            "outputs/$(RUN_ID)"
+          ],
+          "message": "OUTPUT_DIR inherited from Makefile.common",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_filename",
+          "duration_ms": 0.06,
+          "evidence": [],
+          "message": "analyze target uses output directory argument",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.evaluate_input_valid",
+          "duration_ms": 0.08,
+          "evidence": [
+            "input: evaluation/results"
+          ],
+          "message": "evaluate target input path is valid",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.draft",
+          "duration_ms": 0.58,
+          "evidence": [],
+          "message": "Schema draft is 2020-12",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.contract",
+          "duration_ms": 0.15,
+          "evidence": [],
+          "message": "Schema requires metadata and data fields",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.blueprint_structure",
+          "duration_ms": 0.76,
+          "evidence": [],
+          "message": "BLUEPRINT.md has required sections",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.eval_strategy_structure",
+          "duration_ms": 0.61,
+          "evidence": [],
+          "message": "EVAL_STRATEGY.md has required sections",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.structure_naming",
+          "duration_ms": 1.26,
+          "evidence": [],
+          "message": "Test structure and naming conventions followed",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        }
+      ],
+      "name": "git-blame-scanner",
+      "status": "pass"
+    },
+    {
+      "checks": [
+        {
+          "check_id": "structure.paths",
+          "duration_ms": 0.45,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -298,7 +686,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.19,
+          "duration_ms": 0.2,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -308,7 +696,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.15,
+          "duration_ms": 0.1,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -320,9 +708,9 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.21,
+          "duration_ms": 0.27,
           "evidence": [],
-          "message": "analyze target output pattern acceptable",
+          "message": "analyze target uses output directory argument",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -330,7 +718,7 @@
         },
         {
           "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.14,
+          "duration_ms": 1.55,
           "evidence": [],
           "message": "No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
           "severity": "high",
@@ -340,7 +728,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.51,
+          "duration_ms": 2.99,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -350,7 +738,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.29,
+          "duration_ms": 0.2,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -360,7 +748,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.65,
+          "duration_ms": 0.62,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -370,7 +758,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 1.16,
+          "duration_ms": 0.66,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -380,7 +768,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 1.68,
+          "duration_ms": 2.79,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -389,274 +777,14 @@
           "stdout_summary": null
         }
       ],
-      "name": "devskim",
+      "name": "git-fame",
       "status": "pass"
     },
     {
       "checks": [
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.45,
-          "evidence": [],
-          "message": "All required paths present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.targets",
-          "duration_ms": 0.5,
-          "evidence": [],
-          "message": "Makefile targets present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.permissions",
-          "duration_ms": 0.03,
-          "evidence": [],
-          "message": "Makefile has correct permissions",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.uses_common",
-          "duration_ms": 0.06,
-          "evidence": [],
-          "message": "Makefile includes ../Makefile.common",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_dir_convention",
-          "duration_ms": 0.08,
-          "evidence": [
-            "outputs/$(RUN_ID)"
-          ],
-          "message": "OUTPUT_DIR inherited from Makefile.common",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_filename",
-          "duration_ms": 0.05,
-          "evidence": [],
-          "message": "analyze target uses output directory argument",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.evaluate_input_valid",
-          "duration_ms": 1.01,
-          "evidence": [
-            "input: $(SYNTHETIC_OUTPUT_DIR)"
-          ],
-          "message": "evaluate target input path is valid",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.draft",
-          "duration_ms": 0.53,
-          "evidence": [],
-          "message": "Schema draft is 2020-12",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.contract",
-          "duration_ms": 0.08,
-          "evidence": [],
-          "message": "Schema requires metadata and data fields",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.33,
-          "evidence": [],
-          "message": "BLUEPRINT.md has required sections",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.44,
-          "evidence": [],
-          "message": "EVAL_STRATEGY.md has required sections",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "test.structure_naming",
-          "duration_ms": 1.07,
-          "evidence": [],
-          "message": "Test structure and naming conventions followed",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        }
-      ],
-      "name": "dotcover",
-      "status": "pass"
-    },
-    {
-      "checks": [
-        {
-          "check_id": "structure.paths",
-          "duration_ms": 0.19,
-          "evidence": [],
-          "message": "All required paths present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.targets",
-          "duration_ms": 0.41,
-          "evidence": [],
-          "message": "Makefile targets present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.permissions",
-          "duration_ms": 0.02,
-          "evidence": [],
-          "message": "Makefile has correct permissions",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.uses_common",
-          "duration_ms": 0.05,
-          "evidence": [],
-          "message": "Makefile includes ../Makefile.common",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_dir_convention",
-          "duration_ms": 0.07,
-          "evidence": [
-            "outputs/$(RUN_ID)"
-          ],
-          "message": "OUTPUT_DIR inherited from Makefile.common",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_filename",
-          "duration_ms": 0.05,
-          "evidence": [],
-          "message": "analyze target uses output directory argument",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.06,
-          "evidence": [
-            "input: evaluation/results"
-          ],
-          "message": "evaluate target input path is valid",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.draft",
-          "duration_ms": 0.37,
-          "evidence": [],
-          "message": "Schema draft is 2020-12",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.contract",
-          "duration_ms": 0.09,
-          "evidence": [],
-          "message": "Schema requires metadata and data fields",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.28,
-          "evidence": [],
-          "message": "BLUEPRINT.md has required sections",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.37,
-          "evidence": [],
-          "message": "EVAL_STRATEGY.md has required sections",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "test.structure_naming",
-          "duration_ms": 0.98,
-          "evidence": [],
-          "message": "Test structure and naming conventions followed",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        }
-      ],
-      "name": "git-blame-scanner",
-      "status": "pass"
-    },
-    {
-      "checks": [
-        {
-          "check_id": "structure.paths",
-          "duration_ms": 0.56,
+          "duration_ms": 0.24,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -676,7 +804,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.02,
+          "duration_ms": 0.09,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -686,7 +814,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.05,
+          "duration_ms": 0.15,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -696,7 +824,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.08,
+          "duration_ms": 0.26,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -708,7 +836,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.05,
+          "duration_ms": 0.19,
           "evidence": [],
           "message": "analyze target uses output directory argument",
           "severity": "medium",
@@ -718,17 +846,19 @@
         },
         {
           "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.06,
-          "evidence": [],
-          "message": "No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
+          "duration_ms": 0.2,
+          "evidence": [
+            "input: evaluation/results"
+          ],
+          "message": "evaluate target input path is valid",
           "severity": "high",
-          "status": "skip",
+          "status": "pass",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.37,
+          "duration_ms": 0.53,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -738,7 +868,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.09,
+          "duration_ms": 0.16,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -748,7 +878,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.58,
+          "duration_ms": 0.45,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -758,7 +888,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.46,
+          "duration_ms": 0.67,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -768,7 +898,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 1.01,
+          "duration_ms": 1.35,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -777,14 +907,14 @@
           "stdout_summary": null
         }
       ],
-      "name": "git-fame",
+      "name": "git-sizer",
       "status": "pass"
     },
     {
       "checks": [
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.23,
+          "duration_ms": 0.26,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -794,7 +924,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.5,
+          "duration_ms": 0.49,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -814,7 +944,137 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.05,
+          "duration_ms": 0.07,
+          "evidence": [],
+          "message": "Makefile includes ../Makefile.common",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_dir_convention",
+          "duration_ms": 0.14,
+          "evidence": [
+            "outputs/$(RUN_ID)"
+          ],
+          "message": "OUTPUT_DIR inherited from Makefile.common",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_filename",
+          "duration_ms": 0.23,
+          "evidence": [],
+          "message": "analyze target uses output directory argument",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.evaluate_input_valid",
+          "duration_ms": 0.15,
+          "evidence": [
+            "input: outputs/runs"
+          ],
+          "message": "evaluate target input path is valid",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.draft",
+          "duration_ms": 0.53,
+          "evidence": [],
+          "message": "Schema draft is 2020-12",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.contract",
+          "duration_ms": 0.15,
+          "evidence": [],
+          "message": "Schema requires metadata and data fields",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.blueprint_structure",
+          "duration_ms": 0.73,
+          "evidence": [],
+          "message": "BLUEPRINT.md has required sections",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.eval_strategy_structure",
+          "duration_ms": 1.02,
+          "evidence": [],
+          "message": "EVAL_STRATEGY.md has required sections",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.structure_naming",
+          "duration_ms": 1.37,
+          "evidence": [],
+          "message": "Test structure and naming conventions followed",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        }
+      ],
+      "name": "gitleaks",
+      "status": "pass"
+    },
+    {
+      "checks": [
+        {
+          "check_id": "structure.paths",
+          "duration_ms": 0.24,
+          "evidence": [],
+          "message": "All required paths present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.targets",
+          "duration_ms": 0.51,
+          "evidence": [],
+          "message": "Makefile targets present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.permissions",
+          "duration_ms": 0.03,
+          "evidence": [],
+          "message": "Makefile has correct permissions",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.uses_common",
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -838,7 +1098,7 @@
           "check_id": "make.output_filename",
           "duration_ms": 0.07,
           "evidence": [],
-          "message": "analyze target uses output directory argument",
+          "message": "analyze target output pattern acceptable",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -846,19 +1106,17 @@
         },
         {
           "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.09,
-          "evidence": [
-            "input: evaluation/results"
-          ],
-          "message": "evaluate target input path is valid",
+          "duration_ms": 0.08,
+          "evidence": [],
+          "message": "No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
           "severity": "high",
-          "status": "pass",
+          "status": "skip",
           "stderr_summary": null,
           "stdout_summary": null
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.27,
+          "duration_ms": 0.6,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -868,7 +1126,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.09,
+          "duration_ms": 0.18,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -878,7 +1136,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.34,
+          "duration_ms": 1.24,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -888,7 +1146,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.55,
+          "duration_ms": 1.62,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -898,7 +1156,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 0.79,
+          "duration_ms": 1.56,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -907,14 +1165,144 @@
           "stdout_summary": null
         }
       ],
-      "name": "git-sizer",
+      "name": "layout-scanner",
       "status": "pass"
     },
     {
       "checks": [
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.48,
+          "duration_ms": 0.86,
+          "evidence": [],
+          "message": "All required paths present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.targets",
+          "duration_ms": 0.52,
+          "evidence": [],
+          "message": "Makefile targets present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.permissions",
+          "duration_ms": 0.03,
+          "evidence": [],
+          "message": "Makefile has correct permissions",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.uses_common",
+          "duration_ms": 0.08,
+          "evidence": [],
+          "message": "Makefile includes ../Makefile.common",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_dir_convention",
+          "duration_ms": 0.13,
+          "evidence": [
+            "outputs/$(RUN_ID)"
+          ],
+          "message": "OUTPUT_DIR inherited from Makefile.common",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_filename",
+          "duration_ms": 0.08,
+          "evidence": [],
+          "message": "analyze target uses output directory argument",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.evaluate_input_valid",
+          "duration_ms": 0.1,
+          "evidence": [
+            "input: $(EVAL_OUTPUT_DIR)/output.json"
+          ],
+          "message": "evaluate target input path is valid",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.draft",
+          "duration_ms": 0.7,
+          "evidence": [],
+          "message": "Schema draft is 2020-12",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.contract",
+          "duration_ms": 0.36,
+          "evidence": [],
+          "message": "Schema requires metadata and data fields",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.blueprint_structure",
+          "duration_ms": 1.39,
+          "evidence": [],
+          "message": "BLUEPRINT.md has required sections",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.eval_strategy_structure",
+          "duration_ms": 0.97,
+          "evidence": [],
+          "message": "EVAL_STRATEGY.md has required sections",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.structure_naming",
+          "duration_ms": 2.37,
+          "evidence": [],
+          "message": "Test structure and naming conventions followed",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        }
+      ],
+      "name": "lizard",
+      "status": "pass"
+    },
+    {
+      "checks": [
+        {
+          "check_id": "structure.paths",
+          "duration_ms": 0.62,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -934,7 +1322,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.03,
+          "duration_ms": 0.06,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -944,7 +1332,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.12,
+          "duration_ms": 0.16,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -954,7 +1342,137 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.08,
+          "duration_ms": 0.37,
+          "evidence": [
+            "outputs/$(RUN_ID)"
+          ],
+          "message": "OUTPUT_DIR inherited from Makefile.common",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_filename",
+          "duration_ms": 0.22,
+          "evidence": [],
+          "message": "analyze target uses output directory argument",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.evaluate_input_valid",
+          "duration_ms": 0.2,
+          "evidence": [
+            "input: $(SYNTHETIC_OUTPUT)"
+          ],
+          "message": "evaluate target input path is valid",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.draft",
+          "duration_ms": 1.49,
+          "evidence": [],
+          "message": "Schema draft is 2020-12",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.contract",
+          "duration_ms": 0.35,
+          "evidence": [],
+          "message": "Schema requires metadata and data fields",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.blueprint_structure",
+          "duration_ms": 1.06,
+          "evidence": [],
+          "message": "BLUEPRINT.md has required sections",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.eval_strategy_structure",
+          "duration_ms": 1.86,
+          "evidence": [],
+          "message": "EVAL_STRATEGY.md has required sections",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.structure_naming",
+          "duration_ms": 2.02,
+          "evidence": [],
+          "message": "Test structure and naming conventions followed",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        }
+      ],
+      "name": "pmd-cpd",
+      "status": "pass"
+    },
+    {
+      "checks": [
+        {
+          "check_id": "structure.paths",
+          "duration_ms": 0.24,
+          "evidence": [],
+          "message": "All required paths present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.targets",
+          "duration_ms": 0.45,
+          "evidence": [],
+          "message": "Makefile targets present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.permissions",
+          "duration_ms": 0.02,
+          "evidence": [],
+          "message": "Makefile has correct permissions",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.uses_common",
+          "duration_ms": 0.06,
+          "evidence": [],
+          "message": "Makefile includes ../Makefile.common",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_dir_convention",
+          "duration_ms": 0.12,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -976,11 +1494,11 @@
         },
         {
           "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.29,
+          "duration_ms": 0.16,
           "evidence": [
-            "input: outputs/runs"
+            "prerequisites: $(VENV_READY) analyze"
           ],
-          "message": "evaluate target input path is valid",
+          "message": "evaluate uses $(OUTPUT_DIR) but depends on analyze",
           "severity": "high",
           "status": "pass",
           "stderr_summary": null,
@@ -988,7 +1506,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.54,
+          "duration_ms": 0.51,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -998,7 +1516,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.28,
+          "duration_ms": 0.3,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -1008,7 +1526,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.87,
+          "duration_ms": 1.02,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -1018,7 +1536,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 1.89,
+          "duration_ms": 1.45,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -1028,7 +1546,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 1.19,
+          "duration_ms": 1.83,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -1037,14 +1555,14 @@
           "stdout_summary": null
         }
       ],
-      "name": "gitleaks",
+      "name": "roslyn-analyzers",
       "status": "pass"
     },
     {
       "checks": [
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.18,
+          "duration_ms": 0.25,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -1054,7 +1572,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.33,
+          "duration_ms": 0.48,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -1074,7 +1592,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.15,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -1084,7 +1602,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.15,
+          "duration_ms": 0.09,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -1096,9 +1614,9 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.39,
+          "duration_ms": 0.07,
           "evidence": [],
-          "message": "analyze target output pattern acceptable",
+          "message": "analyze target uses output directory argument",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -1106,7 +1624,7 @@
         },
         {
           "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.39,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
           "severity": "high",
@@ -1116,7 +1634,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 1.09,
+          "duration_ms": 0.45,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -1126,7 +1644,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.54,
+          "duration_ms": 0.11,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -1136,7 +1654,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 1.41,
+          "duration_ms": 0.5,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -1146,7 +1664,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 1.52,
+          "duration_ms": 0.43,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -1156,7 +1674,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 2.0,
+          "duration_ms": 1.45,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -1165,14 +1683,14 @@
           "stdout_summary": null
         }
       ],
-      "name": "layout-scanner",
+      "name": "scancode",
       "status": "pass"
     },
     {
       "checks": [
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.2,
+          "duration_ms": 1.12,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -1182,7 +1700,135 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.54,
+          "duration_ms": 0.41,
+          "evidence": [],
+          "message": "Makefile targets present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.permissions",
+          "duration_ms": 0.07,
+          "evidence": [],
+          "message": "Makefile has correct permissions",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.uses_common",
+          "duration_ms": 0.25,
+          "evidence": [],
+          "message": "Makefile includes ../Makefile.common",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_dir_convention",
+          "duration_ms": 0.45,
+          "evidence": [
+            "outputs/$(RUN_ID)"
+          ],
+          "message": "OUTPUT_DIR inherited from Makefile.common",
+          "severity": "low",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.output_filename",
+          "duration_ms": 0.19,
+          "evidence": [],
+          "message": "analyze target uses output directory argument",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.evaluate_input_valid",
+          "duration_ms": 0.21,
+          "evidence": [],
+          "message": "No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
+          "severity": "high",
+          "status": "skip",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.draft",
+          "duration_ms": 0.81,
+          "evidence": [],
+          "message": "Schema draft is 2020-12",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "schema.contract",
+          "duration_ms": 0.8,
+          "evidence": [],
+          "message": "Schema requires metadata and data fields",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.blueprint_structure",
+          "duration_ms": 1.22,
+          "evidence": [],
+          "message": "BLUEPRINT.md has required sections",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "docs.eval_strategy_structure",
+          "duration_ms": 1.18,
+          "evidence": [],
+          "message": "EVAL_STRATEGY.md has required sections",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "test.structure_naming",
+          "duration_ms": 1.77,
+          "evidence": [],
+          "message": "Test structure and naming conventions followed",
+          "severity": "medium",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        }
+      ],
+      "name": "scc",
+      "status": "pass"
+    },
+    {
+      "checks": [
+        {
+          "check_id": "structure.paths",
+          "duration_ms": 0.39,
+          "evidence": [],
+          "message": "All required paths present",
+          "severity": "high",
+          "status": "pass",
+          "stderr_summary": null,
+          "stdout_summary": null
+        },
+        {
+          "check_id": "make.targets",
+          "duration_ms": 0.45,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -1202,7 +1848,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.07,
+          "duration_ms": 0.09,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -1212,7 +1858,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.1,
+          "duration_ms": 0.43,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -1224,9 +1870,9 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.1,
+          "duration_ms": 0.2,
           "evidence": [],
-          "message": "analyze target uses output directory argument",
+          "message": "analyze target output pattern acceptable",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -1234,9 +1880,9 @@
         },
         {
           "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.08,
+          "duration_ms": 0.21,
           "evidence": [
-            "input: $(EVAL_OUTPUT_DIR)/output.json"
+            "input: evaluation/results/output.json"
           ],
           "message": "evaluate target input path is valid",
           "severity": "high",
@@ -1246,7 +1892,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.49,
+          "duration_ms": 0.54,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -1256,7 +1902,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.18,
+          "duration_ms": 0.22,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -1266,7 +1912,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.86,
+          "duration_ms": 0.8,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -1276,137 +1922,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.93,
-          "evidence": [],
-          "message": "EVAL_STRATEGY.md has required sections",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "test.structure_naming",
-          "duration_ms": 1.63,
-          "evidence": [],
-          "message": "Test structure and naming conventions followed",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        }
-      ],
-      "name": "lizard",
-      "status": "pass"
-    },
-    {
-      "checks": [
-        {
-          "check_id": "structure.paths",
-          "duration_ms": 0.38,
-          "evidence": [],
-          "message": "All required paths present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.targets",
-          "duration_ms": 0.66,
-          "evidence": [],
-          "message": "Makefile targets present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.permissions",
-          "duration_ms": 0.12,
-          "evidence": [],
-          "message": "Makefile has correct permissions",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.uses_common",
-          "duration_ms": 0.28,
-          "evidence": [],
-          "message": "Makefile includes ../Makefile.common",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_dir_convention",
-          "duration_ms": 0.25,
-          "evidence": [
-            "outputs/$(RUN_ID)"
-          ],
-          "message": "OUTPUT_DIR inherited from Makefile.common",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_filename",
-          "duration_ms": 0.17,
-          "evidence": [],
-          "message": "analyze target uses output directory argument",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.12,
-          "evidence": [
-            "input: $(SYNTHETIC_OUTPUT)"
-          ],
-          "message": "evaluate target input path is valid",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.draft",
-          "duration_ms": 0.5,
-          "evidence": [],
-          "message": "Schema draft is 2020-12",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.contract",
-          "duration_ms": 0.42,
-          "evidence": [],
-          "message": "Schema requires metadata and data fields",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.96,
-          "evidence": [],
-          "message": "BLUEPRINT.md has required sections",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 1.07,
+          "duration_ms": 0.7,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -1425,14 +1941,14 @@
           "stdout_summary": null
         }
       ],
-      "name": "pmd-cpd",
+      "name": "semgrep",
       "status": "pass"
     },
     {
       "checks": [
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.41,
+          "duration_ms": 0.21,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -1442,137 +1958,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.36,
-          "evidence": [],
-          "message": "Makefile targets present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.permissions",
-          "duration_ms": 0.09,
-          "evidence": [],
-          "message": "Makefile has correct permissions",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.uses_common",
-          "duration_ms": 0.07,
-          "evidence": [],
-          "message": "Makefile includes ../Makefile.common",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_dir_convention",
-          "duration_ms": 0.11,
-          "evidence": [
-            "outputs/$(RUN_ID)"
-          ],
-          "message": "OUTPUT_DIR inherited from Makefile.common",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_filename",
-          "duration_ms": 0.08,
-          "evidence": [],
-          "message": "analyze target uses output directory argument",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.19,
-          "evidence": [
-            "prerequisites: $(VENV_READY) analyze"
-          ],
-          "message": "evaluate uses $(OUTPUT_DIR) but depends on analyze",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.draft",
-          "duration_ms": 0.32,
-          "evidence": [],
-          "message": "Schema draft is 2020-12",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.contract",
-          "duration_ms": 0.15,
-          "evidence": [],
-          "message": "Schema requires metadata and data fields",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.86,
-          "evidence": [],
-          "message": "BLUEPRINT.md has required sections",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 1.11,
-          "evidence": [],
-          "message": "EVAL_STRATEGY.md has required sections",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "test.structure_naming",
-          "duration_ms": 1.01,
-          "evidence": [],
-          "message": "Test structure and naming conventions followed",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        }
-      ],
-      "name": "roslyn-analyzers",
-      "status": "pass"
-    },
-    {
-      "checks": [
-        {
-          "check_id": "structure.paths",
-          "duration_ms": 0.47,
-          "evidence": [],
-          "message": "All required paths present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.targets",
-          "duration_ms": 0.62,
+          "duration_ms": 0.49,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -1592,264 +1978,8 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.13,
-          "evidence": [],
-          "message": "Makefile includes ../Makefile.common",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_dir_convention",
-          "duration_ms": 0.17,
-          "evidence": [
-            "outputs/$(RUN_ID)"
-          ],
-          "message": "OUTPUT_DIR inherited from Makefile.common",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_filename",
-          "duration_ms": 0.25,
-          "evidence": [],
-          "message": "analyze target uses output directory argument",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.11,
-          "evidence": [],
-          "message": "No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
-          "severity": "high",
-          "status": "skip",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.draft",
-          "duration_ms": 0.52,
-          "evidence": [],
-          "message": "Schema draft is 2020-12",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.contract",
-          "duration_ms": 0.11,
-          "evidence": [],
-          "message": "Schema requires metadata and data fields",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.46,
-          "evidence": [],
-          "message": "BLUEPRINT.md has required sections",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.69,
-          "evidence": [],
-          "message": "EVAL_STRATEGY.md has required sections",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "test.structure_naming",
-          "duration_ms": 0.92,
-          "evidence": [],
-          "message": "Test structure and naming conventions followed",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        }
-      ],
-      "name": "scancode",
-      "status": "pass"
-    },
-    {
-      "checks": [
-        {
-          "check_id": "structure.paths",
-          "duration_ms": 0.25,
-          "evidence": [],
-          "message": "All required paths present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.targets",
-          "duration_ms": 0.36,
-          "evidence": [],
-          "message": "Makefile targets present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.permissions",
-          "duration_ms": 0.02,
-          "evidence": [],
-          "message": "Makefile has correct permissions",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.uses_common",
-          "duration_ms": 0.05,
-          "evidence": [],
-          "message": "Makefile includes ../Makefile.common",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_dir_convention",
-          "duration_ms": 0.25,
-          "evidence": [
-            "outputs/$(RUN_ID)"
-          ],
-          "message": "OUTPUT_DIR inherited from Makefile.common",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_filename",
           "duration_ms": 0.06,
           "evidence": [],
-          "message": "analyze target uses output directory argument",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.07,
-          "evidence": [],
-          "message": "No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
-          "severity": "high",
-          "status": "skip",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.draft",
-          "duration_ms": 0.47,
-          "evidence": [],
-          "message": "Schema draft is 2020-12",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.contract",
-          "duration_ms": 0.15,
-          "evidence": [],
-          "message": "Schema requires metadata and data fields",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.75,
-          "evidence": [],
-          "message": "BLUEPRINT.md has required sections",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.96,
-          "evidence": [],
-          "message": "EVAL_STRATEGY.md has required sections",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "test.structure_naming",
-          "duration_ms": 0.97,
-          "evidence": [],
-          "message": "Test structure and naming conventions followed",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        }
-      ],
-      "name": "scc",
-      "status": "pass"
-    },
-    {
-      "checks": [
-        {
-          "check_id": "structure.paths",
-          "duration_ms": 0.71,
-          "evidence": [],
-          "message": "All required paths present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.targets",
-          "duration_ms": 0.55,
-          "evidence": [],
-          "message": "Makefile targets present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.permissions",
-          "duration_ms": 0.07,
-          "evidence": [],
-          "message": "Makefile has correct permissions",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.uses_common",
-          "duration_ms": 0.23,
-          "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
           "status": "pass",
@@ -1858,7 +1988,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.42,
+          "duration_ms": 0.33,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -1870,9 +2000,9 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.26,
+          "duration_ms": 0.44,
           "evidence": [],
-          "message": "analyze target output pattern acceptable",
+          "message": "analyze target produces output.json",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -1892,7 +2022,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.93,
+          "duration_ms": 0.63,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -1902,7 +2032,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.33,
+          "duration_ms": 0.32,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -1912,7 +2042,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 1.43,
+          "duration_ms": 1.01,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -1922,7 +2052,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 1.73,
+          "duration_ms": 1.35,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -1932,7 +2062,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 2.21,
+          "duration_ms": 2.56,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",
@@ -1941,14 +2071,14 @@
           "stdout_summary": null
         }
       ],
-      "name": "semgrep",
+      "name": "sonarqube",
       "status": "pass"
     },
     {
       "checks": [
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.48,
+          "duration_ms": 0.21,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -1958,7 +2088,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 1.13,
+          "duration_ms": 0.63,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -1968,7 +2098,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.08,
+          "duration_ms": 0.03,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -1978,7 +2108,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.19,
+          "duration_ms": 0.07,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -1988,7 +2118,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.27,
+          "duration_ms": 0.1,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -2000,9 +2130,9 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.16,
+          "duration_ms": 0.07,
           "evidence": [],
-          "message": "analyze target produces output.json",
+          "message": "analyze target uses output directory argument",
           "severity": "medium",
           "status": "pass",
           "stderr_summary": null,
@@ -2010,9 +2140,9 @@
         },
         {
           "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.12,
+          "duration_ms": 0.09,
           "evidence": [
-            "input: evaluation/results/output.json"
+            "input: $(EVAL_OUTPUT_DIR)/output.json"
           ],
           "message": "evaluate target input path is valid",
           "severity": "high",
@@ -2032,7 +2162,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.33,
+          "duration_ms": 0.12,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -2042,7 +2172,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 1.0,
+          "duration_ms": 0.55,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -2052,137 +2182,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 1.34,
-          "evidence": [],
-          "message": "EVAL_STRATEGY.md has required sections",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "test.structure_naming",
-          "duration_ms": 0.98,
-          "evidence": [],
-          "message": "Test structure and naming conventions followed",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        }
-      ],
-      "name": "sonarqube",
-      "status": "pass"
-    },
-    {
-      "checks": [
-        {
-          "check_id": "structure.paths",
-          "duration_ms": 0.47,
-          "evidence": [],
-          "message": "All required paths present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.targets",
-          "duration_ms": 0.33,
-          "evidence": [],
-          "message": "Makefile targets present",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.permissions",
-          "duration_ms": 0.02,
-          "evidence": [],
-          "message": "Makefile has correct permissions",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.uses_common",
-          "duration_ms": 0.05,
-          "evidence": [],
-          "message": "Makefile includes ../Makefile.common",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_dir_convention",
-          "duration_ms": 0.09,
-          "evidence": [
-            "outputs/$(RUN_ID)"
-          ],
-          "message": "OUTPUT_DIR inherited from Makefile.common",
-          "severity": "low",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.output_filename",
-          "duration_ms": 0.06,
-          "evidence": [],
-          "message": "analyze target uses output directory argument",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.07,
-          "evidence": [
-            "input: $(EVAL_OUTPUT_DIR)/output.json"
-          ],
-          "message": "evaluate target input path is valid",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.draft",
-          "duration_ms": 0.39,
-          "evidence": [],
-          "message": "Schema draft is 2020-12",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "schema.contract",
-          "duration_ms": 0.09,
-          "evidence": [],
-          "message": "Schema requires metadata and data fields",
-          "severity": "high",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.53,
-          "evidence": [],
-          "message": "BLUEPRINT.md has required sections",
-          "severity": "medium",
-          "status": "pass",
-          "stderr_summary": null,
-          "stdout_summary": null
-        },
-        {
-          "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.59,
+          "duration_ms": 0.56,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -2208,7 +2208,7 @@
       "checks": [
         {
           "check_id": "structure.paths",
-          "duration_ms": 0.51,
+          "duration_ms": 0.66,
           "evidence": [],
           "message": "All required paths present",
           "severity": "high",
@@ -2218,7 +2218,7 @@
         },
         {
           "check_id": "make.targets",
-          "duration_ms": 0.69,
+          "duration_ms": 0.35,
           "evidence": [],
           "message": "Makefile targets present",
           "severity": "high",
@@ -2228,7 +2228,7 @@
         },
         {
           "check_id": "make.permissions",
-          "duration_ms": 0.03,
+          "duration_ms": 0.02,
           "evidence": [],
           "message": "Makefile has correct permissions",
           "severity": "low",
@@ -2238,7 +2238,7 @@
         },
         {
           "check_id": "make.uses_common",
-          "duration_ms": 0.16,
+          "duration_ms": 0.09,
           "evidence": [],
           "message": "Makefile includes ../Makefile.common",
           "severity": "medium",
@@ -2248,7 +2248,7 @@
         },
         {
           "check_id": "make.output_dir_convention",
-          "duration_ms": 0.64,
+          "duration_ms": 0.26,
           "evidence": [
             "outputs/$(RUN_ID)"
           ],
@@ -2260,7 +2260,7 @@
         },
         {
           "check_id": "make.output_filename",
-          "duration_ms": 0.19,
+          "duration_ms": 0.13,
           "evidence": [],
           "message": "analyze target uses output directory argument",
           "severity": "medium",
@@ -2270,7 +2270,7 @@
         },
         {
           "check_id": "make.evaluate_input_valid",
-          "duration_ms": 0.25,
+          "duration_ms": 0.24,
           "evidence": [],
           "message": "No --results-dir/--analysis-dir/--analysis argument found in evaluate target",
           "severity": "high",
@@ -2280,7 +2280,7 @@
         },
         {
           "check_id": "schema.draft",
-          "duration_ms": 0.53,
+          "duration_ms": 0.58,
           "evidence": [],
           "message": "Schema draft is 2020-12",
           "severity": "medium",
@@ -2290,7 +2290,7 @@
         },
         {
           "check_id": "schema.contract",
-          "duration_ms": 0.12,
+          "duration_ms": 0.18,
           "evidence": [],
           "message": "Schema requires metadata and data fields",
           "severity": "high",
@@ -2300,7 +2300,7 @@
         },
         {
           "check_id": "docs.blueprint_structure",
-          "duration_ms": 0.64,
+          "duration_ms": 1.03,
           "evidence": [],
           "message": "BLUEPRINT.md has required sections",
           "severity": "medium",
@@ -2310,7 +2310,7 @@
         },
         {
           "check_id": "docs.eval_strategy_structure",
-          "duration_ms": 0.4,
+          "duration_ms": 0.84,
           "evidence": [],
           "message": "EVAL_STRATEGY.md has required sections",
           "severity": "high",
@@ -2320,7 +2320,7 @@
         },
         {
           "check_id": "test.structure_naming",
-          "duration_ms": 1.66,
+          "duration_ms": 2.06,
           "evidence": [],
           "message": "Test structure and naming conventions followed",
           "severity": "medium",

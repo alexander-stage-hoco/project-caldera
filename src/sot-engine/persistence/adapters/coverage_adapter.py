@@ -174,7 +174,7 @@ class CoverageAdapter(BaseAdapter):
 
         Files not found in layout are skipped with a warning.
         """
-        seen: set[str] = set()
+        tracker = self._dedup_tracker("file")
         for entry in files:
             relative_path = self._normalize_path(entry.get("relative_path", ""))
 
@@ -186,11 +186,8 @@ class CoverageAdapter(BaseAdapter):
                 self._log(f"WARN: skipping file not in layout: {relative_path}")
                 continue
 
-            # Deduplicate by file_id
-            if file_id in seen:
-                self._log(f"WARN: skipping duplicate file: {relative_path}")
+            if tracker.is_duplicate(file_id, label=relative_path):
                 continue
-            seen.add(file_id)
 
             yield CoverageSummary(
                 run_pk=run_pk,

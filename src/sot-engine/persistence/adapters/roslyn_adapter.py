@@ -93,16 +93,14 @@ class RoslynAdapter(BaseAdapter):
         self.validate_quality(files)
         violations = list(self._map_violations(run_pk, layout_run_pk, files))
 
-        # De-duplicate by primary key (run_pk, file_id, rule_id, line_start, column_start)
-        seen_keys: set[tuple] = set()
-        unique_violations = []
-        for v in violations:
-            key = (v.run_pk, v.file_id, v.rule_id, v.line_start, v.column_start)
-            if key not in seen_keys:
-                seen_keys.add(key)
-                unique_violations.append(v)
-            else:
-                self._log(f"WARN: skipping duplicate violation {v.rule_id} at {v.relative_path}:{v.line_start}")
+        tracker = self._dedup_tracker("violation")
+        unique_violations = [
+            v for v in violations
+            if not tracker.is_duplicate(
+                (v.run_pk, v.file_id, v.rule_id, v.line_start, v.column_start),
+                label=f"{v.rule_id} at {v.relative_path}:{v.line_start}",
+            )
+        ]
 
         self._roslyn_repo.insert_violations(unique_violations)
         return run_pk

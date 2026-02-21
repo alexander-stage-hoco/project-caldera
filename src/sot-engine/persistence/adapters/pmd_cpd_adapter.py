@@ -197,7 +197,7 @@ class PmdCpdAdapter(BaseAdapter):
 
         Deduplicates by file_id to match primary key constraint.
         """
-        seen: set[str] = set()
+        tracker = self._dedup_tracker("file")
         for file_entry in files:
             relative_path = self._normalize_path(file_entry.get("path", ""))
 
@@ -209,11 +209,8 @@ class PmdCpdAdapter(BaseAdapter):
                 self._log(f"WARN: skipping file not in layout: {relative_path}")
                 continue
 
-            # Deduplicate by file_id
-            if file_id in seen:
-                self._log(f"WARN: skipping duplicate file: {relative_path}")
+            if tracker.is_duplicate(file_id, label=relative_path):
                 continue
-            seen.add(file_id)
 
             yield PmdCpdFileMetric(
                 run_pk=run_pk,
@@ -236,17 +233,14 @@ class PmdCpdAdapter(BaseAdapter):
         """
         dup_entities: list[PmdCpdDuplication] = []
         occ_entities: list[PmdCpdOccurrence] = []
-        seen_dups: set[str] = set()
-        seen_occs: set[tuple[str, str, int]] = set()
+        dup_tracker = self._dedup_tracker("clone_id")
+        occ_tracker = self._dedup_tracker("occurrence")
 
         for dup in duplications:
             clone_id = dup.get("clone_id", "")
 
-            # Deduplicate duplications by clone_id
-            if clone_id in seen_dups:
-                self._log(f"WARN: skipping duplicate clone_id: {clone_id}")
+            if dup_tracker.is_duplicate(clone_id):
                 continue
-            seen_dups.add(clone_id)
 
             occurrences = dup.get("occurrences", [])
 
@@ -280,12 +274,9 @@ class PmdCpdAdapter(BaseAdapter):
 
                 line_start = occ.get("line_start", 1)
 
-                # Deduplicate occurrences by (clone_id, file_id, line_start)
                 occ_key = (clone_id, file_id, line_start)
-                if occ_key in seen_occs:
-                    self._log(f"WARN: skipping duplicate occurrence: {clone_id} at {relative_path}:{line_start}")
+                if occ_tracker.is_duplicate(occ_key, label=f"{clone_id} at {relative_path}:{line_start}"):
                     continue
-                seen_occs.add(occ_key)
 
                 occ_entities.append(
                     PmdCpdOccurrence(

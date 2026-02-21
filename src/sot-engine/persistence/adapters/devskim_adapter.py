@@ -126,7 +126,7 @@ class DevskimAdapter(BaseAdapter):
         self, run_pk: int, layout_run_pk: int, files: Iterable[dict]
     ) -> Iterable[DevskimFinding]:
         """Map file entries with issues to DevskimFinding entities."""
-        seen: set[tuple[str, str, int | None]] = set()
+        tracker = self._dedup_tracker("issue")
         for file_entry in files:
             relative_path = self._normalize_path(file_entry.get("path", ""))
 
@@ -141,12 +141,8 @@ class DevskimAdapter(BaseAdapter):
 
             for issue in file_entry.get("issues", []):
                 key = (file_id, issue.get("rule_id", ""), issue.get("line_start"))
-                if key in seen:
-                    self._log(
-                        f"WARN: skipping duplicate issue {key[1]} at {relative_path}:{key[2]}"
-                    )
+                if tracker.is_duplicate(key, label=f"{key[1]} at {relative_path}:{key[2]}"):
                     continue
-                seen.add(key)
                 yield DevskimFinding(
                     run_pk=run_pk,
                     file_id=file_id,

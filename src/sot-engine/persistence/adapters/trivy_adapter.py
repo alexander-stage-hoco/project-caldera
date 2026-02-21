@@ -306,7 +306,7 @@ class TrivyAdapter(BaseAdapter):
 
         Deduplicates by target_key to match primary key constraint.
         """
-        seen: set[str] = set()
+        tracker = self._dedup_tracker("target")
         for target in targets:
             raw_path = target.get("path", "")
             if not raw_path:
@@ -316,11 +316,8 @@ class TrivyAdapter(BaseAdapter):
             target_type = target.get("type")
             target_key = self._generate_target_key(relative_path, target_type)
 
-            # Deduplicate by target_key
-            if target_key in seen:
-                self._log(f"WARN: skipping duplicate target: {relative_path}")
+            if tracker.is_duplicate(target_key, label=relative_path):
                 continue
-            seen.add(target_key)
 
             # Try to link to layout for file_id resolution (best-effort)
             file_id = None
@@ -356,7 +353,7 @@ class TrivyAdapter(BaseAdapter):
 
         Deduplicates by (target_key, vulnerability_id, package_name) to match primary key.
         """
-        seen: set[tuple[str, str, str]] = set()
+        tracker = self._dedup_tracker("vulnerability")
         for vuln in vulnerabilities:
             # Generate target_key from the vulnerability's target path
             target_path = vuln.get("target", "")
@@ -369,12 +366,9 @@ class TrivyAdapter(BaseAdapter):
             vuln_id = vuln.get("id", "")
             package_name = vuln.get("package", "")
 
-            # Deduplicate by (target_key, vulnerability_id, package_name)
             key = (target_key, vuln_id, package_name)
-            if key in seen:
-                self._log(f"WARN: skipping duplicate vulnerability: {vuln_id} in {package_name}")
+            if tracker.is_duplicate(key, label=f"{vuln_id} in {package_name}"):
                 continue
-            seen.add(key)
 
             yield TrivyVulnerability(
                 run_pk=run_pk,
@@ -401,7 +395,7 @@ class TrivyAdapter(BaseAdapter):
 
         Deduplicates by (relative_path, misconfig_id, start_line) to match primary key.
         """
-        seen: set[tuple[str, str, int]] = set()
+        tracker = self._dedup_tracker("IaC misconfig")
         for misconfig in misconfigs:
             raw_path = misconfig.get("target", "")
             if not raw_path:
@@ -420,12 +414,9 @@ class TrivyAdapter(BaseAdapter):
 
             misconfig_id = misconfig.get("id", "")
 
-            # Deduplicate by (relative_path, misconfig_id, start_line)
             key = (relative_path, misconfig_id, start_line)
-            if key in seen:
-                self._log(f"WARN: skipping duplicate IaC misconfig: {misconfig_id} at {relative_path}:{start_line}")
+            if tracker.is_duplicate(key, label=f"{misconfig_id} at {relative_path}:{start_line}"):
                 continue
-            seen.add(key)
 
             # Try to link to layout for file_id resolution
             file_id = None

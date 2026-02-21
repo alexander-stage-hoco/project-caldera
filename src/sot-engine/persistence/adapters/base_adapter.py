@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Hashable
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
@@ -16,6 +17,24 @@ from ..validation import (
     validate_json_schema,
     validate_lz_schema,
 )
+
+
+class _DedupTracker:
+    """Tracks seen keys and logs duplicate warnings."""
+
+    def __init__(self, entity_type: str, log_fn: Callable[[str], None]) -> None:
+        self._seen: set[Hashable] = set()
+        self._entity_type = entity_type
+        self._log = log_fn
+
+    def is_duplicate(self, key: Hashable, label: str = "") -> bool:
+        """Return True if key was already seen. Logs warning on duplicates."""
+        if key in self._seen:
+            display = label or str(key)
+            self._log(f"WARN: skipping duplicate {self._entity_type}: {display}")
+            return True
+        self._seen.add(key)
+        return False
 
 
 class BaseAdapter(ABC):
@@ -104,6 +123,10 @@ class BaseAdapter(ABC):
     def _normalize_path(self, raw_path: str) -> str:
         """Normalize file path to repo-relative format."""
         return normalize_file_path(raw_path, self._repo_root)
+
+    def _dedup_tracker(self, entity_type: str) -> _DedupTracker:
+        """Create a dedup tracker for use in mapping loops."""
+        return _DedupTracker(entity_type, self._log)
 
     def _create_tool_run(self, metadata: dict) -> int:
         """Create a ToolRun entity from metadata and insert it.

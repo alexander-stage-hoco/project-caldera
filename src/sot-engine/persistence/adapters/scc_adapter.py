@@ -139,18 +139,15 @@ class SccAdapter(BaseAdapter):
 
         Deduplicates by (file_id) to match primary key constraint.
         """
-        seen: set[str] = set()
+        tracker = self._dedup_tracker("file")
         for entry in files:
             relative_path = self._normalize_path(entry.get("path", ""))
             file_id, directory_id = self._layout_repo.get_file_record(
                 layout_run_pk, relative_path
             )
 
-            # Deduplicate by file_id (primary key is run_pk, file_id)
-            if file_id in seen:
-                self._log(f"WARN: skipping duplicate file: {relative_path}")
+            if tracker.is_duplicate(file_id, label=relative_path):
                 continue
-            seen.add(file_id)
 
             yield SccFileMetric(
                 run_pk=run_pk,

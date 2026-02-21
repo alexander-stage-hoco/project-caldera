@@ -129,7 +129,7 @@ class SemgrepAdapter(BaseAdapter):
         self, run_pk: int, layout_run_pk: int, files: Iterable[dict]
     ) -> Iterable[SemgrepSmell]:
         """Map file entries with smells to SemgrepSmell entities."""
-        seen: set[tuple[str, str, int | None]] = set()
+        tracker = self._dedup_tracker("smell")
         for file_entry in files:
             relative_path = self._normalize_path(file_entry.get("path", ""))
 
@@ -144,12 +144,8 @@ class SemgrepAdapter(BaseAdapter):
 
             for smell in file_entry.get("smells", []):
                 key = (file_id, smell.get("rule_id", ""), smell.get("line_start"))
-                if key in seen:
-                    self._log(
-                        f"WARN: skipping duplicate smell {key[1]} at {relative_path}:{key[2]}"
-                    )
+                if tracker.is_duplicate(key, label=f"{key[1]} at {relative_path}:{key[2]}"):
                     continue
-                seen.add(key)
                 yield SemgrepSmell(
                     run_pk=run_pk,
                     file_id=file_id,

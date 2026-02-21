@@ -157,7 +157,7 @@ class ScancodeAdapter(BaseAdapter):
         self, run_pk: int, layout_run_pk: int, findings: Iterable[dict]
     ) -> Iterable[ScancodeFileLicense]:
         """Map findings to ScancodeFileLicense entities."""
-        seen: set[tuple[str, str, int | None]] = set()
+        tracker = self._dedup_tracker("license")
         for finding in findings:
             relative_path = self._normalize_path(finding.get("file_path", ""))
 
@@ -171,12 +171,8 @@ class ScancodeAdapter(BaseAdapter):
 
             line_number = finding.get("line_number")
             key = (file_id, finding.get("spdx_id", ""), line_number)
-            if key in seen:
-                self._log(
-                    f"WARN: skipping duplicate license {key[1]} at {relative_path}:{line_number}"
-                )
+            if tracker.is_duplicate(key, label=f"{key[1]} at {relative_path}:{line_number}"):
                 continue
-            seen.add(key)
 
             yield ScancodeFileLicense(
                 run_pk=run_pk,
