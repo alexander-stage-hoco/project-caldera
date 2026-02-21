@@ -72,12 +72,12 @@ LLM_MODEL ?= opus-4.5
 
 _common-test: $(VENV_READY)
 	@echo "Running all tests..."
-	@$(PYTHON_VENV) -m pytest tests/ -v --tb=short
+	@$(PYTHON_VENV) -m pytest tests/ -v --tb=short --confcutdir=.
 	@echo "All tests complete!"
 
 _common-test-quick: $(VENV_READY)
 	@echo "Running quick tests..."
-	@$(PYTHON_VENV) -m pytest tests/ -v --tb=short -x
+	@$(PYTHON_VENV) -m pytest tests/ -v --tb=short -x --confcutdir=.
 	@echo "Quick tests complete!"
 
 _common-clean:
