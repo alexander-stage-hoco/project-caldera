@@ -10,11 +10,11 @@ WITH run_map AS (
     WHERE tr_source.run_pk = {{ run_pk }}
 )
 SELECT
-    type AS iac_type,
+    target_type AS iac_type,
     COUNT(*) AS count,
     SUM(CASE WHEN severity = 'CRITICAL' THEN 1 ELSE 0 END) AS critical_count,
     SUM(CASE WHEN severity = 'HIGH' THEN 1 ELSE 0 END) AS high_count
 FROM stg_trivy_iac_misconfigs
 WHERE run_pk = (SELECT trivy_run_pk FROM run_map)
-GROUP BY type
+GROUP BY target_type
 ORDER BY count DESC

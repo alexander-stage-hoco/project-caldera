@@ -12,12 +12,12 @@ WITH run_map AS (
 SELECT
     rule_id,
     severity,
-    category,
+    dd_category AS category,
     COUNT(*) AS count,
     COUNT(DISTINCT file_id) AS affected_files
 FROM lz_roslyn_violations
 WHERE run_pk = (SELECT roslyn_run_pk FROM run_map)
-GROUP BY rule_id, severity, category
+GROUP BY rule_id, severity, dd_category
 ORDER BY
     CASE severity
         WHEN 'Error' THEN 1

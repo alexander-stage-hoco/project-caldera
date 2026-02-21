@@ -13,8 +13,8 @@ SELECT
     misconfig_id,
     severity,
     title,
-    type AS iac_type,
-    target_key AS file_path
+    target_type AS iac_type,
+    relative_path AS file_path
 FROM stg_trivy_iac_misconfigs
 WHERE run_pk = (SELECT trivy_run_pk FROM run_map)
 ORDER BY

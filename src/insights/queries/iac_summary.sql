@@ -12,7 +12,7 @@ WITH run_map AS (
 SELECT
     severity,
     COUNT(*) AS count,
-    COUNT(DISTINCT target_key) AS affected_files
+    COUNT(DISTINCT relative_path) AS affected_files
 FROM stg_trivy_iac_misconfigs
 WHERE run_pk = (SELECT trivy_run_pk FROM run_map)
 GROUP BY severity

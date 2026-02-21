@@ -415,7 +415,7 @@ class InsightsGenerator:
         # Check file count from unified_file_metrics
         try:
             file_count_sql = """
-            SELECT COUNT(*) as file_count, COALESCE(SUM(lines), 0) as total_loc
+            SELECT COUNT(*) as file_count, COALESCE(SUM(loc_total), 0) as total_loc
             FROM unified_file_metrics
             WHERE run_pk = {{ run_pk }}
             """
@@ -442,10 +442,12 @@ class InsightsGenerator:
         try:
             dotnet_check_sql = """
             SELECT
-                COUNT(CASE WHEN language IN ('C#', 'csharp', 'cs') THEN 1 END) as csharp_files,
-                COALESCE(SUM(CASE WHEN language IN ('C#', 'csharp', 'cs') THEN lines END), 0) as csharp_loc
-            FROM unified_file_metrics
-            WHERE run_pk = {{ run_pk }}
+                COUNT(CASE WHEN lf.language IN ('C#', 'csharp', 'cs') THEN 1 END) as csharp_files,
+                COALESCE(SUM(CASE WHEN lf.language IN ('C#', 'csharp', 'cs') THEN ufm.loc_total END), 0) as csharp_loc
+            FROM unified_file_metrics ufm
+            JOIN lz_layout_files lf
+                ON ufm.file_id = lf.file_id AND ufm.run_pk = lf.run_pk
+            WHERE ufm.run_pk = {{ run_pk }}
             """
             result = self.fetcher.fetch_raw(dotnet_check_sql, run_pk=run_pk)
             if result and result[0].get("csharp_files", 0) > 0:
