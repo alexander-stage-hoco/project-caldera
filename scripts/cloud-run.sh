@@ -129,19 +129,33 @@ echo ""
 # Initialize Terraform (idempotent)
 terraform init -input=false -no-color 2>&1 | grep -E "^(Initializing|Terraform has been)" || true
 
-# Plan and apply
+# Plan and apply (with retry for transient SSH/network failures)
 echo ">>> Creating server and running analysis..."
 echo "    (This takes 10–30 minutes depending on repo size and server type)"
 echo ""
 
-terraform apply \
-    -auto-approve \
-    -var="repo_url=${REPO_URL}" \
-    -var="server_type=${SERVER_TYPE}" \
-    -var="skip_tools=${SKIP_TOOLS}" \
-    -var="pipeline_llm=${PIPELINE_LLM}" \
-    -var="max_parallel=${MAX_PARALLEL}" \
-    -var="results_dir=${RESULTS_DIR}"
+APPLY_FAILED=0
+MAX_RETRIES=2
+for attempt in $(seq 1 $MAX_RETRIES); do
+    echo ">>> Terraform apply attempt $attempt of $MAX_RETRIES..."
+    if terraform apply \
+        -auto-approve \
+        -var="repo_url=${REPO_URL}" \
+        -var="server_type=${SERVER_TYPE}" \
+        -var="skip_tools=${SKIP_TOOLS}" \
+        -var="pipeline_llm=${PIPELINE_LLM}" \
+        -var="max_parallel=${MAX_PARALLEL}" \
+        -var="results_dir=${RESULTS_DIR}"; then
+        break
+    fi
+    if [ "$attempt" -eq "$MAX_RETRIES" ]; then
+        echo "ERROR: terraform apply failed after $MAX_RETRIES attempts"
+        APPLY_FAILED=1
+        break
+    fi
+    echo "  terraform apply failed, retrying in 15s..."
+    sleep 15
+done
 
 echo ""
 
@@ -175,6 +189,13 @@ fi
 # ---------------------------------------------------------------------------
 # Verify results were downloaded
 # ---------------------------------------------------------------------------
+
+if [ "${APPLY_FAILED}" -eq 1 ]; then
+    echo ""
+    echo "ERROR: terraform apply failed — results were not downloaded."
+    echo "Use --keep-server to debug on the VM."
+    exit 1
+fi
 
 if [ ! -d "${RESULTS_DIR}" ] || [ -z "$(ls -A "${RESULTS_DIR}" 2>/dev/null)" ]; then
     echo ""

@@ -203,15 +203,28 @@ resource "null_resource" "run_analysis" {
     ]
   }
 
-  # Download results to local machine
+  # Download results to local machine (with retry for transient network failures)
   provisioner "local-exec" {
     command = <<-EOT
       set -e
       mkdir -p "${var.results_dir}"
-      scp -o StrictHostKeyChecking=no \
-          -i ${pathexpand(var.ssh_private_key_path)} \
-          -r root@${hcloud_server.runner.ipv4_address}:/opt/caldera/results/* \
-          "${var.results_dir}/"
+      MAX_RETRIES=3
+      RETRY_DELAY=10
+      for attempt in $$(seq 1 $$MAX_RETRIES); do
+        echo ">>> SCP download attempt $$attempt of $$MAX_RETRIES..."
+        if scp -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+            -i ${pathexpand(var.ssh_private_key_path)} \
+            -r root@${hcloud_server.runner.ipv4_address}:/opt/caldera/results/* \
+            "${var.results_dir}/"; then
+          break
+        fi
+        if [ "$$attempt" -eq "$$MAX_RETRIES" ]; then
+          echo "ERROR: SCP failed after $$MAX_RETRIES attempts"
+          exit 1
+        fi
+        echo "  SCP failed, retrying in $${RETRY_DELAY}s..."
+        sleep $$RETRY_DELAY
+      done
       # Verify at least one manifest.json was downloaded
       if ! find "${var.results_dir}" -name "manifest.json" -maxdepth 4 | grep -q .; then
         echo "ERROR: No manifest.json found in downloaded results. SCP may have failed silently."
