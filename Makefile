@@ -214,7 +214,7 @@ prune-outputs:
 	@test "$(CONFIRM)" = "1" || (echo "Refusing to delete outputs without CONFIRM=1"; exit 1)
 	@echo "Pruning generated outputs..."
 	@rm -rf src/insights/output/pipeline/*
-	@find src/tools -maxdepth 2 -type d -name outputs -exec rm -rf {}/\* ';'
+	@find src/tools -maxdepth 2 -type d -name outputs -exec sh -c 'rm -rf "$$1"/*' _ {} ';'
 	@echo "Done."
 
 # =============================================================================
