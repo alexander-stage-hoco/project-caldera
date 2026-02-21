@@ -136,6 +136,15 @@ class TestCollectionRunRepository:
         # Should not raise even with no tool runs to delete
         cr_repo.delete_collection_data("run-1")
 
+    def test_mark_status_to_partial_success(self, duckdb_conn: duckdb.DuckDBPyConnection) -> None:
+        repo = CollectionRunRepository(duckdb_conn)
+        repo.insert(_make_collection_run())
+        repo.mark_status("run-1", "partial_success", datetime.now(timezone.utc))
+        fetched = repo.get_by_repo_commit("repo-1", "a" * 40)
+        assert fetched is not None
+        assert fetched.status == "partial_success"
+        assert fetched.completed_at is not None
+
     def test_mark_status_to_failed(self, duckdb_conn: duckdb.DuckDBPyConnection) -> None:
         repo = CollectionRunRepository(duckdb_conn)
         repo.insert(_make_collection_run())

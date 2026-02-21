@@ -117,9 +117,13 @@ def _run_tool(
     duration = time.perf_counter() - start
 
     output_json_path = output_dir / "output.json"
-    output_json_rel = (
-        str(output_json_path.relative_to(bundle_root)) if output_json_path.exists() else None
-    )
+    output_json_rel = None
+    if output_json_path.exists():
+        try:
+            json.loads(output_json_path.read_text(encoding="utf-8"))
+            output_json_rel = str(output_json_path.relative_to(bundle_root))
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            print(f"  WARNING: {tool_name}/output.json is invalid JSON: {e}")
 
     return ToolResult(
         name=tool_name,

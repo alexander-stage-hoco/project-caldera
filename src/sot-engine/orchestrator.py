@@ -571,8 +571,8 @@ def run_dbt(
     dbt_project_dir: Path,
     profiles_dir: Path,
     logger: OrchestratorLogger,
-    target_path: str = "/tmp/dbt_target",
-    log_path: str = "/tmp/dbt_logs",
+    target_path: str = "~/.caldera/dbt_target",
+    log_path: str = "~/.caldera/dbt_logs",
     dbt_summary: dict[str, Any] | None = None,
     db_path: Path | None = None,
     continue_on_test_failure: bool = False,
@@ -646,7 +646,7 @@ def main() -> int:
     parser.add_argument("--run-id", default=str(uuid.uuid4()))
     parser.add_argument("--branch", default="main")
     parser.add_argument("--commit", default="0" * 40)
-    parser.add_argument("--db-path", default="/tmp/caldera_sot.duckdb")
+    parser.add_argument("--db-path", default="~/.caldera/caldera_sot.duckdb")
     parser.add_argument("--output-root", help="Override tool output root directory")
     parser.add_argument("--skip-tools", help="Comma-separated tool names to skip")
     parser.add_argument("--schema-path", default="src/sot-engine/persistence/schema.sql")
@@ -675,8 +675,8 @@ def main() -> int:
     parser.add_argument("--dbt-bin", default="src/sot-engine/.venv-dbt/bin/dbt")
     parser.add_argument("--dbt-project-dir", default="src/sot-engine/dbt")
     parser.add_argument("--dbt-profiles-dir", default="src/sot-engine/dbt")
-    parser.add_argument("--dbt-target-path", default="/tmp/dbt_target")
-    parser.add_argument("--dbt-log-path", default="/tmp/dbt_logs")
+    parser.add_argument("--dbt-target-path", default="~/.caldera/dbt_target")
+    parser.add_argument("--dbt-log-path", default="~/.caldera/dbt_logs")
     parser.add_argument("--log-path", default=None)
     parser.add_argument("--summary-path", default=None, help="Write a JSON run summary for debugging")
     parser.add_argument("--dbt-summary-path", default=None, help="Write a JSON dbt summary for debugging")
@@ -702,7 +702,9 @@ def main() -> int:
         db_path = (repo_root / db_path).resolve()
     else:
         db_path = db_path.resolve()
-    log_path = Path(args.log_path) if args.log_path else Path("/tmp") / f"caldera_orchestrator_{args.run_id}.log"
+    args.dbt_target_path = str(Path(args.dbt_target_path).expanduser())
+    args.dbt_log_path = str(Path(args.dbt_log_path).expanduser())
+    log_path = Path(args.log_path) if args.log_path else Path("~/.caldera").expanduser() / f"caldera_orchestrator_{args.run_id}.log"
     if not log_path.is_absolute():
         log_path = repo_root / log_path
     logger = OrchestratorLogger(log_path)
@@ -967,13 +969,14 @@ def main() -> int:
             summary["steps"]["dbt"]["status"] = "skipped"
             dbt_summary["dbt"]["status"] = "skipped"
 
+        tools_failed = summary["steps"]["tools"]["status"] == "failed"
+        db_status = "partial_success" if tools_failed and args.continue_on_tool_failure else "completed"
+        summary["status"] = "partial_success" if tools_failed and args.continue_on_tool_failure else "success"
         conn = duckdb.connect(str(db_path))
         collection_repo = CollectionRunRepository(conn)
         collection_repo.mark_status(
-            collection_run_id, "completed", datetime.now(timezone.utc)
+            collection_run_id, db_status, datetime.now(timezone.utc)
         )
-        tools_failed = summary["steps"]["tools"]["status"] == "failed"
-        summary["status"] = "partial_success" if tools_failed and args.continue_on_tool_failure else "success"
         summary["completed_at"] = datetime.now(timezone.utc).isoformat()
         logger.info("Done.")
         return 0

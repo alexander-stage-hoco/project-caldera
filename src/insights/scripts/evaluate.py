@@ -64,6 +64,8 @@ class EvaluationSummary:
     llm_score: float | None
     llm_provider: str | None
     llm_trace_id: str | None = None  # Trace ID for LLM observability
+    llm_status: str = "success"  # "success", "skipped", "failed"
+    llm_error: str | None = None
 
     # Details
     check_results: list[dict[str, Any]] = field(default_factory=list)
@@ -349,8 +351,11 @@ def evaluate(
     suggestions: list[str] = []
     llm_provider = None
     trace_id = None
+    llm_status = "skipped"
+    llm_error: str | None = None
 
     if not skip_llm:
+        llm_status = "success"
         judge_info = f"({provider})"
         if include_insight_quality:
             judge_info = f"({provider}, with insight quality)"
@@ -374,6 +379,8 @@ def evaluate(
                 console.print(f"  [dim]Trace ID: {trace_id}[/dim]")
 
         except Exception as e:
+            llm_status = "failed"
+            llm_error = str(e)
             console.print(f"[yellow]LLM evaluation failed: {e}[/yellow]")
 
     # Calculate overall score (60% programmatic, 40% LLM)
@@ -417,6 +424,8 @@ def evaluate(
         llm_score=llm_score,
         llm_provider=llm_provider,
         llm_trace_id=trace_id,
+        llm_status=llm_status,
+        llm_error=llm_error,
         check_results=check_results,
         llm_results=llm_results,
         suggestions=suggestions,
