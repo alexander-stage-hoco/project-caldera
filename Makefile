@@ -1,4 +1,4 @@
-.PHONY: help setup analyze status list-runs report clean-db \
+.PHONY: help setup analyze status doctor list-runs report clean-db \
 	compliance compliance-preflight compliance-full \
 	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
@@ -21,6 +21,7 @@ DB_PATH ?= $(HOME)/.caldera/caldera_sot.duckdb
 SKIP_TOOLS ?=
 PIPELINE_LLM ?= 1
 CONTINUE_ON_TOOL_FAILURE ?= 0
+COLLECTION_RUN_ID ?=
 BUNDLE ?=
 BUNDLE_DIR ?= artifacts
 BUNDLE_TAR ?= 1
@@ -156,14 +157,15 @@ _analyze-local:
 		$(if $(filter 1,$(CONTINUE_ON_TOOL_FAILURE)),CONTINUE_ON_TOOL_FAILURE=1,)
 
 report:
-	@RUN_PK="$(RUN_PK)"; \
-	  if [ -z "$$RUN_PK" ]; then \
-	    RUN_PK=$$($(PYTHON_VENV) scripts/get_latest_run_pk.py --db "$(ORCH_DB_PATH)"); \
+	@COLL_RUN_ID="$(COLLECTION_RUN_ID)"; \
+	  if [ -z "$$COLL_RUN_ID" ]; then \
+	    COLL_RUN_ID=$$($(PYTHON_VENV) scripts/get_latest_collection_run_id.py --db "$(ORCH_DB_PATH)"); \
 	  fi; \
-	  test -n "$$RUN_PK" || (echo "No runs found in database. Run 'make analyze' first."; exit 1); \
-	  echo "Generating report for run_pk=$$RUN_PK..."; \
+	  test -n "$$COLL_RUN_ID" || (echo "No runs found in database. Run 'make analyze' first."; exit 1); \
+	  echo "Generating report for collection_run_id=$$COLL_RUN_ID..."; \
 	  mkdir -p $(CURDIR)/$(PIPELINE_OUTPUT_DIR); \
-	  (cd src && $(PYTHON_VENV) -m insights generate $$RUN_PK \
+	  (cd src && $(PYTHON_VENV) -m insights generate \
+	    --collection-run-id $$COLL_RUN_ID \
 	    --db $(ORCH_DB_PATH) \
 	    --format html \
 	    --output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html); \
@@ -184,6 +186,24 @@ status:
 	  printf "Runs:          "; \
 	  .venv/bin/python scripts/count_collection_runs.py --db "$(ORCH_DB_PATH)" 2>/dev/null || echo "0"; \
 	fi
+
+doctor:
+	@echo "=== Caldera Doctor ==="
+	@printf "Python 3.12+:  "; python3 -c "import sys; v=sys.version_info; print(f'OK ({v.major}.{v.minor}.{v.micro})')" 2>/dev/null || echo "MISSING"
+	@printf "Project venv:  "; test -f .venv/bin/activate && echo "OK" || echo "MISSING (run: make setup)"
+	@printf "duckdb (py):   "; test -f .venv/bin/python && .venv/bin/python -c "import duckdb" >/dev/null 2>&1 && echo "OK" || echo "MISSING"
+	@printf "dbt:           "; test -x .venv/bin/dbt && echo "OK" || echo "MISSING"
+	@printf "git:           "; command -v git >/dev/null && echo "OK" || echo "MISSING"
+	@printf "Database:      "; test -f $(ORCH_DB_PATH) && echo "OK ($(ORCH_DB_PATH))" || echo "No database yet"
+	@printf "dbt profile:   "; \
+	  CALDERA_DB_PATH=$(ORCH_DB_PATH) .venv/bin/dbt debug --project-dir src/sot-engine/dbt --profiles-dir src/sot-engine/dbt 2>&1 | grep -q "Connection test:.*OK" \
+	    && echo "OK (connects to $(ORCH_DB_PATH))" \
+	    || echo "FAILED — dbt cannot connect to $(ORCH_DB_PATH)"
+	@printf "ANTHROPIC_API_KEY: "; \
+	  test -n "$$ANTHROPIC_API_KEY" && echo "OK (set)" || echo "NOT SET (LLM eval will be skipped)"
+	@printf "docker:        "; command -v docker >/dev/null && echo "OK" || echo "MISSING (sonarqube needs it)"
+	@printf "go:            "; command -v go >/dev/null && echo "OK (optional)" || echo "MISSING (git-sizer needs it)"
+	@printf "dotnet:        "; command -v dotnet >/dev/null && echo "OK (optional)" || echo "MISSING (roslyn/devskim/dotcover need it)"
 
 clean-db:
 	@echo "Removing database at $(ORCH_DB_PATH)..."
@@ -349,16 +369,16 @@ pipeline-eval:
 		$(if $(SKIP_TOOLS),ORCH_SKIP_TOOLS=$(SKIP_TOOLS),) \
 		$(if $(ORCH_REPLACE),ORCH_REPLACE=1,) \
 		$(if $(filter 1,$(CONTINUE_ON_TOOL_FAILURE)),CONTINUE_ON_TOOL_FAILURE=1,)
-	@RUN_PK=$$($(PYTHON_VENV) scripts/get_run_pk.py --db "$(ORCH_DB_PATH)" --run-id "$(AUTO_RUN_ID)"); \
-	  echo "Run PK:    $$RUN_PK"; \
-	  echo ""; \
+	@echo ""; \
 	  echo "=== Phase 2: Generate Insights Report ==="; \
-	  (cd src && $(PYTHON_VENV) -m insights generate $$RUN_PK \
+	  (cd src && $(PYTHON_VENV) -m insights generate \
+	    --collection-run-id $(AUTO_RUN_ID) \
 	    --db $(ORCH_DB_PATH) \
 	    --format html \
 	    --output $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html); \
 	  cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html; \
 	  if [ "$(PIPELINE_LLM)" = "1" ]; then \
+	    RUN_PK=$$($(PYTHON_VENV) scripts/get_run_pk.py --db "$(ORCH_DB_PATH)" --run-id "$(AUTO_RUN_ID)"); \
 	    echo ""; \
 	    echo "=== Phase 3: LLM Evaluation with InsightQualityJudge ==="; \
 	    (cd src && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \

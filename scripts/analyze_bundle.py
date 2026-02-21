@@ -106,8 +106,6 @@ def main() -> int:
             check=True,
         )
 
-        run_pk = _get_run_pk(db_path, run_id)
-
         # Generate report
         subprocess.run(
             [
@@ -115,7 +113,8 @@ def main() -> int:
                 "-m",
                 "insights",
                 "generate",
-                str(run_pk),
+                "--collection-run-id",
+                str(run_id),
                 "--db",
                 str(db_path),
                 "--format",
@@ -123,11 +122,12 @@ def main() -> int:
                 "--output",
                 str(report_out),
             ],
-            cwd="src/insights",
+            cwd="src",
             check=True,
         )
 
         if int(args.llm) == 1:
+            run_pk = _get_run_pk(db_path, run_id)
             eval_out = report_out.parent / "evaluation.json"
             top3_out = report_out.parent / "top3_insights.json"
             subprocess.run(
@@ -145,7 +145,7 @@ def main() -> int:
                     "--output",
                     str(eval_out),
                 ],
-                cwd="src/insights",
+                cwd="src",
                 check=True,
             )
             subprocess.run(
@@ -160,7 +160,7 @@ def main() -> int:
                     "--format",
                     "rich",
                 ],
-                cwd="src/insights",
+                cwd="src",
                 check=True,
             )
 
