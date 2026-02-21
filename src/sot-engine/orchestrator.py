@@ -481,6 +481,7 @@ def ingest_outputs(
     coverage_output: Path | None = None,
     schema_path: Path = None,
     logger: OrchestratorLogger | None = None,
+    continue_on_failure: bool = False,
 ) -> None:
     ensure_schema(conn, schema_path)
     run_repo = ToolRunRepository(conn)
@@ -519,23 +520,15 @@ def ingest_outputs(
     }
 
     # Ingest each tool using its configuration
+    ingest_errors: list[str] = []
     for config in TOOL_INGESTION_CONFIGS:
         output_path = tool_outputs.get(config.name)
         if not output_path:
             continue
 
-        payload = load_payload(output_path)
-        if config.validate_metadata:
-            validate_payload(
-                payload.get("metadata", {}),
-                repo_id,
-                run_id,
-                expected_commit=commit,
-                expected_tool=config.name,
-            )
-        else:
-            # Best-effort validation: do not fail the run, but surface contract drift.
-            try:
+        try:
+            payload = load_payload(output_path)
+            if config.validate_metadata:
                 validate_payload(
                     payload.get("metadata", {}),
                     repo_id,
@@ -543,19 +536,41 @@ def ingest_outputs(
                     expected_commit=commit,
                     expected_tool=config.name,
                 )
-            except Exception as exc:
-                log_fn(f"WARNING: metadata validation skipped for {config.name}: {exc}")
+            else:
+                # Best-effort validation: do not fail the run, but surface contract drift.
+                try:
+                    validate_payload(
+                        payload.get("metadata", {}),
+                        repo_id,
+                        run_id,
+                        expected_commit=commit,
+                        expected_tool=config.name,
+                    )
+                except Exception as exc:
+                    if log_fn:
+                        log_fn(f"WARNING: metadata validation skipped for {config.name}: {exc}")
 
-        # Create adapter with appropriate repository
-        tool_repo = config.repo_class(conn) if config.repo_class else None
-        adapter = config.adapter_class(
-            run_repo,
-            layout_repo,
-            tool_repo,
-            repo_path,
-            log_fn,
-        )
-        adapter.persist(payload)
+            # Create adapter with appropriate repository
+            tool_repo = config.repo_class(conn) if config.repo_class else None
+            adapter = config.adapter_class(
+                run_repo,
+                layout_repo,
+                tool_repo,
+                repo_path,
+                log_fn,
+            )
+            adapter.persist(payload)
+        except Exception as exc:
+            if continue_on_failure:
+                msg = f"WARNING: {config.name} ingestion failed: {exc}"
+                if log_fn:
+                    log_fn(msg)
+                ingest_errors.append(config.name)
+            else:
+                raise
+
+    if ingest_errors and log_fn:
+        log_fn(f"Ingestion completed with {len(ingest_errors)} error(s): {', '.join(ingest_errors)}")
 
 
 def _resolve_dbt_cmd(dbt_bin: Path, repo_root: Path) -> list[str]:
@@ -934,6 +949,7 @@ def main() -> int:
             coverage_output,
             schema_path,
             logger,
+            continue_on_failure=args.continue_on_tool_failure,
         )
         summary["steps"]["ingest"]["status"] = "success"
         summary["steps"]["ingest"]["duration_seconds"] = round(time.perf_counter() - start, 3)

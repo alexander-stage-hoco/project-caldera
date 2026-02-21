@@ -210,20 +210,22 @@ resource "null_resource" "run_analysis" {
       mkdir -p "${var.results_dir}"
       MAX_RETRIES=3
       RETRY_DELAY=10
-      for attempt in $$(seq 1 $$MAX_RETRIES); do
-        echo ">>> SCP download attempt $$attempt of $$MAX_RETRIES..."
+      attempt=1
+      while [ "$attempt" -le "$MAX_RETRIES" ]; do
+        echo ">>> SCP download attempt $attempt of $MAX_RETRIES..."
         if scp -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
             -i ${pathexpand(var.ssh_private_key_path)} \
             -r root@${hcloud_server.runner.ipv4_address}:/opt/caldera/results/* \
             "${var.results_dir}/"; then
           break
         fi
-        if [ "$$attempt" -eq "$$MAX_RETRIES" ]; then
-          echo "ERROR: SCP failed after $$MAX_RETRIES attempts"
+        if [ "$attempt" -eq "$MAX_RETRIES" ]; then
+          echo "ERROR: SCP failed after $MAX_RETRIES attempts"
           exit 1
         fi
-        echo "  SCP failed, retrying in $${RETRY_DELAY}s..."
-        sleep $$RETRY_DELAY
+        echo "  SCP failed, retrying in $RETRY_DELAY seconds..."
+        sleep $RETRY_DELAY
+        attempt=$((attempt + 1))
       done
       # Verify at least one manifest.json was downloaded
       if ! find "${var.results_dir}" -name "manifest.json" -maxdepth 4 | grep -q .; then

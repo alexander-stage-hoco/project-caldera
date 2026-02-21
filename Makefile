@@ -373,14 +373,19 @@ pipeline-eval:
 		$(if $(filter 1,$(CONTINUE_ON_TOOL_FAILURE)),CONTINUE_ON_TOOL_FAILURE=1,)
 	@echo ""; \
 	  echo "=== Phase 2: Generate Insights Report ==="; \
+	  RESOLVED_RUN_ID=$(AUTO_RUN_ID); \
+	  if [ -n "$(ORCH_REPLACE)" ]; then \
+	    echo "Resolving actual collection_run_id after --replace..."; \
+	    RESOLVED_RUN_ID=$$($(PYTHON_VENV) scripts/get_latest_collection_run_id.py --db "$(ORCH_DB_PATH)"); \
+	  fi; \
 	  (cd src && $(PYTHON_VENV) -m insights generate \
-	    --collection-run-id $(AUTO_RUN_ID) \
+	    --collection-run-id $$RESOLVED_RUN_ID \
 	    --db $(ORCH_DB_PATH) \
 	    --format html \
 	    --output $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html); \
 	  cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html; \
 	  if [ "$(PIPELINE_LLM)" = "1" ]; then \
-	    RUN_PK=$$($(PYTHON_VENV) scripts/get_run_pk.py --db "$(ORCH_DB_PATH)" --run-id "$(AUTO_RUN_ID)"); \
+	    RUN_PK=$$($(PYTHON_VENV) scripts/get_run_pk.py --db "$(ORCH_DB_PATH)" --run-id "$$RESOLVED_RUN_ID"); \
 	    echo ""; \
 	    echo "=== Phase 3: LLM Evaluation with InsightQualityJudge ==="; \
 	    (cd src && $(PYTHON_VENV) -m insights.scripts.evaluate evaluate \
@@ -403,7 +408,7 @@ pipeline-eval:
 	  fi; \
 	  $(PYTHON_VENV) scripts/write_run_manifest.py \
 	    --db "$(ORCH_DB_PATH)" \
-	    --collection-run-id "$(AUTO_RUN_ID)" \
+	    --collection-run-id "$$RESOLVED_RUN_ID" \
 	    --out "$(CURDIR)/$(PIPELINE_RUN_DIR)/run_manifest.json" \
 	    --report "$(CURDIR)/$(PIPELINE_RUN_DIR)/report.html"; \
 	  cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/run_manifest.json $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/run_manifest.json

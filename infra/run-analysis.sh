@@ -154,6 +154,7 @@ make analyze \
     SKIP_TOOLS="${SKIP_TOOLS}" \
     PIPELINE_LLM="${PIPELINE_LLM}" \
     CONTINUE_ON_TOOL_FAILURE=1 \
+    REPLACE=1 \
     2>&1 | tee /tmp/caldera-run.log
 
 END_TIME=$(date +%s)
