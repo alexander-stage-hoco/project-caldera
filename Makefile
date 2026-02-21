@@ -20,6 +20,7 @@ DBT_PROJECT_DIR ?= src/sot-engine/dbt
 DB_PATH ?= $(HOME)/.caldera/caldera_sot.duckdb
 SKIP_TOOLS ?=
 PIPELINE_LLM ?= 1
+PIPELINE_PROVIDER ?= claude_code
 CONTINUE_ON_TOOL_FAILURE ?= 0
 COLLECTION_RUN_ID ?=
 BUNDLE ?=
@@ -393,6 +394,7 @@ pipeline-eval:
 	      --db $(ORCH_DB_PATH) \
 	      --run-pk $$RUN_PK \
 	      --include-insight-quality \
+	      --provider $(PIPELINE_PROVIDER) \
 	      --output $(CURDIR)/$(PIPELINE_RUN_DIR)/evaluation.json); \
 	    cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/evaluation.json $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/evaluation.json; \
 	    echo ""; \

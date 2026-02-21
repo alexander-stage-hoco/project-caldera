@@ -17,6 +17,7 @@ caldera_repo_url = "https://github.com/yourorg/caldera.git"
 # pipeline_llm         = 0
 # max_parallel         = 4
 # results_dir          = "./results"
+# anthropic_api_key    = ""             # Required if pipeline_llm = 1 (for LLM insight judges)
 
 # SSH key paths — defaults to ed25519. If you use RSA or another key type,
 # uncomment and set these to match your key:

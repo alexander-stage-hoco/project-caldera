@@ -86,6 +86,13 @@ variable "pipeline_llm" {
   default     = 0
 }
 
+variable "anthropic_api_key" {
+  description = "Anthropic API key for LLM evaluation (optional, only needed if pipeline_llm=1)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "max_parallel" {
   description = "Max parallel tool execution"
   type        = number
@@ -199,7 +206,7 @@ resource "null_resource" "run_analysis" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /opt/caldera/run-analysis.sh",
-      "REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' /opt/caldera/run-analysis.sh",
+      "REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' ANTHROPIC_API_KEY='${var.anthropic_api_key}' /opt/caldera/run-analysis.sh",
     ]
   }
 

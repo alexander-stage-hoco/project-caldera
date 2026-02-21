@@ -20,6 +20,17 @@ PIPELINE_LLM="${PIPELINE_LLM:-0}"
 MAX_PARALLEL="${MAX_PARALLEL:-4}"
 SERVER_TYPE="${SERVER_TYPE:-unknown}"
 
+# When LLM evaluation is enabled, configure the Anthropic SDK provider
+# (Claude Code CLI is not available on the VM)
+if [ "${PIPELINE_LLM}" = "1" ] && [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+    export ANTHROPIC_API_KEY
+    export USE_ANTHROPIC_SDK=1
+    export PIPELINE_PROVIDER=anthropic
+elif [ "${PIPELINE_LLM}" = "1" ]; then
+    echo "WARNING: PIPELINE_LLM=1 but ANTHROPIC_API_KEY is not set."
+    echo "LLM evaluation will fail. Pass anthropic_api_key in terraform.tfvars."
+fi
+
 WORK_DIR="/opt/caldera"
 RESULTS_DIR="${WORK_DIR}/results"
 CALDERA_DIR="${WORK_DIR}/project"
@@ -153,6 +164,7 @@ make analyze \
     REPO="${CLONE_DIR}" \
     SKIP_TOOLS="${SKIP_TOOLS}" \
     PIPELINE_LLM="${PIPELINE_LLM}" \
+    ${PIPELINE_PROVIDER:+PIPELINE_PROVIDER=${PIPELINE_PROVIDER}} \
     CONTINUE_ON_TOOL_FAILURE=1 \
     REPLACE=1 \
     2>&1 | tee /tmp/caldera-run.log

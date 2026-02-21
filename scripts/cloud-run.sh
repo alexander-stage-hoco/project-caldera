@@ -145,7 +145,8 @@ for attempt in $(seq 1 $MAX_RETRIES); do
         -var="skip_tools=${SKIP_TOOLS}" \
         -var="pipeline_llm=${PIPELINE_LLM}" \
         -var="max_parallel=${MAX_PARALLEL}" \
-        -var="results_dir=${RESULTS_DIR}"; then
+        -var="results_dir=${RESULTS_DIR}" \
+        -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}"; then
         break
     fi
     if [ "$attempt" -eq "$MAX_RETRIES" ]; then
@@ -173,6 +174,7 @@ if [ "${DESTROY_AFTER}" -eq 1 ]; then
         -var="pipeline_llm=${PIPELINE_LLM}" \
         -var="max_parallel=${MAX_PARALLEL}" \
         -var="results_dir=${RESULTS_DIR}" \
+        -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}" \
         2>&1 | grep -E "^(Destroy|hcloud_)" || true
     echo "    Server destroyed."
 else
