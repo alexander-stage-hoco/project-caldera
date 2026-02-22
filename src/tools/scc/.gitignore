@@ -26,7 +26,7 @@ coverage_report/
 # Generated Output (recreated by pipeline)
 output/
 
-# Evaluation Results (timestamped, regenerated)
+# Evaluation Results (timestamped, regenerated; keep scorecard)
 evaluation/results/
 evaluation/timing.md
 evaluation/llm/results/

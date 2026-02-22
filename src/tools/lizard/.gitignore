@@ -19,5 +19,5 @@ output/
 .DS_Store
 Thumbs.db
 
-# Evaluation results (keep ground-truth, ignore generated)
+# Evaluation results (keep ground-truth and scorecard, ignore generated)
 evaluation/results/
