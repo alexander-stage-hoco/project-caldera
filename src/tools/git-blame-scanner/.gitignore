@@ -1,1 +1,2 @@
-eval-repos/synthetic/
+eval-repos/synthetic/*
+!eval-repos/synthetic/.gitkeep
