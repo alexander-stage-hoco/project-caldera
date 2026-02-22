@@ -21,4 +21,3 @@ Thumbs.db
 
 # Evaluation results (keep ground-truth, ignore generated)
 evaluation/results/
-evaluation/scorecard.md

@@ -29,7 +29,6 @@ output/
 # Evaluation Results (timestamped, regenerated)
 evaluation/results/
 evaluation/timing.md
-evaluation/scorecard.md
 evaluation/llm/results/
 
 # scc Binary (downloaded by Makefile)
