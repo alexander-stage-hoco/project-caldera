@@ -1,10 +1,11 @@
-.PHONY: help setup analyze status doctor list-runs report clean-db \
+.PHONY: help setup setup-core analyze status doctor list-runs report clean-db \
 	compliance compliance-preflight compliance-full \
 	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
 	orchestrate test pipeline-eval arch-review \
 	collect analyze-bundle prune-outputs \
-	cloud-setup cloud-run cloud-status cloud-destroy
+	cloud-setup cloud-run cloud-status cloud-destroy \
+	github-setup github-plan github-apply
 
 TOOLS_DIR := src/tools
 TOOL ?=
@@ -117,6 +118,11 @@ help:
 	@echo "    make cloud-status             Check status of cloud servers and results"
 	@echo "    make cloud-destroy            Destroy cloud server (if --keep-server was used)"
 	@echo "    CLOUD_SERVER=cx42             Override server type (default: cx33)"
+	@echo ""
+	@echo "  GitHub IaC (branch protection, environments):"
+	@echo "    make github-setup             One-time: terraform init for infra/github"
+	@echo "    make github-plan              Preview GitHub settings changes"
+	@echo "    make github-apply             Apply GitHub settings (requires GITHUB_TOKEN)"
 
 # Cloud variables
 CLOUD_SERVER ?= cx33
@@ -128,14 +134,19 @@ CLOUD_RESULTS ?= $(CURDIR)/infra/results
 
 setup:
 	@echo "=== Setting up Project Caldera ==="
-	@python3 -c "import sys; assert sys.version_info >= (3, 12), f'Python 3.12+ required, got {sys.version}'"
-	@if [ ! -f .venv/bin/activate ]; then python3 -m venv .venv; fi
-	@.venv/bin/pip install --upgrade pip -q
-	@.venv/bin/pip install -r requirements.txt -q
+	@$(MAKE) setup-core
 	@echo "Project venv ready. Setting up tools..."
 	@$(MAKE) tools-setup
 	@echo ""
 	@echo "Setup complete! Run: make analyze REPO=/path/to/repo"
+
+setup-core: ## Set up project venv only (no tool venvs/binaries)
+	@echo "==> Setting up project virtual environment..."
+	@python3 -c "import sys; assert sys.version_info >= (3, 12), f'Python 3.12+ required, got {sys.version}'"
+	@if [ ! -f .venv/bin/activate ]; then python3 -m venv .venv; fi
+	@.venv/bin/pip install --upgrade pip -q
+	@.venv/bin/pip install -r requirements.txt -q
+	@echo "==> Core setup complete"
 
 analyze:
 	@test -n "$(REPO)" || (echo "Usage: make analyze REPO=/path/to/repo"; echo "       make analyze REPO=https://github.com/user/project"; exit 1)
@@ -514,3 +525,25 @@ cloud-destroy:
 	cd infra && terraform destroy -auto-approve \
 		-var="repo_url=placeholder" \
 		-var="server_type=$(CLOUD_SERVER)"
+
+# =============================================================================
+# GitHub IaC (branch protection, environments, long-lived branches)
+# =============================================================================
+
+github-setup:
+	@command -v terraform >/dev/null 2>&1 || (echo "ERROR: terraform not installed. Run: brew install terraform"; exit 1)
+	@test -n "$$GITHUB_TOKEN" || (echo "ERROR: GITHUB_TOKEN env var not set."; echo "  export GITHUB_TOKEN=ghp_..."; exit 1)
+	@test -f infra/github/terraform.tfvars || (echo "ERROR: infra/github/terraform.tfvars not found."; echo "  cp infra/github/terraform.tfvars.example infra/github/terraform.tfvars"; echo "  # Then fill in your GitHub owner and repository name"; exit 1)
+	cd infra/github && terraform init
+
+github-plan:
+	@command -v terraform >/dev/null 2>&1 || (echo "ERROR: terraform not installed. Run: brew install terraform"; exit 1)
+	@test -n "$$GITHUB_TOKEN" || (echo "ERROR: GITHUB_TOKEN env var not set."; echo "  export GITHUB_TOKEN=ghp_..."; exit 1)
+	@test -f infra/github/terraform.tfvars || (echo "ERROR: infra/github/terraform.tfvars not found."; echo "  cp infra/github/terraform.tfvars.example infra/github/terraform.tfvars"; exit 1)
+	cd infra/github && terraform plan
+
+github-apply:
+	@command -v terraform >/dev/null 2>&1 || (echo "ERROR: terraform not installed. Run: brew install terraform"; exit 1)
+	@test -n "$$GITHUB_TOKEN" || (echo "ERROR: GITHUB_TOKEN env var not set."; echo "  export GITHUB_TOKEN=ghp_..."; exit 1)
+	@test -f infra/github/terraform.tfvars || (echo "ERROR: infra/github/terraform.tfvars not found."; echo "  cp infra/github/terraform.tfvars.example infra/github/terraform.tfvars"; exit 1)
+	cd infra/github && terraform apply

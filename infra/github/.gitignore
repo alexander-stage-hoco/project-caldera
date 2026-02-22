@@ -1,0 +1,8 @@
+# Terraform state (local, not shared)
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Secrets
+terraform.tfvars

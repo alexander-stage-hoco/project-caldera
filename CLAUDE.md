@@ -22,6 +22,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
 | Run cloud analysis | [infra/README.md](infra/README.md) |
 | Compare cloud hosting options | [docs/CLOUD_HOSTING_COMPARISON.md](docs/CLOUD_HOSTING_COMPARISON.md) |
 | Understand production modes | [docs/PRODUCTION_MODES.md](docs/PRODUCTION_MODES.md) |
+| Understand CI/CD pipeline | [docs/CI_CD.md](docs/CI_CD.md) |
 
 ## Architecture
 
@@ -104,6 +105,9 @@ make prune-outputs           # Delete generated tool outputs (requires CONFIRM=1
 make cloud-setup             # One-time: terraform init for cloud runs
 make cloud-run REPO=<url>    # Spin up Hetzner VM, analyze, download results, destroy
 make cloud-destroy           # Destroy cloud server (if KEEP_SERVER=1 was used)
+make github-setup            # One-time: terraform init for GitHub settings IaC
+make github-plan             # Preview GitHub settings changes (branches, protection, environments)
+make github-apply            # Apply GitHub settings (requires GITHUB_TOKEN)
 ```
 
 ### Advanced (from project root)
@@ -269,6 +273,7 @@ class SccFileMetric:
 | `docs/PLAN.md` | LLM standardization plan (completed) |
 | `docs/CLOUD_HOSTING_COMPARISON.md` | Cloud hosting provider comparison |
 | `docs/PRODUCTION_MODES.md` | Production deployment modes |
+| `docs/CI_CD.md` | CI/CD pipeline and branch strategy |
 | `docs/templates/BLUEPRINT.md.template` | Architecture document template |
 | `docs/templates/EVAL_STRATEGY.md.template` | Evaluation strategy template |
 
@@ -365,6 +370,39 @@ terraform destroy ────────────────────�
 ```
 
 Key files: `scripts/cloud-run.sh` (local orchestrator), `infra/main.tf` (Terraform config), `infra/run-analysis.sh` (remote runner), `infra/cloud-init.yml` (VM bootstrap). See [infra/README.md](infra/README.md) for the full reference.
+
+## CI/CD Pipeline
+
+GitHub Actions with branch promotion: `develop → release → main`. Branch protection, environments, and long-lived branches are managed as IaC in `infra/github/` (see [infra/github/README.md](infra/github/README.md)). See [docs/CI_CD.md](docs/CI_CD.md) for full details.
+
+### Branch Conventions
+
+- `feature/*`, `fix/*`, `tool/*/**`, `infra/*` → PR to `develop`
+- `develop` → PR to `release` (pre-production)
+- `release` → PR to `main` (production)
+- Tags `vX.Y.Z` cut from `main`
+
+### Gates
+
+| Gate | Trigger | Duration | What it checks |
+|------|---------|----------|---------------|
+| 0 — Preflight | Push to feature branches | ~30s | `make compliance-preflight` |
+| A — Quality | Every PR | ~2 min | Preflight + unit tests + observability |
+| B — Compliance | PRs to `release`/`main` | ~10s | Full compliance scan |
+| C — LOCAL Smoke | PRs to `release` | ~5-10 min | Pipeline end-to-end (DuckDB + dbt + report) |
+| D — BUNDLE Smoke | PRs to `release` | ~5-10 min | Collect + ingest + report |
+| E — LLM Eval | Tag `vX.0.0` | ~30-45 min | Full compliance with tool execution + LLM judges |
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `.github/actions/caldera-setup/action.yml` | Composite action (Python 3.12 + venv cache) |
+| `.github/workflows/preflight.yml` | Gate 0 |
+| `.github/workflows/ci.yml` | Gates A-D (router workflow) |
+| `.github/workflows/tool-evaluation-major.yml` | Gate E (LLM, environment-protected) |
+| `.github/workflows/cloud-smoke.yml` | Cloud smoke test (manual + major tags) |
+| `tests/fixtures/ci-repo/` | Minimal fixture repo for CI smoke tests |
 
 ## Troubleshooting
 
