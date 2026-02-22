@@ -493,15 +493,17 @@ class TestE2ECli:
 
     def test_cli_generate_help(self) -> None:
         """Test generate --help."""
+        import re
         from typer.testing import CliRunner
         from insights.cli import app
 
         runner = CliRunner()
         result = runner.invoke(app, ["generate", "--help"])
 
+        plain = re.sub(r"\x1b\[[0-9;]*m", "", result.stdout)
         assert result.exit_code == 0
-        assert "--db" in result.stdout
-        assert "--format" in result.stdout
+        assert "--db" in plain
+        assert "--format" in plain
 
 
 class TestE2EReportContent:

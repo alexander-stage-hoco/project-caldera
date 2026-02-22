@@ -1,9 +1,11 @@
+from pathlib import Path
+
 import duckdb
 
 from report_test_utils import load_sql, render_report_sql
 
 
-REPORT_PATH = "/Users/alexander.stage/Projects/2026-01-24-Project-Caldera/src/sot-engine/dbt/analysis/report_repo_health_snapshot.sql"
+REPORT_PATH = str(Path(__file__).resolve().parents[1] / "dbt" / "analysis" / "report_repo_health_snapshot.sql")
 
 
 def test_report_health_snapshot_joins_lizard_run() -> None:
