@@ -610,7 +610,11 @@ promote: ## Push current branch and open PR to correct base branch
 		echo "ERROR: Cannot auto-detect base branch for '$$BRANCH'."; \
 		echo "Use: make promote PROMOTE_BASE=<branch>"; exit 1; \
 	fi; \
-	AHEAD=$$(git rev-list --count $$BASE..HEAD 2>/dev/null || echo 0); \
+	REF=$$(git rev-parse --verify $$BASE 2>/dev/null || git rev-parse --verify origin/$$BASE 2>/dev/null || true); \
+	if [ -z "$$REF" ]; then \
+		echo "ERROR: Neither $$BASE nor origin/$$BASE exists."; exit 1; \
+	fi; \
+	AHEAD=$$(git rev-list --count $$REF..HEAD 2>/dev/null || echo 0); \
 	if [ "$$AHEAD" = "0" ]; then \
 		echo "ERROR: No commits ahead of $$BASE. Nothing to promote."; exit 1; \
 	fi; \
