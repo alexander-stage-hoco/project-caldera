@@ -41,7 +41,7 @@ jobs:
         run: |
           TAG="${{ github.ref_name }}"
           # Wait briefly for release to be created (if using release-on-tag)
-          sleep 5
+          sleep 30
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" \
               docs/tool_compliance_report.json \
