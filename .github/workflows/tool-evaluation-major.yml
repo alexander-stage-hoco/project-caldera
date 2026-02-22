@@ -3,7 +3,7 @@ name: "Gate E — Tool Evaluation (Major Release)"
 on:
   push:
     tags:
-      - "v[0-9]+.0.0"
+      - "v*.0.0"
 
 jobs:
   llm-evaluation:
@@ -22,6 +22,7 @@ jobs:
         run: make compliance-full
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          USE_ANTHROPIC_SDK: "1"
 
       - name: Upload evaluation artifacts
         uses: actions/upload-artifact@v4

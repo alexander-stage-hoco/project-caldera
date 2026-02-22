@@ -5161,9 +5161,11 @@ def main() -> int:
     # Write report files (unless in quiet mode with single tool)
     if not (args.quiet and single_tool):
         out_json = (project_root / args.out_json).resolve()
+        out_json.parent.mkdir(parents=True, exist_ok=True)
         out_json.write_text(json.dumps(report, indent=2, sort_keys=True))
 
         out_md = (project_root / args.out_md).resolve()
+        out_md.parent.mkdir(parents=True, exist_ok=True)
         write_markdown(report, out_md)
 
     # In quiet mode, only print failures

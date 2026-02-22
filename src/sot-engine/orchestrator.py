@@ -137,6 +137,7 @@ def _format_duration(seconds: float) -> str:
 class OrchestratorLogger:
     def __init__(self, log_path: Path) -> None:
         self._log_path = log_path
+        log_path.parent.mkdir(parents=True, exist_ok=True)
         self._handle = log_path.open("a", encoding="utf-8")
 
     @property

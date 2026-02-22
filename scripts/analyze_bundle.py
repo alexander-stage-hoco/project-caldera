@@ -84,7 +84,7 @@ def main() -> int:
     try:
         subprocess.run(
             [
-                ".venv/bin/python",
+                sys.executable,
                 "src/sot-engine/orchestrator.py",
                 "--repo-path",
                 str(repo_path),
@@ -117,7 +117,7 @@ def main() -> int:
         # Generate report
         subprocess.run(
             [
-                ".venv/bin/python",
+                sys.executable,
                 "-m",
                 "insights",
                 "generate",
@@ -140,7 +140,7 @@ def main() -> int:
             top3_out = report_out.parent / "top3_insights.json"
             subprocess.run(
                 [
-                    ".venv/bin/python",
+                    sys.executable,
                     "-m",
                     "insights.scripts.evaluate",
                     "evaluate",
@@ -158,7 +158,7 @@ def main() -> int:
             )
             subprocess.run(
                 [
-                    ".venv/bin/python",
+                    sys.executable,
                     "-m",
                     "insights.scripts.extract_top_insights",
                     "extract",
@@ -174,7 +174,7 @@ def main() -> int:
 
         subprocess.run(
             [
-                ".venv/bin/python",
+                sys.executable,
                 "scripts/write_run_manifest.py",
                 "--db",
                 str(db_path),

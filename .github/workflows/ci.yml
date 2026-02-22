@@ -8,9 +8,9 @@ concurrency:
   group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
-# Tools to skip in smoke tests (everything except layout-scanner)
+# Tools to skip in smoke tests (keep scc + layout-scanner for insights anchor)
 env:
-  CI_SKIP_TOOLS: "scc,lizard,semgrep,roslyn-analyzers,sonarqube,trivy,gitleaks,symbol-scanner,scancode,pmd-cpd,devskim,dotcover,git-fame,git-sizer,git-blame-scanner,dependensee,coverage-ingest"
+  CI_SKIP_TOOLS: "lizard,semgrep,roslyn-analyzers,sonarqube,trivy,gitleaks,symbol-scanner,scancode,pmd-cpd,devskim,dotcover,git-fame,git-sizer,git-blame-scanner,dependensee,coverage-ingest"
 
 jobs:
   # ── Gate A — Fast Quality (always runs) ──────────────────────────────────
@@ -70,7 +70,7 @@ jobs:
       - name: Run pipeline (LOCAL mode, LLM off)
         run: |
           make pipeline-eval \
-            ORCH_REPO_PATH=tests/fixtures/ci-repo \
+            ORCH_REPO_PATH=${{ github.workspace }}/tests/fixtures/ci-repo \
             PIPELINE_LLM=0 \
             SKIP_TOOLS=${{ env.CI_SKIP_TOOLS }}
 
