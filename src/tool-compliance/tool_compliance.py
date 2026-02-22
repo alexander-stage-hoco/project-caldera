@@ -1107,7 +1107,8 @@ def _validate_schema_with_venv(
 
 
 def _check_required_paths(tool_root: Path) -> CheckResult:
-    missing = [p for p in REQUIRED_PATHS if not (tool_root / p).exists()]
+    skip = set(TOOL_RULES.get(tool_root.name, {}).get("skip_required_paths", []))
+    missing = [p for p in REQUIRED_PATHS if p not in skip and not (tool_root / p).exists()]
     if missing:
         return CheckResult(
             check_id="structure.paths",

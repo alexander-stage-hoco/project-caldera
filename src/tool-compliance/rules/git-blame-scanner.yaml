@@ -1,6 +1,11 @@
 # Tool compliance rules for git-blame-scanner
 # Per-file authorship and knowledge risk analysis
 
+# eval-repos/synthetic is a generated git repo (created by make setup),
+# cannot be committed as a regular directory
+skip_required_paths:
+  - eval-repos/synthetic
+
 required_check_modules:
   - accuracy.py
   - coverage.py
