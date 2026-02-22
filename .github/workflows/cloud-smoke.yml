@@ -1,0 +1,70 @@
+name: "Cloud Smoke Test"
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo_url:
+        description: "Repository URL to analyze"
+        required: false
+        default: "https://github.com/pallets/click"
+      server_type:
+        description: "Hetzner server type"
+        required: false
+        default: "cx22"
+  push:
+    tags:
+      - "v[0-9]+.0.0"
+
+jobs:
+  cloud-test:
+    name: "Cloud Smoke Test (Hetzner)"
+    runs-on: ubuntu-latest
+    environment: cloud
+    timeout-minutes: 45
+    env:
+      HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.7"
+
+      - uses: ./.github/actions/caldera-setup
+
+      - name: Configure Terraform vars
+        run: |
+          cat > infra/terraform.tfvars <<EOF
+          hcloud_token = "${{ secrets.HCLOUD_TOKEN }}"
+          ssh_public_key_path = "~/.ssh/id_ed25519.pub"
+          ssh_private_key_path = "~/.ssh/id_ed25519"
+          EOF
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+
+      - name: Terraform init
+        run: make cloud-setup
+
+      - name: Run cloud analysis
+        run: |
+          REPO_URL="${{ github.event.inputs.repo_url || 'https://github.com/pallets/click' }}"
+          SERVER="${{ github.event.inputs.server_type || 'cx22' }}"
+          make cloud-run REPO="$REPO_URL" CLOUD_SERVER="$SERVER"
+
+      - name: Destroy cloud server
+        if: always()
+        run: make cloud-destroy
+
+      - name: Upload cloud results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cloud-results
+          path: infra/results/
+          retention-days: 30

@@ -1,0 +1,131 @@
+name: "CI Pipeline"
+
+on:
+  pull_request:
+    branches: [develop, release, main]
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# Tools to skip in smoke tests (everything except layout-scanner)
+env:
+  CI_SKIP_TOOLS: "scc,lizard,semgrep,roslyn-analyzers,sonarqube,trivy,gitleaks,symbol-scanner,scancode,pmd-cpd,devskim,dotcover,git-fame,git-sizer,git-blame-scanner,dependensee,coverage-ingest"
+
+jobs:
+  # ── Gate A — Fast Quality (always runs) ──────────────────────────────────
+  quality:
+    name: "Gate A — Quality"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/caldera-setup
+
+      - name: Compliance preflight
+        run: make compliance-preflight
+
+      - name: Core unit tests (fast)
+        run: .venv/bin/python -m pytest -m "not slow and not integration" --tb=short -q
+
+      - name: Observability compliance
+        run: .venv/bin/python scripts/check_observability_compliance.py
+
+  # ── Gate B — Compliance Report (release, main) ───────────────────────────
+  compliance-report:
+    name: "Gate B — Compliance Report"
+    if: github.base_ref == 'release' || github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/caldera-setup
+
+      - name: Full compliance scan
+        run: make compliance COMPLIANCE_OUT_JSON=ci_artifacts/compliance_report.json COMPLIANCE_OUT_MD=ci_artifacts/compliance_report.md
+
+      - name: Upload compliance artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compliance-report
+          path: ci_artifacts/
+          retention-days: 30
+
+  # ── Gate C — Production Mode Smoke: LOCAL (release) ──────────────────────
+  prod-smoke-local:
+    name: "Gate C — LOCAL Smoke"
+    if: github.base_ref == 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/caldera-setup
+        with:
+          setup-tools: "true"
+
+      - name: Run pipeline (LOCAL mode, LLM off)
+        run: |
+          make pipeline-eval \
+            ORCH_REPO_PATH=tests/fixtures/ci-repo \
+            PIPELINE_LLM=0 \
+            SKIP_TOOLS=${{ env.CI_SKIP_TOOLS }}
+
+      - name: Verify report exists
+        run: |
+          REPORT=$(find src/insights/output/pipeline -name "report.html" -type f | head -1)
+          if [ -z "$REPORT" ]; then
+            echo "ERROR: report.html not found"
+            exit 1
+          fi
+          SIZE=$(stat -c%s "$REPORT" 2>/dev/null || stat -f%z "$REPORT" 2>/dev/null)
+          if [ "$SIZE" -lt 100 ]; then
+            echo "ERROR: report.html is too small ($SIZE bytes)"
+            exit 1
+          fi
+          echo "OK: report.html exists ($SIZE bytes)"
+
+  # ── Gate D — Production Mode Smoke: BUNDLE (release) ─────────────────────
+  prod-smoke-bundle:
+    name: "Gate D — BUNDLE Smoke"
+    if: github.base_ref == 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/caldera-setup
+        with:
+          setup-tools: "true"
+
+      - name: Collect artifacts
+        run: |
+          .venv/bin/python scripts/collect_artifacts.py \
+            --repo-path tests/fixtures/ci-repo \
+            --repo-id ci-sample \
+            --run-id ci-run \
+            --skip-tools "${{ env.CI_SKIP_TOOLS }}"
+
+      - name: Ingest bundle and generate report
+        run: |
+          make analyze-bundle \
+            REPO=tests/fixtures/ci-repo \
+            BUNDLE=artifacts/ci-sample/ci-run \
+            PIPELINE_LLM=0
+
+      - name: Verify report exists
+        run: |
+          REPORT=$(find src/insights/output/pipeline -name "report.html" -type f | head -1)
+          if [ -z "$REPORT" ]; then
+            echo "ERROR: report.html not found"
+            exit 1
+          fi
+          SIZE=$(stat -c%s "$REPORT" 2>/dev/null || stat -f%z "$REPORT" 2>/dev/null)
+          if [ "$SIZE" -lt 100 ]; then
+            echo "ERROR: report.html is too small ($SIZE bytes)"
+            exit 1
+          fi
+          echo "OK: report.html exists ($SIZE bytes)"

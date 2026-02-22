@@ -1,0 +1,56 @@
+name: "Caldera Setup"
+description: "Set up Python 3.12, project venv, and optionally tool environments"
+
+inputs:
+  setup-tools:
+    description: "Also set up tool venvs and binaries (slower)"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Cache pip downloads
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: pip-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          pip-${{ runner.os }}-
+
+    - name: Cache project venv
+      uses: actions/cache@v4
+      with:
+        path: .venv
+        key: core-venv-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+
+    - name: Set up project venv
+      shell: bash
+      run: make setup-core
+
+    - name: Cache tool venvs
+      if: inputs.setup-tools == 'true'
+      uses: actions/cache@v4
+      with:
+        path: src/tools/*/.venv
+        key: tool-venvs-${{ runner.os }}-${{ hashFiles('src/tools/*/requirements.txt') }}
+
+    - name: Cache tool binaries
+      if: inputs.setup-tools == 'true'
+      uses: actions/cache@v4
+      with:
+        path: |
+          src/tools/git-sizer/bin
+          src/tools/gitleaks/bin
+          src/tools/trivy/bin
+        key: tool-bins-${{ runner.os }}-${{ hashFiles('src/tools/*/Makefile') }}
+
+    - name: Set up tool environments
+      if: inputs.setup-tools == 'true'
+      shell: bash
+      run: make tools-setup

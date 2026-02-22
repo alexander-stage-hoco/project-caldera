@@ -1,0 +1,51 @@
+name: "Gate E — Tool Evaluation (Major Release)"
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.0.0"
+
+jobs:
+  llm-evaluation:
+    name: "Full Tool Evaluation (LLM)"
+    runs-on: ubuntu-latest
+    environment: llm-eval
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/caldera-setup
+        with:
+          setup-tools: "true"
+
+      - name: Full compliance with tool execution
+        run: make compliance-full
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Upload evaluation artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tool-evaluation-${{ github.ref_name }}
+          path: |
+            docs/tool_compliance_report.json
+            docs/tool_compliance_report.md
+          retention-days: 90
+
+      - name: Attach results to GitHub release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          # Wait briefly for release to be created (if using release-on-tag)
+          sleep 5
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" \
+              docs/tool_compliance_report.json \
+              docs/tool_compliance_report.md \
+              --clobber
+          else
+            echo "No release found for tag $TAG — skipping artifact upload"
+          fi
