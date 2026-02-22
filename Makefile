@@ -639,6 +639,13 @@ release: ## Create and push a new version tag (RELEASE_TYPE=major|minor|patch)
 	if [ "$$BRANCH" != "main" ]; then \
 		echo "ERROR: Releases must be tagged from main (currently on $$BRANCH)"; exit 1; \
 	fi; \
+	if ! git diff-index --quiet HEAD; then \
+		echo "ERROR: Working tree has uncommitted changes. Commit or stash first."; exit 1; \
+	fi; \
+	git fetch origin main --quiet; \
+	if ! git diff HEAD origin/main --quiet; then \
+		echo "ERROR: Local main differs from origin/main. Pull or push first."; exit 1; \
+	fi; \
 	LATEST=$$(git tag --sort=-v:refname | grep '^v' | head -1); \
 	if [ -z "$$LATEST" ]; then LATEST="v0.0.0"; fi; \
 	MAJOR=$$(echo $$LATEST | sed 's/^v//' | cut -d. -f1); \
@@ -651,6 +658,9 @@ release: ## Create and push a new version tag (RELEASE_TYPE=major|minor|patch)
 		*) echo "ERROR: RELEASE_TYPE must be major, minor, or patch"; exit 1 ;; \
 	esac; \
 	NEXT="v$$MAJOR.$$MINOR.$$PATCH"; \
+	if git rev-parse --verify "$$NEXT" >/dev/null 2>&1; then \
+		echo "ERROR: Tag $$NEXT already exists"; exit 1; \
+	fi; \
 	echo "Latest tag: $$LATEST"; \
 	echo "Next tag:   $$NEXT ($(RELEASE_TYPE))"; \
 	echo ""; \
@@ -660,7 +670,11 @@ release: ## Create and push a new version tag (RELEASE_TYPE=major|minor|patch)
 	echo "Creating tag $$NEXT..."; \
 	git tag -a "$$NEXT" -m "Release $$NEXT"; \
 	echo "Pushing tag $$NEXT to origin..."; \
-	git push origin "$$NEXT"; \
+	if ! git push origin "$$NEXT"; then \
+		echo "Push failed — rolling back local tag $$NEXT"; \
+		git tag -d "$$NEXT"; \
+		exit 1; \
+	fi; \
 	echo ""; \
 	echo "Done. GitHub Release will be created automatically."
 
