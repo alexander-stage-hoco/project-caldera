@@ -5178,7 +5178,16 @@ def main() -> int:
                 print(f"FAIL: {tool_name} - {check_id}: {message}", file=sys.stderr)
         return 0 if report["summary"]["failed"] == 0 else 1
 
-    return 0 if report["summary"]["failed"] == 0 else 1
+    # Print summary (always, so CI logs show what happened)
+    summary = report["summary"]
+    total_checks = summary["passed"] + summary["failed"]
+    print(f"Compliance: {summary['passed']}/{total_checks} tools passed, {summary['failed']} failed")
+    if summary["failed"] > 0:
+        for tool in report["tools"]:
+            for check in tool["checks"]:
+                if check["status"] == "fail":
+                    print(f"  FAIL: {tool['name']} - {check['check_id']}: {check['message']}")
+    return 0 if summary["failed"] == 0 else 1
 
 
 if __name__ == "__main__":
