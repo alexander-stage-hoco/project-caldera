@@ -1,9 +1,8 @@
 # Copy this file to terraform.tfvars and fill in your values.
 # terraform.tfvars is gitignored — never commit secrets.
-
-# Required: Your Hetzner Cloud API token
-# Get it from: https://console.hetzner.cloud → Project → Security → API Tokens
-hcloud_token = "your-hetzner-api-token-here"
+#
+# SECRETS: hcloud_token and anthropic_api_key are loaded from .env via TF_VAR_*
+# environment variables. See .env.example in the project root.
 
 # Required: Git URL of the Caldera project itself (so the VM can clone it)
 # This should be the URL of YOUR fork/copy of this repository.
@@ -17,7 +16,6 @@ caldera_repo_url = "https://github.com/yourorg/caldera.git"
 # pipeline_llm         = 0
 # max_parallel         = 4
 # results_dir          = "./results"
-# anthropic_api_key    = ""             # Required if pipeline_llm = 1 (for LLM insight judges)
 
 # SSH key paths — defaults to ed25519. If you use RSA or another key type,
 # uncomment and set these to match your key:

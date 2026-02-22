@@ -23,6 +23,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
 | Compare cloud hosting options | [docs/CLOUD_HOSTING_COMPARISON.md](docs/CLOUD_HOSTING_COMPARISON.md) |
 | Understand production modes | [docs/PRODUCTION_MODES.md](docs/PRODUCTION_MODES.md) |
 | Understand CI/CD pipeline | [docs/CI_CD.md](docs/CI_CD.md) |
+| Configure local secrets | [`.env.example`](.env.example) |
 
 ## Architecture
 
@@ -403,6 +404,15 @@ GitHub Actions with branch promotion: `develop → release → main`. Branch pro
 | `.github/workflows/tool-evaluation-major.yml` | Gate E (LLM, environment-protected) |
 | `.github/workflows/cloud-smoke.yml` | Cloud smoke test (manual + major tags) |
 | `tests/fixtures/ci-repo/` | Minimal fixture repo for CI smoke tests |
+
+## Secrets Management
+
+| Context | How secrets are provided |
+|---------|------------------------|
+| Local development | `.env` file at project root (see `.env.example`) |
+| CI/CD | GitHub Actions per-environment secrets |
+| Cloud runs (local) | `.env` → Makefile exports `TF_VAR_*` → Terraform |
+| Cloud runs (CI) | `cloud-smoke.yml` → `secrets.HCLOUD_TOKEN` etc. |
 
 ## Troubleshooting
 

@@ -23,7 +23,15 @@ make setup
 
 This creates the project virtual environment, installs dependencies, and sets up all 18 tool environments.
 
-### 2. Analyze a repository
+### 2. Configure secrets (one-time)
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and fill in the API keys you need. At minimum, set `ANTHROPIC_API_KEY` for LLM evaluation. All secrets are documented in the file. The `.env` file is gitignored and never committed.
+
+### 3. Analyze a repository
 
 **Local repository:**
 
@@ -39,7 +47,7 @@ make analyze REPO=https://github.com/user/project
 
 Remote URLs are cloned (full history by default) to a temporary directory, analyzed, then cleaned up. Pass `CLONE_DEPTH=1` for a shallow clone if you don't need history-based tools (git-fame, git-blame-scanner, gitleaks).
 
-### 3. View results
+### 4. View results
 
 The pipeline produces three output files:
 

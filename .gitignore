@@ -83,6 +83,7 @@ src/tools/trivy/bin/trivy
 # Secrets (never commit)
 .env
 .env.*
+!/.env.example
 *.pem
 *.key
 credentials.json

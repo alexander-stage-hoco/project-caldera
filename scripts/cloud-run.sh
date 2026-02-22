@@ -8,7 +8,8 @@
 #
 # Prerequisites:
 #   1. terraform installed (brew install terraform)
-#   2. infra/terraform.tfvars configured with hcloud_token + caldera_repo_url
+#   2. .env configured with HCLOUD_TOKEN (see .env.example)
+#      OR infra/terraform.tfvars with caldera_repo_url (secrets via .env)
 #   3. SSH key at ~/.ssh/id_ed25519 (or override via tfvars)
 #
 # This script:
@@ -21,6 +22,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 INFRA_DIR="${PROJECT_ROOT}/infra"
+
+# Load secrets from .env if present (when run outside Make)
+if [ -f "${PROJECT_ROOT}/.env" ]; then
+    set -a
+    source "${PROJECT_ROOT}/.env"
+    set +a
+fi
 
 # ---------------------------------------------------------------------------
 # Parse arguments

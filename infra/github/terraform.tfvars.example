@@ -13,6 +13,8 @@ llm_eval_reviewers = ["your-username"]
 # Leave empty [] to skip reviewer requirement
 cloud_reviewers = ["your-username"]
 
-# Auth: Set GITHUB_TOKEN env var (never put tokens in this file)
+# Auth: GITHUB_TOKEN comes from .env in the project root (see .env.example).
+# The Makefile exports it automatically. You can also set it directly:
+#   export GITHUB_TOKEN=ghp_...
 # Required scopes: repo (full) + admin:org (read)
 # Or fine-grained: Administration (write), Environments (write), Contents (write)

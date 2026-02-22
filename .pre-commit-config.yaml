@@ -35,6 +35,18 @@ repos:
       - id: check-added-large-files
         args: ['--maxkb=1000']
 
+  # Secret detection — prevents accidental secret commits
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: >-
+          (?x)^(
+            src/tools/.*/eval-repos/.*|
+            src/sot-engine/persistence/fixtures/.*
+          )$
+
   # Python code quality (optional - can be enabled)
   # - repo: https://github.com/astral-sh/ruff-pre-commit
   #   rev: v0.1.9

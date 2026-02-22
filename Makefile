@@ -7,6 +7,27 @@
 	cloud-setup cloud-run cloud-status cloud-destroy \
 	github-setup github-plan github-apply
 
+# ---------------------------------------------------------------------------
+# Secrets: load from .env if present (see .env.example)
+# ---------------------------------------------------------------------------
+-include .env
+ifdef ANTHROPIC_API_KEY
+export ANTHROPIC_API_KEY
+endif
+ifdef HCLOUD_TOKEN
+export HCLOUD_TOKEN
+export TF_VAR_hcloud_token := $(HCLOUD_TOKEN)
+endif
+ifdef ANTHROPIC_API_KEY
+export TF_VAR_anthropic_api_key := $(ANTHROPIC_API_KEY)
+endif
+ifdef GITHUB_TOKEN
+export GITHUB_TOKEN
+endif
+ifdef SONAR_TOKEN
+export SONAR_TOKEN
+endif
+
 TOOLS_DIR := src/tools
 TOOL ?=
 TOOL_DIRS := $(shell find $(TOOLS_DIR) -maxdepth 1 -type d -not -path $(TOOLS_DIR) -exec test -f {}/Makefile ';' -print | sort)
@@ -213,6 +234,7 @@ doctor:
 	  CALDERA_DB_PATH=$(ORCH_DB_PATH) .venv/bin/dbt debug --project-dir src/sot-engine/dbt --profiles-dir src/sot-engine/dbt 2>&1 | grep -q "Connection test:.*OK" \
 	    && echo "OK (connects to $(ORCH_DB_PATH))" \
 	    || echo "FAILED — dbt cannot connect to $(ORCH_DB_PATH)"
+	@printf "Secrets (.env): "; test -f .env && echo "OK" || echo "NOT FOUND (cp .env.example .env)"
 	@printf "ANTHROPIC_API_KEY: "; \
 	  test -n "$$ANTHROPIC_API_KEY" && echo "OK (set)" || echo "NOT SET (LLM eval will be skipped)"
 	@printf "docker:        "; command -v docker >/dev/null && echo "OK" || echo "MISSING (sonarqube needs it)"
