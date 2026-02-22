@@ -5,7 +5,8 @@
 	orchestrate test pipeline-eval arch-review \
 	collect analyze-bundle prune-outputs \
 	cloud-setup cloud-run cloud-status cloud-destroy \
-	github-setup github-plan github-apply
+	github-setup github-plan github-apply \
+	promote promote-develop promote-release promote-main
 
 # ---------------------------------------------------------------------------
 # Secrets: load from .env if present (see .env.example)
@@ -144,6 +145,13 @@ help:
 	@echo "    make github-setup             One-time: terraform init for infra/github"
 	@echo "    make github-plan              Preview GitHub settings changes"
 	@echo "    make github-apply             Apply GitHub settings (requires GITHUB_TOKEN)"
+	@echo ""
+	@echo "  Promote:"
+	@echo "    make promote                  Push + open PR to correct base branch"
+	@echo "    make promote PROMOTE_TITLE=.. With explicit PR title"
+	@echo "    make promote-develop          Promote current -> develop"
+	@echo "    make promote-release          Promote develop -> release"
+	@echo "    make promote-main             Promote release -> main"
 
 # Cloud variables
 CLOUD_SERVER ?= cx33
@@ -569,3 +577,61 @@ github-apply:
 	@test -n "$$GITHUB_TOKEN" || (echo "ERROR: GITHUB_TOKEN env var not set."; echo "  export GITHUB_TOKEN=ghp_..."; exit 1)
 	@test -f infra/github/terraform.tfvars || (echo "ERROR: infra/github/terraform.tfvars not found."; echo "  cp infra/github/terraform.tfvars.example infra/github/terraform.tfvars"; exit 1)
 	cd infra/github && terraform apply
+
+# =============================================================================
+# Branch Promotion (PR creation via gh CLI)
+# =============================================================================
+
+PROMOTE_TITLE ?=
+PROMOTE_BASE ?=
+
+promote: ## Push current branch and open PR to correct base branch
+	@set -e; \
+	command -v gh >/dev/null 2>&1 || { echo "ERROR: gh CLI not installed. Run: brew install gh"; exit 1; }; \
+	if [ -n "$$(git status --porcelain)" ]; then \
+		echo "ERROR: Working tree is not clean. Commit or stash changes first."; exit 1; \
+	fi; \
+	BRANCH=$$(git rev-parse --abbrev-ref HEAD); \
+	if [ "$$BRANCH" = "HEAD" ]; then \
+		echo "ERROR: Detached HEAD state. Check out a branch first."; exit 1; \
+	fi; \
+	if [ "$$BRANCH" = "main" ]; then \
+		echo "ERROR: Cannot promote main."; exit 1; \
+	fi; \
+	if [ -n "$(PROMOTE_BASE)" ]; then \
+		BASE="$(PROMOTE_BASE)"; \
+	elif echo "$$BRANCH" | grep -qE '^(feature|fix|tool|infra)/'; then \
+		BASE="develop"; \
+	elif [ "$$BRANCH" = "develop" ]; then \
+		BASE="release"; \
+	elif [ "$$BRANCH" = "release" ]; then \
+		BASE="main"; \
+	else \
+		echo "ERROR: Cannot auto-detect base branch for '$$BRANCH'."; \
+		echo "Use: make promote PROMOTE_BASE=<branch>"; exit 1; \
+	fi; \
+	AHEAD=$$(git rev-list --count $$BASE..HEAD 2>/dev/null || echo 0); \
+	if [ "$$AHEAD" = "0" ]; then \
+		echo "ERROR: No commits ahead of $$BASE. Nothing to promote."; exit 1; \
+	fi; \
+	echo "Pushing $$BRANCH to origin..."; \
+	git push -u origin HEAD; \
+	if [ -n "$(PROMOTE_TITLE)" ]; then \
+		TITLE="$(PROMOTE_TITLE)"; \
+	else \
+		TITLE=$$(echo "$$BRANCH" | sed 's|^[^/]*/||' | tr '-' ' ' | tr '_' ' ' | \
+			awk '{for(i=1;i<=NF;i++) $$i=toupper(substr($$i,1,1)) substr($$i,2)}1'); \
+	fi; \
+	COMMITS=$$(git log --oneline $$BASE..HEAD | head -20); \
+	BODY=$$(printf '## Summary\n\nPromote **%s** to **%s**.\n\n### Commits\n\n%s\n\n### Checklist\n\n- [ ] CI gates pass\n- [ ] Changes reviewed\n\n---\nGenerated with `make promote`' "$$BRANCH" "$$BASE" "$$COMMITS"); \
+	echo "Creating PR: $$BRANCH -> $$BASE"; \
+	gh pr create --base "$$BASE" --title "$$TITLE" --body "$$BODY"
+
+promote-develop: ## Promote current branch -> develop
+	@$(MAKE) promote PROMOTE_BASE=develop $(if $(PROMOTE_TITLE),PROMOTE_TITLE="$(PROMOTE_TITLE)",)
+
+promote-release: ## Promote develop -> release
+	@$(MAKE) promote PROMOTE_BASE=release $(if $(PROMOTE_TITLE),PROMOTE_TITLE="$(PROMOTE_TITLE)",)
+
+promote-main: ## Promote release -> main
+	@$(MAKE) promote PROMOTE_BASE=main $(if $(PROMOTE_TITLE),PROMOTE_TITLE="$(PROMOTE_TITLE)",)
