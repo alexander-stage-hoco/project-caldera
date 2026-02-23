@@ -104,6 +104,7 @@ make collect REPO=<path>     # Collect tool artifacts into a portable bundle
 make analyze-bundle REPO=<path> BUNDLE=<dir>  # Ingest bundle + generate report
 make prune-outputs           # Delete generated tool outputs (requires CONFIRM=1)
 make promote                 # Push current branch and open PR to correct base
+make release                 # Create + push version tag (RELEASE_TYPE=major|minor|patch)
 make cloud-setup             # One-time: terraform init for cloud runs
 make cloud-run REPO=<url>    # Spin up Hetzner VM, analyze, download results, destroy
 make cloud-destroy           # Destroy cloud server (if KEEP_SERVER=1 was used)
