@@ -241,6 +241,29 @@ def seeded_db_with_marts(seeded_db: Path) -> Path:
         SELECT * FROM lz_lizard_file_metrics
     """)
 
+    # Create empty stub views for optional tool tables
+    conn.execute("""
+        CREATE VIEW stg_trivy_vulnerabilities AS
+        SELECT
+            NULL::INTEGER AS run_pk,
+            NULL::VARCHAR AS vulnerability_id,
+            NULL::VARCHAR AS package_name,
+            NULL::VARCHAR AS severity,
+            NULL::DOUBLE AS cvss_score,
+            NULL::VARCHAR AS title
+        WHERE false
+    """)
+
+    conn.execute("""
+        CREATE VIEW stg_semgrep_file_metrics AS
+        SELECT
+            NULL::INTEGER AS run_pk,
+            NULL::VARCHAR AS file_id,
+            NULL::VARCHAR AS relative_path,
+            NULL::INTEGER AS smell_count
+        WHERE false
+    """)
+
     # Create unified file metrics mart
     conn.execute("""
         CREATE VIEW unified_file_metrics AS
@@ -249,7 +272,7 @@ def seeded_db_with_marts(seeded_db: Path) -> Path:
             COALESCE(scc.file_id, liz.file_id) AS file_id,
             COALESCE(scc.relative_path, liz.relative_path) AS relative_path,
             COALESCE(scc.language, liz.language) AS language,
-            scc.lines_total AS loc,
+            scc.lines_total AS loc_total,
             scc.code_lines,
             scc.comment_lines,
             scc.blank_lines,
