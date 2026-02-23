@@ -182,6 +182,7 @@ python src/tool-compliance/tool_compliance.py src/tools/dependensee
 ## Rollup Validation
 
 Rollups:
+<!-- Project-level tool with no directory aggregations -->
 
 Tests:
 - src/tools/dependensee/tests/unit/test_analyze.py
