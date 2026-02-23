@@ -274,7 +274,9 @@ compliance:
 compliance-preflight:
 	@.venv/bin/python src/tool-compliance/tool_compliance.py \
 		--root $(CURDIR) \
-		--preflight
+		--preflight \
+		--out-json $(COMPLIANCE_OUT_JSON) \
+		--out-md $(COMPLIANCE_OUT_MD)
 
 compliance-full:
 	@.venv/bin/python src/tool-compliance/tool_compliance.py \
