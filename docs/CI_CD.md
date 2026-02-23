@@ -73,6 +73,24 @@ Proves BUNDLE mode works: collects artifacts, ingests bundle, generates report. 
 
 Runs `make compliance-full` (analysis + programmatic eval + LLM eval + coverage). Protected by GitHub Environment `llm-eval` requiring manual approval.
 
+### Release Workflow
+
+**File:** `.github/workflows/release.yml`
+**Trigger:** Tag push matching `v*`
+**Duration:** ~30s | **Cost:** Free
+
+Automatically creates a GitHub Release with a changelog when any version tag is pushed. Changelog groups commits by prefix (`Add`, `Fix`, `Update`, other). Gate E runs after the release is created and attaches evaluation artifacts to it.
+
+Use `make release` to create and push tags locally:
+
+```bash
+make release                     # Next minor version (default)
+make release RELEASE_TYPE=major  # Next major version
+make release RELEASE_TYPE=patch  # Next patch version
+```
+
+The `make release` target enforces that you are on the `main` branch, computes the next version from the latest tag, and pushes an annotated tag to origin.
+
 ### Cloud Smoke Test
 
 **File:** `.github/workflows/cloud-smoke.yml`
