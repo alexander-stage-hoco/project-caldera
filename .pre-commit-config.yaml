@@ -20,6 +20,16 @@ repos:
         stages: [commit]
         verbose: true
 
+      - id: insights-tests
+        name: Insights Tests
+        description: Run insights tests when insights code is modified
+        entry: scripts/hooks/check-insights-tests.sh
+        language: script
+        files: ^src/insights/
+        pass_filenames: false
+        stages: [commit]
+        verbose: true
+
   # Standard Python hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
