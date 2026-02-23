@@ -631,6 +631,53 @@ promote: ## Push current branch and open PR to correct base branch
 	echo "Creating PR: $$BRANCH -> $$BASE"; \
 	gh pr create --base "$$BASE" --title "$$TITLE" --body "$$BODY"
 
+RELEASE_TYPE ?= minor
+
+release: ## Create and push a new version tag (RELEASE_TYPE=major|minor|patch)
+	@set -e; \
+	BRANCH=$$(git rev-parse --abbrev-ref HEAD); \
+	if [ "$$BRANCH" != "main" ]; then \
+		echo "ERROR: Releases must be tagged from main (currently on $$BRANCH)"; exit 1; \
+	fi; \
+	if ! git diff-index --quiet HEAD; then \
+		echo "ERROR: Working tree has uncommitted changes. Commit or stash first."; exit 1; \
+	fi; \
+	git fetch origin main --quiet; \
+	if ! git diff HEAD origin/main --quiet; then \
+		echo "ERROR: Local main differs from origin/main. Pull or push first."; exit 1; \
+	fi; \
+	LATEST=$$(git tag --sort=-v:refname | grep '^v' | head -1); \
+	if [ -z "$$LATEST" ]; then LATEST="v0.0.0"; fi; \
+	MAJOR=$$(echo $$LATEST | sed 's/^v//' | cut -d. -f1); \
+	MINOR=$$(echo $$LATEST | sed 's/^v//' | cut -d. -f2); \
+	PATCH=$$(echo $$LATEST | sed 's/^v//' | cut -d. -f3); \
+	case "$(RELEASE_TYPE)" in \
+		major) MAJOR=$$((MAJOR+1)); MINOR=0; PATCH=0 ;; \
+		minor) MINOR=$$((MINOR+1)); PATCH=0 ;; \
+		patch) PATCH=$$((PATCH+1)) ;; \
+		*) echo "ERROR: RELEASE_TYPE must be major, minor, or patch"; exit 1 ;; \
+	esac; \
+	NEXT="v$$MAJOR.$$MINOR.$$PATCH"; \
+	if git rev-parse --verify "$$NEXT" >/dev/null 2>&1; then \
+		echo "ERROR: Tag $$NEXT already exists"; exit 1; \
+	fi; \
+	echo "Latest tag: $$LATEST"; \
+	echo "Next tag:   $$NEXT ($(RELEASE_TYPE))"; \
+	echo ""; \
+	echo "Commits since $$LATEST:"; \
+	git log --oneline $$LATEST..HEAD | head -20; \
+	echo ""; \
+	echo "Creating tag $$NEXT..."; \
+	git tag -a "$$NEXT" -m "Release $$NEXT"; \
+	echo "Pushing tag $$NEXT to origin..."; \
+	if ! git push origin "$$NEXT"; then \
+		echo "Push failed — rolling back local tag $$NEXT"; \
+		git tag -d "$$NEXT"; \
+		exit 1; \
+	fi; \
+	echo ""; \
+	echo "Done. GitHub Release will be created automatically."
+
 promote-develop: ## Promote current branch -> develop
 	@$(MAKE) promote PROMOTE_BASE=develop $(if $(PROMOTE_TITLE),PROMOTE_TITLE="$(PROMOTE_TITLE)",)
 

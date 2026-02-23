@@ -40,13 +40,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${{ github.ref_name }}"
-          # Wait briefly for release to be created (if using release-on-tag)
-          sleep 5
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" \
-              docs/tool_compliance_report.json \
-              docs/tool_compliance_report.md \
-              --clobber
-          else
-            echo "No release found for tag $TAG — skipping artifact upload"
+          # Poll for the release to appear (created by release.yml)
+          echo "Waiting for release $TAG to appear..."
+          ELAPSED=0
+          while [ $ELAPSED -lt 120 ]; do
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              echo "Release $TAG found after ${ELAPSED}s"
+              break
+            fi
+            sleep 1
+            ELAPSED=$((ELAPSED + 1))
+          done
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            echo "ERROR: Release $TAG not found after 120s"
+            exit 1
           fi
+          gh release upload "$TAG" \
+            docs/tool_compliance_report.json \
+            docs/tool_compliance_report.md \
+            --clobber
