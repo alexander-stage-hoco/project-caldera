@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Tool compliance preflight check for pre-commit hook
+# Tool compliance check for pre-commit hook
 #
-# This script detects modified tool directories and runs preflight compliance
-# checks to catch issues before they reach CI.
+# This script detects modified tool directories and runs full compliance
+# checks (structure + evaluation quality) to catch issues before they reach CI.
 #
 # Exit codes:
 #   0 - All checks passed (or no tools modified)
@@ -52,8 +52,14 @@ if [[ ! -f "${COMPLIANCE_SCRIPT}" ]]; then
     exit 1
 fi
 
-# Find Python interpreter
-PYTHON="${PYTHON:-python3}"
+# Find Python interpreter (prefer project venv)
+if [[ -z "${PYTHON:-}" ]]; then
+    if [[ -x "${REPO_ROOT}/.venv/bin/python" ]]; then
+        PYTHON="${REPO_ROOT}/.venv/bin/python"
+    else
+        PYTHON="python3"
+    fi
+fi
 if ! command -v "${PYTHON}" &> /dev/null; then
     log_error "Python interpreter not found: ${PYTHON}"
     exit 1
@@ -93,19 +99,19 @@ get_staged_tool_dirs() {
     printf '%s\n' "${tool_dirs[@]:-}"
 }
 
-# Run preflight check on a single tool
-run_preflight() {
+# Run compliance check on a single tool
+run_compliance() {
     local tool_dir="$1"
     local tool_name
     tool_name="$(basename "${tool_dir}")"
 
-    log_info "Running preflight on: ${tool_name}"
+    log_info "Running compliance on: ${tool_name}"
 
-    if "${PYTHON}" "${COMPLIANCE_SCRIPT}" "${tool_dir}" --preflight --quiet; then
-        log_success "${tool_name}: All preflight checks passed"
+    if "${PYTHON}" "${COMPLIANCE_SCRIPT}" "${tool_dir}" --quiet; then
+        log_success "${tool_name}: All compliance checks passed"
         return 0
     else
-        log_error "${tool_name}: Preflight checks failed"
+        log_error "${tool_name}: Compliance checks failed"
         return 1
     fi
 }
@@ -127,13 +133,13 @@ main() {
     log_info "Found ${#tool_dirs[@]} modified tool(s): ${tool_dirs[*]##*/}"
     echo ""
 
-    # Run preflight on each modified tool
+    # Run compliance on each modified tool
     for tool_dir in "${tool_dirs[@]}"; do
         if [[ -n "${tool_dir}" ]]; then
-            if ! run_preflight "${tool_dir}"; then
+            if ! run_compliance "${tool_dir}"; then
                 ((failed++))
             fi
-            ((checked++))
+            checked=$((checked + 1))
         fi
     done
 
@@ -143,7 +149,7 @@ main() {
     if [[ ${failed} -gt 0 ]]; then
         echo ""
         log_error "Commit blocked: Fix compliance issues before committing"
-        log_info "Run 'python ${COMPLIANCE_SCRIPT} <tool-dir> --preflight' for details"
+        log_info "Run 'python ${COMPLIANCE_SCRIPT} <tool-dir>' for details"
         exit 1
     fi
 

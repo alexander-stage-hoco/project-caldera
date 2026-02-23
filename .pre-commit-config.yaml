@@ -10,9 +10,9 @@ repos:
   # Local hooks for Caldera-specific validation
   - repo: local
     hooks:
-      - id: tool-compliance-preflight
-        name: Tool Compliance Preflight
-        description: Run preflight compliance checks on modified tool directories
+      - id: tool-compliance
+        name: Tool Compliance
+        description: Run full compliance checks on modified tool directories
         entry: scripts/hooks/check-tool-compliance.sh
         language: script
         files: ^src/tools/
