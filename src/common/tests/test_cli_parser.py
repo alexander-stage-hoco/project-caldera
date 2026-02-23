@@ -65,22 +65,25 @@ class TestAddCommonArgs:
         assert hasattr(args, "commit")
 
     def test_default_repo_path(self):
-        """Should use default repo_path value."""
+        """Default repo_path is None at parse time; resolved during validation."""
         parser = argparse.ArgumentParser()
         add_common_args(parser)
 
         args = parser.parse_args([])
 
-        assert args.repo_path == "eval-repos/synthetic"
+        # Defaults are now applied in validate_common_args_raising, not argparse
+        assert args.repo_path is None
+        assert args._default_repo_path == "eval-repos/synthetic"
 
     def test_custom_default_repo_path(self):
-        """Should use custom default_repo_path when provided."""
+        """Custom default_repo_path stored on parser for validation."""
         parser = argparse.ArgumentParser()
         add_common_args(parser, default_repo_path="/custom/path")
 
         args = parser.parse_args([])
 
-        assert args.repo_path == "/custom/path"
+        assert args.repo_path is None
+        assert args._default_repo_path == "/custom/path"
 
     def test_no_default_repo_path(self):
         """Should allow None default_repo_path for required repo-path."""
@@ -90,15 +93,17 @@ class TestAddCommonArgs:
         args = parser.parse_args([])
 
         assert args.repo_path is None
+        assert args._default_repo_path is None
 
     def test_default_branch(self):
-        """Should default branch to 'main'."""
+        """Branch default is None at parse time; 'main' applied during validation."""
         parser = argparse.ArgumentParser()
         add_common_args(parser)
 
         args = parser.parse_args([])
 
-        assert args.branch == "main"
+        # Defaults are now applied in validate_common_args_raising
+        assert args.branch is None
 
     def test_cli_overrides_defaults(self):
         """Should allow CLI arguments to override defaults."""
@@ -124,15 +129,16 @@ class TestAddCommonArgs:
         assert args.commit == "abc123"
 
     @patch.dict("os.environ", {"REPO_PATH": "/env/repo", "BRANCH": "feature"})
-    def test_env_vars_override_defaults(self):
-        """Should use environment variables over defaults."""
+    def test_env_vars_resolved_during_validation(self):
+        """Env vars are now resolved during validation, not at parse time."""
         parser = argparse.ArgumentParser()
         add_common_args(parser)
 
         args = parser.parse_args([])
 
-        assert args.repo_path == "/env/repo"
-        assert args.branch == "feature"
+        # At parse time, values are None (sentinel)
+        assert args.repo_path is None
+        assert args.branch is None
 
     @patch.dict("os.environ", {"REPO_PATH": "/env/repo"})
     def test_cli_overrides_env_vars(self):
@@ -153,7 +159,8 @@ class TestAddCommonArgs:
         args = parser.parse_args(["--my-tool-option", "value"])
 
         assert args.my_tool_option == "value"
-        assert args.repo_path == "eval-repos/synthetic"
+        # repo_path is None at parse time; default resolved during validation
+        assert args.repo_path is None
 
 
 class TestValidateCommonArgsRaising:

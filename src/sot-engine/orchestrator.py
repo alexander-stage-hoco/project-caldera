@@ -29,9 +29,18 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from execution import (
+    ExecutionBackend,
+    ExecutionConfig,
+    ExecutionMode,
+    LocalBackend,
+    ToolTask,
+    get_backend,
+)
 from persistence.adapters import CoverageAdapter, DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitBlameScannerAdapter, GitFameAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
+from persistence.quality import DataQualityChecker
 from persistence.repositories import (
     BaseRepository,
     CollectionRunRepository,
@@ -329,16 +338,42 @@ def _run_tools(
     output_root: Path | None,
     continue_on_failure: bool = False,
     show_progress: bool = True,
+    backend: ExecutionBackend | None = None,
 ) -> tuple[dict[str, Path], list[dict[str, Any]]]:
-    """Run all configured tools and return (outputs, per-tool summaries)."""
+    """Run all configured tools and return (outputs, per-tool summaries).
+
+    Delegates execution to the provided backend (defaults to LocalBackend).
+    Handles progress display, JSON validation, and failure semantics.
+    """
+    if backend is None:
+        backend = LocalBackend()
+
     outputs: dict[str, Path] = {}
     tool_summaries: list[dict[str, Any]] = []
     total_tools = len(tool_configs)
     use_rich = show_progress and RICH_AVAILABLE and sys.stdout.isatty()
     console = Console() if use_rich else None
 
-    for idx, tool in enumerate(tool_configs, 1):
-        output_path = _default_output_path(tool, run_id, output_root)
+    # Convert ToolConfig list to ToolTask list for the backend
+    tasks = [
+        ToolTask(
+            name=tc.name,
+            tool_root=Path(tc.path),
+            extra_env=tc.extra_env or {},
+        )
+        for tc in tool_configs
+    ]
+    exec_config = ExecutionConfig(
+        repo_path=repo_path,
+        repo_name=repo_name,
+        run_id=run_id,
+        repo_id=repo_id,
+        branch=branch,
+        commit=commit,
+        output_root=output_root,
+    )
+
+    for idx, (tool, task) in enumerate(zip(tool_configs, tasks), 1):
         tool_start = time.perf_counter()
 
         try:
@@ -350,36 +385,20 @@ def _run_tools(
                     transient=True,
                 ) as progress:
                     progress.add_task(f"[{idx}/{total_tools}] {tool.name}...", total=None)
-                    run_tool_make(
-                        Path(tool.path),
-                        repo_path,
-                        repo_name,
-                        run_id,
-                        repo_id,
-                        branch,
-                        commit,
-                        output_path.parent,
-                        logger,
-                        extra_env=tool.extra_env,
-                    )
+                    results = backend.execute_batch([task], exec_config, logger.log_pipe())
                 duration = time.perf_counter() - tool_start
                 console.print(f"[green]✓[/] [{idx}/{total_tools}] {tool.name} ({duration:.1f}s)")
             else:
-                run_tool_make(
-                    Path(tool.path),
-                    repo_path,
-                    repo_name,
-                    run_id,
-                    repo_id,
-                    branch,
-                    commit,
-                    output_path.parent,
-                    logger,
-                    extra_env=tool.extra_env,
-                )
+                results = backend.execute_batch([task], exec_config, logger.log_pipe())
                 duration = time.perf_counter() - tool_start
                 logger.info(f"[{idx}/{total_tools}] {tool.name} ({duration:.1f}s)")
 
+            result = results[0]
+
+            if result.status == "failed":
+                raise RuntimeError(result.error or f"{tool.name} failed")
+
+            output_path = result.output_path
             if not output_path.exists():
                 raise FileNotFoundError(
                     f"{tool.name} did not write expected output.json at {output_path}"
@@ -396,7 +415,7 @@ def _run_tools(
                 {
                     "tool_name": tool.name,
                     "status": "success",
-                    "duration_seconds": round(duration, 3),
+                    "duration_seconds": round(result.duration_seconds, 3),
                     "output_path": str(output_path),
                     "output_exists": True,
                     "output_bytes": output_path.stat().st_size,
@@ -407,6 +426,7 @@ def _run_tools(
             duration = time.perf_counter() - tool_start
             returncode = getattr(exc, "returncode", None)
             cmd = getattr(exc, "cmd", None)
+            output_path = _default_output_path(tool, run_id, output_root)
             tool_summaries.append(
                 {
                     "tool_name": tool.name,
@@ -488,6 +508,7 @@ def ingest_outputs(
     run_repo = ToolRunRepository(conn)
     layout_repo = LayoutRepository(conn)
     log_fn = logger.info if logger else None
+    quality_checker = DataQualityChecker(conn, logger=log_fn)
 
     # Layout must be ingested first (other tools depend on it)
     if not layout_output:
@@ -560,6 +581,7 @@ def ingest_outputs(
                 repo_path,
                 log_fn,
             )
+            adapter._quality_checker = quality_checker
             adapter.persist(payload)
         except Exception as exc:
             if continue_on_failure:
@@ -688,6 +710,7 @@ def main() -> int:
     parser.add_argument("--run-dbt", action="store_true")
     parser.add_argument("--replace", action="store_true")
     parser.add_argument("--no-progress", action="store_true", help="Disable rich progress display")
+    parser.add_argument("--mode", default="local", choices=["local"], help="Execution mode (only 'local' supported)")
     parser.add_argument("--dbt-bin", default="src/sot-engine/.venv-dbt/bin/dbt")
     parser.add_argument("--dbt-project-dir", default="src/sot-engine/dbt")
     parser.add_argument("--dbt-profiles-dir", default="src/sot-engine/dbt")

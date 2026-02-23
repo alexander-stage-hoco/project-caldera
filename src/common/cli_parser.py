@@ -9,6 +9,7 @@ arguments used by all Caldera tools:
 - --repo-id: Repository identifier (required)
 - --branch: Branch analyzed
 - --commit: Commit SHA (auto-detected if not provided)
+- --config: Optional JSON config file (CLI > config > env > default)
 """
 from __future__ import annotations
 
@@ -16,9 +17,10 @@ import sys
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Self
+from typing import Any, Self
 import os
 
+from .config_loader import ConfigError, ToolConfig, load_and_validate_config
 from .git_utilities import resolve_commit
 
 
@@ -122,6 +124,9 @@ def add_common_args(
     This function adds the standard set of CLI arguments used by all Caldera
     tools. Tools can add their own tool-specific arguments after calling this.
 
+    The ``--config`` flag accepts a JSON config file path. Precedence order:
+    CLI > config file > environment variable > built-in default.
+
     Args:
         parser: ArgumentParser to add arguments to.
         default_repo_path: Default value for --repo-path. Set to None to make
@@ -133,41 +138,70 @@ def add_common_args(
         parser.add_argument("--my-option", help="Tool-specific option")
         args = parser.parse_args()
     """
+    # Store default_repo_path on the parser so validate can access it
+    parser.set_defaults(_default_repo_path=default_repo_path)
+
+    parser.add_argument(
+        "--config",
+        default=None,
+        help="Path to JSON config file (CLI > config > env > default)",
+    )
     parser.add_argument(
         "--repo-path",
-        default=os.environ.get("REPO_PATH", default_repo_path),
+        default=None,
         help="Path to repository to analyze",
     )
     parser.add_argument(
         "--repo-name",
-        default=os.environ.get("REPO_NAME", ""),
+        default=None,
         help="Repository name for output naming",
     )
     parser.add_argument(
         "--output-dir",
-        default=os.environ.get("OUTPUT_DIR"),
+        default=None,
         help="Directory to write analysis output (default: outputs/<run-id>)",
     )
     parser.add_argument(
         "--run-id",
-        default=os.environ.get("RUN_ID", ""),
+        default=None,
         help="Run identifier (required)",
     )
     parser.add_argument(
         "--repo-id",
-        default=os.environ.get("REPO_ID", ""),
+        default=None,
         help="Repository identifier (required)",
     )
     parser.add_argument(
         "--branch",
-        default=os.environ.get("BRANCH", "main"),
+        default=None,
         help="Branch analyzed",
     )
     parser.add_argument(
         "--commit",
-        default=os.environ.get("COMMIT", ""),
+        default=None,
         help="Commit SHA (auto-detected if not provided)",
     )
+
+
+def _resolve_arg(
+    cli_value: Any,
+    config_value: Any,
+    env_key: str | None,
+    default: Any,
+) -> Any:
+    """Apply precedence: CLI > config > env > default.
+
+    A CLI value of None means "not provided by user on the command line".
+    """
+    if cli_value is not None:
+        return cli_value
+    if config_value is not None:
+        return config_value
+    if env_key is not None:
+        env_val = os.environ.get(env_key)
+        if env_val is not None:
+            return env_val
+    return default
 
 
 def validate_common_args_raising(
@@ -178,8 +212,9 @@ def validate_common_args_raising(
 ) -> CommonArgs:
     """Validate CLI arguments and return CommonArgs. Raises exceptions on error.
 
-    This variant raises exceptions for validation failures, suitable for tools
-    that want to handle errors with try/except blocks.
+    When ``--config`` is provided, the config file is loaded and its values are
+    used as a layer between CLI arguments and environment variables. Precedence:
+    CLI > config > env > default.
 
     Args:
         args: Parsed argument namespace from argparse.
@@ -193,6 +228,7 @@ def validate_common_args_raising(
         ValidationError: When a required argument is missing or invalid.
         FileNotFoundError: When repo_path does not exist.
         ValueError: When commit resolution fails in strict mode.
+        ConfigError: When the config file is invalid.
 
     Example:
         args = parser.parse_args()
@@ -204,33 +240,86 @@ def validate_common_args_raising(
     if commit_config is None:
         commit_config = CommitResolutionConfig.lenient()
 
+    # Load config file if provided
+    config: ToolConfig | None = None
+    config_path = getattr(args, "config", None)
+    if config_path is not None:
+        config = load_and_validate_config(Path(config_path))
+
+    # Retrieve default_repo_path stored by add_common_args
+    default_repo_path = getattr(args, "_default_repo_path", "eval-repos/synthetic")
+
+    # Apply precedence: CLI > config > env > default
+    repo_path_str = _resolve_arg(
+        args.repo_path,
+        config.repo_path if config else None,
+        "REPO_PATH",
+        default_repo_path,
+    )
+    repo_name_str = _resolve_arg(
+        args.repo_name,
+        config.repo_name if config else None,
+        "REPO_NAME",
+        "",
+    )
+    output_dir_str = _resolve_arg(
+        args.output_dir,
+        config.output_dir if config else None,
+        "OUTPUT_DIR",
+        None,
+    )
+    run_id = _resolve_arg(
+        args.run_id,
+        config.run_id if config else None,
+        "RUN_ID",
+        "",
+    )
+    repo_id = _resolve_arg(
+        args.repo_id,
+        config.repo_id if config else None,
+        "REPO_ID",
+        "",
+    )
+    branch = _resolve_arg(
+        args.branch,
+        config.branch if config else None,
+        "BRANCH",
+        "main",
+    )
+    commit_str = _resolve_arg(
+        args.commit,
+        config.commit if config else None,
+        "COMMIT",
+        "",
+    )
+
     # Validate repo_path
-    if not args.repo_path:
+    if not repo_path_str:
         raise ValidationError("--repo-path is required")
 
-    repo_path = Path(args.repo_path)
+    repo_path = Path(repo_path_str)
     if not repo_path.exists():
         raise FileNotFoundError(f"Repository not found at {repo_path}")
 
     # Derive repo_name
-    repo_name = args.repo_name or repo_path.resolve().name
+    repo_name = repo_name_str or repo_path.resolve().name
 
     # Validate required identifiers
-    if not args.run_id:
+    if not run_id:
         raise ValidationError("--run-id is required")
-    if not args.repo_id:
+    if not repo_id:
         raise ValidationError("--repo-id is required")
 
     # Resolve commit (may raise ValueError in strict mode)
     commit = resolve_commit(
         repo_path.resolve(),
-        args.commit or None,
+        commit_str or None,
         fallback_repo=commit_config.fallback_repo,
         strict=commit_config.strict,
     )
 
     # Determine output directory
-    output_dir = Path(args.output_dir) if args.output_dir else Path("outputs") / args.run_id
+    output_dir = Path(output_dir_str) if output_dir_str else Path("outputs") / run_id
     if create_output_dir:
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -241,9 +330,9 @@ def validate_common_args_raising(
         repo_name=repo_name,
         output_dir=output_dir,
         output_path=output_path,
-        run_id=args.run_id,
-        repo_id=args.repo_id,
-        branch=args.branch,
+        run_id=run_id,
+        repo_id=repo_id,
+        branch=branch,
         commit=commit,
     )
 
