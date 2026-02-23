@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Hashable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 import duckdb
 
@@ -17,6 +17,9 @@ from ..validation import (
     validate_json_schema,
     validate_lz_schema,
 )
+
+if TYPE_CHECKING:
+    from ..quality import DataQualityChecker
 
 
 class _DedupTracker:
@@ -92,6 +95,7 @@ class BaseAdapter(ABC):
         *,
         repo_root: Path | None = None,
         logger: Callable[[str], None] | None = None,
+        quality_checker: DataQualityChecker | None = None,
     ) -> None:
         """Initialize the adapter.
 
@@ -100,11 +104,13 @@ class BaseAdapter(ABC):
             layout_repo: Repository for layout records (optional for LayoutAdapter)
             repo_root: Root path of the repository for path normalization
             logger: Optional logging callback function
+            quality_checker: Optional centralized quality checker for post-persist checks
         """
         self._run_repo = run_repo
         self._layout_repo = layout_repo
         self._repo_root = repo_root
         self._logger = logger
+        self._quality_checker = quality_checker
 
     @property
     def _conn(self) -> duckdb.DuckDBPyConnection:
@@ -262,6 +268,7 @@ class BaseAdapter(ABC):
         2. Ensures landing zone tables exist
         3. Validates the landing zone schema
         4. Delegates to _do_persist() for tool-specific persistence
+        5. Runs post-persist quality checks (if quality_checker is set)
 
         Args:
             payload: The JSON payload to persist
@@ -269,10 +276,58 @@ class BaseAdapter(ABC):
         Returns:
             run_pk: Primary key of the inserted tool run
         """
+        # Pre-persist: check metadata completeness if quality checker is set
+        metadata_complete = True
+        if self._quality_checker:
+            meta_result = self._quality_checker.check_metadata(
+                payload.get("metadata", {}), self.tool_name,
+            )
+            metadata_complete = meta_result.passed
+
         self.validate_schema(payload)
         self.ensure_lz_tables()
         self.validate_lz_schema()
-        return self._do_persist(payload)
+        run_pk = self._do_persist(payload)
+
+        # Post-persist: advisory quality report (never raises)
+        if self._quality_checker:
+            try:
+                self._run_post_persist_quality(run_pk, metadata_complete)
+            except Exception as exc:
+                self._log(f"QUALITY_WARNING: post-persist checks failed: {exc}")
+
+        return run_pk
+
+    def _run_post_persist_quality(self, run_pk: int, metadata_complete: bool) -> None:
+        """Run post-persist quality checks. Advisory only — never raises."""
+        if not self._quality_checker:
+            return
+
+        checks = []
+
+        # FK integrity check for tables that have file_id
+        for table_name in self.lz_tables:
+            if "file_id" in self.lz_tables[table_name]:
+                result = self._quality_checker.check_fk_integrity(
+                    table_name, "file_id", run_pk, self.tool_name,
+                )
+                checks.append(result)
+
+        # Uniqueness check on key columns
+        for table_name, columns in self.lz_tables.items():
+            key_cols = ["run_pk"] + [c for c in columns if c != "run_pk"][:1]
+            if len(key_cols) >= 2:
+                result = self._quality_checker.check_uniqueness(
+                    table_name, key_cols, self.tool_name,
+                )
+                checks.append(result)
+
+        self._quality_checker.build_report(
+            self.tool_name,
+            checks,
+            schema_valid=True,
+            metadata_complete=metadata_complete,
+        )
 
     @abstractmethod
     def _do_persist(self, payload: dict) -> int:

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://caldera.dev/schemas/config.schema.json",
+  "title": "Caldera Tool Configuration",
+  "description": "Configuration file schema for Caldera tool invocation.",
+  "type": "object",
+  "required": ["schema_version"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver version of this config schema. MAJOR mismatch = error."
+    },
+    "repo_path": {
+      "type": "string",
+      "description": "Path to repository to analyze."
+    },
+    "repo_name": {
+      "type": "string",
+      "description": "Repository name for output naming."
+    },
+    "output_dir": {
+      "type": "string",
+      "description": "Directory to write analysis output."
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Run identifier."
+    },
+    "repo_id": {
+      "type": "string",
+      "description": "Repository identifier."
+    },
+    "branch": {
+      "type": "string",
+      "description": "Branch analyzed."
+    },
+    "commit": {
+      "type": "string",
+      "description": "Commit SHA."
+    },
+    "tool_specific": {
+      "type": "object",
+      "description": "Tool-specific configuration (open dict, no per-tool schema enforcement in Phase 1).",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
