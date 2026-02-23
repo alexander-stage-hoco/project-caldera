@@ -248,9 +248,12 @@ def seeded_db_with_marts(seeded_db: Path) -> Path:
             NULL::INTEGER AS run_pk,
             NULL::VARCHAR AS vulnerability_id,
             NULL::VARCHAR AS package_name,
+            NULL::VARCHAR AS installed_version,
+            NULL::VARCHAR AS fixed_version,
             NULL::VARCHAR AS severity,
             NULL::DOUBLE AS cvss_score,
-            NULL::VARCHAR AS title
+            NULL::VARCHAR AS title,
+            NULL::BOOLEAN AS fix_available
         WHERE false
     """)
 
@@ -273,15 +276,19 @@ def seeded_db_with_marts(seeded_db: Path) -> Path:
             COALESCE(scc.relative_path, liz.relative_path) AS relative_path,
             COALESCE(scc.language, liz.language) AS language,
             scc.lines_total AS loc_total,
-            scc.code_lines,
-            scc.comment_lines,
+            scc.code_lines AS loc_code,
+            scc.comment_lines AS loc_comment,
             scc.blank_lines,
             scc.complexity AS scc_complexity,
             liz.nloc,
             liz.function_count,
-            liz.total_ccn,
+            liz.total_ccn AS complexity_total_ccn,
             liz.avg_ccn,
-            liz.max_ccn
+            liz.max_ccn AS complexity_max,
+            scc.run_pk AS scc_run_pk,
+            liz.run_pk AS lizard_run_pk,
+            NULL::BIGINT AS semgrep_run_pk,
+            NULL::BIGINT AS layout_run_pk
         FROM lz_scc_file_metrics scc
         FULL OUTER JOIN lz_lizard_file_metrics liz
             ON scc.file_id = liz.file_id
@@ -594,7 +601,16 @@ class TestE2ESectionFallbacks:
                 file_id VARCHAR,
                 relative_path VARCHAR,
                 language VARCHAR,
-                loc INTEGER
+                loc INTEGER,
+                loc_total INTEGER,
+                loc_code INTEGER,
+                loc_comment INTEGER,
+                complexity_total_ccn INTEGER,
+                complexity_max INTEGER,
+                scc_run_pk BIGINT,
+                lizard_run_pk BIGINT,
+                semgrep_run_pk BIGINT,
+                layout_run_pk BIGINT
             )
         """)
         conn.execute("""
@@ -610,6 +626,14 @@ class TestE2ESectionFallbacks:
                 commit VARCHAR,
                 timestamp TIMESTAMP,
                 created_at TIMESTAMP
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE lz_layout_files (
+                run_pk BIGINT,
+                file_id VARCHAR,
+                relative_path VARCHAR,
+                language VARCHAR
             )
         """)
         # Insert minimal tool run data
