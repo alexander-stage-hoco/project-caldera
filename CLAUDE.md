@@ -103,6 +103,7 @@ make clean-db                # Remove database, start fresh
 make collect REPO=<path>     # Collect tool artifacts into a portable bundle
 make analyze-bundle REPO=<path> BUNDLE=<dir>  # Ingest bundle + generate report
 make prune-outputs           # Delete generated tool outputs (requires CONFIRM=1)
+make preflight               # Local pre-commit gate (~30s, run before committing)
 make promote                 # Push current branch and open PR to correct base
 make release                 # Create + push version tag (RELEASE_TYPE=major|minor|patch)
 make cloud-setup             # One-time: terraform init for cloud runs
@@ -190,6 +191,42 @@ python scripts/create-tool.py <name> --sot-integration      # With SoT adapter f
 python scripts/seed_ground_truth.py <tool> <output.json>    # Seed ground truth
 python scripts/generate_dbt_models.py <tool> --table <tbl> --metrics <cols>
 ```
+
+## Developer Workflow
+
+### Before Every Commit
+
+Run `make preflight` — a fast local gate (~30s) that mirrors CI Gate A:
+
+```bash
+make preflight   # compliance-preflight + unit tests + observability check
+```
+
+### Pre-commit Hooks
+
+Pre-commit hooks are installed automatically via `make setup`. They run on every `git commit` and check:
+- Tool compliance (when `src/tools/` files are modified)
+- Insights tests (when `src/insights/` files are modified)
+- Trailing whitespace, YAML/JSON validity, large file detection
+- Secret detection via `detect-secrets`
+
+If hooks are missing, reinstall with: `.venv/bin/pre-commit install`
+
+### Creating PRs
+
+Always use `make promote` — it auto-detects the correct base branch and creates a properly formatted PR. Never use `gh pr create` manually.
+
+### Branch Naming
+
+Branches must follow these conventions:
+- `feature/*` — new features
+- `fix/*` — bug fixes
+- `tool/*/**` — tool-specific changes
+- `infra/*` — infrastructure changes
+
+### Protected Branches
+
+Never push directly to `develop`, `release`, or `main`. All changes flow through PRs.
 
 ## Virtual Environment
 
@@ -473,3 +510,11 @@ python src/tool-compliance/tool_compliance.py src/tools/<name>
 # Single tool preflight
 python src/tool-compliance/tool_compliance.py src/tools/<name> --preflight
 ```
+
+## Claude Code Rules
+
+- **Always run `make preflight` before committing.** This catches compliance, test, and observability issues locally before they reach CI.
+- If `src/insights/` files were changed, also run `pytest src/insights/tests/ --tb=short -q` before committing.
+- If `src/tools/` files were changed, also run `make compliance` on the affected tools before committing.
+- Use `make promote` to create PRs. Never use `gh pr create` manually.
+- Never push directly to `develop`, `release`, or `main`.

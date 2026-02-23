@@ -2,6 +2,28 @@
 
 Project Caldera uses GitHub Actions with a branch promotion model: `develop → release → main`.
 
+## Local Development Workflow
+
+Run checks locally **before** committing to catch issues early and avoid wasting CI cycles.
+
+### Local Checks (Before Commit)
+
+| Check | Command | When | Duration |
+|-------|---------|------|----------|
+| Full local preflight | `make preflight` | Before every commit | ~30s |
+| Tool compliance | `make compliance` | When modifying `src/tools/` | ~10s |
+| Insights tests | `pytest src/insights/tests/` | When modifying `src/insights/` | ~15s |
+| Pre-commit hooks | Automatic (installed via `make setup`) | Every `git commit` | ~5-30s |
+
+### Branch Workflow
+
+1. Create branch: `git checkout -b feature/my-change`
+2. Make changes
+3. Run `make preflight`
+4. Commit (pre-commit hooks run automatically)
+5. Push: `git push -u origin HEAD`
+6. Create PR: `make promote` (auto-detects base branch)
+
 ## Branching Strategy
 
 ```

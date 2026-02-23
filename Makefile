@@ -1,5 +1,5 @@
 .PHONY: help setup setup-core analyze status doctor list-runs report clean-db \
-	compliance compliance-preflight compliance-full \
+	compliance compliance-preflight compliance-full preflight \
 	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
 	orchestrate test pipeline-eval arch-review \
@@ -106,6 +106,9 @@ help:
 	@echo "    make list-runs              Show all analysis runs"
 	@echo "    make status                 Check prerequisites and health"
 	@echo ""
+	@echo "  Developer:"
+	@echo "    make preflight              Local pre-commit gate (~30s, run before committing)"
+	@echo ""
 	@echo "  Advanced:"
 	@echo "    make orchestrate            Run orchestrator (requires ORCH_* variables)"
 	@echo "    make pipeline-eval          Full E2E with LLM evaluation"
@@ -175,6 +178,10 @@ setup-core: ## Set up project venv only (no tool venvs/binaries)
 	@if [ ! -f .venv/bin/activate ]; then python3 -m venv .venv; fi
 	@.venv/bin/pip install --upgrade pip -q
 	@.venv/bin/pip install -r requirements.txt -q
+	@if [ -f .pre-commit-config.yaml ]; then \
+		echo "==> Installing pre-commit hooks..."; \
+		.venv/bin/pre-commit install; \
+	fi
 	@echo "==> Core setup complete"
 
 analyze:
@@ -264,6 +271,13 @@ prune-outputs:
 # =============================================================================
 # Tool and Infrastructure Targets
 # =============================================================================
+
+preflight: ## Local pre-commit gate (mirrors Gate A, ~30s)
+	@echo "==> Running local preflight checks..."
+	@$(MAKE) compliance-preflight
+	@.venv/bin/python -m pytest -m "not slow and not integration" --tb=short -q
+	@.venv/bin/python scripts/check_observability_compliance.py
+	@echo "==> Preflight passed"
 
 compliance:
 	@.venv/bin/python src/tool-compliance/tool_compliance.py \
