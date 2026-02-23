@@ -23,6 +23,7 @@ jobs:
     timeout-minutes: 45
     env:
       HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -56,7 +57,7 @@ jobs:
         run: |
           REPO_URL="${{ github.event.inputs.repo_url || 'https://github.com/pallets/click' }}"
           SERVER="${{ github.event.inputs.server_type || 'cx22' }}"
-          make cloud-run REPO="$REPO_URL" CLOUD_SERVER="$SERVER"
+          make cloud-run REPO="$REPO_URL" CLOUD_SERVER="$SERVER" PIPELINE_LLM=0
 
       - name: Destroy cloud server
         if: always()
