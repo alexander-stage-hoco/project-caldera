@@ -8,7 +8,7 @@ COPY src/tools/scc/ /caldera/src/tools/scc/
 WORKDIR /caldera/src/tools/scc
 
 # Symlink so the Makefile's SCC_BIN=./bin/scc resolves
-RUN mkdir -p bin && ln -s /usr/local/bin/scc bin/scc
+RUN mkdir -p bin && ln -sf /usr/local/bin/scc bin/scc
 
 RUN make setup
 

@@ -8,7 +8,7 @@ COPY src/tools/gitleaks/ /caldera/src/tools/gitleaks/
 WORKDIR /caldera/src/tools/gitleaks
 
 # Symlink so the Makefile's bin/gitleaks resolves
-RUN mkdir -p bin && ln -s /usr/local/bin/gitleaks bin/gitleaks
+RUN mkdir -p bin && ln -sf /usr/local/bin/gitleaks bin/gitleaks
 
 RUN make setup
 

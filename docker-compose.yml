@@ -46,12 +46,6 @@ services:
       - DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:-caldera}_default
       - CALDERA_REPO_VOLUME=caldera-repo
       - CALDERA_ARTIFACTS_VOLUME=caldera-artifacts
-    command: >-
-      --repo-url=${REPO_URL:-}
-      --workspace=/workspace
-      --skip-tools=${SKIP_TOOLS:-}
-      --max-parallel=${MAX_PARALLEL:-4}
-      ${CLONE_DEPTH:+--clone-depth=${CLONE_DEPTH}}
     networks:
       - default
 
@@ -80,9 +74,13 @@ services:
 
 volumes:
   caldera-repo:
+    name: caldera-repo
   caldera-artifacts:
+    name: caldera-artifacts
   caldera-db:
+    name: caldera-db
   caldera-results:
+    name: caldera-results
   sonarqube-data:
   sonarqube-logs:
 

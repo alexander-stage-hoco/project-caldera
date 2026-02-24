@@ -125,7 +125,7 @@ if [ -n "$COMPOSE_PROFILES" ]; then
 fi
 
 echo "=== Starting pipeline ==="
-$COMPOSE_CMD up --build --abort-on-container-exit
+$COMPOSE_CMD up --build
 EXIT_CODE=$?
 
 # Extract results from volumes
@@ -144,6 +144,12 @@ docker run --rm \
     -v caldera-db:/source:ro \
     -v "$RESULTS_DIR":/dest \
     alpine sh -c "cp -r /source/. /dest/ 2>/dev/null || true"
+
+# Copy artifact bundle from the caldera-artifacts volume
+docker run --rm \
+    -v caldera-artifacts:/source:ro \
+    -v "$RESULTS_DIR":/dest \
+    alpine sh -c "mkdir -p /dest/artifacts && cp -r /source/. /dest/artifacts/ 2>/dev/null || true"
 
 echo "Results extracted to: $RESULTS_DIR"
 ls -la "$RESULTS_DIR/" 2>/dev/null || true
