@@ -21,6 +21,7 @@ LZ_TABLES = {
         "file_id": "VARCHAR",
         "relative_path": "VARCHAR",
         "directory_id": "VARCHAR",
+        "stable_fingerprint": "VARCHAR",
     },
     "lz_layout_directories": {
         "run_pk": "BIGINT",
@@ -43,6 +44,7 @@ TABLE_DDL = {
             size_bytes BIGINT,
             line_count INTEGER,
             is_binary BOOLEAN,
+            stable_fingerprint VARCHAR,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (run_pk, file_id)
         )
@@ -63,12 +65,23 @@ TABLE_DDL = {
 QUALITY_RULES = ["paths", "ranges", "required_fields"]
 
 
+_MIGRATION_SQL = [
+    "ALTER TABLE lz_layout_files ADD COLUMN IF NOT EXISTS stable_fingerprint VARCHAR",
+]
+
+
 class LayoutAdapter(BaseAdapter):
     """Adapts layout-scanner JSON output to entity objects for persistence.
 
     Unlike other adapters, LayoutAdapter writes TO the layout repository
     rather than reading from it to resolve file IDs.
     """
+
+    def ensure_lz_tables(self) -> list[str]:
+        created = super().ensure_lz_tables()
+        for stmt in _MIGRATION_SQL:
+            self._conn.execute(stmt)
+        return created
 
     @property
     def tool_name(self) -> str:
@@ -193,6 +206,7 @@ class LayoutAdapter(BaseAdapter):
                 size_bytes=entry.get("size_bytes"),
                 line_count=entry.get("line_count"),
                 is_binary=entry.get("is_binary"),
+                stable_fingerprint=entry.get("content_hash"),
             )
 
     def _map_directories(

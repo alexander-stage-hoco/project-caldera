@@ -48,7 +48,8 @@
         "classification_reason": "path",
         "classification_confidence": 0.9,
         "parent_directory_id": "d-000000000002",
-        "depth": 1
+        "depth": 1,
+        "content_hash": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
       },
       "src/utils/helpers.py": {
         "id": "f-000000000002",
@@ -63,7 +64,8 @@
         "classification_reason": "path",
         "classification_confidence": 0.9,
         "parent_directory_id": "d-000000000003",
-        "depth": 2
+        "depth": 2,
+        "content_hash": "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"
       },
       "package-lock.json": {
         "id": "f-000000000003",
