@@ -5,6 +5,7 @@
 	orchestrate test pipeline-eval arch-review \
 	collect analyze-bundle prune-outputs export-results \
 	cloud-setup cloud-run cloud-status cloud-destroy \
+	docker-build-base docker-build-tool docker-test-tool \
 	github-setup github-plan github-apply \
 	promote promote-develop promote-release promote-main
 
@@ -581,6 +582,43 @@ cloud-destroy:
 	cd infra && terraform destroy -auto-approve \
 		-var="repo_url=placeholder" \
 		-var="server_type=$(CLOUD_SERVER)"
+
+# =============================================================================
+# Docker Targets (Tool Containerization)
+# =============================================================================
+
+docker-build-base:  ## Build shared Python base image
+	docker build -f docker/caldera-python-base/Dockerfile -t caldera-python-base .
+
+docker-build-tool: docker-build-base  ## Build a single tool image (TOOL=<name>)
+	@test -n "$(TOOL)" || (echo "Usage: make docker-build-tool TOOL=<name>"; exit 1)
+	@test -f src/tools/$(TOOL)/Dockerfile || (echo "No Dockerfile for $(TOOL)"; exit 1)
+	docker build -f src/tools/$(TOOL)/Dockerfile -t caldera-tool-$(TOOL) .
+
+docker-test-tool: docker-build-tool  ## Build + test a tool image against native (TOOL=<name> REPO=<path>)
+	@test -n "$(TOOL)" || (echo "TOOL is required"; exit 1)
+	@test -n "$(REPO)" || (echo "REPO is required"; exit 1)
+	@NATIVE_OUT=$$(mktemp -d /tmp/caldera-native-XXXXXX); \
+	  DOCKER_OUT=$$(mktemp -d /tmp/caldera-docker-XXXXXX); \
+	  REPO_ABS=$$(cd "$(REPO)" && pwd); \
+	  COMMIT_SHA=$$(git -C "$$REPO_ABS" rev-parse HEAD 2>/dev/null || echo "0000000000000000000000000000000000000000"); \
+	  echo "=== Native run ==="; \
+	  $(MAKE) -C src/tools/$(TOOL) analyze \
+	    REPO_PATH="$$REPO_ABS" REPO_NAME=docker-test \
+	    OUTPUT_DIR="$$NATIVE_OUT" RUN_ID=native-test \
+	    REPO_ID=docker-test BRANCH=main COMMIT="$$COMMIT_SHA"; \
+	  echo "=== Docker run ==="; \
+	  docker run --rm \
+	    -v "$$REPO_ABS":/repo:ro \
+	    -v "$$DOCKER_OUT":/output \
+	    caldera-tool-$(TOOL) \
+	    RUN_ID=docker-test REPO_ID=docker-test \
+	    REPO_NAME=docker-test BRANCH=main COMMIT="$$COMMIT_SHA"; \
+	  echo "=== Compare ==="; \
+	  $(PYTHON_VENV) scripts/compare_tool_outputs.py \
+	    --native "$$NATIVE_OUT/output.json" \
+	    --docker "$$DOCKER_OUT/output.json"; \
+	  rm -rf "$$NATIVE_OUT" "$$DOCKER_OUT"
 
 # =============================================================================
 # GitHub IaC (branch protection, environments, long-lived branches)
