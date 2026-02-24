@@ -1,7 +1,7 @@
 FROM caldera-dotnet-base:latest
 
-COPY src/tools/dotcover/ /caldera/src/tools/dotcover/
-WORKDIR /caldera/src/tools/dotcover
+COPY src/tools/roslyn-analyzers/ /caldera/src/tools/roslyn-analyzers/
+WORKDIR /caldera/src/tools/roslyn-analyzers
 
 RUN make setup
 
