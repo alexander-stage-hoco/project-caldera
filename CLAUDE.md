@@ -105,6 +105,7 @@ make analyze-bundle REPO=<path> BUNDLE=<dir>  # Ingest bundle + generate report
 make prune-outputs           # Delete generated tool outputs (requires CONFIRM=1)
 make promote                 # Push current branch and open PR to correct base
 make release                 # Create + push version tag (RELEASE_TYPE=major|minor|patch)
+make export-results          # Export latest run to git results repository
 make cloud-setup             # One-time: terraform init for cloud runs
 make cloud-run REPO=<url>    # Spin up Hetzner VM, analyze, download results, destroy
 make cloud-destroy           # Destroy cloud server (if KEEP_SERVER=1 was used)
@@ -147,6 +148,8 @@ make pipeline-eval           # Full E2E: orchestrate -> insights -> LLM eval -> 
 | `CLOUD_SERVER` | `cx33` | Hetzner server type for `make cloud-run` |
 | `CLOUD_RESULTS` | `infra/results` | Local directory for cloud run results |
 | `KEEP_SERVER` | unset | Set to `1` to keep VM alive after cloud run |
+| `RESULTS_REPO_URL` | unset | Git URL for results repository (`make export-results`) |
+| `PUSH` | unset | Set to `1` to push after export (`make export-results`) |
 
 ### Orchestrator
 

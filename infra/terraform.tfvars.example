@@ -17,6 +17,10 @@ caldera_repo_url = "https://github.com/yourorg/caldera.git"
 # max_parallel         = 4
 # results_dir          = "./results"
 
+# Anthropic API key for LLM evaluation on the VM.
+# Loaded from .env via TF_VAR_anthropic_api_key; no need to set here if using .env.
+# anthropic_api_key = ""
+
 # SSH key paths — defaults to ed25519. If you use RSA or another key type,
 # uncomment and set these to match your key:
 #   ls ~/.ssh/id_*  # to see your available keys
