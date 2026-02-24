@@ -5,6 +5,7 @@
 with authors as (
     select *
     from {{ ref('stg_lz_git_fame_authors') }}
+    where files_touched >= 1
 ),
 
 -- Calculate author rankings within each run

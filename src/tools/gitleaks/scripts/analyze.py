@@ -122,7 +122,7 @@ def main() -> int:
         help="Path to gitleaks binary",
     )
     parser.add_argument(
-        "--config",
+        "--gitleaks-config",
         help="Path to gitleaks config file",
     )
     parser.add_argument(
@@ -158,7 +158,7 @@ def main() -> int:
     analysis = analyze_repository(
         gitleaks_path=gitleaks_path,
         repo_path=common.repo_path,
-        config_path=Path(args.config) if args.config else None,
+        config_path=Path(args.gitleaks_config) if args.gitleaks_config else None,
         baseline_path=Path(args.baseline) if args.baseline else None,
         repo_name_override=common.repo_name,
     )

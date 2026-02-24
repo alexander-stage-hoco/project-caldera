@@ -307,6 +307,7 @@ class LayoutRepository(BaseRepository):
     _FILE_COLUMNS = (
         "run_pk", "file_id", "relative_path", "directory_id", "filename",
         "extension", "language", "category", "size_bytes", "line_count", "is_binary",
+        "stable_fingerprint",
     )
     _DIR_COLUMNS = (
         "run_pk", "directory_id", "relative_path", "parent_id", "depth",
@@ -321,6 +322,7 @@ class LayoutRepository(BaseRepository):
             lambda f: (
                 f.run_pk, f.file_id, f.relative_path, f.directory_id, f.filename,
                 f.extension, f.language, f.category, f.size_bytes, f.line_count, f.is_binary,
+                f.stable_fingerprint,
             ),
         )
 

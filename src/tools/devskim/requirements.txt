@@ -9,6 +9,9 @@ pydantic>=2.0.0
 # Analysis
 pyyaml>=6.0.0
 
+# Shared
+jsonschema>=4.21.1
+
 # Testing
 pytest>=7.0.0
 pytest-cov>=4.0.0

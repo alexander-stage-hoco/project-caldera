@@ -83,7 +83,7 @@ def _run_tool(
     bundle_root: Path,
     extra_env: dict[str, str] | None = None,
 ) -> ToolResult:
-    output_dir = bundle_root / tool_name / run_id
+    output_dir = bundle_root / tool_name
     output_dir.mkdir(parents=True, exist_ok=True)
     log_path = output_dir / "execution.log"
 

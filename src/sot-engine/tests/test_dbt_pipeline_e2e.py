@@ -952,3 +952,36 @@ class TestMartContentValidation:
             """
         ).fetchone()[0]
         assert bad == 0, f"{bad} row(s) where loc_total < loc_code"
+
+    def test_identity_map_empty_single_run(
+        self, db: duckdb.DuckDBPyConnection
+    ) -> None:
+        """Single collection run → mart_file_identity_map should have 0 rows."""
+        count = db.execute(
+            "SELECT COUNT(*) FROM mart_file_identity_map"
+        ).fetchone()[0]
+        assert count == 0, (
+            "mart_file_identity_map should be empty with a single run"
+        )
+
+    def test_directory_trends_empty_single_run(
+        self, db: duckdb.DuckDBPyConnection
+    ) -> None:
+        """Single collection run → mart_directory_trend_signals should have 0 rows."""
+        count = db.execute(
+            "SELECT COUNT(*) FROM mart_directory_trend_signals"
+        ).fetchone()[0]
+        assert count == 0, (
+            "mart_directory_trend_signals should be empty with a single run"
+        )
+
+    def test_stable_fingerprint_column_populated(
+        self, db: duckdb.DuckDBPyConnection
+    ) -> None:
+        """After fixture update, at least some files have stable_fingerprint."""
+        count = db.execute(
+            "SELECT COUNT(*) FROM lz_layout_files WHERE stable_fingerprint IS NOT NULL"
+        ).fetchone()[0]
+        assert count > 0, (
+            "Expected at least one file with stable_fingerprint populated"
+        )

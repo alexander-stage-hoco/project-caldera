@@ -337,11 +337,11 @@ def _run_tool(
         repo_id=repo_id,
         branch="main",
         commit="0" * 40,  # Fallback commit for non-git repo
-        output_dir=output_dir / tool_name / run_id,
+        output_dir=output_dir / tool_name,
         logger=logger,
         extra_env=extra_env,
     )
-    return output_dir / tool_name / run_id / "output.json"
+    return output_dir / tool_name / "output.json"
 
 
 def _validate_json_envelope(output_path: Path, run_id: str, repo_id: str) -> dict:
