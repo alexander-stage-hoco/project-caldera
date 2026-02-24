@@ -1,0 +1,9 @@
+.git
+.venv
+**/.venv
+**/outputs
+**/__pycache__
+**/.pytest_cache
+*.duckdb
+.env
+infra/results

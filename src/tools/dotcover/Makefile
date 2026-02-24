@@ -58,7 +58,7 @@ DOCKER_IMAGE ?= dotcover-runner
 
 docker-build:  ## Build Docker image for dotCover (bypasses ARM64 bug)
 	@echo "Building Docker image (linux/amd64)..."
-	docker build --platform linux/amd64 -t $(DOCKER_IMAGE) .
+	docker build --platform linux/amd64 -f Dockerfile.runner -t $(DOCKER_IMAGE) .
 
 analyze-docker: docker-build $(VENV_READY)  ## Run analysis in Docker (bypasses ARM64 bug)
 	@mkdir -p $(OUTPUT_DIR)
