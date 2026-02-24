@@ -17,8 +17,8 @@
 | Cloud wrapper script | **Built + hardened** | `scripts/cloud-run.sh` |
 | Makefile cloud targets | **Built + hardened** | `Makefile` (`cloud-setup`, `cloud-run`, `cloud-destroy`) |
 | Terraform config template | **Done** | `infra/terraform.tfvars.example`, `infra/.gitignore` |
-| DOCKERIZED mode (Mode 3) | **Wave 1 done** | `docs/PRODUCTION_MODES.md` (bundle-first architecture) |
-| Tool Dockerfiles (18) | **Wave 1: 2 of 18** | `docker/caldera-python-base/Dockerfile`, `src/tools/{layout-scanner,scc}/Dockerfile` |
+| DOCKERIZED mode (Mode 3) | **Wave 2 done** | `docs/PRODUCTION_MODES.md` (bundle-first architecture) |
+| Tool Dockerfiles (18) | **Done (17 of 18)** | `docker/caldera-{python,java,dotnet}-base/`, `src/tools/*/Dockerfile` (sonarqube deferred to Phase 4) |
 | `ExecutionBackend` refactor | **Deprioritized** | Not needed for bundle-first approach |
 
 ### Key decisions made
@@ -80,8 +80,8 @@ This phase is only needed if you want the fully DOCKERIZED mode (Mode 3). The cl
 |---|------|--------|
 | 3.1 | ~~Base Python image (`docker/caldera-python-base/Dockerfile`)~~ | **Done** |
 | 3.2 | ~~layout-scanner + scc Dockerfiles + native-vs-Docker output comparison~~ | **Done** |
-| 3.3 | Remaining 17 tool Dockerfiles | 1 day |
-| 3.4 | `make docker-build-tools` target | 1 hr |
+| 3.3 | ~~Remaining 17 tool Dockerfiles~~ | **Done** |
+| 3.4 | ~~`make docker-build-tools` target~~ | **Done** |
 | 3.5 | ~~`make docker-test-tool TOOL=<name> REPO=<path>` target~~ | **Done** |
 | 3.6 | ~~`scripts/compare_tool_outputs.py` (ignore timestamps)~~ | **Done** |
 
@@ -201,7 +201,7 @@ All costs are Hetzner CX-series (shared vCPU). Billing is per-hour, minimum 1 ho
 |-------|------|--------|--------|
 | **1** | Validate Hetzner cloud path | **Tested (Flask, Feb 19)** | 1 hr (mostly waiting) |
 | **2** | Harden cloud path | **Hardened (8 fixes)** | 1 day |
-| **3** | Tool Dockerfiles | **Wave 1 done** (base + 2 tools) | 2 days |
+| **3** | Tool Dockerfiles | **Done** (3 bases + 17 tools) | 2 days |
 | **4** | Dockerized compose stack | Future | 2 days |
 | **5** | Results repository | **Done** | 0.5 day |
 

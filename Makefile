@@ -5,7 +5,7 @@
 	orchestrate test pipeline-eval arch-review \
 	collect analyze-bundle prune-outputs export-results \
 	cloud-setup cloud-run cloud-status cloud-destroy \
-	docker-build-base docker-build-tool docker-test-tool \
+	docker-build-base docker-build-tool docker-build-tools docker-test-tool \
 	github-setup github-plan github-apply \
 	promote promote-develop promote-release promote-main
 
@@ -587,8 +587,20 @@ cloud-destroy:
 # Docker Targets (Tool Containerization)
 # =============================================================================
 
-docker-build-base:  ## Build shared Python base image
+docker-build-base:  ## Build all base Docker images (Python, Java, .NET)
 	docker build -f docker/caldera-python-base/Dockerfile -t caldera-python-base .
+	docker build -f docker/caldera-java-base/Dockerfile -t caldera-java-base .
+	docker build -f docker/caldera-dotnet-base/Dockerfile -t caldera-dotnet-base .
+
+DOCKER_TOOLS := layout-scanner scc lizard semgrep symbol-scanner scancode \
+	git-blame-scanner git-fame dependensee coverage-ingest \
+	trivy gitleaks git-sizer pmd-cpd roslyn-analyzers devskim dotcover
+
+docker-build-tools: docker-build-base  ## Build all tool Docker images
+	@for tool in $(DOCKER_TOOLS); do \
+		echo "=== Building caldera-tool-$$tool ==="; \
+		$(MAKE) docker-build-tool TOOL=$$tool; \
+	done
 
 docker-build-tool: docker-build-base  ## Build a single tool image (TOOL=<name>)
 	@test -n "$(TOOL)" || (echo "Usage: make docker-build-tool TOOL=<name>"; exit 1)
