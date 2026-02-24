@@ -31,6 +31,7 @@ services:
 
   # ── Runner: dispatches tool containers ───────────────────────────────
   runner:
+    image: ${CALDERA_RUNNER_IMAGE:-caldera-runner}
     build:
       context: .
       dockerfile: docker/caldera-runner/Dockerfile
@@ -46,11 +47,13 @@ services:
       - DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:-caldera}_default
       - CALDERA_REPO_VOLUME=caldera-repo
       - CALDERA_ARTIFACTS_VOLUME=caldera-artifacts
+      - CALDERA_TOOL_IMAGE_PREFIX=${CALDERA_TOOL_IMAGE_PREFIX:-caldera-tool-}
     networks:
       - default
 
   # ── Orchestrator: ingests bundle, runs dbt + report ──────────────────
   orchestrator:
+    image: ${CALDERA_ORCHESTRATOR_IMAGE:-caldera-orchestrator}
     build:
       context: .
       dockerfile: docker/caldera-orchestrator/Dockerfile

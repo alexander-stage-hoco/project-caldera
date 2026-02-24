@@ -17,7 +17,7 @@ Project Caldera supports multiple production modes. **For v1**, the recommended 
 |------|--------|---------------|------------------|
 | **LOCAL** | Analyst laptop | Native tool Makefiles (Docker optional per tool) | Local filesystem |
 | **BUNDLE** | Hybrid (runner + laptop) | Tools run elsewhere, artifacts shipped to laptop | Local filesystem |
-| **DOCKERIZED (future)** | Cloud VM / single machine | Everything in containers | Git results repository |
+| **DOCKERIZED** | Cloud VM / single machine | Everything in containers | Git results repository |
 
 All modes aim to produce the same *logical* outputs (tool JSON artifacts → DuckDB → dbt marts → HTML report + optional LLM eval). The difference is where tool execution happens and how artifacts move between machines.
 
@@ -160,9 +160,9 @@ artifacts/<repo_id>/<run_id>/
 
 ---
 
-## Mode 3: DOCKERIZED (Cloud / Single Machine) — future
+## Mode 3: DOCKERIZED (Cloud / Single Machine)
 
-This section describes a future “everything in containers” deployment. It is **not implemented in v1**; keep it as a design target.
+This mode runs the full pipeline in containers. Implemented in Phase 3-4 (per-tool Dockerfiles, runner, orchestrator, compose stack).
 
 Recommended direction: use the **bundle layout** as the contract between tool execution and ingestion. A dockerized runner can execute tools in containers, write `/workspace/artifacts/<repo-id>/<run-id>/...`, then invoke the orchestrator in BUNDLE mode.
 
@@ -370,7 +370,7 @@ services:
       - caldera-artifacts:/workspace/artifacts
     environment:
       - REPO_URL=${REPO_URL}
-      - MAX_PARALLEL=${MAX_PARALLEL:-8}
+      - MAX_PARALLEL=${MAX_PARALLEL:-4}
       - SKIP_TOOLS=${SKIP_TOOLS:-}
 
   # Stage 2: ingest bundle, dbt, report
@@ -411,7 +411,7 @@ The orchestrator needs to know which bundle root to ingest (repo_id + run_id). I
 
 ## Results Repository
 
-In **DOCKERIZED (future)** mode, all run outputs can be committed to a git repository. This allows analysts to clone results locally and run arbitrary analytics, queries, and reports.
+In **DOCKERIZED** mode, all run outputs can be committed to a git repository. This allows analysts to clone results locally and run arbitrary analytics, queries, and reports.
 
 ### Repository Structure
 
@@ -577,7 +577,7 @@ DuckDB files are tracked via Git LFS. The export script automatically initialize
 
 ## Configuration Matrix
 
-| Aspect | LOCAL | BUNDLE | DOCKERIZED (future) |
+| Aspect | LOCAL | BUNDLE | DOCKERIZED |
 |--------|-------|--------|--------------------|
 | **Host prerequisites** | Python 3.12 (+ optional Docker per tool) | Runner: tool-specific; Laptop: Python 3.12 | Docker only |
 | **Tool execution** | On laptop | On runner machine/container host | In containers |

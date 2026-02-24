@@ -91,6 +91,28 @@ make release RELEASE_TYPE=patch  # Next patch version
 
 The `make release` target enforces that you are on the `main` branch, computes the next version from the latest tag, and pushes an annotated tag to origin.
 
+### Docker Images
+
+**File:** `.github/workflows/docker-images.yml`
+**Trigger:** Push to `main`, tag push `v*`, `workflow_dispatch`
+**Duration:** ~10-20 min | **Cost:** Free
+
+Builds and pushes all Docker images to GHCR (`ghcr.io/<owner>/caldera-*`). Uses a phased job chain:
+
+1. **detect-changes** — On `main` pushes, diffs changed paths to determine which images need rebuilding. Tags and manual dispatch rebuild everything.
+2. **build-bases** — Builds `caldera-python-base`, `caldera-java-base`, `caldera-dotnet-base` (skips unchanged).
+3. **build-tools** — Matrix of 17 tool images, `max-parallel: 10`. Each receives `--build-arg BASE_IMAGE=ghcr.io/.../caldera-<base>-base:<tag>`.
+4. **build-infra** — Builds `caldera-runner` and `caldera-orchestrator` (parallel with tools, no base dependency).
+
+**Tagging:** `latest` on `main`, `sha-<short>` always, `1.2.3` / `1.2` / `1` on version tags.
+
+**Pulling pre-built images:**
+
+```bash
+make docker-pull-all                    # Pull all from GHCR, tag locally
+GHCR_REGISTRY=ghcr.io/my-org make docker-pull-all  # Custom registry
+```
+
 ### Cloud Smoke Test
 
 **File:** `.github/workflows/cloud-smoke.yml`

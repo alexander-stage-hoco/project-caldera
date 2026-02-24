@@ -7,6 +7,7 @@
 	cloud-setup cloud-run cloud-status cloud-destroy \
 	docker-build-base docker-build-tool docker-build-tools docker-test-tool \
 	docker-build-runner docker-build-orchestrator docker-build-all \
+	docker-pull-all \
 	github-setup github-plan github-apply \
 	promote promote-develop promote-release promote-main
 
@@ -615,6 +616,29 @@ docker-build-orchestrator:  ## Build the Caldera orchestrator Docker image
 	docker build -f docker/caldera-orchestrator/Dockerfile -t caldera-orchestrator .
 
 docker-build-all: docker-build-tools docker-build-runner docker-build-orchestrator  ## Build all Docker images (bases + tools + runner + orchestrator)
+
+GHCR_REGISTRY ?= ghcr.io/alexander-stage-hoco
+
+docker-pull-all:  ## Pull all images from GHCR and tag locally
+	@echo "=== Pulling base images ==="
+	@for img in caldera-python-base caldera-java-base caldera-dotnet-base; do \
+		echo "  $$img"; \
+		docker pull $(GHCR_REGISTRY)/$$img:latest && \
+		docker tag $(GHCR_REGISTRY)/$$img:latest $$img:latest; \
+	done
+	@echo "=== Pulling tool images ==="
+	@for tool in $(DOCKER_TOOLS); do \
+		echo "  caldera-tool-$$tool"; \
+		docker pull $(GHCR_REGISTRY)/caldera-tool-$$tool:latest && \
+		docker tag $(GHCR_REGISTRY)/caldera-tool-$$tool:latest caldera-tool-$$tool:latest; \
+	done
+	@echo "=== Pulling infra images ==="
+	@for img in caldera-runner caldera-orchestrator; do \
+		echo "  $$img"; \
+		docker pull $(GHCR_REGISTRY)/$$img:latest && \
+		docker tag $(GHCR_REGISTRY)/$$img:latest $$img:latest; \
+	done
+	@echo "Done. All images tagged locally."
 
 docker-test-tool: docker-build-tool  ## Build + test a tool image against native (TOOL=<name> REPO=<path>)
 	@test -n "$(TOOL)" || (echo "TOOL is required"; exit 1)

@@ -1,4 +1,5 @@
-FROM caldera-python-base:latest
+ARG BASE_IMAGE=caldera-python-base:latest
+FROM ${BASE_IMAGE}
 
 ARG TRIVY_VERSION=0.58.0
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \

@@ -1,0 +1,335 @@
+name: "Docker Images"
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/caldera
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # ── Job 1: Detect which images need rebuilding ─────────────────────────────
+  detect-changes:
+    name: "Detect Changes"
+    runs-on: ubuntu-latest
+    outputs:
+      base_python: ${{ steps.changes.outputs.base_python }}
+      base_java: ${{ steps.changes.outputs.base_java }}
+      base_dotnet: ${{ steps.changes.outputs.base_dotnet }}
+      runner: ${{ steps.changes.outputs.runner }}
+      orchestrator: ${{ steps.changes.outputs.orchestrator }}
+      tool_matrix: ${{ steps.changes.outputs.tool_matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed paths
+        id: changes
+        run: |
+          # On tags or manual dispatch, build everything
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]] || [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "base_python=true" >> "$GITHUB_OUTPUT"
+            echo "base_java=true" >> "$GITHUB_OUTPUT"
+            echo "base_dotnet=true" >> "$GITHUB_OUTPUT"
+            echo "runner=true" >> "$GITHUB_OUTPUT"
+            echo "orchestrator=true" >> "$GITHUB_OUTPUT"
+            # All tools
+            echo 'tool_matrix=[{"tool":"layout-scanner","base":"python"},{"tool":"scc","base":"python"},{"tool":"lizard","base":"python"},{"tool":"semgrep","base":"python"},{"tool":"symbol-scanner","base":"python"},{"tool":"scancode","base":"python"},{"tool":"git-blame-scanner","base":"python"},{"tool":"git-fame","base":"python"},{"tool":"dependensee","base":"python"},{"tool":"coverage-ingest","base":"python"},{"tool":"trivy","base":"python"},{"tool":"gitleaks","base":"python"},{"tool":"git-sizer","base":"python"},{"tool":"pmd-cpd","base":"java"},{"tool":"roslyn-analyzers","base":"dotnet"},{"tool":"devskim","base":"dotnet"},{"tool":"dotcover","base":"dotnet"}]' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # On main push, diff against prior commit
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+
+          # Python base paths
+          PYTHON_BASE_PATHS="docker/caldera-python-base/ src/common/ src/shared/ src/tools/Makefile.common"
+          base_python=false
+          for p in $PYTHON_BASE_PATHS; do
+            if echo "$CHANGED" | grep -q "^${p}"; then
+              base_python=true
+              break
+            fi
+          done
+
+          # Java base (own dir + transitive python-base)
+          base_java=false
+          if [[ "$base_python" == "true" ]] || echo "$CHANGED" | grep -q "^docker/caldera-java-base/"; then
+            base_java=true
+          fi
+
+          # Dotnet base
+          DOTNET_BASE_PATHS="docker/caldera-dotnet-base/ src/common/ src/shared/ src/tools/Makefile.common"
+          base_dotnet=false
+          for p in $DOTNET_BASE_PATHS; do
+            if echo "$CHANGED" | grep -q "^${p}"; then
+              base_dotnet=true
+              break
+            fi
+          done
+
+          # Runner
+          runner=false
+          if echo "$CHANGED" | grep -q "^docker/caldera-runner/" || echo "$CHANGED" | grep -q "^scripts/docker_runner.py"; then
+            runner=true
+          fi
+
+          # Orchestrator
+          ORCH_PATHS="docker/caldera-orchestrator/ requirements.txt src/sot-engine/ src/common/ src/shared/ src/insights/ scripts/analyze_bundle.py scripts/docker_orchestrator_entrypoint.py scripts/export_results.py scripts/write_run_manifest.py"
+          orchestrator=false
+          for p in $ORCH_PATHS; do
+            if echo "$CHANGED" | grep -q "^${p}"; then
+              orchestrator=true
+              break
+            fi
+          done
+          # Also trigger on tool schema changes
+          if echo "$CHANGED" | grep -q "^src/tools/.*/schemas/"; then
+            orchestrator=true
+          fi
+
+          echo "base_python=$base_python" >> "$GITHUB_OUTPUT"
+          echo "base_java=$base_java" >> "$GITHUB_OUTPUT"
+          echo "base_dotnet=$base_dotnet" >> "$GITHUB_OUTPUT"
+          echo "runner=$runner" >> "$GITHUB_OUTPUT"
+          echo "orchestrator=$orchestrator" >> "$GITHUB_OUTPUT"
+
+          # Build tool matrix — include tool if its own files changed OR its base changed
+          PYTHON_TOOLS="layout-scanner scc lizard semgrep symbol-scanner scancode git-blame-scanner git-fame dependensee coverage-ingest trivy gitleaks git-sizer"
+          JAVA_TOOLS="pmd-cpd"
+          DOTNET_TOOLS="roslyn-analyzers devskim dotcover"
+
+          tools="[]"
+          for tool in $PYTHON_TOOLS; do
+            if [[ "$base_python" == "true" ]] || echo "$CHANGED" | grep -q "^src/tools/${tool}/"; then
+              tools=$(echo "$tools" | jq -c ". + [{\"tool\":\"${tool}\",\"base\":\"python\"}]")
+            fi
+          done
+          for tool in $JAVA_TOOLS; do
+            if [[ "$base_java" == "true" ]] || echo "$CHANGED" | grep -q "^src/tools/${tool}/"; then
+              tools=$(echo "$tools" | jq -c ". + [{\"tool\":\"${tool}\",\"base\":\"java\"}]")
+            fi
+          done
+          for tool in $DOTNET_TOOLS; do
+            if [[ "$base_dotnet" == "true" ]] || echo "$CHANGED" | grep -q "^src/tools/${tool}/"; then
+              tools=$(echo "$tools" | jq -c ". + [{\"tool\":\"${tool}\",\"base\":\"dotnet\"}]")
+            fi
+          done
+
+          echo "tool_matrix=${tools}" >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        run: |
+          echo "### Change Detection Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Image | Rebuild |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|---------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Python base | ${{ steps.changes.outputs.base_python }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Java base | ${{ steps.changes.outputs.base_java }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| .NET base | ${{ steps.changes.outputs.base_dotnet }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Runner | ${{ steps.changes.outputs.runner }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Orchestrator | ${{ steps.changes.outputs.orchestrator }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Tools | $(echo '${{ steps.changes.outputs.tool_matrix }}' | jq length) |" >> "$GITHUB_STEP_SUMMARY"
+
+  # ── Job 2: Build base images ───────────────────────────────────────────────
+  build-bases:
+    name: "Base — ${{ matrix.image }}"
+    needs: detect-changes
+    if: needs.detect-changes.outputs.base_python == 'true' || needs.detect-changes.outputs.base_java == 'true' || needs.detect-changes.outputs.base_dotnet == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: python-base
+            dockerfile: docker/caldera-python-base/Dockerfile
+            flag: base_python
+          - image: java-base
+            dockerfile: docker/caldera-java-base/Dockerfile
+            flag: base_java
+          - image: dotnet-base
+            dockerfile: docker/caldera-dotnet-base/Dockerfile
+            flag: base_dotnet
+    steps:
+      - name: Skip check
+        id: skip
+        run: |
+          flag="${{ matrix.flag }}"
+          val="${{ needs.detect-changes.outputs[matrix.flag] }}"
+          echo "should_build=${val}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.skip.outputs.should_build == 'true'
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.skip.outputs.should_build == 'true'
+
+      - name: Log in to GHCR
+        if: steps.skip.outputs.should_build == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        if: steps.skip.outputs.should_build == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - name: Resolve build args
+        if: steps.skip.outputs.should_build == 'true'
+        id: args
+        run: |
+          tag="${{ steps.meta.outputs.version }}"
+          if [[ "${{ matrix.image }}" == "java-base" ]]; then
+            echo "build_args=BASE_IMAGE=${{ env.IMAGE_PREFIX }}-python-base:${tag}" >> "$GITHUB_OUTPUT"
+          else
+            echo "build_args=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and push
+        if: steps.skip.outputs.should_build == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ steps.args.outputs.build_args }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  # ── Job 3: Build tool images ───────────────────────────────────────────────
+  build-tools:
+    name: "Tool — ${{ matrix.tool }}"
+    needs: [detect-changes, build-bases]
+    if: always() && needs.detect-changes.result == 'success' && (needs.build-bases.result == 'success' || needs.build-bases.result == 'skipped') && fromJSON(needs.detect-changes.outputs.tool_matrix)[0] != null
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        include: ${{ fromJSON(needs.detect-changes.outputs.tool_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_PREFIX }}-tool-${{ matrix.tool }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - name: Resolve base image
+        id: base
+        run: |
+          tag="${{ steps.meta.outputs.version }}"
+          echo "image=${{ env.IMAGE_PREFIX }}-${{ matrix.base }}-base:${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/tools/${{ matrix.tool }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: BASE_IMAGE=${{ steps.base.outputs.image }}
+          cache-from: type=gha,scope=tool-${{ matrix.tool }}
+          cache-to: type=gha,mode=max,scope=tool-${{ matrix.tool }}
+
+  # ── Job 4: Build infra images (runner + orchestrator) ──────────────────────
+  build-infra:
+    name: "Infra — ${{ matrix.image }}"
+    needs: detect-changes
+    if: needs.detect-changes.outputs.runner == 'true' || needs.detect-changes.outputs.orchestrator == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: runner
+            dockerfile: docker/caldera-runner/Dockerfile
+            flag: runner
+          - image: orchestrator
+            dockerfile: docker/caldera-orchestrator/Dockerfile
+            flag: orchestrator
+    steps:
+      - name: Skip check
+        id: skip
+        run: |
+          val="${{ needs.detect-changes.outputs[matrix.flag] }}"
+          echo "should_build=${val}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.skip.outputs.should_build == 'true'
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.skip.outputs.should_build == 'true'
+
+      - name: Log in to GHCR
+        if: steps.skip.outputs.should_build == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        if: steps.skip.outputs.should_build == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - name: Build and push
+        if: steps.skip.outputs.should_build == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

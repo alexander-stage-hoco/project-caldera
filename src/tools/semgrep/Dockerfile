@@ -1,4 +1,5 @@
-FROM caldera-python-base:latest
+ARG BASE_IMAGE=caldera-python-base:latest
+FROM ${BASE_IMAGE}
 
 COPY src/tools/semgrep/ /caldera/src/tools/semgrep/
 WORKDIR /caldera/src/tools/semgrep

@@ -1,4 +1,5 @@
-FROM caldera-python-base:latest
+ARG BASE_IMAGE=caldera-python-base:latest
+FROM ${BASE_IMAGE}
 
 COPY src/tools/dependensee/ /caldera/src/tools/dependensee/
 WORKDIR /caldera/src/tools/dependensee

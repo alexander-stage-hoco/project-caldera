@@ -1,4 +1,5 @@
-FROM caldera-python-base:latest
+ARG BASE_IMAGE=caldera-python-base:latest
+FROM ${BASE_IMAGE}
 
 ARG GITLEAKS_VERSION=8.18.4
 RUN curl -sL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \

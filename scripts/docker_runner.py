@@ -134,12 +134,13 @@ def _run_tool_container(
         Path("/artifacts") / repo_id / run_id / tool_name
     )
 
+    image_prefix = os.environ.get("CALDERA_TOOL_IMAGE_PREFIX", "caldera-tool-")
     cmd: list[str] = [
         "docker", "run", "--rm",
         "--network", network,
         "-v", f"{repo_volume}:/repo:ro",
         "-v", f"{artifacts_volume}:/artifacts",
-        f"caldera-tool-{tool_name}",
+        f"{image_prefix}{tool_name}",
         f"RUN_ID={run_id}",
         f"REPO_ID={repo_id}",
         f"REPO_NAME={repo_id}",

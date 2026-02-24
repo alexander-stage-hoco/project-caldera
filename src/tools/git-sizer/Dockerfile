@@ -1,4 +1,5 @@
-FROM caldera-python-base:latest
+ARG BASE_IMAGE=caldera-python-base:latest
+FROM ${BASE_IMAGE}
 
 ARG GIT_SIZER_VERSION=1.5.0
 RUN apt-get update && apt-get install -y --no-install-recommends unzip golang-go && rm -rf /var/lib/apt/lists/* && \

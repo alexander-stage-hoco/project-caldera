@@ -87,6 +87,12 @@ src/
     └── orchestrator.py      # End-to-end workflow coordinator
 docs/                        # Documentation (see Key Files Reference)
 scripts/                     # Automation scripts
+docker/
+├── caldera-python-base/     # Shared Python 3.12 base image
+├── caldera-java-base/       # Java 21 base for pmd-cpd
+├── caldera-dotnet-base/     # .NET SDK base for roslyn/dotcover
+├── caldera-runner/          # Tool dispatcher (Docker CLI + Python)
+└── caldera-orchestrator/    # Bundle ingest + dbt + reporting
 ```
 
 ## Key Commands
@@ -137,6 +143,7 @@ make pipeline-eval           # Full E2E: orchestrate -> insights -> LLM eval -> 
 make docker-build-base           # Build shared Python base image
 make docker-build-tool TOOL=<n>  # Build a single tool Docker image
 make docker-build-all            # Build all images (bases + tools + runner + orchestrator)
+make docker-pull-all             # Pull all pre-built images from GHCR
 make docker-test-tool TOOL=<n> REPO=<path>  # Test Docker vs native output
 ```
 
@@ -155,6 +162,11 @@ make docker-test-tool TOOL=<n> REPO=<path>  # Test Docker vs native output
 | `KEEP_SERVER` | unset | Set to `1` to keep VM alive after cloud run |
 | `RESULTS_REPO_URL` | unset | Git URL for results repository (`make export-results`) |
 | `PUSH` | unset | Set to `1` to push after export (`make export-results`) |
+| `MAX_PARALLEL` | `4` | Max parallel tool containers (docker/cloud modes) |
+| `GHCR_REGISTRY` | `ghcr.io/alexander-stage-hoco` | GHCR registry for `make docker-pull-all` |
+| `CALDERA_TOOL_IMAGE_PREFIX` | `caldera-tool-` | Docker image prefix for tool containers |
+| `CALDERA_RUNNER_IMAGE` | `caldera-runner` | Runner image (set to GHCR ref for pre-built) |
+| `CALDERA_ORCHESTRATOR_IMAGE` | `caldera-orchestrator` | Orchestrator image (set to GHCR ref for pre-built) |
 
 ### Orchestrator
 
@@ -298,6 +310,7 @@ class SccFileMetric:
 | `src/sot-engine/persistence/schema.sql` | Landing zone table definitions |
 | `src/sot-engine/persistence/adapters/` | Tool-specific JSON → entity adapters |
 | `src/sot-engine/dbt/models/` | Staging and mart SQL models |
+| `src/sot-engine/execution.py` | Execution backend abstraction (LOCAL/DOCKER/VM) |
 
 ### Utilities
 
@@ -312,6 +325,11 @@ class SccFileMetric:
 | `scripts/check_observability_compliance.py` | CI compliance checker |
 | `scripts/collect_artifacts.py` | Artifact bundle collector |
 | `scripts/analyze_bundle.py` | Bundle ingest + report generator |
+| `scripts/docker_runner.py` | Dockerized tool dispatcher |
+| `scripts/docker_orchestrator_entrypoint.py` | Orchestrator container entrypoint |
+| `scripts/export_results.py` | Results repository exporter |
+| `scripts/write_run_manifest.py` | Post-ingest manifest writer |
+| `scripts/build_results_index.py` | Results catalog builder |
 
 ## Data Model Concepts
 
@@ -413,6 +431,7 @@ GitHub Actions with branch promotion: `develop → release → main`. Branch pro
 | `.github/workflows/ci.yml` | Gates A-D (router workflow) |
 | `.github/workflows/tool-evaluation-major.yml` | Gate E (LLM, environment-protected) |
 | `.github/workflows/cloud-smoke.yml` | Cloud smoke test (manual + major tags) |
+| `.github/workflows/docker-images.yml` | Docker image builds → GHCR (main + tags) |
 | `tests/fixtures/ci-repo/` | Minimal fixture repo for CI smoke tests |
 
 ## Secrets Management

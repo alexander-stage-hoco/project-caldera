@@ -1,4 +1,5 @@
-FROM caldera-dotnet-base:latest
+ARG BASE_IMAGE=caldera-dotnet-base:latest
+FROM ${BASE_IMAGE}
 
 COPY src/tools/dotcover/ /caldera/src/tools/dotcover/
 WORKDIR /caldera/src/tools/dotcover
