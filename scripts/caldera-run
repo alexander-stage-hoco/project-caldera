@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+# caldera-run — wrapper for the Caldera dockerized pipeline (Mode 3)
+#
+# Usage:
+#   ./scripts/caldera-run --repo=https://github.com/org/repo [options]
+#
+# Options:
+#   --repo=<url|path>     Repository URL or local path (required)
+#   --skip-tools=<list>   Comma-separated tool names to skip
+#   --max-parallel=<n>    Max parallel tool containers (default: 4)
+#   --clone-depth=<n>     Git clone depth (default: full)
+#   --llm / --no-llm      Enable/disable LLM evaluation (default: --no-llm)
+#   --with-sonarqube      Start SonarQube sidecar
+#   --results-repo=<url>  Git URL to push results to
+#   --results-dir=<path>  Local directory to copy results to (default: docker-results/)
+#   --keep-volumes        Don't remove Docker volumes after run
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Defaults
+REPO=""
+SKIP_TOOLS=""
+MAX_PARALLEL=4
+CLONE_DEPTH=""
+PIPELINE_LLM=0
+WITH_SONARQUBE=0
+RESULTS_REPO=""
+RESULTS_DIR="${PROJECT_ROOT}/docker-results"
+KEEP_VOLUMES=0
+
+# Parse arguments
+for arg in "$@"; do
+    case "$arg" in
+        --repo=*)       REPO="${arg#--repo=}" ;;
+        --skip-tools=*) SKIP_TOOLS="${arg#--skip-tools=}" ;;
+        --max-parallel=*) MAX_PARALLEL="${arg#--max-parallel=}" ;;
+        --clone-depth=*) CLONE_DEPTH="${arg#--clone-depth=}" ;;
+        --llm)          PIPELINE_LLM=1 ;;
+        --no-llm)       PIPELINE_LLM=0 ;;
+        --with-sonarqube) WITH_SONARQUBE=1 ;;
+        --results-repo=*) RESULTS_REPO="${arg#--results-repo=}" ;;
+        --results-dir=*) RESULTS_DIR="${arg#--results-dir=}" ;;
+        --keep-volumes) KEEP_VOLUMES=1 ;;
+        --help|-h)
+            echo "Usage: $(basename "$0") --repo=<url|path> [options]"
+            echo ""
+            echo "Options:"
+            echo "  --repo=<url|path>     Repository URL or local path (required)"
+            echo "  --skip-tools=<list>   Comma-separated tool names to skip"
+            echo "  --max-parallel=<n>    Max parallel tool containers (default: 4)"
+            echo "  --clone-depth=<n>     Git clone depth"
+            echo "  --llm                 Enable LLM evaluation"
+            echo "  --no-llm              Disable LLM evaluation (default)"
+            echo "  --with-sonarqube      Start SonarQube sidecar"
+            echo "  --results-repo=<url>  Git URL to push results to"
+            echo "  --results-dir=<path>  Local dir for results (default: docker-results/)"
+            echo "  --keep-volumes        Don't remove Docker volumes after run"
+            exit 0
+            ;;
+        *) echo "Unknown argument: $arg"; exit 1 ;;
+    esac
+done
+
+if [ -z "$REPO" ]; then
+    echo "ERROR: --repo is required"
+    echo "Usage: $(basename "$0") --repo=<url|path>"
+    exit 1
+fi
+
+# Detect local path vs URL
+IS_URL=0
+if echo "$REPO" | grep -qE '^(https?://|git@)'; then
+    IS_URL=1
+fi
+
+if [ "$IS_URL" -eq 0 ]; then
+    # Local path — resolve it
+    REPO="$(cd "$REPO" && pwd)"
+    if [ ! -d "$REPO" ]; then
+        echo "ERROR: repo path does not exist: $REPO"
+        exit 1
+    fi
+fi
+
+# Auto-build images if runner image doesn't exist
+if ! docker image inspect caldera-runner >/dev/null 2>&1; then
+    echo "=== Building Docker images ==="
+    make -C "$PROJECT_ROOT" docker-build-all
+fi
+
+# Build compose profiles
+COMPOSE_PROFILES=""
+if [ "$WITH_SONARQUBE" -eq 1 ]; then
+    COMPOSE_PROFILES="sonarqube"
+fi
+
+# Export environment for compose
+export REPO_URL="$REPO"
+export SKIP_TOOLS
+export MAX_PARALLEL
+export CLONE_DEPTH
+export PIPELINE_LLM
+export RESULTS_REPO
+
+echo ""
+echo "=== Caldera Dockerized Pipeline ==="
+echo "  Repo:          $REPO"
+echo "  Skip tools:    ${SKIP_TOOLS:-none}"
+echo "  Max parallel:  $MAX_PARALLEL"
+echo "  Clone depth:   ${CLONE_DEPTH:-full}"
+echo "  LLM:           $([ "$PIPELINE_LLM" -eq 1 ] && echo "enabled" || echo "disabled")"
+echo "  SonarQube:     $([ "$WITH_SONARQUBE" -eq 1 ] && echo "enabled" || echo "disabled")"
+echo "  Results dir:   $RESULTS_DIR"
+echo ""
+
+# Run the compose stack
+cd "$PROJECT_ROOT"
+
+COMPOSE_CMD="docker compose"
+if [ -n "$COMPOSE_PROFILES" ]; then
+    COMPOSE_CMD="$COMPOSE_CMD --profile $COMPOSE_PROFILES"
+fi
+
+echo "=== Starting pipeline ==="
+$COMPOSE_CMD up --build --abort-on-container-exit
+EXIT_CODE=$?
+
+# Extract results from volumes
+echo ""
+echo "=== Extracting results ==="
+mkdir -p "$RESULTS_DIR"
+
+# Copy results from the caldera-results volume
+docker run --rm \
+    -v caldera-results:/source:ro \
+    -v "$RESULTS_DIR":/dest \
+    alpine sh -c "cp -r /source/. /dest/ 2>/dev/null || true"
+
+# Copy DB from the caldera-db volume
+docker run --rm \
+    -v caldera-db:/source:ro \
+    -v "$RESULTS_DIR":/dest \
+    alpine sh -c "cp -r /source/. /dest/ 2>/dev/null || true"
+
+echo "Results extracted to: $RESULTS_DIR"
+ls -la "$RESULTS_DIR/" 2>/dev/null || true
+
+# Cleanup
+echo ""
+echo "=== Cleanup ==="
+if [ "$KEEP_VOLUMES" -eq 0 ]; then
+    $COMPOSE_CMD down -v
+    echo "Volumes removed."
+else
+    $COMPOSE_CMD down
+    echo "Containers stopped (volumes preserved)."
+fi
+
+if [ "$EXIT_CODE" -ne 0 ]; then
+    echo ""
+    echo "WARNING: Pipeline exited with code $EXIT_CODE"
+fi
+
+exit "$EXIT_CODE"

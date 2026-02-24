@@ -1,0 +1,91 @@
+# Caldera Dockerized Pipeline (Mode 3: DOCKERIZED)
+#
+# Usage:
+#   REPO_URL=https://github.com/org/repo docker compose up --abort-on-container-exit
+#
+# Or via the wrapper script:
+#   ./scripts/caldera-run --repo=https://github.com/org/repo
+#
+# Architecture:
+#   runner  → clones repo, dispatches caldera-tool-* containers, writes bundle
+#   orchestrator → reads bundle, runs orchestrator + dbt + report
+
+services:
+  # ── Optional: SonarQube sidecar ──────────────────────────────────────
+  sonarqube:
+    image: sonarqube:10.7.0-community
+    profiles: [sonarqube]
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/api/system/status | grep -q UP"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-logs:/opt/sonarqube/logs
+
+  # ── Runner: dispatches tool containers ───────────────────────────────
+  runner:
+    build:
+      context: .
+      dockerfile: docker/caldera-runner/Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - caldera-repo:/workspace/repo
+      - caldera-artifacts:/workspace/artifacts
+    environment:
+      - REPO_URL=${REPO_URL:-}
+      - SKIP_TOOLS=${SKIP_TOOLS:-}
+      - MAX_PARALLEL=${MAX_PARALLEL:-4}
+      - CLONE_DEPTH=${CLONE_DEPTH:-}
+      - DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:-caldera}_default
+      - CALDERA_REPO_VOLUME=caldera-repo
+      - CALDERA_ARTIFACTS_VOLUME=caldera-artifacts
+    command: >-
+      --repo-url=${REPO_URL:-}
+      --workspace=/workspace
+      --skip-tools=${SKIP_TOOLS:-}
+      --max-parallel=${MAX_PARALLEL:-4}
+      ${CLONE_DEPTH:+--clone-depth=${CLONE_DEPTH}}
+    networks:
+      - default
+
+  # ── Orchestrator: ingests bundle, runs dbt + report ──────────────────
+  orchestrator:
+    build:
+      context: .
+      dockerfile: docker/caldera-orchestrator/Dockerfile
+    depends_on:
+      runner:
+        condition: service_completed_successfully
+    volumes:
+      - caldera-repo:/workspace/repo:ro
+      - caldera-artifacts:/workspace/artifacts:ro
+      - caldera-db:/workspace/db
+      - caldera-results:/workspace/results
+    environment:
+      - WORKSPACE=/workspace
+      - DB_PATH=/workspace/db/caldera_sot.duckdb
+      - RESULTS_DIR=/workspace/results
+      - PIPELINE_LLM=${PIPELINE_LLM:-0}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - RESULTS_REPO=${RESULTS_REPO:-}
+    networks:
+      - default
+
+volumes:
+  caldera-repo:
+  caldera-artifacts:
+  caldera-db:
+  caldera-results:
+  sonarqube-data:
+  sonarqube-logs:
+
+networks:
+  default:
+    name: ${COMPOSE_PROJECT_NAME:-caldera}_default

@@ -109,6 +109,7 @@ make export-results          # Export latest run to git results repository
 make cloud-setup             # One-time: terraform init for cloud runs
 make cloud-run REPO=<url>    # Spin up Hetzner VM, analyze, download results, destroy
 make cloud-destroy           # Destroy cloud server (if KEEP_SERVER=1 was used)
+./scripts/caldera-run --repo=<url>  # Full dockerized pipeline (Mode 3)
 make github-setup            # One-time: terraform init for GitHub settings IaC
 make github-plan             # Preview GitHub settings changes (branches, protection, environments)
 make github-apply            # Apply GitHub settings (requires GITHUB_TOKEN)
@@ -135,6 +136,7 @@ make orchestrate             # Full end-to-end pipeline
 make pipeline-eval           # Full E2E: orchestrate -> insights -> LLM eval -> top 3
 make docker-build-base           # Build shared Python base image
 make docker-build-tool TOOL=<n>  # Build a single tool Docker image
+make docker-build-all            # Build all images (bases + tools + runner + orchestrator)
 make docker-test-tool TOOL=<n> REPO=<path>  # Test Docker vs native output
 ```
 

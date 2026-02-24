@@ -89,17 +89,17 @@ This phase is only needed if you want the fully DOCKERIZED mode (Mode 3). The cl
 
 ---
 
-### Phase 4: Dockerized runner + compose stack (future — Mode 3)
+### Phase 4: Dockerized runner + compose stack (Mode 3)
 
-Only after Phase 3. Uses bundle-first architecture from PRODUCTION_MODES.md.
+Uses bundle-first architecture from PRODUCTION_MODES.md.
 
 | # | Task | Effort |
 |---|------|--------|
-| 4.1 | Runner Dockerfile (dispatches tool containers, writes bundle) | 4 hrs |
-| 4.2 | Orchestrator Dockerfile (BUNDLE-mode ingestion only, no docker.sock) | 2 hrs |
-| 4.3 | `docker-compose.yml` (runner → orchestrator, shared volumes) | 2 hrs |
-| 4.4 | `caldera-run` wrapper script | 2 hrs |
-| 4.5 | Results repository export (`ResultsExporter` + git push) | 4 hrs |
+| 4.1 | ~~Runner Dockerfile (dispatches tool containers, writes bundle)~~ | **Done** |
+| 4.2 | ~~Orchestrator Dockerfile (BUNDLE-mode ingestion only, no docker.sock)~~ | **Done** |
+| 4.3 | ~~`docker-compose.yml` (runner → orchestrator, shared volumes)~~ | **Done** |
+| 4.4 | ~~`caldera-run` wrapper script~~ | **Done** |
+| 4.5 | ~~Results repository export (`ResultsExporter` + git push)~~ | **Done** (Phase 5) |
 
 **Acceptance:** `caldera-run --repo <url>` runs the full pipeline in containers and produces a queryable results directory.
 
@@ -202,7 +202,7 @@ All costs are Hetzner CX-series (shared vCPU). Billing is per-hour, minimum 1 ho
 | **1** | Validate Hetzner cloud path | **Tested (Flask, Feb 19)** | 1 hr (mostly waiting) |
 | **2** | Harden cloud path | **Hardened (8 fixes)** | 1 day |
 | **3** | Tool Dockerfiles | **Done** (3 bases + 17 tools) | 2 days |
-| **4** | Dockerized compose stack | Future | 2 days |
+| **4** | Dockerized compose stack | **Done** | 2 days |
 | **5** | Results repository | **Done** | 0.5 day |
 
 **We are on track.** Phase 1 (cloud via Hetzner) is fully built and ready for your first test run. Phases 3–5 (full DOCKERIZED mode) are design-only and deferred — they're not needed for production use of LOCAL + BUNDLE + cloud.
