@@ -133,6 +133,9 @@ make dbt-test                # Run dbt tests
 make dbt-test-reports        # Run report-specific dbt tests
 make orchestrate             # Full end-to-end pipeline
 make pipeline-eval           # Full E2E: orchestrate -> insights -> LLM eval -> top 3
+make docker-build-base           # Build shared Python base image
+make docker-build-tool TOOL=<n>  # Build a single tool Docker image
+make docker-test-tool TOOL=<n> REPO=<path>  # Test Docker vs native output
 ```
 
 ### Pipeline Variables
