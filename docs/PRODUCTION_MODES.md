@@ -143,9 +143,8 @@ Notes:
 artifacts/<repo_id>/<run_id>/
 ├── manifest.json
 ├── <tool>/
-│   └── <run_id>/
-│       ├── output.json
-│       └── execution.log
+│   ├── output.json
+│   └── execution.log
 └── ... (per tool)
 ```
 
@@ -187,7 +186,7 @@ The dockerized mode uses a two-stage pipeline. Stage 1 (the **runner**) executes
 │  │  │  • Generates repo_id + run_id, resolves commit            │      │ │
 │  │  │  • Runs tool containers sequentially/parallel              │      │ │
 │  │  │  • Writes bundle: /workspace/artifacts/<repo_id>/<run_id>/│      │ │
-│  │  │    └── <tool>/<run_id>/output.json + execution.log        │      │ │
+│  │  │    └── <tool>/output.json + execution.log                  │      │ │
 │  │  │  • Writes manifest.json into bundle root                  │      │ │
 │  │  └──────────┬───────────────────────────────────────────────┘      │ │
 │  │             │ docker run (per tool)                                  │ │
@@ -425,11 +424,11 @@ caldera-results/
 │           ├── run_manifest.json            # Post-ingest manifest (DuckDB state)
 │           ├── artifacts/                   # Raw tool JSON outputs
 │           │   ├── layout-scanner/
-│           │   │   └── <run-id>/output.json
+│           │   │   └── output.json
 │           │   ├── scc/
-│           │   │   └── <run-id>/output.json
+│           │   │   └── output.json
 │           │   ├── lizard/
-│           │   │   └── <run-id>/output.json
+│           │   │   └── output.json
 │           │   └── ... (all tools)
 │           ├── tool_run_summary.json        # Written even on failure
 │           ├── dbt_summary.json             # Written even on failure
@@ -472,15 +471,15 @@ All **bundle-producing** modes should emit the same `manifest.json` schema. This
       "name": "scc",
       "status": "success",
       "duration_seconds": 12.5,
-      "output_json": "scc/550e8400-.../output.json",
-      "log_path": "scc/550e8400-.../execution.log"
+      "output_json": "scc/output.json",
+      "log_path": "scc/execution.log"
     },
     {
       "name": "sonarqube",
       "status": "failed",
       "duration_seconds": 120.0,
       "output_json": null,
-      "log_path": "sonarqube/550e8400-.../execution.log"
+      "log_path": "sonarqube/execution.log"
     }
   ]
 }
@@ -600,7 +599,7 @@ DuckDB files are tracked via Git LFS. The export script automatically initialize
 For **v1 LOCAL + BUNDLE**, the orchestrator already supports the key production behaviors:
 
 - **LOCAL**: `--run-tools --run-dbt` runs tool Makefiles and then ingests + runs dbt.
-- **BUNDLE**: `--output-root <bundle_root> --run-dbt` discovers tool outputs under `<bundle_root>/<tool>/<run_id>/output.json` and ingests without running tools.
+- **BUNDLE**: `--output-root <bundle_root> --run-dbt` discovers tool outputs under `<bundle_root>/<tool>/output.json` and ingests without running tools.
 - **Failure diagnostics**: `tool_run_summary.json` and `dbt_summary.json` are written even if the run fails.
 - **Operational resilience**: `--continue-on-tool-failure` can be enabled to collect a full failure map before ingest.
 
