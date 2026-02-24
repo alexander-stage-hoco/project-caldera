@@ -3,7 +3,7 @@
 	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
 	orchestrate test pipeline-eval arch-review \
-	collect analyze-bundle prune-outputs \
+	collect analyze-bundle prune-outputs export-results \
 	cloud-setup cloud-run cloud-status cloud-destroy \
 	github-setup github-plan github-apply \
 	promote promote-develop promote-release promote-main
@@ -28,6 +28,9 @@ endif
 ifdef SONAR_TOKEN
 export SONAR_TOKEN
 endif
+ifdef RESULTS_REPO_URL
+export RESULTS_REPO_URL
+endif
 
 TOOLS_DIR := src/tools
 TOOL ?=
@@ -50,6 +53,7 @@ BUNDLE ?=
 BUNDLE_DIR ?= artifacts
 BUNDLE_TAR ?= 1
 CLONE_DEPTH ?=
+RESULTS_REPO_URL ?=
 ORCH_REPO_PATH ?=
 ORCH_REPO_ID ?=
 ORCH_RUN_ID ?=
@@ -118,6 +122,7 @@ help:
 	@echo "    make collect REPO=<path|url>            Collect tool artifacts bundle only"
 	@echo "    make analyze-bundle REPO=<path> BUNDLE=<bundle>  Ingest + report from bundle"
 	@echo "    make prune-outputs CONFIRM=1            Delete generated tool/report outputs"
+	@echo "    make export-results                     Export latest run to results repo"
 	@echo "    make clean-db               Remove database and start fresh"
 	@echo "    make test                   Run all project tests"
 	@echo ""
@@ -133,6 +138,8 @@ help:
 	@echo "    CONTINUE_ON_TOOL_FAILURE=1  Continue running tools after a failure (partial results)"
 	@echo "    BUNDLE_DIR=<dir>  Bundle output dir (default: artifacts)"
 	@echo "    BUNDLE_TAR=0      Do not create .tar.gz bundle"
+	@echo "    RESULTS_REPO_URL=<url>  Git URL for results repo (make export-results)"
+	@echo "    PUSH=1            Push to remote after export (make export-results)"
 	@echo ""
 	@echo "  Cloud (Hetzner):"
 	@echo "    make cloud-setup              One-time: terraform init"
@@ -260,6 +267,23 @@ prune-outputs:
 	@rm -rf src/insights/output/pipeline/*
 	@find src/tools -maxdepth 2 -type d -name outputs -exec sh -c 'rm -rf "$$1"/*' _ {} ';'
 	@echo "Done."
+
+export-results:  ## Export latest run to results repository
+	@test -n "$(RESULTS_REPO_URL)" || (echo "ERROR: RESULTS_REPO_URL not set. See .env.example"; exit 1)
+	@COLL_RUN_ID="$(COLLECTION_RUN_ID)"; \
+	  if [ -z "$$COLL_RUN_ID" ]; then \
+	    COLL_RUN_ID=$$($(PYTHON_VENV) scripts/get_latest_collection_run_id.py --db "$(ORCH_DB_PATH)"); \
+	  fi; \
+	  test -n "$$COLL_RUN_ID" || (echo "No runs found. Run 'make analyze' first."; exit 1); \
+	  RUN_DIR=$(PIPELINE_OUTPUT_DIR)/runs; \
+	  MATCH=$$(find $$RUN_DIR -name run_manifest.json -path "*/$$COLL_RUN_ID/*" 2>/dev/null | head -1); \
+	  test -n "$$MATCH" || (echo "Run directory not found for $$COLL_RUN_ID"; exit 1); \
+	  RUN_PATH=$$(dirname "$$MATCH"); \
+	  $(PYTHON_VENV) scripts/export_results.py \
+	    --run-dir "$$RUN_PATH" \
+	    --db "$(ORCH_DB_PATH)" \
+	    --results-repo "$(RESULTS_REPO_URL)" \
+	    $(if $(PUSH),--push,)
 
 # =============================================================================
 # Tool and Infrastructure Targets

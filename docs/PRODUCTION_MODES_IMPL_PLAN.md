@@ -64,7 +64,7 @@ After the basic flow works, improve reliability and UX.
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
 | 2.1 | ~~Add `--skip` passthrough for `SKIP_TOOLS` in cloud-run.sh~~ | ~~Medium~~ | **Done** |
-| 2.2 | Add `ANTHROPIC_API_KEY` passthrough for LLM eval on VM | Medium | 30 min |
+| 2.2 | ~~Add `ANTHROPIC_API_KEY` passthrough for LLM eval on VM~~ | ~~Medium~~ | **Done** |
 | 2.3 | ~~Better error reporting: capture tool-level failures in manifest~~ | ~~Medium~~ | **Done** |
 | 2.4 | ~~Retry logic for transient cloud-init/SSH failures~~ | ~~Low~~ | **Done** |
 | 2.5 | ~~Add `make cloud-status` to check running servers~~ | ~~Low~~ | **Done** |
@@ -105,13 +105,13 @@ Only after Phase 3. Uses bundle-first architecture from PRODUCTION_MODES.md.
 
 ---
 
-### Phase 5: Results repository (future — after Phase 4)
+### Phase 5: Results repository
 
 | # | Task | Effort |
 |---|------|--------|
-| 5.1 | Git results repo export (commit + push after run) | 2 hrs |
-| 5.2 | `index.json` catalog of all runs | 1 hr |
-| 5.3 | DuckDB handling: Git LFS vs Parquet export vs gitignore+rebuild | Decision |
+| 5.1 | ~~Git results repo export (commit + push after run)~~ | **Done** |
+| 5.2 | ~~`index.json` catalog of all runs~~ | **Done** |
+| 5.3 | ~~DuckDB handling: Git LFS~~ | **Done** (Git LFS tracking for `*.duckdb`) |
 
 ---
 
@@ -203,6 +203,6 @@ All costs are Hetzner CX-series (shared vCPU). Billing is per-hour, minimum 1 ho
 | **2** | Harden cloud path | **Hardened (8 fixes)** | 1 day |
 | **3** | Tool Dockerfiles | Future | 2 days |
 | **4** | Dockerized compose stack | Future | 2 days |
-| **5** | Results repository | Future | 0.5 day |
+| **5** | Results repository | **Done** | 0.5 day |
 
 **We are on track.** Phase 1 (cloud via Hetzner) is fully built and ready for your first test run. Phases 3–5 (full DOCKERIZED mode) are design-only and deferred — they're not needed for production use of LOCAL + BUNDLE + cloud.
