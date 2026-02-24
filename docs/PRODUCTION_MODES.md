@@ -530,6 +530,52 @@ SQL
 
 ---
 
+## Results Repository
+
+After any pipeline run (LOCAL, BUNDLE, or cloud), results can be exported to a git-based results repository for persistent, shareable archival.
+
+### Setup
+
+1. Create a git repository for results (e.g., on GitHub)
+2. Set `RESULTS_REPO_URL` in `.env` (or export it)
+3. Ensure `git-lfs` is installed (`brew install git-lfs`)
+
+### Usage
+
+```bash
+# Export the latest run (commit only)
+make export-results
+
+# Export and push to remote
+make export-results PUSH=1
+
+# Export a specific collection run
+make export-results COLLECTION_RUN_ID=<uuid>
+
+# Use a local results repo for testing
+RESULTS_REPO_URL=/path/to/local/repo make export-results
+```
+
+### What gets exported
+
+Each run is stored under `runs/<repo_id>/<run_id>/` in the results repo:
+
+| File | Always | Description |
+|------|--------|-------------|
+| `run_manifest.json` | Yes | Pipeline metadata (repo, commit, tools, timing) |
+| `report.html` | Yes | HTML insights report |
+| `caldera_sot.duckdb` | Yes | Complete database (LZ + marts), tracked via Git LFS |
+| `evaluation.json` | If LLM eval ran | LLM judge scores |
+| `top3_insights.json` | If LLM eval ran | Top 3 extracted insights |
+
+An `index.json` catalog at the repo root is regenerated on each export, listing all runs sorted by recency.
+
+### DuckDB and Git LFS
+
+DuckDB files are tracked via Git LFS. The export script automatically initializes LFS and adds `*.duckdb` tracking if not already configured.
+
+---
+
 ## Configuration Matrix
 
 | Aspect | LOCAL | BUNDLE | DOCKERIZED (future) |
