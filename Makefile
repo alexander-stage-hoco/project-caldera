@@ -7,7 +7,7 @@
 	cloud-setup cloud-run cloud-status cloud-destroy \
 	docker-build-base docker-build-tool docker-build-tools docker-test-tool \
 	docker-build-runner docker-build-orchestrator docker-build-all \
-	docker-pull-all \
+	docker-pull-all docker-test-all \
 	github-setup github-plan github-apply \
 	promote promote-develop promote-release promote-main
 
@@ -662,8 +662,15 @@ docker-test-tool: docker-build-tool  ## Build + test a tool image against native
 	  echo "=== Compare ==="; \
 	  $(PYTHON_VENV) scripts/compare_tool_outputs.py \
 	    --native "$$NATIVE_OUT/output.json" \
-	    --docker "$$DOCKER_OUT/output.json"; \
+	    --docker "$$DOCKER_OUT/output.json" \
+	    --sort-arrays \
+	    --repo-name "$$(basename "$$REPO_ABS")"; \
 	  rm -rf "$$NATIVE_OUT" "$$DOCKER_OUT"
+
+DOCKER_TEST_SKIP ?= coverage-ingest,git-blame-scanner
+
+docker-test-all:  ## Run Docker vs native parity for all tools (REPO=<path>)
+	@./scripts/docker_test_all.sh --repo "$(or $(REPO),.)" --skip "$(DOCKER_TEST_SKIP)"
 
 # =============================================================================
 # GitHub IaC (branch protection, environments, long-lived branches)

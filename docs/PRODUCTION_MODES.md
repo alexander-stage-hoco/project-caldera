@@ -262,6 +262,28 @@ caldera-run \
   --no-llm
 ```
 
+### Docker vs Native Parity Validation
+
+All tool Docker images are validated for output parity against native execution. This ensures that containerized runs produce the same logical results as local runs.
+
+```bash
+# Test a single tool
+make docker-test-tool TOOL=scc REPO=.
+
+# Batch test all tools
+make docker-test-all REPO=.
+
+# Skip specific tools
+make docker-test-all REPO=. DOCKER_TEST_SKIP=coverage-ingest,sonarqube
+```
+
+**Known acceptable differences:**
+- `tool_version` in metadata (binary versions may differ between local and Docker)
+- Array ordering of file lists and findings (handled by `--sort-arrays` in the comparison script)
+- Trivy vulnerability DB freshness (DB downloaded at image build time vs local update time)
+
+Parity tests run automatically via the `docker-parity.yml` CI workflow on PRs to `release` that touch tool or Docker files. Results are report-only (do not block merges) and uploaded as artifacts.
+
 ### Container Images
 
 #### Runner Image

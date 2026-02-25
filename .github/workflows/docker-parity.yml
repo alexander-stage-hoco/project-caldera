@@ -1,0 +1,80 @@
+name: "Docker Parity"
+
+on:
+  pull_request:
+    branches: [release]
+    paths:
+      - "src/tools/**"
+      - "docker/**"
+      - "scripts/compare_tool_outputs.py"
+      - "scripts/docker_test_all.sh"
+  workflow_dispatch:
+
+concurrency:
+  group: docker-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  parity-test:
+    name: "Docker vs Native Parity"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/caldera-setup
+
+      - name: Build all Docker images
+        run: make docker-build-all
+
+      - name: Run parity tests
+        id: parity
+        continue-on-error: true
+        run: |
+          RESULTS_DIR="${{ runner.temp }}/parity-results"
+          mkdir -p "$RESULTS_DIR"
+          ./scripts/docker_test_all.sh \
+            --repo . \
+            --skip "coverage-ingest,sonarqube" \
+            --results-dir "$RESULTS_DIR"
+
+      - name: Generate summary
+        if: always()
+        run: |
+          RESULTS_DIR="${{ runner.temp }}/parity-results"
+          if [[ ! -f "$RESULTS_DIR/parity-results.json" ]]; then
+            echo "No parity results found." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          .venv/bin/python -c "
+          import json, sys
+
+          data = json.load(open(sys.argv[1]))
+          s = data['summary']
+
+          print('### Docker vs Native Parity Results')
+          print('')
+          print(f'**Total:** {s[\"total\"]}  |  '
+                f'**Pass:** {s[\"pass\"]}  |  '
+                f'**Fail:** {s[\"fail\"]}  |  '
+                f'**Skip:** {s[\"skip\"]}  |  '
+                f'**Error:** {s[\"error\"]}')
+          print('')
+          print('| Tool | Status | Diffs |')
+          print('|------|--------|-------|')
+          for t in data['tools']:
+              icon = {'pass': ':white_check_mark:', 'fail': ':x:', 'skip': ':fast_forward:', 'error': ':warning:'}.get(t['status'], ':question:')
+              print(f'| {t[\"tool\"]} | {icon} {t[\"status\"].upper()} | {t.get(\"diff_count\", 0)} |')
+          " "$RESULTS_DIR/parity-results.json" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload parity results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-results
+          path: ${{ runner.temp }}/parity-results/
+          retention-days: 30
