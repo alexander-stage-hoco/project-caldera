@@ -17,7 +17,7 @@ Project Caldera supports multiple production modes. **For v1**, the recommended 
 |------|--------|---------------|------------------|
 | **LOCAL** | Analyst laptop | Native tool Makefiles (Docker optional per tool) | Local filesystem |
 | **BUNDLE** | Hybrid (runner + laptop) | Tools run elsewhere, artifacts shipped to laptop | Local filesystem |
-| **DOCKERIZED (future)** | Cloud VM / single machine | Everything in containers | Git results repository |
+| **DOCKERIZED** | Cloud VM / single machine | Everything in containers | Git results repository |
 
 All modes aim to produce the same *logical* outputs (tool JSON artifacts → DuckDB → dbt marts → HTML report + optional LLM eval). The difference is where tool execution happens and how artifacts move between machines.
 
@@ -143,9 +143,8 @@ Notes:
 artifacts/<repo_id>/<run_id>/
 ├── manifest.json
 ├── <tool>/
-│   └── <run_id>/
-│       ├── output.json
-│       └── execution.log
+│   ├── output.json
+│   └── execution.log
 └── ... (per tool)
 ```
 
@@ -161,9 +160,9 @@ artifacts/<repo_id>/<run_id>/
 
 ---
 
-## Mode 3: DOCKERIZED (Cloud / Single Machine) — future
+## Mode 3: DOCKERIZED (Cloud / Single Machine)
 
-This section describes a future “everything in containers” deployment. It is **not implemented in v1**; keep it as a design target.
+This mode runs the full pipeline in containers. Implemented in Phase 3-4 (per-tool Dockerfiles, runner, orchestrator, compose stack).
 
 Recommended direction: use the **bundle layout** as the contract between tool execution and ingestion. A dockerized runner can execute tools in containers, write `/workspace/artifacts/<repo-id>/<run-id>/...`, then invoke the orchestrator in BUNDLE mode.
 
@@ -187,7 +186,7 @@ The dockerized mode uses a two-stage pipeline. Stage 1 (the **runner**) executes
 │  │  │  • Generates repo_id + run_id, resolves commit            │      │ │
 │  │  │  • Runs tool containers sequentially/parallel              │      │ │
 │  │  │  • Writes bundle: /workspace/artifacts/<repo_id>/<run_id>/│      │ │
-│  │  │    └── <tool>/<run_id>/output.json + execution.log        │      │ │
+│  │  │    └── <tool>/output.json + execution.log                  │      │ │
 │  │  │  • Writes manifest.json into bundle root                  │      │ │
 │  │  └──────────┬───────────────────────────────────────────────┘      │ │
 │  │             │ docker run (per tool)                                  │ │
@@ -371,7 +370,7 @@ services:
       - caldera-artifacts:/workspace/artifacts
     environment:
       - REPO_URL=${REPO_URL}
-      - MAX_PARALLEL=${MAX_PARALLEL:-8}
+      - MAX_PARALLEL=${MAX_PARALLEL:-4}
       - SKIP_TOOLS=${SKIP_TOOLS:-}
 
   # Stage 2: ingest bundle, dbt, report
@@ -412,7 +411,7 @@ The orchestrator needs to know which bundle root to ingest (repo_id + run_id). I
 
 ## Results Repository
 
-In **DOCKERIZED (future)** mode, all run outputs can be committed to a git repository. This allows analysts to clone results locally and run arbitrary analytics, queries, and reports.
+In **DOCKERIZED** mode, all run outputs can be committed to a git repository. This allows analysts to clone results locally and run arbitrary analytics, queries, and reports.
 
 ### Repository Structure
 
@@ -425,11 +424,11 @@ caldera-results/
 │           ├── run_manifest.json            # Post-ingest manifest (DuckDB state)
 │           ├── artifacts/                   # Raw tool JSON outputs
 │           │   ├── layout-scanner/
-│           │   │   └── <run-id>/output.json
+│           │   │   └── output.json
 │           │   ├── scc/
-│           │   │   └── <run-id>/output.json
+│           │   │   └── output.json
 │           │   ├── lizard/
-│           │   │   └── <run-id>/output.json
+│           │   │   └── output.json
 │           │   └── ... (all tools)
 │           ├── tool_run_summary.json        # Written even on failure
 │           ├── dbt_summary.json             # Written even on failure
@@ -472,15 +471,15 @@ All **bundle-producing** modes should emit the same `manifest.json` schema. This
       "name": "scc",
       "status": "success",
       "duration_seconds": 12.5,
-      "output_json": "scc/550e8400-.../output.json",
-      "log_path": "scc/550e8400-.../execution.log"
+      "output_json": "scc/output.json",
+      "log_path": "scc/execution.log"
     },
     {
       "name": "sonarqube",
       "status": "failed",
       "duration_seconds": 120.0,
       "output_json": null,
-      "log_path": "sonarqube/550e8400-.../execution.log"
+      "log_path": "sonarqube/execution.log"
     }
   ]
 }
@@ -578,7 +577,7 @@ DuckDB files are tracked via Git LFS. The export script automatically initialize
 
 ## Configuration Matrix
 
-| Aspect | LOCAL | BUNDLE | DOCKERIZED (future) |
+| Aspect | LOCAL | BUNDLE | DOCKERIZED |
 |--------|-------|--------|--------------------|
 | **Host prerequisites** | Python 3.12 (+ optional Docker per tool) | Runner: tool-specific; Laptop: Python 3.12 | Docker only |
 | **Tool execution** | On laptop | On runner machine/container host | In containers |
@@ -600,7 +599,7 @@ DuckDB files are tracked via Git LFS. The export script automatically initialize
 For **v1 LOCAL + BUNDLE**, the orchestrator already supports the key production behaviors:
 
 - **LOCAL**: `--run-tools --run-dbt` runs tool Makefiles and then ingests + runs dbt.
-- **BUNDLE**: `--output-root <bundle_root> --run-dbt` discovers tool outputs under `<bundle_root>/<tool>/<run_id>/output.json` and ingests without running tools.
+- **BUNDLE**: `--output-root <bundle_root> --run-dbt` discovers tool outputs under `<bundle_root>/<tool>/output.json` and ingests without running tools.
 - **Failure diagnostics**: `tool_run_summary.json` and `dbt_summary.json` are written even if the run fails.
 - **Operational resilience**: `--continue-on-tool-failure` can be enabled to collect a full failure map before ingest.
 

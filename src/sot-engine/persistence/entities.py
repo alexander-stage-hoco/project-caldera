@@ -128,10 +128,13 @@ class LayoutFile:
     size_bytes: int | None
     line_count: int | None
     is_binary: bool | None
+    stable_fingerprint: str | None = None
 
     def __post_init__(self) -> None:
         _validate_positive_pk(self.run_pk)
         _validate_relative_path(self.relative_path, "relative_path")
+        if self.stable_fingerprint is not None and len(self.stable_fingerprint) not in (32, 40, 64):
+            raise ValueError("stable_fingerprint must be a valid hex hash (32/40/64 chars)")
 
 
 @dataclass(frozen=True)

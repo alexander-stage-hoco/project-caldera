@@ -1,4 +1,5 @@
-FROM caldera-java-base:latest
+ARG BASE_IMAGE=caldera-java-base:latest
+FROM ${BASE_IMAGE}
 
 ARG PMD_VERSION=7.0.0
 RUN curl -sL "https://github.com/pmd/pmd/releases/download/pmd_releases%2F${PMD_VERSION}/pmd-dist-${PMD_VERSION}-bin.zip" \

@@ -1,16 +1,15 @@
-FROM caldera-python-base:latest
-
-RUN apt-get update && apt-get install -y --no-install-recommends unzip && rm -rf /var/lib/apt/lists/*
+ARG BASE_IMAGE=caldera-python-base:latest
+FROM ${BASE_IMAGE}
 
 ARG GIT_SIZER_VERSION=1.5.0
-RUN curl -sL "https://github.com/github/git-sizer/releases/download/v${GIT_SIZER_VERSION}/git-sizer-${GIT_SIZER_VERSION}-linux-amd64.zip" \
-    -o /tmp/git-sizer.zip && unzip -o /tmp/git-sizer.zip -d /usr/local/bin && rm /tmp/git-sizer.zip
+RUN apt-get update && apt-get install -y --no-install-recommends unzip golang-go && rm -rf /var/lib/apt/lists/* && \
+    GOBIN=/usr/local/bin go install -ldflags "-X main.ReleaseVersion=${GIT_SIZER_VERSION}" github.com/github/git-sizer@v${GIT_SIZER_VERSION}
 
 COPY src/tools/git-sizer/ /caldera/src/tools/git-sizer/
 WORKDIR /caldera/src/tools/git-sizer
 
 # Symlink so the Makefile's bin/git-sizer resolves
-RUN mkdir -p bin && ln -s /usr/local/bin/git-sizer bin/git-sizer
+RUN mkdir -p bin && ln -sf /usr/local/bin/git-sizer bin/git-sizer
 
 RUN make setup
 

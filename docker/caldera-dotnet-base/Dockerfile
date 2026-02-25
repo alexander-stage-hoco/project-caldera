@@ -11,4 +11,6 @@ COPY src/common/ /caldera/src/common/
 COPY src/shared/ /caldera/src/shared/
 COPY src/tools/Makefile.common /caldera/src/tools/Makefile.common
 
+RUN python3 -m pip install --no-cache-dir --break-system-packages jsonschema
+
 ENV PYTHONPATH=/caldera/src

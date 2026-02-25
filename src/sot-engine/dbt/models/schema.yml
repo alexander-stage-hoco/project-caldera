@@ -90,6 +90,9 @@ models:
         tests:
           - not_null
 
+      - name: stable_fingerprint
+        description: "SHA-256 content hash from layout-scanner (NULL if not computed)"
+
   - name: stg_lz_layout_directories
     columns:
       - name: run_pk
@@ -6409,3 +6412,60 @@ models:
                   - high
                   - medium
                   - low
+
+  - name: mart_file_identity_map
+    description: "Cross-run file lifecycle tracking — classifies files as unchanged, modified, moved, new, or deleted between consecutive runs"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: collection_run_id
+        tests:
+          - not_null
+      - name: repo_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: lifecycle_status
+        description: "File lifecycle classification between consecutive runs"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - unchanged
+                  - modified
+                  - moved
+                  - new
+                  - deleted
+                  - unknown
+
+  - name: mart_directory_trend_signals
+    description: "Cross-run directory metric deltas — shows which directories are growing, shrinking, or newly created"
+    columns:
+      - name: run_pk
+        tests:
+          - not_null
+      - name: collection_run_id
+        tests:
+          - not_null
+      - name: repo_id
+        tests:
+          - not_null
+      - name: relative_path
+        tests:
+          - not_null
+      - name: structure_trend
+        description: "Directory structure trend between consecutive runs"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - new_directory
+                  - growing
+                  - shrinking
+                  - stable
+                  - deleted
