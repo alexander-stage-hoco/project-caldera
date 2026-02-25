@@ -10,5 +10,6 @@ select
     size_bytes,
     line_count,
     is_binary,
+    stable_fingerprint,
     created_at
 from {{ source('lz', 'lz_layout_files') }}

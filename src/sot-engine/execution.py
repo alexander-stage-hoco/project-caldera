@@ -72,7 +72,7 @@ def _is_git_commit(repo_path: Path, commit: str) -> bool:
 def _default_output_path(task: ToolTask, run_id: str, output_root: Path | None) -> Path:
     """Compute the expected output path for a tool task."""
     if output_root:
-        return (output_root / task.name / run_id / "output.json").resolve()
+        return (output_root / task.name / "output.json").resolve()
     return (task.tool_root / "outputs" / run_id / "output.json").resolve()
 
 

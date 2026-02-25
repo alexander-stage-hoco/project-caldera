@@ -41,6 +41,7 @@ CREATE TABLE lz_layout_files (
     size_bytes BIGINT,
     line_count INTEGER,
     is_binary BOOLEAN,
+    stable_fingerprint VARCHAR,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (run_pk, file_id)
 );

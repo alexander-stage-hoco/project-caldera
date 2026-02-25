@@ -99,7 +99,7 @@ class TestDefaultOutputPath:
     def test_with_output_root(self, tmp_path: Path):
         task = ToolTask("scc", Path("/tools/scc"))
         result = _default_output_path(task, "run-1", tmp_path)
-        assert result == (tmp_path / "scc" / "run-1" / "output.json").resolve()
+        assert result == (tmp_path / "scc" / "output.json").resolve()
 
     def test_without_output_root(self):
         task = ToolTask("scc", Path("/tools/scc"))

@@ -238,16 +238,16 @@ def run_tool_make(
 
 def _default_output_path(tool: ToolConfig, run_id: str, output_root: Path | None) -> Path:
     if output_root:
-        return (output_root / tool.name / run_id / "output.json").resolve()
+        return (output_root / tool.name / "output.json").resolve()
     return (Path(tool.path) / "outputs" / run_id / "output.json").resolve()
 
 
-def _discover_outputs(output_root: Path, run_id: str) -> dict[str, Path]:
+def _discover_outputs(output_root: Path) -> dict[str, Path]:
     """Discover tool output.json files under a standard output_root layout."""
     known_tools = {t.name for t in TOOL_CONFIGS} | {"coverage-ingest"}
     outputs: dict[str, Path] = {}
     for tool_name in sorted(known_tools):
-        candidate = (output_root / tool_name / run_id / "output.json").resolve()
+        candidate = (output_root / tool_name / "output.json").resolve()
         if candidate.exists():
             outputs[tool_name] = candidate
     return outputs
@@ -909,7 +909,7 @@ def main() -> int:
         elif output_root:
             # Bundle/ingest mode: discover outputs under output_root when tools
             # were executed elsewhere (e.g. another machine or container).
-            discovered = _discover_outputs(output_root, args.run_id)
+            discovered = _discover_outputs(output_root)
             if "layout-scanner" not in discovered:
                 summary["steps"]["tools"]["status"] = "failed"
                 summary["steps"]["tools"]["error"] = (

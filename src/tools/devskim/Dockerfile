@@ -1,4 +1,5 @@
-FROM caldera-dotnet-base:latest
+ARG BASE_IMAGE=caldera-dotnet-base:latest
+FROM ${BASE_IMAGE}
 
 RUN dotnet tool install --global Microsoft.CST.DevSkim.CLI
 ENV PATH="$PATH:/root/.dotnet/tools"
