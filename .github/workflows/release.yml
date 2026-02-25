@@ -26,7 +26,7 @@ jobs:
             RANGE="${PREV_TAG}..HEAD"
           fi
           {
-            echo "CHANGELOG<<'CHANGELOGEOF'"
+            echo "CHANGELOG<<CHANGELOGEOF"
             echo "## What's Changed"
             echo ""
             for prefix in "Add" "Fix" "Update"; do

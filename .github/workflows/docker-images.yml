@@ -141,11 +141,11 @@ jobs:
           echo "| Orchestrator | ${{ steps.changes.outputs.orchestrator }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Tools | $(echo '${{ steps.changes.outputs.tool_matrix }}' | jq length) |" >> "$GITHUB_STEP_SUMMARY"
 
-  # ── Job 2: Build base images ───────────────────────────────────────────────
-  build-bases:
+  # ── Job 2a: Build independent base images (python-base, dotnet-base) ──────
+  build-base-python:
     name: "Base — ${{ matrix.image }}"
     needs: detect-changes
-    if: needs.detect-changes.outputs.base_python == 'true' || needs.detect-changes.outputs.base_java == 'true' || needs.detect-changes.outputs.base_dotnet == 'true'
+    if: needs.detect-changes.outputs.base_python == 'true' || needs.detect-changes.outputs.base_dotnet == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -154,9 +154,6 @@ jobs:
           - image: python-base
             dockerfile: docker/caldera-python-base/Dockerfile
             flag: base_python
-          - image: java-base
-            dockerfile: docker/caldera-java-base/Dockerfile
-            flag: base_java
           - image: dotnet-base
             dockerfile: docker/caldera-dotnet-base/Dockerfile
             flag: base_dotnet
@@ -164,7 +161,6 @@ jobs:
       - name: Skip check
         id: skip
         run: |
-          flag="${{ matrix.flag }}"
           val="${{ needs.detect-changes.outputs[matrix.flag] }}"
           echo "should_build=${val}" >> "$GITHUB_OUTPUT"
 
@@ -195,17 +191,6 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
 
-      - name: Resolve build args
-        if: steps.skip.outputs.should_build == 'true'
-        id: args
-        run: |
-          tag="${{ steps.meta.outputs.version }}"
-          if [[ "${{ matrix.image }}" == "java-base" ]]; then
-            echo "build_args=BASE_IMAGE=${{ env.IMAGE_PREFIX }}-python-base:${tag}" >> "$GITHUB_OUTPUT"
-          else
-            echo "build_args=" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Build and push
         if: steps.skip.outputs.should_build == 'true'
         uses: docker/build-push-action@v6
@@ -215,15 +200,62 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: ${{ steps.args.outputs.build_args }}
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  # ── Job 2b: Build derived base images (java-base depends on python-base) ─
+  build-base-derived:
+    name: "Base — java-base"
+    needs: [detect-changes, build-base-python]
+    if: always() && needs.detect-changes.outputs.base_java == 'true' && (needs.build-base-python.result == 'success' || needs.build-base-python.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_PREFIX }}-java-base
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - name: Resolve build args
+        id: args
+        run: |
+          tag="${{ steps.meta.outputs.version }}"
+          echo "build_args=BASE_IMAGE=${{ env.IMAGE_PREFIX }}-python-base:${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/caldera-java-base/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ steps.args.outputs.build_args }}
+          cache-from: type=gha,scope=java-base
+          cache-to: type=gha,mode=max,scope=java-base
 
   # ── Job 3: Build tool images ───────────────────────────────────────────────
   build-tools:
     name: "Tool — ${{ matrix.tool }}"
-    needs: [detect-changes, build-bases]
-    if: always() && needs.detect-changes.result == 'success' && (needs.build-bases.result == 'success' || needs.build-bases.result == 'skipped') && fromJSON(needs.detect-changes.outputs.tool_matrix)[0] != null
+    needs: [detect-changes, build-base-python, build-base-derived]
+    if: always() && needs.detect-changes.result == 'success' && (needs.build-base-python.result == 'success' || needs.build-base-python.result == 'skipped') && (needs.build-base-derived.result == 'success' || needs.build-base-derived.result == 'skipped') && fromJSON(needs.detect-changes.outputs.tool_matrix)[0] != null
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
