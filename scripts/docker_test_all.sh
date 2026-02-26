@@ -136,6 +136,7 @@ run_tool_test() {
     --native "$native_out/output.json" \
     --docker "$docker_out/output.json" \
     --sort-arrays \
+    --ignore-language-diffs \
     --tool "$tool" \
     --repo-name "$(basename "$REPO_ABS")" \
     --output-json "$RESULTS_DIR/${tool}.json"; then

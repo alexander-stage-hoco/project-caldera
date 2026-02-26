@@ -664,6 +664,7 @@ docker-test-tool: docker-build-tool  ## Build + test a tool image against native
 	    --native "$$NATIVE_OUT/output.json" \
 	    --docker "$$DOCKER_OUT/output.json" \
 	    --sort-arrays \
+	    --ignore-language-diffs \
 	    --repo-name "$$(basename "$$REPO_ABS")"; \
 	  rm -rf "$$NATIVE_OUT" "$$DOCKER_OUT"
 

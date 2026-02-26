@@ -28,14 +28,36 @@ ISO_TIMESTAMP_RE = re.compile(
 # Top-level metadata keys that are always volatile
 VOLATILE_METADATA_KEYS = {"run_id", "timestamp", "tool_run_id", "tool_version", "repo_path"}
 
-# Data-level keys that are volatile (timing/performance fields at any depth)
+# Data-level keys that are volatile (timing/performance and version fields at any depth)
 VOLATILE_DATA_KEYS = {
     "scan_duration_ms",
     "scan_time_ms",
     "files_per_second",
     "analysis_duration_ms",
     "elapsed_ms",
+    "elapsed_seconds",
     "duration_ms",
+    # Tool version strings differ between native (macOS) and Docker (Linux) installs
+    "tool_version",
+    "lizard_version",
+    # Auto-generated IDs that are non-deterministic across platforms
+    "clone_id",
+    # Tool error/warning arrays contain environment-specific paths and messages
+    "errors",
+    "warnings",
+}
+
+# Directory-structure summary keys that are inherently path-depth-dependent.
+# Native runs have deeper absolute paths than Docker's /repo mount, so directory
+# counts, depths, and per-directory averages will always differ slightly.
+VOLATILE_STRUCTURE_KEYS = {
+    "total_directories",
+    "directory_count",
+    "avg_depth",
+    "max_depth",
+    "avg_files_per_directory",
+    "leaf_directory_count",
+    "depth",  # per-directory depth computed from absolute path
 }
 
 # Repo name placeholders used for normalization
@@ -53,15 +75,29 @@ def _is_volatile_value(value: str) -> bool:
 def _normalize_repo_name(value: str, native_name: str) -> str:
     """Replace repo root directory names with a placeholder.
 
-    Handles two cases:
+    Handles several cases:
     - Native root dir name (e.g. '2026-01-24-Project-Caldera') replaced anywhere
-    - Docker mount '/repo' replaced only at path boundaries to avoid false positives
+    - Any path prefix before the repo name is stripped (e.g. 'Users/foo/Projects/<REPO>' → '<REPO>')
+    - Docker mount 'repo' replaced at path boundaries to avoid false positives
       (e.g. 'repository' should not be affected)
     """
     # Native name is typically unique enough to replace everywhere
     value = value.replace(native_name, _REPO_PLACEHOLDER)
-    # Docker mount: replace '/repo/' prefix and standalone '/repo'
-    value = re.sub(r"(?<=/)" + re.escape(_DOCKER_MOUNT_NAME) + r"(?=/|$)", _REPO_PLACEHOLDER, value)
+
+    # Strip any path prefix before <REPO> (e.g. 'Users/foo/bar/<REPO>/src' → '<REPO>/src')
+    value = re.sub(r"^[^<]*" + re.escape(_REPO_PLACEHOLDER), _REPO_PLACEHOLDER, value)
+
+    # Docker mount: replace 'repo' at start of string or after '/' (boundary-safe)
+    value = re.sub(
+        r"(?:^|(?<=/))(" + re.escape(_DOCKER_MOUNT_NAME) + r")(?=/|$)",
+        _REPO_PLACEHOLDER,
+        value,
+    )
+
+    # Strip leading slashes (Docker absolute paths vs native relative paths)
+    if _REPO_PLACEHOLDER in value:
+        value = value.lstrip("/")
+
     return value
 
 
@@ -81,6 +117,9 @@ def _strip_volatile(
             # Drop volatile data keys (timing/perf) at any depth
             if key in VOLATILE_DATA_KEYS:
                 continue
+            # Drop directory-structure summary keys (path-depth-dependent)
+            if key in VOLATILE_STRUCTURE_KEYS:
+                continue
             # Drop run_id in data context (contains timestamps/repo names)
             if key == "run_id" and path.startswith("data"):
                 continue
@@ -97,13 +136,180 @@ def _strip_volatile(
     return obj
 
 
+def _filter_prefix_directories(obj: object) -> object:
+    """Remove directory entries that are artifacts of the native host path prefix.
+
+    After repo-name normalization, genuine directories start with '<REPO>/' or are
+    exactly '<REPO>'.  Entries like 'Users', 'Users/alexander.stage', etc. are
+    host-path artifacts that only appear in native runs and should be filtered out.
+    """
+    if not isinstance(obj, dict):
+        return obj
+    result = {}
+    for key, value in obj.items():
+        if key == "directories" and isinstance(value, list):
+            filtered = []
+            for item in value:
+                if isinstance(item, dict) and "path" in item:
+                    path = item["path"]
+                    # Keep only entries rooted at the repo placeholder
+                    if path == _REPO_PLACEHOLDER or path.startswith(_REPO_PLACEHOLDER + "/"):
+                        filtered.append(_filter_prefix_directories(item))
+                else:
+                    filtered.append(_filter_prefix_directories(item))
+            result[key] = filtered
+        elif isinstance(value, (dict, list)):
+            result[key] = _filter_prefix_directories(value)
+        else:
+            result[key] = value
+    return result
+
+
+def _find_disputed_languages(native: object, docker: object) -> set[str]:
+    """Find language names affected by cross-platform classification differences.
+
+    Returns the set of language names that appear as mismatches in file entries
+    (e.g. one platform says 'Treetop', the other says 'TemplateToolkit').
+    """
+    disputed: set[str] = set()
+    if not isinstance(native, dict) or not isinstance(docker, dict):
+        return disputed
+
+    for key in native:
+        n_val = native[key]
+        d_val = docker.get(key)
+        if d_val is None:
+            continue
+        if isinstance(n_val, dict) and isinstance(d_val, dict):
+            disputed |= _find_disputed_languages(n_val, d_val)
+        elif isinstance(n_val, list) and isinstance(d_val, list):
+            if n_val and isinstance(n_val[0], dict) and "language" in n_val[0]:
+                path_key = None
+                for pk in ("file_path", "path", "relative_path"):
+                    if pk in n_val[0]:
+                        path_key = pk
+                        break
+                if path_key:
+                    n_by_path = {
+                        item[path_key]: item
+                        for item in n_val
+                        if isinstance(item, dict) and path_key in item
+                    }
+                    d_by_path = {
+                        item[path_key]: item
+                        for item in d_val
+                        if isinstance(item, dict) and path_key in item
+                    }
+                    for p in n_by_path:
+                        if p in d_by_path:
+                            n_lang = n_by_path[p].get("language")
+                            d_lang = d_by_path[p].get("language")
+                            if n_lang != d_lang:
+                                if n_lang:
+                                    disputed.add(n_lang)
+                                if d_lang:
+                                    disputed.add(d_lang)
+    return disputed
+
+
+def _apply_language_filter(
+    native: object, docker: object, disputed: set[str],
+) -> tuple[object, object]:
+    """Recursively filter entries affected by disputed language classifications."""
+    if not isinstance(native, dict) or not isinstance(docker, dict):
+        return native, docker
+
+    native = dict(native)
+    docker = dict(docker)
+
+    # Keys whose values are derived from language-dependent aggregations
+    aggregate_keys = {"cocomo", "by_language"}
+
+    for key in list(native):
+        n_val = native[key]
+        d_val = docker.get(key)
+
+        if d_val is None:
+            continue
+
+        # Handle aggregate keys affected by language mismatches
+        if key in aggregate_keys:
+            if key == "by_language" and isinstance(n_val, dict) and isinstance(d_val, dict):
+                native[key] = {k: v for k, v in n_val.items() if k not in disputed}
+                docker[key] = {k: v for k, v in d_val.items() if k not in disputed}
+            elif key == "cocomo":
+                # COCOMO estimates derive from total code lines which change
+                # when files are classified differently — mark as volatile
+                native[key] = "<LANGUAGE_VOLATILE>"
+                docker[key] = "<LANGUAGE_VOLATILE>"
+            continue
+
+        if isinstance(n_val, dict) and isinstance(d_val, dict):
+            native[key], docker[key] = _apply_language_filter(n_val, d_val, disputed)
+        elif (
+            isinstance(n_val, list)
+            and isinstance(d_val, list)
+            and n_val
+            and isinstance(n_val[0], dict)
+            and "language" in n_val[0]
+        ):
+            first = n_val[0]
+            # File array (has a path key): filter out files with disputed languages
+            path_key = None
+            for pk in ("file_path", "path", "relative_path"):
+                if pk in first:
+                    path_key = pk
+                    break
+
+            if path_key:
+                native[key] = [
+                    i for i in n_val
+                    if not (isinstance(i, dict) and i.get("language") in disputed)
+                ]
+                docker[key] = [
+                    i for i in d_val
+                    if not (isinstance(i, dict) and i.get("language") in disputed)
+                ]
+            elif "name" in first:
+                # Language-aggregate array: filter out disputed language entries
+                native[key] = [
+                    i for i in n_val
+                    if not (isinstance(i, dict) and i.get("name") in disputed)
+                ]
+                docker[key] = [
+                    i for i in d_val
+                    if not (isinstance(i, dict) and i.get("name") in disputed)
+                ]
+
+    return native, docker
+
+
+def _filter_language_mismatches(native: object, docker: object) -> tuple[object, object]:
+    """Remove entries affected by cross-platform language classification differences.
+
+    scc binaries on different platforms (macOS arm64 vs Linux x86_64) can classify
+    ambiguous files into different languages, which cascades into all derived metrics
+    including per-language aggregations, by_language summaries, and COCOMO estimates.
+    """
+    disputed = _find_disputed_languages(native, docker)
+    if not disputed:
+        return native, docker
+    return _apply_language_filter(native, docker, disputed)
+
+
 def _sort_key(item: object) -> str:
     """Generate a deterministic sort key for an array element."""
     if isinstance(item, dict):
         # Prefer common deterministic keys; fall back to full JSON repr
-        for key in ("file_path", "path", "relative_path", "name", "id", "rule_id"):
+        for key in ("file_path", "path", "relative_path", "name", "id", "rule_id", "fingerprint"):
             if key in item:
                 return str(item[key])
+        # Composite key for findings/duplications that lack a single unique ID
+        # (e.g. pmd-cpd duplications: sort by first occurrence file + line)
+        if "occurrences" in item and isinstance(item["occurrences"], list) and item["occurrences"]:
+            occ = item["occurrences"][0]
+            if isinstance(occ, dict):
+                return f"{occ.get('file', '')}:{occ.get('line_start', 0)}"
         return json.dumps(item, sort_keys=True, default=str)
     return str(item)
 
@@ -179,6 +385,8 @@ def main() -> int:
                         help="Tool name (for JSON output metadata)")
     parser.add_argument("--repo-name", type=str, default=None,
                         help="Native repo directory name (e.g. 'my-project') for root-dir normalization")
+    parser.add_argument("--ignore-language-diffs", action="store_true",
+                        help="Ignore files where language classification differs (platform-specific)")
     args = parser.parse_args()
 
     # Graceful handling of missing files
@@ -209,6 +417,15 @@ def main() -> int:
     # Strip volatile fields before comparison
     native_clean = _strip_volatile(copy.deepcopy(native_data), native_name=args.repo_name)
     docker_clean = _strip_volatile(copy.deepcopy(docker_data), native_name=args.repo_name)
+
+    # Filter out host-path-prefix directory entries (native has extra levels)
+    if args.repo_name:
+        native_clean = _filter_prefix_directories(native_clean)
+        docker_clean = _filter_prefix_directories(docker_clean)
+
+    # Optionally ignore files where language classification differs across platforms
+    if args.ignore_language_diffs:
+        native_clean, docker_clean = _filter_language_mismatches(native_clean, docker_clean)
 
     # Optionally sort arrays for order-independent comparison
     if args.sort_arrays:
