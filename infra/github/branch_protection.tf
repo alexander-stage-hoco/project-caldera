@@ -1,14 +1,12 @@
 # Branch protection rules for the three long-lived branches
+# Note: no required_pull_request_reviews — solo developer repo.
+# Note: enforce_admins = false — allows admin merge when needed.
 
 resource "github_branch_protection" "main" {
   repository_id = var.github_repository
   pattern       = "main"
 
-  enforce_admins = true
-
-  required_pull_request_reviews {
-    dismiss_stale_reviews = true
-  }
+  enforce_admins = false
 
   required_status_checks {
     strict = true
@@ -27,11 +25,7 @@ resource "github_branch_protection" "release" {
   repository_id = var.github_repository
   pattern       = "release"
 
-  enforce_admins = true
-
-  required_pull_request_reviews {
-    dismiss_stale_reviews = true
-  }
+  enforce_admins = false
 
   required_status_checks {
     strict = true
@@ -51,11 +45,7 @@ resource "github_branch_protection" "develop" {
   repository_id = var.github_repository
   pattern       = "develop"
 
-  enforce_admins = true
-
-  required_pull_request_reviews {
-    dismiss_stale_reviews = true
-  }
+  enforce_admins = false
 
   required_status_checks {
     strict = true
