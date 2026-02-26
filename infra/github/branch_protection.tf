@@ -15,6 +15,7 @@ resource "github_branch_protection" "main" {
     contexts = [
       "Gate A — Quality",
       "Gate B — Compliance Report",
+      "Promotion Policy",
     ]
   }
 

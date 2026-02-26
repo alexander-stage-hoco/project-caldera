@@ -6,7 +6,8 @@ RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/
     | sh -s -- -b /usr/local/bin v${TRIVY_VERSION}
 
 # Pre-cache vulnerability DB so scans don't need network access
-RUN trivy filesystem --download-db-only --cache-dir /root/.cache/trivy 2>/dev/null || true
+RUN trivy filesystem --download-db-only --cache-dir /root/.cache/trivy || true
+RUN trivy filesystem --download-java-db-only --cache-dir /root/.cache/trivy || true
 
 COPY src/tools/trivy/ /caldera/src/tools/trivy/
 WORKDIR /caldera/src/tools/trivy
