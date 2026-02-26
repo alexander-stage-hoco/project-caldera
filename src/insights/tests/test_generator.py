@@ -51,6 +51,7 @@ class TestInsightsGenerator:
             "dotcover_coverage",
             "git_sizer",
             "risk_register",
+            "rewrite_risk",
             "evidence_pack",
             "claim_register",
             "sampling_rationale",

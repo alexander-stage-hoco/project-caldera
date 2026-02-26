@@ -55,6 +55,7 @@ from .sections.circular_dependencies import CircularDependenciesSection
 from .sections.risk_register import RiskRegisterSection
 from .sections.evidence_pack import EvidencePackSection
 from .sections.claim_register import ClaimRegisterSection
+from .sections.rewrite_risk import RewriteRiskSection
 from .sections.sampling_rationale import SamplingRationaleSection
 
 
@@ -101,6 +102,7 @@ class InsightsGenerator:
         "code_inequality": CodeInequalitySection,
         "license_compliance": LicenseComplianceSection,
         "risk_register": RiskRegisterSection,
+        "rewrite_risk": RewriteRiskSection,
         "sampling_rationale": SamplingRationaleSection,
         "evidence_pack": EvidencePackSection,
         "claim_register": ClaimRegisterSection,
