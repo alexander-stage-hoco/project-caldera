@@ -209,3 +209,92 @@ class TestEvidenceRegistry:
         s = reg.summary()
         assert s["total_evidence"] == 1
         assert s["evidence_by_category"]["complexity"] == 1
+
+    def test_add_claim(self):
+        reg = EvidenceRegistry()
+        claim = self._make_claim()
+        reg.add_claim(claim)
+        assert len(reg.claims) == 1
+        assert reg.claim_by_id("CLM-COUP-001") is claim
+
+    def test_add_risk(self):
+        reg = EvidenceRegistry()
+        risk = ExecutionRisk(
+            risk_id="RISK-001",
+            description="Test risk",
+            technical_cause="Test cause",
+            claim_ids=("CLM-COUP-001",),
+            manifests_in=("src/file.py",),
+            triggered_by="TestPattern",
+            severity="high",
+        )
+        reg.add_risk(risk)
+        assert len(reg.risks) == 1
+        assert reg.risk_by_id("RISK-001") is risk
+
+    def test_claims_for_risk(self):
+        claim1 = self._make_claim("CLM-COUP-001")
+        claim2 = self._make_claim("CLM-COUP-002")
+        risk = ExecutionRisk(
+            risk_id="RISK-001",
+            description="Test risk",
+            technical_cause="Test cause",
+            claim_ids=("CLM-COUP-001", "CLM-COUP-002"),
+            manifests_in=("src/file.py",),
+            triggered_by="TestPattern",
+            severity="high",
+        )
+        reg = EvidenceRegistry(claims=[claim1, claim2], risks=[risk])
+        linked = reg.claims_for_risk(risk)
+        assert len(linked) == 2
+        assert linked[0] is claim1
+        assert linked[1] is claim2
+
+    def test_claims_for_risk_missing_id(self):
+        """Risk references a claim_id not in registry → skipped gracefully."""
+        claim1 = self._make_claim("CLM-COUP-001")
+        risk = ExecutionRisk(
+            risk_id="RISK-001",
+            description="Test risk",
+            technical_cause="Test cause",
+            claim_ids=("CLM-COUP-001", "CLM-COUP-999"),
+            manifests_in=(),
+            triggered_by="TestPattern",
+            severity="high",
+        )
+        reg = EvidenceRegistry(claims=[claim1], risks=[risk])
+        linked = reg.claims_for_risk(risk)
+        assert len(linked) == 1
+
+    def test_risks_by_severity(self):
+        risk_high = ExecutionRisk(
+            risk_id="RISK-001",
+            description="High risk",
+            technical_cause="cause",
+            claim_ids=("CLM-COUP-001",),
+            manifests_in=(),
+            triggered_by="Pattern",
+            severity="high",
+        )
+        risk_medium = ExecutionRisk(
+            risk_id="RISK-002",
+            description="Medium risk",
+            technical_cause="cause",
+            claim_ids=("CLM-COUP-001",),
+            manifests_in=(),
+            triggered_by="Pattern",
+            severity="medium",
+        )
+        risk_high2 = ExecutionRisk(
+            risk_id="RISK-003",
+            description="Another high risk",
+            technical_cause="cause",
+            claim_ids=("CLM-COUP-001",),
+            manifests_in=(),
+            triggered_by="Pattern",
+            severity="high",
+        )
+        reg = EvidenceRegistry(risks=[risk_high, risk_medium, risk_high2])
+        assert len(reg.risks_by_severity("high")) == 2
+        assert len(reg.risks_by_severity("medium")) == 1
+        assert len(reg.risks_by_severity("critical")) == 0

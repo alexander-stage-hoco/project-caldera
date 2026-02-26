@@ -8,9 +8,11 @@ import pytest
 
 from insights.evidence.claim_generator import (
     ClaimGenerator,
+    ComplexityConcentrationRule,
     CoverageGapRule,
     HighCouplingRule,
     KnowledgeSiloRule,
+    PervasiveDebtRule,
     SecurityExposureRule,
     _parse_float_from_excerpt,
     _parse_int_from_excerpt,
@@ -146,6 +148,160 @@ class TestClaimGenerator:
         # Should not raise
         claims = gen.generate([], fetcher, 1)
         assert isinstance(claims, list)
+
+
+class TestComplexityConcentrationRule:
+    def test_fires_when_gini_above_threshold(self):
+        """Gini > 0.7 with matching complexity evidence → claim generated."""
+        rule = ComplexityConcentrationRule()
+        ev = _evidence("E-CCN-001", "complexity", location="src/heavy.py", excerpt="max_ccn=25")
+        fetcher = _mock_fetcher({
+            "claim_complexity_concentration": [
+                {"directory_path": "src", "gini_ccn": 0.85, "file_count": 15},
+            ],
+        })
+        claims = rule.evaluate([ev], fetcher, 1)
+        assert len(claims) == 1
+        assert "src/" in claims[0].statement
+        assert "Gini=0.85" in claims[0].statement
+        assert claims[0].evidence_ids == ("E-CCN-001",)
+
+    def test_does_not_fire_on_empty_query(self):
+        """Fetcher returns empty → no claims."""
+        rule = ComplexityConcentrationRule()
+        ev = _evidence("E-CCN-001", "complexity")
+        claims = rule.evaluate([ev], _mock_fetcher(), 1)
+        assert len(claims) == 0
+
+    def test_synthetic_linking_fallback(self):
+        """When no evidence matches directory, falls back to first 3 complexity items."""
+        rule = ComplexityConcentrationRule()
+        # Evidence at different directory than query result
+        ev1 = _evidence("E-CCN-001", "complexity", location="other/a.py")
+        ev2 = _evidence("E-CCN-002", "complexity", location="other/b.py")
+        ev3 = _evidence("E-CCN-003", "complexity", location="other/c.py")
+        ev4 = _evidence("E-CCN-004", "complexity", location="other/d.py")
+        fetcher = _mock_fetcher({
+            "claim_complexity_concentration": [
+                {"directory_path": "src", "gini_ccn": 0.75, "file_count": 20},
+            ],
+        })
+        claims = rule.evaluate([ev1, ev2, ev3, ev4], fetcher, 1)
+        assert len(claims) == 1
+        # Synthetic fallback takes first 3
+        assert len(claims[0].evidence_ids) == 3
+        assert claims[0].evidence_ids == ("E-CCN-001", "E-CCN-002", "E-CCN-003")
+
+    def test_high_confidence_above_0_8(self):
+        """Gini > 0.8 → high confidence."""
+        rule = ComplexityConcentrationRule()
+        ev = _evidence("E-CCN-001", "complexity", location="src/file.py")
+        fetcher = _mock_fetcher({
+            "claim_complexity_concentration": [
+                {"directory_path": "src", "gini_ccn": 0.9, "file_count": 12},
+            ],
+        })
+        claims = rule.evaluate([ev], fetcher, 1)
+        assert claims[0].confidence == "high"
+
+    def test_medium_confidence_at_0_8(self):
+        """Gini == 0.8 → medium confidence (not > 0.8)."""
+        rule = ComplexityConcentrationRule()
+        ev = _evidence("E-CCN-001", "complexity", location="src/file.py")
+        fetcher = _mock_fetcher({
+            "claim_complexity_concentration": [
+                {"directory_path": "src", "gini_ccn": 0.8, "file_count": 12},
+            ],
+        })
+        claims = rule.evaluate([ev], fetcher, 1)
+        assert claims[0].confidence == "medium"
+
+    def test_skips_when_no_complexity_evidence(self):
+        """If query returns rows but no complexity evidence exists, no claims."""
+        rule = ComplexityConcentrationRule()
+        fetcher = _mock_fetcher({
+            "claim_complexity_concentration": [
+                {"directory_path": "src", "gini_ccn": 0.9, "file_count": 12},
+            ],
+        })
+        claims = rule.evaluate([], fetcher, 1)
+        assert len(claims) == 0
+
+
+class TestPervasiveDebtRule:
+    def test_fires_for_pervasive_smells(self):
+        """Query returns rows with quality evidence → claim generated."""
+        rule = PervasiveDebtRule()
+        ev = _evidence("E-QUAL-001", "quality", location="src/messy.py")
+        fetcher = _mock_fetcher({
+            "claim_pervasive_smells": [
+                {"smell_type": "long_method", "affected_pct": 65},
+            ],
+        })
+        claims = rule.evaluate([ev], fetcher, 1)
+        assert len(claims) == 1
+        assert "long_method" in claims[0].statement
+        assert "65%" in claims[0].statement
+        assert claims[0].evidence_ids == ("E-QUAL-001",)
+
+    def test_does_not_fire_without_quality_evidence(self):
+        """Even if query returns rows, no quality evidence → no claims."""
+        rule = PervasiveDebtRule()
+        # Only complexity evidence, no quality
+        ev = _evidence("E-CCN-001", "complexity")
+        fetcher = _mock_fetcher({
+            "claim_pervasive_smells": [
+                {"smell_type": "long_method", "affected_pct": 80},
+            ],
+        })
+        claims = rule.evaluate([ev], fetcher, 1)
+        assert len(claims) == 0
+
+    def test_high_confidence_above_70(self):
+        """affected_pct > 70 → high confidence."""
+        rule = PervasiveDebtRule()
+        ev = _evidence("E-QUAL-001", "quality")
+        fetcher = _mock_fetcher({
+            "claim_pervasive_smells": [
+                {"smell_type": "god_class", "affected_pct": 75},
+            ],
+        })
+        claims = rule.evaluate([ev], fetcher, 1)
+        assert claims[0].confidence == "high"
+
+    def test_medium_confidence_at_70(self):
+        """affected_pct == 70 → medium confidence (not > 70)."""
+        rule = PervasiveDebtRule()
+        ev = _evidence("E-QUAL-001", "quality")
+        fetcher = _mock_fetcher({
+            "claim_pervasive_smells": [
+                {"smell_type": "long_method", "affected_pct": 70},
+            ],
+        })
+        claims = rule.evaluate([ev], fetcher, 1)
+        assert claims[0].confidence == "medium"
+
+    def test_empty_query_no_claims(self):
+        """Fetcher returns empty → no claims."""
+        rule = PervasiveDebtRule()
+        ev = _evidence("E-QUAL-001", "quality")
+        claims = rule.evaluate([ev], _mock_fetcher(), 1)
+        assert len(claims) == 0
+
+    def test_multiple_smells_produce_multiple_claims(self):
+        """Multiple rows → multiple claims with sequential IDs."""
+        rule = PervasiveDebtRule()
+        ev = _evidence("E-QUAL-001", "quality")
+        fetcher = _mock_fetcher({
+            "claim_pervasive_smells": [
+                {"smell_type": "long_method", "affected_pct": 60},
+                {"smell_type": "god_class", "affected_pct": 55},
+            ],
+        })
+        claims = rule.evaluate([ev], fetcher, 1)
+        assert len(claims) == 2
+        assert claims[0].claim_id == "CLM-DEBT-001"
+        assert claims[1].claim_id == "CLM-DEBT-002"
 
 
 class TestExcerptParsing:
