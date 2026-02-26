@@ -69,6 +69,25 @@ class TestComputeBusFactor:
         # Pass unsorted — function should sort
         assert compute_bus_factor([10.0, 60.0, 30.0]) == 1
 
+    def test_exact_threshold_boundary_50_50(self):
+        """Two authors at exactly 50/50 — first author hits threshold exactly."""
+        # cumulative after first: 50.0 >= 50.0 → bus_factor = 1
+        assert compute_bus_factor([50.0, 50.0]) == 1
+
+    def test_just_below_threshold(self):
+        """First author at 49.9 should need second author to cross threshold."""
+        assert compute_bus_factor([49.9, 49.9, 0.2]) == 2
+
+    def test_exact_threshold_with_custom_value(self):
+        """Exact boundary with custom threshold=70 and [35, 35, 30]."""
+        # 35 < 70, 35+35=70 >= 70 → 2
+        assert compute_bus_factor([35.0, 35.0, 30.0], threshold=70.0) == 2
+
+    def test_all_authors_needed(self):
+        """Very high threshold that requires all authors."""
+        # threshold=100, need all: 40+30+20+10=100
+        assert compute_bus_factor([40.0, 30.0, 20.0, 10.0], threshold=100.0) == 4
+
 
 # =============================================================================
 # extract_author_metric

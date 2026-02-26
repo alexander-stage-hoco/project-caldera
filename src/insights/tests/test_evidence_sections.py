@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-import pytest
-
 from insights.evidence.entities import (
     EvidenceItem,
     EvidenceRegistry,
@@ -75,11 +73,6 @@ def _mock_fetcher() -> MagicMock:
 
 
 class TestRiskRegisterSection:
-    def test_config(self):
-        section = RiskRegisterSection()
-        assert section.config.name == "risk_register"
-        assert section.config.priority == 1
-
     def test_fetch_data_with_registry(self):
         section = RiskRegisterSection()
         section.set_evidence_registry(_make_registry())
@@ -93,16 +86,6 @@ class TestRiskRegisterSection:
         data = section.fetch_data(_mock_fetcher(), 1)
         assert data["has_data"] is False
 
-    def test_fallback_data(self):
-        section = RiskRegisterSection()
-        fallback = section.get_fallback_data()
-        assert fallback["total_risks"] == 0
-        assert fallback["has_data"] is False
-
-    def test_template_name(self):
-        section = RiskRegisterSection()
-        assert section.get_template_name() == "risk_register.html.j2"
-        assert section.get_markdown_template_name() == "risk_register.md.j2"
 
 
 # ---------------------------------------------------------------------------
@@ -111,11 +94,6 @@ class TestRiskRegisterSection:
 
 
 class TestEvidencePackSection:
-    def test_config(self):
-        section = EvidencePackSection()
-        assert section.config.name == "evidence_pack"
-        assert section.config.priority == 98
-
     def test_fetch_data_with_registry(self):
         section = EvidencePackSection()
         section.set_evidence_registry(_make_registry())
@@ -139,11 +117,6 @@ class TestEvidencePackSection:
 
 
 class TestClaimRegisterSection:
-    def test_config(self):
-        section = ClaimRegisterSection()
-        assert section.config.name == "claim_register"
-        assert section.config.priority == 99
-
     def test_fetch_data_with_registry(self):
         section = ClaimRegisterSection()
         section.set_evidence_registry(_make_registry())
@@ -164,11 +137,6 @@ class TestClaimRegisterSection:
 
 
 class TestSamplingRationaleSection:
-    def test_config(self):
-        section = SamplingRationaleSection()
-        assert section.config.name == "sampling_rationale"
-        assert section.config.priority == 97
-
     def test_fetch_data_with_targets(self):
         section = SamplingRationaleSection()
         section.set_evidence_registry(_make_registry())

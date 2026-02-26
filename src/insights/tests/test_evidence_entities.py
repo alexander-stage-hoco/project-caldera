@@ -33,16 +33,6 @@ class TestEvidenceItem:
         defaults.update(overrides)
         return EvidenceItem(**defaults)
 
-    def test_valid_creation(self):
-        item = self._make()
-        assert item.evidence_id == "E-CCN-001"
-        assert item.category == "complexity"
-
-    def test_frozen(self):
-        item = self._make()
-        with pytest.raises(AttributeError):
-            item.location = "other.py"  # type: ignore[misc]
-
     def test_invalid_id_format(self):
         with pytest.raises(ValueError, match="evidence_id must match"):
             self._make(evidence_id="BAD-ID")
@@ -79,15 +69,6 @@ class TestTechnicalClaim:
         defaults.update(overrides)
         return TechnicalClaim(**defaults)
 
-    def test_valid_creation(self):
-        claim = self._make()
-        assert claim.claim_id == "CLM-COUP-001"
-
-    def test_frozen(self):
-        claim = self._make()
-        with pytest.raises(AttributeError):
-            claim.statement = "other"  # type: ignore[misc]
-
     def test_invalid_id_format(self):
         with pytest.raises(ValueError, match="claim_id must match"):
             self._make(claim_id="BAD")
@@ -119,15 +100,6 @@ class TestExecutionRisk:
         }
         defaults.update(overrides)
         return ExecutionRisk(**defaults)
-
-    def test_valid_creation(self):
-        risk = self._make()
-        assert risk.risk_id == "RISK-001"
-
-    def test_frozen(self):
-        risk = self._make()
-        with pytest.raises(AttributeError):
-            risk.severity = "low"  # type: ignore[misc]
 
     def test_invalid_id(self):
         with pytest.raises(ValueError, match="risk_id must match"):

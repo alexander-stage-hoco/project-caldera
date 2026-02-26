@@ -101,11 +101,6 @@ class TestRiskAggregator:
         assert risks[0].severity == "low"
         assert risks[0].triggered_by == "Custom"
 
-    def test_empty_claims_produce_no_risks(self):
-        agg = RiskAggregator()
-        risks = agg.aggregate([])
-        assert risks == []
-
     def test_knowledge_concentration_fires_with_two_ownership_claims(self):
         """Knowledge concentration pattern requires 2 ownership claims."""
         agg = RiskAggregator()

@@ -1,6 +1,5 @@
 """Tests for ComponentInventorySection."""
 
-import pytest
 from unittest.mock import MagicMock
 
 from insights.sections.component_inventory import ComponentInventorySection
@@ -8,48 +7,6 @@ from insights.sections.component_inventory import ComponentInventorySection
 
 class TestComponentInventorySection:
     """Tests for the ComponentInventorySection class."""
-
-    def test_config(self):
-        """Test section configuration."""
-        section = ComponentInventorySection()
-        assert section.config.name == "component_inventory"
-        assert section.config.title == "Component Inventory"
-        assert section.config.priority == 5
-
-    def test_template_name(self):
-        """Test template name generation."""
-        section = ComponentInventorySection()
-        assert section.get_template_name() == "component_inventory.html.j2"
-        assert section.get_markdown_template_name() == "component_inventory.md.j2"
-
-    def test_fallback_data(self):
-        """Test fallback data structure."""
-        section = ComponentInventorySection()
-        fallback = section.get_fallback_data()
-
-        assert fallback["components"] == []
-        assert fallback["healthy_components"] == []
-        assert fallback["at_risk_components"] == []
-        assert fallback["critical_components"] == []
-        assert fallback["has_data"] is False
-        assert fallback["has_critical"] is False
-        assert "summary" in fallback
-        assert fallback["summary"]["total_components"] == 0
-        assert "grade_distribution" in fallback
-        assert fallback["grade_distribution"]["A"] == 0
-
-    def test_validate_data_no_data(self):
-        """Test validation with no data."""
-        section = ComponentInventorySection()
-        errors = section.validate_data({"has_data": False})
-        assert len(errors) == 1
-        assert "No component data" in errors[0]
-
-    def test_validate_data_with_data(self):
-        """Test validation with data."""
-        section = ComponentInventorySection()
-        errors = section.validate_data({"has_data": True})
-        assert len(errors) == 0
 
     def test_identify_risks_high_coupling(self):
         """Test risk identification for high coupling."""

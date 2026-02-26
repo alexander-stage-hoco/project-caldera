@@ -304,6 +304,71 @@ class TestPervasiveDebtRule:
         assert claims[1].claim_id == "CLM-DEBT-002"
 
 
+class TestHighCouplingRuleBoundary:
+    def test_does_not_fire_when_fan_out_equals_fan_in_times_three(self):
+        """fan_out == fan_in * 3 exactly should NOT fire (condition is >)."""
+        rule = HighCouplingRule()
+        # fan_out=9 == fan_in=3 * 3, and fan_out > 5, but NOT fan_out > fan_in * 3
+        ev = _evidence("E-COUP-001", "coupling", excerpt="fan_in=3, fan_out=9, coupling=12")
+        claims = rule.evaluate([ev], _mock_fetcher(), 1)
+        assert len(claims) == 0
+
+    def test_does_not_fire_when_ratio_exceeds_but_fan_out_not_above_five(self):
+        """fan_out=5, fan_in=1 — ratio > 3x but fan_out is not > 5 → should NOT fire."""
+        rule = HighCouplingRule()
+        ev = _evidence("E-COUP-001", "coupling", excerpt="fan_in=1, fan_out=5, coupling=6")
+        claims = rule.evaluate([ev], _mock_fetcher(), 1)
+        assert len(claims) == 0
+
+
+class TestSecurityExposureRuleBoth:
+    def test_fires_two_claims_for_critical_and_high(self):
+        """Both critical AND high evidence present → 2 claims with sequential IDs."""
+        rule = SecurityExposureRule()
+        ev_critical = _evidence(
+            "E-SEC-001", "security",
+            excerpt="CVE-2024-9999 (CRITICAL) in pkg 2.0",
+        )
+        ev_high = _evidence(
+            "E-SEC-002", "security",
+            excerpt="CVE-2024-8888 (HIGH) in pkg 3.0",
+        )
+        claims = rule.evaluate([ev_critical, ev_high], _mock_fetcher(), 1)
+        assert len(claims) == 2
+        assert claims[0].claim_id == "CLM-SECX-001"
+        assert claims[1].claim_id == "CLM-SECX-002"
+        assert "critical" in claims[0].statement.lower()
+        assert "high" in claims[1].statement.lower()
+
+
+class TestClaimGeneratorGracefulFailureWithEvidence:
+    def test_graceful_on_rule_failure_with_real_evidence(self):
+        """Generator continues when a rule raises, even with non-empty evidence.
+
+        Unlike the existing test which passes empty evidence (so rules like
+        HighCouplingRule never call fetcher.fetch), this test passes coupling
+        evidence that triggers the parsing path, and makes the
+        ComplexityConcentrationRule fail via a broken fetcher while
+        HighCouplingRule still succeeds locally (it doesn't call fetcher).
+        """
+        gen = ClaimGenerator()
+        fetcher = MagicMock()
+        # fetch raises — will break ComplexityConcentrationRule and PervasiveDebtRule
+        fetcher.fetch.side_effect = Exception("boom")
+        evidence = [
+            _evidence("E-COUP-001", "coupling", excerpt="fan_in=1, fan_out=20, coupling=21"),
+        ]
+        import warnings
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            claims = gen.generate(evidence, fetcher, 1)
+        # HighCouplingRule should still succeed (it doesn't call fetcher.fetch)
+        assert any("high outbound coupling" in c.statement.lower() for c in claims)
+        # At least one warning should be emitted for the broken rules
+        warning_messages = [str(w.message) for w in caught]
+        assert any("failed" in m.lower() for m in warning_messages)
+
+
 class TestExcerptParsing:
     def test_parse_int(self):
         assert _parse_int_from_excerpt("authors=3, lines=500", "authors=") == 3

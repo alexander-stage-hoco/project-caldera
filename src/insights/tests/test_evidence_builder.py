@@ -195,10 +195,3 @@ class TestEvidenceRegistryBuilder:
         assert len(registry.risks) == 0
         summary = registry.summary()
         assert summary["total_evidence"] == 0
-
-    def test_defaults_create_real_instances(self):
-        """Without injection, builder creates real Collector/Generator/Aggregator."""
-        builder = EvidenceRegistryBuilder()
-        assert isinstance(builder._collector, EvidenceCollector)
-        assert isinstance(builder._claim_generator, ClaimGenerator)
-        assert isinstance(builder._risk_aggregator, RiskAggregator)

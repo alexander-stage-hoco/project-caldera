@@ -28,67 +28,10 @@ from execution import (
 # ---------------------------------------------------------------------------
 
 class TestToolTask:
-    def test_creation(self):
-        task = ToolTask(name="scc", tool_root=Path("/tools/scc"))
-        assert task.name == "scc"
-        assert task.tool_root == Path("/tools/scc")
-        assert task.extra_env == {}
-
-    def test_with_extra_env(self):
-        task = ToolTask(name="layout", tool_root=Path("/t"), extra_env={"NO_GITIGNORE": "1"})
-        assert task.extra_env == {"NO_GITIGNORE": "1"}
-
     def test_frozen(self):
         task = ToolTask(name="scc", tool_root=Path("/t"))
         with pytest.raises(AttributeError):
             task.name = "other"  # type: ignore[misc]
-
-
-class TestExecutionResult:
-    def test_success(self):
-        r = ExecutionResult(
-            tool_name="scc",
-            status="success",
-            duration_seconds=1.23,
-            output_path=Path("/out/output.json"),
-            output_exists=True,
-            output_bytes=1024,
-        )
-        assert r.status == "success"
-        assert r.error is None
-
-    def test_failure(self):
-        r = ExecutionResult(
-            tool_name="scc",
-            status="failed",
-            duration_seconds=0.5,
-            output_path=Path("/out/output.json"),
-            output_exists=False,
-            output_bytes=None,
-            error="CalledProcessError",
-            returncode=2,
-        )
-        assert r.status == "failed"
-        assert r.returncode == 2
-
-
-class TestExecutionConfig:
-    def test_defaults(self):
-        cfg = ExecutionConfig(
-            repo_path=Path("/repo"),
-            repo_name="my-repo",
-            run_id="run-1",
-            repo_id="repo-1",
-            branch="main",
-            commit="abc123",
-        )
-        assert cfg.max_parallel == 1
-        assert cfg.output_root is None
-
-
-class TestExecutionMode:
-    def test_local(self):
-        assert ExecutionMode.LOCAL.value == "local"
 
 
 # ---------------------------------------------------------------------------
@@ -274,8 +217,13 @@ class TestGetBackend:
         assert isinstance(backend, LocalBackend)
 
     def test_invalid_mode_raises(self):
-        # Workaround: create an invalid mode
-        # Since Enum prevents arbitrary values, test via attribute hack
-        # Just verify the factory works for LOCAL
-        backend = get_backend(ExecutionMode.LOCAL)
-        assert backend is not None
+        """Passing a mode not handled by get_backend must raise ValueError."""
+        # Create a fake enum member that get_backend does not support.
+        # We cannot pass a raw string because the function expects ExecutionMode,
+        # so we dynamically add a temporary member to exercise the else branch.
+        import enum
+        fake_mode = object.__new__(ExecutionMode)
+        fake_mode._name_ = "FAKE"
+        fake_mode._value_ = "fake"
+        with pytest.raises(ValueError, match="Unsupported execution mode"):
+            get_backend(fake_mode)

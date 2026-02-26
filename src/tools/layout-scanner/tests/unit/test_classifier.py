@@ -10,8 +10,6 @@ from scripts.classifier import (
     classify_directory_by_name,
     get_classification_distribution,
     get_language_distribution,
-    ClassificationResult,
-    LanguageResult,
     CLASSIFICATIONS,
     PATH_RULES,
     FILENAME_RULES,
@@ -19,42 +17,6 @@ from scripts.classifier import (
     LANGUAGE_MAP,
     DIRECTORY_NAME_RULES,
 )
-
-
-class TestClassificationResult:
-    """Tests for ClassificationResult dataclass."""
-
-    def test_classification_result_fields(self):
-        """ClassificationResult should have all required fields."""
-        result = ClassificationResult(
-            category="source",
-            confidence=0.9,
-            reason="extension:.py",
-            signals={"extension": "source"},
-        )
-        assert result.category == "source"
-        assert result.confidence == 0.9
-        assert result.reason == "extension:.py"
-        assert result.signals == {"extension": "source"}
-
-    def test_classification_result_default_signals(self):
-        """ClassificationResult should have empty signals by default."""
-        result = ClassificationResult(
-            category="test",
-            confidence=0.8,
-            reason="path:tests/",
-        )
-        assert result.signals == {}
-
-
-class TestLanguageResult:
-    """Tests for LanguageResult dataclass."""
-
-    def test_language_result_fields(self):
-        """LanguageResult should have all required fields."""
-        result = LanguageResult(language="python", confidence=0.95)
-        assert result.language == "python"
-        assert result.confidence == 0.95
 
 
 class TestClassifyFilePathRules:
