@@ -58,12 +58,14 @@ jobs:
           path: ci_artifacts/
           retention-days: 30
 
-  # ── Gate C — Production Mode Smoke: LOCAL (release) ──────────────────────
-  prod-smoke-local:
-    name: "Gate C — LOCAL Smoke"
+  # ── Gate C — Production Smoke (release) ──────────────────────────────────
+  # Runs LOCAL and BUNDLE modes sequentially in a single job to avoid
+  # duplicating ~3-5 min of setup (checkout, Python, venv, tool binaries).
+  prod-smoke:
+    name: "Gate C — Production Smoke"
     if: github.base_ref == 'release'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -71,6 +73,7 @@ jobs:
         with:
           setup-tools: "true"
 
+      # ── LOCAL mode ──────────────────────────────────────────────────────
       - name: Run pipeline (LOCAL mode, LLM off)
         run: |
           make pipeline-eval \
@@ -78,7 +81,7 @@ jobs:
             PIPELINE_LLM=0 \
             SKIP_TOOLS=${{ env.CI_SKIP_TOOLS }}
 
-      - name: Verify report exists
+      - name: Verify LOCAL report exists
         run: |
           REPORT=$(find src/insights/output/pipeline -name "report.html" -type f | head -1)
           if [ -z "$REPORT" ]; then
@@ -90,21 +93,12 @@ jobs:
             echo "ERROR: report.html is too small ($SIZE bytes)"
             exit 1
           fi
-          echo "OK: report.html exists ($SIZE bytes)"
+          echo "OK: LOCAL report.html exists ($SIZE bytes)"
 
-  # ── Gate D — Production Mode Smoke: BUNDLE (release) ─────────────────────
-  prod-smoke-bundle:
-    name: "Gate D — BUNDLE Smoke"
-    if: github.base_ref == 'release'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
+      - name: Clean DB for BUNDLE mode
+        run: make clean-db
 
-      - uses: ./.github/actions/caldera-setup
-        with:
-          setup-tools: "true"
-
+      # ── BUNDLE mode ─────────────────────────────────────────────────────
       - name: Collect artifacts
         run: |
           .venv/bin/python scripts/collect_artifacts.py \
@@ -120,7 +114,7 @@ jobs:
             BUNDLE=artifacts/ci-sample/ci-run \
             PIPELINE_LLM=0
 
-      - name: Verify report exists
+      - name: Verify BUNDLE report exists
         run: |
           REPORT=$(find src/insights/output/pipeline -name "report.html" -type f | head -1)
           if [ -z "$REPORT" ]; then
@@ -132,7 +126,7 @@ jobs:
             echo "ERROR: report.html is too small ($SIZE bytes)"
             exit 1
           fi
-          echo "OK: report.html exists ($SIZE bytes)"
+          echo "OK: BUNDLE report.html exists ($SIZE bytes)"
 
   # ── Promotion Policy (main only) ───────────────────────────────────────
   promotion-check:

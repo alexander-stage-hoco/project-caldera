@@ -282,7 +282,7 @@ make docker-test-all REPO=. DOCKER_TEST_SKIP=coverage-ingest,sonarqube
 - Array ordering of file lists and findings (handled by `--sort-arrays` in the comparison script)
 - Trivy vulnerability DB freshness (DB downloaded at image build time vs local update time)
 
-Parity tests run automatically via the `docker-parity.yml` CI workflow on PRs to `release` that touch tool or Docker files. Results are report-only (do not block merges) and uploaded as artifacts.
+Parity tests are run locally via `make docker-test-all REPO=<path>` (or per-tool with `make docker-test-tool TOOL=<name> REPO=<path>`).
 
 ### Container Images
 
