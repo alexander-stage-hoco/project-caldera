@@ -149,6 +149,7 @@ class TestGenerateByCollection:
                 sections=["repo_health"],
                 output_path=None,
                 title="My Report",
+                profile=None,
             )
             generator.fetcher.get_scc_run_pk_for_collection.assert_called_once_with("coll-abc")
 

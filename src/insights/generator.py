@@ -57,6 +57,7 @@ from .sections.evidence_pack import EvidencePackSection
 from .sections.claim_register import ClaimRegisterSection
 from .sections.rewrite_risk import RewriteRiskSection
 from .sections.sampling_rationale import SamplingRationaleSection
+from .profiles import StakeholderProfile, get_profile
 
 
 class InsightsGenerator:
@@ -148,6 +149,7 @@ class InsightsGenerator:
         output_path: Path | None = None,
         title: str | None = None,
         skip_validation: bool = False,
+        profile: str | StakeholderProfile | None = None,
     ) -> str:
         """
         Generate a complete report.
@@ -174,8 +176,16 @@ class InsightsGenerator:
         if not formatter:
             raise ValueError(f"Unknown format: {format}. Available: {list(self._formatters.keys())}")
 
-        # Determine which sections to render
-        section_names = sections or list(self.sections.keys())
+        # Resolve profile vs explicit sections
+        if profile is not None and sections is not None:
+            raise ValueError("Cannot specify both 'profile' and 'sections'.")
+
+        resolved_profile: StakeholderProfile | None = None
+        if profile is not None:
+            resolved_profile = get_profile(profile) if isinstance(profile, str) else profile
+            section_names = [s for s in resolved_profile.sections if s in self.sections]
+        else:
+            section_names = sections or list(self.sections.keys())
 
         # Validate section names
         invalid_sections = set(section_names) - set(self.sections.keys())
@@ -211,10 +221,15 @@ class InsightsGenerator:
             "repository": repository,
             "format": format,
             "sections_included": section_names,
+            "profile": resolved_profile.name if resolved_profile else None,
         }
 
         # Generate report title
-        report_title = title or f"Insights Report: {repository}"
+        report_title = title or (
+            resolved_profile.title_template.format(repository=repository)
+            if resolved_profile
+            else f"Insights Report: {repository}"
+        )
 
         # Format the complete report
         report = formatter.format_report(
@@ -288,6 +303,7 @@ class InsightsGenerator:
         sections: list[str] | None = None,
         output_path: Path | None = None,
         title: str | None = None,
+        profile: str | StakeholderProfile | None = None,
     ) -> str:
         """
         Generate a report for a collection run.
@@ -315,6 +331,7 @@ class InsightsGenerator:
             sections=sections,
             output_path=output_path,
             title=title,
+            profile=profile,
         )
 
     def generate_section(
