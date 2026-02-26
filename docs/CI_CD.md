@@ -15,8 +15,8 @@ infra/*    ──PR──►  develop
 |--------|---------|----------------|
 | `feature/*`, `fix/*`, `tool/*/**`, `infra/*` | Development | Gate 0 (preflight on push) |
 | `develop` | Integration | Gate A |
-| `release` | Pre-production staging | Gates A, B, C, D |
-| `main` | Production-ready | Gates A, B (C, D already passed) |
+| `release` | Pre-production staging | Gates A, B, C |
+| `main` | Production-ready | Gates A, B (C already passed) |
 | Tags `vX.Y.Z` | Releases cut from `main` | Gate E on `vX.0.0` only |
 
 ## Pipeline Gates
@@ -49,21 +49,17 @@ Runs `make compliance-preflight` for immediate structural feedback.
 
 Runs `make compliance-preflight` as a hard gate (must pass), then runs `make compliance` with `continue-on-error` to generate a full compliance report. Uploads JSON + MD reports as artifacts for release readiness assessment.
 
-### Gate C — LOCAL Smoke Test
+### Gate C — Production Smoke
 
-**File:** `.github/workflows/ci.yml` → `prod-smoke-local` job
+**File:** `.github/workflows/ci.yml` → `prod-smoke` job
 **Trigger:** PRs to `release`
-**Duration:** ~5-10 min | **Cost:** Free
+**Duration:** ~10-15 min | **Cost:** Free
 
-Proves LOCAL production mode works: runs `make pipeline-eval` against `tests/fixtures/ci-repo/` with only `scc` and `layout-scanner` enabled and LLM off. Verifies `report.html` is generated.
+Proves both production modes work in a single job (avoiding duplicate setup):
 
-### Gate D — BUNDLE Smoke Test
-
-**File:** `.github/workflows/ci.yml` → `prod-smoke-bundle` job
-**Trigger:** PRs to `release`
-**Duration:** ~5-10 min | **Cost:** Free
-
-Proves BUNDLE mode works: collects artifacts, ingests bundle, generates report. Same fixture repo and tool allowlist as Gate C.
+1. **LOCAL mode:** runs `make pipeline-eval` against `tests/fixtures/ci-repo/` with only `scc` and `layout-scanner` enabled and LLM off. Verifies `report.html` is generated.
+2. **Clean DB** to reset state between modes.
+3. **BUNDLE mode:** collects artifacts, ingests bundle, generates report. Same fixture repo and tool allowlist.
 
 ### Gate E — Deep Tool Evaluation (LLM)
 
@@ -134,14 +130,14 @@ Spins up a Hetzner VM, runs full pipeline, downloads results, destroys VM. Prote
 |------|-----|---------|
 | Project `.venv/` | `core-venv-{os}-{hash(requirements.txt)}` | All jobs |
 | pip cache | `pip-{os}-{hash(requirements.txt)}` | All jobs |
-| Tool venvs | `tool-venvs-{os}-{hash(tool requirements)}` | Gates C, D, E |
-| Tool binaries (scc, git-sizer, gitleaks, trivy) | `tool-bins-{os}-{hash(tool Makefiles)}` | Gates C, D, E |
+| Tool venvs | `tool-venvs-{os}-{hash(tool requirements)}` | Gates C, E |
+| Tool binaries (scc, git-sizer, gitleaks, trivy) | `tool-bins-{os}-{hash(tool Makefiles)}` | Gates C, E |
 
 ## Branch Protection Rules
 
 **`develop`:** Require PR, status check `"Gate A — Quality"`, no force push.
 
-**`release`:** Require PR (from `develop`), status checks: `"Gate A — Quality"`, `"Gate B — Compliance Report"`, `"Gate C — LOCAL Smoke"`, `"Gate D — BUNDLE Smoke"`. No force push.
+**`release`:** Require PR (from `develop`), status checks: `"Gate A — Quality"`, `"Gate B — Compliance Report"`, `"Gate C — Production Smoke"`. No force push.
 
 **`main`:** Require PR (from `release`), status checks: `"Gate A — Quality"`, `"Gate B — Compliance Report"`, `"Promotion Policy"`. No force push, no deletion. The `"Promotion Policy"` check enforces that PRs to `main` originate from the `release` branch.
 

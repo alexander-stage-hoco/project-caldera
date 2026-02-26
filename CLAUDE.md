@@ -420,8 +420,7 @@ GitHub Actions with branch promotion: `develop → release → main`. Branch pro
 | 0 — Preflight | Push to feature branches | ~30s | `make compliance-preflight` |
 | A — Quality | Every PR | ~2 min | Preflight + unit tests + observability |
 | B — Compliance | PRs to `release`/`main` | ~10s | Full compliance scan |
-| C — LOCAL Smoke | PRs to `release` | ~5-10 min | Pipeline end-to-end (DuckDB + dbt + report) |
-| D — BUNDLE Smoke | PRs to `release` | ~5-10 min | Collect + ingest + report |
+| C — Production Smoke | PRs to `release` | ~10-15 min | LOCAL pipeline + BUNDLE ingest + report |
 | E — LLM Eval | Tag `vX.0.0` | ~30-45 min | Full compliance with tool execution + LLM judges |
 
 ### Key Files
@@ -430,7 +429,7 @@ GitHub Actions with branch promotion: `develop → release → main`. Branch pro
 |------|---------|
 | `.github/actions/caldera-setup/action.yml` | Composite action (Python 3.12 + venv cache) |
 | `.github/workflows/preflight.yml` | Gate 0 |
-| `.github/workflows/ci.yml` | Gates A-D (router workflow) |
+| `.github/workflows/ci.yml` | Gates A-C (router workflow) |
 | `.github/workflows/tool-evaluation-major.yml` | Gate E (LLM, environment-protected) |
 | `.github/workflows/cloud-smoke.yml` | Cloud smoke test (manual + major tags) |
 | `.github/workflows/docker-images.yml` | Docker image builds → GHCR (main + tags) |
