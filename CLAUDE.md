@@ -434,7 +434,6 @@ GitHub Actions with branch promotion: `develop → release → main`. Branch pro
 | `.github/workflows/tool-evaluation-major.yml` | Gate E (LLM, environment-protected) |
 | `.github/workflows/cloud-smoke.yml` | Cloud smoke test (manual + major tags) |
 | `.github/workflows/docker-images.yml` | Docker image builds → GHCR (main + tags) |
-| `.github/workflows/docker-parity.yml` | Docker vs native parity check (PRs to release) |
 | `tests/fixtures/ci-repo/` | Minimal fixture repo for CI smoke tests |
 
 ## Secrets Management
