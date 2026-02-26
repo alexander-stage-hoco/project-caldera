@@ -24,21 +24,33 @@ base_files AS (
     SELECT
         ufm.relative_path,
         ufm.loc_total,
-        ufm.max_ccn,
-        ufm.total_ccn,
+        ufm.complexity_max,
+        ufm.complexity_total_ccn,
         ufm.function_count,
-        ufm.smell_count,
-        ufm.issue_count,
-        ufm.line_coverage_pct
+        COALESCE(ufm.semgrep_smell_count, 0) AS smell_count,
+        COALESCE(ufm.sonarqube_issue_count, 0) + COALESCE(ufm.devskim_issue_count, 0) AS issue_count,
+        ufm.coverage_line_pct,
+        ufm.total_coupling
     FROM unified_file_metrics ufm
     WHERE ufm.run_pk = (SELECT scc_run_pk FROM run_map)
       AND ufm.loc_total > 50
 ),
+blame_files AS (
+    SELECT
+        relative_path,
+        risk_score,
+        churn_30d,
+        unique_authors,
+        top_author_pct
+    FROM mart_git_blame_knowledge_risk
+    WHERE run_pk = (SELECT blame_run_pk FROM run_map)
+),
 -- Normalize scores to 0-1 range using percentile-based approach
 stats AS (
     SELECT
-        PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY max_ccn) AS ccn_p90,
-        PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY smell_count + issue_count) AS quality_p90
+        PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY complexity_max) AS ccn_p90,
+        PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY smell_count + issue_count) AS quality_p90,
+        PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY total_coupling) AS coupling_p90
     FROM base_files
     WHERE function_count > 0
 ),
@@ -46,30 +58,40 @@ scored AS (
     SELECT
         bf.relative_path,
         bf.loc_total,
-        bf.max_ccn,
-        bf.line_coverage_pct,
+        bf.complexity_max,
+        bf.coverage_line_pct,
+        bf.total_coupling,
+        bl.unique_authors,
+        bl.top_author_pct,
+        bl.churn_30d,
         -- Complexity score (0-1)
-        LEAST(1.0, COALESCE(bf.max_ccn * 1.0 / NULLIF(s.ccn_p90, 0), 0)) AS ccn_score,
-        -- Coupling score placeholder (would need symbol join)
-        0.0 AS coupling_score,
-        -- Ownership score placeholder (would need blame join)
-        0.0 AS ownership_score,
+        LEAST(1.0, COALESCE(bf.complexity_max * 1.0 / NULLIF(s.ccn_p90, 0), 0)) AS ccn_score,
+        -- Coupling score (0-1, normalized against p90)
+        LEAST(1.0, COALESCE(bf.total_coupling * 1.0 / NULLIF(s.coupling_p90, 0), 0)) AS coupling_score,
+        -- Ownership score (0-1, from blame risk_score 0-100 + churn boost)
+        LEAST(1.0, COALESCE(bl.risk_score / 100.0, 0) +
+            CASE WHEN bl.churn_30d > 0 THEN 0.1 ELSE 0 END) AS ownership_score,
         -- Coverage score (inverted: low coverage = high score)
         CASE
-            WHEN bf.line_coverage_pct IS NULL THEN 0.5
-            ELSE LEAST(1.0, (100.0 - bf.line_coverage_pct) / 100.0)
+            WHEN bf.coverage_line_pct IS NULL THEN 0.5
+            ELSE LEAST(1.0, (100.0 - bf.coverage_line_pct) / 100.0)
         END AS coverage_score,
         -- Quality score
         LEAST(1.0, COALESCE((bf.smell_count + bf.issue_count) * 1.0 / NULLIF(s.quality_p90, 0), 0)) AS quality_score
     FROM base_files bf
     CROSS JOIN stats s
+    LEFT JOIN blame_files bl ON bl.relative_path = bf.relative_path
 ),
 composite AS (
     SELECT
         relative_path,
         loc_total,
-        max_ccn,
-        line_coverage_pct,
+        complexity_max,
+        coverage_line_pct,
+        total_coupling,
+        unique_authors,
+        top_author_pct,
+        churn_30d,
         ccn_score,
         coupling_score,
         ownership_score,

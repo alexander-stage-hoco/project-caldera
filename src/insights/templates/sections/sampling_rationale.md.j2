@@ -9,6 +9,21 @@
 **Contributing tools:** {{ tools_contributing | join(', ') }}
 {% endif %}
 
+{% if sampling_coverage %}
+### Codebase Coverage
+
+**{{ sampling_coverage.sampled_files }}** files ({{ sampling_coverage.sampled_pct }}% of codebase, {{ sampling_coverage.sampled_kloc }} KLOC) selected for detailed review out of **{{ sampling_coverage.eligible_files }}** eligible files ({{ sampling_coverage.total_files }} total, {{ sampling_coverage.eligible_loc | int }} LOC with >50 lines).
+{% endif %}
+
+{% if risk_drivers %}
+### Risk Driver Breakdown
+
+Files grouped by dominant risk factor:
+
+{% for driver, count in risk_drivers.items() %}{% if count > 0 %}- **{{ driver | capitalize }}**: {{ count }} files
+{% endif %}{% endfor %}
+{% endif %}
+
 ### Top {{ target_count }} Files by Risk Score
 
 | File | Composite | CCN | Coupling | Ownership | Coverage | Quality | Rationale |
