@@ -1,0 +1,50 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Sampling Rationale</h2>
+
+    {% if has_data %}
+    <div class="subsection">
+        <h3>Composite Risk Formula</h3>
+        <p><code>{{ formula }}</code></p>
+        {% if tools_contributing %}
+        <p><strong>Contributing tools:</strong> {{ tools_contributing | join(', ') }}</p>
+        {% endif %}
+    </div>
+
+    <div class="subsection">
+        <h3>Top {{ target_count }} Files by Risk Score</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Composite</th>
+                    <th class="number">CCN</th>
+                    <th class="number">Coupling</th>
+                    <th class="number">Ownership</th>
+                    <th class="number">Coverage</th>
+                    <th class="number">Quality</th>
+                    <th>Rationale</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for target in targets[:30] %}
+                <tr>
+                    <td><code>{{ target.file_path }}</code></td>
+                    <td class="number">{{ "%.2f" | format(target.composite_score) }}</td>
+                    <td class="number">{{ "%.2f" | format(target.ccn_score) }}</td>
+                    <td class="number">{{ "%.2f" | format(target.coupling_score) }}</td>
+                    <td class="number">{{ "%.2f" | format(target.ownership_score) }}</td>
+                    <td class="number">{{ "%.2f" | format(target.coverage_score) }}</td>
+                    <td class="number">{{ "%.2f" | format(target.quality_score) }}</td>
+                    <td><small>{{ target.rationale }}</small></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <p>No sampling targets computed for this run.</p>
+    </div>
+    {% endif %}
+</section>

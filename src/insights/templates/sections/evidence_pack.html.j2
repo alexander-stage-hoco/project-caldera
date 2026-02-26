@@ -1,0 +1,47 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Evidence Pack</h2>
+
+    {% if has_data %}
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Evidence Items</div>
+            <div class="value">{{ total_evidence }}</div>
+        </div>
+    </div>
+
+    {% for cat in categories %}
+    {% if cat.items %}
+    <div class="subsection">
+        <h3>{{ cat.category | title }} ({{ cat.total_count }}{% if cat.truncated %}, showing {{ cat.displayed_count }}{% endif %})</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Location</th>
+                    <th>Observation</th>
+                    <th>Tool</th>
+                    <th>Confidence</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for item in cat.items %}
+                <tr>
+                    <td><code>{{ item.evidence_id }}</code></td>
+                    <td><code>{{ item.location }}</code></td>
+                    <td>{{ item.observation }}</td>
+                    <td>{{ item.tool_source }}</td>
+                    <td>{{ item.confidence }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    {% else %}
+    <div class="empty-state">
+        <p>No evidence items collected in this run.</p>
+    </div>
+    {% endif %}
+</section>

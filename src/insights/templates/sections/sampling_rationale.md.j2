@@ -1,0 +1,22 @@
+## Sampling Rationale
+
+{% if has_data %}
+### Composite Risk Formula
+
+`{{ formula }}`
+
+{% if tools_contributing %}
+**Contributing tools:** {{ tools_contributing | join(', ') }}
+{% endif %}
+
+### Top {{ target_count }} Files by Risk Score
+
+| File | Composite | CCN | Coupling | Ownership | Coverage | Quality | Rationale |
+|------|----------:|----:|---------:|----------:|---------:|--------:|-----------|
+{% for target in targets[:30] %}
+| `{{ target.file_path }}` | {{ "%.2f" | format(target.composite_score) }} | {{ "%.2f" | format(target.ccn_score) }} | {{ "%.2f" | format(target.coupling_score) }} | {{ "%.2f" | format(target.ownership_score) }} | {{ "%.2f" | format(target.coverage_score) }} | {{ "%.2f" | format(target.quality_score) }} | {{ target.rationale }} |
+{% endfor %}
+
+{% else %}
+*No sampling targets computed for this run.*
+{% endif %}

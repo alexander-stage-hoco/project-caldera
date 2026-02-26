@@ -10,10 +10,11 @@ from pathlib import Path
 from typing import Any, Literal
 
 from .data_fetcher import DataFetcher
+from .evidence.builder import EvidenceRegistryBuilder
 from .formatters.base import BaseFormatter
 from .formatters.html import HtmlFormatter
 from .formatters.markdown import MarkdownFormatter
-from .sections.base import BaseSection, SectionData
+from .sections.base import BaseSection, EvidenceAwareSection, SectionData
 from .sections.executive_summary import ExecutiveSummarySection
 from .sections.repo_health import RepoHealthSection
 from .sections.file_hotspots import FileHotspotsSection
@@ -51,6 +52,10 @@ from .sections.dotcover_coverage import DotcoverCoverageSection
 from .sections.git_sizer import GitSizerSection
 from .sections.import_dependencies import ImportDependenciesSection
 from .sections.circular_dependencies import CircularDependenciesSection
+from .sections.risk_register import RiskRegisterSection
+from .sections.evidence_pack import EvidencePackSection
+from .sections.claim_register import ClaimRegisterSection
+from .sections.sampling_rationale import SamplingRationaleSection
 
 
 class InsightsGenerator:
@@ -95,6 +100,10 @@ class InsightsGenerator:
         "module_health": ModuleHealthSection,
         "code_inequality": CodeInequalitySection,
         "license_compliance": LicenseComplianceSection,
+        "risk_register": RiskRegisterSection,
+        "sampling_rationale": SamplingRationaleSection,
+        "evidence_pack": EvidencePackSection,
+        "claim_register": ClaimRegisterSection,
     }
 
     def __init__(
@@ -119,6 +128,9 @@ class InsightsGenerator:
         self.sections: dict[str, BaseSection] = {
             name: cls() for name, cls in self.SECTIONS.items()
         }
+
+        # Initialize evidence builder
+        self._evidence_builder = EvidenceRegistryBuilder()
 
         # Initialize formatters
         self._formatters: dict[str, BaseFormatter] = {
@@ -174,10 +186,15 @@ class InsightsGenerator:
             key=lambda name: self.sections[name].config.priority,
         )
 
+        # Build evidence registry once for all evidence-aware sections
+        registry = self._evidence_builder.build(self.fetcher, run_pk)
+
         # Render each section
         rendered_sections: list[SectionData] = []
         for name in section_names:
             section = self.sections[name]
+            if isinstance(section, EvidenceAwareSection):
+                section.set_evidence_registry(registry)
             section_data = self._render_section(section, run_pk, formatter)
             rendered_sections.append(section_data)
 

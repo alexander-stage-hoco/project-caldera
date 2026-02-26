@@ -51,6 +51,10 @@ class TestInsightsGenerator:
             "devskim_security",
             "dotcover_coverage",
             "git_sizer",
+            "risk_register",
+            "evidence_pack",
+            "claim_register",
+            "sampling_rationale",
         ]
 
         assert set(InsightsGenerator.SECTIONS.keys()) == set(expected_sections)
@@ -78,9 +82,10 @@ class TestInsightsGenerator:
             section = cls()
             priorities.append(section.config.priority)
 
-        # All priorities should be valid numbers in range 0-11
+        # All priorities should be valid numbers in range 0-99
         # Note: Some sections share priorities (e.g., secrets and cross_tool both use 5)
-        assert all(0 <= p <= 11 for p in priorities)
+        # Evidence framework sections use high priorities (97-99) for appendix placement
+        assert all(0 <= p <= 99 for p in priorities)
         assert len(priorities) == len(InsightsGenerator.SECTIONS)
 
     @pytest.mark.parametrize("format_type", ["html", "md"])
