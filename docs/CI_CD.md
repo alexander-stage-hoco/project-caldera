@@ -47,7 +47,7 @@ Runs `make compliance-preflight` for immediate structural feedback.
 **Trigger:** PRs to `release` or `main`
 **Duration:** ~10s | **Cost:** Free
 
-Runs full structural compliance (`make compliance`) and uploads JSON + MD reports as artifacts.
+Runs `make compliance-preflight` as a hard gate (must pass), then runs `make compliance` with `continue-on-error` to generate a full compliance report. Uploads JSON + MD reports as artifacts for release readiness assessment.
 
 ### Gate C — LOCAL Smoke Test
 
@@ -55,7 +55,7 @@ Runs full structural compliance (`make compliance`) and uploads JSON + MD report
 **Trigger:** PRs to `release`
 **Duration:** ~5-10 min | **Cost:** Free
 
-Proves LOCAL production mode works: runs `make pipeline-eval` against `tests/fixtures/ci-repo/` with only `layout-scanner` enabled and LLM off. Verifies `report.html` is generated.
+Proves LOCAL production mode works: runs `make pipeline-eval` against `tests/fixtures/ci-repo/` with only `scc` and `layout-scanner` enabled and LLM off. Verifies `report.html` is generated.
 
 ### Gate D — BUNDLE Smoke Test
 
@@ -135,15 +135,15 @@ Spins up a Hetzner VM, runs full pipeline, downloads results, destroys VM. Prote
 | Project `.venv/` | `core-venv-{os}-{hash(requirements.txt)}` | All jobs |
 | pip cache | `pip-{os}-{hash(requirements.txt)}` | All jobs |
 | Tool venvs | `tool-venvs-{os}-{hash(tool requirements)}` | Gates C, D, E |
-| Tool binaries | `tool-bins-{os}-{hash(tool Makefiles)}` | Gates C, D, E |
+| Tool binaries (scc, git-sizer, gitleaks, trivy) | `tool-bins-{os}-{hash(tool Makefiles)}` | Gates C, D, E |
 
 ## Branch Protection Rules
 
-**`develop`:** Require PR, status check `quality` (Gate A), no force push.
+**`develop`:** Require PR, status check `"Gate A — Quality"`, no force push.
 
-**`release`:** Require PR (from `develop`), status checks: `quality`, `compliance-report`, `prod-smoke-local`, `prod-smoke-bundle`. No force push.
+**`release`:** Require PR (from `develop`), status checks: `"Gate A — Quality"`, `"Gate B — Compliance Report"`, `"Gate C — LOCAL Smoke"`, `"Gate D — BUNDLE Smoke"`. No force push.
 
-**`main`:** Require PR (from `release`), same status checks as `release` (already green). No force push, no deletion.
+**`main`:** Require PR (from `release`), status checks: `"Gate A — Quality"`, `"Gate B — Compliance Report"`, `"Promotion Policy"`. No force push, no deletion. The `"Promotion Policy"` check enforces that PRs to `main` originate from the `release` branch.
 
 ## CI Fixture Repo
 

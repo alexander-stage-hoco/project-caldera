@@ -107,6 +107,11 @@ src/tools/sonarqube/eval-repos/synthetic/**/bin/
 src/tools/sonarqube/eval-repos/synthetic/**/obj/
 src/tools/roslyn-analyzers/obj/
 
+# .NET build artifacts from eval-repo builds
+**/eval-repos/**/bin/
+**/eval-repos/**/obj/
+obj/
+
 # Architecture review output (regenerated)
 src/architecture-review/results/
 

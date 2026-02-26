@@ -43,8 +43,12 @@ jobs:
 
       - uses: ./.github/actions/caldera-setup
 
-      - name: Compliance scan (preflight — structure only)
-        run: make compliance-preflight COMPLIANCE_OUT_JSON=ci_artifacts/compliance_report.json COMPLIANCE_OUT_MD=ci_artifacts/compliance_report.md
+      - name: Compliance gate (preflight — must pass)
+        run: make compliance-preflight
+
+      - name: Full compliance report (informational)
+        continue-on-error: true
+        run: make compliance COMPLIANCE_OUT_JSON=ci_artifacts/compliance_report.json COMPLIANCE_OUT_MD=ci_artifacts/compliance_report.md
 
       - name: Upload compliance artifacts
         uses: actions/upload-artifact@v4
@@ -129,3 +133,18 @@ jobs:
             exit 1
           fi
           echo "OK: report.html exists ($SIZE bytes)"
+
+  # ── Promotion Policy (main only) ───────────────────────────────────────
+  promotion-check:
+    name: "Promotion Policy"
+    if: github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Check source branch
+        run: |
+          if [ "${{ github.head_ref }}" != "release" ]; then
+            echo "ERROR: PRs to main must come from release branch"
+            echo "Current source: ${{ github.head_ref }}"
+            exit 1
+          fi
