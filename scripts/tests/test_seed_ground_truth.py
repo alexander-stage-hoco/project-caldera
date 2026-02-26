@@ -400,7 +400,7 @@ class TestToolSeedersRegistry:
 
     def test_all_expected_tools_registered(self) -> None:
         """Test that all expected tools have seeders registered."""
-        expected_tools = {"scc", "lizard", "semgrep", "layout-scanner", "roslyn-analyzers", "trivy", "git-sizer"}
+        expected_tools = {"scc", "lizard", "semgrep", "layout-scanner", "roslyn-analyzers", "trivy", "git-sizer", "symbol-scanner"}
         assert set(TOOL_SEEDERS.keys()) == expected_tools
 
     def test_seeders_are_callable(self) -> None:

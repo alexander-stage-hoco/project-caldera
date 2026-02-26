@@ -144,7 +144,8 @@ make docker-build-base           # Build shared Python base image
 make docker-build-tool TOOL=<n>  # Build a single tool Docker image
 make docker-build-all            # Build all images (bases + tools + runner + orchestrator)
 make docker-pull-all             # Pull all pre-built images from GHCR
-make docker-test-tool TOOL=<n> REPO=<path>  # Test Docker vs native output
+make docker-test-tool TOOL=<n> REPO=<path>  # Test Docker vs native output for one tool
+make docker-test-all REPO=<path> # Batch Docker vs native parity test (all tools)
 ```
 
 ### Pipeline Variables
@@ -167,6 +168,7 @@ make docker-test-tool TOOL=<n> REPO=<path>  # Test Docker vs native output
 | `CALDERA_TOOL_IMAGE_PREFIX` | `caldera-tool-` | Docker image prefix for tool containers |
 | `CALDERA_RUNNER_IMAGE` | `caldera-runner` | Runner image (set to GHCR ref for pre-built) |
 | `CALDERA_ORCHESTRATOR_IMAGE` | `caldera-orchestrator` | Orchestrator image (set to GHCR ref for pre-built) |
+| `DOCKER_TEST_SKIP` | `coverage-ingest` | Comma-separated tools to skip in `make docker-test-all` |
 
 ### Orchestrator
 
@@ -418,8 +420,7 @@ GitHub Actions with branch promotion: `develop → release → main`. Branch pro
 | 0 — Preflight | Push to feature branches | ~30s | `make compliance-preflight` |
 | A — Quality | Every PR | ~2 min | Preflight + unit tests + observability |
 | B — Compliance | PRs to `release`/`main` | ~10s | Full compliance scan |
-| C — LOCAL Smoke | PRs to `release` | ~5-10 min | Pipeline end-to-end (DuckDB + dbt + report) |
-| D — BUNDLE Smoke | PRs to `release` | ~5-10 min | Collect + ingest + report |
+| C — Production Smoke | PRs to `release` | ~10-15 min | LOCAL pipeline + BUNDLE ingest + report |
 | E — LLM Eval | Tag `vX.0.0` | ~30-45 min | Full compliance with tool execution + LLM judges |
 
 ### Key Files
@@ -428,7 +429,7 @@ GitHub Actions with branch promotion: `develop → release → main`. Branch pro
 |------|---------|
 | `.github/actions/caldera-setup/action.yml` | Composite action (Python 3.12 + venv cache) |
 | `.github/workflows/preflight.yml` | Gate 0 |
-| `.github/workflows/ci.yml` | Gates A-D (router workflow) |
+| `.github/workflows/ci.yml` | Gates A-C (router workflow) |
 | `.github/workflows/tool-evaluation-major.yml` | Gate E (LLM, environment-protected) |
 | `.github/workflows/cloud-smoke.yml` | Cloud smoke test (manual + major tags) |
 | `.github/workflows/docker-images.yml` | Docker image builds → GHCR (main + tags) |
