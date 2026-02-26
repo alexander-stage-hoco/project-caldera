@@ -59,16 +59,8 @@ def get_trivy_version() -> str:
         return "unknown"
 
 
-def run_trivy_scan(repo_path: Path, timeout: int) -> dict:
-    """Run trivy filesystem scan and return parsed JSON output.
-
-    Args:
-        repo_path: Path to repository to scan
-        timeout: Scan timeout in seconds
-
-    Returns:
-        Parsed trivy JSON output
-    """
+def _run_trivy_cmd(repo_path: Path, timeout: int, scanners: str) -> dict | None:
+    """Execute a single trivy scan and return parsed JSON, or None on failure."""
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         output_file = Path(f.name)
 
@@ -79,17 +71,19 @@ def run_trivy_scan(repo_path: Path, timeout: int) -> dict:
             "--format", "json",
             "--output", str(output_file),
             "--severity", "CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN",
-            "--scanners", "vuln,misconfig",
+            "--scanners", scanners,
             "--timeout", f"{timeout}s",
+            "--skip-db-update",
+            "--skip-java-db-update",
             str(repo_path),
         ]
 
-        logger.info("Running trivy scan", cmd=" ".join(cmd))
+        logger.info("Running trivy scan", cmd=" ".join(cmd), scanners=scanners)
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            timeout=timeout + 30,  # Allow extra time for cleanup
+            timeout=timeout + 30,
         )
 
         if result.returncode != 0:
@@ -100,22 +94,53 @@ def run_trivy_scan(repo_path: Path, timeout: int) -> dict:
             )
 
         # Read and parse output
-        if output_file.exists():
-            raw_output = json.loads(output_file.read_text())
-            return raw_output
-        else:
-            logger.error("Trivy output file not created")
-            return {"Results": []}
+        if output_file.exists() and output_file.stat().st_size > 0:
+            return json.loads(output_file.read_text())
+
+        logger.warning("Trivy output file missing or empty", scanners=scanners)
+        return None
 
     except subprocess.TimeoutExpired:
         logger.error("Trivy scan timed out", timeout=timeout)
         raise
-    except json.JSONDecodeError as e:
-        logger.error("Failed to parse trivy JSON output", error=str(e))
-        raise
+    except json.JSONDecodeError:
+        logger.warning("Failed to parse trivy JSON output", scanners=scanners)
+        return None
     finally:
         if output_file.exists():
             output_file.unlink()
+
+
+def run_trivy_scan(repo_path: Path, timeout: int) -> dict:
+    """Run trivy filesystem scan and return parsed JSON output.
+
+    Tries vuln+misconfig first; if trivy crashes (e.g. misconfig analyzer bug
+    on certain platforms), falls back to vuln-only scanning.
+
+    Args:
+        repo_path: Path to repository to scan
+        timeout: Scan timeout in seconds
+
+    Returns:
+        Parsed trivy JSON output
+    """
+    # Try full scan (vuln + misconfig)
+    raw_output = _run_trivy_cmd(repo_path, timeout, "vuln,misconfig")
+    if raw_output is not None:
+        return raw_output
+
+    # Fallback: vuln-only (misconfig analyzer can crash on some platforms)
+    logger.warning(
+        "Full scan failed, retrying with vuln-only scanners "
+        "(misconfig analyzer may not be supported in this environment)"
+    )
+    raw_output = _run_trivy_cmd(repo_path, timeout, "vuln")
+    if raw_output is not None:
+        return raw_output
+
+    # Both failed
+    logger.error("Trivy scan failed for both vuln+misconfig and vuln-only")
+    return {"Results": []}
 
 
 def discover_scannable_files(repo_path: Path) -> dict:

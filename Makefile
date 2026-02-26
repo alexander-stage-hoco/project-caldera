@@ -640,6 +640,8 @@ docker-pull-all:  ## Pull all images from GHCR and tag locally
 	done
 	@echo "Done. All images tagged locally."
 
+COMPARE_FLAGS ?=
+
 docker-test-tool: docker-build-tool  ## Build + test a tool image against native (TOOL=<name> REPO=<path>)
 	@test -n "$(TOOL)" || (echo "TOOL is required"; exit 1)
 	@test -n "$(REPO)" || (echo "REPO is required"; exit 1)
@@ -665,7 +667,8 @@ docker-test-tool: docker-build-tool  ## Build + test a tool image against native
 	    --docker "$$DOCKER_OUT/output.json" \
 	    --sort-arrays \
 	    --ignore-language-diffs \
-	    --repo-name "$$(basename "$$REPO_ABS")"; \
+	    --tool "$(TOOL)" \
+	    --repo-name "$$(basename "$$REPO_ABS")" $(COMPARE_FLAGS); \
 	  rm -rf "$$NATIVE_OUT" "$$DOCKER_OUT"
 
 DOCKER_TEST_SKIP ?= coverage-ingest,git-blame-scanner

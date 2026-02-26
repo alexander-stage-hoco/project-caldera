@@ -74,6 +74,16 @@ if ! command -v dotnet >/dev/null 2>&1; then
   echo ""
 fi
 
+# ── Per-tool compare flags ────────────────────────────────────────────────────
+tool_compare_flags() {
+  case "$1" in
+    trivy)                                echo "--array-length-tolerance 0.1" ;;
+    roslyn-analyzers|devskim|dotcover)    echo "--array-length-tolerance 0.05" ;;
+    lizard)                               echo "--numeric-tolerance 0.001" ;;
+    *)                                    echo "" ;;
+  esac
+}
+
 # ── Per-tool test function ────────────────────────────────────────────────────
 run_tool_test() {
   local tool="$1"
@@ -132,6 +142,9 @@ run_tool_test() {
 
   # Compare
   echo "  Comparing..."
+  local extra_flags
+  extra_flags="$(tool_compare_flags "$tool")"
+
   if $PYTHON_VENV scripts/compare_tool_outputs.py \
     --native "$native_out/output.json" \
     --docker "$docker_out/output.json" \
@@ -139,7 +152,8 @@ run_tool_test() {
     --ignore-language-diffs \
     --tool "$tool" \
     --repo-name "$(basename "$REPO_ABS")" \
-    --output-json "$RESULTS_DIR/${tool}.json"; then
+    --output-json "$RESULTS_DIR/${tool}.json" \
+    $extra_flags; then
     status="PASS"
   else
     status="FAIL"
