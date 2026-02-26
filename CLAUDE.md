@@ -21,6 +21,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
 | Review tool architecture | [src/architecture-review/README.md](src/architecture-review/README.md) |
 | Run cloud analysis | [infra/README.md](infra/README.md) |
 | Compare cloud hosting options | [docs/CLOUD_HOSTING_COMPARISON.md](docs/CLOUD_HOSTING_COMPARISON.md) |
+| See project status & roadmap | [docs/STATUS_AND_ROADMAP.md](docs/STATUS_AND_ROADMAP.md) |
 | Understand production modes | [docs/PRODUCTION_MODES.md](docs/PRODUCTION_MODES.md) |
 | Understand CI/CD pipeline | [docs/CI_CD.md](docs/CI_CD.md) |
 | Configure local secrets | [`.env.example`](.env.example) |

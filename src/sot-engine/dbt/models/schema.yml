@@ -6469,3 +6469,201 @@ models:
                   - shrinking
                   - stable
                   - deleted
+
+  - name: unified_directory_metrics
+    description: "Unified directory-level metrics combining recursive rollups from all tools. Complements unified_file_metrics with directory-level cross-tool analysis. Uses layout-scanner directories as the spine."
+    columns:
+      - name: run_pk
+        description: "Layout-scanner run primary key (spine)"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_lz_tool_runs')
+                field: run_pk
+      - name: collection_run_id
+        description: "Collection run identifier linking all tool runs"
+        tests:
+          - not_null
+      - name: directory_id
+        description: "Unique directory identifier from layout-scanner"
+        tests:
+          - not_null
+      - name: directory_path
+        description: "Repo-relative directory path"
+        tests:
+          - not_null
+      - name: file_count
+        description: "Total files in directory subtree (from layout-scanner)"
+        tests:
+          - not_null
+      - name: binary_file_count
+        description: "Number of binary files in subtree"
+      - name: total_size_bytes
+        description: "Total file size in bytes across subtree"
+      - name: total_line_count
+        description: "Total lines across all files in subtree"
+      - name: language_count
+        description: "Number of distinct programming languages in subtree"
+      - name: category_count
+        description: "Number of distinct file categories in subtree"
+      - name: loc_total
+        description: "Total lines (SCC)"
+      - name: loc_code
+        description: "Code lines excluding comments and blanks (SCC)"
+      - name: loc_comment
+        description: "Comment lines (SCC)"
+      - name: loc_blank
+        description: "Blank lines (SCC)"
+      - name: scc_complexity
+        description: "Total cyclomatic complexity (SCC)"
+      - name: minified_count
+        description: "Number of minified files in subtree"
+      - name: generated_count
+        description: "Number of generated files in subtree"
+      - name: lizard_nloc
+        description: "Total non-comment lines of code (Lizard)"
+      - name: lizard_function_count
+        description: "Total function count (Lizard)"
+      - name: lizard_total_ccn
+        description: "Total cyclomatic complexity number (Lizard)"
+      - name: lizard_avg_ccn
+        description: "Average CCN per function across subtree (Lizard)"
+      - name: lizard_max_ccn
+        description: "Maximum CCN of any function in subtree (Lizard)"
+      - name: symbol_count
+        description: "Total code symbols in subtree (symbol-scanner)"
+      - name: symbol_function_count
+        description: "Total function symbols (symbol-scanner)"
+      - name: symbol_class_count
+        description: "Total class symbols (symbol-scanner)"
+      - name: symbol_method_count
+        description: "Total method symbols (symbol-scanner)"
+      - name: symbol_exported_count
+        description: "Total exported symbols (symbol-scanner)"
+      - name: symbol_avg_parameters
+        description: "Average parameter count per function (symbol-scanner)"
+      - name: total_call_count
+        description: "Total function calls in subtree (symbol-scanner)"
+      - name: total_distinct_callees
+        description: "Distinct callee symbols (symbol-scanner)"
+      - name: total_distinct_callee_files
+        description: "Distinct callee files (symbol-scanner)"
+      - name: total_direct_call_count
+        description: "Direct function calls (symbol-scanner)"
+      - name: total_dynamic_call_count
+        description: "Dynamic function calls (symbol-scanner)"
+      - name: total_async_call_count
+        description: "Async function calls (symbol-scanner)"
+      - name: coupling_fan_out
+        description: "Number of distinct external files this subtree calls (symbol-scanner)"
+      - name: coupling_fan_in
+        description: "Number of distinct external files calling into this subtree (symbol-scanner)"
+      - name: coupling_outgoing_calls
+        description: "Total outgoing calls from subtree (symbol-scanner)"
+      - name: coupling_instability
+        description: "Instability metric: fan_out/(fan_in+fan_out), 0=stable, 1=unstable"
+      - name: total_import_count
+        description: "Total import statements in subtree (symbol-scanner)"
+      - name: total_unique_imports
+        description: "Distinct import targets in subtree (symbol-scanner)"
+      - name: coverage_lines_covered
+        description: "Lines covered by tests (coverage-ingest)"
+      - name: coverage_lines_total
+        description: "Total coverable lines (coverage-ingest)"
+      - name: coverage_lines_missed
+        description: "Lines not covered by tests (coverage-ingest)"
+      - name: coverage_line_pct
+        description: "Line coverage percentage (coverage-ingest)"
+      - name: dotcover_type_count
+        description: "Type count covered (dotcover)"
+      - name: dotcover_covered_statements
+        description: "Statements covered (dotcover)"
+      - name: dotcover_total_statements
+        description: "Total statements (dotcover)"
+      - name: dotcover_coverage_pct
+        description: "Statement coverage percentage (dotcover)"
+      - name: roslyn_violation_count
+        description: "Total Roslyn analyzer violations (roslyn-analyzers)"
+      - name: roslyn_severity_high_plus
+        description: "High+ severity Roslyn violations (roslyn-analyzers)"
+      - name: roslyn_cat_security
+        description: "Security category violations (roslyn-analyzers)"
+      - name: roslyn_cat_design
+        description: "Design category violations (roslyn-analyzers)"
+      - name: semgrep_smell_count
+        description: "Total code smell findings (semgrep)"
+      - name: semgrep_severity_high_plus
+        description: "High+ severity findings (semgrep)"
+      - name: devskim_issue_count
+        description: "Total security issues (devskim)"
+      - name: devskim_severity_high_plus
+        description: "High+ severity issues (devskim)"
+      - name: sonarqube_issue_count
+        description: "Total issues (sonarqube)"
+      - name: sonarqube_type_bug
+        description: "Bug-type issues (sonarqube)"
+      - name: sonarqube_type_vulnerability
+        description: "Vulnerability-type issues (sonarqube)"
+      - name: sonarqube_type_code_smell
+        description: "Code smell issues (sonarqube)"
+      - name: sonarqube_severity_high_plus
+        description: "High+ severity issues (sonarqube)"
+      - name: sonarqube_cognitive_complexity
+        description: "Total cognitive complexity (sonarqube)"
+      - name: sonarqube_duplicated_lines
+        description: "Total duplicated lines (sonarqube)"
+      - name: gitleaks_secret_count
+        description: "Total secrets detected (gitleaks)"
+      - name: gitleaks_severity_high_plus
+        description: "High+ severity secrets (gitleaks)"
+      - name: gitleaks_secrets_in_head
+        description: "Secrets present in HEAD (gitleaks)"
+      - name: gitleaks_secrets_in_history
+        description: "Secrets found in git history (gitleaks)"
+      - name: trivy_vulnerability_count
+        description: "Total vulnerabilities (trivy)"
+      - name: trivy_vuln_critical
+        description: "Critical vulnerabilities (trivy)"
+      - name: trivy_vuln_high
+        description: "High vulnerabilities (trivy)"
+      - name: trivy_iac_misconfig_count
+        description: "Total IaC misconfigurations (trivy)"
+      - name: trivy_total_finding_count
+        description: "Combined vulnerability + IaC findings (trivy)"
+      - name: trivy_severity_high_plus
+        description: "High+ severity findings (trivy)"
+      - name: scancode_license_count
+        description: "Total license detections (scancode)"
+      - name: scancode_cat_copyleft
+        description: "Copyleft license detections (scancode)"
+      - name: scancode_cat_permissive
+        description: "Permissive license detections (scancode)"
+      - name: pmd_cpd_duplicate_lines
+        description: "Total duplicate lines (pmd-cpd)"
+      - name: pmd_cpd_duplicate_blocks
+        description: "Total duplicate blocks (pmd-cpd)"
+      - name: pmd_cpd_avg_duplication_pct
+        description: "Average duplication percentage across files (pmd-cpd)"
+      - name: blame_avg_unique_authors
+        description: "Average unique authors per file (git-blame-scanner)"
+      - name: blame_max_unique_authors
+        description: "Maximum unique authors for any file (git-blame-scanner)"
+      - name: blame_avg_top_author_pct
+        description: "Average top-author ownership percentage (git-blame-scanner)"
+      - name: blame_single_author_files
+        description: "Files with a single author (git-blame-scanner)"
+      - name: blame_high_concentration_files
+        description: "Files where top author owns 80%+ (git-blame-scanner)"
+      - name: blame_knowledge_silo_count
+        description: "Single-author files with 100+ lines (git-blame-scanner)"
+      - name: blame_stale_file_count
+        description: "Files with zero churn in 90 days (git-blame-scanner)"
+      - name: blame_churn_30d
+        description: "Total line churn in last 30 days (git-blame-scanner)"
+      - name: blame_churn_90d
+        description: "Total line churn in last 90 days (git-blame-scanner)"
+      - name: sources
+        description: "Comma-separated list of tools contributing data to this row"
+        tests:
+          - not_null
