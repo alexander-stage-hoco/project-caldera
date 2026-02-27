@@ -185,7 +185,12 @@ setup-core: ## Set up project venv only (no tool venvs/binaries)
 	@if [ ! -f .venv/bin/activate ]; then python3 -m venv .venv; fi
 	@.venv/bin/pip install --upgrade pip -q
 	@.venv/bin/pip install -r requirements.txt -q
+	@.venv/bin/pip install -e . -q
 	@echo "==> Core setup complete"
+
+cli-install: ## Install caldera CLI in editable mode
+	@.venv/bin/pip install -e . -q
+	@echo "caldera CLI installed. Run: caldera --help"
 
 analyze:
 	@test -n "$(REPO)" || (echo "Usage: make analyze REPO=/path/to/repo"; echo "       make analyze REPO=https://github.com/user/project"; exit 1)
