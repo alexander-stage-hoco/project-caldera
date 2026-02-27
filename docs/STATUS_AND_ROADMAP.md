@@ -1,6 +1,6 @@
 # Project Caldera — Status & Forward Roadmap
 
-## Current State: v0.12.0-dev (2026-02-26)
+## Current State: v0.13.0-dev (2026-02-27)
 
 Core platform is production-ready. All 18 tools pass compliance, all 3 production modes work (LOCAL, BUNDLE, DOCKERIZED), CI/CD has 5 gates, cloud runs on Hetzner, and the dbt warehouse has 168 models + 2 snapshots + 25 analyses.
 
@@ -24,6 +24,8 @@ Core platform is production-ready. All 18 tools pass compliance, all 3 productio
 - `unified_directory_metrics` mart for cross-tool directory analysis
 - dbt snapshots for trend analysis (unified_run_summary, unified_repo_metrics)
 - Run-over-run comparison and file-level regression detection analyses
+- Stakeholder report profiles (CTO, Investor, CEO) with tailored section selections
+- Unified `caldera` CLI with 10 subcommand groups (analyze, report, db, compliance, tools, dbt, export, cloud, docker, status)
 
 ### Gap Analysis
 
@@ -32,8 +34,8 @@ All 6 product spec deliverables now have implementations. Remaining gaps are pla
 | Gap | Status | Notes |
 |-----|--------|-------|
 | PDF report generation | Not started | Formal deliverable format for stakeholders |
-| Stakeholder report variants | Not started | CTO/Investor/CEO tailored section selections per product spec Appendix A |
-| Unified CLI | Not started | 20+ scripts with no single entry point |
+| Stakeholder report variants | **Done** | Profiles implemented (`caldera report list-profiles`), CTO/Investor/CEO |
+| Unified CLI | **Done** | `caldera` entry point with 10 subcommand groups, 65 tests |
 | Execution abstraction | Deferred | Only LocalBackend; DOCKER/VM handled externally |
 | Multi-platform Docker | Not started | amd64 only, no arm64 |
 | Incremental pipeline | Not started | No skip-unchanged-tools capability |
@@ -46,18 +48,14 @@ All 6 product spec deliverables now have implementations. Remaining gaps are pla
 
 **Goal:** Deliver tailored reports for different audiences.
 
-- Stakeholder report variants (CTO, Investor, CEO per product spec Appendix A)
+- ~~Stakeholder report variants (CTO, Investor, CEO per product spec Appendix A)~~ **Done**
 - PDF generation for formal deliverables
-- Update product spec gap analysis table to reflect 100% coverage
 
 ### Mid-term: v0.14–v1.0 — Platform Polish
 
 **Goal:** Improve developer experience and operational maturity.
 
-- Unified `caldera` CLI:
-  - Single entry point with subcommands (analyze, report, collect, export, cloud, compliance)
-  - Replace 20+ standalone scripts
-  - Consistent error handling, logging, and progress feedback
+- ~~Unified `caldera` CLI~~ **Done** (10 subcommand groups, 65 tests)
 - Multi-platform Docker:
   - arm64 support for M-series Macs
   - `platforms: [linux/amd64, linux/arm64]` in docker-images.yml
