@@ -144,6 +144,28 @@ class TestRiskAggregator:
         assert len(debt_risks) == 1
         assert debt_risks[0].severity == "medium"
 
+    def test_untested_complexity_does_not_fire_with_coverage_only(self):
+        """Two coverage-only claims must NOT trigger untested-complexity."""
+        agg = RiskAggregator()
+        claims = [
+            _claim("CLM-COVG-001", "coverage"),
+            _claim("CLM-COVG-002", "coverage"),
+        ]
+        risks = agg.aggregate(claims)
+        complexity_risks = [r for r in risks if "test coverage" in r.description.lower()]
+        assert len(complexity_risks) == 0
+
+    def test_untested_complexity_does_not_fire_with_complexity_only(self):
+        """Two complexity-only claims must NOT trigger untested-complexity."""
+        agg = RiskAggregator()
+        claims = [
+            _claim("CLM-CONC-001", "complexity"),
+            _claim("CLM-CONC-002", "complexity"),
+        ]
+        risks = agg.aggregate(claims)
+        complexity_risks = [r for r in risks if "test coverage" in r.description.lower()]
+        assert len(complexity_risks) == 0
+
     def test_systemic_debt_does_not_fire_with_two(self):
         """Systemic debt requires min 3 — 2 claims should NOT trigger."""
         agg = RiskAggregator()

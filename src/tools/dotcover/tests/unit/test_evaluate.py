@@ -435,8 +435,14 @@ class TestSaveScorecards:
 class TestEvaluateMain:
     """Test the main() CLI entry point."""
 
-    def test_main_with_valid_output(self, tmp_path: Path):
+    def test_main_with_valid_output(self, tmp_path: Path, monkeypatch):
+        import scripts.evaluate as evaluate_mod
         from scripts.evaluate import main
+
+        # Redirect scorecard output to tmp_path
+        eval_dir = tmp_path / "evaluation"
+        eval_dir.mkdir()
+        monkeypatch.setattr(evaluate_mod, "SCORECARD_DIR", eval_dir)
 
         # Create results dir with output.json
         results_dir = tmp_path / "results"
@@ -460,10 +466,6 @@ class TestEvaluateMain:
         # Create output path
         eval_output = tmp_path / "eval" / "results.json"
 
-        # Create evaluation dir for scorecards
-        eval_dir = Path(__file__).parent.parent.parent / "evaluation"
-        eval_dir.mkdir(parents=True, exist_ok=True)
-
         with patch("sys.argv", [
             "evaluate.py",
             "--results-dir", str(results_dir),
@@ -478,8 +480,14 @@ class TestEvaluateMain:
         assert "score" in report
         assert "checks" in report
 
-    def test_main_finds_output_in_subdirectory(self, tmp_path: Path):
+    def test_main_finds_output_in_subdirectory(self, tmp_path: Path, monkeypatch):
+        import scripts.evaluate as evaluate_mod
         from scripts.evaluate import main
+
+        # Redirect scorecard output to tmp_path
+        eval_dir = tmp_path / "evaluation"
+        eval_dir.mkdir()
+        monkeypatch.setattr(evaluate_mod, "SCORECARD_DIR", eval_dir)
 
         results_dir = tmp_path / "results"
         sub = results_dir / "run-abc"
@@ -496,9 +504,6 @@ class TestEvaluateMain:
         gt_dir.mkdir()
         eval_output = tmp_path / "eval.json"
 
-        eval_dir = Path(__file__).parent.parent.parent / "evaluation"
-        eval_dir.mkdir(parents=True, exist_ok=True)
-
         with patch("sys.argv", [
             "evaluate.py",
             "--results-dir", str(results_dir),
@@ -509,8 +514,14 @@ class TestEvaluateMain:
 
         assert eval_output.exists()
 
-    def test_main_loads_ground_truth_when_present(self, tmp_path: Path):
+    def test_main_loads_ground_truth_when_present(self, tmp_path: Path, monkeypatch):
+        import scripts.evaluate as evaluate_mod
         from scripts.evaluate import main
+
+        # Redirect scorecard output to tmp_path
+        eval_dir = tmp_path / "evaluation"
+        eval_dir.mkdir()
+        monkeypatch.setattr(evaluate_mod, "SCORECARD_DIR", eval_dir)
 
         results_dir = tmp_path / "results"
         results_dir.mkdir()
@@ -534,9 +545,6 @@ class TestEvaluateMain:
         (gt_dir / "synthetic.json").write_text(json.dumps(gt_data))
 
         eval_output = tmp_path / "eval.json"
-
-        eval_dir = Path(__file__).parent.parent.parent / "evaluation"
-        eval_dir.mkdir(parents=True, exist_ok=True)
 
         with patch("sys.argv", [
             "evaluate.py",
