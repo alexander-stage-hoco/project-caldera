@@ -558,6 +558,7 @@ cloud-run:
 		--results "$(CLOUD_RESULTS)" \
 		$(if $(SKIP_TOOLS),--skip "$(SKIP_TOOLS)",) \
 		$(if $(filter 1,$(PIPELINE_LLM)),--llm,) \
+		$(if $(CLONE_DEPTH),--clone-depth "$(CLONE_DEPTH)",) \
 		$(if $(KEEP_SERVER),--keep-server,)
 
 cloud-status:  ## Check status of cloud servers

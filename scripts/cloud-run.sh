@@ -4,7 +4,7 @@
 #
 # Usage:
 #   ./scripts/cloud-run.sh https://github.com/org/repo
-#   ./scripts/cloud-run.sh https://github.com/org/repo --server cx42 --skip sonarqube
+#   ./scripts/cloud-run.sh https://github.com/org/repo --server cx42 --skip sonarqube --clone-depth 1
 #
 # Prerequisites:
 #   1. terraform installed (brew install terraform)
@@ -39,6 +39,7 @@ SERVER_TYPE="cx33"
 SKIP_TOOLS=""
 PIPELINE_LLM=0
 MAX_PARALLEL=4
+CLONE_DEPTH="${CLONE_DEPTH:-}"
 RESULTS_DIR="${INFRA_DIR}/results"
 DESTROY_AFTER=1
 
@@ -55,6 +56,7 @@ usage() {
     echo "  --skip <tools>          Comma-separated tools to skip"
     echo "  --llm                   Enable LLM evaluation (needs ANTHROPIC_API_KEY in tfvars)"
     echo "  --parallel <n>          Max parallel tools (default: 4)"
+    echo "  --clone-depth <n>       Shallow clone depth (default: full clone)"
     echo "  --results <dir>         Local results directory (default: infra/results)"
     echo "  --keep-server           Don't destroy the server after (for debugging)"
     echo "  -h, --help              Show this help"
@@ -67,6 +69,7 @@ while [[ $# -gt 0 ]]; do
         --skip)      SKIP_TOOLS="$2"; shift 2 ;;
         --llm)       PIPELINE_LLM=1; shift ;;
         --parallel)  MAX_PARALLEL="$2"; shift 2 ;;
+        --clone-depth) CLONE_DEPTH="$2"; shift 2 ;;
         --results)   RESULTS_DIR="$2"; shift 2 ;;
         --keep-server) DESTROY_AFTER=0; shift ;;
         -h|--help)   usage ;;
@@ -180,7 +183,7 @@ cd "${INFRA_DIR}"
 
 cleanup() {
     local exit_code=$?
-    if [ "${DESTROY_AFTER}" -eq 1 ] && [ -f "${INFRA_DIR}/.terraform/terraform.tfstate" ]; then
+    if [ "${DESTROY_AFTER}" -eq 1 ] && [ -f "${INFRA_DIR}/terraform.tfstate" ]; then
         echo ""
         echo ">>> Cleaning up — destroying server..."
         terraform destroy \
@@ -190,6 +193,7 @@ cleanup() {
             -var="skip_tools=${SKIP_TOOLS}" \
             -var="pipeline_llm=${PIPELINE_LLM}" \
             -var="max_parallel=${MAX_PARALLEL}" \
+            -var="clone_depth=${CLONE_DEPTH}" \
             -var="results_dir=${RESULTS_DIR}" \
             -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}" \
             2>&1 | grep -E "^(Destroy|hcloud_)" || true
@@ -230,6 +234,7 @@ for attempt in $(seq 1 $MAX_RETRIES); do
         -var="skip_tools=${SKIP_TOOLS}" \
         -var="pipeline_llm=${PIPELINE_LLM}" \
         -var="max_parallel=${MAX_PARALLEL}" \
+        -var="clone_depth=${CLONE_DEPTH}" \
         -var="results_dir=${RESULTS_DIR}" \
         -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}"; then
         break

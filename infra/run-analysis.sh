@@ -19,6 +19,7 @@ SKIP_TOOLS="${SKIP_TOOLS:-}"
 PIPELINE_LLM="${PIPELINE_LLM:-0}"
 MAX_PARALLEL="${MAX_PARALLEL:-4}"
 SERVER_TYPE="${SERVER_TYPE:-unknown}"
+CLONE_DEPTH="${CLONE_DEPTH:-}"
 
 # When LLM evaluation is enabled, configure the Anthropic SDK provider
 # (Claude Code CLI is not available on the VM)
@@ -99,9 +100,14 @@ if ! echo "${REPO_URL}" | grep -qE '^(https?://|git@)'; then
 fi
 
 CLONE_OK=0
+CLONE_DEPTH_ARGS=""
+if [ -n "${CLONE_DEPTH}" ]; then
+    CLONE_DEPTH_ARGS="--depth=${CLONE_DEPTH}"
+    echo "  Using shallow clone (depth=${CLONE_DEPTH})"
+fi
 for clone_attempt in 1 2 3; do
     echo "  Clone attempt ${clone_attempt} of 3..."
-    if git clone "${REPO_URL}" "${CLONE_DIR}"; then
+    if git clone ${CLONE_DEPTH_ARGS} "${REPO_URL}" "${CLONE_DIR}"; then
         CLONE_OK=1
         break
     fi

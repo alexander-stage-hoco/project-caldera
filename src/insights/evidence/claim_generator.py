@@ -60,11 +60,14 @@ class ComplexityConcentrationRule(ClaimRule):
             gini = row.get("gini_ccn", 0)
 
             # Link evidence items whose location is within this directory
-            linked = [
-                e.evidence_id
-                for e in complexity_evidence
-                if e.location.startswith(dir_path + "/") or e.location == dir_path
-            ]
+            if dir_path in (".", ""):
+                linked = [e.evidence_id for e in complexity_evidence]
+            else:
+                linked = [
+                    e.evidence_id
+                    for e in complexity_evidence
+                    if e.location.startswith(dir_path + "/") or e.location == dir_path
+                ]
 
             if not linked:
                 # Synthetic fallback: use first 3 complexity evidence items

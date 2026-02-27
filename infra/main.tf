@@ -99,6 +99,12 @@ variable "max_parallel" {
   default     = 4
 }
 
+variable "clone_depth" {
+  description = "Shallow clone depth for the target repository (empty = full clone)"
+  type        = string
+  default     = ""
+}
+
 variable "results_dir" {
   description = "Local directory to download results into"
   type        = string
@@ -214,8 +220,7 @@ resource "null_resource" "run_analysis" {
     inline = [
       "chmod +x /opt/caldera/run-analysis.sh",
       "chmod 600 /opt/caldera/.env.secrets",
-      "set -a && . /opt/caldera/.env.secrets && set +a && REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' /opt/caldera/run-analysis.sh",
-      "rm -f /opt/caldera/.env.secrets",
+      "trap 'rm -f /opt/caldera/.env.secrets' EXIT && set -a && . /opt/caldera/.env.secrets && set +a && REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' CLONE_DEPTH='${var.clone_depth}' /opt/caldera/run-analysis.sh",
     ]
   }
 
