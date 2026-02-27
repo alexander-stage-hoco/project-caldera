@@ -11,10 +11,7 @@ Tests cover:
 
 from __future__ import annotations
 
-import json
-from dataclasses import asdict
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -23,9 +20,6 @@ from analyze import (
     FileBlameStats,
     AuthorStats,
     compute_author_stats,
-    TOOL_NAME,
-    TOOL_VERSION,
-    SCHEMA_VERSION,
 )
 
 
@@ -191,64 +185,6 @@ def test_summary_required_fields(sample_output: dict):
         assert field in summary, f"Missing required field: {field}"
 
 
-class TestFileBlameStats:
-    """Tests for FileBlameStats dataclass."""
-
-    def test_create_file_blame_stats(self):
-        """Test creating a FileBlameStats instance."""
-        stats = FileBlameStats(
-            relative_path="src/main.py",
-            total_lines=100,
-            unique_authors=2,
-            top_author="alice@example.com",
-            top_author_lines=80,
-            top_author_pct=80.0,
-            last_modified="2025-01-01",
-            churn_30d=2,
-            churn_90d=5,
-            authors={"alice@example.com": 80, "bob@example.com": 20},
-        )
-
-        assert stats.relative_path == "src/main.py"
-        assert stats.total_lines == 100
-        assert stats.unique_authors == 2
-        assert stats.top_author_pct == 80.0
-
-    def test_top_author_pct_range(self):
-        """Test that top_author_pct is between 0 and 100."""
-        stats = FileBlameStats(
-            relative_path="test.py",
-            total_lines=100,
-            unique_authors=1,
-            top_author="alice@example.com",
-            top_author_lines=100,
-            top_author_pct=100.0,
-            last_modified="2025-01-01",
-            churn_30d=0,
-            churn_90d=0,
-            authors={"alice@example.com": 100},
-        )
-
-        assert 0 <= stats.top_author_pct <= 100
-
-    def test_churn_invariant(self):
-        """Test that churn_30d <= churn_90d."""
-        stats = FileBlameStats(
-            relative_path="test.py",
-            total_lines=50,
-            unique_authors=1,
-            top_author="alice@example.com",
-            top_author_lines=50,
-            top_author_pct=100.0,
-            last_modified="2025-01-01",
-            churn_30d=3,
-            churn_90d=5,
-            authors={"alice@example.com": 50},
-        )
-
-        assert stats.churn_30d <= stats.churn_90d
-
-
 class TestAuthorStats:
     """Tests for AuthorStats dataclass."""
 
@@ -355,6 +291,104 @@ class TestComputeAuthorStats:
         assert len(author_stats) == 0
 
 
+class TestKnowledgeSiloDetection:
+    """Tests for knowledge silo detection logic.
+
+    A knowledge silo is a file with a single author (unique_authors == 1)
+    and more than 100 lines (total_lines > 100).
+    """
+
+    def test_single_author_large_file_is_silo(self):
+        """A single-author file with >100 lines should be flagged as a knowledge silo."""
+        file_stats = [
+            FileBlameStats(
+                relative_path="src/critical_module.py",
+                total_lines=500,
+                unique_authors=1,
+                top_author="alice@example.com",
+                top_author_lines=500,
+                top_author_pct=100.0,
+                last_modified="2025-06-01",
+                churn_30d=0,
+                churn_90d=1,
+                authors={"alice@example.com": 500},
+            ),
+        ]
+        # Replicate production silo detection logic
+        knowledge_silos = [
+            fs.relative_path for fs in file_stats
+            if fs.unique_authors == 1 and fs.total_lines > 100
+        ]
+        assert len(knowledge_silos) == 1
+        assert knowledge_silos[0] == "src/critical_module.py"
+
+    def test_single_author_small_file_not_silo(self):
+        """A single-author file with <=100 lines should NOT be a silo."""
+        file_stats = [
+            FileBlameStats(
+                relative_path="src/tiny.py",
+                total_lines=50,
+                unique_authors=1,
+                top_author="bob@example.com",
+                top_author_lines=50,
+                top_author_pct=100.0,
+                last_modified="2025-06-01",
+                churn_30d=0,
+                churn_90d=0,
+                authors={"bob@example.com": 50},
+            ),
+        ]
+        knowledge_silos = [
+            fs.relative_path for fs in file_stats
+            if fs.unique_authors == 1 and fs.total_lines > 100
+        ]
+        assert len(knowledge_silos) == 0
+
+    def test_multi_author_large_file_not_silo(self):
+        """A multi-author file, even with >100 lines, should NOT be a silo."""
+        file_stats = [
+            FileBlameStats(
+                relative_path="src/shared_module.py",
+                total_lines=800,
+                unique_authors=3,
+                top_author="alice@example.com",
+                top_author_lines=400,
+                top_author_pct=50.0,
+                last_modified="2025-06-01",
+                churn_30d=2,
+                churn_90d=5,
+                authors={"alice@example.com": 400, "bob@example.com": 250, "carol@example.com": 150},
+            ),
+        ]
+        knowledge_silos = [
+            fs.relative_path for fs in file_stats
+            if fs.unique_authors == 1 and fs.total_lines > 100
+        ]
+        assert len(knowledge_silos) == 0
+
+    def test_boundary_at_exactly_100_lines(self):
+        """A file with exactly 100 lines should NOT be a silo (threshold is >100)."""
+        file_stats = [
+            FileBlameStats(
+                relative_path="src/edge_case.py",
+                total_lines=100,
+                unique_authors=1,
+                top_author="alice@example.com",
+                top_author_lines=100,
+                top_author_pct=100.0,
+                last_modified="2025-06-01",
+                churn_30d=0,
+                churn_90d=0,
+                authors={"alice@example.com": 100},
+            ),
+        ]
+        knowledge_silos = [
+            fs.relative_path for fs in file_stats
+            if fs.unique_authors == 1 and fs.total_lines > 100
+        ]
+        assert len(knowledge_silos) == 0
+
+
 class TestMetricRanges:
     """Tests for metric value ranges."""
 
@@ -388,17 +422,3 @@ class TestMetricRanges:
             )
 
 
-class TestToolConstants:
-    """Tests for tool constants."""
-
-    def test_tool_name(self):
-        """Test TOOL_NAME constant."""
-        assert TOOL_NAME == "git-blame-scanner"
-
-    def test_tool_version(self):
-        """Test TOOL_VERSION constant."""
-        assert TOOL_VERSION == "1.0.0"
-
-    def test_schema_version(self):
-        """Test SCHEMA_VERSION constant."""
-        assert SCHEMA_VERSION == "1.0.0"

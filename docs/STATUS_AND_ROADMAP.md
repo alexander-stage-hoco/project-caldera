@@ -1,8 +1,8 @@
 # Project Caldera — Status & Forward Roadmap
 
-## Current State: v0.12.0-dev (2026-02-26)
+## Current State: v0.13.0-dev (2026-02-27)
 
-Core platform is production-ready. All 18 tools pass compliance, all 3 production modes work (LOCAL, BUNDLE, DOCKERIZED), CI/CD has 5 gates, cloud runs on Hetzner, and the dbt warehouse has 170+ models.
+Core platform is production-ready. All 18 tools pass compliance, all 3 production modes work (LOCAL, BUNDLE, DOCKERIZED), CI/CD has 5 gates, cloud runs on Hetzner, and the dbt warehouse has 168 models + 2 snapshots + 25 analyses.
 
 ### What's Complete
 
@@ -11,94 +11,62 @@ Core platform is production-ready. All 18 tools pass compliance, all 3 productio
 - 3 production modes (LOCAL, BUNDLE, DOCKERIZED)
 - CI/CD gates (0, A, B, C, E) with branch promotion (develop → release → main)
 - Cloud infrastructure (Hetzner Terraform)
-- Insights component with 20+ report sections
+- Insights component with 42 report sections covering all 6 product spec deliverables
+- 95 SQL insight queries with 84 Jinja2 templates (HTML + Markdown)
+- Evidence & Claim framework (entities, builder, collector, risk aggregator, claim generator)
+- Sampling rationale with composite risk scoring
+- Rewrite risk assessment (structural vs addressable constraint detection)
 - Artifact bundle workflow + results export
 - LLM evaluation infrastructure (BaseJudge, observability)
 - GitHub IaC for branch protection and environments
 - All 18 tools have full dbt staging → mart → rollup models
+- 168 dbt models (51 staging + 117 marts) + 2 snapshots + 25 analyses
 - `unified_directory_metrics` mart for cross-tool directory analysis
 - dbt snapshots for trend analysis (unified_run_summary, unified_repo_metrics)
 - Run-over-run comparison and file-level regression detection analyses
+- Stakeholder report profiles (CTO, Investor, CEO) with tailored section selections
+- Unified `caldera` CLI with 10 subcommand groups (analyze, report, db, compliance, tools, dbt, export, cloud, docker, status)
+- Cloud operational improvements: cost tracking in manifests, orphan VM cleanup, server presets
 
 ### Gap Analysis
 
-#### 1. Insights Deliverable Coverage (biggest gap)
+All 6 product spec deliverables now have implementations. Remaining gaps are platform-level:
 
-Per `docs/INSIGHTS_PRODUCT_SPEC.md`, deliverable coverage is partial:
-
-| Deliverable | Coverage | Missing |
-|-------------|----------|---------|
-| Code Quality Report | ~60% | Sampling rationale, pattern narrative |
-| Technical Evidence Pack | ~40% | Evidence IDs, location references |
-| Risk Register | ~40% | "Triggered by" reasoning |
-| Component Inventory | ~30% | Responsibilities, interactions |
-| Rewrite Risk Memo | ~20% | Structural vs addressable assessment |
-| Claim Register | 0% | Entire capability |
-
-Missing capabilities: evidence-claim linking, component boundary detection, sampling rationale, code ownership integration.
-
-#### 2. Execution Abstraction Incomplete
-
-- Only `LocalBackend` implemented in `src/sot-engine/execution.py`
-- DOCKER/VM deferred by design (bundle-first architecture handles it externally via `docker_runner.py` and `cloud-run.sh`)
-
-#### 3. No Unified CLI
-
-- 20+ scripts scattered across `scripts/` with no single entry point
-- Inconsistent error handling and logging across scripts
-
-#### 4. Docker Gaps
-
-- No multi-platform builds (amd64 only, no arm64 for M-series Macs)
-- No HEALTHCHECK directives in tool Dockerfiles
-- No image size tracking or optimization targets
+| Gap | Status | Notes |
+|-----|--------|-------|
+| PDF report generation | Not started | Formal deliverable format for stakeholders |
+| Stakeholder report variants | **Done** | Profiles implemented (`caldera report list-profiles`), CTO/Investor/CEO |
+| Unified CLI | **Done** | `caldera` entry point with 10 subcommand groups, 65 tests |
+| Execution abstraction | Deferred | Only LocalBackend; DOCKER/VM handled externally |
+| Multi-platform Docker | Not started | amd64 only, no arm64 |
+| Incremental pipeline | Not started | No skip-unchanged-tools capability |
 
 ---
 
 ## Forward Roadmap
 
-### Mid-term: v0.13 – v1.0 — Insights Maturity
+### Near-term: v0.13 — Stakeholder Reports
 
-**Goal:** Close the deliverable gaps in the insights product spec.
+**Goal:** Deliver tailored reports for different audiences.
 
-- Evidence-claim linking:
-  - Structured claim register with traceable evidence IDs
-  - Each insight maps to specific tool findings with file:line references
-- Component boundary detection:
-  - Leverage symbol-scanner call graphs for coupling/cohesion analysis
-  - Identify logical components beyond directory structure
-- Code ownership integration:
-  - Wire git-blame-scanner data into risk scoring
-  - Bus factor per component, knowledge silo detection
-  - New report sections: authorship concentration, knowledge risk heatmap
-- Sampling rationale:
-  - Risk-driven analysis focus instead of equal treatment of all files
-  - Prioritize files with high complexity + low coverage + recent churn
-- Report format expansion:
-  - Markdown output for CI integration
-  - PDF generation for formal deliverables
+- ~~Stakeholder report variants (CTO, Investor, CEO per product spec Appendix A)~~ **Done**
+- PDF generation for formal deliverables
 
-### Longer-term: v1.x — Platform Polish
+### Mid-term: v0.14–v1.0 — Platform Polish
 
 **Goal:** Improve developer experience and operational maturity.
 
-- Unified `caldera` CLI:
-  - Single entry point with subcommands (analyze, report, collect, export, cloud, compliance)
-  - Replace 20+ standalone scripts
-  - Consistent error handling, logging, and progress feedback
+- ~~Unified `caldera` CLI~~ **Done** (10 subcommand groups, 65 tests)
 - Multi-platform Docker:
   - arm64 support for M-series Macs
   - `platforms: [linux/amd64, linux/arm64]` in docker-images.yml
 - Incremental pipeline:
   - Skip unchanged tools on re-analysis of same repo
   - Content-hash-based cache invalidation
-- Cloud operational improvements:
-  - Embed Hetzner API cost per run in manifests
-  - Scheduled job to destroy orphaned VMs (TTL labels)
-  - Expose server type presets (cx22 for CI, cx42 for heavy workloads)
-- Execution abstraction completion:
-  - Evaluate whether DOCKER/VM backends in execution.py add value vs current external scripts
-  - If so, implement; if not, document the decision and remove placeholders
+- ~~Cloud operational improvements~~ **Done**:
+  - ~~Embed Hetzner API cost per run in manifests~~ (cost fields in cloud manifest section)
+  - ~~Scheduled job to destroy orphaned VMs (TTL labels)~~ (`make cloud-cleanup` + `created_at` labels)
+  - ~~Expose server type presets (small/medium/large/xlarge)~~ (`infra/server_presets.json`)
 
 ---
 

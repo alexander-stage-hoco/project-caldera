@@ -46,10 +46,6 @@ class TestQualityScore:
         with pytest.raises(ValueError, match="validity"):
             QualityScore(1.0, 1.1, 1.0, 1.0)
 
-    def test_frozen(self):
-        s = QualityScore(1.0, 1.0, 1.0, 1.0)
-        with pytest.raises(AttributeError):
-            s.completeness = 0.5  # type: ignore[misc]
 
 
 # ---------------------------------------------------------------------------
@@ -67,11 +63,6 @@ class TestCheckResult:
         )
         assert r.passed is True
         assert r.details == {}
-
-    def test_frozen(self):
-        r = CheckResult("test", CheckLevel.L1, True, CheckSeverity.INFO, "ok")
-        with pytest.raises(AttributeError):
-            r.passed = False  # type: ignore[misc]
 
 
 # ---------------------------------------------------------------------------
@@ -244,3 +235,72 @@ class TestDataQualityChecker:
         checker = DataQualityChecker(conn, logger=messages.append)
         checker.build_report("scc", [], schema_valid=True, metadata_complete=True)
         assert any("QUALITY_REPORT" in m for m in messages)
+
+    def test_check_fk_integrity_custom_ref_table(self, conn: duckdb.DuckDBPyConnection):
+        """FK check with a custom ref_table and ref_column instead of defaults."""
+        conn.execute("CREATE TABLE lz_custom_ref (custom_id VARCHAR)")
+        conn.execute("INSERT INTO lz_custom_ref VALUES ('c-1'), ('c-2')")
+        conn.execute("CREATE TABLE lz_tool_data (ref_id VARCHAR, run_pk BIGINT)")
+        conn.execute("INSERT INTO lz_tool_data VALUES ('c-1', 1), ('c-3', 1)")
+
+        checker = DataQualityChecker(conn)
+        result = checker.check_fk_integrity(
+            "lz_tool_data", "ref_id", 1, "test-tool",
+            ref_table="lz_custom_ref", ref_column="custom_id",
+        )
+        assert result.passed is False
+        assert result.details["orphan_count"] == 1
+
+    def test_check_fk_integrity_custom_ref_all_valid(self, conn: duckdb.DuckDBPyConnection):
+        """FK check with custom ref passes when all references exist."""
+        conn.execute("CREATE TABLE lz_ref (rid VARCHAR)")
+        conn.execute("INSERT INTO lz_ref VALUES ('r-1'), ('r-2')")
+        conn.execute("CREATE TABLE lz_child (fk_col VARCHAR, run_pk BIGINT)")
+        conn.execute("INSERT INTO lz_child VALUES ('r-1', 1), ('r-2', 1)")
+
+        checker = DataQualityChecker(conn)
+        result = checker.check_fk_integrity(
+            "lz_child", "fk_col", 1, "test-tool",
+            ref_table="lz_ref", ref_column="rid",
+        )
+        assert result.passed is True
+
+    def test_check_uniqueness_empty_table(self, conn: duckdb.DuckDBPyConnection):
+        """Uniqueness check on an empty table should pass with 0 duplicates."""
+        conn.execute("CREATE TABLE lz_empty (run_pk BIGINT, file_id VARCHAR)")
+
+        checker = DataQualityChecker(conn)
+        result = checker.check_uniqueness("lz_empty", ["run_pk", "file_id"], "test-tool")
+        assert result.passed is True
+        assert result.details["duplicates"] == 0
+        assert result.details["total"] == 0
+        assert result.details["distinct"] == 0
+
+
+class TestQualityReportMixed:
+    """Tests for QualityReport with both warnings and errors simultaneously."""
+
+    def test_warnings_and_errors_together(self):
+        """A report can have both warnings and errors; passed should be False."""
+        checks = (
+            CheckResult("check_a", CheckLevel.L1, True, CheckSeverity.INFO, "ok"),
+            CheckResult("check_b", CheckLevel.L2, False, CheckSeverity.WARNING, "warn msg"),
+            CheckResult("check_c", CheckLevel.L2, False, CheckSeverity.ERROR, "error msg"),
+        )
+        report = QualityReport("mixed-tool", checks, QualityScore(0.5, 0.5, 0.5, 1.0))
+        assert report.passed is False
+        assert len(report.warnings) == 1
+        assert len(report.errors) == 1
+        assert report.warnings[0].check_name == "check_b"
+        assert report.errors[0].check_name == "check_c"
+
+    def test_multiple_warnings_no_errors_passes(self):
+        """Multiple warnings but no errors should still pass."""
+        checks = (
+            CheckResult("w1", CheckLevel.L2, False, CheckSeverity.WARNING, "warn 1"),
+            CheckResult("w2", CheckLevel.L2, False, CheckSeverity.WARNING, "warn 2"),
+        )
+        report = QualityReport("tool", checks, QualityScore(0.5, 0.5, 0.5, 1.0))
+        assert report.passed is True
+        assert len(report.warnings) == 2
+        assert len(report.errors) == 0

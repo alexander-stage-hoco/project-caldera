@@ -7,6 +7,8 @@ from typing import Any
 import duckdb
 import re
 
+_SQL_IDENT_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
+
 
 class DataFetcher:
     """Executes SQL queries against DuckDB with Caldera dbt marts."""
@@ -94,12 +96,18 @@ class DataFetcher:
 
         return [dict(zip(columns, row)) for row in rows]
 
-    def fetch_raw(self, sql: str, **params) -> list[dict[str, Any]]:
+    def fetch_raw(
+        self,
+        sql: str,
+        bind_params: list[Any] | None = None,
+        **params,
+    ) -> list[dict[str, Any]]:
         """
         Execute a raw SQL query and return results as dicts.
 
         Args:
             sql: The SQL query string.
+            bind_params: Optional list of bind parameters for ``?`` placeholders.
             **params: Parameters for the query template.
 
         Returns:
@@ -108,7 +116,10 @@ class DataFetcher:
         rendered_sql = self._render_template(sql, **params)
 
         with self._get_connection() as conn:
-            result = conn.execute(rendered_sql)
+            if bind_params:
+                result = conn.execute(rendered_sql, bind_params)
+            else:
+                result = conn.execute(rendered_sql)
             columns = [desc[0] for desc in result.description]
             rows = result.fetchall()
 
@@ -135,30 +146,42 @@ class DataFetcher:
         Returns:
             List of dictionaries with query results.
         """
+        if not _SQL_IDENT_RE.match(mart_name):
+            raise ValueError(f"Invalid mart name: {mart_name!r}")
+
+        params: list[Any] = [run_pk]
         sql_parts = [f"SELECT * FROM {mart_name}"]
-        conditions = [f"run_pk = {run_pk}"]
+        conditions = ["run_pk = ?"]
 
         if filters:
             for col, val in filters.items():
-                if isinstance(val, str):
-                    conditions.append(f"{col} = '{val}'")
-                elif val is None:
+                if not _SQL_IDENT_RE.match(col):
+                    raise ValueError(f"Invalid column name: {col!r}")
+                if val is None:
                     conditions.append(f"{col} IS NULL")
                 else:
-                    conditions.append(f"{col} = {val}")
+                    conditions.append(f"{col} = ?")
+                    params.append(val)
 
         sql_parts.append("WHERE " + " AND ".join(conditions))
 
         if order_by:
+            for token in re.split(r",\s*", order_by):
+                parts = token.strip().split()
+                if not _SQL_IDENT_RE.match(parts[0]):
+                    raise ValueError(f"Invalid order_by: {order_by!r}")
+                if len(parts) > 1 and parts[1].upper() not in ("ASC", "DESC"):
+                    raise ValueError(f"Invalid order_by: {order_by!r}")
             sql_parts.append(f"ORDER BY {order_by}")
 
         if limit:
-            sql_parts.append(f"LIMIT {limit}")
+            sql_parts.append("LIMIT ?")
+            params.append(limit)
 
         sql = " ".join(sql_parts)
 
         with self._get_connection() as conn:
-            result = conn.execute(sql)
+            result = conn.execute(sql, params)
             columns = [desc[0] for desc in result.description]
             rows = result.fetchall()
 
@@ -166,13 +189,9 @@ class DataFetcher:
 
     def table_exists(self, table_name: str) -> bool:
         """Check if a table exists in the database."""
-        sql = f"""
-        SELECT COUNT(*) as cnt
-        FROM information_schema.tables
-        WHERE table_name = '{table_name}'
-        """
+        sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = ?"
         with self._get_connection() as conn:
-            result = conn.execute(sql).fetchone()
+            result = conn.execute(sql, [table_name]).fetchone()
             return result[0] > 0 if result else False
 
     def get_run_info(self, run_pk: int) -> dict[str, Any]:
@@ -231,11 +250,11 @@ class DataFetcher:
         sql = """
         SELECT run_pk
         FROM stg_lz_tool_runs
-        WHERE collection_run_id = '{{ collection_run_id }}'
+        WHERE collection_run_id = ?
           AND tool_name = 'scc'
         LIMIT 1
         """
-        results = self.fetch_raw(sql, collection_run_id=collection_run_id)
+        results = self.fetch_raw(sql, bind_params=[collection_run_id])
         if results:
             return results[0]["run_pk"]
 
@@ -254,7 +273,7 @@ class DataFetcher:
         Returns:
             List of collection run info dictionaries.
         """
-        sql = f"""
+        sql = """
         SELECT
             collection_run_id,
             repo_id,
@@ -265,6 +284,6 @@ class DataFetcher:
             status
         FROM lz_collection_runs
         ORDER BY started_at DESC
-        LIMIT {limit}
+        LIMIT ?
         """
-        return self.fetch_raw(sql)
+        return self.fetch_raw(sql, bind_params=[limit])

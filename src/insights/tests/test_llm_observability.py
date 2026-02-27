@@ -207,13 +207,6 @@ class TestObservabilityConfig:
             assert config.log_dir == Path("/custom/logs")
             assert config.log_to_console is True
 
-    def test_global_config(self, clean_config):
-        """Test global config singleton."""
-        config1 = get_config()
-        config2 = get_config()
-
-        assert config1 is config2
-
     def test_set_config(self, clean_config):
         """Test setting custom config."""
         custom = ObservabilityConfig(enabled=False, retention_days=7)

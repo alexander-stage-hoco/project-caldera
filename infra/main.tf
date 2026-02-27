@@ -139,8 +139,9 @@ resource "hcloud_server" "runner" {
   ssh_keys    = [hcloud_ssh_key.caldera.id]
 
   labels = {
-    project = "caldera"
-    purpose = "analysis-run"
+    project    = "caldera"
+    purpose    = "analysis-run"
+    created_at = formatdate("YYYY-MM-DD-hh-mm-ss", timestamp())
   }
 
   # Cloud-init installs prerequisites and clones Caldera
@@ -202,11 +203,18 @@ resource "null_resource" "run_analysis" {
     destination = "/opt/caldera/run-analysis.sh"
   }
 
+  # Upload API key as a secrets file (avoids exposing in ps/command-line)
+  provisioner "file" {
+    content     = "ANTHROPIC_API_KEY='${var.anthropic_api_key}'"
+    destination = "/opt/caldera/.env.secrets"
+  }
+
   # Execute the analysis
   provisioner "remote-exec" {
     inline = [
       "chmod +x /opt/caldera/run-analysis.sh",
-      "REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' ANTHROPIC_API_KEY='${var.anthropic_api_key}' /opt/caldera/run-analysis.sh",
+      "chmod 600 /opt/caldera/.env.secrets",
+      "set -a && . /opt/caldera/.env.secrets && set +a && REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' /opt/caldera/run-analysis.sh",
     ]
   }
 
@@ -220,7 +228,7 @@ resource "null_resource" "run_analysis" {
       attempt=1
       while [ "$attempt" -le "$MAX_RETRIES" ]; do
         echo ">>> SCP download attempt $attempt of $MAX_RETRIES..."
-        if scp -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+        if scp -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 \
             -i ${pathexpand(var.ssh_private_key_path)} \
             -r root@${hcloud_server.runner.ipv4_address}:/opt/caldera/results/* \
             "${var.results_dir}/"; then

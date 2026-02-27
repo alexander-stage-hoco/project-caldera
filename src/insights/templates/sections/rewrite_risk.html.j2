@@ -1,0 +1,142 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Rewrite Risk Assessment</h2>
+
+    {% if has_data %}
+    <div class="executive-summary" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-muted, #f8f9fa); border-radius: 4px;">
+        <p><strong>Assessment:</strong>
+        {% if assessment == "significant rewrite risk" %}
+            <span style="color: var(--color-high, #dc3545);">{{ assessment | upper }}</span>
+        {% elif assessment == "viable with constraints" %}
+            <span style="color: var(--color-warning, #ffc107);">{{ assessment | upper }}</span>
+        {% else %}
+            <span style="color: var(--color-success, #28a745);">{{ assessment | upper }}</span>
+        {% endif %}
+        — {{ structural_count }} structural, {{ addressable_count }} addressable constraint{{ "s" if addressable_count != 1 else "" }}
+        </p>
+        <p>{{ recommendation }}</p>
+    </div>
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Constraints</div>
+            <div class="value">{{ total_constraints }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Structural</div>
+            <div class="value" style="color: var(--color-high, #dc3545);">{{ structural_count }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Addressable</div>
+            <div class="value">{{ addressable_count }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">High Risk</div>
+            <div class="value" style="color: var(--color-high, #dc3545);">{{ high_count }}</div>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Constraints</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th>Type</th>
+                    <th>Risk</th>
+                    <th>Signals</th>
+                    <th>LOC</th>
+                    <th>Trigger</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for c in constraints %}
+                <tr>
+                    <td><code>{{ c.directory }}</code></td>
+                    <td>
+                        {% if c.constraint_type == "structural" %}
+                            <span style="color: var(--color-high, #dc3545);">structural</span>
+                        {% else %}
+                            <span>addressable</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if c.risk_level == "high" %}
+                            <span style="color: var(--color-high, #dc3545);">{{ c.risk_level }}</span>
+                        {% elif c.risk_level == "medium" %}
+                            <span style="color: var(--color-warning, #ffc107);">{{ c.risk_level }}</span>
+                        {% else %}
+                            <span>{{ c.risk_level }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ c.signals | join(", ") }}</td>
+                    <td>{{ "{:,}".format(c.loc_total) }}</td>
+                    <td>{{ c.trigger_condition }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% for c in constraints %}
+    {% if c.risk_level in ["high", "medium"] %}
+    <div class="subsection" style="border-left: 3px solid {% if c.risk_level == 'high' %}var(--color-high, #dc3545){% else %}var(--color-warning, #ffc107){% endif %}; padding-left: 1rem; margin-bottom: 1.5rem;">
+        <h4><code>{{ c.directory }}</code> — {{ c.constraint_type }} / {{ c.risk_level }}</h4>
+
+        <blockquote style="border-left: 3px solid var(--color-muted, #6c757d); padding-left: 0.75rem; color: var(--color-muted, #6c757d); margin: 0.5rem 0;">
+            <em>"{{ c.assumption_that_fails }}"</em>
+        </blockquote>
+
+        <p><strong>Why it fails:</strong> {{ c.why_it_fails }}</p>
+
+        <p><strong>Signals:</strong> {{ c.signals | join(", ") }} |
+           <strong>LOC:</strong> {{ "{:,}".format(c.loc_total) }} |
+           <strong>Files:</strong> {{ c.file_count }} |
+           <strong>Avg CCN:</strong> {{ c.avg_ccn }} |
+           <strong>Fan-out:</strong> {{ c.coupling_fan_out }} |
+           <strong>Fan-in:</strong> {{ c.coupling_fan_in }} |
+           <strong>Coverage:</strong> {{ c.coverage_line_pct }}%
+        </p>
+
+        {% if c.linked_evidence %}
+        <p><strong>Evidence:</strong> {% for eid in c.linked_evidence %}<code>{{ eid }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+        {% endif %}
+
+        <p><strong>Trigger:</strong> {{ c.trigger_condition }}</p>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <div class="subsection">
+        <h3>Constraint Matrix</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Type \ Risk</th>
+                    <th>High</th>
+                    <th>Medium</th>
+                    <th>Low</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Structural</strong></td>
+                    <td>{{ matrix.structural.high }}</td>
+                    <td>{{ matrix.structural.medium }}</td>
+                    <td>{{ matrix.structural.low }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Addressable</strong></td>
+                    <td>{{ matrix.addressable.high }}</td>
+                    <td>{{ matrix.addressable.medium }}</td>
+                    <td>{{ matrix.addressable.low }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <p>No rewrite risk constraints detected. The codebase supports incremental modernisation.</p>
+    </div>
+    {% endif %}
+</section>

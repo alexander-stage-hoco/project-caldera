@@ -85,7 +85,18 @@ class ComponentInventorySection(BaseSection):
                 "hotspot_type": hs.get("hotspot_type", ""),
             })
 
-        # 5. Enrich components with dependencies, hotspots, and risk signals
+        # 4b. Fetch ownership data from git-blame
+        ownership_data = self._safe_fetch(fetcher, "component_ownership", run_pk)
+        ownership_map: dict[str, dict] = {}
+        for own in ownership_data:
+            ownership_map[own.get("directory_path", "")] = {
+                "avg_unique_authors": own.get("avg_unique_authors", 0),
+                "knowledge_silo_count": own.get("knowledge_silo_count", 0),
+                "avg_top_author_pct": own.get("avg_top_author_pct", 0),
+                "high_risk_file_count": own.get("high_risk_file_count", 0),
+            }
+
+        # 5. Enrich components with dependencies, hotspots, ownership, and risk signals
         for comp in components:
             comp_path = comp.get("directory_path", "")
 
@@ -95,6 +106,13 @@ class ComponentInventorySection(BaseSection):
 
             # Add hotspots
             comp["hotspots"] = hotspot_map.get(comp_path, [])
+
+            # Add ownership data
+            own = ownership_map.get(comp_path, {})
+            comp["avg_unique_authors"] = own.get("avg_unique_authors", 0)
+            comp["knowledge_silo_count"] = own.get("knowledge_silo_count", 0)
+            comp["ownership_top_author_pct"] = own.get("avg_top_author_pct", 0)
+            comp["high_risk_file_count"] = own.get("high_risk_file_count", 0)
 
             # Calculate risk signals
             comp["risk_signals"] = self._identify_risks(comp)
@@ -164,6 +182,11 @@ class ComponentInventorySection(BaseSection):
         critical_hotspots = [h for h in hotspots if h.get("hotspot_type") == "critical_complexity"]
         if critical_hotspots:
             risks.append(f"{len(critical_hotspots)} critical complexity hotspot(s)")
+
+        # Knowledge silos (from git-blame ownership enrichment)
+        silo_count = comp.get("knowledge_silo_count", 0)
+        if silo_count > 0:
+            risks.append(f"{silo_count} knowledge silo(s) (single-author files)")
 
         return risks
 

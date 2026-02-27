@@ -88,3 +88,55 @@ class TestSchemaValidation:
         properties = schema.get("properties", {})
         # schema_version should be defined
         assert "schema_version" in properties or "version" in properties or True
+
+    def test_envelope_missing_commit_fails_validation(self, schema: dict) -> None:
+        """Envelope missing required metadata.commit should fail jsonschema validation."""
+        jsonschema = pytest.importorskip("jsonschema")
+
+        output = {
+            "metadata": {
+                "tool_name": "devskim",
+                "tool_version": "1.0.0",
+                "run_id": "550e8400-e29b-41d4-a716-446655440000",
+                "repo_id": "660e8400-e29b-41d4-a716-446655440000",
+                "branch": "main",
+                # "commit" deliberately omitted
+                "timestamp": "2026-01-01T00:00:00Z",
+                "schema_version": "1.0.0",
+            },
+            "data": {
+                "tool": "devskim",
+                "tool_version": "1.0.0",
+                "summary": {"total_issues": 0, "issues_by_severity": {}, "issues_by_category": {}},
+                "files": [],
+            },
+        }
+
+        with pytest.raises(jsonschema.ValidationError, match="commit"):
+            jsonschema.validate(output, schema)
+
+    def test_envelope_invalid_commit_sha_fails_validation(self, schema: dict) -> None:
+        """Envelope with a commit that is not a 40-char hex string should fail."""
+        jsonschema = pytest.importorskip("jsonschema")
+
+        output = {
+            "metadata": {
+                "tool_name": "devskim",
+                "tool_version": "1.0.0",
+                "run_id": "550e8400-e29b-41d4-a716-446655440000",
+                "repo_id": "660e8400-e29b-41d4-a716-446655440000",
+                "branch": "main",
+                "commit": "not-a-valid-sha",
+                "timestamp": "2026-01-01T00:00:00Z",
+                "schema_version": "1.0.0",
+            },
+            "data": {
+                "tool": "devskim",
+                "tool_version": "1.0.0",
+                "summary": {"total_issues": 0, "issues_by_severity": {}, "issues_by_category": {}},
+                "files": [],
+            },
+        }
+
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate(output, schema)

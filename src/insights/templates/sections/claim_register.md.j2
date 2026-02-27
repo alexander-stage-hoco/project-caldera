@@ -1,0 +1,24 @@
+## Claim Register
+
+{% if has_data %}
+| Metric | Value |
+|--------|------:|
+| Total Claims | {{ total_claims }} |
+| High Confidence | {{ confidence_distribution.high }} |
+| Medium Confidence | {{ confidence_distribution.medium }} |
+| Low Confidence | {{ confidence_distribution.low }} |
+
+{% for cat in categories %}
+### {{ cat.category | title }} ({{ cat.claim_count }})
+
+| Claim ID | Statement | Confidence | Evidence | Rule |
+|----------|-----------|------------|----------|------|
+{% for claim in cat.claims %}
+| `{{ claim.claim_id }}` | {{ claim.statement }} | {{ claim.confidence }} | {{ claim.evidence_count }} | {{ claim.triggered_by }} |
+{% endfor %}
+
+{% endfor %}
+
+{% else %}
+*No claims generated in this run.*
+{% endif %}

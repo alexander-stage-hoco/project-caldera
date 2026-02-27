@@ -2,7 +2,7 @@
 Report sections for Caldera insights reports.
 """
 
-from .base import BaseSection, SectionConfig, SectionData
+from .base import BaseSection, EvidenceAwareSection, SectionConfig, SectionData
 from .executive_summary import ExecutiveSummarySection
 from .repo_health import RepoHealthSection
 from .file_hotspots import FileHotspotsSection
@@ -37,6 +37,10 @@ from .tool_coverage_dashboard import ToolCoverageDashboardSection
 from .component_inventory import ComponentInventorySection
 from .import_dependencies import ImportDependenciesSection
 from .circular_dependencies import CircularDependenciesSection
+from .risk_register import RiskRegisterSection
+from .evidence_pack import EvidencePackSection
+from .claim_register import ClaimRegisterSection
+from .sampling_rationale import SamplingRationaleSection
 
 __all__ = [
     "BaseSection",
@@ -76,4 +80,9 @@ __all__ = [
     "ComponentInventorySection",
     "ImportDependenciesSection",
     "CircularDependenciesSection",
+    "EvidenceAwareSection",
+    "RiskRegisterSection",
+    "EvidencePackSection",
+    "ClaimRegisterSection",
+    "SamplingRationaleSection",
 ]

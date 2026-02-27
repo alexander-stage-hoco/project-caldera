@@ -163,7 +163,7 @@ class TestFunctionNaming:
         assert func.name in func.long_name
 
     def test_nested_function_naming(self):
-        """Test naming for nested functions."""
+        """Test naming for nested functions uses :: separator."""
         func = FunctionInfo(
             name="inner",
             long_name="outer::inner",
@@ -175,5 +175,26 @@ class TestFunctionNaming:
             parameter_count=0,
             length=5,
         )
-        # Nested function should have qualified name
-        assert "::" in func.long_name or "." in func.long_name or func.name in func.long_name
+        # Nested function should use :: separator and contain both names
+        assert "::" in func.long_name
+        assert func.long_name == "outer::inner"
+        assert func.name == "inner"
+
+    def test_high_ccn_function(self):
+        """Test function with very high CCN is accurately represented."""
+        func = FunctionInfo(
+            name="complex_handler",
+            long_name="RequestHandler.complex_handler",
+            start_line=1,
+            end_line=200,
+            nloc=150,
+            ccn=45,
+            token_count=800,
+            parameter_count=5,
+            length=200,
+        )
+        assert func.ccn == 45
+        assert func.nloc == 150
+        assert func.parameter_count == 5
+        # High CCN relative to NLOC indicates dense branching
+        assert func.ccn / func.nloc > 0.2

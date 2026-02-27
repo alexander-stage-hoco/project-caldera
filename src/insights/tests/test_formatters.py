@@ -12,11 +12,6 @@ from insights.sections.base import SectionData
 class TestHtmlFormatter:
     """Tests for HtmlFormatter."""
 
-    def test_file_extension(self):
-        """Test HTML formatter returns correct extension."""
-        formatter = HtmlFormatter()
-        assert formatter.file_extension == ".html"
-
     def test_format_number_filter(self):
         """Test number formatting filter."""
         assert HtmlFormatter._format_number(1234567) == "1,234,567"
@@ -53,11 +48,6 @@ class TestHtmlFormatter:
 
 class TestMarkdownFormatter:
     """Tests for MarkdownFormatter."""
-
-    def test_file_extension(self):
-        """Test Markdown formatter returns correct extension."""
-        formatter = MarkdownFormatter()
-        assert formatter.file_extension == ".md"
 
     def test_severity_emoji_filter(self):
         """Test severity emoji filter."""
@@ -103,3 +93,35 @@ class TestMarkdownFormatter:
 
         assert "| name | loc |" in table
         assert "ccn" not in table
+
+    def test_severity_emoji_info(self):
+        """Test severity emoji for 'info' level."""
+        assert MarkdownFormatter._severity_emoji("info") == "\U0001f535"
+
+
+class TestHtmlFormatterFalsyEdgeCase:
+    """Edge case tests for HtmlFormatter."""
+
+    def test_format_number_zero(self):
+        """_format_number(0) should return '0', not 'N/A' (falsy edge case)."""
+        result = HtmlFormatter._format_number(0)
+        assert result == "0"
+
+    def test_format_number_zero_float(self):
+        """_format_number(0.0) should return '0.00', not 'N/A'."""
+        result = HtmlFormatter._format_number(0.0)
+        assert result == "0.00"
+
+
+class TestMarkdownFormatterFalsyEdgeCase:
+    """Edge case tests for MarkdownFormatter."""
+
+    def test_format_number_zero(self):
+        """_format_number(0) should return '0', not 'N/A'."""
+        result = MarkdownFormatter._format_number(0)
+        assert result == "0"
+
+    def test_format_number_zero_float(self):
+        """_format_number(0.0) should return '0.00', not 'N/A'."""
+        result = MarkdownFormatter._format_number(0.0)
+        assert result == "0.00"

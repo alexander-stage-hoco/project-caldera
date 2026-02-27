@@ -572,3 +572,68 @@ class TestAnalyzeRepo:
         result = analyze_repo(dotnet_repo, tmp_path)
         assert result["tool_version"] == "fallback-parser"
         mock_install.assert_called_once()
+
+
+class TestCircularDependencyDetection:
+    """Tests for detect_circular_dependencies."""
+
+    def _make_project(self, path: str, refs: list[str]) -> ProjectInfo:
+        """Create a minimal ProjectInfo for cycle detection testing."""
+        return ProjectInfo(
+            name=path.split("/")[-1].replace(".csproj", ""),
+            path=path,
+            target_framework="net8.0",
+            project_references=refs,
+            package_references=[],
+        )
+
+    def test_no_cycles(self) -> None:
+        """A simple DAG should have no circular dependencies."""
+        projects = [
+            self._make_project("A/A.csproj", ["B/B.csproj"]),
+            self._make_project("B/B.csproj", ["C/C.csproj"]),
+            self._make_project("C/C.csproj", []),
+        ]
+        cycles = detect_circular_dependencies(projects)
+        assert cycles == []
+
+    def test_simple_cycle(self) -> None:
+        """A -> B -> A should be detected as a cycle."""
+        projects = [
+            self._make_project("A/A.csproj", ["B/B.csproj"]),
+            self._make_project("B/B.csproj", ["A/A.csproj"]),
+        ]
+        cycles = detect_circular_dependencies(projects)
+        assert len(cycles) >= 1
+        # The cycle should mention both projects
+        cycle_nodes = set()
+        for cycle in cycles:
+            cycle_nodes.update(cycle)
+        assert "A/A.csproj" in cycle_nodes
+        assert "B/B.csproj" in cycle_nodes
+
+    def test_self_reference(self) -> None:
+        """A -> A should be detected as a cycle."""
+        projects = [
+            self._make_project("A/A.csproj", ["A/A.csproj"]),
+        ]
+        cycles = detect_circular_dependencies(projects)
+        assert len(cycles) >= 1
+
+
+class TestBuildDependencyGraphPathNormalization:
+    """Tests for path normalization in dependency graph."""
+
+    def test_project_references_are_repo_relative(self, dotnet_repo: Path) -> None:
+        """Project references in the graph should use repo-relative paths."""
+        projects = []
+        for proj_path in find_project_files(dotnet_repo):
+            proj = parse_project_file(proj_path, dotnet_repo)
+            if proj:
+                projects.append(proj)
+        graph = build_dependency_graph(projects)
+
+        # All keys and values should be repo-relative (no leading / or ./)
+        for key in graph:
+            assert not key.startswith("/"), f"Absolute key: {key}"
+            assert not key.startswith("./"), f"./ prefix key: {key}"

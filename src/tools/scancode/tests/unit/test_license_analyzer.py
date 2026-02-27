@@ -491,3 +491,29 @@ class TestLicenseFindingDataclass:
             match_type="file",
         )
         assert finding.line_number == 0
+
+
+class TestGetCategoryEdgeCases:
+    """Tests for get_category with unknown and edge-case SPDX IDs."""
+
+    def test_unknown_spdx_id_returns_unknown(self):
+        """Unrecognized SPDX ID should return 'unknown' category."""
+        assert get_category("FAKE-LICENSE-99.0") == "unknown"
+
+    def test_empty_spdx_id_returns_unknown(self):
+        """Empty SPDX ID should return 'unknown'."""
+        assert get_category("") == "unknown"
+
+
+class TestDetectLicensePathNormalization:
+    """Tests for license detection with various file path formats."""
+
+    def test_repo_relative_path_in_finding(self):
+        """Findings should use the file_path exactly as passed (repo-relative)."""
+        content = "# SPDX-License-Identifier: MIT"
+        findings = detect_license_in_content(content, "src/lib/module.py")
+        assert len(findings) == 1
+        # Path in finding should match the input (no leading /, ./, etc.)
+        assert findings[0].file_path == "src/lib/module.py"
+        assert not findings[0].file_path.startswith("/")
+        assert not findings[0].file_path.startswith("./")

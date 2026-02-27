@@ -60,6 +60,9 @@ TIMESTAMP ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 # COMMIT is tool-specific since REPO_PATH varies - tools should define:
 #   COMMIT ?= $(shell git -C $(REPO_PATH) rev-parse HEAD 2>/dev/null || echo "")
 
+# Portable SHA256 command (macOS: shasum -a 256, Linux: sha256sum)
+SHA256_CMD := $(shell command -v shasum >/dev/null 2>&1 && echo "shasum -a 256" || echo "sha256sum")
+
 # LLM model configuration (default: sonnet)
 LLM_MODEL ?= opus-4.5
 

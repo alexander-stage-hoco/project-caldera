@@ -615,3 +615,29 @@ VAR3 = 3
         variable_symbols = [s for s in result.symbols if s.symbol_type == "variable"]
         assert len(variable_symbols) == 1
         assert variable_symbols[0].symbol_name == "VAR"
+
+    def test_extracted_symbols_use_repo_relative_path(self, extractor, temp_dir):
+        """Symbols extracted with a repo-relative path should store that path."""
+        code = "def hello():\n    pass\n"
+        test_file = temp_dir / "test.py"
+        test_file.write_text(code)
+
+        result = extractor.extract_file(test_file, "src/lib/test.py")
+
+        assert len(result.symbols) == 1
+        # The symbol path should match the relative_path we passed in
+        assert result.symbols[0].path == "src/lib/test.py"
+        # Must be repo-relative: no leading / or ./
+        assert not result.symbols[0].path.startswith("/")
+        assert not result.symbols[0].path.startswith("./")
+
+    def test_extract_empty_file(self, extractor, temp_dir):
+        """Extracting an empty Python file should produce no symbols, imports, or calls."""
+        test_file = temp_dir / "empty.py"
+        test_file.write_text("")
+
+        result = extractor.extract_file(test_file, "empty.py")
+
+        assert len(result.symbols) == 0
+        assert len(result.imports) == 0
+        assert len(result.calls) == 0

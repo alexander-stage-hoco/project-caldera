@@ -1,0 +1,41 @@
+## Risk Register
+
+{% if has_data %}
+| Metric | Value |
+|--------|------:|
+| Total Risks | {{ total_risks }} |
+| Critical | {{ critical_count }} |
+| High | {{ high_count }} |
+| Medium | {{ medium_count }} |
+
+{% for severity in ["critical", "high", "medium", "low"] %}
+{% set sev_risks = risks_by_severity[severity] %}
+{% if sev_risks %}
+### {{ severity | upper }} Risks
+
+{% for risk in sev_risks %}
+#### {{ risk.risk_id }}: {{ risk.triggered_by }}
+
+- **Description:** {{ risk.description }}
+- **Technical cause:** {{ risk.technical_cause }}
+- **Supporting claims:** {{ risk.claim_count }}
+
+{% if risk.claims %}
+| Claim ID | Statement | Confidence |
+|----------|-----------|------------|
+{% for claim in risk.claims %}
+| `{{ claim.claim_id }}` | {{ claim.statement }} | {{ claim.confidence }} |
+{% endfor %}
+{% endif %}
+
+{% if risk.manifests_in %}
+**Affected locations:** {% for loc in risk.manifests_in %}`{{ loc }}`{% if not loop.last %}, {% endif %}{% endfor %}
+{% endif %}
+
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+{% else %}
+*No execution risks identified in this run.*
+{% endif %}

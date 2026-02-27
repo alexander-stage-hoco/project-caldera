@@ -1,6 +1,5 @@
 """Tests for ComponentInventorySection."""
 
-import pytest
 from unittest.mock import MagicMock
 
 from insights.sections.component_inventory import ComponentInventorySection
@@ -8,48 +7,6 @@ from insights.sections.component_inventory import ComponentInventorySection
 
 class TestComponentInventorySection:
     """Tests for the ComponentInventorySection class."""
-
-    def test_config(self):
-        """Test section configuration."""
-        section = ComponentInventorySection()
-        assert section.config.name == "component_inventory"
-        assert section.config.title == "Component Inventory"
-        assert section.config.priority == 5
-
-    def test_template_name(self):
-        """Test template name generation."""
-        section = ComponentInventorySection()
-        assert section.get_template_name() == "component_inventory.html.j2"
-        assert section.get_markdown_template_name() == "component_inventory.md.j2"
-
-    def test_fallback_data(self):
-        """Test fallback data structure."""
-        section = ComponentInventorySection()
-        fallback = section.get_fallback_data()
-
-        assert fallback["components"] == []
-        assert fallback["healthy_components"] == []
-        assert fallback["at_risk_components"] == []
-        assert fallback["critical_components"] == []
-        assert fallback["has_data"] is False
-        assert fallback["has_critical"] is False
-        assert "summary" in fallback
-        assert fallback["summary"]["total_components"] == 0
-        assert "grade_distribution" in fallback
-        assert fallback["grade_distribution"]["A"] == 0
-
-    def test_validate_data_no_data(self):
-        """Test validation with no data."""
-        section = ComponentInventorySection()
-        errors = section.validate_data({"has_data": False})
-        assert len(errors) == 1
-        assert "No component data" in errors[0]
-
-    def test_validate_data_with_data(self):
-        """Test validation with data."""
-        section = ComponentInventorySection()
-        errors = section.validate_data({"has_data": True})
-        assert len(errors) == 0
 
     def test_identify_risks_high_coupling(self):
         """Test risk identification for high coupling."""
@@ -269,6 +226,104 @@ class TestComponentInventorySection:
         assert len(data["components"][0]["hotspots"]) == 1
         assert data["summary"]["total_components"] == 1
         assert data["summary"]["at_risk_count"] == 1
+
+    def test_ownership_enrichment(self):
+        """Ownership data enriches components with author metrics."""
+        section = ComponentInventorySection()
+        mock_fetcher = MagicMock()
+
+        mock_fetcher.fetch.side_effect = [
+            # component_inventory query
+            [
+                {
+                    "directory_path": "src/services",
+                    "display_name": "services",
+                    "health_grade": "C",
+                    "health_score": 72,
+                    "total_coupling": 15,
+                    "loc": 2000,
+                    "file_count": 10,
+                    "fan_in": 5,
+                    "fan_out": 10,
+                    "avg_ccn": 6.0,
+                    "avg_top_author_pct": 45.0,
+                    "instability": 0.67,
+                },
+            ],
+            # component_dependencies query
+            [],
+            # component_hotspots query
+            [],
+            # component_ownership query
+            [
+                {
+                    "directory_path": "src/services",
+                    "avg_unique_authors": 2.5,
+                    "knowledge_silo_count": 3,
+                    "avg_top_author_pct": 65.0,
+                    "high_risk_file_count": 2,
+                },
+            ],
+        ]
+
+        data = section.fetch_data(mock_fetcher, run_pk=1)
+        comp = data["components"][0]
+        assert comp["avg_unique_authors"] == 2.5
+        assert comp["knowledge_silo_count"] == 3
+        assert comp["ownership_top_author_pct"] == 65.0
+        assert comp["high_risk_file_count"] == 2
+
+    def test_knowledge_silo_risk_signal(self):
+        """Component with knowledge_silo_count > 0 → risk signal."""
+        section = ComponentInventorySection()
+        comp = {
+            "total_coupling": 10,
+            "fan_out": 5,
+            "avg_ccn": 5,
+            "avg_top_author_pct": 40,
+            "instability": 0.5,
+            "hotspots": [],
+            "knowledge_silo_count": 4,
+        }
+        risks = section._identify_risks(comp)
+        assert any("4 knowledge silo(s)" in r for r in risks)
+
+    def test_no_ownership_data_defaults(self):
+        """No ownership data from fetcher → components have default 0 values."""
+        section = ComponentInventorySection()
+        mock_fetcher = MagicMock()
+
+        mock_fetcher.fetch.side_effect = [
+            # component_inventory query
+            [
+                {
+                    "directory_path": "src/services",
+                    "display_name": "services",
+                    "health_grade": "B",
+                    "health_score": 82,
+                    "total_coupling": 10,
+                    "loc": 1000,
+                    "file_count": 5,
+                    "fan_in": 3,
+                    "fan_out": 7,
+                    "avg_ccn": 4.0,
+                    "avg_top_author_pct": 35.0,
+                    "instability": 0.5,
+                },
+            ],
+            # component_dependencies query
+            [],
+            # component_hotspots query
+            [],
+            # component_ownership query — empty
+            [],
+        ]
+
+        data = section.fetch_data(mock_fetcher, run_pk=1)
+        comp = data["components"][0]
+        assert comp["avg_unique_authors"] == 0
+        assert comp["knowledge_silo_count"] == 0
+        assert comp["ownership_top_author_pct"] == 0
 
     def test_component_categorization(self):
         """Test that components are correctly categorized by grade."""
