@@ -191,7 +191,8 @@ class TestObservabilityConfig:
         assert config.enabled is True
         assert config.log_to_file is True
         assert config.log_to_console is False
-        assert config.include_prompts is True
+        assert config.include_prompts is False
+        assert config.include_responses is False
         assert config.retention_days == 30
 
     def test_from_env(self, clean_config):
@@ -311,6 +312,8 @@ class TestLLMLogger:
         """Test prompt truncation with max_prompt_length."""
         config = ObservabilityConfig(
             log_dir=temp_log_dir,
+            include_prompts=True,
+            include_responses=True,
             max_prompt_length=50,
         )
         logger = LLMLogger(config=config)
