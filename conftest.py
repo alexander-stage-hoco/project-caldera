@@ -123,9 +123,15 @@ def _reorder_sys_path(tool_dir: Path) -> None:
 
 
 def _is_tool_path(p: str) -> bool:
-    """Check if a sys.path entry belongs to any tool."""
+    """Check if a sys.path entry belongs to any tool.
+
+    Excludes ``.venv`` directories so tool virtual-environment
+    site-packages are not removed from ``sys.path``.
+    """
     try:
-        Path(p).relative_to(_TOOLS_ROOT)
+        rel = Path(p).relative_to(_TOOLS_ROOT)
+        if ".venv" in rel.parts:
+            return False
         return True
     except ValueError:
         return False

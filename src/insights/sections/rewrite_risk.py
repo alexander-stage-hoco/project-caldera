@@ -148,13 +148,8 @@ class RewriteRiskSection(EvidenceAwareSection):
             dp = row["directory_path"]
             by_dir.setdefault(dp, []).append(row)
 
-        # Collect evidence IDs from registry if available
-        evidence_ids: dict[str, list[str]] = {}
+        # Collect evidence by category and directory prefix for per-directory linking
         registry = self._evidence_registry
-        if registry:
-            for ev in registry.evidence:
-                if ev.category in ("complexity", "coupling", "ownership", "coverage"):
-                    evidence_ids.setdefault(ev.category, []).append(ev.evidence_id)
 
         constraints: list[dict[str, Any]] = []
         for directory_path, rows in by_dir.items():
@@ -171,17 +166,26 @@ class RewriteRiskSection(EvidenceAwareSection):
                     primary_signal = s
                     break
 
-            # Build linked evidence list
+            # Build per-directory evidence ID lookup (filter by location prefix)
+            dir_evidence: dict[str, list[str]] = {}
+            if registry:
+                dir_prefix = directory_path.rstrip("/") + "/"
+                for ev in registry.evidence:
+                    if ev.category in ("complexity", "coupling", "ownership", "coverage"):
+                        if ev.location.startswith(dir_prefix) or ev.location == directory_path:
+                            dir_evidence.setdefault(ev.category, []).append(ev.evidence_id)
+
+            # Build linked evidence list from directory-scoped evidence
             linked: list[str] = []
             for s in signals:
-                if s in ("monolith",) and "complexity" in evidence_ids:
-                    linked.extend(evidence_ids["complexity"][:2])
-                if s in ("bidirectional_coupling", "unidirectional_coupling") and "coupling" in evidence_ids:
-                    linked.extend(evidence_ids["coupling"][:2])
-                if s == "knowledge_silo" and "ownership" in evidence_ids:
-                    linked.extend(evidence_ids["ownership"][:2])
-                if s == "untested_core" and "coverage" in evidence_ids:
-                    linked.extend(evidence_ids["coverage"][:2])
+                if s in ("monolith",) and "complexity" in dir_evidence:
+                    linked.extend(dir_evidence["complexity"][:2])
+                if s in ("bidirectional_coupling", "unidirectional_coupling") and "coupling" in dir_evidence:
+                    linked.extend(dir_evidence["coupling"][:2])
+                if s == "knowledge_silo" and "ownership" in dir_evidence:
+                    linked.extend(dir_evidence["ownership"][:2])
+                if s == "untested_core" and "coverage" in dir_evidence:
+                    linked.extend(dir_evidence["coverage"][:2])
             linked = list(dict.fromkeys(linked))  # Dedupe preserving order
 
             constraints.append({

@@ -482,7 +482,7 @@ class InsightsGenerator:
                 COALESCE(SUM(CASE WHEN lf.language IN ('C#', 'csharp', 'cs') THEN ufm.loc_total END), 0) as csharp_loc
             FROM unified_file_metrics ufm
             JOIN lz_layout_files lf
-                ON ufm.file_id = lf.file_id AND ufm.run_pk = lf.run_pk
+                ON ufm.file_id = lf.file_id AND ufm.layout_run_pk = lf.run_pk
             WHERE ufm.run_pk = {{ run_pk }}
             """
             result = self.fetcher.fetch_raw(dotnet_check_sql, run_pk=run_pk)
