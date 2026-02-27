@@ -42,6 +42,8 @@ MAX_PARALLEL=4
 CLONE_DEPTH="${CLONE_DEPTH:-}"
 RESULTS_DIR="${INFRA_DIR}/results"
 DESTROY_AFTER=1
+MAX_DURATION=""
+MAX_COST=""
 
 usage() {
     echo "Usage: $0 <repo-url> [options]"
@@ -59,6 +61,8 @@ usage() {
     echo "  --clone-depth <n>       Shallow clone depth (default: full clone)"
     echo "  --results <dir>         Local results directory (default: infra/results)"
     echo "  --keep-server           Don't destroy the server after (for debugging)"
+    echo "  --max-duration <secs>   Kill analysis after this many seconds"
+    echo "  --max-cost <eur>        Kill analysis when estimated cost exceeds this (EUR)"
     echo "  -h, --help              Show this help"
     exit 1
 }
@@ -72,6 +76,8 @@ while [[ $# -gt 0 ]]; do
         --clone-depth) CLONE_DEPTH="$2"; shift 2 ;;
         --results)   RESULTS_DIR="$2"; shift 2 ;;
         --keep-server) DESTROY_AFTER=0; shift ;;
+        --max-duration) MAX_DURATION="$2"; shift 2 ;;
+        --max-cost)     MAX_COST="$2"; shift 2 ;;
         -h|--help)   usage ;;
         -*)          echo "Unknown option: $1"; usage ;;
         *)           REPO_URL="$1"; shift ;;
@@ -196,6 +202,8 @@ cleanup() {
             -var="clone_depth=${CLONE_DEPTH}" \
             -var="results_dir=${RESULTS_DIR}" \
             -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}" \
+            -var="max_duration=${MAX_DURATION}" \
+            -var="max_cost=${MAX_COST}" \
             2>&1 | grep -E "^(Destroy|hcloud_)" || true
         echo "    Server destroyed."
     fi
@@ -212,6 +220,10 @@ echo "Skip:       ${SKIP_TOOLS:-none}"
 echo "LLM:        ${PIPELINE_LLM}"
 echo "Parallel:   ${MAX_PARALLEL}"
 echo "Results:    ${RESULTS_DIR}"
+if [ -n "${MAX_DURATION}" ] || [ -n "${MAX_COST}" ]; then
+    echo "Max dur:    ${MAX_DURATION:-unlimited}"
+    echo "Max cost:   ${MAX_COST:-unlimited} EUR"
+fi
 echo "=============================================="
 echo ""
 
@@ -236,7 +248,9 @@ for attempt in $(seq 1 $MAX_RETRIES); do
         -var="max_parallel=${MAX_PARALLEL}" \
         -var="clone_depth=${CLONE_DEPTH}" \
         -var="results_dir=${RESULTS_DIR}" \
-        -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}"; then
+        -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}" \
+        -var="max_duration=${MAX_DURATION}" \
+        -var="max_cost=${MAX_COST}"; then
         break
     fi
     if [ "$attempt" -eq "$MAX_RETRIES" ]; then

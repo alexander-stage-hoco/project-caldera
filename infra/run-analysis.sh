@@ -20,6 +20,8 @@ PIPELINE_LLM="${PIPELINE_LLM:-0}"
 MAX_PARALLEL="${MAX_PARALLEL:-4}"
 SERVER_TYPE="${SERVER_TYPE:-unknown}"
 CLONE_DEPTH="${CLONE_DEPTH:-}"
+MAX_DURATION="${MAX_DURATION:-}"
+MAX_COST="${MAX_COST:-}"
 
 # When LLM evaluation is enabled, configure the Anthropic SDK provider
 # (Claude Code CLI is not available on the VM)
@@ -45,6 +47,10 @@ echo "Server type:    ${SERVER_TYPE}"
 echo "Skip tools:     ${SKIP_TOOLS:-none}"
 echo "LLM eval:       ${PIPELINE_LLM}"
 echo "Max parallel:   ${MAX_PARALLEL}"
+if [ -n "${MAX_DURATION}" ] || [ -n "${MAX_COST}" ]; then
+    echo "Max duration:   ${MAX_DURATION:-unlimited}"
+    echo "Max cost:       ${MAX_COST:-unlimited} EUR"
+fi
 echo "=============================================="
 
 # ---------------------------------------------------------------------------
@@ -216,20 +222,81 @@ echo ""
 echo ">>> Running analysis pipeline..."
 START_TIME=$(date +%s)
 
-make analyze \
-    REPO="${CLONE_DIR}" \
-    SKIP_TOOLS="${SKIP_TOOLS}" \
-    PIPELINE_LLM="${PIPELINE_LLM}" \
-    ${PIPELINE_PROVIDER:+PIPELINE_PROVIDER=${PIPELINE_PROVIDER}} \
-    CONTINUE_ON_TOOL_FAILURE=1 \
-    REPLACE=1 \
-    2>&1 | tee /tmp/caldera-run.log
+# Budget guard: compute effective timeout for make analyze
+ANALYSIS_TIMEOUT=""
+BUDGET_GUARD_TRIGGERED=false
+
+if [ -n "${MAX_COST}" ] && [ -n "${SERVER_TYPE}" ]; then
+    COST_DURATION=$(python3 -c "
+import json, math, sys
+with open('/opt/caldera/project/infra/server_presets.json') as f:
+    data = json.load(f)
+rate = data['pricing_eur_per_hour'].get('${SERVER_TYPE}', 0)
+if rate <= 0:
+    print('')
+    sys.exit(0)
+max_hours = math.floor(float('${MAX_COST}') / rate)
+print(str(max(max_hours, 1) * 3600))
+" 2>/dev/null || echo "")
+    if [ -n "${COST_DURATION}" ]; then
+        echo "  Budget guard: --max-cost ${MAX_COST} EUR -> ${COST_DURATION}s for ${SERVER_TYPE}"
+        ANALYSIS_TIMEOUT="${COST_DURATION}"
+    fi
+fi
+
+if [ -n "${MAX_DURATION}" ]; then
+    echo "  Budget guard: --max-duration ${MAX_DURATION}s"
+    if [ -z "${ANALYSIS_TIMEOUT}" ]; then
+        ANALYSIS_TIMEOUT="${MAX_DURATION}"
+    elif [ "${MAX_DURATION}" -lt "${ANALYSIS_TIMEOUT}" ]; then
+        ANALYSIS_TIMEOUT="${MAX_DURATION}"
+    fi
+fi
+
+if [ -n "${ANALYSIS_TIMEOUT}" ]; then
+    echo "  Effective analysis timeout: ${ANALYSIS_TIMEOUT}s ($(( ANALYSIS_TIMEOUT / 60 ))m)"
+fi
+
+set +e
+if [ -n "${ANALYSIS_TIMEOUT}" ]; then
+    timeout --signal=TERM --kill-after=30 "${ANALYSIS_TIMEOUT}" \
+        make analyze \
+            REPO="${CLONE_DIR}" \
+            SKIP_TOOLS="${SKIP_TOOLS}" \
+            PIPELINE_LLM="${PIPELINE_LLM}" \
+            ${PIPELINE_PROVIDER:+PIPELINE_PROVIDER=${PIPELINE_PROVIDER}} \
+            CONTINUE_ON_TOOL_FAILURE=1 \
+            REPLACE=1 \
+            2>&1 | tee /tmp/caldera-run.log
+    ANALYSIS_EXIT=${PIPESTATUS[0]}
+else
+    make analyze \
+        REPO="${CLONE_DIR}" \
+        SKIP_TOOLS="${SKIP_TOOLS}" \
+        PIPELINE_LLM="${PIPELINE_LLM}" \
+        ${PIPELINE_PROVIDER:+PIPELINE_PROVIDER=${PIPELINE_PROVIDER}} \
+        CONTINUE_ON_TOOL_FAILURE=1 \
+        REPLACE=1 \
+        2>&1 | tee /tmp/caldera-run.log
+    ANALYSIS_EXIT=${PIPESTATUS[0]}
+fi
+set -e
 
 END_TIME=$(date +%s)
 DURATION=$((END_TIME - START_TIME))
 
-echo ""
-echo ">>> Pipeline completed in ${DURATION} seconds."
+if [ "${ANALYSIS_EXIT}" -eq 124 ]; then
+    BUDGET_GUARD_TRIGGERED=true
+    echo ""
+    echo ">>> BUDGET GUARD: Analysis terminated after ${DURATION}s (limit: ${ANALYSIS_TIMEOUT}s)"
+    echo ">>> Exporting partial results..."
+elif [ "${ANALYSIS_EXIT}" -ne 0 ]; then
+    echo ""
+    echo ">>> Pipeline exited with code ${ANALYSIS_EXIT}. Exporting whatever results exist..."
+else
+    echo ""
+    echo ">>> Pipeline completed in ${DURATION} seconds."
+fi
 
 # ---------------------------------------------------------------------------
 # 6. Export results
@@ -332,6 +399,15 @@ cloud_section = {
     'pipeline_llm': bool(int('${PIPELINE_LLM}')),
     'run_pk': int('${RUN_PK}') if '${RUN_PK}' else None,
 }
+budget_guard = {
+    'max_duration': int('${MAX_DURATION}') if '${MAX_DURATION}' else None,
+    'max_cost': float('${MAX_COST}') if '${MAX_COST}' else None,
+    'effective_timeout': int('${ANALYSIS_TIMEOUT}') if '${ANALYSIS_TIMEOUT}' else None,
+    'triggered': True if '${BUDGET_GUARD_TRIGGERED}' == 'true' else False,
+    'analysis_exit_code': ${ANALYSIS_EXIT},
+}
+cloud_section['budget_guard'] = budget_guard
+
 if dbt_info is not None:
     cloud_section['dbt'] = dbt_info
 

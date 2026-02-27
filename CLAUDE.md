@@ -173,6 +173,8 @@ make docker-test-all REPO=<path> # Batch Docker vs native parity test (all tools
 | `CALDERA_TOOL_IMAGE_PREFIX` | `caldera-tool-` | Docker image prefix for tool containers |
 | `CALDERA_RUNNER_IMAGE` | `caldera-runner` | Runner image (set to GHCR ref for pre-built) |
 | `CALDERA_ORCHESTRATOR_IMAGE` | `caldera-orchestrator` | Orchestrator image (set to GHCR ref for pre-built) |
+| `MAX_DURATION` | unset | Max analysis duration in seconds for `make cloud-run` |
+| `MAX_COST` | unset | Max estimated cost in EUR for `make cloud-run` |
 | `DOCKER_TEST_SKIP` | `coverage-ingest` | Comma-separated tools to skip in `make docker-test-all` |
 
 ### Orchestrator
