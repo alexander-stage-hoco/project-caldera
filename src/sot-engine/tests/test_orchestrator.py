@@ -562,6 +562,17 @@ def test_compute_content_hash_changes_with_content(tmp_path: Path) -> None:
     assert _compute_content_hash(d1) != _compute_content_hash(d2)
 
 
+def test_compute_content_hash_changes_with_same_size_content(tmp_path: Path) -> None:
+    """Same file name and size but different bytes must produce different hashes."""
+    d1 = tmp_path / "d1"
+    d2 = tmp_path / "d2"
+    d1.mkdir()
+    d2.mkdir()
+    (d1 / "a.txt").write_text("aaaa")
+    (d2 / "a.txt").write_text("bbbb")  # same size, different content
+    assert _compute_content_hash(d1) != _compute_content_hash(d2)
+
+
 def test_compute_content_hash_empty_dir(tmp_path: Path) -> None:
     empty = tmp_path / "empty"
     empty.mkdir()

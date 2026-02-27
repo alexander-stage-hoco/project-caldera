@@ -6,6 +6,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 from pathlib import Path
 
@@ -24,7 +25,8 @@ def _resolve_bundle_root(bundle: Path) -> Path:
         return bundle
     if bundle.suffixes[-2:] == [".tar", ".gz"] or bundle.suffix == ".tgz":
         tmp_dir = Path(tempfile.mkdtemp(prefix="caldera-bundle-"))
-        subprocess.run(["tar", "-xzf", str(bundle), "-C", str(tmp_dir)], check=True)
+        with tarfile.open(bundle) as tf:
+            tf.extractall(tmp_dir, filter="data")
         children = [p for p in tmp_dir.iterdir() if p.is_dir()]
         if len(children) != 1:
             raise RuntimeError(f"Expected 1 directory in extracted bundle, found {len(children)}")

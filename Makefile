@@ -1,7 +1,7 @@
 .PHONY: help setup setup-core analyze status doctor list-runs report clean-db \
 	compliance compliance-preflight compliance-full \
 	tools-setup tools-analyze tools-evaluate \
-	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
+	tools-evaluate-llm tools-test tools-clean dbt-migrate dbt-run dbt-test \
 	orchestrate test pipeline-eval arch-review \
 	collect analyze-bundle prune-outputs export-results \
 	cloud-setup cloud-run cloud-status cloud-destroy cloud-cleanup \
@@ -338,7 +338,10 @@ tools-test:
 tools-clean:
 	$(call run_tools,clean)
 
-dbt-run:
+dbt-migrate:
+	@$(PYTHON_VENV) -c "import duckdb; c=duckdb.connect('$(ORCH_DB_PATH)'); c.execute('ALTER TABLE lz_layout_files ADD COLUMN IF NOT EXISTS stable_fingerprint VARCHAR'); c.close()" 2>/dev/null || true
+
+dbt-run: dbt-migrate
 	@CALDERA_DB_PATH=$(ORCH_DB_PATH) DBT_PROFILES_DIR=$(DBT_PROFILES_DIR) $(DBT_BIN) run --project-dir $(DBT_PROJECT_DIR) --target-path /tmp/dbt_target --log-path /tmp/dbt_logs
 
 dbt-test:

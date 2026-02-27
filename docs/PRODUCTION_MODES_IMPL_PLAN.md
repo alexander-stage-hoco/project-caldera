@@ -170,15 +170,15 @@ make docker-test-tool TOOL=scc REPO=/path/to/repo
 
 ## Cost Reference
 
-| Scenario | Server | Time | Cost |
-|----------|--------|------|------|
-| Tiny repo (nocode) | CX32 | ~5 min | ~$0.001 |
-| Small Python project (~500 files) | CX32 | ~10 min | ~$0.002 |
-| Medium project (~5k files) | CX32 | ~15 min | ~$0.004 |
-| Large project (~20k files) | CX42 | ~25 min | ~$0.010 |
-| Very large project + SonarQube | CX52 | ~45 min | ~$0.037 |
+| Scenario | Server | Time | Cost (1h min) |
+|----------|--------|------|---------------|
+| Tiny repo (nocode) | CX32 | ~5 min | ~$0.014 |
+| Small Python project (~500 files) | CX32 | ~10 min | ~$0.014 |
+| Medium project (~5k files) | CX32 | ~15 min | ~$0.014 |
+| Large project (~20k files) | CX42 | ~25 min | ~$0.027 |
+| Very large project + SonarQube | CX52 | ~45 min | ~$0.044 |
 
-All costs are Hetzner CX-series (shared vCPU). Billing is per-hour, minimum 1 hour.
+All costs are Hetzner CX-series (shared vCPU). Billing is per-hour with a 1-hour minimum, so short runs still incur 1 hour of cost. CX32 ≈ €0.013/hr, CX42 ≈ €0.025/hr, CX52 ≈ €0.041/hr.
 
 ---
 
