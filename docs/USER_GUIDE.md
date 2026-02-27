@@ -210,6 +210,8 @@ If you used `KEEP_SERVER=1`, destroy the server when done:
 make cloud-destroy
 ```
 
+For large repositories and detailed cloud configuration, see [Cloud Analysis Guide](CLOUD_ANALYSIS_GUIDE.md).
+
 See [infra/README.md](../infra/README.md) for the full infrastructure reference.
 
 ### Reset the database
