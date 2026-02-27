@@ -187,12 +187,13 @@ def _is_fallback_commit(commit: str) -> bool:
 
 
 def _compute_content_hash(repo_path: Path) -> str:
-    """Compute a deterministic 40-hex hash from repo file listing and sizes."""
+    """Compute a deterministic 40-hex hash from repo file paths and contents."""
     h = hashlib.sha1(usedforsecurity=False)
     for f in sorted(repo_path.rglob("*")):
         if f.is_file():
             rel = f.relative_to(repo_path).as_posix()
-            h.update(f"{rel}:{f.stat().st_size}\n".encode())
+            h.update(f"{rel}\n".encode())
+            h.update(f.read_bytes())
     return h.hexdigest()
 
 
