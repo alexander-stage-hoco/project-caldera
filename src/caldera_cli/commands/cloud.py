@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import typer
 
-from caldera_cli._shared import run_make
+from caldera_cli._shared import run_make, run_script
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -19,7 +19,12 @@ def setup() -> None:
 @app.command("run")
 def cloud_run(
     repo: str = typer.Argument(..., help="GitHub URL of repository to analyze"),
-    server: str | None = typer.Option(None, "--server", "-s", help="Hetzner server type (e.g., cx33)"),
+    server: str | None = typer.Option(
+        None,
+        "--server",
+        "-s",
+        help="Server preset (small/medium/large/xlarge) or Hetzner type (cx23/cx33/cx43/cx53)",
+    ),
     keep: bool = typer.Option(False, "--keep", help="Keep VM alive after run"),
 ) -> None:
     """Run analysis on a cloud VM."""
@@ -44,4 +49,19 @@ def status() -> None:
 def destroy() -> None:
     """Destroy cloud server."""
     rc = run_make("cloud-destroy")
+    raise typer.Exit(rc)
+
+
+@app.command()
+def cleanup(
+    ttl_hours: float = typer.Option(4.0, "--ttl-hours", help="Max VM age in hours before destruction"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="List orphaned VMs without destroying them"),
+) -> None:
+    """Destroy orphaned cloud VMs older than TTL."""
+    args = []
+    if ttl_hours != 4.0:
+        args.extend(["--ttl-hours", str(ttl_hours)])
+    if dry_run:
+        args.append("--dry-run")
+    rc = run_script("cloud_cleanup.py", args)
     raise typer.Exit(rc)

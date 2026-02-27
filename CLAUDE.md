@@ -116,6 +116,7 @@ make export-results          # Export latest run to git results repository
 make cloud-setup             # One-time: terraform init for cloud runs
 make cloud-run REPO=<url>    # Spin up Hetzner VM, analyze, download results, destroy
 make cloud-destroy           # Destroy cloud server (if KEEP_SERVER=1 was used)
+make cloud-cleanup           # Destroy orphaned VMs older than TTL (needs hcloud CLI)
 ./scripts/caldera-run --repo=<url>  # Full dockerized pipeline (Mode 3)
 make github-setup            # One-time: terraform init for GitHub settings IaC
 make github-plan             # Preview GitHub settings changes (branches, protection, environments)
@@ -159,9 +160,11 @@ make docker-test-all REPO=<path> # Batch Docker vs native parity test (all tools
 | `BUNDLE_DIR` | `artifacts` | Bundle output directory for `make collect` |
 | `BUNDLE_TAR` | `1` | Create `.tar.gz` from bundle |
 | `CLONE_DEPTH` | unset | Clone depth for remote URLs (empty = full clone) |
-| `CLOUD_SERVER` | `cx33` | Hetzner server type for `make cloud-run` |
+| `CLOUD_SERVER` | `cx33` | Hetzner server type or preset name for `make cloud-run` |
 | `CLOUD_RESULTS` | `infra/results` | Local directory for cloud run results |
 | `KEEP_SERVER` | unset | Set to `1` to keep VM alive after cloud run |
+| `TTL_HOURS` | `4` | Max VM age in hours for `make cloud-cleanup` |
+| `DRY_RUN` | unset | Set to `1` for dry-run mode in `make cloud-cleanup` |
 | `RESULTS_REPO_URL` | unset | Git URL for results repository (`make export-results`) |
 | `PUSH` | unset | Set to `1` to push after export (`make export-results`) |
 | `MAX_PARALLEL` | `4` | Max parallel tool containers (docker/cloud modes) |

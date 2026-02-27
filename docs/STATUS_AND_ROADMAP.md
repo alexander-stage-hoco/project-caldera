@@ -26,6 +26,7 @@ Core platform is production-ready. All 18 tools pass compliance, all 3 productio
 - Run-over-run comparison and file-level regression detection analyses
 - Stakeholder report profiles (CTO, Investor, CEO) with tailored section selections
 - Unified `caldera` CLI with 10 subcommand groups (analyze, report, db, compliance, tools, dbt, export, cloud, docker, status)
+- Cloud operational improvements: cost tracking in manifests, orphan VM cleanup, server presets
 
 ### Gap Analysis
 
@@ -62,10 +63,10 @@ All 6 product spec deliverables now have implementations. Remaining gaps are pla
 - Incremental pipeline:
   - Skip unchanged tools on re-analysis of same repo
   - Content-hash-based cache invalidation
-- Cloud operational improvements:
-  - Embed Hetzner API cost per run in manifests
-  - Scheduled job to destroy orphaned VMs (TTL labels)
-  - Expose server type presets (cx22 for CI, cx42 for heavy workloads)
+- ~~Cloud operational improvements~~ **Done**:
+  - ~~Embed Hetzner API cost per run in manifests~~ (cost fields in cloud manifest section)
+  - ~~Scheduled job to destroy orphaned VMs (TTL labels)~~ (`make cloud-cleanup` + `created_at` labels)
+  - ~~Expose server type presets (small/medium/large/xlarge)~~ (`infra/server_presets.json`)
 
 ---
 

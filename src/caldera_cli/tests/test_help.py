@@ -44,6 +44,7 @@ runner = CliRunner()
         ["cloud", "run", "--help"],
         ["cloud", "status", "--help"],
         ["cloud", "destroy", "--help"],
+        ["cloud", "cleanup", "--help"],
         ["docker", "--help"],
         ["docker", "build", "--help"],
         ["docker", "pull", "--help"],

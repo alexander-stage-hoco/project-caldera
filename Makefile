@@ -4,7 +4,7 @@
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
 	orchestrate test pipeline-eval arch-review \
 	collect analyze-bundle prune-outputs export-results \
-	cloud-setup cloud-run cloud-status cloud-destroy \
+	cloud-setup cloud-run cloud-status cloud-destroy cloud-cleanup \
 	docker-build-base docker-build-tool docker-build-tools docker-test-tool \
 	docker-build-runner docker-build-orchestrator docker-build-all \
 	docker-pull-all docker-test-all \
@@ -149,7 +149,10 @@ help:
 	@echo "    make cloud-run REPO=<url>     Spin up VM, analyze, download results, destroy"
 	@echo "    make cloud-status             Check status of cloud servers and results"
 	@echo "    make cloud-destroy            Destroy cloud server (if --keep-server was used)"
-	@echo "    CLOUD_SERVER=cx42             Override server type (default: cx33)"
+	@echo "    make cloud-cleanup            Destroy orphaned VMs older than TTL"
+	@echo "    CLOUD_SERVER=cx42             Override server type or preset (default: medium/cx33)"
+	@echo "    TTL_HOURS=2                   TTL for cloud-cleanup (default: 4)"
+	@echo "    DRY_RUN=1                     Dry run for cloud-cleanup"
 	@echo ""
 	@echo "  GitHub IaC (branch protection, environments):"
 	@echo "    make github-setup             One-time: terraform init for infra/github"
@@ -589,6 +592,9 @@ cloud-destroy:
 	cd infra && terraform destroy -auto-approve \
 		-var="repo_url=placeholder" \
 		-var="server_type=$(CLOUD_SERVER)"
+
+cloud-cleanup:  ## Destroy orphaned cloud VMs older than TTL
+	.venv/bin/python scripts/cloud_cleanup.py $(if $(TTL_HOURS),--ttl-hours $(TTL_HOURS),) $(if $(DRY_RUN),--dry-run,)
 
 # =============================================================================
 # Docker Targets (Tool Containerization)

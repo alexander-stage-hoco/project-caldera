@@ -49,8 +49,9 @@ usage() {
     echo "  <repo-url>              Git URL of the repository to analyze (required)"
     echo ""
     echo "Options:"
-    echo "  --server <type>         Hetzner server type (default: cx33)"
-    echo "                          cx23=2vCPU/4GB, cx33=4/8, cx43=8/16, cx53=16/32"
+    echo "  --server <type|preset>  Server type or preset name (default: medium)"
+    echo "                          Presets: small (cx23), medium (cx33), large (cx43), xlarge (cx53)"
+    echo "                          Or raw types: cx23=2vCPU/4GB, cx33=4/8, cx43=8/16, cx53=16/32"
     echo "  --skip <tools>          Comma-separated tools to skip"
     echo "  --llm                   Enable LLM evaluation (needs ANTHROPIC_API_KEY in tfvars)"
     echo "  --parallel <n>          Max parallel tools (default: 4)"
@@ -78,6 +79,57 @@ if [ -z "${REPO_URL}" ]; then
     echo "ERROR: Repository URL is required."
     echo ""
     usage
+fi
+
+# ---------------------------------------------------------------------------
+# Resolve server preset to Hetzner type
+# ---------------------------------------------------------------------------
+
+PRESETS_FILE="${INFRA_DIR}/server_presets.json"
+
+resolve_preset() {
+    local input="$1"
+    if [ -f "${PRESETS_FILE}" ]; then
+        # Try to resolve via Python (handles both preset names and raw types)
+        local resolved
+        resolved=$(python3 -c "
+import json, sys
+with open('${PRESETS_FILE}') as f:
+    data = json.load(f)
+name = sys.argv[1]
+if name in data['presets']:
+    print(data['presets'][name]['server_type'])
+elif name in data['pricing_eur_per_hour']:
+    print(name)
+else:
+    print(name)  # pass through unknown types
+" "$input" 2>/dev/null)
+        echo "${resolved:-$input}"
+    else
+        echo "$input"
+    fi
+}
+
+SERVER_TYPE=$(resolve_preset "${SERVER_TYPE}")
+
+# Print server specs and cost rate
+if [ -f "${PRESETS_FILE}" ]; then
+    python3 -c "
+import json, sys
+with open('${PRESETS_FILE}') as f:
+    data = json.load(f)
+st = sys.argv[1]
+rate = data['pricing_eur_per_hour'].get(st)
+if rate:
+    # Find matching preset for use_case info
+    info = ''
+    for name, p in data['presets'].items():
+        if p['server_type'] == st:
+            info = f\" ({p['vcpu']} vCPU, {p['ram_gb']} GB RAM — {p['use_case']})\"
+            break
+    print(f'Server: {st}{info}')
+    print(f'Rate:   EUR {rate:.3f}/hour')
+" "${SERVER_TYPE}" 2>/dev/null || true
 fi
 
 # ---------------------------------------------------------------------------
@@ -288,6 +340,36 @@ if failed > 0:
     fail_names = [t['tool_name'] for t in tools if t.get('status') == 'failed']
     print(f\"  \033[31mFailed tools: {', '.join(fail_names)}\033[0m\")
 print('=' * 58)
+" 2>/dev/null || true
+    fi
+
+    # Show cost summary from manifest
+    if [ -n "${MANIFEST}" ]; then
+        python3 -c "
+import json, sys
+try:
+    with open('${MANIFEST}') as f:
+        m = json.load(f)
+    cloud = m.get('cloud', {})
+    cost = cloud.get('estimated_cost_eur')
+    if cost is not None:
+        rate = cloud.get('pricing_eur_per_hour', 0)
+        hours = cloud.get('billable_hours', 0)
+        dur = cloud.get('duration_seconds', 0)
+        st = cloud.get('server_type', '?')
+        mins = dur // 60
+        secs = dur % 60
+        print()
+        print('Cost Summary')
+        print('=' * 42)
+        print(f'  Server type:     {st}')
+        print(f'  Duration:        {mins}m {secs}s')
+        print(f'  Billable hours:  {hours}')
+        print(f'  Rate:            EUR {rate:.3f}/hour')
+        print(f'  Estimated cost:  EUR {cost:.4f}')
+        print('=' * 42)
+except Exception:
+    pass
 " 2>/dev/null || true
     fi
 

@@ -139,8 +139,9 @@ resource "hcloud_server" "runner" {
   ssh_keys    = [hcloud_ssh_key.caldera.id]
 
   labels = {
-    project = "caldera"
-    purpose = "analysis-run"
+    project    = "caldera"
+    purpose    = "analysis-run"
+    created_at = formatdate("YYYY-MM-DD-hh-mm-ss", timestamp())
   }
 
   # Cloud-init installs prerequisites and clones Caldera
