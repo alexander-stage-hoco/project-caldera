@@ -7,9 +7,12 @@ from __future__ import annotations
 import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ..data_fetcher import DataFetcher
+
+if TYPE_CHECKING:
+    from ..evidence.entities import EvidenceRegistry
 
 
 @dataclass
@@ -121,3 +124,18 @@ class BaseSection(ABC):
             Dictionary with minimal/empty data for graceful degradation.
         """
         return {}
+
+
+class EvidenceAwareSection(BaseSection):
+    """Mixin for sections that consume the evidence registry.
+
+    The generator injects the registry via ``set_evidence_registry()``
+    before calling ``fetch_data()``.  Subclasses access it through
+    ``self._evidence_registry``.
+    """
+
+    _evidence_registry: EvidenceRegistry | None = None
+
+    def set_evidence_registry(self, registry: EvidenceRegistry) -> None:
+        """Inject the evidence registry for this render pass."""
+        self._evidence_registry = registry

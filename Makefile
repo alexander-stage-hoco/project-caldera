@@ -4,7 +4,7 @@
 	tools-evaluate-llm tools-test tools-clean dbt-run dbt-test \
 	orchestrate test pipeline-eval arch-review \
 	collect analyze-bundle prune-outputs export-results \
-	cloud-setup cloud-run cloud-status cloud-destroy \
+	cloud-setup cloud-run cloud-status cloud-destroy cloud-cleanup \
 	docker-build-base docker-build-tool docker-build-tools docker-test-tool \
 	docker-build-runner docker-build-orchestrator docker-build-all \
 	docker-pull-all docker-test-all \
@@ -149,7 +149,10 @@ help:
 	@echo "    make cloud-run REPO=<url>     Spin up VM, analyze, download results, destroy"
 	@echo "    make cloud-status             Check status of cloud servers and results"
 	@echo "    make cloud-destroy            Destroy cloud server (if --keep-server was used)"
-	@echo "    CLOUD_SERVER=cx42             Override server type (default: cx33)"
+	@echo "    make cloud-cleanup            Destroy orphaned VMs older than TTL"
+	@echo "    CLOUD_SERVER=cx42             Override server type or preset (default: medium/cx33)"
+	@echo "    TTL_HOURS=2                   TTL for cloud-cleanup (default: 4)"
+	@echo "    DRY_RUN=1                     Dry run for cloud-cleanup"
 	@echo ""
 	@echo "  GitHub IaC (branch protection, environments):"
 	@echo "    make github-setup             One-time: terraform init for infra/github"
@@ -185,7 +188,12 @@ setup-core: ## Set up project venv only (no tool venvs/binaries)
 	@if [ ! -f .venv/bin/activate ]; then python3 -m venv .venv; fi
 	@.venv/bin/pip install --upgrade pip -q
 	@.venv/bin/pip install -r requirements.txt -q
+	@.venv/bin/pip install -e . -q
 	@echo "==> Core setup complete"
+
+cli-install: ## Install caldera CLI in editable mode
+	@.venv/bin/pip install -e . -q
+	@echo "caldera CLI installed. Run: caldera --help"
 
 analyze:
 	@test -n "$(REPO)" || (echo "Usage: make analyze REPO=/path/to/repo"; echo "       make analyze REPO=https://github.com/user/project"; exit 1)
@@ -339,6 +347,9 @@ dbt-test:
 dbt-test-reports:
 	@CALDERA_DB_PATH=$(ORCH_DB_PATH) DBT_PROFILES_DIR=$(DBT_PROFILES_DIR) $(DBT_BIN) test --project-dir $(DBT_PROJECT_DIR) --target-path /tmp/dbt_target --log-path /tmp/dbt_logs --select test_report_repo_health_snapshot_ccn_present test_report_repo_health_snapshot_scc_present
 
+MAX_PARALLEL ?= 1
+MODE ?= local
+
 orchestrate:
 	@test -n "$(ORCH_REPO_PATH)" || (echo "ORCH_REPO_PATH is required"; exit 1)
 	@test -n "$(ORCH_REPO_ID)" || (echo "ORCH_REPO_ID is required"; exit 1)
@@ -353,6 +364,8 @@ orchestrate:
 		--commit $(ORCH_COMMIT) \
 		--db-path $(ORCH_DB_PATH) \
 		--schema-path src/sot-engine/persistence/schema.sql \
+		--mode $(MODE) \
+		--max-parallel $(MAX_PARALLEL) \
 		$(if $(ORCH_OUTPUT_ROOT),--output-root $(ORCH_OUTPUT_ROOT),) \
 		$(if $(ORCH_SKIP_TOOLS),--skip-tools $(ORCH_SKIP_TOOLS),) \
 		$(if $(ORCH_LAYOUT_OUTPUT),--layout-output $(ORCH_LAYOUT_OUTPUT),) \
@@ -584,6 +597,9 @@ cloud-destroy:
 	cd infra && terraform destroy -auto-approve \
 		-var="repo_url=placeholder" \
 		-var="server_type=$(CLOUD_SERVER)"
+
+cloud-cleanup:  ## Destroy orphaned cloud VMs older than TTL
+	.venv/bin/python scripts/cloud_cleanup.py $(if $(TTL_HOURS),--ttl-hours $(TTL_HOURS),) $(if $(DRY_RUN),--dry-run,)
 
 # =============================================================================
 # Docker Targets (Tool Containerization)

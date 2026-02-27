@@ -47,7 +47,7 @@ Configured in `infra/terraform.tfvars`. See `terraform.tfvars.example` for the t
 | `hcloud_token` | Yes | — | Hetzner Cloud API token (read/write) |
 | `caldera_repo_url` | Yes | — | Git URL of your Caldera fork (cloned onto the VM) |
 | `repo_url` | — | Set by script | Target repo to analyze (passed by `cloud-run.sh`) |
-| `server_type` | No | `cx33` | VM size (see Server Types below) |
+| `server_type` | No | `cx33` | VM size (see Server Presets below) |
 | `location` | No | `nbg1` | Datacenter location |
 | `ssh_public_key_path` | No | `~/.ssh/id_ed25519.pub` | SSH public key for server access |
 | `ssh_private_key_path` | No | `~/.ssh/id_ed25519` | SSH private key for provisioner connections |
@@ -57,16 +57,65 @@ Configured in `infra/terraform.tfvars`. See `terraform.tfvars.example` for the t
 | `max_parallel` | No | `4` | Max parallel tool execution |
 | `results_dir` | No | `./results` | Local directory for downloaded results |
 
-## Server Types
+## Server Presets
 
-| Type | vCPU | RAM | Recommended for |
-|------|------|-----|-----------------|
-| `cx22` | 2 | 4 GB | Small repos (< 1k files) |
-| `cx32` | 4 | 8 GB | Medium repos — **default** |
-| `cx42` | 8 | 16 GB | Large repos or parallel-heavy runs |
-| `cx52` | 16 | 32 GB | Very large monorepos |
+Instead of remembering raw Hetzner type codes, use preset names:
+
+| Preset | Type | vCPU | RAM | Use case |
+|--------|------|------|-----|----------|
+| `small` | `cx23` | 2 | 4 GB | Small repos, CI |
+| `medium` | `cx33` | 4 | 8 GB | Medium repos — **default** |
+| `large` | `cx43` | 8 | 16 GB | Large repos, parallel-heavy |
+| `xlarge` | `cx53` | 16 | 32 GB | Very large monorepos |
+
+```bash
+# Use a preset name
+make cloud-run REPO=https://github.com/org/repo CLOUD_SERVER=large
+
+# Or a raw Hetzner type (still works)
+make cloud-run REPO=https://github.com/org/repo CLOUD_SERVER=cx43
+```
+
+Presets and pricing are defined in `infra/server_presets.json` (single source of truth).
 
 All types use shared vCPU (Intel). Pricing is per-hour; a typical run costs a few cents.
+
+## Cost Tracking
+
+Cloud run manifests automatically include cost estimates:
+
+```json
+{
+  "cloud": {
+    "server_type": "cx33",
+    "duration_seconds": 842,
+    "estimated_cost_eur": 0.013,
+    "pricing_eur_per_hour": 0.013,
+    "billable_hours": 1
+  }
+}
+```
+
+Pricing data is inlined in `run-analysis.sh` (mirroring `server_presets.json`) since the remote VM doesn't have the presets file. The cost summary is also printed at the end of `cloud-run.sh`.
+
+## VM Cleanup
+
+Orphaned VMs (e.g. from interrupted runs) can be destroyed automatically:
+
+```bash
+# List orphaned VMs (default TTL: 4 hours)
+make cloud-cleanup DRY_RUN=1
+
+# Destroy orphaned VMs
+make cloud-cleanup
+
+# Custom TTL
+make cloud-cleanup TTL_HOURS=2
+```
+
+Requires the `hcloud` CLI (`brew install hcloud`) with a configured context. The cleanup script finds servers with the `project=caldera` label and destroys any older than the TTL based on the Hetzner API `created` timestamp.
+
+Server labels include `created_at` for traceability (set by Terraform).
 
 ## Datacenter Locations
 
@@ -121,6 +170,9 @@ The `manifest.json` follows the canonical bundle schema with a `cloud` extension
     "mode": "cloud-hetzner",
     "server_type": "cx33",
     "duration_seconds": 842,
+    "estimated_cost_eur": 0.013,
+    "pricing_eur_per_hour": 0.013,
+    "billable_hours": 1,
     "skip_tools": [],
     "pipeline_llm": false
   },
@@ -191,5 +243,8 @@ cd infra && terraform destroy -auto-approve -var="repo_url=placeholder"
 | `infra/main.tf` | Terraform config (server, provisioners, outputs) |
 | `infra/cloud-init.yml` | Cloud-init template (packages, Caldera clone) |
 | `infra/run-analysis.sh` | Remote analysis script (uploaded to VM via Terraform) |
+| `infra/server_presets.json` | Server presets and pricing (single source of truth) |
+| `infra/cloud_pricing.py` | Python pricing utilities (cost estimation, preset resolution) |
 | `infra/terraform.tfvars.example` | Template for required variables |
 | `scripts/cloud-run.sh` | Local orchestrator (parses args, runs terraform apply/destroy) |
+| `scripts/cloud_cleanup.py` | Orphan VM cleanup (TTL-based destruction via hcloud CLI) |

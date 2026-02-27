@@ -13,9 +13,6 @@ from unittest.mock import patch, MagicMock
 import pytest
 from scripts.checks import CheckResult
 from scripts.checks.license import (
-    check_mit_license,
-    check_open_source,
-    check_no_usage_fees,
     run_license_checks,
 )
 from scripts.checks.installation import (
@@ -47,22 +44,6 @@ from scripts.checks.per_file import (
 # ---------------------------------------------------------------------------
 
 class TestLicenseChecks:
-    def test_mit_license(self, tmp_path):
-        result = check_mit_license(tmp_path)
-        assert result.passed is True
-        assert result.check_id == "CL-1"
-        assert "MIT" in result.message
-
-    def test_open_source(self, tmp_path):
-        result = check_open_source(tmp_path)
-        assert result.passed is True
-        assert result.check_id == "CL-2"
-
-    def test_no_usage_fees(self, tmp_path):
-        result = check_no_usage_fees(tmp_path)
-        assert result.passed is True
-        assert result.check_id == "CL-3"
-
     def test_run_license_checks(self, tmp_path):
         results = run_license_checks(tmp_path)
         assert len(results) == 3

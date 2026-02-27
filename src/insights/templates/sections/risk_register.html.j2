@@ -1,0 +1,68 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Risk Register</h2>
+
+    {% if has_data %}
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Risks</div>
+            <div class="value">{{ total_risks }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Critical</div>
+            <div class="value" style="color: var(--color-critical);">{{ critical_count }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">High</div>
+            <div class="value" style="color: var(--color-high);">{{ high_count }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Medium</div>
+            <div class="value">{{ medium_count }}</div>
+        </div>
+    </div>
+
+    {% for severity in ["critical", "high", "medium", "low"] %}
+    {% set sev_risks = risks_by_severity[severity] %}
+    {% if sev_risks %}
+    <div class="subsection">
+        <h3>{{ severity | upper }} Risks</h3>
+        {% for risk in sev_risks %}
+        <div class="risk-entry" style="border-left: 3px solid var(--color-{{ severity }}, #666); padding-left: 1rem; margin-bottom: 1.5rem;">
+            <h4>{{ risk.risk_id }}: {{ risk.triggered_by }}</h4>
+            <p><strong>Description:</strong> {{ risk.description }}</p>
+            <p><strong>Technical cause:</strong> {{ risk.technical_cause }}</p>
+            <p><strong>Supporting claims:</strong> {{ risk.claim_count }}</p>
+
+            {% if risk.claims %}
+            <details>
+                <summary>View claims</summary>
+                <ul>
+                {% for claim in risk.claims %}
+                    <li><code>{{ claim.claim_id }}</code> — {{ claim.statement }} <em>({{ claim.confidence }})</em></li>
+                {% endfor %}
+                </ul>
+            </details>
+            {% endif %}
+
+            {% if risk.manifests_in %}
+            <details>
+                <summary>Affected locations ({{ risk.manifests_in | length }})</summary>
+                <ul>
+                {% for loc in risk.manifests_in %}
+                    <li><code>{{ loc }}</code></li>
+                {% endfor %}
+                </ul>
+            </details>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    {% else %}
+    <div class="empty-state">
+        <p>No execution risks identified in this run.</p>
+    </div>
+    {% endif %}
+</section>

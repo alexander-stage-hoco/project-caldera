@@ -1,0 +1,17 @@
+{
+  "presets": {
+    "small":   { "server_type": "cx23", "vcpu": 2,  "ram_gb": 4,  "use_case": "Small repos, CI" },
+    "medium":  { "server_type": "cx33", "vcpu": 4,  "ram_gb": 8,  "use_case": "Medium repos (default)" },
+    "large":   { "server_type": "cx43", "vcpu": 8,  "ram_gb": 16, "use_case": "Large repos, parallel-heavy" },
+    "xlarge":  { "server_type": "cx53", "vcpu": 16, "ram_gb": 32, "use_case": "Very large monorepos" }
+  },
+  "pricing_eur_per_hour": {
+    "cx23": 0.007,
+    "cx33": 0.013,
+    "cx43": 0.025,
+    "cx53": 0.050
+  },
+  "billing_increment_seconds": 3600,
+  "default_preset": "medium",
+  "ttl_hours": 4
+}

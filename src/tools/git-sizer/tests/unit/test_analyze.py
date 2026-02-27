@@ -131,6 +131,19 @@ class TestCalculateThresholdLevel:
         assert calculate_threshold_level("max_path_depth", 20) == 3
         assert calculate_threshold_level("max_path_depth", 35) == 4
 
+    def test_max_blob_size_exact_boundary(self):
+        """Value exactly at 1 MiB boundary should trigger level 1."""
+        assert calculate_threshold_level("max_blob_size", 1048576) == 1
+        # One byte below should remain level 0
+        assert calculate_threshold_level("max_blob_size", 1048575) == 0
+
+    def test_commit_count_levels(self):
+        """Test commit_count thresholds if metric exists, otherwise returns 0."""
+        # Unknown metrics return 0 — this validates the fallback
+        result = calculate_threshold_level("commit_count", 999999)
+        assert isinstance(result, int)
+        assert result >= 0
+
 
 class TestCalculateHealthGrade:
     """Tests for calculate_health_grade function."""

@@ -7,12 +7,16 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tarfile
 import time
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+from common.identifier_validation import validate_safe_identifier
 
 
 def _utc_now_iso() -> str:
@@ -181,7 +185,12 @@ def main() -> int:
         raise SystemExit("--include-coverage-ingest requires --coverage-file")
     tools = [t for t in _find_tools(tools_root) if t not in skip]
 
+    validate_safe_identifier(repo_id, "repo_id")
+    validate_safe_identifier(run_id, "run_id")
+
     bundle_root = out_dir / repo_id / run_id
+    bundle_root.resolve().relative_to(out_dir.resolve())  # raises ValueError on escape
+
     if bundle_root.exists():
         shutil.rmtree(bundle_root)
     bundle_root.mkdir(parents=True, exist_ok=True)

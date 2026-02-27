@@ -222,6 +222,71 @@ class TestBuildAnalysisData:
         assert data["files"] == {}
         assert data["directories"] == {}
 
+    def test_multiple_findings_same_file_grouped_correctly(self) -> None:
+        """Multiple secrets in the same file should produce one file entry with correct count."""
+        finding1 = SecretFinding(
+            file_path="config/.env",
+            line_number=5,
+            rule_id="generic-api-key",
+            secret_type="generic-api-key",
+            description="Generic API Key",
+            secret_preview="sk_live****",
+            entropy=4.5,
+            commit_hash="abc123",
+            commit_author="dev@test.com",
+            commit_date="2026-01-01",
+            fingerprint="fp1",
+            in_current_head=True,
+            severity="HIGH",
+        )
+        finding2 = SecretFinding(
+            file_path="config/.env",
+            line_number=12,
+            rule_id="aws-access-key-id",
+            secret_type="aws-access-key-id",
+            description="AWS Access Key",
+            secret_preview="AKIA****",
+            entropy=3.8,
+            commit_hash="abc123",
+            commit_author="dev@test.com",
+            commit_date="2026-01-01",
+            fingerprint="fp2",
+            in_current_head=True,
+            severity="CRITICAL",
+        )
+        file_summary = FileSummary(
+            file_path="config/.env",
+            secret_count=2,
+            rule_ids=["generic-api-key", "aws-access-key-id"],
+            earliest_commit="abc123",
+            latest_commit="abc123",
+        )
+        analysis = SecretAnalysis(
+            repo_name="test-repo",
+            repo_path="/tmp/test-repo",
+            tool_version="8.18.4",
+            total_secrets=2,
+            unique_secrets=2,
+            secrets_in_head=2,
+            secrets_in_history=0,
+            files_with_secrets=1,
+            commits_with_secrets=1,
+            secrets_by_rule={"generic-api-key": 1, "aws-access-key-id": 1},
+            secrets_by_severity={"HIGH": 1, "CRITICAL": 1},
+            findings=[finding1, finding2],
+            files={"config/.env": file_summary},
+            directories={},
+        )
+        data = build_analysis_data(analysis, "8.18.4")
+
+        # Two findings but only one file entry
+        assert len(data["findings"]) == 2
+        assert len(data["files"]) == 1
+
+        file_data = list(data["files"].values())[0]
+        assert file_data["secret_count"] == 2
+        assert set(file_data["rule_ids"]) == {"generic-api-key", "aws-access-key-id"}
+
     def test_with_repo_root_normalizes_paths(self, tmp_path: Path) -> None:
         """Passing repo_root should normalize file paths."""
         finding = SecretFinding(

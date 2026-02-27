@@ -348,3 +348,42 @@ class TestCategoryMapCompleteness:
         assert total_exact >= 100, f"Only {total_exact} exact rules mapped"
         # And at least 15 prefix patterns
         assert total_prefix >= 15, f"Only {total_prefix} prefix patterns"
+
+
+class TestViolationPathNormalization:
+    """Tests for file path handling in parsed violations."""
+
+    def test_file_uri_preserved_in_raw_parse(self, tmp_path):
+        """parse_sarif preserves the URI as-is; stripping happens downstream."""
+        sarif_data = {
+            "version": "2.1.0",
+            "runs": [{
+                "tool": {"driver": {"name": "test", "rules": []}},
+                "results": [{
+                    "ruleId": "CA1001",
+                    "level": "warning",
+                    "message": {"text": "Test violation"},
+                    "locations": [{
+                        "physicalLocation": {
+                            "artifactLocation": {
+                                "uri": "file:///repo/src/Program.cs"
+                            },
+                            "region": {"startLine": 10}
+                        }
+                    }]
+                }]
+            }]
+        }
+        sarif_path = tmp_path / "uri_test.sarif"
+        sarif_path.write_text(json.dumps(sarif_data))
+
+        violations = parse_sarif(sarif_path)
+
+        assert len(violations) == 1
+        # parse_sarif stores the raw URI; path normalization happens later
+        assert "Program.cs" in violations[0].file_path
+
+    def test_severity_map_covers_expected_sarif_levels(self):
+        """SEVERITY_MAP should cover the SARIF levels actually used by Roslyn."""
+        for sarif_level in ["error", "warning", "info", "none", "hidden"]:
+            assert sarif_level in SEVERITY_MAP, f"SARIF level '{sarif_level}' not in SEVERITY_MAP"

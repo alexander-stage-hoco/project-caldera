@@ -1,0 +1,62 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Claim Register</h2>
+
+    {% if has_data %}
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Total Claims</div>
+            <div class="value">{{ total_claims }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">High Confidence</div>
+            <div class="value">{{ confidence_distribution.high }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Medium Confidence</div>
+            <div class="value">{{ confidence_distribution.medium }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Low Confidence</div>
+            <div class="value">{{ confidence_distribution.low }}</div>
+        </div>
+    </div>
+
+    {% for cat in categories %}
+    <div class="subsection">
+        <h3>{{ cat.category | title }} ({{ cat.claim_count }})</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Claim ID</th>
+                    <th>Statement</th>
+                    <th>Confidence</th>
+                    <th>Evidence</th>
+                    <th>Rule</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for claim in cat.claims %}
+                <tr>
+                    <td><code>{{ claim.claim_id }}</code></td>
+                    <td>
+                        {{ claim.statement }}
+                        {% if claim.implication %}
+                        <br><small><em>{{ claim.implication }}</em></small>
+                        {% endif %}
+                    </td>
+                    <td>{{ claim.confidence }}</td>
+                    <td>{{ claim.evidence_count }} item(s)</td>
+                    <td><small>{{ claim.triggered_by }}</small></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <div class="empty-state">
+        <p>No claims generated in this run.</p>
+    </div>
+    {% endif %}
+</section>

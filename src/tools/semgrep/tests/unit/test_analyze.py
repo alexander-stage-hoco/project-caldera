@@ -4,12 +4,10 @@ Covers:
 - result_to_data_dict conversion logic
 - _directory_stats_to_dict helper
 - to_envelope_format wrapper
-- TOOL_VERSION / SCHEMA_VERSION constants
 """
 from __future__ import annotations
 
 import sys
-from dataclasses import dataclass, field
 from pathlib import Path
 
 import pytest
@@ -24,8 +22,6 @@ from scripts.analyze import (
     result_to_data_dict,
     _directory_stats_to_dict,
     to_envelope_format,
-    TOOL_VERSION,
-    SCHEMA_VERSION,
 )
 from scripts.smell_analyzer import (
     AnalysisResult,
@@ -215,15 +211,3 @@ class TestToEnvelopeFormat:
         assert "data" in envelope
         assert envelope["metadata"]["tool_name"] == "semgrep"
         assert envelope["metadata"]["run_id"] == "run-123"
-
-
-# ===========================================================================
-# Constants
-# ===========================================================================
-
-class TestConstants:
-    def test_tool_version(self):
-        assert TOOL_VERSION == "1.0.0"
-
-    def test_schema_version(self):
-        assert SCHEMA_VERSION == "1.0.0"

@@ -416,3 +416,107 @@ class TestMain:
         data = json.loads(output_file.read_text())
         summary = data["envelope"]["summary"]
         assert summary["overall_branch_coverage_pct"] == 50.0
+
+
+class TestDirectoryLevelAggregation:
+    """Tests for directory-level coverage aggregation."""
+
+    def test_files_in_multiple_directories(self, tmp_path: Path) -> None:
+        """compute_summary handles files spread across different directories."""
+        coverages = [
+            {
+                "relative_path": "src/core/engine.py",
+                "lines_total": 100,
+                "lines_covered": 80,
+                "branches_total": None,
+                "branches_covered": None,
+            },
+            {
+                "relative_path": "src/utils/helpers.py",
+                "lines_total": 50,
+                "lines_covered": 25,
+                "branches_total": None,
+                "branches_covered": None,
+            },
+            {
+                "relative_path": "tests/test_engine.py",
+                "lines_total": 30,
+                "lines_covered": 30,
+                "branches_total": None,
+                "branches_covered": None,
+            },
+        ]
+        summary = compute_summary(coverages)
+
+        assert summary["total_files"] == 3
+        assert summary["files_with_coverage"] == 3
+        assert summary["total_lines"] == 180
+        assert summary["total_lines_covered"] == 135
+        assert summary["overall_line_coverage_pct"] == 75.0
+
+    def test_mixed_directories_with_zero_coverage_file(self) -> None:
+        """A file with 0% coverage but >0 total lines still counts as having coverage data."""
+        coverages = [
+            {
+                "relative_path": "src/main.py",
+                "lines_total": 100,
+                "lines_covered": 100,
+                "branches_total": None,
+                "branches_covered": None,
+            },
+            {
+                "relative_path": "lib/vendor.py",
+                "lines_total": 200,
+                "lines_covered": 0,
+                "branches_total": None,
+                "branches_covered": None,
+            },
+        ]
+        summary = compute_summary(coverages)
+
+        assert summary["total_files"] == 2
+        # files_with_coverage counts files with lines_total > 0
+        assert summary["files_with_coverage"] == 2
+        assert summary["total_lines"] == 300
+        assert summary["total_lines_covered"] == 100
+        assert summary["overall_line_coverage_pct"] == 33.33
+
+
+class TestZeroCoverageEdgeCases:
+    """Tests for line_coverage_pct=0 (falsy but valid)."""
+
+    def test_zero_coverage_pct_is_valid(self, tmp_path: Path) -> None:
+        """A file with line_coverage_pct=0.0 should be preserved as 0.0, not None."""
+        coverages = [
+            FileCoverage(
+                relative_path="src/uncovered.py",
+                line_coverage_pct=0.0,
+                branch_coverage_pct=None,
+                lines_total=50,
+                lines_covered=0,
+                lines_missed=50,
+                branches_total=None,
+                branches_covered=None,
+            ),
+        ]
+        with patch("scripts.analyze.normalize_file_path", side_effect=lambda p, r: p):
+            results = normalize_coverage_paths(coverages, tmp_path)
+
+        assert len(results) == 1
+        assert results[0]["line_coverage_pct"] == 0.0
+        assert results[0]["lines_covered"] == 0
+        assert results[0]["lines_missed"] == 50
+
+    def test_zero_coverage_contributes_to_summary(self) -> None:
+        """Files with 0% coverage but >0 lines still count as having coverage data."""
+        coverages = [
+            {"lines_total": 100, "lines_covered": 0, "branches_total": None, "branches_covered": None},
+        ]
+        summary = compute_summary(coverages)
+
+        assert summary["total_files"] == 1
+        # files_with_coverage = files where lines_total > 0 (they have coverage instrumentation)
+        assert summary["files_with_coverage"] == 1
+        assert summary["total_lines"] == 100
+        assert summary["total_lines_covered"] == 0
+        assert summary["overall_line_coverage_pct"] == 0.0

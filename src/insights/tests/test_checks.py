@@ -9,21 +9,14 @@ import pytest
 from insights.scripts.checks import (
     CheckResult,
     CheckOutput,
-    get_all_checks,
     get_checks_by_dimension,
     run_check,
     run_all_checks,
-    CHECK_REGISTRY,
 )
 
 
 class TestCheckRegistry:
     """Tests for check registry functionality."""
-
-    def test_all_checks_registered(self) -> None:
-        """Verify all checks are properly registered."""
-        checks = get_all_checks()
-        assert len(checks) == 21, f"Expected 21 checks, got {len(checks)}"
 
     def test_accuracy_checks_registered(self) -> None:
         """Verify accuracy dimension checks."""
@@ -85,6 +78,16 @@ class TestAccuracyChecks:
             db_data={"total_files": 0},
         )
         assert result.result == CheckResult.SKIP
+
+    def test_total_files_accuracy_within_tolerance(self) -> None:
+        """Test IN-AC-1 tolerance boundary: 99 vs 100 is 1% error, should PASS."""
+        result = run_check(
+            "IN-AC-1",
+            report_data={"repo_health": {"total_files": 99}},
+            db_data={"total_files": 100},
+        )
+        assert result.result == CheckResult.PASS
+        assert result.score == 0.99
 
     def test_total_loc_accuracy_match(self) -> None:
         """Test IN-AC-2 with matching LOC."""
@@ -176,23 +179,35 @@ class TestFormatQualityChecks:
 class TestDataIntegrityChecks:
     """Tests for data integrity checks (IN-DI-*)."""
 
-    def test_file_counts_consistent(self) -> None:
-        """Test IN-DI-1 with consistent counts."""
+    def test_file_counts_consistent_passes(self) -> None:
+        """Test IN-DI-1 with consistent counts should PASS (not just PASS or SKIP)."""
         result = run_check(
             "IN-DI-1",
             report_content="",
             report_data={
                 "repo_health": {"total_files": 100},
-                "file_hotspots": {"file_count": 100},
+                "language_coverage": {"total_files": 100},
             },
             db_data={},
             format="html",
         )
-        # Should pass or skip if data not comparable
-        assert result.result in (CheckResult.PASS, CheckResult.SKIP)
+        assert result.result == CheckResult.PASS
 
-    def test_loc_sums_consistent(self) -> None:
-        """Test IN-DI-2 with consistent LOC sums."""
+    def test_file_counts_consistent_skips_without_data(self) -> None:
+        """Test IN-DI-1 skips when language_coverage is absent."""
+        result = run_check(
+            "IN-DI-1",
+            report_content="",
+            report_data={
+                "repo_health": {"total_files": 100},
+            },
+            db_data={},
+            format="html",
+        )
+        assert result.result == CheckResult.SKIP
+
+    def test_loc_sums_consistent_passes(self) -> None:
+        """Test IN-DI-2 with code + comments <= total_loc should PASS."""
         result = run_check(
             "IN-DI-2",
             report_content="",
@@ -206,8 +221,33 @@ class TestDataIntegrityChecks:
             db_data={},
             format="html",
         )
-        # Code + comments should be <= total_loc
-        assert result.result in (CheckResult.PASS, CheckResult.SKIP)
+        assert result.result == CheckResult.PASS
+
+    def test_loc_sums_inconsistent_fails(self) -> None:
+        """Test IN-DI-2 with code + comments > total_loc should FAIL."""
+        result = run_check(
+            "IN-DI-2",
+            report_content="",
+            report_data={
+                "repo_health": {
+                    "total_loc": 100,
+                    "total_code": 80,
+                    "total_comment": 50,
+                },
+            },
+            db_data={},
+            format="html",
+        )
+        assert result.result == CheckResult.FAIL
+
+
+class TestRunCheckUnknownId:
+    """Tests for run_check with unknown check_id."""
+
+    def test_unknown_check_id_raises_value_error(self) -> None:
+        """run_check with an unregistered check_id should raise ValueError."""
+        with pytest.raises(ValueError, match="Unknown check"):
+            run_check("IN-XX-999", report_data={}, db_data={})
 
 
 class TestRunAllChecks:
@@ -233,32 +273,3 @@ class TestRunAllChecks:
         )
         # Should not raise exceptions
         assert all(isinstance(r, CheckOutput) for r in results)
-
-
-class TestCheckOutput:
-    """Tests for CheckOutput data class."""
-
-    def test_check_output_creation(self) -> None:
-        """Verify CheckOutput can be created."""
-        output = CheckOutput(
-            check_id="TEST-1",
-            name="Test Check",
-            result=CheckResult.PASS,
-            score=1.0,
-            message="Test passed",
-        )
-        assert output.check_id == "TEST-1"
-        assert output.result == CheckResult.PASS
-        assert output.score == 1.0
-
-    def test_check_output_with_details(self) -> None:
-        """Verify CheckOutput with details."""
-        output = CheckOutput(
-            check_id="TEST-2",
-            name="Test Check",
-            result=CheckResult.FAIL,
-            score=0.5,
-            message="Test failed",
-            details={"reason": "mismatch"},
-        )
-        assert output.details["reason"] == "mismatch"

@@ -61,10 +61,24 @@ help:  ## Show this help message
 setup: setup-gitleaks $(VENV_READY)  ## Set up gitleaks and virtual environment
 	@echo "Setup complete"
 
+# SHA256 checksums per platform (gitleaks v8.18.4)
+GITLEAKS_SHA256_darwin_arm64 := a480d8593acd8215b22402cf0f3f88b01dcd3610c63b5391db640f7767e62104
+GITLEAKS_SHA256_darwin_x64   := 1a69e5666b13cd374889cbcb1939ed1573b63b551251283d5d2329a53cf58e2f
+GITLEAKS_SHA256_linux_x64    := ba6dbb656933921c775ee5a2d1c13a91046e7952e9d919f9bac4cec61d628e7d
+GITLEAKS_SHA256_linux_arm64  := bf5f7f466ebfade1296c8bd32cf7d3f592c2aa78836aa9980ffbe2cadca7a861
+
 setup-gitleaks:
 	@echo "Installing gitleaks $(GITLEAKS_VERSION)..."
 	@mkdir -p bin
-	@curl -sL $(GITLEAKS_URL) | tar -xz -C bin gitleaks
+	@EXPECTED="$(GITLEAKS_SHA256_$(GITLEAKS_PLATFORM))"; \
+	curl -sL $(GITLEAKS_URL) -o /tmp/gitleaks.tar.gz; \
+	if [ -n "$$EXPECTED" ]; then \
+		echo "$$EXPECTED  /tmp/gitleaks.tar.gz" | $(SHA256_CMD) -c - || { echo "ERROR: checksum mismatch"; rm -f /tmp/gitleaks.tar.gz; exit 1; }; \
+	else \
+		echo "WARNING: no checksum configured for $(GITLEAKS_PLATFORM), skipping verification"; \
+	fi; \
+	tar -xz -C bin gitleaks < /tmp/gitleaks.tar.gz; \
+	rm -f /tmp/gitleaks.tar.gz
 	@chmod +x bin/gitleaks
 	@echo "gitleaks installed at bin/gitleaks"
 	@bin/gitleaks version
