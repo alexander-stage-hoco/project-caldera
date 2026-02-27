@@ -33,7 +33,7 @@ class TestEvidenceCollector:
                 {
                     "relative_path": "src/heavy.py",
                     "loc_total": 500,
-                    "max_ccn": 25,
+                    "complexity_max": 25,
                     "total_ccn": 100,
                     "function_count": 10,
                     "avg_ccn": 10.0,
@@ -131,9 +131,9 @@ class TestEvidenceCollector:
         collector = EvidenceCollector()
         fetcher = self._make_fetcher({
             "evidence_complexity": [
-                {"relative_path": "a.py", "loc_total": 100, "max_ccn": 20, "function_count": 5, "tool_run_pk": 1},
-                {"relative_path": "b.py", "loc_total": 200, "max_ccn": 30, "function_count": 8, "tool_run_pk": 1},
-                {"relative_path": "c.py", "loc_total": 300, "max_ccn": 40, "function_count": 12, "tool_run_pk": 1},
+                {"relative_path": "a.py", "loc_total": 100, "complexity_max": 20, "function_count": 5, "tool_run_pk": 1},
+                {"relative_path": "b.py", "loc_total": 200, "complexity_max": 30, "function_count": 8, "tool_run_pk": 1},
+                {"relative_path": "c.py", "loc_total": 300, "complexity_max": 40, "function_count": 12, "tool_run_pk": 1},
             ],
         })
         items = collector.collect(fetcher, run_pk=1)
@@ -148,7 +148,7 @@ class TestEvidenceCollector:
         collector = EvidenceCollector()
         fetcher = self._make_fetcher({
             "evidence_complexity": [
-                {"relative_path": "null.py", "loc_total": None, "max_ccn": None, "function_count": None, "tool_run_pk": 1},
+                {"relative_path": "null.py", "loc_total": None, "complexity_max": None, "function_count": None, "tool_run_pk": 1},
             ],
         })
         items = collector.collect(fetcher, run_pk=1)
@@ -182,12 +182,12 @@ class TestEvidenceCollector:
         """Verify all 6 categories are attempted."""
         collector = EvidenceCollector()
         fetcher = self._make_fetcher({
-            "evidence_complexity": [{"relative_path": "a.py", "loc_total": 100, "max_ccn": 20, "total_ccn": 20, "function_count": 2, "avg_ccn": 10.0, "tool_run_pk": 1}],
+            "evidence_complexity": [{"relative_path": "a.py", "loc_total": 100, "complexity_max": 20, "total_ccn": 20, "function_count": 2, "avg_ccn": 10.0, "tool_run_pk": 1}],
             "evidence_security": [{"finding_type": "cve", "location": "b.py", "finding_id": "CVE-1", "severity": "HIGH", "description": "vuln", "package_name": "pkg", "installed_version": "1", "fixed_version": "2", "tool_run_pk": 1}],
             "evidence_coupling": [{"symbol_name": "X", "symbol_type": "class", "relative_path": "c.py", "fan_in": 1, "fan_out": 10, "total_coupling": 11, "instability": 0.9, "coupling_risk": "high", "coupling_pattern": "hub", "tool_run_pk": 1}],
-            "evidence_coverage": [{"relative_path": "d.py", "loc_total": 200, "max_ccn": 20, "total_ccn": 20, "function_count": 3, "line_coverage_pct": 20, "branch_coverage_pct": 10, "tool_run_pk": 1}],
+            "evidence_coverage": [{"relative_path": "d.py", "loc_total": 200, "complexity_max": 20, "total_ccn": 20, "function_count": 3, "coverage_line_pct": 20, "branch_coverage_pct": 10, "tool_run_pk": 1}],
             "evidence_ownership": [{"relative_path": "e.py", "unique_authors": 1, "top_author": "dev", "top_author_pct": 100, "total_lines": 600, "risk_level": "critical", "tool_run_pk": 1}],
-            "evidence_quality": [{"relative_path": "f.py", "loc_total": 200, "smell_count": 10, "issue_count": 5, "smell_density_per_kloc": 50, "issue_density_per_kloc": 25, "tool_run_pk": 1}],
+            "evidence_quality": [{"relative_path": "f.py", "loc_total": 200, "semgrep_smell_count": 10, "devskim_issue_count": 5, "smell_density_per_kloc": 50, "issue_density_per_kloc": 25, "tool_run_pk": 1}],
         })
         items = collector.collect(fetcher, run_pk=1)
         categories = {i.category for i in items}

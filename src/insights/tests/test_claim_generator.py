@@ -86,7 +86,7 @@ class TestKnowledgeSiloRule:
 class TestCoverageGapRule:
     def test_fires_for_low_coverage_high_ccn(self):
         rule = CoverageGapRule()
-        ev = _evidence("E-COV-001", "coverage", excerpt="coverage=20%, max_ccn=25, loc=500")
+        ev = _evidence("E-COV-001", "coverage", excerpt="coverage=20%, complexity_max=25, loc=500")
         claims = rule.evaluate([ev], _mock_fetcher(), 1)
         assert len(claims) == 1
         assert "high-risk" in claims[0].statement.lower()
@@ -94,7 +94,7 @@ class TestCoverageGapRule:
 
     def test_medium_confidence_for_moderate_coverage(self):
         rule = CoverageGapRule()
-        ev = _evidence("E-COV-001", "coverage", excerpt="coverage=40%, max_ccn=20, loc=300")
+        ev = _evidence("E-COV-001", "coverage", excerpt="coverage=40%, complexity_max=20, loc=300")
         claims = rule.evaluate([ev], _mock_fetcher(), 1)
         assert len(claims) == 1
         assert claims[0].confidence == "medium"
@@ -154,7 +154,7 @@ class TestComplexityConcentrationRule:
     def test_fires_when_gini_above_threshold(self):
         """Gini > 0.7 with matching complexity evidence → claim generated."""
         rule = ComplexityConcentrationRule()
-        ev = _evidence("E-CCN-001", "complexity", location="src/heavy.py", excerpt="max_ccn=25")
+        ev = _evidence("E-CCN-001", "complexity", location="src/heavy.py", excerpt="complexity_max=25")
         fetcher = _mock_fetcher({
             "claim_complexity_concentration": [
                 {"directory_path": "src", "gini_ccn": 0.85, "file_count": 15},
@@ -378,7 +378,7 @@ class TestExcerptParsing:
         assert _parse_int_from_excerpt("nothing here", "authors=") == 0
 
     def test_parse_float(self):
-        assert _parse_float_from_excerpt("coverage=45.5%, max_ccn=10", "coverage=") == 45.5
+        assert _parse_float_from_excerpt("coverage=45.5%, complexity_max=10", "coverage=") == 45.5
 
     def test_parse_float_missing(self):
         assert _parse_float_from_excerpt("nothing", "coverage=") == 0.0

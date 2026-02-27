@@ -107,6 +107,26 @@ def ensure_schema(conn: duckdb.DuckDBPyConnection, schema_path: Path) -> None:
             "lz_collection_runs missing. Apply schema.sql before running orchestrator."
         )
 
+    _apply_migrations(conn)
+
+
+# -- Schema migrations --------------------------------------------------------
+# Each entry is an idempotent ALTER TABLE statement for columns added after the
+# initial schema.sql release.  DuckDB supports ADD COLUMN IF NOT EXISTS.
+
+_MIGRATIONS: tuple[str, ...] = (
+    "ALTER TABLE lz_layout_files ADD COLUMN IF NOT EXISTS stable_fingerprint VARCHAR",
+)
+
+
+def _apply_migrations(conn: duckdb.DuckDBPyConnection) -> None:
+    """Run idempotent schema migrations on an existing database."""
+    for stmt in _MIGRATIONS:
+        try:
+            conn.execute(stmt)
+        except Exception as exc:
+            _log.warning("Migration skipped (%s): %s", stmt.split()[:5], exc)
+
 
 def load_payload(path: Path) -> dict:
     return json.loads(path.read_text())

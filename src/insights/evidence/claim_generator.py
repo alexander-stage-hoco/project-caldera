@@ -184,7 +184,7 @@ class CoverageGapRule(ClaimRule):
 
         for i, ev in enumerate(coverage_evidence, start=1):
             coverage = _parse_float_from_excerpt(ev.excerpt, "coverage=")
-            ccn = _parse_int_from_excerpt(ev.excerpt, "max_ccn=")
+            ccn = _parse_int_from_excerpt(ev.excerpt, "complexity_max=")
             claims.append(
                 TechnicalClaim(
                     claim_id=f"CLM-{self.abbr}-{i:03d}",
