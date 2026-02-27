@@ -284,7 +284,8 @@ if [ ! -d "${RESULTS_DIR}" ] || [ -z "$(ls -A "${RESULTS_DIR}" 2>/dev/null)" ]; 
     exit 1
 fi
 
-MANIFEST=$(find "${RESULTS_DIR}" -name "manifest.json" -maxdepth 4 2>/dev/null | head -1)
+MANIFEST=$(find "${RESULTS_DIR}" -name "manifest.json" -maxdepth 4 2>/dev/null \
+    | xargs ls -t 2>/dev/null | head -1)
 if [ -z "${MANIFEST}" ]; then
     echo ""
     echo "ERROR: No manifest.json found in ${RESULTS_DIR}"
@@ -296,6 +297,24 @@ fi
 if ! python3 -m json.tool "${MANIFEST}" >/dev/null 2>&1; then
     echo "ERROR: manifest.json is not valid JSON — download may be corrupted."
     exit 1
+fi
+
+# Warn if manifest is stale (> 4 hours old — may be from a previous run)
+STALE=$(python3 -c "
+import json, datetime, sys
+with open('${MANIFEST}') as f:
+    m = json.load(f)
+ca = m.get('created_at', '')
+if not ca:
+    sys.exit(0)
+dt = datetime.datetime.fromisoformat(ca)
+age = (datetime.datetime.now(datetime.timezone.utc) - dt).total_seconds()
+if age > 14400:
+    print(f'Manifest is {age/3600:.1f}h old — may be from a previous run')
+" 2>/dev/null || true)
+
+if [ -n "${STALE}" ]; then
+    echo "WARNING: ${STALE}"
 fi
 
 # Check DuckDB exists and is non-empty

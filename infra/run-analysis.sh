@@ -104,6 +104,18 @@ CLONE_DEPTH_ARGS=""
 if [ -n "${CLONE_DEPTH}" ]; then
     CLONE_DEPTH_ARGS="--depth=${CLONE_DEPTH}"
     echo "  Using shallow clone (depth=${CLONE_DEPTH})"
+
+    HISTORY_TOOLS="git-fame git-blame-scanner gitleaks"
+    HISTORY_WARN=""
+    for ht in ${HISTORY_TOOLS}; do
+        if ! echo ",${SKIP_TOOLS}," | grep -q ",${ht},"; then
+            HISTORY_WARN="${HISTORY_WARN} ${ht}"
+        fi
+    done
+    if [ -n "${HISTORY_WARN}" ]; then
+        echo "  WARNING: Shallow clone may produce incomplete results for:${HISTORY_WARN}"
+        echo "  Consider --skip or full clone for accurate history analysis."
+    fi
 fi
 for clone_attempt in 1 2 3; do
     echo "  Clone attempt ${clone_attempt} of 3..."
