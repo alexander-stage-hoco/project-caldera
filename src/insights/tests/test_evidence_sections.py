@@ -108,7 +108,7 @@ class TestEvidencePackSection:
         data = section.fetch_data(_mock_fetcher(), 1)
         complexity_cat = next(c for c in data["categories"] if c["category"] == "complexity")
         assert complexity_cat["total_count"] == 1
-        assert len(complexity_cat["items"]) == 1
+        assert len(complexity_cat["evidence_items"]) == 1
 
 
 # ---------------------------------------------------------------------------
