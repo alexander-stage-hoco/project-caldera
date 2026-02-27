@@ -165,6 +165,20 @@ class OrchestratorLogger:
         return self._handle
 
 
+def _subprocess_run_with_retry(
+    *args: Any, retries: int = 3, delay: float = 1.0, **kwargs: Any,
+) -> subprocess.CompletedProcess:
+    """subprocess.run with retry on transient BlockingIOError (EAGAIN)."""
+    for attempt in range(retries):
+        try:
+            return subprocess.run(*args, **kwargs)
+        except BlockingIOError:
+            if attempt == retries - 1:
+                raise
+            time.sleep(delay * (attempt + 1))
+    raise RuntimeError("unreachable")
+
+
 def _is_fallback_commit(commit: str) -> bool:
     """Check if commit is a fallback value (all zeros or empty)."""
     return not commit or commit == "0" * 40
@@ -184,7 +198,7 @@ def _commit_is_git_commit(repo_path: Path, commit: str) -> bool:
     """Return True only if commit resolves as a git commit in repo_path."""
     if _is_fallback_commit(commit):
         return False
-    result = subprocess.run(
+    result = _subprocess_run_with_retry(
         ["git", "-C", str(repo_path), "cat-file", "-e", f"{commit}^{{commit}}"],
         capture_output=True,
         text=True,
@@ -226,7 +240,7 @@ def run_tool_make(
     env["COMMIT"] = commit if _commit_is_git_commit(repo_path, commit) else ("0" * 40)
     if extra_env:
         env.update(extra_env)
-    subprocess.run(
+    _subprocess_run_with_retry(
         ["make", "analyze"],
         cwd=tool_root,
         env=env,
@@ -643,7 +657,7 @@ def run_dbt(
                 }
             )
         try:
-            subprocess.run(
+            _subprocess_run_with_retry(
                 cmd,
                 cwd=str(dbt_project_dir),
                 env=env,
