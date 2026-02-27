@@ -18,7 +18,7 @@ WITH run_map AS (
 trivy_findings AS (
     SELECT
         'cve' AS finding_type,
-        COALESCE(tv.relative_path, tv.package_name) AS location,
+        tv.package_name AS location,
         tv.vulnerability_id AS finding_id,
         tv.severity,
         tv.title AS description,

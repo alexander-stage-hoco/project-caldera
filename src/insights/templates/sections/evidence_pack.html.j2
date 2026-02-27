@@ -10,7 +10,7 @@
     </div>
 
     {% for cat in categories %}
-    {% if cat.items %}
+    {% if cat.evidence_items %}
     <div class="subsection">
         <h3>{{ cat.category | title }} ({{ cat.total_count }}{% if cat.truncated %}, showing {{ cat.displayed_count }}{% endif %})</h3>
         <table>
@@ -24,7 +24,7 @@
                 </tr>
             </thead>
             <tbody>
-            {% for item in cat.items %}
+            {% for item in cat.evidence_items %}
                 <tr>
                     <td><code>{{ item.evidence_id }}</code></td>
                     <td><code>{{ item.location }}</code></td>

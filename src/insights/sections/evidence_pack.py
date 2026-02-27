@@ -38,7 +38,7 @@ class EvidencePackSection(EvidenceAwareSection):
                 "total_count": total,
                 "displayed_count": len(displayed),
                 "truncated": total > self.MAX_PER_CATEGORY,
-                "items": [
+                "evidence_items": [
                     {
                         "evidence_id": e.evidence_id,
                         "evidence_type": e.evidence_type,

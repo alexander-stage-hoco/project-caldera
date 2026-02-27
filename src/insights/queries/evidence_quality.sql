@@ -16,14 +16,14 @@ file_smells AS (
     SELECT
         ufm.relative_path,
         ufm.loc_total,
-        ufm.smell_count,
-        ufm.issue_count,
-        ROUND(ufm.smell_count * 1000.0 / NULLIF(ufm.loc_total, 0), 1) AS smell_density_per_kloc,
-        ROUND(ufm.issue_count * 1000.0 / NULLIF(ufm.loc_total, 0), 1) AS issue_density_per_kloc,
+        ufm.semgrep_smell_count,
+        ufm.devskim_issue_count,
+        ROUND(ufm.semgrep_smell_count * 1000.0 / NULLIF(ufm.loc_total, 0), 1) AS smell_density_per_kloc,
+        ROUND(ufm.devskim_issue_count * 1000.0 / NULLIF(ufm.loc_total, 0), 1) AS issue_density_per_kloc,
         (SELECT scc_run_pk FROM run_map) AS tool_run_pk
     FROM unified_file_metrics ufm
     WHERE ufm.run_pk = (SELECT scc_run_pk FROM run_map)
-      AND (ufm.smell_count > 0 OR ufm.issue_count > 0)
+      AND (COALESCE(ufm.semgrep_smell_count, 0) + COALESCE(ufm.devskim_issue_count, 0) + COALESCE(ufm.sonarqube_issue_count, 0) > 0)
       AND ufm.loc_total > 50
 )
 SELECT *

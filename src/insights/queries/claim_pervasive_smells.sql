@@ -20,12 +20,12 @@ total_files AS (
 ),
 smell_distribution AS (
     SELECT
-        sfm.rule_id AS smell_type,
-        COUNT(DISTINCT sfm.relative_path) AS affected_files,
-        SUM(sfm.finding_count) AS total_findings
-    FROM stg_semgrep_file_metrics sfm
-    WHERE sfm.run_pk = (SELECT semgrep_run_pk FROM run_map)
-    GROUP BY sfm.rule_id
+        ss.rule_id AS smell_type,
+        COUNT(DISTINCT ss.relative_path) AS affected_files,
+        COUNT(*) AS total_findings
+    FROM stg_lz_semgrep_smells ss
+    WHERE ss.run_pk = (SELECT semgrep_run_pk FROM run_map)
+    GROUP BY ss.rule_id
 )
 SELECT
     sd.smell_type,

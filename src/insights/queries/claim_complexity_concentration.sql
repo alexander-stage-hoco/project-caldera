@@ -20,9 +20,9 @@ dir_stats AS (
             ELSE '.'
         END AS directory_path,
         COUNT(*) AS file_count,
-        SUM(ufm.total_ccn) AS total_ccn,
-        MAX(ufm.max_ccn) AS max_ccn,
-        AVG(ufm.total_ccn) AS avg_ccn
+        SUM(ufm.complexity_total_ccn) AS complexity_total_ccn,
+        MAX(ufm.complexity_max) AS complexity_max,
+        AVG(ufm.complexity_total_ccn) AS avg_ccn
     FROM unified_file_metrics ufm
     WHERE ufm.run_pk = (SELECT scc_run_pk FROM run_map)
       AND ufm.function_count > 0
@@ -34,12 +34,12 @@ ranked AS (
     SELECT
         ds.directory_path,
         ds.file_count,
-        ds.total_ccn,
-        ds.max_ccn,
+        ds.complexity_total_ccn,
+        ds.complexity_max,
         ds.avg_ccn,
         ufm.relative_path,
-        ufm.total_ccn AS file_ccn,
-        ROW_NUMBER() OVER (PARTITION BY ds.directory_path ORDER BY ufm.total_ccn) AS rn
+        ufm.complexity_total_ccn AS file_ccn,
+        ROW_NUMBER() OVER (PARTITION BY ds.directory_path ORDER BY ufm.complexity_total_ccn) AS rn
     FROM dir_stats ds
     JOIN unified_file_metrics ufm
         ON CASE
@@ -54,8 +54,8 @@ gini_calc AS (
     SELECT
         directory_path,
         file_count,
-        total_ccn,
-        max_ccn,
+        complexity_total_ccn,
+        complexity_max,
         avg_ccn,
         -- Gini formula: (2 * sum(i * xi)) / (n * sum(xi)) - (n + 1) / n
         CASE
@@ -68,13 +68,13 @@ gini_calc AS (
             ELSE 0
         END AS gini_ccn
     FROM ranked
-    GROUP BY directory_path, file_count, total_ccn, max_ccn, avg_ccn
+    GROUP BY directory_path, file_count, complexity_total_ccn, complexity_max, avg_ccn
 )
 SELECT
     directory_path,
     file_count,
-    total_ccn,
-    max_ccn,
+    complexity_total_ccn,
+    complexity_max,
     ROUND(avg_ccn, 1) AS avg_ccn,
     gini_ccn
 FROM gini_calc
