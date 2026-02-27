@@ -174,6 +174,31 @@ fi
 
 cd "${INFRA_DIR}"
 
+# ---------------------------------------------------------------------------
+# Trap: ensure VM cleanup on interrupt (Ctrl-C, TERM, or script exit)
+# ---------------------------------------------------------------------------
+
+cleanup() {
+    local exit_code=$?
+    if [ "${DESTROY_AFTER}" -eq 1 ] && [ -f "${INFRA_DIR}/.terraform/terraform.tfstate" ]; then
+        echo ""
+        echo ">>> Cleaning up — destroying server..."
+        terraform destroy \
+            -auto-approve \
+            -var="repo_url=${REPO_URL}" \
+            -var="server_type=${SERVER_TYPE}" \
+            -var="skip_tools=${SKIP_TOOLS}" \
+            -var="pipeline_llm=${PIPELINE_LLM}" \
+            -var="max_parallel=${MAX_PARALLEL}" \
+            -var="results_dir=${RESULTS_DIR}" \
+            -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}" \
+            2>&1 | grep -E "^(Destroy|hcloud_)" || true
+        echo "    Server destroyed."
+    fi
+    exit $exit_code
+}
+trap cleanup EXIT
+
 echo "=============================================="
 echo "Caldera Cloud Run"
 echo "=============================================="
@@ -221,23 +246,10 @@ done
 echo ""
 
 # ---------------------------------------------------------------------------
-# Tear down (unless --keep-server)
+# Keep-server message (destruction handled by EXIT trap above)
 # ---------------------------------------------------------------------------
 
-if [ "${DESTROY_AFTER}" -eq 1 ]; then
-    echo ">>> Destroying server..."
-    terraform destroy \
-        -auto-approve \
-        -var="repo_url=${REPO_URL}" \
-        -var="server_type=${SERVER_TYPE}" \
-        -var="skip_tools=${SKIP_TOOLS}" \
-        -var="pipeline_llm=${PIPELINE_LLM}" \
-        -var="max_parallel=${MAX_PARALLEL}" \
-        -var="results_dir=${RESULTS_DIR}" \
-        -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}" \
-        2>&1 | grep -E "^(Destroy|hcloud_)" || true
-    echo "    Server destroyed."
-else
+if [ "${DESTROY_AFTER}" -eq 0 ]; then
     SERVER_IP=$(terraform output -raw server_ip 2>/dev/null || echo "unknown")
     echo ">>> Server kept alive at: ${SERVER_IP}"
     echo "    SSH: ssh root@${SERVER_IP}"
@@ -263,7 +275,7 @@ if [ ! -d "${RESULTS_DIR}" ] || [ -z "$(ls -A "${RESULTS_DIR}" 2>/dev/null)" ]; 
     echo ""
     echo "ERROR: Results directory is empty or missing: ${RESULTS_DIR}"
     echo "The analysis may have failed or SCP download was incomplete."
-    echo "Use KEEP_SERVER=1 to debug on the VM."
+    echo "Use --keep-server to debug on the VM."
     exit 1
 fi
 
@@ -273,6 +285,26 @@ if [ -z "${MANIFEST}" ]; then
     echo "ERROR: No manifest.json found in ${RESULTS_DIR}"
     echo "Results download may be incomplete."
     exit 1
+fi
+
+# Validate manifest is valid JSON
+if ! python3 -m json.tool "${MANIFEST}" >/dev/null 2>&1; then
+    echo "ERROR: manifest.json is not valid JSON — download may be corrupted."
+    exit 1
+fi
+
+# Check DuckDB exists and is non-empty
+DUCKDB_CHECK=$(find "${RESULTS_DIR}" -name "*.duckdb" -maxdepth 4 2>/dev/null | head -1)
+if [ -z "${DUCKDB_CHECK}" ]; then
+    echo "WARNING: No DuckDB database found in results."
+elif [ ! -s "${DUCKDB_CHECK}" ]; then
+    echo "WARNING: DuckDB database exists but is empty (0 bytes)."
+fi
+
+# Check reports directory has content
+REPORTS_CHECK=$(find "${RESULTS_DIR}" -name "*.html" -maxdepth 5 2>/dev/null | head -1)
+if [ -z "${REPORTS_CHECK}" ]; then
+    echo "WARNING: No HTML reports found in results."
 fi
 
 echo ""

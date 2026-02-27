@@ -215,6 +215,7 @@ resource "null_resource" "run_analysis" {
       "chmod +x /opt/caldera/run-analysis.sh",
       "chmod 600 /opt/caldera/.env.secrets",
       "set -a && . /opt/caldera/.env.secrets && set +a && REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' /opt/caldera/run-analysis.sh",
+      "rm -f /opt/caldera/.env.secrets",
     ]
   }
 
@@ -240,11 +241,21 @@ resource "null_resource" "run_analysis" {
         fi
         echo "  SCP failed, retrying in $RETRY_DELAY seconds..."
         sleep $RETRY_DELAY
+        RETRY_DELAY=$((RETRY_DELAY * 2))
         attempt=$((attempt + 1))
       done
-      # Verify at least one manifest.json was downloaded
-      if ! find "${var.results_dir}" -name "manifest.json" -maxdepth 4 | grep -q .; then
+      # Verify manifest.json was downloaded and is non-empty
+      MANIFEST=$(find "${var.results_dir}" -name "manifest.json" -maxdepth 4 | head -1)
+      if [ -z "$MANIFEST" ]; then
         echo "ERROR: No manifest.json found in downloaded results. SCP may have failed silently."
+        exit 1
+      fi
+      # Verify DuckDB was downloaded and is non-empty
+      DUCKDB=$(find "${var.results_dir}" -name "*.duckdb" -maxdepth 4 | head -1)
+      if [ -z "$DUCKDB" ]; then
+        echo "WARNING: No DuckDB database found in downloaded results."
+      elif [ ! -s "$DUCKDB" ]; then
+        echo "ERROR: DuckDB file downloaded but is empty (0 bytes). Download may be corrupted."
         exit 1
       fi
       echo ""

@@ -66,6 +66,12 @@ fi
 
 cd "${CALDERA_DIR}"
 
+# Disk space pre-flight check
+AVAIL_GB=$(df --output=avail / | tail -1 | awk '{print int($1/1048576)}')
+if [ "${AVAIL_GB}" -lt 10 ]; then
+    echo "WARNING: Only ${AVAIL_GB} GB disk space available. Large repos may exhaust disk."
+fi
+
 # ---------------------------------------------------------------------------
 # 2. Set up Caldera project environment
 # ---------------------------------------------------------------------------
@@ -86,13 +92,28 @@ echo ""
 echo ">>> Cloning target repository..."
 rm -rf "${CLONE_DIR}"
 
-if echo "${REPO_URL}" | grep -qE '^https?://'; then
-    git clone "${REPO_URL}" "${CLONE_DIR}"
-elif echo "${REPO_URL}" | grep -qE '^git@'; then
-    git clone "${REPO_URL}" "${CLONE_DIR}"
-else
+if ! echo "${REPO_URL}" | grep -qE '^(https?://|git@)'; then
     echo "ERROR: REPO_URL must be a git URL (https:// or git@)"
     echo "Local paths are not supported in cloud mode."
+    exit 1
+fi
+
+CLONE_OK=0
+for clone_attempt in 1 2 3; do
+    echo "  Clone attempt ${clone_attempt} of 3..."
+    if git clone "${REPO_URL}" "${CLONE_DIR}"; then
+        CLONE_OK=1
+        break
+    fi
+    if [ "${clone_attempt}" -lt 3 ]; then
+        echo "  Clone failed, retrying in 10s..."
+        rm -rf "${CLONE_DIR}"
+        sleep 10
+    fi
+done
+
+if [ "${CLONE_OK}" -eq 0 ]; then
+    echo "ERROR: git clone failed after 3 attempts."
     exit 1
 fi
 
@@ -141,16 +162,33 @@ echo ""
 echo ">>> Setting up tools (best-effort, failures are non-fatal)..."
 # Run setup for each tool individually so one failure doesn't block others.
 # Tools that fail setup will also fail during analyze and be reported there.
+SETUP_OK=0
+SETUP_FAIL=0
+SETUP_SKIP=0
+SETUP_FAILED_NAMES=""
 for tool_dir in src/tools/*/; do
     tool_name=$(basename "$tool_dir")
     # Skip tools that are in SKIP_TOOLS
     if echo ",${SKIP_TOOLS}," | grep -q ",${tool_name},"; then
         echo "  Skipping setup for ${tool_name} (in SKIP_TOOLS)"
+        SETUP_SKIP=$((SETUP_SKIP + 1))
         continue
     fi
     echo "  Setting up ${tool_name}..."
-    make -C "$tool_dir" setup 2>&1 | tail -3 || echo "  WARNING: ${tool_name} setup failed (will be skipped during analyze)"
+    if make -C "$tool_dir" setup 2>&1 | tail -3; then
+        SETUP_OK=$((SETUP_OK + 1))
+    else
+        echo "  WARNING: ${tool_name} setup failed (will be skipped during analyze)"
+        SETUP_FAIL=$((SETUP_FAIL + 1))
+        SETUP_FAILED_NAMES="${SETUP_FAILED_NAMES} ${tool_name}"
+    fi
 done
+
+echo ""
+echo "  Tool setup summary: ${SETUP_OK} succeeded, ${SETUP_FAIL} failed, ${SETUP_SKIP} skipped"
+if [ "${SETUP_FAIL}" -gt 0 ]; then
+    echo "  Failed:${SETUP_FAILED_NAMES}"
+fi
 
 # ---------------------------------------------------------------------------
 # 5. Run the analysis pipeline
