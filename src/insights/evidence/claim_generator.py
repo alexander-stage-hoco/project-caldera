@@ -67,6 +67,9 @@ class ComplexityConcentrationRule(ClaimRule):
             ]
 
             if not linked:
+                # Synthetic fallback: use first 3 complexity evidence items
+                linked = [e.evidence_id for e in complexity_evidence[:3]]
+            if not linked:
                 continue
 
             claims.append(
