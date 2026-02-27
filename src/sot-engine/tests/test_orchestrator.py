@@ -568,3 +568,49 @@ def test_compute_content_hash_empty_dir(tmp_path: Path) -> None:
     h = _compute_content_hash(empty)
     assert len(h) == 40
     assert all(c in "0123456789abcdef" for c in h)
+
+
+# =============================================================================
+# validate_payload edge cases
+# =============================================================================
+
+
+def test_validate_payload_rejects_repo_id_mismatch() -> None:
+    """repo_id mismatch between orchestrator and payload must raise."""
+    metadata = {"repo_id": "wrong-repo", "run_id": "run1"}
+    with pytest.raises(ValueError, match="repo_id mismatch"):
+        validate_payload(metadata, "correct-repo", "run1")
+
+
+def test_validate_payload_rejects_run_id_mismatch() -> None:
+    """run_id mismatch between orchestrator and payload must raise."""
+    metadata = {"repo_id": "r1", "run_id": "wrong-run"}
+    with pytest.raises(ValueError, match="run_id mismatch"):
+        validate_payload(metadata, "r1", "correct-run")
+
+
+# =============================================================================
+# _format_duration boundary tests
+# =============================================================================
+
+
+def test_format_duration_zero() -> None:
+    """0 seconds should format as '0.00s'."""
+    assert _format_duration(0) == "0.00s"
+
+
+def test_format_duration_just_under_60() -> None:
+    """59.999 seconds rounds to 60.00s because :.2f uses banker's rounding."""
+    assert _format_duration(59.999) == "60.00s"
+    assert _format_duration(59.994) == "59.99s"
+
+
+def test_format_duration_large_value() -> None:
+    """100+ seconds should still format correctly as seconds."""
+    assert _format_duration(123.456) == "123.46s"
+
+
+def test_format_duration_very_small() -> None:
+    """Sub-second values should show two decimal places."""
+    assert _format_duration(0.001) == "0.00s"
+    assert _format_duration(0.005) == "0.01s"

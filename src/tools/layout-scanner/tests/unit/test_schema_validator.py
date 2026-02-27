@@ -550,3 +550,39 @@ class TestCLI:
 
         result = main([str(output_file), "--level", "schema"])
         assert result == 0
+
+
+class TestSchemaValidationNegativeCases:
+    """Negative tests for schema validation."""
+
+    def test_missing_required_tool_field(self):
+        """Output missing required 'tool' field should fail validation."""
+        output = _create_minimal_valid_output()
+        del output["tool"]
+
+        validator = SchemaValidator()
+        result = validator.validate_schema(output)
+        assert result.valid is False
+        assert len(result.errors) > 0
+
+    def test_missing_statistics_field(self):
+        """Output missing required 'statistics' field should fail validation."""
+        output = _create_minimal_valid_output()
+        del output["statistics"]
+
+        validator = SchemaValidator()
+        result = validator.validate_schema(output)
+        assert result.valid is False
+
+    def test_broken_referential_integrity(self, tmp_path):
+        """File referencing a non-existent parent directory should fail referential checks."""
+        output = _create_minimal_valid_output()
+        # Point file to a non-existent parent directory
+        output["files"]["test.py"]["parent_directory_id"] = "d-999999999999"
+
+        output_file = tmp_path / "bad_refs.json"
+        output_file.write_text(json.dumps(output))
+
+        result = validate_file(output_file)
+        # Referential integrity check should catch the missing parent
+        assert not result.valid or len(result.all_errors) > 0

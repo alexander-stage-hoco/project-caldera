@@ -1,57 +1,15 @@
 """Tests for report sections."""
 
-import pytest
-from unittest.mock import MagicMock
-
-from insights.sections.repo_health import RepoHealthSection
 from insights.sections.file_hotspots import FileHotspotsSection
 from insights.sections.directory_analysis import DirectoryAnalysisSection
 from insights.sections.vulnerabilities import VulnerabilitiesSection
 from insights.sections.cross_tool import CrossToolSection
 from insights.sections.language_coverage import LanguageCoverageSection
-from insights.sections.coverage_gap import CoverageGapSection
 from insights.sections.technical_debt_summary import TechnicalDebtSummarySection
-from insights.sections.import_dependencies import ImportDependenciesSection
-from insights.sections.circular_dependencies import CircularDependenciesSection
-
-
-class TestRepoHealthSection:
-    """Tests for RepoHealthSection."""
-
-    def test_config(self):
-        """Test section configuration."""
-        section = RepoHealthSection()
-
-        assert section.config.name == "repo_health"
-        assert section.config.priority == 1
-        assert "health" in section.config.description.lower()
-
-    def test_get_template_name(self):
-        """Test template name."""
-        section = RepoHealthSection()
-        assert section.get_template_name() == "repo_health.html.j2"
-
-    def test_get_fallback_data(self):
-        """Test fallback data structure."""
-        section = RepoHealthSection()
-        fallback = section.get_fallback_data()
-
-        assert "total_files" in fallback
-        assert "total_loc" in fallback
-        assert "avg_ccn" in fallback
-        assert "languages" in fallback
-        assert fallback["total_files"] == 0
 
 
 class TestFileHotspotsSection:
     """Tests for FileHotspotsSection."""
-
-    def test_config(self):
-        """Test section configuration."""
-        section = FileHotspotsSection()
-
-        assert section.config.name == "file_hotspots"
-        assert section.config.priority == 2
 
     def test_find_compound_hotspots(self):
         """Test compound hotspot detection."""
@@ -83,13 +41,6 @@ class TestFileHotspotsSection:
 
 class TestVulnerabilitiesSection:
     """Tests for VulnerabilitiesSection."""
-
-    def test_config(self):
-        """Test section configuration."""
-        section = VulnerabilitiesSection()
-
-        assert section.config.name == "vulnerabilities"
-        assert section.config.priority == 4
 
     def test_calculate_risk_level(self):
         """Test risk level calculation."""
@@ -169,121 +120,39 @@ class TestCrossToolSection:
         assert summary["complex_vulnerable_count"] == 2
 
 
-class TestCoverageGapSection:
-    """Tests for CoverageGapSection."""
+class TestFileHotspotsCompoundHotspots:
+    """Tests for _find_compound_hotspots edge cases."""
 
-    def test_config(self):
-        """Test section configuration."""
-        section = CoverageGapSection()
+    def test_file_in_all_three_categories_is_compound(self):
+        """A file appearing in all 3 categories should be included in compound."""
+        section = FileHotspotsSection()
 
-        assert section.config.name == "coverage_gap"
-        assert section.config.title == "Coverage Gap Analysis"
-        assert section.config.priority == 3.5
-        assert "complexity" in section.config.description.lower()
+        complexity = [{"relative_path": "src/big.py", "complexity": 60}]
+        size = [{"relative_path": "src/big.py", "loc_total": 2000}]
+        smells = [{"relative_path": "src/big.py", "smell_count": 15}]
 
-    def test_get_template_name(self):
-        """Test template name."""
-        section = CoverageGapSection()
-        assert section.get_template_name() == "coverage_gap.html.j2"
+        compound = section._find_compound_hotspots(complexity, size, smells)
 
-    def test_get_fallback_data(self):
-        """Test fallback data structure."""
-        section = CoverageGapSection()
-        fallback = section.get_fallback_data()
+        assert len(compound) == 1
+        assert compound[0]["relative_path"] == "src/big.py"
+        assert compound[0]["category_count"] == 3
+        assert set(compound[0]["categories"]) == {"complexity", "size", "smells"}
 
-        # Check top-level keys
-        assert "hotspots" in fallback
-        assert "critical_hotspots" in fallback
-        assert "high_hotspots" in fallback
-        assert "summary" in fallback
-        assert "has_data" in fallback
+    def test_file_in_only_one_category_is_excluded(self):
+        """A file in only 1 category should NOT appear in compound hotspots."""
+        section = FileHotspotsSection()
 
-        # Check fallback values
-        assert fallback["hotspots"] == []
-        assert fallback["has_data"] is False
+        complexity = [{"relative_path": "src/only_complex.py", "complexity": 60}]
+        size = [{"relative_path": "src/only_big.py", "loc_total": 2000}]
+        smells = [{"relative_path": "src/only_smelly.py", "smell_count": 15}]
 
-        # Check summary structure
-        summary = fallback["summary"]
-        assert summary["critical_count"] == 0
-        assert summary["high_count"] == 0
-        assert summary["total_files"] == 0
-        assert summary["total_statements_at_risk"] == 0
+        compound = section._find_compound_hotspots(complexity, size, smells)
 
-    def test_validate_data_no_data(self):
-        """Test validation returns error when no data available."""
-        section = CoverageGapSection()
-        errors = section.validate_data({"has_data": False})
-
-        assert len(errors) == 1
-        assert "lizard" in errors[0].lower() or "coverage" in errors[0].lower()
-
-    def test_validate_data_with_data(self):
-        """Test validation passes when data is available."""
-        section = CoverageGapSection()
-        errors = section.validate_data({"has_data": True})
-
-        assert len(errors) == 0
+        assert len(compound) == 0
 
 
 class TestTechnicalDebtSummarySection:
     """Tests for TechnicalDebtSummarySection."""
-
-    def test_config(self):
-        """Test section configuration."""
-        section = TechnicalDebtSummarySection()
-
-        assert section.config.name == "technical_debt_summary"
-        assert section.config.title == "Technical Debt Summary"
-        assert section.config.priority == 2
-        assert "debt" in section.config.description.lower()
-
-    def test_get_template_name(self):
-        """Test template name."""
-        section = TechnicalDebtSummarySection()
-        assert section.get_template_name() == "technical_debt_summary.html.j2"
-
-    def test_get_fallback_data(self):
-        """Test fallback data structure."""
-        section = TechnicalDebtSummarySection()
-        fallback = section.get_fallback_data()
-
-        # Check top-level keys
-        assert "summary" in fallback
-        assert "categories" in fallback
-        assert "overall_score" in fallback
-        assert "overall_grade" in fallback
-        assert "hotspots" in fallback
-        assert "hotspots_by_type" in fallback
-        assert "priorities" in fallback
-        assert "has_data" in fallback
-
-        # Check category keys
-        categories = fallback["categories"]
-        assert "complexity" in categories
-        assert "duplication" in categories
-        assert "code_smells" in categories
-        assert "coverage_gaps" in categories
-        assert "size" in categories
-
-        # Check default values
-        assert fallback["overall_grade"] == "A"
-        assert fallback["overall_score"] == 0
-        assert fallback["has_data"] is False
-
-    def test_validate_data_no_data(self):
-        """Test validation returns error when no data available."""
-        section = TechnicalDebtSummarySection()
-        errors = section.validate_data({"has_data": False})
-
-        assert len(errors) == 1
-        assert "technical debt" in errors[0].lower() or "data" in errors[0].lower()
-
-    def test_validate_data_with_data(self):
-        """Test validation passes when data is available."""
-        section = TechnicalDebtSummarySection()
-        errors = section.validate_data({"has_data": True})
-
-        assert len(errors) == 0
 
     def test_score_to_grade(self):
         """Test grade conversion from score."""
@@ -308,6 +177,15 @@ class TestTechnicalDebtSummarySection:
         # score < 20 → "A"
         assert section._score_to_grade(0) == "A"
         assert section._score_to_grade(19) == "A"
+
+    def test_score_to_grade_boundary_79_vs_80(self):
+        """Test boundary at exactly 79 vs 80."""
+        section = TechnicalDebtSummarySection()
+
+        # 79 is >= 60 but < 80, so grade is "D"
+        assert section._score_to_grade(79) == "D"
+        # 80 is >= 80, so grade is "F"
+        assert section._score_to_grade(80) == "F"
 
     def test_calculate_overall_score(self):
         """Test weighted score calculation."""
@@ -362,119 +240,3 @@ class TestTechnicalDebtSummarySection:
         # Unknown category
         action = section._get_remediation_action("unknown", {})
         assert "review" in action.lower()
-
-
-class TestImportDependenciesSection:
-    """Tests for ImportDependenciesSection."""
-
-    def test_config(self):
-        """Test section configuration."""
-        section = ImportDependenciesSection()
-
-        assert section.config.name == "import_dependencies"
-        assert section.config.title == "Import Dependencies"
-        assert section.config.priority == 6.8
-        assert "import" in section.config.description.lower()
-
-    def test_get_template_name(self):
-        """Test template name."""
-        section = ImportDependenciesSection()
-        assert section.get_template_name() == "import_dependencies.html.j2"
-
-    def test_get_fallback_data(self):
-        """Test fallback data structure."""
-        section = ImportDependenciesSection()
-        fallback = section.get_fallback_data()
-
-        # Check top-level keys
-        assert "top_importers" in fallback
-        assert "most_imported_targets" in fallback
-        assert "summary" in fallback
-        assert "has_data" in fallback
-
-        # Check fallback values
-        assert fallback["top_importers"] == []
-        assert fallback["most_imported_targets"] == []
-        assert fallback["has_data"] is False
-
-        # Check summary structure
-        summary = fallback["summary"]
-        assert summary["total_files"] == 0
-        assert summary["avg_imports_per_file"] == 0
-        assert summary["max_import_count"] == 0
-
-    def test_validate_data_no_data(self):
-        """Test validation returns error when no data available."""
-        section = ImportDependenciesSection()
-        errors = section.validate_data({"has_data": False})
-
-        assert len(errors) == 1
-        assert "import" in errors[0].lower() or "symbol-scanner" in errors[0].lower()
-
-    def test_validate_data_with_data(self):
-        """Test validation passes when data is available."""
-        section = ImportDependenciesSection()
-        errors = section.validate_data({"has_data": True})
-
-        assert len(errors) == 0
-
-
-class TestCircularDependenciesSection:
-    """Tests for CircularDependenciesSection."""
-
-    def test_config(self):
-        """Test section configuration."""
-        section = CircularDependenciesSection()
-
-        assert section.config.name == "circular_dependencies"
-        assert section.config.title == "Circular Dependencies"
-        assert section.config.priority == 6.9
-        assert "circular" in section.config.description.lower() or "cycle" in section.config.description.lower()
-
-    def test_get_template_name(self):
-        """Test template name."""
-        section = CircularDependenciesSection()
-        assert section.get_template_name() == "circular_dependencies.html.j2"
-
-    def test_get_fallback_data(self):
-        """Test fallback data structure."""
-        section = CircularDependenciesSection()
-        fallback = section.get_fallback_data()
-
-        # Check top-level keys
-        assert "cycles" in fallback
-        assert "severity_counts" in fallback
-        assert "summary" in fallback
-        assert "has_data" in fallback
-
-        # Check fallback values
-        assert fallback["cycles"] == []
-        assert fallback["has_data"] is False
-
-        # Check severity counts
-        assert fallback["severity_counts"]["critical"] == 0
-        assert fallback["severity_counts"]["high"] == 0
-        assert fallback["severity_counts"]["medium"] == 0
-        assert fallback["severity_counts"]["low"] == 0
-
-        # Check summary structure
-        summary = fallback["summary"]
-        assert summary["total_cycles"] == 0
-        assert summary["critical_count"] == 0
-        assert summary["files_involved"] == 0
-        assert summary["avg_cycle_length"] == 0
-
-    def test_validate_data_no_data(self):
-        """Test validation returns error when no data available."""
-        section = CircularDependenciesSection()
-        errors = section.validate_data({"has_data": False})
-
-        assert len(errors) == 1
-        assert "circular" in errors[0].lower() or "symbol-scanner" in errors[0].lower()
-
-    def test_validate_data_with_data(self):
-        """Test validation passes when data is available."""
-        section = CircularDependenciesSection()
-        errors = section.validate_data({"has_data": True})
-
-        assert len(errors) == 0

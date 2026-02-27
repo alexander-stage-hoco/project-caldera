@@ -1356,3 +1356,24 @@ class TestMain:
 
         assert result == 0
         assert output_path.exists()
+
+
+class TestOutputStructureValidation:
+    """Tests for output structure and path normalization."""
+
+    def test_output_metadata_required_fields(self, sample_output: dict) -> None:
+        """All 8 required metadata fields must be present."""
+        required = [
+            "tool_name", "tool_version", "run_id", "repo_id",
+            "branch", "commit", "timestamp", "schema_version",
+        ]
+        for field in required:
+            assert field in sample_output["metadata"], f"Missing: {field}"
+
+    def test_type_file_paths_are_repo_relative(self, sample_output: dict) -> None:
+        """Type file_path values must be repo-relative (no leading / or ./)."""
+        for type_entry in sample_output["data"].get("types", []):
+            path = type_entry.get("file_path", "")
+            assert not path.startswith("/"), f"Absolute path: {path}"
+            assert not path.startswith("./"), f"./ prefix: {path}"
+            assert "\\" not in path, f"Backslash in path: {path}"

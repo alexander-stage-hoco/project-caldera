@@ -5,6 +5,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 import time
@@ -30,6 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from execution import (
+    DockerConfig,
     ExecutionBackend,
     ExecutionConfig,
     ExecutionMode,
@@ -165,6 +167,20 @@ class OrchestratorLogger:
         return self._handle
 
 
+def _subprocess_run_with_retry(
+    *args: Any, retries: int = 3, delay: float = 1.0, **kwargs: Any,
+) -> subprocess.CompletedProcess:
+    """subprocess.run with retry on transient BlockingIOError (EAGAIN)."""
+    for attempt in range(retries):
+        try:
+            return subprocess.run(*args, **kwargs)
+        except BlockingIOError:
+            if attempt == retries - 1:
+                raise
+            time.sleep(delay * (attempt + 1))
+    raise RuntimeError("unreachable")
+
+
 def _is_fallback_commit(commit: str) -> bool:
     """Check if commit is a fallback value (all zeros or empty)."""
     return not commit or commit == "0" * 40
@@ -184,7 +200,7 @@ def _commit_is_git_commit(repo_path: Path, commit: str) -> bool:
     """Return True only if commit resolves as a git commit in repo_path."""
     if _is_fallback_commit(commit):
         return False
-    result = subprocess.run(
+    result = _subprocess_run_with_retry(
         ["git", "-C", str(repo_path), "cat-file", "-e", f"{commit}^{{commit}}"],
         capture_output=True,
         text=True,
@@ -226,7 +242,7 @@ def run_tool_make(
     env["COMMIT"] = commit if _commit_is_git_commit(repo_path, commit) else ("0" * 40)
     if extra_env:
         env.update(extra_env)
-    subprocess.run(
+    _subprocess_run_with_retry(
         ["make", "analyze"],
         cwd=tool_root,
         env=env,
@@ -339,11 +355,16 @@ def _run_tools(
     continue_on_failure: bool = False,
     show_progress: bool = True,
     backend: ExecutionBackend | None = None,
+    max_parallel: int = 1,
 ) -> tuple[dict[str, Path], list[dict[str, Any]]]:
     """Run all configured tools and return (outputs, per-tool summaries).
 
     Delegates execution to the provided backend (defaults to LocalBackend).
     Handles progress display, JSON validation, and failure semantics.
+
+    When ``max_parallel > 1``, all tasks are dispatched as a single batch via
+    the backend, which handles concurrency internally.  When ``max_parallel == 1``
+    (default), tools run one at a time with per-tool progress spinners.
     """
     if backend is None:
         backend = LocalBackend()
@@ -371,8 +392,88 @@ def _run_tools(
         branch=branch,
         commit=commit,
         output_root=output_root,
+        max_parallel=max_parallel,
     )
 
+    if max_parallel > 1:
+        # ── Parallel mode: dispatch all tasks in one batch ──────────────
+        import threading as _threading
+        completed_count = 0
+        _lock = _threading.Lock()
+
+        def on_complete(name: str, status: str, dur: float) -> None:
+            nonlocal completed_count
+            with _lock:
+                completed_count += 1
+                logger.info(f"[{completed_count}/{total_tools}] {name}: {status} ({dur:.1f}s)")
+
+        all_results = backend.execute_batch(
+            tasks, exec_config, logger.log_pipe(), on_complete=on_complete,
+        )
+
+        # Post-process results: validate JSON, populate outputs/tool_summaries
+        for result in all_results:
+            if result.status == "success":
+                output_path = result.output_path
+                valid = True
+                error = None
+                if not output_path.exists():
+                    valid = False
+                    error = f"{result.tool_name} did not write expected output.json at {output_path}"
+                else:
+                    try:
+                        json.loads(output_path.read_text(encoding="utf-8"))
+                    except Exception as exc:
+                        valid = False
+                        error = f"{result.tool_name} wrote invalid JSON: {exc!r}"
+
+                if valid:
+                    outputs[result.tool_name] = output_path
+                    tool_summaries.append({
+                        "tool_name": result.tool_name,
+                        "status": "success",
+                        "duration_seconds": round(result.duration_seconds, 3),
+                        "output_path": str(output_path),
+                        "output_exists": True,
+                        "output_bytes": output_path.stat().st_size,
+                        "error": None,
+                    })
+                else:
+                    tool_summaries.append({
+                        "tool_name": result.tool_name,
+                        "status": "failed",
+                        "duration_seconds": round(result.duration_seconds, 3),
+                        "output_path": str(output_path),
+                        "output_exists": output_path.exists(),
+                        "output_bytes": output_path.stat().st_size if output_path.exists() else None,
+                        "error": error,
+                    })
+                    if not continue_on_failure:
+                        raise ToolPhaseError(
+                            f"Tool failed: {result.tool_name}",
+                            outputs=outputs,
+                            tool_summaries=tool_summaries,
+                        )
+            else:
+                tool_summaries.append({
+                    "tool_name": result.tool_name,
+                    "status": "failed",
+                    "duration_seconds": round(result.duration_seconds, 3),
+                    "output_path": str(result.output_path),
+                    "output_exists": result.output_exists,
+                    "output_bytes": result.output_bytes,
+                    "error": result.error,
+                })
+                if not continue_on_failure:
+                    raise ToolPhaseError(
+                        f"Tool failed: {result.tool_name}",
+                        outputs=outputs,
+                        tool_summaries=tool_summaries,
+                    )
+
+        return outputs, tool_summaries
+
+    # ── Sequential mode (max_parallel == 1): original per-tool logic ────────
     for idx, (tool, task) in enumerate(zip(tool_configs, tasks), 1):
         tool_start = time.perf_counter()
 
@@ -643,7 +744,7 @@ def run_dbt(
                 }
             )
         try:
-            subprocess.run(
+            _subprocess_run_with_retry(
                 cmd,
                 cwd=str(dbt_project_dir),
                 env=env,
@@ -710,7 +811,12 @@ def main() -> int:
     parser.add_argument("--run-dbt", action="store_true")
     parser.add_argument("--replace", action="store_true")
     parser.add_argument("--no-progress", action="store_true", help="Disable rich progress display")
-    parser.add_argument("--mode", default="local", choices=["local"], help="Execution mode (only 'local' supported)")
+    parser.add_argument("--mode", default="local", choices=["local", "docker"], help="Execution mode")
+    parser.add_argument("--max-parallel", type=int, default=1, help="Max parallel tool executions (default: 1 = sequential)")
+    parser.add_argument("--docker-image-prefix", default=None, help="Docker image prefix (env: CALDERA_TOOL_IMAGE_PREFIX)")
+    parser.add_argument("--docker-network", default=None, help="Docker network name (env: DOCKER_NETWORK)")
+    parser.add_argument("--docker-repo-volume", default=None, help="Docker repo volume (env: CALDERA_REPO_VOLUME)")
+    parser.add_argument("--docker-artifacts-volume", default=None, help="Docker artifacts volume (env: CALDERA_ARTIFACTS_VOLUME)")
     parser.add_argument("--dbt-bin", default="src/sot-engine/.venv-dbt/bin/dbt")
     parser.add_argument("--dbt-project-dir", default="src/sot-engine/dbt")
     parser.add_argument("--dbt-profiles-dir", default="src/sot-engine/dbt")
@@ -725,6 +831,12 @@ def main() -> int:
         help="Run remaining tools even if one fails (ingest/dbt still run; status becomes partial_success)",
     )
     args = parser.parse_args()
+
+    # Validate identifiers to prevent path traversal via --run-id / --repo-id
+    _safe_id_re = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+    for _field_name, _value in [("run_id", args.run_id), ("repo_id", args.repo_id)]:
+        if not _safe_id_re.match(_value) or ".." in _value:
+            parser.error(f"Unsafe {_field_name}: {_value!r}")
 
     repo_path = Path(args.repo_path)
     if _is_fallback_commit(args.commit):
@@ -836,6 +948,18 @@ def main() -> int:
                 output_root,
             )
 
+        # Construct execution backend
+        exec_mode = ExecutionMode(args.mode)
+        docker_config = None
+        if exec_mode == ExecutionMode.DOCKER:
+            docker_config = DockerConfig(
+                image_prefix=args.docker_image_prefix or os.environ.get("CALDERA_TOOL_IMAGE_PREFIX", "caldera-tool-"),
+                network=args.docker_network or os.environ.get("DOCKER_NETWORK", "caldera_default"),
+                repo_volume=args.docker_repo_volume or os.environ.get("CALDERA_REPO_VOLUME", "caldera-repo"),
+                artifacts_volume=args.docker_artifacts_volume or os.environ.get("CALDERA_ARTIFACTS_VOLUME", "caldera-artifacts"),
+            )
+        backend = get_backend(exec_mode, docker_config=docker_config)
+
         if args.run_tools:
             summary["steps"]["tools"]["status"] = "running"
             start = time.perf_counter()
@@ -858,6 +982,8 @@ def main() -> int:
                     output_root,
                     continue_on_failure=args.continue_on_tool_failure,
                     show_progress=not args.no_progress,
+                    backend=backend,
+                    max_parallel=args.max_parallel,
                 )
             except ToolPhaseError as exc:
                 summary["steps"]["tools"]["status"] = "failed"

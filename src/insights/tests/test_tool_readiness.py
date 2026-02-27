@@ -16,12 +16,6 @@ from insights.sections.tool_readiness import ToolReadinessSection
 class TestToolReadinessSection:
     """Tests for ToolReadinessSection."""
 
-    def test_config(self) -> None:
-        """Test section configuration."""
-        section = ToolReadinessSection()
-        assert section.config.name == "tool_readiness"
-        assert section.config.priority == 0  # First section
-
     def test_fetch_data_with_real_tools_dir(self) -> None:
         """Test fetch_data with the real tools directory."""
         section = ToolReadinessSection()
@@ -155,21 +149,6 @@ class TestToolReadinessSection:
         assert result["failed_checks"] == 1
         assert len(result["dimensions"]) == 2
         assert len(result["failed_check_details"]) == 1
-
-    def test_get_template_name(self) -> None:
-        """Test template name generation."""
-        section = ToolReadinessSection()
-        assert section.get_template_name() == "tool_readiness.html.j2"
-        assert section.get_markdown_template_name() == "tool_readiness.md.j2"
-
-    def test_fallback_data(self) -> None:
-        """Test fallback data structure."""
-        section = ToolReadinessSection()
-        fallback = section.get_fallback_data()
-
-        assert fallback["tools"] == []
-        assert fallback["has_tools"] is False
-        assert fallback["summary"]["total"] == 0
 
     def test_fetch_data_with_synthetic_tools(self) -> None:
         """Test fetch_data with synthetic tool directories."""

@@ -1,0 +1,21 @@
+## Evidence Pack
+
+{% if has_data %}
+**Total Evidence Items:** {{ total_evidence }}
+
+{% for cat in categories %}
+{% if cat.evidence_items %}
+### {{ cat.category | title }} ({{ cat.total_count }}{% if cat.truncated %}, showing {{ cat.displayed_count }}{% endif %})
+
+| ID | Location | Observation | Tool | Confidence |
+|----|----------|-------------|------|------------|
+{% for item in cat.evidence_items %}
+| `{{ item.evidence_id }}` | `{{ item.location }}` | {{ item.observation }} | {{ item.tool_source }} | {{ item.confidence }} |
+{% endfor %}
+
+{% endif %}
+{% endfor %}
+
+{% else %}
+*No evidence items collected in this run.*
+{% endif %}

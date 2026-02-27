@@ -20,6 +20,8 @@ COMMIT ?= $(shell git -C $(REPO_PATH) rev-parse HEAD 2>/dev/null || echo "000000
 # Trivy settings
 TRIVY_VERSION ?= 0.58.0
 TRIVY_TIMEOUT ?= 600
+TRIVY_INSTALL_URL := https://raw.githubusercontent.com/aquasecurity/trivy/v$(TRIVY_VERSION)/contrib/install.sh
+TRIVY_INSTALL_SH_SHA256 := 2304dcc0c1883e802d376eae1b514c923b7427a7d88091dfcaf83967e6f55a7c
 
 help:  ## Show this help message
 	@echo "Trivy Vulnerability Scanner"
@@ -40,9 +42,19 @@ install-trivy:  ## Install trivy binary
 	@if ! command -v trivy &> /dev/null; then \
 		echo "Installing trivy..."; \
 		if [ "$$(uname)" = "Darwin" ]; then \
-			brew install trivy || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v$(TRIVY_VERSION); \
+			brew install trivy || { \
+				curl -sfL $(TRIVY_INSTALL_URL) -o /tmp/trivy-install.sh && \
+				echo "$(TRIVY_INSTALL_SH_SHA256)  /tmp/trivy-install.sh" | $(SHA256_CMD) -c - || \
+					{ echo "ERROR: checksum mismatch for trivy install script"; rm -f /tmp/trivy-install.sh; exit 1; }; \
+				sh /tmp/trivy-install.sh -b /usr/local/bin v$(TRIVY_VERSION) && \
+				rm -f /tmp/trivy-install.sh; \
+			}; \
 		else \
-			curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v$(TRIVY_VERSION); \
+			curl -sfL $(TRIVY_INSTALL_URL) -o /tmp/trivy-install.sh && \
+			echo "$(TRIVY_INSTALL_SH_SHA256)  /tmp/trivy-install.sh" | $(SHA256_CMD) -c - || \
+				{ echo "ERROR: checksum mismatch for trivy install script"; rm -f /tmp/trivy-install.sh; exit 1; }; \
+			sh /tmp/trivy-install.sh -b /usr/local/bin v$(TRIVY_VERSION) && \
+			rm -f /tmp/trivy-install.sh; \
 		fi \
 	else \
 		echo "trivy already installed: $$(trivy --version | head -1)"; \

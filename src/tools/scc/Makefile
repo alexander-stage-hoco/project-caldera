@@ -62,16 +62,34 @@ all: setup analyze evaluate
 setup: $(SCC_BIN) $(VENV_READY)
 	@echo "Setup complete!"
 
+# SHA256 checksums per platform (scc v3.6.0)
+SCC_SHA256_Darwin_arm64  := b8ef6ec7341cfb0cf67482f6d5290f117e0c74ed03c93274e8d171e66cd5b638
+SCC_SHA256_Darwin_x86_64 := eda4b38121832e8d82ea14d65612e74184e90ce9a540f2f552159b34028e333f
+SCC_SHA256_Linux_x86_64  := da923e0b94c5ce818088ba2e3d1667cdb064b3c684592e3c774c7f97b63194f6
+SCC_SHA256_Linux_arm64   := 87fd3f5d4c393c6b665d23bf9b601753b2f6f8a953e6f265d5ea1498195d082f
+SCC_SHA256_Linux_aarch64 := $(SCC_SHA256_Linux_arm64)
+
 $(SCC_BIN):
 	@echo "Installing scc $(SCC_VERSION)..."
 	@mkdir -p bin
 	@OS=$$(uname -s); \
 	ARCH=$$(uname -m); \
 	URL="https://github.com/boyter/scc/releases/download/v$(SCC_VERSION)/scc_$${OS}_$${ARCH}.tar.gz"; \
+	EXPECTED=$$(make -s --no-print-directory _scc-checksum-$${OS}_$${ARCH} 2>/dev/null); \
 	echo "Downloading from $$URL"; \
-	curl -sL "$$URL" | tar xz -C bin scc; \
+	curl -sL "$$URL" -o /tmp/scc.tar.gz; \
+	if [ -n "$$EXPECTED" ]; then \
+		echo "$$EXPECTED  /tmp/scc.tar.gz" | $(SHA256_CMD) -c - || { echo "ERROR: checksum mismatch"; rm -f /tmp/scc.tar.gz; exit 1; }; \
+	else \
+		echo "WARNING: no checksum configured for $${OS}_$${ARCH}, skipping verification"; \
+	fi; \
+	tar xz -C bin scc < /tmp/scc.tar.gz; \
+	rm -f /tmp/scc.tar.gz; \
 	chmod +x $(SCC_BIN)
 	@$(SCC_BIN) --version
+
+_scc-checksum-%:
+	@echo "$(SCC_SHA256_$*)"
 
 # =============================================================================
 # Analysis

@@ -1,0 +1,88 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Sampling Rationale</h2>
+
+    {% if has_data %}
+    <div class="subsection">
+        <h3>Composite Risk Formula</h3>
+        <p><code>{{ formula }}</code></p>
+        {% if tools_contributing %}
+        <p><strong>Contributing tools:</strong> {{ tools_contributing | join(', ') }}</p>
+        {% endif %}
+    </div>
+
+    {% if sampling_coverage %}
+    <div class="subsection">
+        <h3>Codebase Coverage</h3>
+        <p>
+            <strong>{{ sampling_coverage.sampled_files }}</strong> files
+            ({{ sampling_coverage.sampled_pct }}% of codebase, {{ sampling_coverage.sampled_kloc }} KLOC)
+            selected for detailed review out of
+            <strong>{{ sampling_coverage.eligible_files }}</strong> eligible files
+            ({{ sampling_coverage.total_files }} total, {{ sampling_coverage.eligible_loc | int }} LOC with &gt;50 lines).
+        </p>
+    </div>
+    {% endif %}
+
+    {% if risk_drivers %}
+    <div class="subsection">
+        <h3>Risk Driver Breakdown</h3>
+        <p>Files grouped by dominant risk factor:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Driver</th>
+                    <th class="number">Files</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for driver, count in risk_drivers.items() %}
+                {% if count > 0 %}
+                <tr>
+                    <td>{{ driver | capitalize }}</td>
+                    <td class="number">{{ count }}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="subsection">
+        <h3>Top {{ target_count }} Files by Risk Score</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th class="number">Composite</th>
+                    <th class="number">CCN</th>
+                    <th class="number">Coupling</th>
+                    <th class="number">Ownership</th>
+                    <th class="number">Coverage</th>
+                    <th class="number">Quality</th>
+                    <th>Rationale</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for target in targets[:30] %}
+                <tr>
+                    <td><code>{{ target.file_path }}</code></td>
+                    <td class="number {% if target.composite_score >= 0.7 %}score-red{% elif target.composite_score >= 0.4 %}score-amber{% else %}score-green{% endif %}">{{ "%.2f" | format(target.composite_score) }}</td>
+                    <td class="number {% if target.ccn_score >= 0.7 %}score-red{% elif target.ccn_score >= 0.4 %}score-amber{% else %}score-green{% endif %}">{{ "%.2f" | format(target.ccn_score) }}</td>
+                    <td class="number {% if target.coupling_score >= 0.7 %}score-red{% elif target.coupling_score >= 0.4 %}score-amber{% else %}score-green{% endif %}">{{ "%.2f" | format(target.coupling_score) }}</td>
+                    <td class="number {% if target.ownership_score >= 0.7 %}score-red{% elif target.ownership_score >= 0.4 %}score-amber{% else %}score-green{% endif %}">{{ "%.2f" | format(target.ownership_score) }}</td>
+                    <td class="number {% if target.coverage_score >= 0.7 %}score-red{% elif target.coverage_score >= 0.4 %}score-amber{% else %}score-green{% endif %}">{{ "%.2f" | format(target.coverage_score) }}</td>
+                    <td class="number {% if target.quality_score >= 0.7 %}score-red{% elif target.quality_score >= 0.4 %}score-amber{% else %}score-green{% endif %}">{{ "%.2f" | format(target.quality_score) }}</td>
+                    <td><small>{{ target.rationale }}</small></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <p>No sampling targets computed for this run.</p>
+    </div>
+    {% endif %}
+</section>

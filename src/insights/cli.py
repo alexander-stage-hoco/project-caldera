@@ -34,6 +34,7 @@ def generate(
     format: str = typer.Option("html", "--format", "-f", help="Output format: html, md"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
     sections: str | None = typer.Option(None, "--sections", "-s", help="Comma-separated section names"),
+    profile: str | None = typer.Option(None, "--profile", "-p", help="Stakeholder profile (cto, investor, ceo)"),
     title: str | None = typer.Option(None, "--title", "-t", help="Custom report title"),
 ) -> None:
     """Generate an insights report for a collection run.
@@ -56,6 +57,10 @@ def generate(
 
     if run_pk is not None and collection_run_id is not None:
         console.print("[red]Error:[/red] Cannot specify both run_pk and --collection-run-id")
+        raise typer.Exit(1)
+
+    if profile is not None and sections is not None:
+        console.print("[red]Error:[/red] Cannot specify both --profile and --sections")
         raise typer.Exit(1)
 
     if not db.exists():
@@ -90,6 +95,7 @@ def generate(
                     sections=section_list,
                     output_path=output,
                     title=title,
+                    profile=profile,
                 )
             else:
                 result = generator.generate(
@@ -98,6 +104,7 @@ def generate(
                     sections=section_list,
                     output_path=output,
                     title=title,
+                    profile=profile,
                 )
 
             # Display any captured warnings
@@ -137,6 +144,30 @@ def list_sections() -> None:
             section.config.title,
             str(section.config.priority),
             section.config.description,
+        )
+
+    console.print(table)
+
+
+@app.command("list-profiles")
+def list_profiles_cmd() -> None:
+    """List available stakeholder report profiles."""
+    from .profiles import list_profiles
+
+    table = Table(title="Stakeholder Report Profiles")
+    table.add_column("Name", style="cyan")
+    table.add_column("Audience", style="green")
+    table.add_column("Sections", justify="right")
+    table.add_column("Description")
+    table.add_column("Gaps", style="yellow")
+
+    for p in list_profiles():
+        table.add_row(
+            p.name,
+            p.display_name,
+            str(len(p.sections)),
+            p.description,
+            ", ".join(p.gaps) if p.gaps else "-",
         )
 
     console.print(table)

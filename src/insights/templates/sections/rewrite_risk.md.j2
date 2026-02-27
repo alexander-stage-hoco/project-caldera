@@ -1,0 +1,52 @@
+## Rewrite Risk Assessment
+
+{% if has_data %}
+**Assessment: {{ assessment | upper }}** — {{ structural_count }} structural, {{ addressable_count }} addressable constraint{{ "s" if addressable_count != 1 else "" }}
+
+{{ recommendation }}
+
+| Metric | Value |
+|--------|------:|
+| Total Constraints | {{ total_constraints }} |
+| Structural | {{ structural_count }} |
+| Addressable | {{ addressable_count }} |
+| High Risk | {{ high_count }} |
+
+### Constraints
+
+| Directory | Type | Risk | Signals | LOC | Trigger |
+|-----------|------|------|---------|----:|---------|
+{% for c in constraints %}
+| `{{ c.directory }}` | {{ c.constraint_type }} | {{ c.risk_level }} | {{ c.signals | join(", ") }} | {{ "{:,}".format(c.loc_total) }} | {{ c.trigger_condition }} |
+{% endfor %}
+
+{% for c in constraints %}
+{% if c.risk_level in ["high", "medium"] %}
+### `{{ c.directory }}` — {{ c.constraint_type }} / {{ c.risk_level }}
+
+> *"{{ c.assumption_that_fails }}"*
+
+**Why it fails:** {{ c.why_it_fails }}
+
+- **Signals:** {{ c.signals | join(", ") }}
+- **LOC:** {{ "{:,}".format(c.loc_total) }} | **Files:** {{ c.file_count }}
+- **Avg CCN:** {{ c.avg_ccn }} | **Fan-out:** {{ c.coupling_fan_out }} | **Fan-in:** {{ c.coupling_fan_in }}
+- **Coverage:** {{ c.coverage_line_pct }}%
+{% if c.linked_evidence %}
+- **Evidence:** {% for eid in c.linked_evidence %}`{{ eid }}`{% if not loop.last %}, {% endif %}{% endfor %}
+{% endif %}
+- **Trigger:** {{ c.trigger_condition }}
+
+{% endif %}
+{% endfor %}
+
+### Constraint Matrix
+
+| Type \ Risk | High | Medium | Low |
+|-------------|-----:|-------:|----:|
+| **Structural** | {{ matrix.structural.high }} | {{ matrix.structural.medium }} | {{ matrix.structural.low }} |
+| **Addressable** | {{ matrix.addressable.high }} | {{ matrix.addressable.medium }} | {{ matrix.addressable.low }} |
+
+{% else %}
+*No rewrite risk constraints detected. The codebase supports incremental modernisation.*
+{% endif %}

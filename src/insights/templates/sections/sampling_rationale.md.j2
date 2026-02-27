@@ -1,0 +1,37 @@
+## Sampling Rationale
+
+{% if has_data %}
+### Composite Risk Formula
+
+`{{ formula }}`
+
+{% if tools_contributing %}
+**Contributing tools:** {{ tools_contributing | join(', ') }}
+{% endif %}
+
+{% if sampling_coverage %}
+### Codebase Coverage
+
+**{{ sampling_coverage.sampled_files }}** files ({{ sampling_coverage.sampled_pct }}% of codebase, {{ sampling_coverage.sampled_kloc }} KLOC) selected for detailed review out of **{{ sampling_coverage.eligible_files }}** eligible files ({{ sampling_coverage.total_files }} total, {{ sampling_coverage.eligible_loc | int }} LOC with >50 lines).
+{% endif %}
+
+{% if risk_drivers %}
+### Risk Driver Breakdown
+
+Files grouped by dominant risk factor:
+
+{% for driver, count in risk_drivers.items() %}{% if count > 0 %}- **{{ driver | capitalize }}**: {{ count }} files
+{% endif %}{% endfor %}
+{% endif %}
+
+### Top {{ target_count }} Files by Risk Score
+
+| File | Composite | CCN | Coupling | Ownership | Coverage | Quality | Rationale |
+|------|----------:|----:|---------:|----------:|---------:|--------:|-----------|
+{% for target in targets[:30] %}
+| `{{ target.file_path }}` | {{ "%.2f" | format(target.composite_score) }} | {{ "%.2f" | format(target.ccn_score) }} | {{ "%.2f" | format(target.coupling_score) }} | {{ "%.2f" | format(target.ownership_score) }} | {{ "%.2f" | format(target.coverage_score) }} | {{ "%.2f" | format(target.quality_score) }} | {{ target.rationale }} |
+{% endfor %}
+
+{% else %}
+*No sampling targets computed for this run.*
+{% endif %}

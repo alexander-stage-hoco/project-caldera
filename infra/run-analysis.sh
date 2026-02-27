@@ -226,7 +226,7 @@ TARGET_COMMIT=$(cd "${CLONE_DIR}" 2>/dev/null && git rev-parse HEAD 2>/dev/null 
 # contains DuckDB + reports, not raw tool bundles.  The top-level keys match the
 # canonical schema; cloud-specific metadata lives under the `cloud` extension key.
 python3 -c "
-import json, datetime, os
+import json, datetime, os, math
 
 # Read per-tool status from orchestrator summary (if available)
 import glob as _glob
@@ -257,12 +257,21 @@ try:
 except (FileNotFoundError, json.JSONDecodeError, IndexError):
     pass
 
+# Pricing lookup — inline dict mirrors infra/server_presets.json
+_pricing = {'cx23': 0.007, 'cx33': 0.013, 'cx43': 0.025, 'cx53': 0.050}
+_hourly_rate = _pricing.get('${SERVER_TYPE}', 0.0)
+_billable_hours = math.ceil(${DURATION} / 3600) if ${DURATION} > 0 else 0
+_estimated_cost = round(_billable_hours * _hourly_rate, 4)
+
 cloud_section = {
     'mode': 'cloud-hetzner',
     'server_type': '${SERVER_TYPE}',
     'started_at': datetime.datetime.fromtimestamp(${START_TIME}, tz=datetime.timezone.utc).isoformat(),
     'completed_at': datetime.datetime.fromtimestamp(${END_TIME}, tz=datetime.timezone.utc).isoformat(),
     'duration_seconds': ${DURATION},
+    'estimated_cost_eur': _estimated_cost,
+    'pricing_eur_per_hour': _hourly_rate,
+    'billable_hours': _billable_hours,
     'skip_tools': '${SKIP_TOOLS}'.split(',') if '${SKIP_TOOLS}' else [],
     'pipeline_llm': bool(int('${PIPELINE_LLM}')),
     'run_pk': int('${RUN_PK}') if '${RUN_PK}' else None,

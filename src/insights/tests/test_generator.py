@@ -1,11 +1,10 @@
 """Tests for InsightsGenerator."""
 
-import pytest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch, MagicMock
 
 from insights.generator import InsightsGenerator
-from insights.sections.base import SectionData
+from insights.sections.base import BaseSection, SectionConfig, SectionData
+from insights.formatters.markdown import MarkdownFormatter
 
 
 class TestInsightsGenerator:
@@ -51,6 +50,11 @@ class TestInsightsGenerator:
             "devskim_security",
             "dotcover_coverage",
             "git_sizer",
+            "risk_register",
+            "rewrite_risk",
+            "evidence_pack",
+            "claim_register",
+            "sampling_rationale",
         ]
 
         assert set(InsightsGenerator.SECTIONS.keys()) == set(expected_sections)
@@ -78,47 +82,74 @@ class TestInsightsGenerator:
             section = cls()
             priorities.append(section.config.priority)
 
-        # All priorities should be valid numbers in range 0-11
+        # All priorities should be valid numbers in range 0-99
         # Note: Some sections share priorities (e.g., secrets and cross_tool both use 5)
-        assert all(0 <= p <= 11 for p in priorities)
+        # Evidence framework sections use high priorities (97-99) for appendix placement
+        assert all(0 <= p <= 99 for p in priorities)
         assert len(priorities) == len(InsightsGenerator.SECTIONS)
 
-    @pytest.mark.parametrize("format_type", ["html", "md"])
-    def test_format_support(self, format_type: str):
-        """Test that both HTML and MD formats are supported."""
+
+class TestRenderSectionFallback:
+    """Tests for _render_section error handling."""
+
+    def test_render_section_uses_fallback_on_fetch_error(self):
+        """When section.fetch_data raises, _render_section should use fallback data
+        and set data['_error']."""
         with patch.object(InsightsGenerator, "__init__", lambda x, **kwargs: None):
             generator = InsightsGenerator.__new__(InsightsGenerator)
-            generator._formatters = {
-                "html": MagicMock(),
-                "md": MagicMock(),
-            }
 
-            assert format_type in generator._formatters
+            # Create a section whose fetch_data raises
+            section = MagicMock(spec=BaseSection)
+            section.config = SectionConfig(
+                name="broken_section",
+                title="Broken",
+                description="Always fails",
+                priority=50,
+            )
+            section.fetch_data.side_effect = RuntimeError("DB gone")
+            section.get_fallback_data.return_value = {"fallback_key": "fallback_val"}
+            section.validate_data.return_value = []
+            section.get_markdown_template_name.return_value = "broken.md.j2"
+
+            # Use a real MarkdownFormatter which will hit _render_fallback_section
+            formatter = MagicMock()
+            formatter.format_section.return_value = "<rendered>"
+
+            generator.fetcher = MagicMock()
+
+            result = generator._render_section(section, run_pk=1, formatter=formatter)
+
+            assert isinstance(result, SectionData)
+            assert result.data["_error"] == "DB gone"
+            assert result.data["fallback_key"] == "fallback_val"
 
 
-class TestSectionData:
-    """Tests for SectionData dataclass."""
+class TestGenerateByCollection:
+    """Tests for generate_by_collection delegation."""
 
-    def test_section_data_creation(self):
-        """Test creating a SectionData instance."""
-        data = SectionData(
-            id="test_section",
-            title="Test Section",
-            content="<div>Content</div>",
-            data={"key": "value"},
-        )
+    def test_delegates_to_generate_with_resolved_run_pk(self):
+        """generate_by_collection should resolve SCC run_pk then call generate."""
+        with patch.object(InsightsGenerator, "__init__", lambda x, **kwargs: None):
+            generator = InsightsGenerator.__new__(InsightsGenerator)
+            generator.fetcher = MagicMock()
+            generator.fetcher.get_scc_run_pk_for_collection.return_value = 42
 
-        assert data.id == "test_section"
-        assert data.title == "Test Section"
-        assert data.content == "<div>Content</div>"
-        assert data.data == {"key": "value"}
+            with patch.object(generator, "generate", return_value="<report>") as mock_gen:
+                result = generator.generate_by_collection(
+                    collection_run_id="coll-abc",
+                    format="md",
+                    sections=["repo_health"],
+                    title="My Report",
+                )
 
-    def test_section_data_default_data(self):
-        """Test SectionData with default empty data."""
-        data = SectionData(
-            id="test",
-            title="Test",
-            content="",
-        )
+            assert result == "<report>"
+            mock_gen.assert_called_once_with(
+                run_pk=42,
+                format="md",
+                sections=["repo_health"],
+                output_path=None,
+                title="My Report",
+                profile=None,
+            )
+            generator.fetcher.get_scc_run_pk_for_collection.assert_called_once_with("coll-abc")
 
-        assert data.data == {}

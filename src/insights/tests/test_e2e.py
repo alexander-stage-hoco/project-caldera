@@ -341,9 +341,14 @@ class TestE2EReportGeneration:
             format="md",
         )
 
-        # Verify Markdown structure
-        assert "#" in report  # Has headers
-        assert "---" in report or "Report" in report
+        # Verify Markdown structure: must have a top-level heading
+        assert report.lstrip().startswith("#") or "\n# " in report
+        # Must contain the repository name in the title
+        assert "test-repo" in report
+        # Must have section headings (## level)
+        assert "\n## " in report
+        # Must have a horizontal rule or table of contents separator
+        assert "---" in report
 
     def test_generate_report_to_file(self, seeded_db_with_marts: Path) -> None:
         """Test generating a report and writing to file."""
@@ -529,9 +534,8 @@ class TestE2EReportContent:
         generator = InsightsGenerator(db_path=seeded_db_with_marts)
         report = generator.generate(run_pk=2, format="html")
 
-        # Check for metadata indicators
-        # The run_pk or repository name should appear somewhere
-        assert "test-repo" in report or "run_pk" in report or "2" in report
+        # The repository name should appear in the report
+        assert "test-repo" in report
 
     def test_all_sections_render(self, seeded_db_with_marts: Path) -> None:
         """Test that all sections can render without errors."""
