@@ -190,9 +190,13 @@ cd "${INFRA_DIR}"
 cleanup() {
     local exit_code=$?
     if [ "${DESTROY_AFTER}" -eq 1 ] && [ -f "${INFRA_DIR}/terraform.tfstate" ]; then
+        # Skip destroy if state has no resources (already clean)
+        if ! terraform -chdir="${INFRA_DIR}" state list 2>/dev/null | grep -q .; then
+            exit $exit_code
+        fi
         echo ""
         echo ">>> Cleaning up — destroying server..."
-        terraform destroy \
+        if terraform destroy \
             -auto-approve \
             -var="repo_url=${REPO_URL}" \
             -var="server_type=${SERVER_TYPE}" \
@@ -203,9 +207,12 @@ cleanup() {
             -var="results_dir=${RESULTS_DIR}" \
             -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}" \
             -var="max_duration=${MAX_DURATION}" \
-            -var="max_cost=${MAX_COST}" \
-            2>&1 | grep -E "^(Destroy|hcloud_)" || true
-        echo "    Server destroyed."
+            -var="max_cost=${MAX_COST}"; then
+            echo "    Server destroyed."
+        else
+            echo "    WARNING: terraform destroy failed. VM may still be running."
+            echo "    Run 'make cloud-destroy' or check https://console.hetzner.cloud"
+        fi
     fi
     exit $exit_code
 }

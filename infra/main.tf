@@ -232,7 +232,7 @@ resource "null_resource" "run_analysis" {
     inline = [
       "chmod +x /opt/caldera/run-analysis.sh",
       "chmod 600 /opt/caldera/.env.secrets",
-      "trap 'rm -f /opt/caldera/.env.secrets' EXIT && set -a && . /opt/caldera/.env.secrets && set +a && REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' CLONE_DEPTH='${var.clone_depth}' MAX_DURATION='${var.max_duration}' MAX_COST='${var.max_cost}' /opt/caldera/run-analysis.sh",
+      "set -a && . /opt/caldera/.env.secrets && set +a && rm -f /opt/caldera/.env.secrets && REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' CLONE_DEPTH='${var.clone_depth}' MAX_DURATION='${var.max_duration}' MAX_COST='${var.max_cost}' /opt/caldera/run-analysis.sh",
     ]
   }
 

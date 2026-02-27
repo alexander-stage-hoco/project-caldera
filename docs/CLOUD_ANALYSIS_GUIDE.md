@@ -94,6 +94,23 @@ make cloud-run \
 
 > **Note:** `CLONE_DEPTH` is passed to `git clone --depth` on the VM. The target repo must be accessible from the VM (public URL or SSH with deployed keys).
 
+## Budget Guards
+
+Use `MAX_DURATION` and `MAX_COST` to cap cloud runs and prevent runaway costs. When a limit is reached, the analysis is terminated gracefully and partial results are exported.
+
+```bash
+# Cap analysis at 30 minutes
+make cloud-run REPO=https://github.com/org/repo MAX_DURATION=1800
+
+# Cap cost at EUR 0.05
+make cloud-run REPO=https://github.com/org/repo MAX_COST=0.05
+
+# Both — whichever triggers first wins
+make cloud-run REPO=https://github.com/org/repo MAX_DURATION=1800 MAX_COST=0.05
+```
+
+`MAX_COST` is converted to a time limit using the server's hourly rate (from `infra/server_presets.json`). The effective timeout is the minimum of the two limits. Budget guard status is recorded in the `manifest.json` under `cloud.budget_guard`.
+
 ## Running the Analysis
 
 **Basic run:**
@@ -126,6 +143,8 @@ make cloud-run \
 | `KEEP_SERVER` | (unset) | Set to `1` to keep VM alive after run |
 | `CLONE_DEPTH` | (full) | Shallow clone depth |
 | `CLOUD_RESULTS` | `infra/results` | Local directory for downloaded results |
+| `MAX_DURATION` | (unlimited) | Max analysis duration in seconds |
+| `MAX_COST` | (unlimited) | Max estimated cost in EUR (uses server pricing) |
 
 You can also invoke the script directly for more control:
 

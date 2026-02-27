@@ -39,6 +39,9 @@ RESULTS_DIR="${WORK_DIR}/results"
 CALDERA_DIR="${WORK_DIR}/project"
 CLONE_DIR="/tmp/target-repo"
 
+# Scrub secrets file as early as possible (env vars already in memory from caller)
+rm -f "${WORK_DIR}/.env.secrets"
+
 echo "=============================================="
 echo "Caldera Cloud Runner"
 echo "=============================================="
