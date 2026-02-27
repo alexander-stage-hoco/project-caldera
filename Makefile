@@ -347,6 +347,9 @@ dbt-test:
 dbt-test-reports:
 	@CALDERA_DB_PATH=$(ORCH_DB_PATH) DBT_PROFILES_DIR=$(DBT_PROFILES_DIR) $(DBT_BIN) test --project-dir $(DBT_PROJECT_DIR) --target-path /tmp/dbt_target --log-path /tmp/dbt_logs --select test_report_repo_health_snapshot_ccn_present test_report_repo_health_snapshot_scc_present
 
+MAX_PARALLEL ?= 1
+MODE ?= local
+
 orchestrate:
 	@test -n "$(ORCH_REPO_PATH)" || (echo "ORCH_REPO_PATH is required"; exit 1)
 	@test -n "$(ORCH_REPO_ID)" || (echo "ORCH_REPO_ID is required"; exit 1)
@@ -361,6 +364,8 @@ orchestrate:
 		--commit $(ORCH_COMMIT) \
 		--db-path $(ORCH_DB_PATH) \
 		--schema-path src/sot-engine/persistence/schema.sql \
+		--mode $(MODE) \
+		--max-parallel $(MAX_PARALLEL) \
 		$(if $(ORCH_OUTPUT_ROOT),--output-root $(ORCH_OUTPUT_ROOT),) \
 		$(if $(ORCH_SKIP_TOOLS),--skip-tools $(ORCH_SKIP_TOOLS),) \
 		$(if $(ORCH_LAYOUT_OUTPUT),--layout-output $(ORCH_LAYOUT_OUTPUT),) \
