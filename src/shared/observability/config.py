@@ -20,8 +20,10 @@ class ObservabilityConfig:
         log_dir: Base directory for log files (default: output/llm_logs)
         log_to_console: Whether to also log to console via structlog (default: False)
         log_to_file: Whether to persist to JSON-Lines files (default: True)
-        include_prompts: Whether to log full prompt text (default: True)
-        include_responses: Whether to log full response text (default: True)
+        include_prompts: Whether to log full prompt text (default: False).
+            Enable via LLM_OBSERVABILITY_INCLUDE_PROMPTS=true for debugging.
+        include_responses: Whether to log full response text (default: False).
+            Enable via LLM_OBSERVABILITY_INCLUDE_RESPONSES=true for debugging.
         max_prompt_length: Truncate prompts longer than this (default: None = no truncation)
         max_response_length: Truncate responses longer than this (default: None = no truncation)
         retention_days: Auto-cleanup logs older than this (default: 30, 0 = no cleanup)
@@ -32,8 +34,8 @@ class ObservabilityConfig:
     log_dir: Path = field(default_factory=lambda: Path("output/llm_logs"))
     log_to_console: bool = False
     log_to_file: bool = True
-    include_prompts: bool = True
-    include_responses: bool = True
+    include_prompts: bool = False
+    include_responses: bool = False
     max_prompt_length: int | None = None
     max_response_length: int | None = None
     retention_days: int = 30
@@ -66,8 +68,8 @@ class ObservabilityConfig:
             enabled=os.getenv("LLM_OBSERVABILITY_ENABLED", "true").lower() == "true",
             log_dir=Path(os.getenv("LLM_OBSERVABILITY_LOG_DIR", "output/llm_logs")),
             log_to_console=os.getenv("LLM_OBSERVABILITY_CONSOLE", "false").lower() == "true",
-            include_prompts=os.getenv("LLM_OBSERVABILITY_INCLUDE_PROMPTS", "true").lower() == "true",
-            include_responses=os.getenv("LLM_OBSERVABILITY_INCLUDE_RESPONSES", "true").lower() == "true",
+            include_prompts=os.getenv("LLM_OBSERVABILITY_INCLUDE_PROMPTS", "false").lower() == "true",
+            include_responses=os.getenv("LLM_OBSERVABILITY_INCLUDE_RESPONSES", "false").lower() == "true",
             retention_days=int(os.getenv("LLM_OBSERVABILITY_RETENTION_DAYS", "30")),
         )
 

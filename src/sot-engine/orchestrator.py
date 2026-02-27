@@ -107,6 +107,26 @@ def ensure_schema(conn: duckdb.DuckDBPyConnection, schema_path: Path) -> None:
             "lz_collection_runs missing. Apply schema.sql before running orchestrator."
         )
 
+    _apply_migrations(conn)
+
+
+# -- Schema migrations --------------------------------------------------------
+# Each entry is an idempotent ALTER TABLE statement for columns added after the
+# initial schema.sql release.  DuckDB supports ADD COLUMN IF NOT EXISTS.
+
+_MIGRATIONS: tuple[str, ...] = (
+    "ALTER TABLE lz_layout_files ADD COLUMN IF NOT EXISTS stable_fingerprint VARCHAR",
+)
+
+
+def _apply_migrations(conn: duckdb.DuckDBPyConnection) -> None:
+    """Run idempotent schema migrations on an existing database."""
+    for stmt in _MIGRATIONS:
+        try:
+            conn.execute(stmt)
+        except Exception as exc:
+            _log.warning("Migration skipped (%s): %s", stmt.split()[:5], exc)
+
 
 def load_payload(path: Path) -> dict:
     return json.loads(path.read_text())
@@ -187,12 +207,13 @@ def _is_fallback_commit(commit: str) -> bool:
 
 
 def _compute_content_hash(repo_path: Path) -> str:
-    """Compute a deterministic 40-hex hash from repo file listing and sizes."""
+    """Compute a deterministic 40-hex hash from repo file paths and contents."""
     h = hashlib.sha1(usedforsecurity=False)
     for f in sorted(repo_path.rglob("*")):
         if f.is_file():
             rel = f.relative_to(repo_path).as_posix()
-            h.update(f"{rel}:{f.stat().st_size}\n".encode())
+            h.update(f"{rel}\n".encode())
+            h.update(f.read_bytes())
     return h.hexdigest()
 
 

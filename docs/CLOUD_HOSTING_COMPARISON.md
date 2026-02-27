@@ -47,7 +47,7 @@ For platforms that don't support DinD, we build a single "caldera-all-in-one" im
 | **Docker support** | Full (it's a VM, install anything) |
 | **DinD** | Yes (full VM, no restrictions) |
 | **Pricing** | CX22 (2 vCPU/4 GB): €0.007/hr · CX32 (4/8): €0.013/hr · CX42 (8/16): €0.025/hr |
-| **Cost per run (15 min)** | **€0.003–0.006 ($0.004–0.007)** |
+| **Cost per run (15 min)** | **€0.007–0.025 ($0.008–0.027)** (1h minimum billing) |
 | **Startup time** | ~30–60s (VM boot + Docker ready) |
 | **Disk** | 40–160 GB included (SSD) |
 | **Regions** | EU (Nuremberg, Falkenstein, Helsinki), US East (Ashburn) |

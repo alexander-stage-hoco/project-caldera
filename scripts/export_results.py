@@ -9,6 +9,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from common.identifier_validation import validate_safe_identifier
+
 # Ensure sibling scripts are importable
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_results_index import build_index
@@ -89,6 +92,10 @@ def main() -> int:
     commit = cr.get("commit", "")
     commit_short = commit[:7] if commit else "unknown"
 
+    # Validate identifiers to prevent path traversal
+    validate_safe_identifier(repo_id, "repo_id")
+    validate_safe_identifier(run_id, "run_id")
+
     # Clone or open the results repo
     is_local = _is_local_path(args.results_repo)
     if is_local:
@@ -115,6 +122,8 @@ def main() -> int:
 
     # Create the run directory in the results repo
     dest = results_dir / "runs" / repo_id / run_id
+    # Safety: ensure dest is still under results_dir after resolution
+    dest.resolve().relative_to(results_dir.resolve())
     dest.mkdir(parents=True, exist_ok=True)
 
     # Copy artifacts

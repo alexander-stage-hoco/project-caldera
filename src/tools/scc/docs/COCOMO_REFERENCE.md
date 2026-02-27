@@ -105,25 +105,25 @@ Based on typical organizational characteristics, we define the following presets
 
 | Organization | Effort (PM) | Schedule (mo) | People | Cost |
 |--------------|-------------|---------------|--------|------|
-| Early Startup | 16.0 | 7.5 | 2.1 | $300K |
-| Growth Startup | 22.4 | 8.4 | 2.7 | $504K |
-| Scale-up | 33.5 | 9.2 | 3.6 | $805K |
-| SME | 39.5 | 9.6 | 4.1 | $950K |
-| Mid-Market | 47.1 | 10.0 | 4.7 | $1.2M |
-| Large Enterprise | 62.9 | 10.4 | 6.0 | $1.9M |
-| Regulated | 100.0 | 12.6 | 7.9 | $4.2M |
+| Early Startup | 16.0 | 6.7 | 2.4 | $300K |
+| Growth Startup | 24.2 | 8.4 | 2.9 | $509K |
+| Scale-up | 33.7 | 8.9 | 3.8 | $802K |
+| SME | 39.5 | 9.1 | 4.4 | $949K |
+| Mid-Market | 49.7 | 9.4 | 5.3 | $1.2M |
+| Large Enterprise | 68.5 | 9.7 | 7.1 | $1.9M |
+| Regulated | 106.7 | 11.4 | 9.4 | $3.7M |
 
 ### 100,000 LOC Codebase
 
 | Organization | Effort (PM) | Schedule (mo) | People | Cost |
 |--------------|-------------|---------------|--------|------|
-| Early Startup | 160.0 | 17.5 | 9.1 | $3.0M |
-| Growth Startup | 251.2 | 20.0 | 12.6 | $5.7M |
-| Scale-up | 403.3 | 22.0 | 18.3 | $9.7M |
-| SME | 497.3 | 23.0 | 21.6 | $11.9M |
-| Mid-Market | 664.7 | 24.6 | 27.0 | $17.4M |
-| Large Enterprise | 996.4 | 26.4 | 37.7 | $30.0M |
-| Regulated | 1995.3 | 33.3 | 59.9 | $83.8M |
+| Early Startup | 160.0 | 16.8 | 9.6 | $3.0M |
+| Growth Startup | 271.9 | 21.0 | 12.9 | $5.7M |
+| Scale-up | 404.7 | 21.7 | 18.6 | $9.6M |
+| SME | 521.3 | 22.3 | 23.3 | $12.5M |
+| Mid-Market | 702.3 | 23.2 | 30.3 | $17.5M |
+| Large Enterprise | 1085.1 | 23.4 | 46.4 | $29.8M |
+| Regulated | 1897.4 | 27.0 | 70.4 | $66.4M |
 
 ---
 
