@@ -12,7 +12,6 @@ from ..validation import (
     check_required,
     validate_file_paths_in_entries,
 )
-from shared.path_utils import is_repo_relative_path, normalize_file_path
 
 # Schema path points to the local trivy tool directory
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "trivy" / "schemas" / "output.schema.json"
@@ -116,6 +115,7 @@ TABLE_DDL = {
 }
 
 QUALITY_RULES = ["paths", "line_numbers", "required_fields"]
+VALID_SEVERITIES = {"CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"}
 
 
 class TrivyAdapter(BaseAdapter):
@@ -232,10 +232,9 @@ class TrivyAdapter(BaseAdapter):
 
             severity = vuln.get("severity")
             if severity is not None:
-                valid_severities = {"CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"}
-                if severity not in valid_severities:
+                if severity not in VALID_SEVERITIES:
                     errors.append(
-                        f"vulnerabilities[{vuln_idx}].severity must be one of {valid_severities}"
+                        f"vulnerabilities[{vuln_idx}].severity must be one of {VALID_SEVERITIES}"
                     )
 
             cvss = vuln.get("cvss_score")

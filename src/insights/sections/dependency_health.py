@@ -5,6 +5,8 @@ Uses mart_dependency_health_summary and mart_project_blast_radius to assess
 overall health grade, blast radius, circular dependencies, and version conflicts.
 """
 
+from __future__ import annotations
+
 import warnings
 
 from typing import Any

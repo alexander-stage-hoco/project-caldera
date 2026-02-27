@@ -2,6 +2,8 @@
 IaC Misconfigurations section - Infrastructure-as-Code security findings from Trivy.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

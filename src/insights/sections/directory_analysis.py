@@ -2,6 +2,8 @@
 Directory analysis section with rollups and hotspots.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

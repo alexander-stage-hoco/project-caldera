@@ -22,6 +22,9 @@ if TYPE_CHECKING:
     from ..quality import DataQualityChecker
 
 
+LAYOUT_TOOL_NAMES = ["layout-scanner", "layout"]
+
+
 class _DedupTracker:
     """Tracks seen keys and logs duplicate warnings."""
 
@@ -175,7 +178,7 @@ class BaseAdapter(ABC):
         try:
             return self._run_repo.get_run_pk_any(
                 run_id,
-                ["layout-scanner", "layout"],
+                LAYOUT_TOOL_NAMES,
             )
         except KeyError as exc:
             raise KeyError("layout run not found") from exc

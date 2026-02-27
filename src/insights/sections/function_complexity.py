@@ -5,6 +5,8 @@ Uses mart_complexity_hotspots to identify functions with high cyclomatic
 complexity, providing more granular insights than file-level metrics.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

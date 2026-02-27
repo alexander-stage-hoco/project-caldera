@@ -6,6 +6,8 @@ refactoring or splitting, helping with maintainability risk assessment
 and technical debt tracking.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

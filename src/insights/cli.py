@@ -2,6 +2,8 @@
 CLI entry point for Caldera Insights reporting.
 """
 
+from __future__ import annotations
+
 import warnings
 from pathlib import Path
 

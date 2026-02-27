@@ -2,6 +2,8 @@
 Repository health overview section.
 """
 
+from __future__ import annotations
+
 import warnings
 
 from typing import Any

@@ -6,6 +6,8 @@ affect the most code when modified, helping with refactoring risk
 assessment and change management planning.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

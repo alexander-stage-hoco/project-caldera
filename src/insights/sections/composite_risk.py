@@ -5,6 +5,8 @@ Uses mart_composite_file_hotspots to identify files with combined risk from
 complexity, coverage gaps, code smells, and coupling.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig
