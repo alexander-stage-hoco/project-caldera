@@ -5,6 +5,8 @@ Combines multiple distribution metrics into a single health score (0-100)
 with letter grades (A-F) for easy interpretation.
 """
 
+from __future__ import annotations
+
 import warnings
 
 from typing import Any

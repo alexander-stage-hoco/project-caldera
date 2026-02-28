@@ -20,4 +20,4 @@ evaluation_outputs:
 
 adapter:
   module: persistence.adapters.layout_adapter
-  class: LayoutAdapter
+  class: LayoutScannerAdapter

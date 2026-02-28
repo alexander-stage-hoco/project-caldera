@@ -6,7 +6,7 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import SonarqubeIssue, SonarqubeMetric
 from ..repositories import LayoutRepository, SonarqubeRepository, ToolRunRepository
-from shared.path_utils import is_repo_relative_path, normalize_file_path
+from shared.path_utils import is_repo_relative_path
 from ..validation import check_required
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "tools" / "sonarqube" / "schemas" / "output.schema.json"
@@ -157,7 +157,7 @@ class SonarqubeAdapter(BaseAdapter):
                 component = components.get(component_key, {})
                 raw_path = component.get("path", "")
                 if raw_path:
-                    normalized = normalize_file_path(raw_path, self._repo_root)
+                    normalized = self._normalize_path(raw_path)
                     if not is_repo_relative_path(normalized):
                         errors.append(f"issues[{issue_idx}].path is not repo-relative: {raw_path}")
             line = issue.get("line")

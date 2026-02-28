@@ -14,7 +14,7 @@ from typing import Any, Callable, Iterable
 from .base_adapter import BaseAdapter
 from ..entities import DependenseeProject, DependenseeProjectReference, DependenseePackageReference
 from ..repositories import DependenseeRepository, LayoutRepository, ToolRunRepository
-from shared.path_utils import is_repo_relative_path, normalize_file_path
+from shared.path_utils import is_repo_relative_path
 from ..validation import check_non_negative, check_required, validate_file_paths_in_entries
 
 # Path to the tool's JSON schema for validation
@@ -163,7 +163,7 @@ class DependenseeAdapter(BaseAdapter):
             # Validate project references are repo-relative
             project_refs = entry.get("project_references", [])
             for ref_idx, ref in enumerate(project_refs):
-                ref_normalized = normalize_file_path(ref, self._repo_root)
+                ref_normalized = self._normalize_path(ref)
                 if not is_repo_relative_path(ref_normalized):
                     errors.append(f"{prefix}.project_references[{ref_idx}] invalid path: {ref}")
 

@@ -11,7 +11,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import LayoutAdapter, GitleaksAdapter
+from persistence.adapters import LayoutScannerAdapter, GitleaksAdapter
 from persistence.repositories import GitleaksRepository, LayoutRepository, ToolRunRepository
 
 
@@ -28,7 +28,7 @@ def _create_layout_run(conn: duckdb.DuckDBPyConnection, run_id: str, repo_id: st
 
     run_repo = ToolRunRepository(conn)
     layout_repo = LayoutRepository(conn)
-    LayoutAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None).persist(layout_payload)
+    LayoutScannerAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None).persist(layout_payload)
     return run_repo.get_run_pk(run_id, "layout-scanner")
 
 

@@ -11,7 +11,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import LayoutAdapter, RoslynAdapter
+from persistence.adapters import LayoutScannerAdapter, RoslynAnalyzersAdapter
 from persistence.repositories import LayoutRepository, RoslynRepository, ToolRunRepository
 
 
@@ -28,7 +28,7 @@ def _create_layout_run(conn: duckdb.DuckDBPyConnection, run_id: str, repo_id: st
 
     run_repo = ToolRunRepository(conn)
     layout_repo = LayoutRepository(conn)
-    LayoutAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None).persist(layout_payload)
+    LayoutScannerAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None).persist(layout_payload)
     return run_repo.get_run_pk(run_id, "layout-scanner")
 
 
@@ -37,7 +37,7 @@ def _load_roslyn_fixture() -> dict:
     return json.loads(fixture_path.read_text())
 
 
-class TestRoslynAdapter:
+class TestRoslynAnalyzersAdapter:
     """Comprehensive tests for the Roslyn adapter."""
 
     def test_persist_violations(self, tmp_path: Path) -> None:
@@ -57,7 +57,7 @@ class TestRoslynAdapter:
         layout_repo = LayoutRepository(conn)
         roslyn_repo = RoslynRepository(conn)
 
-        adapter = RoslynAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
+        adapter = RoslynAnalyzersAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         assert run_pk > 0
@@ -85,7 +85,7 @@ class TestRoslynAdapter:
         layout_repo = LayoutRepository(conn)
         roslyn_repo = RoslynRepository(conn)
 
-        adapter = RoslynAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
+        adapter = RoslynAnalyzersAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         row = conn.execute(
@@ -115,7 +115,7 @@ class TestRoslynAdapter:
         layout_repo = LayoutRepository(conn)
         roslyn_repo = RoslynRepository(conn)
 
-        adapter = RoslynAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
+        adapter = RoslynAnalyzersAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
         with pytest.raises(KeyError, match="layout run not found"):
             adapter.persist(payload)
 
@@ -146,7 +146,7 @@ class TestRoslynAdapter:
         layout_repo = LayoutRepository(conn)
         roslyn_repo = RoslynRepository(conn)
 
-        adapter = RoslynAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
+        adapter = RoslynAnalyzersAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         count = conn.execute(
@@ -180,7 +180,7 @@ class TestRoslynAdapter:
         layout_repo = LayoutRepository(conn)
         roslyn_repo = RoslynRepository(conn)
 
-        adapter = RoslynAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
+        adapter = RoslynAnalyzersAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         count = conn.execute(
@@ -209,7 +209,7 @@ class TestRoslynAdapter:
         layout_repo = LayoutRepository(conn)
         roslyn_repo = RoslynRepository(conn)
 
-        adapter = RoslynAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
+        adapter = RoslynAnalyzersAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
         with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(payload)
 
@@ -233,7 +233,7 @@ class TestRoslynAdapter:
         layout_repo = LayoutRepository(conn)
         roslyn_repo = RoslynRepository(conn)
 
-        adapter = RoslynAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
+        adapter = RoslynAnalyzersAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
         with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(payload)
 
@@ -260,7 +260,7 @@ class TestRoslynAdapter:
         layout_repo = LayoutRepository(conn)
         roslyn_repo = RoslynRepository(conn)
 
-        adapter = RoslynAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
+        adapter = RoslynAnalyzersAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         count = conn.execute(
@@ -287,7 +287,7 @@ class TestRoslynAdapter:
         layout_repo = LayoutRepository(conn)
         roslyn_repo = RoslynRepository(conn)
 
-        adapter = RoslynAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
+        adapter = RoslynAnalyzersAdapter(run_repo, layout_repo, roslyn_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         joined = conn.execute(

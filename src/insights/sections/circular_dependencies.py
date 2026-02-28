@@ -7,6 +7,8 @@ This is distinct from dependency_health which covers project/package-level
 cycles (e.g. NuGet references via dependensee).
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

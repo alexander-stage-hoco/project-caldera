@@ -50,24 +50,27 @@ class ComplexityConcentrationRule(ClaimRule):
         rows = _safe_query(fetcher, "claim_complexity_concentration", run_pk)
         claims: list[TechnicalClaim] = []
 
-        # Map evidence by location for linking
+        # Map evidence by directory prefix for linking
         complexity_evidence = [
             e for e in evidence if e.category == "complexity"
         ]
-        evidence_by_dir: dict[str, list[str]] = {}
-        for e in complexity_evidence:
-            parts = e.location.split("/")
-            dir_key = parts[0] if len(parts) > 1 else "."
-            evidence_by_dir.setdefault(dir_key, []).append(e.evidence_id)
 
         for i, row in enumerate(rows, start=1):
             dir_path = row.get("directory_path", "")
             gini = row.get("gini_ccn", 0)
-            linked = evidence_by_dir.get(dir_path, [])
 
-            # Must have at least one linked evidence item
+            # Link evidence items whose location is within this directory
+            if dir_path in (".", ""):
+                linked = [e.evidence_id for e in complexity_evidence]
+            else:
+                linked = [
+                    e.evidence_id
+                    for e in complexity_evidence
+                    if e.location.startswith(dir_path + "/") or e.location == dir_path
+                ]
+
             if not linked:
-                # Create a synthetic link to all complexity evidence
+                # Synthetic fallback: use first 3 complexity evidence items
                 linked = [e.evidence_id for e in complexity_evidence[:3]]
             if not linked:
                 continue
@@ -182,12 +185,16 @@ class CoverageGapRule(ClaimRule):
         ]
         claims: list[TechnicalClaim] = []
 
-        for i, ev in enumerate(coverage_evidence, start=1):
+        seq = 0
+        for ev in coverage_evidence:
             coverage = _parse_float_from_excerpt(ev.excerpt, "coverage=")
             ccn = _parse_int_from_excerpt(ev.excerpt, "complexity_max=")
+            if coverage >= 50 or ccn <= 15:
+                continue
+            seq += 1
             claims.append(
                 TechnicalClaim(
-                    claim_id=f"CLM-{self.abbr}-{i:03d}",
+                    claim_id=f"CLM-{self.abbr}-{seq:03d}",
                     category=self.category,
                     statement=f"File {ev.location} is high-risk: "
                     f"{ccn} CCN with {coverage:.0f}% coverage",

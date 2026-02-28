@@ -56,6 +56,10 @@ Configured in `infra/terraform.tfvars`. See `terraform.tfvars.example` for the t
 | `pipeline_llm` | No | `0` | Set to `1` to enable LLM evaluation |
 | `max_parallel` | No | `4` | Max parallel tool execution |
 | `results_dir` | No | `./results` | Local directory for downloaded results |
+| `clone_depth` | No | `""` | Shallow clone depth (empty = full clone) |
+| `max_duration` | No | `""` | Max analysis duration in seconds |
+| `max_cost` | No | `""` | Max estimated cost in EUR |
+| `anthropic_api_key` | No | `""` | Anthropic API key (sensitive, optional) |
 
 ## Server Presets
 
@@ -164,17 +168,33 @@ The `manifest.json` follows the canonical bundle schema with a `cloud` extension
 {
   "schema_version": 1,
   "created_at": "2026-02-19T...",
-  "repo": { "repo_id": "flask-a1b2c3d4e5", "commit": "..." },
+  "repo": {
+    "repo_id": "flask-a1b2c3d4e5",
+    "commit": "...",
+    "repo_path": "/tmp/target-repo",
+    "is_git": true,
+    "branch": "main"
+  },
   "run_id": "...",
   "cloud": {
     "mode": "cloud-hetzner",
     "server_type": "cx33",
+    "run_pk": "...",
+    "started_at": "2026-02-19T...",
+    "completed_at": "2026-02-19T...",
     "duration_seconds": 842,
     "estimated_cost_eur": 0.013,
     "pricing_eur_per_hour": 0.013,
     "billable_hours": 1,
     "skip_tools": [],
-    "pipeline_llm": false
+    "pipeline_llm": false,
+    "budget_guard": {
+      "max_duration": "",
+      "max_cost": "",
+      "effective_timeout": 14400,
+      "triggered": false,
+      "analysis_exit_code": 0
+    }
   },
   "exports": {
     "database": "database/caldera_sot.duckdb",

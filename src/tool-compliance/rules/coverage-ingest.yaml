@@ -19,5 +19,5 @@ evaluation_outputs:
 
 adapter:
   module: persistence.adapters.coverage_adapter
-  class: CoverageAdapter
+  class: CoverageIngestAdapter
   table_prefix: coverage  # Uses 'coverage' instead of 'coverage_ingest' for table naming

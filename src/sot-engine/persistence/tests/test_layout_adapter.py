@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from persistence.adapters import LayoutAdapter
+from persistence.adapters import LayoutScannerAdapter
 from persistence.repositories import (
     LayoutRepository,
     ToolRunRepository,
@@ -23,7 +23,7 @@ def test_layout_adapter_inserts_files(
     fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "layout_output.json"
     payload = json.loads(fixture_path.read_text())
 
-    adapter = LayoutAdapter(
+    adapter = LayoutScannerAdapter(
         tool_run_repo,
         layout_repo,
     )
@@ -53,7 +53,7 @@ def test_layout_adapter_inserts_directories(
     fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "layout_output.json"
     payload = json.loads(fixture_path.read_text())
 
-    adapter = LayoutAdapter(
+    adapter = LayoutScannerAdapter(
         tool_run_repo,
         layout_repo,
     )
@@ -85,7 +85,7 @@ def test_layout_adapter_creates_directory_tree(
     fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "layout_output.json"
     payload = json.loads(fixture_path.read_text())
 
-    adapter = LayoutAdapter(
+    adapter = LayoutScannerAdapter(
         tool_run_repo,
         layout_repo,
     )
@@ -122,7 +122,7 @@ def test_layout_adapter_normalizes_paths(
     fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "layout_output.json"
     payload = json.loads(fixture_path.read_text())
 
-    adapter = LayoutAdapter(
+    adapter = LayoutScannerAdapter(
         tool_run_repo,
         layout_repo,
     )
@@ -150,7 +150,7 @@ def test_layout_adapter_calculates_depth(
     fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "layout_output.json"
     payload = json.loads(fixture_path.read_text())
 
-    adapter = LayoutAdapter(
+    adapter = LayoutScannerAdapter(
         tool_run_repo,
         layout_repo,
     )

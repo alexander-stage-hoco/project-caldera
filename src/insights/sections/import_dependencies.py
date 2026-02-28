@@ -6,6 +6,8 @@ which files are the heaviest importers, the static/dynamic mix, and
 which files are the most depended-upon (breaking change risk).
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

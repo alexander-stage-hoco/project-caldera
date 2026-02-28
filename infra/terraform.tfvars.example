@@ -9,7 +9,7 @@
 caldera_repo_url = "https://github.com/yourorg/caldera.git"
 
 # Optional: Override defaults
-# server_type          = "cx32"         # cx22=2vCPU/4GB, cx32=4/8, cx42=8/16
+# server_type          = "cx33"         # cx23=2vCPU/4GB, cx33=4/8, cx43=8/16, cx53=16/32
 # location             = "fsn1"         # fsn1, nbg1, hel1, ash
 # caldera_branch       = "main"
 # skip_tools           = ""

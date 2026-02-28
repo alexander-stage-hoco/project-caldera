@@ -198,6 +198,7 @@ lizard_files as (
         rm.symbol_run_pk,
         lm.file_id,
         lm.nloc,
+        lm.function_count as lizard_function_count,
         lm.total_ccn as lizard_total_ccn,
         lm.avg_ccn,
         lm.max_ccn
@@ -422,6 +423,7 @@ combined as (
         scc.blank_lines,
         scc.complexity as scc_complexity,
         lizard.nloc,
+        lizard.lizard_function_count,
         lizard.lizard_total_ccn,
         lizard.avg_ccn,
         lizard.max_ccn,
@@ -454,6 +456,7 @@ select
     combined.blank_lines as loc_blank,
     combined.scc_complexity as complexity_total,
     combined.nloc,
+    combined.lizard_function_count,
     combined.lizard_total_ccn as complexity_total_ccn,
     combined.avg_ccn as complexity_avg,
     combined.max_ccn as complexity_max,

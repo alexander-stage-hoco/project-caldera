@@ -5,7 +5,7 @@ import pytest
 
 from persistence.adapters.scc_adapter import SccAdapter
 from persistence.adapters.lizard_adapter import LizardAdapter
-from persistence.adapters.layout_adapter import LayoutAdapter
+from persistence.adapters.layout_adapter import LayoutScannerAdapter
 from persistence.adapters.semgrep_adapter import SemgrepAdapter
 from persistence.repositories import (
     ToolRunRepository,
@@ -36,7 +36,7 @@ def test_lizard_lz_schema_validation_fails() -> None:
 
 def test_layout_lz_schema_validation_fails() -> None:
     conn = _empty_conn()
-    adapter = LayoutAdapter(ToolRunRepository(conn), LayoutRepository(conn))
+    adapter = LayoutScannerAdapter(ToolRunRepository(conn), LayoutRepository(conn))
     with pytest.raises(ValueError):
         adapter.validate_lz_schema()
 

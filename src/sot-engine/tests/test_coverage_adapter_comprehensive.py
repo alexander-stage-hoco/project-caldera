@@ -11,7 +11,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import LayoutAdapter, CoverageAdapter
+from persistence.adapters import LayoutScannerAdapter, CoverageIngestAdapter
 from persistence.repositories import CoverageRepository, LayoutRepository, ToolRunRepository
 
 
@@ -28,7 +28,7 @@ def _create_layout_run(conn: duckdb.DuckDBPyConnection, run_id: str, repo_id: st
 
     run_repo = ToolRunRepository(conn)
     layout_repo = LayoutRepository(conn)
-    LayoutAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None).persist(layout_payload)
+    LayoutScannerAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None).persist(layout_payload)
     return run_repo.get_run_pk(run_id, "layout-scanner")
 
 
@@ -37,7 +37,7 @@ def _load_coverage_fixture() -> dict:
     return json.loads(fixture_path.read_text())
 
 
-class TestCoverageAdapter:
+class TestCoverageIngestAdapter:
     """Comprehensive tests for the Coverage adapter."""
 
     def test_persist_summaries(self, tmp_path: Path) -> None:
@@ -58,7 +58,7 @@ class TestCoverageAdapter:
         layout_repo = LayoutRepository(conn)
         coverage_repo = CoverageRepository(conn)
 
-        adapter = CoverageAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
+        adapter = CoverageIngestAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         assert run_pk > 0
@@ -88,7 +88,7 @@ class TestCoverageAdapter:
         layout_repo = LayoutRepository(conn)
         coverage_repo = CoverageRepository(conn)
 
-        adapter = CoverageAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
+        adapter = CoverageIngestAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         row = conn.execute(
@@ -124,7 +124,7 @@ class TestCoverageAdapter:
         layout_repo = LayoutRepository(conn)
         coverage_repo = CoverageRepository(conn)
 
-        adapter = CoverageAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
+        adapter = CoverageIngestAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
 
         with pytest.raises(KeyError, match="layout run not found"):
             adapter.persist(payload)
@@ -153,7 +153,7 @@ class TestCoverageAdapter:
         layout_repo = LayoutRepository(conn)
         coverage_repo = CoverageRepository(conn)
 
-        adapter = CoverageAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
+        adapter = CoverageIngestAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         count = conn.execute(
@@ -183,7 +183,7 @@ class TestCoverageAdapter:
         layout_repo = LayoutRepository(conn)
         coverage_repo = CoverageRepository(conn)
 
-        adapter = CoverageAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
+        adapter = CoverageIngestAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
 
         with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(payload)
@@ -211,7 +211,7 @@ class TestCoverageAdapter:
         layout_repo = LayoutRepository(conn)
         coverage_repo = CoverageRepository(conn)
 
-        adapter = CoverageAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
+        adapter = CoverageIngestAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
 
         with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(payload)
@@ -237,7 +237,7 @@ class TestCoverageAdapter:
         layout_repo = LayoutRepository(conn)
         coverage_repo = CoverageRepository(conn)
 
-        adapter = CoverageAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
+        adapter = CoverageIngestAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
 
         with pytest.raises(ValueError, match="validation failed"):
             adapter.persist(payload)
@@ -262,7 +262,7 @@ class TestCoverageAdapter:
         layout_repo = LayoutRepository(conn)
         coverage_repo = CoverageRepository(conn)
 
-        adapter = CoverageAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
+        adapter = CoverageIngestAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         # First file has null branch coverage
@@ -294,7 +294,7 @@ class TestCoverageAdapter:
         layout_repo = LayoutRepository(conn)
         coverage_repo = CoverageRepository(conn)
 
-        adapter = CoverageAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
+        adapter = CoverageIngestAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         count = conn.execute(
@@ -322,7 +322,7 @@ class TestCoverageAdapter:
         layout_repo = LayoutRepository(conn)
         coverage_repo = CoverageRepository(conn)
 
-        adapter = CoverageAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
+        adapter = CoverageIngestAdapter(run_repo, layout_repo, coverage_repo, Path("/tmp/test-repo"), None)
         run_pk = adapter.persist(payload)
 
         joined = conn.execute(

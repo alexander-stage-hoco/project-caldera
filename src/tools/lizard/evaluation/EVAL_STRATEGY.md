@@ -38,9 +38,11 @@ combined_score = (0.60 * programmatic_normalized) + (0.40 * llm_score)
 
 ---
 
-## Programmatic Checks (82 Total)
+## Dimension Summary and Check Catalog
 
-### Overview by Category
+### Programmatic Checks (82 Total)
+
+#### Overview by Category
 
 | Category | Checks | Severity Mix | Purpose |
 |----------|--------|--------------|---------|

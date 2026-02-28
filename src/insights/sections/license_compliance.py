@@ -5,6 +5,8 @@ Uses mart_scancode_license_hotspots to identify license types, copyleft risks,
 and compliance status.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

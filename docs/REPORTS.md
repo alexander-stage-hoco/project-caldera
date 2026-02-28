@@ -139,7 +139,7 @@ Data sources (in order of precedence):
 
 ## Insights Component
 
-The `src/insights/` component generates consolidated HTML/Markdown reports with 37 sections:
+The `src/insights/` component generates consolidated HTML/Markdown reports with 42 sections:
 
 | Category | Sections |
 |----------|----------|
@@ -157,6 +157,7 @@ The `src/insights/` component generates consolidated HTML/Markdown reports with 
 | **Statistics** | language_coverage, distribution_insights, code_inequality, module_health |
 | **Cross-Tool** | cross_tool |
 | **Git** | git_sizer |
+| **Evidence** | risk_register, rewrite_risk, sampling_rationale, evidence_pack, claim_register |
 
 Sections are registered in `src/insights/generator.py` and implemented in `src/insights/sections/`.
 See `src/insights/README.md` for full documentation.

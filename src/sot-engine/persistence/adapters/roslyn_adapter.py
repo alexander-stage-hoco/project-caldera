@@ -51,7 +51,7 @@ TABLE_DDL = {
 QUALITY_RULES = ["paths", "line_numbers", "required_fields"]
 
 
-class RoslynAdapter(BaseAdapter):
+class RoslynAnalyzersAdapter(BaseAdapter):
     """Adapter for persisting roslyn-analyzers violation output to the landing zone."""
 
     @property

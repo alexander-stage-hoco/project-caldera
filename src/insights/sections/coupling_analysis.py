@@ -5,6 +5,8 @@ Uses mart_symbol_coupling_hotspots to identify architectural coupling patterns
 including god objects, octopus patterns, and unstable dependencies.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

@@ -17,4 +17,4 @@ evaluation_outputs:
 
 adapter:
   module: persistence.adapters.roslyn_adapter
-  class: RoslynAdapter
+  class: RoslynAnalyzersAdapter

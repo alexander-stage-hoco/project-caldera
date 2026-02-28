@@ -47,25 +47,3 @@ def unwrap_envelope(payload: dict[str, Any]) -> dict[str, Any]:
     if isinstance(payload, dict) and "data" in payload:
         return payload.get("data") or {}
     return payload
-
-
-def wrap_envelope(
-    data: dict[str, Any],
-    metadata: dict[str, Any],
-) -> dict[str, Any]:
-    """Wrap data in standard envelope format.
-
-    Args:
-        data: The tool-specific data to wrap
-        metadata: Metadata about the run (repo_id, run_id, tool_name, etc.)
-
-    Returns:
-        Dictionary in standard envelope format with "metadata" and "data" keys
-
-    Example:
-        >>> data = {"files": [...]}
-        >>> metadata = {"repo_id": "my-repo", "tool_name": "scc"}
-        >>> wrap_envelope(data, metadata)
-        {"metadata": {"repo_id": "my-repo", "tool_name": "scc"}, "data": {"files": [...]}}
-    """
-    return {"metadata": metadata, "data": data}

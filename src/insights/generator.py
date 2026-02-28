@@ -14,6 +14,7 @@ from .evidence.builder import EvidenceRegistryBuilder
 from .formatters.base import BaseFormatter
 from .formatters.html import HtmlFormatter
 from .formatters.markdown import MarkdownFormatter
+from .formatters.pack import PackFormatter
 from .sections.base import BaseSection, EvidenceAwareSection, SectionData
 from .sections.executive_summary import ExecutiveSummarySection
 from .sections.repo_health import RepoHealthSection
@@ -330,6 +331,141 @@ class InsightsGenerator:
             format=format,
             sections=sections,
             output_path=output_path,
+            title=title,
+            profile=profile,
+        )
+
+    def generate_pack(
+        self,
+        run_pk: int,
+        output_dir: Path,
+        sections: list[str] | None = None,
+        title: str | None = None,
+        skip_validation: bool = False,
+        profile: str | StakeholderProfile | None = None,
+    ) -> Path:
+        """Generate an LLM context pack (directory of topic markdown files).
+
+        Args:
+            run_pk: The collection run primary key.
+            output_dir: Directory to write topic files into.
+            sections: Optional list of section names to include.
+            title: Optional custom report title.
+            skip_validation: Skip data validation checks.
+            profile: Stakeholder profile or profile name.
+
+        Returns:
+            The output directory path.
+        """
+        # Validate report data before generating
+        if not skip_validation:
+            data_warnings = self.validate_report_data(run_pk)
+            for warning in data_warnings:
+                warnings.warn(warning, UserWarning, stacklevel=2)
+
+        # Resolve profile vs explicit sections
+        if profile is not None and sections is not None:
+            raise ValueError("Cannot specify both 'profile' and 'sections'.")
+
+        resolved_profile: StakeholderProfile | None = None
+        if profile is not None:
+            resolved_profile = get_profile(profile) if isinstance(profile, str) else profile
+            section_names = [s for s in resolved_profile.sections if s in self.sections]
+        else:
+            section_names = sections or list(self.sections.keys())
+
+        # Validate section names
+        invalid_sections = set(section_names) - set(self.sections.keys())
+        if invalid_sections:
+            raise ValueError(f"Unknown sections: {invalid_sections}. Available: {list(self.sections.keys())}")
+
+        # Sort sections by priority
+        section_names = sorted(
+            section_names,
+            key=lambda name: self.sections[name].config.priority,
+        )
+
+        # Build evidence registry
+        registry = self._evidence_builder.build(self.fetcher, run_pk)
+
+        # Fetch raw data for each section (no template rendering)
+        section_data: dict[str, dict[str, Any]] = {}
+        section_titles: dict[str, str] = {}
+        for name in section_names:
+            section = self.sections[name]
+            if isinstance(section, EvidenceAwareSection):
+                section.set_evidence_registry(registry)
+            try:
+                data = section.fetch_data(self.fetcher, run_pk)
+            except Exception as e:
+                data = section.get_fallback_data()
+                data["_error"] = str(e)
+
+            section_data[name] = data
+            section_titles[name] = section.config.title
+
+        # Get run info for metadata
+        run_info = self.fetcher.get_run_info(run_pk)
+        repository = run_info.get("repository_name", "Unknown") if run_info else "Unknown"
+        commit = run_info.get("commit", "unknown") if run_info else "unknown"
+
+        # Build metadata
+        metadata = {
+            "run_pk": run_pk,
+            "generated_at": datetime.now().isoformat(),
+            "repository": repository,
+            "commit": commit,
+            "format": "pack",
+            "sections_included": section_names,
+            "profile": resolved_profile.name if resolved_profile else None,
+        }
+
+        # Generate report title
+        report_title = title or (
+            resolved_profile.title_template.format(repository=repository)
+            if resolved_profile
+            else f"Caldera Analysis: {repository}"
+        )
+
+        # Render the pack
+        formatter = PackFormatter()
+        return formatter.render_pack(
+            title=report_title,
+            section_data=section_data,
+            section_titles=section_titles,
+            metadata=metadata,
+            evidence_registry=registry,
+            output_dir=output_dir,
+        )
+
+    def generate_pack_by_collection(
+        self,
+        collection_run_id: str,
+        output_dir: Path,
+        sections: list[str] | None = None,
+        title: str | None = None,
+        profile: str | StakeholderProfile | None = None,
+    ) -> Path:
+        """Generate an LLM context pack for a collection run.
+
+        Auto-resolves the correct tool run_pk (SCC anchor) for the
+        collection run.
+
+        Args:
+            collection_run_id: The collection run ID (UUID).
+            output_dir: Directory to write topic files into.
+            sections: Optional list of section names to include.
+            title: Optional custom report title.
+            profile: Stakeholder profile or profile name.
+
+        Returns:
+            The output directory path.
+        """
+        run_pk = self.fetcher.get_scc_run_pk_for_collection(collection_run_id)
+        return self.generate_pack(
+            run_pk=run_pk,
+            output_dir=output_dir,
+            sections=sections,
             title=title,
             profile=profile,
         )

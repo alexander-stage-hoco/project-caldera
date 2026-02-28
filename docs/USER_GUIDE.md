@@ -210,6 +210,8 @@ If you used `KEEP_SERVER=1`, destroy the server when done:
 make cloud-destroy
 ```
 
+For large repositories and detailed cloud configuration, see [Cloud Analysis Guide](CLOUD_ANALYSIS_GUIDE.md).
+
 See [infra/README.md](../infra/README.md) for the full infrastructure reference.
 
 ### Reset the database
@@ -237,6 +239,8 @@ Removes the DuckDB database. The next `make analyze` creates a fresh one.
 | `CLOUD_SERVER` | `cx33` | Hetzner server type for `make cloud-run` |
 | `CLOUD_RESULTS` | `infra/results` | Local directory for cloud run results |
 | `KEEP_SERVER` | unset | Set to `1` to keep VM alive after cloud run |
+| `MAX_DURATION` | unset | Max analysis duration in seconds for cloud runs |
+| `MAX_COST` | unset | Max estimated cost in EUR for cloud runs |
 | `CONTINUE_ON_TOOL_FAILURE` | unset | Set to `1` to continue past tool failures |
 
 ## Troubleshooting
