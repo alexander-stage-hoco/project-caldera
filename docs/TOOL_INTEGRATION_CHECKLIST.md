@@ -779,7 +779,7 @@ def test_output_validates_against_schema():
 - [ ] Test for analyze produces valid output
 - [ ] Test for schema validation
 - [ ] Test for path normalization
-- [ ] `make test` passes
+- [ ] `make test-all` passes
 - [ ] Test coverage >= 80% (run `pytest --cov=scripts --cov-report=term`)
 
 ---
@@ -1355,7 +1355,7 @@ Run through this final checklist before considering the tool complete:
 - [ ] pytest-cov>=4.0.0 in requirements.txt
 - [ ] Unit tests in `tests/unit/`
 - [ ] Integration tests in `tests/integration/`
-- [ ] `make test` passes
+- [ ] `make test-all` passes
 - [ ] Test coverage >= 80% on scripts/
 
 ### Phase 5: SoT Integration

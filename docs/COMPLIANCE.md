@@ -603,7 +603,7 @@ cp docs/templates/EVAL_STRATEGY.md.template src/tools/<tool>/EVAL_STRATEGY.md
 - Unit tests in `tests/unit/`
 - Integration tests in `tests/integration/`
 - Test files follow `test_*.py` naming
-- `make test` succeeds
+- `make test-all` succeeds
 - Test coverage >= 60%
 
 ### Checks & Fix Actions
