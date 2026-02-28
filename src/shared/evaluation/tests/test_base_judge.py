@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from shared.evaluation.base_judge import BaseJudge, JudgeResult
 
 
-class TestJudgeResult:
+class SampleJudgeResult:
     """Tests for JudgeResult dataclass."""
 
     def test_create_with_defaults(self):
@@ -173,7 +173,7 @@ class TestJudgeResult:
 
 
 # Concrete implementation for testing abstract BaseJudge
-class TestJudge(BaseJudge):
+class SampleJudge(BaseJudge):
     """Concrete judge implementation for testing."""
 
     @property
@@ -228,7 +228,7 @@ class TestBaseJudgeInit:
 
     def test_default_initialization(self, tmp_path):
         """BaseJudge should initialize with default values."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         assert judge.model == "opus-4.5"
         assert judge.timeout == 120
@@ -240,7 +240,7 @@ class TestBaseJudgeInit:
         output_dir = tmp_path / "output"
         gt_dir = tmp_path / "ground-truth"
 
-        judge = TestJudge(
+        judge = SampleJudge(
             model="opus",
             timeout=60,
             working_dir=tmp_path,
@@ -257,13 +257,13 @@ class TestBaseJudgeInit:
 
     def test_dimension_name_property(self, tmp_path):
         """dimension_name should return the abstract property value."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         assert judge.dimension_name == "test_dimension"
 
     def test_weight_property(self, tmp_path):
         """weight should return the abstract property value."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         assert judge.weight == 0.25
 
@@ -273,7 +273,7 @@ class TestBaseJudgePrompts:
 
     def test_get_default_prompt(self, tmp_path):
         """get_default_prompt should return the template string."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         prompt = judge.get_default_prompt()
 
@@ -282,7 +282,7 @@ class TestBaseJudgePrompts:
 
     def test_load_prompt_template_uses_default(self, tmp_path):
         """load_prompt_template should use default when file doesn't exist."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         template = judge.load_prompt_template()
 
@@ -290,7 +290,7 @@ class TestBaseJudgePrompts:
 
     def test_build_prompt_injects_evidence(self, tmp_path):
         """build_prompt should replace {{ evidence }} with JSON."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         evidence = {"key1": "value1", "key2": 42}
 
         prompt = judge.build_prompt(evidence)
@@ -306,7 +306,7 @@ class TestBaseJudgeParseResponse:
 
     def test_parse_response_valid_json(self, tmp_path):
         """parse_response should extract valid JSON response."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         response = '''Here is my evaluation:
 {
     "score": 4,
@@ -329,7 +329,7 @@ class TestBaseJudgeParseResponse:
 
     def test_parse_response_extracts_embedded_json(self, tmp_path):
         """parse_response should extract JSON embedded in text."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         response = 'Some preamble text {"score": 5, "reasoning": "Excellent"} and more text'
 
         result = judge.parse_response(response)
@@ -339,7 +339,7 @@ class TestBaseJudgeParseResponse:
 
     def test_parse_response_fallback_score_in_text(self, tmp_path):
         """parse_response should extract score from text when JSON fails."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         response = "Based on my analysis, I give a score: 4 for this dimension."
 
         result = judge.parse_response(response)
@@ -350,7 +350,7 @@ class TestBaseJudgeParseResponse:
 
     def test_parse_response_default_score_3(self, tmp_path):
         """parse_response should default to score 3 when no score found."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         response = "This is some text without any score mentioned."
 
         result = judge.parse_response(response)
@@ -360,7 +360,7 @@ class TestBaseJudgeParseResponse:
 
     def test_parse_response_malformed_json(self, tmp_path):
         """parse_response should handle malformed JSON gracefully."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         response = '{"score": 4, "reasoning": incomplete json'
 
         result = judge.parse_response(response)
@@ -371,7 +371,7 @@ class TestBaseJudgeParseResponse:
 
     def test_parse_response_empty_string(self, tmp_path):
         """parse_response should handle empty response."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         response = ""
 
         result = judge.parse_response(response)
@@ -385,7 +385,7 @@ class TestBaseJudgeInvokeClaude:
 
     def test_invoke_claude_uses_llm_client(self, tmp_path):
         """invoke_claude should use the internal LLMClient."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         with patch.object(judge._llm_client, "invoke", return_value="LLM response") as mock_invoke:
             result = judge.invoke_claude("test prompt")
@@ -395,7 +395,7 @@ class TestBaseJudgeInvokeClaude:
 
     def test_invoke_claude_handles_error_response(self, tmp_path):
         """invoke_claude should handle error responses from LLMClient."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         with patch.object(judge._llm_client, "invoke", return_value="Error: CLI not found"):
             with patch.object(judge._llm_client, "is_error_response", return_value=True):
@@ -406,7 +406,7 @@ class TestBaseJudgeInvokeClaude:
 
     def test_invoke_claude_handles_timeout_error(self, tmp_path):
         """invoke_claude should handle timeout errors from LLMClient."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         with patch.object(judge._llm_client, "invoke", return_value="Error: timed out"):
             with patch.object(judge._llm_client, "is_error_response", return_value=True):
@@ -417,7 +417,7 @@ class TestBaseJudgeInvokeClaude:
 
     def test_llm_client_initialized_with_judge_params(self, tmp_path):
         """LLMClient should be initialized with judge's model and timeout."""
-        judge = TestJudge(working_dir=tmp_path, model="haiku", timeout=30)
+        judge = SampleJudge(working_dir=tmp_path, model="haiku", timeout=30)
 
         assert judge._llm_client.model == "haiku"
         assert judge._llm_client.timeout == 30
@@ -425,7 +425,7 @@ class TestBaseJudgeInvokeClaude:
 
     def test_invoke_claude_success_response(self, tmp_path):
         """invoke_claude should return successful responses unchanged."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         with patch.object(judge._llm_client, "invoke", return_value='{"score": 4}'):
             with patch.object(judge._llm_client, "is_error_response", return_value=False):
@@ -439,7 +439,7 @@ class TestBaseJudgeHeuristic:
 
     def test_heuristic_evaluation_default(self, tmp_path):
         """Default heuristic evaluation should return neutral score."""
-        judge = TestJudge(working_dir=tmp_path, use_llm=False)
+        judge = SampleJudge(working_dir=tmp_path, use_llm=False)
 
         result = judge.run_heuristic_evaluation({})
 
@@ -449,7 +449,7 @@ class TestBaseJudgeHeuristic:
 
     def test_evaluate_uses_heuristic_when_use_llm_false(self, tmp_path):
         """evaluate() should use heuristic when use_llm=False."""
-        judge = TestJudge(working_dir=tmp_path, use_llm=False)
+        judge = SampleJudge(working_dir=tmp_path, use_llm=False)
 
         with patch.object(judge, "run_heuristic_evaluation", return_value=JudgeResult(
             dimension="test",
@@ -473,7 +473,7 @@ class TestBaseJudgeDataLoading:
         output_dir = tmp_path / "output" / "runs"
         output_dir.mkdir(parents=True)
 
-        judge = TestJudge(working_dir=tmp_path, output_dir=output_dir)
+        judge = SampleJudge(working_dir=tmp_path, output_dir=output_dir)
         results = judge.load_analysis_results()
 
         assert results == {}
@@ -487,7 +487,7 @@ class TestBaseJudgeDataLoading:
         (output_dir / "repo1.json").write_text('{"files": []}')
         (output_dir / "repo2.json").write_text('{"data": {"files": []}}')
 
-        judge = TestJudge(working_dir=tmp_path, output_dir=output_dir)
+        judge = SampleJudge(working_dir=tmp_path, output_dir=output_dir)
         results = judge.load_analysis_results()
 
         assert "repo1" in results
@@ -501,7 +501,7 @@ class TestBaseJudgeDataLoading:
         (output_dir / "valid.json").write_text('{"files": []}')
         (output_dir / "invalid.json").write_text('not valid json')
 
-        judge = TestJudge(working_dir=tmp_path, output_dir=output_dir)
+        judge = SampleJudge(working_dir=tmp_path, output_dir=output_dir)
         results = judge.load_analysis_results()
 
         assert "valid" in results
@@ -515,7 +515,7 @@ class TestBaseJudgeDataLoading:
         (gt_dir / "repo1.json").write_text('{"id": "repo1", "expected": {}}')
         (gt_dir / "repo2.json").write_text('{"expected": {}}')
 
-        judge = TestJudge(working_dir=tmp_path, ground_truth_dir=gt_dir)
+        judge = SampleJudge(working_dir=tmp_path, ground_truth_dir=gt_dir)
         results = judge.load_ground_truth()
 
         assert "repo1" in results
@@ -572,7 +572,7 @@ class TestBaseJudgeFullEvaluation:
 
     def test_evaluate_full_pipeline(self, tmp_path):
         """evaluate() should run the full pipeline."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         mock_response = json.dumps({
             "score": 4,
@@ -589,7 +589,7 @@ class TestBaseJudgeFullEvaluation:
 
     def test_run_ground_truth_assertions_default(self, tmp_path):
         """Default ground truth assertions should pass."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         passed, failures = judge.run_ground_truth_assertions()
 
@@ -598,7 +598,7 @@ class TestBaseJudgeFullEvaluation:
 
     def test_legacy_get_prompt(self, tmp_path):
         """Legacy get_prompt should work like build_prompt."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         evidence = {"key": "value"}
 
         legacy_prompt = judge.get_prompt(evidence)
@@ -612,13 +612,13 @@ class TestSyntheticContext:
 
     def test_evaluation_mode_explicit_synthetic(self, tmp_path):
         """evaluation_mode should return explicit value when set to synthetic."""
-        judge = TestJudge(working_dir=tmp_path, evaluation_mode="synthetic")
+        judge = SampleJudge(working_dir=tmp_path, evaluation_mode="synthetic")
 
         assert judge.evaluation_mode == "synthetic"
 
     def test_evaluation_mode_explicit_real_world(self, tmp_path):
         """evaluation_mode should return explicit value when set to real_world."""
-        judge = TestJudge(working_dir=tmp_path, evaluation_mode="real_world")
+        judge = SampleJudge(working_dir=tmp_path, evaluation_mode="real_world")
 
         assert judge.evaluation_mode == "real_world"
 
@@ -629,7 +629,7 @@ class TestSyntheticContext:
         (output_dir / "api-keys").mkdir()
         (output_dir / "aws-credentials").mkdir()
 
-        judge = TestJudge(working_dir=tmp_path, output_dir=output_dir)
+        judge = SampleJudge(working_dir=tmp_path, output_dir=output_dir)
 
         assert judge.evaluation_mode == "synthetic"
 
@@ -640,7 +640,7 @@ class TestSyntheticContext:
         (output_dir / "api-keys.json").write_text('{}')
         (output_dir / "no-secrets.json").write_text('{}')
 
-        judge = TestJudge(working_dir=tmp_path, output_dir=output_dir)
+        judge = SampleJudge(working_dir=tmp_path, output_dir=output_dir)
 
         assert judge.evaluation_mode == "synthetic"
 
@@ -651,19 +651,19 @@ class TestSyntheticContext:
         (output_dir / "DiscordChatExporter.json").write_text('{}')
         (output_dir / "a1b2c3d4-e5f6-7890-abcd-ef1234567890").mkdir()
 
-        judge = TestJudge(working_dir=tmp_path, output_dir=output_dir)
+        judge = SampleJudge(working_dir=tmp_path, output_dir=output_dir)
 
         assert judge.evaluation_mode == "real_world"
 
     def test_evaluation_mode_defaults_to_real_world(self, tmp_path):
         """evaluation_mode should default to real_world when output_dir doesn't exist."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         assert judge.evaluation_mode == "real_world"
 
     def test_load_synthetic_evaluation_context_not_found(self, tmp_path):
         """load_synthetic_evaluation_context should return None when file not found."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
 
         result = judge.load_synthetic_evaluation_context()
 
@@ -691,7 +691,7 @@ class TestSyntheticContext:
         }
         (eval_results_dir / "evaluation_report.json").write_text(json.dumps(report))
 
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         result = judge.load_synthetic_evaluation_context()
 
         assert result is not None
@@ -708,14 +708,14 @@ class TestSyntheticContext:
         eval_results_dir.mkdir(parents=True)
         (eval_results_dir / "evaluation_report.json").write_text("not valid json")
 
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         result = judge.load_synthetic_evaluation_context()
 
         assert result is None
 
     def test_get_interpretation_guidance_high_score(self, tmp_path):
         """get_interpretation_guidance should indicate validated tool for high scores."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         context = {
             "synthetic_score": 0.95,
             "decision": "PASS",
@@ -731,7 +731,7 @@ class TestSyntheticContext:
 
     def test_get_interpretation_guidance_medium_score(self, tmp_path):
         """get_interpretation_guidance should indicate mostly validated for medium scores."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         context = {
             "synthetic_score": 0.75,
             "decision": "WEAK_PASS",
@@ -746,7 +746,7 @@ class TestSyntheticContext:
 
     def test_get_interpretation_guidance_low_score(self, tmp_path):
         """get_interpretation_guidance should indicate partially validated for low scores."""
-        judge = TestJudge(working_dir=tmp_path)
+        judge = SampleJudge(working_dir=tmp_path)
         context = {
             "synthetic_score": 0.5,
             "decision": "FAIL",

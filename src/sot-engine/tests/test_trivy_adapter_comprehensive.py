@@ -371,6 +371,53 @@ class TestTrivyAdapter:
 
         conn.close()
 
+    def test_iac_misconfig_inverted_line_range(self, tmp_path: Path) -> None:
+        """Test that IaC misconfigs with end_line < start_line are rejected."""
+        db_path = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db_path))
+        _load_schema(conn)
+
+        repo_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        run_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+
+        _create_layout_run(conn, run_id, repo_id)
+
+        trivy_fixture = Path(__file__).resolve().parents[1] / "persistence" / "fixtures" / "trivy_output.json"
+        trivy_payload = json.loads(trivy_fixture.read_text())
+
+        # Inject an IaC misconfig with inverted line range (end < start)
+        trivy_payload["data"]["iac_misconfigurations"]["misconfigurations"].append(
+            {
+                "id": "AVD-DS-0098",
+                "severity": "MEDIUM",
+                "title": "Inverted line range",
+                "description": "A misconfig with end_line < start_line",
+                "resolution": "Fix line range",
+                "target": "Dockerfile",
+                "target_type": "dockerfile",
+                "start_line": 10,
+                "end_line": 5,
+            }
+        )
+        trivy_payload["data"]["iac_misconfigurations"]["count"] = 3
+
+        run_repo = ToolRunRepository(conn)
+        layout_repo = LayoutRepository(conn)
+        trivy_repo = TrivyRepository(conn)
+
+        adapter = TrivyAdapter(
+            run_repo,
+            layout_repo,
+            trivy_repo,
+            Path("/tmp/test-repo"),
+            None,
+        )
+
+        with pytest.raises(ValueError, match="quality validation failed"):
+            adapter.persist(trivy_payload)
+
+        conn.close()
+
     def test_iac_misconfig_file_linkage(self, tmp_path: Path) -> None:
         """Test that IaC misconfigs correctly link to layout files."""
         db_path = tmp_path / "test.duckdb"

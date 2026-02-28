@@ -402,7 +402,9 @@ test-integration:
 	@$(MAKE) dbt-run
 	@$(MAKE) dbt-test
 
-test: test-unit test-integration
+test: test-unit  ## Run fast unit tests (default)
+
+test-all: test-unit test-integration  ## Run full suite (unit + tools + dbt)
 
 # =============================================================================
 # Full E2E Pipeline: Repo -> Orchestrate -> Insights -> LLM Eval -> Top 3

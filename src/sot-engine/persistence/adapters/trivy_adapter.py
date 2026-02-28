@@ -268,6 +268,12 @@ class TrivyAdapter(BaseAdapter):
                     errors.append(f"iac_misconfigs[{iac_idx}].line_start must be >= 0")
                 if line_end is not None and line_end < 0:
                     errors.append(f"iac_misconfigs[{iac_idx}].line_end must be >= 0")
+                if (line_start is not None and line_start > 0 and
+                        line_end is not None and line_end > 0 and
+                        line_end < line_start):
+                    errors.append(
+                        f"iac_misconfigs[{iac_idx}].end_line must be >= start_line"
+                    )
 
         if errors:
             for error in errors:
