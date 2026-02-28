@@ -211,6 +211,58 @@ class TestPmdCpdAdapter:
 
         conn.close()
 
+    def test_is_cross_file_recomputed_after_filtering(self, tmp_path: Path) -> None:
+        """Test that is_cross_file reflects filtered occurrences, not raw input.
+
+        A clone with occurrences in 2 files where one file is not in layout
+        should have is_cross_file=False if the surviving file has 2+ occurrences.
+        """
+        db_path = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db_path))
+        _load_schema(conn)
+
+        repo_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        run_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+
+        _create_layout_run(conn, run_id, repo_id)
+
+        cpd_payload = _create_pmd_cpd_fixture_payload(repo_id, run_id)
+
+        # Modify: 3 occurrences — 2 in src/app.py (in layout), 1 in unknown.py (not in layout)
+        cpd_payload["data"]["duplications"][0]["occurrences"] = [
+            {"file": "src/app.py", "line_start": 10, "line_end": 29, "column_start": 1, "column_end": 20},
+            {"file": "src/app.py", "line_start": 50, "line_end": 69, "column_start": 1, "column_end": 20},
+            {"file": "not_in_layout.py", "line_start": 1, "line_end": 20, "column_start": 1, "column_end": 20},
+        ]
+
+        run_repo = ToolRunRepository(conn)
+        layout_repo = LayoutRepository(conn)
+        pmd_cpd_repo = PmdCpdRepository(conn)
+
+        adapter = PmdCpdAdapter(
+            run_repo,
+            layout_repo,
+            pmd_cpd_repo,
+            Path("/tmp/test-repo"),
+            None,
+        )
+        run_pk = adapter.persist(cpd_payload)
+
+        dup = conn.execute(
+            """
+            SELECT clone_id, occurrence_count, is_cross_file
+            FROM lz_pmd_cpd_duplications
+            WHERE run_pk = ?
+            """,
+            [run_pk],
+        ).fetchone()
+
+        assert dup is not None
+        assert dup[1] == 2  # only 2 valid occurrences (both in src/app.py)
+        assert dup[2] is False  # is_cross_file should be False after filtering
+
+        conn.close()
+
     def test_validate_quality_invalid_path(self, tmp_path: Path) -> None:
         """Test that paths starting with 'private/' are rejected as invalid.
 

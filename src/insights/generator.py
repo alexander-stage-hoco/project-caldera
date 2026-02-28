@@ -166,6 +166,9 @@ class InsightsGenerator:
         Returns:
             The generated report as a string.
         """
+        # Reset per-run warning dedup so each report generation sees fresh warnings
+        BaseSection._warned.clear()
+
         # Validate report data before generating
         if not skip_validation:
             data_warnings = self.validate_report_data(run_pk)
@@ -357,6 +360,9 @@ class InsightsGenerator:
         Returns:
             The output directory path.
         """
+        # Reset per-run warning dedup so each report generation sees fresh warnings
+        BaseSection._warned.clear()
+
         # Validate report data before generating
         if not skip_validation:
             data_warnings = self.validate_report_data(run_pk)

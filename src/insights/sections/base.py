@@ -7,7 +7,7 @@ from __future__ import annotations
 import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ..data_fetcher import DataFetcher
 
@@ -39,6 +39,7 @@ class BaseSection(ABC):
     """Abstract base class for report sections."""
 
     config: SectionConfig
+    _warned: ClassVar[set[tuple[str, str]]] = set()
 
     @abstractmethod
     def fetch_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
@@ -98,10 +99,13 @@ class BaseSection(ABC):
         try:
             return fetcher.fetch(query_name, run_pk, **kwargs)
         except Exception as exc:
-            warnings.warn(
-                f"[{self.config.name}] Query '{query_name}' failed: {exc}",
-                stacklevel=2,
-            )
+            key = (self.config.name, query_name, type(exc).__name__)
+            if key not in BaseSection._warned:
+                BaseSection._warned.add(key)
+                warnings.warn(
+                    f"[{self.config.name}] Query '{query_name}' failed: {exc}",
+                    stacklevel=2,
+                )
             return fallback if fallback is not None else []
 
     def validate_data(self, data: dict[str, Any]) -> list[str]:

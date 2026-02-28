@@ -134,7 +134,7 @@ class TrivyAdapter(BaseAdapter):
         Trivy schema may not be available when running from a different project.
         In that case, skip JSON schema validation but still apply data quality rules.
         """
-        if self.schema_path is None:
+        if self.schema_path is None or not self.schema_path.exists():
             self._log("WARN: trivy schema not available, skipping JSON schema validation")
             return
         super().validate_schema(payload)
@@ -261,13 +261,25 @@ class TrivyAdapter(BaseAdapter):
                 errors.extend(
                     check_required(iac.get("target", ""), f"iac_misconfigs[{iac_idx}].target")
                 )
-                # Validate line_start and line_end: both must be >= 1 if present
+                # Validate line_start and line_end
                 line_start = iac.get("start_line")
                 line_end = iac.get("end_line")
-                if line_start is not None and line_start < 1:
-                    errors.append(f"iac_misconfigs[{iac_idx}].line_start must be >= 1")
-                if line_end is not None and line_end < 1:
-                    errors.append(f"iac_misconfigs[{iac_idx}].line_end must be >= 1")
+                if line_start is not None and line_start < 0:
+                    errors.append(f"iac_misconfigs[{iac_idx}].line_start must be >= 0")
+                if line_end is not None and line_end < 0:
+                    errors.append(f"iac_misconfigs[{iac_idx}].line_end must be >= 0")
+                start_is_sentinel = line_start is None or line_start == 0
+                end_is_sentinel = line_end is None or line_end == 0
+                if start_is_sentinel != end_is_sentinel:
+                    errors.append(
+                        f"iac_misconfigs[{iac_idx}].start_line and end_line "
+                        "must both be file-level (0/None) or both be positive"
+                    )
+                if (not start_is_sentinel and not end_is_sentinel
+                        and line_end < line_start):
+                    errors.append(
+                        f"iac_misconfigs[{iac_idx}].end_line must be >= start_line"
+                    )
 
         if errors:
             for error in errors:
