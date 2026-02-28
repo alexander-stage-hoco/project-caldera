@@ -312,6 +312,65 @@ class TestTrivyAdapter:
 
         conn.close()
 
+    def test_iac_misconfig_start_line_zero(self, tmp_path: Path) -> None:
+        """Test that IaC misconfigs with start_line=0 (file-level) persist with -1 sentinel."""
+        db_path = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db_path))
+        _load_schema(conn)
+
+        repo_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        run_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+
+        _create_layout_run(conn, run_id, repo_id)
+
+        trivy_fixture = Path(__file__).resolve().parents[1] / "persistence" / "fixtures" / "trivy_output.json"
+        trivy_payload = json.loads(trivy_fixture.read_text())
+
+        # Inject a file-level IaC misconfig with start_line=0, end_line=0
+        trivy_payload["data"]["iac_misconfigurations"]["misconfigurations"].append(
+            {
+                "id": "AVD-DS-0099",
+                "severity": "LOW",
+                "title": "File-level finding",
+                "description": "A file-level IaC finding with no specific line",
+                "resolution": "Review entire file",
+                "target": "Dockerfile",
+                "target_type": "dockerfile",
+                "start_line": 0,
+                "end_line": 0,
+            }
+        )
+        trivy_payload["data"]["iac_misconfigurations"]["count"] = 3
+
+        run_repo = ToolRunRepository(conn)
+        layout_repo = LayoutRepository(conn)
+        trivy_repo = TrivyRepository(conn)
+
+        adapter = TrivyAdapter(
+            run_repo,
+            layout_repo,
+            trivy_repo,
+            Path("/tmp/test-repo"),
+            None,
+        )
+        run_pk = adapter.persist(trivy_payload)
+
+        # Verify the file-level misconfig persisted with -1 sentinel
+        rows = conn.execute(
+            """
+            SELECT misconfig_id, start_line, end_line
+            FROM lz_trivy_iac_misconfigs
+            WHERE run_pk = ? AND misconfig_id = 'AVD-DS-0099'
+            """,
+            [run_pk],
+        ).fetchall()
+
+        assert len(rows) == 1
+        assert rows[0][1] == -1  # start_line: 0 → -1
+        assert rows[0][2] == -1  # end_line: 0 → -1
+
+        conn.close()
+
     def test_iac_misconfig_file_linkage(self, tmp_path: Path) -> None:
         """Test that IaC misconfigs correctly link to layout files."""
         db_path = tmp_path / "test.duckdb"

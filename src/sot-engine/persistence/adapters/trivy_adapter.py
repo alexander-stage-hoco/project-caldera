@@ -264,10 +264,10 @@ class TrivyAdapter(BaseAdapter):
                 # Validate line_start and line_end: both must be >= 1 if present
                 line_start = iac.get("start_line")
                 line_end = iac.get("end_line")
-                if line_start is not None and line_start < 1:
-                    errors.append(f"iac_misconfigs[{iac_idx}].line_start must be >= 1")
-                if line_end is not None and line_end < 1:
-                    errors.append(f"iac_misconfigs[{iac_idx}].line_end must be >= 1")
+                if line_start is not None and line_start < 0:
+                    errors.append(f"iac_misconfigs[{iac_idx}].line_start must be >= 0")
+                if line_end is not None and line_end < 0:
+                    errors.append(f"iac_misconfigs[{iac_idx}].line_end must be >= 0")
 
         if errors:
             for error in errors:

@@ -254,6 +254,7 @@ class SecurityExposureRule(ClaimRule):
                     "exploited — immediate remediation required.",
                     confidence="high",
                     triggered_by="SecurityExposureRule",
+                    severity="critical",
                 )
             )
 
@@ -270,6 +271,7 @@ class SecurityExposureRule(ClaimRule):
                     "remediation within the next release cycle.",
                     confidence="high",
                     triggered_by="SecurityExposureRule",
+                    severity="high",
                 )
             )
 

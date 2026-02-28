@@ -126,7 +126,7 @@ class RiskAggregator:
 
             # Determine severity: escalate if any claim indicates critical-level findings
             severity = pattern.default_severity
-            if any("critical" in c.statement.lower() for c in matching_claims):
+            if any(c.severity == "critical" for c in matching_claims):
                 severity = "critical"
             if len(matching_claims) >= pattern.min_claims * 3:
                 severity = _escalate(severity)
