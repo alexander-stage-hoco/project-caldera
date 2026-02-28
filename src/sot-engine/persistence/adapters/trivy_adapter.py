@@ -134,7 +134,7 @@ class TrivyAdapter(BaseAdapter):
         Trivy schema may not be available when running from a different project.
         In that case, skip JSON schema validation but still apply data quality rules.
         """
-        if self.schema_path is None:
+        if self.schema_path is None or not self.schema_path.exists():
             self._log("WARN: trivy schema not available, skipping JSON schema validation")
             return
         super().validate_schema(payload)

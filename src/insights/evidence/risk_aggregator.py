@@ -124,8 +124,10 @@ class RiskAggregator:
                         manifests_in.append(ev.location)
                         seen_locations.add(ev.location)
 
-            # Determine severity: escalate if many claims
+            # Determine severity: escalate if any claim indicates critical-level findings
             severity = pattern.default_severity
+            if any("critical" in c.statement.lower() for c in matching_claims):
+                severity = "critical"
             if len(matching_claims) >= pattern.min_claims * 3:
                 severity = _escalate(severity)
 

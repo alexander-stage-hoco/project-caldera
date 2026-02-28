@@ -281,6 +281,10 @@ class PmdCpdAdapter(BaseAdapter):
                     )
                 )
 
+            if len(valid_occs) < 2:
+                self._log(f"WARN: clone {clone_id} dropped — only {len(valid_occs)} valid occurrence(s) after filtering")
+                continue
+
             dup_entities.append(
                 PmdCpdDuplication(
                     run_pk=run_pk,

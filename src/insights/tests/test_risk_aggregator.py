@@ -181,6 +181,40 @@ class TestRiskAggregator:
         complexity_risks = [r for r in risks if "test coverage" in r.description.lower()]
         assert len(complexity_risks) == 0
 
+    def test_critical_security_claim_produces_critical_severity(self):
+        """A single claim mentioning 'critical' should produce critical-severity risk."""
+        agg = RiskAggregator()
+        claim = TechnicalClaim(
+            claim_id="CLM-SECX-001",
+            category="security",
+            statement="Platform has 2 critical security finding(s)",
+            evidence_ids=("E-SEC-001",),
+            implication="Active exploitation risk",
+            confidence="high",
+            triggered_by="SecurityExposureRule",
+        )
+        risks = agg.aggregate([claim])
+        sec_risks = [r for r in risks if "vulnerabilities" in r.description.lower()]
+        assert len(sec_risks) == 1
+        assert sec_risks[0].severity == "critical"
+
+    def test_non_critical_security_claim_stays_high(self):
+        """A security claim without 'critical' in statement stays at default high."""
+        agg = RiskAggregator()
+        claim = TechnicalClaim(
+            claim_id="CLM-SECX-001",
+            category="security",
+            statement="Platform has 5 high security finding(s)",
+            evidence_ids=("E-SEC-001",),
+            implication="Security risk",
+            confidence="high",
+            triggered_by="SecurityExposureRule",
+        )
+        risks = agg.aggregate([claim])
+        sec_risks = [r for r in risks if "vulnerabilities" in r.description.lower()]
+        assert len(sec_risks) == 1
+        assert sec_risks[0].severity == "high"
+
     def test_systemic_debt_does_not_fire_with_two(self):
         """Systemic debt requires min 3 — 2 claims should NOT trigger."""
         agg = RiskAggregator()

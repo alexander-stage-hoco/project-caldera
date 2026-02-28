@@ -559,6 +559,7 @@ cloud-setup:
 	@test -f infra/terraform.tfvars || (echo "ERROR: infra/terraform.tfvars not found."; echo "  cp infra/terraform.tfvars.example infra/terraform.tfvars"; echo "  # Then fill in your Hetzner API token and caldera_repo_url"; exit 1)
 	cd infra && terraform init
 
+cloud-run: PIPELINE_LLM = 0
 cloud-run:
 	@test -n "$(REPO)" || (echo "Usage: make cloud-run REPO=https://github.com/org/repo"; exit 1)
 	bash scripts/cloud-run.sh "$(REPO)" \
