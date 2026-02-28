@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from shared.evaluation.base_judge import BaseJudge, JudgeResult
 
 
-class SampleJudgeResult:
+class TestJudgeResult:
     """Tests for JudgeResult dataclass."""
 
     def test_create_with_defaults(self):

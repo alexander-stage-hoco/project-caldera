@@ -151,7 +151,8 @@ cd src/tools/scc && make analyze REPO_PATH=/path/to/repo
 make status       # verify prerequisites
 make doctor       # detailed system diagnostics (Python, tools, DB, dbt)
 make compliance   # run tool compliance scanner
-make test         # run all tests (pytest + tool tests + dbt)
+make test         # run fast unit tests (default)
+make test-all     # run full suite (unit + tools + dbt)
 ```
 
 ### Artifact bundle workflow (optional)

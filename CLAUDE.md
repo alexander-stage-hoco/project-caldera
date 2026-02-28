@@ -137,7 +137,8 @@ make tools-evaluate          # Run programmatic evaluations
 make tools-evaluate-llm      # Run LLM evaluations for tools
 make tools-test              # Execute all tool tests
 make tools-clean             # Clean tool outputs
-make test                    # Run all project tests (pytest + tools + dbt)
+make test                    # Run fast unit tests (default)
+make test-all                # Run full suite (unit + tools + dbt)
 make dbt-run                 # Execute dbt models
 make dbt-test                # Run dbt tests
 make dbt-test-reports        # Run report-specific dbt tests

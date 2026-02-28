@@ -132,7 +132,8 @@ make list-runs              # Show all collection runs
 make status                 # Check prerequisites and health
 make clean-db               # Remove database, start fresh
 make compliance             # Run tool compliance scanner
-make test                   # Run all tests (pytest + tools + dbt)
+make test                   # Run fast unit tests (default)
+make test-all               # Run full suite (unit + tools + dbt)
 ```
 
 ### Cloud
