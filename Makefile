@@ -2,7 +2,7 @@
 	compliance compliance-preflight compliance-full \
 	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-migrate dbt-run dbt-test \
-	orchestrate test test-unit test-integration pipeline-eval arch-review \
+	orchestrate test test-all test-unit test-integration pipeline-eval arch-review \
 	collect analyze-bundle prune-outputs export-results \
 	cloud-setup cloud-run cloud-status cloud-destroy cloud-cleanup \
 	docker-build-base docker-build-tool docker-build-tools docker-test-tool \

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import duckdb
 import pytest
@@ -462,6 +463,61 @@ class TestTrivyAdapter:
 
         with pytest.raises(ValueError, match="quality validation failed"):
             adapter.persist(trivy_payload)
+
+        conn.close()
+
+    def test_iac_misconfig_string_line_values(self, tmp_path: Path) -> None:
+        """Test that IaC misconfigs with string line numbers are coerced or rejected.
+
+        When schema validation is unavailable (e.g. schema file missing), string
+        line numbers like start_line="10" should be coerced to int, while
+        non-numeric values like end_line="abc" should produce a quality error
+        instead of a TypeError.
+        """
+        db_path = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db_path))
+        _load_schema(conn)
+
+        repo_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        run_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+
+        _create_layout_run(conn, run_id, repo_id)
+
+        trivy_fixture = Path(__file__).resolve().parents[1] / "persistence" / "fixtures" / "trivy_output.json"
+        trivy_payload = json.loads(trivy_fixture.read_text())
+
+        # Inject an IaC misconfig with string line numbers: "10" (coercible) and "abc" (not)
+        trivy_payload["data"]["iac_misconfigurations"]["misconfigurations"].append(
+            {
+                "id": "AVD-DS-0099",
+                "severity": "HIGH",
+                "title": "String line numbers",
+                "description": "A misconfig with string start_line and non-numeric end_line",
+                "resolution": "Fix line types",
+                "target": "Dockerfile",
+                "target_type": "dockerfile",
+                "start_line": "10",
+                "end_line": "abc",
+            }
+        )
+        trivy_payload["data"]["iac_misconfigurations"]["count"] = 3
+
+        run_repo = ToolRunRepository(conn)
+        layout_repo = LayoutRepository(conn)
+        trivy_repo = TrivyRepository(conn)
+
+        adapter = TrivyAdapter(
+            run_repo,
+            layout_repo,
+            trivy_repo,
+            Path("/tmp/test-repo"),
+            None,
+        )
+
+        # Simulate schema file unavailable so string types reach quality validation
+        with patch.object(type(adapter), "schema_path", new_callable=lambda: property(lambda self: None)):
+            with pytest.raises(ValueError, match="quality validation failed"):
+                adapter.persist(trivy_payload)
 
         conn.close()
 

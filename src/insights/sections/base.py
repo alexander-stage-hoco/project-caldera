@@ -39,7 +39,7 @@ class BaseSection(ABC):
     """Abstract base class for report sections."""
 
     config: SectionConfig
-    _warned: ClassVar[set[tuple[str, str]]] = set()
+    _warned: ClassVar[set[tuple[str, str, str]]] = set()
 
     @abstractmethod
     def fetch_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
