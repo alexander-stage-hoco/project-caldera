@@ -157,7 +157,7 @@ make docker-test-all REPO=<path> # Batch Docker vs native parity test (all tools
 |----------|---------|---------|
 | `DB_PATH` | `~/.caldera/caldera_sot.duckdb` | Database location |
 | `SKIP_TOOLS` | unset | Comma-separated tool names to skip |
-| `PIPELINE_LLM` | `1` | Set to `0` to skip LLM evaluation |
+| `PIPELINE_LLM` | `1` | Set to `0` to skip LLM evaluation. Cloud runs default to `0`. |
 | `BUNDLE_DIR` | `artifacts` | Bundle output directory for `make collect` |
 | `BUNDLE_TAR` | `1` | Create `.tar.gz` from bundle |
 | `CLONE_DEPTH` | unset | Clone depth for remote URLs (empty = full clone) |

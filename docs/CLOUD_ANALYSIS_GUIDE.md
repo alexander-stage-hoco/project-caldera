@@ -139,7 +139,7 @@ make cloud-run \
 | `CLOUD_SERVER` | `medium` (cx33) | Server preset or raw Hetzner type |
 | `SKIP_TOOLS` | (none) | Comma-separated tools to skip |
 | `MAX_PARALLEL` | `4` | Max parallel tool execution |
-| `PIPELINE_LLM` | `0` | Set to `1` to enable LLM evaluation (needs `ANTHROPIC_API_KEY`) |
+| `PIPELINE_LLM` | `0` | Set to `1` to enable LLM evaluation (needs `ANTHROPIC_API_KEY` in tfvars). Local runs default to `1`. |
 | `KEEP_SERVER` | (unset) | Set to `1` to keep VM alive after run |
 | `CLONE_DEPTH` | (full) | Shallow clone depth |
 | `CLOUD_RESULTS` | `infra/results` | Local directory for downloaded results |
