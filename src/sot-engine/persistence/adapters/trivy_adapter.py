@@ -264,6 +264,23 @@ class TrivyAdapter(BaseAdapter):
                 # Validate line_start and line_end
                 line_start = iac.get("start_line")
                 line_end = iac.get("end_line")
+                # Coerce to int or reject non-numeric values
+                if line_start is not None and not isinstance(line_start, int):
+                    try:
+                        line_start = int(line_start)
+                    except (ValueError, TypeError):
+                        errors.append(
+                            f"iac_misconfigs[{iac_idx}].start_line must be numeric"
+                        )
+                        line_start = None
+                if line_end is not None and not isinstance(line_end, int):
+                    try:
+                        line_end = int(line_end)
+                    except (ValueError, TypeError):
+                        errors.append(
+                            f"iac_misconfigs[{iac_idx}].end_line must be numeric"
+                        )
+                        line_end = None
                 if line_start is not None and line_start < 0:
                     errors.append(f"iac_misconfigs[{iac_idx}].line_start must be >= 0")
                 if line_end is not None and line_end < 0:
