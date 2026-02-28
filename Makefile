@@ -2,7 +2,7 @@
 	compliance compliance-preflight compliance-full \
 	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-migrate dbt-run dbt-test \
-	orchestrate test pipeline-eval arch-review \
+	orchestrate test test-unit test-integration pipeline-eval arch-review \
 	collect analyze-bundle prune-outputs export-results \
 	cloud-setup cloud-run cloud-status cloud-destroy cloud-cleanup \
 	docker-build-base docker-build-tool docker-build-tools docker-test-tool \
@@ -151,6 +151,8 @@ help:
 	@echo "    make cloud-destroy            Destroy cloud server (if --keep-server was used)"
 	@echo "    make cloud-cleanup            Destroy orphaned VMs older than TTL"
 	@echo "    CLOUD_SERVER=cx42             Override server type or preset (default: medium/cx33)"
+	@echo "    MAX_DURATION=1800             Max analysis duration in seconds"
+	@echo "    MAX_COST=0.05                 Max estimated cost in EUR"
 	@echo "    TTL_HOURS=2                   TTL for cloud-cleanup (default: 4)"
 	@echo "    DRY_RUN=1                     Dry run for cloud-cleanup"
 	@echo ""
@@ -169,6 +171,8 @@ help:
 # Cloud variables
 CLOUD_SERVER ?= cx33
 CLOUD_RESULTS ?= $(CURDIR)/infra/results
+MAX_DURATION ?=
+MAX_COST ?=
 
 # =============================================================================
 # User-Facing Targets
@@ -390,11 +394,15 @@ arch-review:
 		--target $(ARCH_REVIEW_TARGET) \
 		--review-type $(ARCH_REVIEW_TYPE)
 
-test:
+test-unit:
 	@.venv/bin/python -m pytest -q
+
+test-integration:
 	@$(MAKE) tools-test
 	@$(MAKE) dbt-run
 	@$(MAKE) dbt-test
+
+test: test-unit test-integration
 
 # =============================================================================
 # Full E2E Pipeline: Repo -> Orchestrate -> Insights -> LLM Eval -> Top 3
@@ -558,7 +566,10 @@ cloud-run:
 		--results "$(CLOUD_RESULTS)" \
 		$(if $(SKIP_TOOLS),--skip "$(SKIP_TOOLS)",) \
 		$(if $(filter 1,$(PIPELINE_LLM)),--llm,) \
-		$(if $(KEEP_SERVER),--keep-server,)
+		$(if $(CLONE_DEPTH),--clone-depth "$(CLONE_DEPTH)",) \
+		$(if $(KEEP_SERVER),--keep-server,) \
+		$(if $(MAX_DURATION),--max-duration "$(MAX_DURATION)",) \
+		$(if $(MAX_COST),--max-cost "$(MAX_COST)",)
 
 cloud-status:  ## Check status of cloud servers
 	@cd $(CURDIR)/infra && \

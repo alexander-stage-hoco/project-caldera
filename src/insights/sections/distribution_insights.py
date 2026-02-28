@@ -2,6 +2,8 @@
 Distribution insights section - Gini, Hoover, P95 analysis from Caldera rollups.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

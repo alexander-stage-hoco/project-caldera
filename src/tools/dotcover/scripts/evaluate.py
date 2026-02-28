@@ -259,6 +259,9 @@ def generate_scorecard_md(scorecard: dict) -> str:
     return "\n".join(lines)
 
 
+SCORECARD_DIR = Path(__file__).parent.parent / "evaluation"
+
+
 def save_scorecards(results: list[dict], summary: dict, output_dir: Path) -> None:
     """Save scorecard files (JSON and Markdown)."""
     scorecard = generate_scorecard_json(results, summary)
@@ -320,8 +323,7 @@ def main() -> int:
     args.output.write_text(json.dumps(report, indent=2))
 
     # Save scorecards
-    eval_dir = Path(__file__).parent.parent / "evaluation"
-    save_scorecards(results, summary, eval_dir)
+    save_scorecards(results, summary, SCORECARD_DIR)
 
     print(f"Evaluation complete. Decision: {summary['decision']}")
     print(f"Score: {summary['score']:.1%} ({summary['passed']}/{summary['total']} passed)")

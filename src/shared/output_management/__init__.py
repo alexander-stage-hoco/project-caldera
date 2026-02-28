@@ -9,12 +9,11 @@ Usage:
 
 from __future__ import annotations
 
-from .envelope import unwrap_envelope, wrap_envelope
+from .envelope import unwrap_envelope
 from .loader import load_analysis_results, load_ground_truth, load_all_outputs
 
 __all__ = [
     "unwrap_envelope",
-    "wrap_envelope",
     "load_analysis_results",
     "load_ground_truth",
     "load_all_outputs",

@@ -2,7 +2,7 @@
 
 This document defines the evaluation methodology for the Trivy vulnerability and SBOM analysis tool.
 
-## Overview
+## Philosophy
 
 The Trivy PoC scans repositories for CVE vulnerabilities, generates SBOM inventories, and detects IaC misconfigurations. Evaluation focuses on:
 1. Detection accuracy for known vulnerabilities
@@ -21,7 +21,7 @@ The Trivy PoC scans repositories for CVE vulnerabilities, generates SBOM invento
 
 ---
 
-## Programmatic Checks
+## Programmatic Check Catalog
 
 ### Output Quality Checks (OQ-*)
 
@@ -73,7 +73,7 @@ The Trivy PoC scans repositories for CVE vulnerabilities, generates SBOM invento
 
 ---
 
-## Dimension Weights
+## Dimension Summary
 
 | Dimension | Weight | Description |
 |-----------|--------|-------------|

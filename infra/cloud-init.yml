@@ -24,7 +24,7 @@ runcmd:
   # Clone Caldera (or use a tarball upload — see run-analysis.sh)
   - mkdir -p /opt/caldera
   %{ if caldera_repo_url != "" }
-  - git clone --depth 1 --branch ${caldera_branch} "${caldera_repo_url}" /opt/caldera/project
+  - git clone --depth 1 --branch "${caldera_branch}" "${caldera_repo_url}" /opt/caldera/project
   %{ endif }
 
   # Create results directory

@@ -4,7 +4,7 @@
 #
 # Usage:
 #   ./scripts/cloud-run.sh https://github.com/org/repo
-#   ./scripts/cloud-run.sh https://github.com/org/repo --server cx42 --skip sonarqube
+#   ./scripts/cloud-run.sh https://github.com/org/repo --server cx42 --skip sonarqube --clone-depth 1
 #
 # Prerequisites:
 #   1. terraform installed (brew install terraform)
@@ -30,6 +30,10 @@ if [ -f "${PROJECT_ROOT}/.env" ]; then
     set +a
 fi
 
+# Export Terraform variables from environment (so direct invocations work
+# without the Makefile's TF_VAR_ exports, and secrets stay out of CLI args).
+export TF_VAR_anthropic_api_key="${ANTHROPIC_API_KEY:-}"
+
 # ---------------------------------------------------------------------------
 # Parse arguments
 # ---------------------------------------------------------------------------
@@ -39,8 +43,11 @@ SERVER_TYPE="cx33"
 SKIP_TOOLS=""
 PIPELINE_LLM=0
 MAX_PARALLEL=4
+CLONE_DEPTH="${CLONE_DEPTH:-}"
 RESULTS_DIR="${INFRA_DIR}/results"
 DESTROY_AFTER=1
+MAX_DURATION=""
+MAX_COST=""
 
 usage() {
     echo "Usage: $0 <repo-url> [options]"
@@ -55,8 +62,11 @@ usage() {
     echo "  --skip <tools>          Comma-separated tools to skip"
     echo "  --llm                   Enable LLM evaluation (needs ANTHROPIC_API_KEY in tfvars)"
     echo "  --parallel <n>          Max parallel tools (default: 4)"
+    echo "  --clone-depth <n>       Shallow clone depth (default: full clone)"
     echo "  --results <dir>         Local results directory (default: infra/results)"
     echo "  --keep-server           Don't destroy the server after (for debugging)"
+    echo "  --max-duration <secs>   Kill analysis after this many seconds"
+    echo "  --max-cost <eur>        Kill analysis when estimated cost exceeds this (EUR)"
     echo "  -h, --help              Show this help"
     exit 1
 }
@@ -67,8 +77,11 @@ while [[ $# -gt 0 ]]; do
         --skip)      SKIP_TOOLS="$2"; shift 2 ;;
         --llm)       PIPELINE_LLM=1; shift ;;
         --parallel)  MAX_PARALLEL="$2"; shift 2 ;;
+        --clone-depth) CLONE_DEPTH="$2"; shift 2 ;;
         --results)   RESULTS_DIR="$2"; shift 2 ;;
         --keep-server) DESTROY_AFTER=0; shift ;;
+        --max-duration) MAX_DURATION="$2"; shift 2 ;;
+        --max-cost)     MAX_COST="$2"; shift 2 ;;
         -h|--help)   usage ;;
         -*)          echo "Unknown option: $1"; usage ;;
         *)           REPO_URL="$1"; shift ;;
@@ -174,6 +187,40 @@ fi
 
 cd "${INFRA_DIR}"
 
+# ---------------------------------------------------------------------------
+# Trap: ensure VM cleanup on interrupt (Ctrl-C, TERM, or script exit)
+# ---------------------------------------------------------------------------
+
+cleanup() {
+    local exit_code=$?
+    if [ "${DESTROY_AFTER}" -eq 1 ] && [ -f "${INFRA_DIR}/terraform.tfstate" ]; then
+        # Skip destroy if state has no resources (already clean)
+        if ! terraform -chdir="${INFRA_DIR}" state list 2>/dev/null | grep -q .; then
+            exit $exit_code
+        fi
+        echo ""
+        echo ">>> Cleaning up — destroying server..."
+        if terraform destroy \
+            -auto-approve \
+            -var="repo_url=${REPO_URL}" \
+            -var="server_type=${SERVER_TYPE}" \
+            -var="skip_tools=${SKIP_TOOLS}" \
+            -var="pipeline_llm=${PIPELINE_LLM}" \
+            -var="max_parallel=${MAX_PARALLEL}" \
+            -var="clone_depth=${CLONE_DEPTH}" \
+            -var="results_dir=${RESULTS_DIR}" \
+            -var="max_duration=${MAX_DURATION}" \
+            -var="max_cost=${MAX_COST}"; then
+            echo "    Server destroyed."
+        else
+            echo "    WARNING: terraform destroy failed. VM may still be running."
+            echo "    Run 'make cloud-destroy' or check https://console.hetzner.cloud"
+        fi
+    fi
+    exit $exit_code
+}
+trap cleanup EXIT
+
 echo "=============================================="
 echo "Caldera Cloud Run"
 echo "=============================================="
@@ -183,11 +230,23 @@ echo "Skip:       ${SKIP_TOOLS:-none}"
 echo "LLM:        ${PIPELINE_LLM}"
 echo "Parallel:   ${MAX_PARALLEL}"
 echo "Results:    ${RESULTS_DIR}"
+if [ -n "${MAX_DURATION}" ] || [ -n "${MAX_COST}" ]; then
+    echo "Max dur:    ${MAX_DURATION:-unlimited}"
+    echo "Max cost:   ${MAX_COST:-unlimited} EUR"
+fi
 echo "=============================================="
 echo ""
 
 # Initialize Terraform (idempotent)
-terraform init -input=false -no-color 2>&1 | grep -E "^(Initializing|Terraform has been)" || true
+echo ">>> Initializing Terraform..."
+if ! terraform init -input=false -no-color; then
+    echo ""
+    echo "ERROR: terraform init failed."
+    echo "Common causes:"
+    echo "  1. Network connectivity issues"
+    echo "  2. Terraform state corruption (try: rm -rf infra/.terraform && rm -f infra/.terraform.lock.hcl)"
+    exit 1
+fi
 
 # Plan and apply (with retry for transient SSH/network failures)
 echo ">>> Creating server and running analysis..."
@@ -205,8 +264,10 @@ for attempt in $(seq 1 $MAX_RETRIES); do
         -var="skip_tools=${SKIP_TOOLS}" \
         -var="pipeline_llm=${PIPELINE_LLM}" \
         -var="max_parallel=${MAX_PARALLEL}" \
+        -var="clone_depth=${CLONE_DEPTH}" \
         -var="results_dir=${RESULTS_DIR}" \
-        -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}"; then
+        -var="max_duration=${MAX_DURATION}" \
+        -var="max_cost=${MAX_COST}"; then
         break
     fi
     if [ "$attempt" -eq "$MAX_RETRIES" ]; then
@@ -221,23 +282,10 @@ done
 echo ""
 
 # ---------------------------------------------------------------------------
-# Tear down (unless --keep-server)
+# Keep-server message (destruction handled by EXIT trap above)
 # ---------------------------------------------------------------------------
 
-if [ "${DESTROY_AFTER}" -eq 1 ]; then
-    echo ">>> Destroying server..."
-    terraform destroy \
-        -auto-approve \
-        -var="repo_url=${REPO_URL}" \
-        -var="server_type=${SERVER_TYPE}" \
-        -var="skip_tools=${SKIP_TOOLS}" \
-        -var="pipeline_llm=${PIPELINE_LLM}" \
-        -var="max_parallel=${MAX_PARALLEL}" \
-        -var="results_dir=${RESULTS_DIR}" \
-        -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}" \
-        2>&1 | grep -E "^(Destroy|hcloud_)" || true
-    echo "    Server destroyed."
-else
+if [ "${DESTROY_AFTER}" -eq 0 ]; then
     SERVER_IP=$(terraform output -raw server_ip 2>/dev/null || echo "unknown")
     echo ">>> Server kept alive at: ${SERVER_IP}"
     echo "    SSH: ssh root@${SERVER_IP}"
@@ -263,16 +311,55 @@ if [ ! -d "${RESULTS_DIR}" ] || [ -z "$(ls -A "${RESULTS_DIR}" 2>/dev/null)" ]; 
     echo ""
     echo "ERROR: Results directory is empty or missing: ${RESULTS_DIR}"
     echo "The analysis may have failed or SCP download was incomplete."
-    echo "Use KEEP_SERVER=1 to debug on the VM."
+    echo "Use --keep-server to debug on the VM."
     exit 1
 fi
 
-MANIFEST=$(find "${RESULTS_DIR}" -name "manifest.json" -maxdepth 4 2>/dev/null | head -1)
+MANIFEST=$(find "${RESULTS_DIR}" -name "manifest.json" -maxdepth 4 2>/dev/null \
+    | xargs ls -t 2>/dev/null | head -1)
 if [ -z "${MANIFEST}" ]; then
     echo ""
     echo "ERROR: No manifest.json found in ${RESULTS_DIR}"
     echo "Results download may be incomplete."
     exit 1
+fi
+
+# Validate manifest is valid JSON
+if ! python3 -m json.tool "${MANIFEST}" >/dev/null 2>&1; then
+    echo "ERROR: manifest.json is not valid JSON — download may be corrupted."
+    exit 1
+fi
+
+# Warn if manifest is stale (> 4 hours old — may be from a previous run)
+STALE=$(python3 -c "
+import json, datetime, sys
+with open('${MANIFEST}') as f:
+    m = json.load(f)
+ca = m.get('created_at', '')
+if not ca:
+    sys.exit(0)
+dt = datetime.datetime.fromisoformat(ca)
+age = (datetime.datetime.now(datetime.timezone.utc) - dt).total_seconds()
+if age > 14400:
+    print(f'Manifest is {age/3600:.1f}h old — may be from a previous run')
+" 2>/dev/null || true)
+
+if [ -n "${STALE}" ]; then
+    echo "WARNING: ${STALE}"
+fi
+
+# Check DuckDB exists and is non-empty
+DUCKDB_CHECK=$(find "${RESULTS_DIR}" -name "*.duckdb" -maxdepth 4 2>/dev/null | head -1)
+if [ -z "${DUCKDB_CHECK}" ]; then
+    echo "WARNING: No DuckDB database found in results."
+elif [ ! -s "${DUCKDB_CHECK}" ]; then
+    echo "WARNING: DuckDB database exists but is empty (0 bytes)."
+fi
+
+# Check reports directory has content
+REPORTS_CHECK=$(find "${RESULTS_DIR}" -name "*.html" -maxdepth 5 2>/dev/null | head -1)
+if [ -z "${REPORTS_CHECK}" ]; then
+    echo "WARNING: No HTML reports found in results."
 fi
 
 echo ""

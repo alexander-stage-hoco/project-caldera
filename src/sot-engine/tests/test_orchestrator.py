@@ -27,7 +27,7 @@ from orchestrator import (
     run_dbt,
     validate_payload,
 )
-from persistence.adapters import LayoutAdapter
+from persistence.adapters import LayoutScannerAdapter
 from persistence.repositories import LayoutRepository, ToolRunRepository
 
 
@@ -45,7 +45,7 @@ def test_layout_adapter_persists_files(tmp_path: Path) -> None:
     fixture_path = Path(__file__).resolve().parents[1] / "persistence" / "fixtures" / "layout_output.json"
     payload = json.loads(fixture_path.read_text())
 
-    adapter = LayoutAdapter(run_repo, layout_repo)
+    adapter = LayoutScannerAdapter(run_repo, layout_repo)
     run_pk = adapter.persist(payload)
 
     rows = conn.execute(

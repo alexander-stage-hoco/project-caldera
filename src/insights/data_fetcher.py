@@ -2,6 +2,8 @@
 Data fetcher for executing SQL queries against DuckDB with Caldera dbt marts.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Any
 import duckdb

@@ -5,6 +5,8 @@ Uses mart_authorship_summary and mart_git_fame_contributor_hotspots to identify
 knowledge concentration risks and single points of failure.
 """
 
+from __future__ import annotations
+
 import warnings
 
 from typing import Any

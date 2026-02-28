@@ -5,6 +5,8 @@ Uses mart_layout_structure_hotspots to identify nesting depth issues,
 file concentration, and size distribution problems.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

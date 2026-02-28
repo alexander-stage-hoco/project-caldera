@@ -8,6 +8,8 @@ Provides a comprehensive view of each component (depth 1-2 directories) includin
 - Hotspots and risk signals
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

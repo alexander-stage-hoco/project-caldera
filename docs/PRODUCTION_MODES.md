@@ -366,8 +366,8 @@ ENTRYPOINT [".venv/bin/python", "scripts/analyze.py"]
 
 | Tool | Base Image | Extra Dependencies |
 |------|-----------|-------------------|
-| **dotcover** | `mcr.microsoft.com/dotnet/sdk:10.0` (amd64) | JetBrains.dotCover CLI |
-| **roslyn-analyzers** | `mcr.microsoft.com/dotnet/sdk:10.0` | MSBuild, Roslyn analyzers |
+| **dotcover** | `mcr.microsoft.com/dotnet/sdk:8.0` (amd64) | JetBrains.dotCover CLI |
+| **roslyn-analyzers** | `mcr.microsoft.com/dotnet/sdk:8.0` | MSBuild, Roslyn analyzers |
 | **sonarqube** | `python:3.12-slim` + sidecar `sonarqube:10.7.0-community` | sonar-scanner CLI |
 | **semgrep** | `python:3.12-slim` | `semgrep` binary |
 | **trivy** | `python:3.12-slim` | `trivy` binary |

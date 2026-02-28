@@ -6,6 +6,8 @@ frequently violated, helping prioritize technical debt remediation and identify
 systemic code quality issues.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

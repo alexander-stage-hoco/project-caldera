@@ -49,8 +49,22 @@ class TestRiskAggregator:
         claims = [_claim("CLM-SECX-001", "security")]
         risks = agg.aggregate(claims)
         assert len(risks) >= 1
-        sec_risks = [r for r in risks if r.severity == "critical"]
+        sec_risks = [r for r in risks if "vulnerabilities" in r.description.lower()]
         assert len(sec_risks) == 1
+        assert sec_risks[0].severity == "high"
+
+    def test_security_risk_escalates_with_many_claims(self):
+        """3+ security claims (min_claims=1, threshold=1*3=3) escalate to critical."""
+        agg = RiskAggregator()
+        claims = [
+            _claim("CLM-SECX-001", "security"),
+            _claim("CLM-SECX-002", "security"),
+            _claim("CLM-SECX-003", "security"),
+        ]
+        risks = agg.aggregate(claims)
+        sec_risks = [r for r in risks if "vulnerabilities" in r.description.lower()]
+        assert len(sec_risks) == 1
+        assert sec_risks[0].severity == "critical"
 
     def test_change_amplification_requires_two(self):
         agg = RiskAggregator()
@@ -69,7 +83,8 @@ class TestRiskAggregator:
         claims = [_claim("CLM-SECX-001", "security", ("E-SEC-001",))]
         risks = agg.aggregate(claims, evidence=[ev1])
         assert len(risks) >= 1
-        sec_risk = [r for r in risks if r.severity == "critical"][0]
+        sec_risk = [r for r in risks if "vulnerabilities" in r.description.lower()][0]
+        assert sec_risk.severity == "high"
         assert "src/server.py" in sec_risk.manifests_in
 
     def test_severity_escalation(self):
@@ -143,6 +158,28 @@ class TestRiskAggregator:
         debt_risks = [r for r in risks if "quality" in r.technical_cause.lower()]
         assert len(debt_risks) == 1
         assert debt_risks[0].severity == "medium"
+
+    def test_untested_complexity_does_not_fire_with_coverage_only(self):
+        """Two coverage-only claims must NOT trigger untested-complexity."""
+        agg = RiskAggregator()
+        claims = [
+            _claim("CLM-COVG-001", "coverage"),
+            _claim("CLM-COVG-002", "coverage"),
+        ]
+        risks = agg.aggregate(claims)
+        complexity_risks = [r for r in risks if "test coverage" in r.description.lower()]
+        assert len(complexity_risks) == 0
+
+    def test_untested_complexity_does_not_fire_with_complexity_only(self):
+        """Two complexity-only claims must NOT trigger untested-complexity."""
+        agg = RiskAggregator()
+        claims = [
+            _claim("CLM-CONC-001", "complexity"),
+            _claim("CLM-CONC-002", "complexity"),
+        ]
+        risks = agg.aggregate(claims)
+        complexity_risks = [r for r in risks if "test coverage" in r.description.lower()]
+        assert len(complexity_risks) == 0
 
     def test_systemic_debt_does_not_fire_with_two(self):
         """Systemic debt requires min 3 — 2 claims should NOT trigger."""

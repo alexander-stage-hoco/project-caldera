@@ -38,7 +38,7 @@ DEFAULT_PATTERNS: tuple[RiskPattern, ...] = (
         technical_cause="Unpatched dependencies or committed secrets.",
         categories=("security",),
         min_claims=1,
-        default_severity="critical",
+        default_severity="high",
     ),
     RiskPattern(
         name="Change amplification",
@@ -104,6 +104,12 @@ class RiskAggregator:
             matching_claims = [
                 c for c in claims if c.category in pattern.categories
             ]
+
+            # Multi-category patterns require at least one claim from each category
+            if len(pattern.categories) > 1:
+                represented = {c.category for c in matching_claims}
+                if not represented >= set(pattern.categories):
+                    continue
 
             if len(matching_claims) < pattern.min_claims:
                 continue

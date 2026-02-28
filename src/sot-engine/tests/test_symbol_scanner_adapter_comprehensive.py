@@ -37,7 +37,7 @@ def _create_layout_run(
 ) -> int:
     """Create a layout run with specified files by directly inserting records.
 
-    This bypasses the LayoutAdapter to avoid schema validation complexity,
+    This bypasses the LayoutScannerAdapter to avoid schema validation complexity,
     while still creating valid layout records for testing.
 
     Args:

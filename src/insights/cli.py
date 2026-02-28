@@ -2,6 +2,8 @@
 CLI entry point for Caldera Insights reporting.
 """
 
+from __future__ import annotations
+
 import warnings
 from pathlib import Path
 
@@ -31,8 +33,8 @@ def generate(
         "-c",
         help="Collection run ID (auto-resolves to SCC tool's run_pk)",
     ),
-    format: str = typer.Option("html", "--format", "-f", help="Output format: html, md"),
-    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
+    format: str = typer.Option("html", "--format", "-f", help="Output format: html, md, pack (LLM context directory)"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file/directory path"),
     sections: str | None = typer.Option(None, "--sections", "-s", help="Comma-separated section names"),
     profile: str | None = typer.Option(None, "--profile", "-p", help="Stakeholder profile (cto, investor, ceo)"),
     title: str | None = typer.Option(None, "--title", "-t", help="Custom report title"),
@@ -87,34 +89,65 @@ def generate(
         with warnings.catch_warnings(record=True) as caught_warnings:
             warnings.simplefilter("always", UserWarning)
 
-            if collection_run_id:
-                console.print(f"[dim]Resolving collection_run_id to SCC tool's run_pk...[/dim]")
-                result = generator.generate_by_collection(
-                    collection_run_id=collection_run_id,
-                    format=format,  # type: ignore
-                    sections=section_list,
-                    output_path=output,
-                    title=title,
-                    profile=profile,
-                )
+            if format == "pack":
+                # Pack format produces a directory, not a single file
+                pack_dir = output or Path("./caldera-context-pack")
+                if collection_run_id:
+                    console.print(f"[dim]Resolving collection_run_id to SCC tool's run_pk...[/dim]")
+                    generator.generate_pack_by_collection(
+                        collection_run_id=collection_run_id,
+                        output_dir=pack_dir,
+                        sections=section_list,
+                        title=title,
+                        profile=profile,
+                    )
+                else:
+                    generator.generate_pack(
+                        run_pk=run_pk,  # type: ignore
+                        output_dir=pack_dir,
+                        sections=section_list,
+                        title=title,
+                        profile=profile,
+                    )
+
+                # Display any captured warnings
+                for w in caught_warnings:
+                    console.print(f"[yellow]Warning:[/yellow] {w.message}")
+
+                # List files written
+                console.print(f"[green]Context pack written to:[/green] {pack_dir}/")
+                for f in sorted(pack_dir.iterdir()):
+                    size_kb = f.stat().st_size / 1024
+                    console.print(f"  {f.name} ({size_kb:.1f} KB)")
             else:
-                result = generator.generate(
-                    run_pk=run_pk,  # type: ignore (we validated it's not None above)
-                    format=format,  # type: ignore
-                    sections=section_list,
-                    output_path=output,
-                    title=title,
-                    profile=profile,
-                )
+                if collection_run_id:
+                    console.print(f"[dim]Resolving collection_run_id to SCC tool's run_pk...[/dim]")
+                    result = generator.generate_by_collection(
+                        collection_run_id=collection_run_id,
+                        format=format,  # type: ignore
+                        sections=section_list,
+                        output_path=output,
+                        title=title,
+                        profile=profile,
+                    )
+                else:
+                    result = generator.generate(
+                        run_pk=run_pk,  # type: ignore (we validated it's not None above)
+                        format=format,  # type: ignore
+                        sections=section_list,
+                        output_path=output,
+                        title=title,
+                        profile=profile,
+                    )
 
-            # Display any captured warnings
-            for w in caught_warnings:
-                console.print(f"[yellow]Warning:[/yellow] {w.message}")
+                # Display any captured warnings
+                for w in caught_warnings:
+                    console.print(f"[yellow]Warning:[/yellow] {w.message}")
 
-        if output:
-            console.print(f"[green]Report written to:[/green] {output}")
-        else:
-            console.print(result)
+                if output:
+                    console.print(f"[green]Report written to:[/green] {output}")
+                else:
+                    console.print(result)
 
     except ValueError as e:
         console.print(f"[red]Error:[/red] {e}")

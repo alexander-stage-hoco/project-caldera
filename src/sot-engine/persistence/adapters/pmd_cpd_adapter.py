@@ -242,26 +242,15 @@ class PmdCpdAdapter(BaseAdapter):
             if dup_tracker.is_duplicate(clone_id):
                 continue
 
-            occurrences = dup.get("occurrences", [])
+            raw_occurrences = dup.get("occurrences", [])
 
-            # Determine if cross-file
-            files_in_dup = {occ.get("file", "") for occ in occurrences}
+            # Determine if cross-file from raw input
+            files_in_dup = {occ.get("file", "") for occ in raw_occurrences}
             is_cross_file = len(files_in_dup) > 1
 
-            dup_entities.append(
-                PmdCpdDuplication(
-                    run_pk=run_pk,
-                    clone_id=clone_id,
-                    lines=dup.get("lines", 0),
-                    tokens=dup.get("tokens", 0),
-                    occurrence_count=len(occurrences),
-                    is_cross_file=is_cross_file,
-                    code_fragment=dup.get("code_fragment"),
-                )
-            )
-
-            # Map occurrences
-            for occ in occurrences:
+            # Map occurrences first so occurrence_count reflects actual persisted rows
+            valid_occs: list[PmdCpdOccurrence] = []
+            for occ in raw_occurrences:
                 relative_path = self._normalize_path(occ.get("file", ""))
 
                 try:
@@ -278,7 +267,7 @@ class PmdCpdAdapter(BaseAdapter):
                 if occ_tracker.is_duplicate(occ_key, label=f"{clone_id} at {relative_path}:{line_start}"):
                     continue
 
-                occ_entities.append(
+                valid_occs.append(
                     PmdCpdOccurrence(
                         run_pk=run_pk,
                         clone_id=clone_id,
@@ -291,5 +280,18 @@ class PmdCpdAdapter(BaseAdapter):
                         column_end=occ.get("column_end"),
                     )
                 )
+
+            dup_entities.append(
+                PmdCpdDuplication(
+                    run_pk=run_pk,
+                    clone_id=clone_id,
+                    lines=dup.get("lines", 0),
+                    tokens=dup.get("tokens", 0),
+                    occurrence_count=len(valid_occs),
+                    is_cross_file=is_cross_file,
+                    code_fragment=dup.get("code_fragment"),
+                )
+            )
+            occ_entities.extend(valid_occs)
 
         return dup_entities, occ_entities

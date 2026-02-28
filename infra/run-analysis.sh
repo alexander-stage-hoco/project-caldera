@@ -19,6 +19,9 @@ SKIP_TOOLS="${SKIP_TOOLS:-}"
 PIPELINE_LLM="${PIPELINE_LLM:-0}"
 MAX_PARALLEL="${MAX_PARALLEL:-4}"
 SERVER_TYPE="${SERVER_TYPE:-unknown}"
+CLONE_DEPTH="${CLONE_DEPTH:-}"
+MAX_DURATION="${MAX_DURATION:-}"
+MAX_COST="${MAX_COST:-}"
 
 # When LLM evaluation is enabled, configure the Anthropic SDK provider
 # (Claude Code CLI is not available on the VM)
@@ -36,6 +39,9 @@ RESULTS_DIR="${WORK_DIR}/results"
 CALDERA_DIR="${WORK_DIR}/project"
 CLONE_DIR="/tmp/target-repo"
 
+# Scrub secrets file as early as possible (env vars already in memory from caller)
+rm -f "${WORK_DIR}/.env.secrets"
+
 echo "=============================================="
 echo "Caldera Cloud Runner"
 echo "=============================================="
@@ -44,6 +50,10 @@ echo "Server type:    ${SERVER_TYPE}"
 echo "Skip tools:     ${SKIP_TOOLS:-none}"
 echo "LLM eval:       ${PIPELINE_LLM}"
 echo "Max parallel:   ${MAX_PARALLEL}"
+if [ -n "${MAX_DURATION}" ] || [ -n "${MAX_COST}" ]; then
+    echo "Max duration:   ${MAX_DURATION:-unlimited}"
+    echo "Max cost:       ${MAX_COST:-unlimited} EUR"
+fi
 echo "=============================================="
 
 # ---------------------------------------------------------------------------
@@ -66,6 +76,12 @@ fi
 
 cd "${CALDERA_DIR}"
 
+# Disk space pre-flight check
+AVAIL_GB=$(df --output=avail / | tail -1 | awk '{print int($1/1048576)}')
+if [ "${AVAIL_GB}" -lt 10 ]; then
+    echo "WARNING: Only ${AVAIL_GB} GB disk space available. Large repos may exhaust disk."
+fi
+
 # ---------------------------------------------------------------------------
 # 2. Set up Caldera project environment
 # ---------------------------------------------------------------------------
@@ -86,13 +102,45 @@ echo ""
 echo ">>> Cloning target repository..."
 rm -rf "${CLONE_DIR}"
 
-if echo "${REPO_URL}" | grep -qE '^https?://'; then
-    git clone "${REPO_URL}" "${CLONE_DIR}"
-elif echo "${REPO_URL}" | grep -qE '^git@'; then
-    git clone "${REPO_URL}" "${CLONE_DIR}"
-else
+if ! echo "${REPO_URL}" | grep -qE '^(https?://|git@)'; then
     echo "ERROR: REPO_URL must be a git URL (https:// or git@)"
     echo "Local paths are not supported in cloud mode."
+    exit 1
+fi
+
+CLONE_OK=0
+CLONE_DEPTH_ARGS=""
+if [ -n "${CLONE_DEPTH}" ]; then
+    CLONE_DEPTH_ARGS="--depth=${CLONE_DEPTH}"
+    echo "  Using shallow clone (depth=${CLONE_DEPTH})"
+
+    HISTORY_TOOLS="git-fame git-blame-scanner gitleaks"
+    HISTORY_WARN=""
+    for ht in ${HISTORY_TOOLS}; do
+        if ! echo ",${SKIP_TOOLS}," | grep -q ",${ht},"; then
+            HISTORY_WARN="${HISTORY_WARN} ${ht}"
+        fi
+    done
+    if [ -n "${HISTORY_WARN}" ]; then
+        echo "  WARNING: Shallow clone may produce incomplete results for:${HISTORY_WARN}"
+        echo "  Consider --skip or full clone for accurate history analysis."
+    fi
+fi
+for clone_attempt in 1 2 3; do
+    echo "  Clone attempt ${clone_attempt} of 3..."
+    if git clone ${CLONE_DEPTH_ARGS} "${REPO_URL}" "${CLONE_DIR}"; then
+        CLONE_OK=1
+        break
+    fi
+    if [ "${clone_attempt}" -lt 3 ]; then
+        echo "  Clone failed, retrying in 10s..."
+        rm -rf "${CLONE_DIR}"
+        sleep 10
+    fi
+done
+
+if [ "${CLONE_OK}" -eq 0 ]; then
+    echo "ERROR: git clone failed after 3 attempts."
     exit 1
 fi
 
@@ -141,16 +189,33 @@ echo ""
 echo ">>> Setting up tools (best-effort, failures are non-fatal)..."
 # Run setup for each tool individually so one failure doesn't block others.
 # Tools that fail setup will also fail during analyze and be reported there.
+SETUP_OK=0
+SETUP_FAIL=0
+SETUP_SKIP=0
+SETUP_FAILED_NAMES=""
 for tool_dir in src/tools/*/; do
     tool_name=$(basename "$tool_dir")
     # Skip tools that are in SKIP_TOOLS
     if echo ",${SKIP_TOOLS}," | grep -q ",${tool_name},"; then
         echo "  Skipping setup for ${tool_name} (in SKIP_TOOLS)"
+        SETUP_SKIP=$((SETUP_SKIP + 1))
         continue
     fi
     echo "  Setting up ${tool_name}..."
-    make -C "$tool_dir" setup 2>&1 | tail -3 || echo "  WARNING: ${tool_name} setup failed (will be skipped during analyze)"
+    if make -C "$tool_dir" setup 2>&1 | tail -3; then
+        SETUP_OK=$((SETUP_OK + 1))
+    else
+        echo "  WARNING: ${tool_name} setup failed (will be skipped during analyze)"
+        SETUP_FAIL=$((SETUP_FAIL + 1))
+        SETUP_FAILED_NAMES="${SETUP_FAILED_NAMES} ${tool_name}"
+    fi
 done
+
+echo ""
+echo "  Tool setup summary: ${SETUP_OK} succeeded, ${SETUP_FAIL} failed, ${SETUP_SKIP} skipped"
+if [ "${SETUP_FAIL}" -gt 0 ]; then
+    echo "  Failed:${SETUP_FAILED_NAMES}"
+fi
 
 # ---------------------------------------------------------------------------
 # 5. Run the analysis pipeline
@@ -160,20 +225,90 @@ echo ""
 echo ">>> Running analysis pipeline..."
 START_TIME=$(date +%s)
 
-make analyze \
-    REPO="${CLONE_DIR}" \
-    SKIP_TOOLS="${SKIP_TOOLS}" \
-    PIPELINE_LLM="${PIPELINE_LLM}" \
-    ${PIPELINE_PROVIDER:+PIPELINE_PROVIDER=${PIPELINE_PROVIDER}} \
-    CONTINUE_ON_TOOL_FAILURE=1 \
-    REPLACE=1 \
-    2>&1 | tee /tmp/caldera-run.log
+# Budget guard: compute effective timeout for make analyze
+ANALYSIS_TIMEOUT=""
+BUDGET_GUARD_TRIGGERED=false
+
+if [ -n "${MAX_COST}" ] && [ -n "${SERVER_TYPE}" ]; then
+    COST_DURATION=$(python3 -c "
+import json, math, sys
+with open('/opt/caldera/project/infra/server_presets.json') as f:
+    data = json.load(f)
+rate = data['pricing_eur_per_hour'].get('${SERVER_TYPE}', 0)
+if rate <= 0:
+    print('')
+    sys.exit(0)
+max_hours = math.floor(float('${MAX_COST}') / rate)
+if max_hours < 1:
+    print(f'ERROR: MAX_COST ${MAX_COST} EUR < 1 billable hour (EUR {rate:.3f}/hr for ${SERVER_TYPE}). '
+          f'Set MAX_COST >= {rate:.3f} or remove it.', file=sys.stderr)
+    sys.exit(1)
+print(str(max_hours * 3600))
+" 2>&1)
+    COST_EXIT=$?
+    if [ $COST_EXIT -ne 0 ]; then
+        echo "${COST_DURATION}"
+        exit 1
+    fi
+    if [ -n "${COST_DURATION}" ]; then
+        echo "  Budget guard: --max-cost ${MAX_COST} EUR -> ${COST_DURATION}s for ${SERVER_TYPE}"
+        ANALYSIS_TIMEOUT="${COST_DURATION}"
+    fi
+fi
+
+if [ -n "${MAX_DURATION}" ]; then
+    echo "  Budget guard: --max-duration ${MAX_DURATION}s"
+    if [ -z "${ANALYSIS_TIMEOUT}" ]; then
+        ANALYSIS_TIMEOUT="${MAX_DURATION}"
+    elif [ "${MAX_DURATION}" -lt "${ANALYSIS_TIMEOUT}" ]; then
+        ANALYSIS_TIMEOUT="${MAX_DURATION}"
+    fi
+fi
+
+if [ -n "${ANALYSIS_TIMEOUT}" ]; then
+    echo "  Effective analysis timeout: ${ANALYSIS_TIMEOUT}s ($(( ANALYSIS_TIMEOUT / 60 ))m)"
+fi
+
+set +e
+if [ -n "${ANALYSIS_TIMEOUT}" ]; then
+    timeout --signal=TERM --kill-after=30 "${ANALYSIS_TIMEOUT}" \
+        make analyze \
+            REPO="${CLONE_DIR}" \
+            SKIP_TOOLS="${SKIP_TOOLS}" \
+            PIPELINE_LLM="${PIPELINE_LLM}" \
+            ${PIPELINE_PROVIDER:+PIPELINE_PROVIDER=${PIPELINE_PROVIDER}} \
+            CONTINUE_ON_TOOL_FAILURE=1 \
+            REPLACE=1 \
+            2>&1 | tee /tmp/caldera-run.log
+    ANALYSIS_EXIT=${PIPESTATUS[0]}
+else
+    make analyze \
+        REPO="${CLONE_DIR}" \
+        SKIP_TOOLS="${SKIP_TOOLS}" \
+        PIPELINE_LLM="${PIPELINE_LLM}" \
+        ${PIPELINE_PROVIDER:+PIPELINE_PROVIDER=${PIPELINE_PROVIDER}} \
+        CONTINUE_ON_TOOL_FAILURE=1 \
+        REPLACE=1 \
+        2>&1 | tee /tmp/caldera-run.log
+    ANALYSIS_EXIT=${PIPESTATUS[0]}
+fi
+set -e
 
 END_TIME=$(date +%s)
 DURATION=$((END_TIME - START_TIME))
 
-echo ""
-echo ">>> Pipeline completed in ${DURATION} seconds."
+if [ "${ANALYSIS_EXIT}" -eq 124 ]; then
+    BUDGET_GUARD_TRIGGERED=true
+    echo ""
+    echo ">>> BUDGET GUARD: Analysis terminated after ${DURATION}s (limit: ${ANALYSIS_TIMEOUT}s)"
+    echo ">>> Exporting partial results..."
+elif [ "${ANALYSIS_EXIT}" -ne 0 ]; then
+    echo ""
+    echo ">>> Pipeline exited with code ${ANALYSIS_EXIT}. Exporting whatever results exist..."
+else
+    echo ""
+    echo ">>> Pipeline completed in ${DURATION} seconds."
+fi
 
 # ---------------------------------------------------------------------------
 # 6. Export results
@@ -276,6 +411,15 @@ cloud_section = {
     'pipeline_llm': bool(int('${PIPELINE_LLM}')),
     'run_pk': int('${RUN_PK}') if '${RUN_PK}' else None,
 }
+budget_guard = {
+    'max_duration': int('${MAX_DURATION}') if '${MAX_DURATION}' else None,
+    'max_cost': float('${MAX_COST}') if '${MAX_COST}' else None,
+    'effective_timeout': int('${ANALYSIS_TIMEOUT}') if '${ANALYSIS_TIMEOUT}' else None,
+    'triggered': True if '${BUDGET_GUARD_TRIGGERED}' == 'true' else False,
+    'analysis_exit_code': ${ANALYSIS_EXIT},
+}
+cloud_section['budget_guard'] = budget_guard
+
 if dbt_info is not None:
     cloud_section['dbt'] = dbt_info
 

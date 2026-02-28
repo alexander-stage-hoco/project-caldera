@@ -99,6 +99,24 @@ variable "max_parallel" {
   default     = 4
 }
 
+variable "clone_depth" {
+  description = "Shallow clone depth for the target repository (empty = full clone)"
+  type        = string
+  default     = ""
+}
+
+variable "max_duration" {
+  description = "Max analysis duration in seconds (empty = no limit)"
+  type        = string
+  default     = ""
+}
+
+variable "max_cost" {
+  description = "Max estimated cost in EUR (empty = no limit)"
+  type        = string
+  default     = ""
+}
+
 variable "results_dir" {
   description = "Local directory to download results into"
   type        = string
@@ -183,10 +201,17 @@ resource "null_resource" "run_analysis" {
   depends_on = [hcloud_server.runner]
 
   triggers = {
-    # Re-run if any input changes
-    repo_url   = var.repo_url
-    server_id  = hcloud_server.runner.id
-    skip_tools = var.skip_tools
+    # Re-run if any analysis-affecting input changes
+    repo_url       = var.repo_url
+    server_id      = hcloud_server.runner.id
+    server_type    = var.server_type
+    skip_tools     = var.skip_tools
+    pipeline_llm   = var.pipeline_llm
+    max_parallel   = var.max_parallel
+    clone_depth    = var.clone_depth
+    max_duration   = var.max_duration
+    max_cost       = var.max_cost
+    caldera_branch = var.caldera_branch
   }
 
   connection {
@@ -214,7 +239,7 @@ resource "null_resource" "run_analysis" {
     inline = [
       "chmod +x /opt/caldera/run-analysis.sh",
       "chmod 600 /opt/caldera/.env.secrets",
-      "set -a && . /opt/caldera/.env.secrets && set +a && REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' /opt/caldera/run-analysis.sh",
+      "set -a && . /opt/caldera/.env.secrets && set +a && rm -f /opt/caldera/.env.secrets && REPO_URL='${var.repo_url}' SKIP_TOOLS='${var.skip_tools}' PIPELINE_LLM='${var.pipeline_llm}' MAX_PARALLEL='${var.max_parallel}' SERVER_TYPE='${var.server_type}' CLONE_DEPTH='${var.clone_depth}' MAX_DURATION='${var.max_duration}' MAX_COST='${var.max_cost}' /opt/caldera/run-analysis.sh",
     ]
   }
 
@@ -240,11 +265,21 @@ resource "null_resource" "run_analysis" {
         fi
         echo "  SCP failed, retrying in $RETRY_DELAY seconds..."
         sleep $RETRY_DELAY
+        RETRY_DELAY=$((RETRY_DELAY * 2))
         attempt=$((attempt + 1))
       done
-      # Verify at least one manifest.json was downloaded
-      if ! find "${var.results_dir}" -name "manifest.json" -maxdepth 4 | grep -q .; then
+      # Verify manifest.json was downloaded and is non-empty
+      MANIFEST=$(find "${var.results_dir}" -name "manifest.json" -maxdepth 4 | head -1)
+      if [ -z "$MANIFEST" ]; then
         echo "ERROR: No manifest.json found in downloaded results. SCP may have failed silently."
+        exit 1
+      fi
+      # Verify DuckDB was downloaded and is non-empty
+      DUCKDB=$(find "${var.results_dir}" -name "*.duckdb" -maxdepth 4 | head -1)
+      if [ -z "$DUCKDB" ]; then
+        echo "WARNING: No DuckDB database found in downloaded results."
+      elif [ ! -s "$DUCKDB" ]; then
+        echo "ERROR: DuckDB file downloaded but is empty (0 bytes). Download may be corrupted."
         exit 1
       fi
       echo ""

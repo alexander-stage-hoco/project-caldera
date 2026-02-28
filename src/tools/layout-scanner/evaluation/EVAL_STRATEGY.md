@@ -66,7 +66,7 @@ combined_score = (0.60 * programmatic_normalized) + (0.40 * llm_score)
 
 ---
 
-## Programmatic Checks Catalog
+## Programmatic Check Catalog
 
 ### Output Quality Checks (OQ-1 to OQ-8)
 

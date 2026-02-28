@@ -5,6 +5,8 @@ Uses mart_pmd_cpd_clone_hotspots to identify duplicated code blocks,
 their impact, and affected files.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

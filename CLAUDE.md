@@ -20,6 +20,7 @@ Project Caldera is a tool-first workspace for building and validating code analy
 | Run reports | [docs/REPORTS.md](docs/REPORTS.md) |
 | Review tool architecture | [src/architecture-review/README.md](src/architecture-review/README.md) |
 | Run cloud analysis | [infra/README.md](infra/README.md) |
+| Run cloud analysis on large repos | [docs/CLOUD_ANALYSIS_GUIDE.md](docs/CLOUD_ANALYSIS_GUIDE.md) |
 | Compare cloud hosting options | [docs/CLOUD_HOSTING_COMPARISON.md](docs/CLOUD_HOSTING_COMPARISON.md) |
 | See project status & roadmap | [docs/STATUS_AND_ROADMAP.md](docs/STATUS_AND_ROADMAP.md) |
 | Understand production modes | [docs/PRODUCTION_MODES.md](docs/PRODUCTION_MODES.md) |
@@ -156,7 +157,7 @@ make docker-test-all REPO=<path> # Batch Docker vs native parity test (all tools
 |----------|---------|---------|
 | `DB_PATH` | `~/.caldera/caldera_sot.duckdb` | Database location |
 | `SKIP_TOOLS` | unset | Comma-separated tool names to skip |
-| `PIPELINE_LLM` | `1` | Set to `0` to skip LLM evaluation |
+| `PIPELINE_LLM` | `1` | Set to `0` to skip LLM evaluation. Cloud runs default to `0`. |
 | `BUNDLE_DIR` | `artifacts` | Bundle output directory for `make collect` |
 | `BUNDLE_TAR` | `1` | Create `.tar.gz` from bundle |
 | `CLONE_DEPTH` | unset | Clone depth for remote URLs (empty = full clone) |
@@ -167,12 +168,14 @@ make docker-test-all REPO=<path> # Batch Docker vs native parity test (all tools
 | `DRY_RUN` | unset | Set to `1` for dry-run mode in `make cloud-cleanup` |
 | `RESULTS_REPO_URL` | unset | Git URL for results repository (`make export-results`) |
 | `PUSH` | unset | Set to `1` to push after export (`make export-results`) |
-| `MAX_PARALLEL` | `4` | Max parallel tool containers (docker/cloud modes) |
+| `MAX_PARALLEL` | `1` | Max parallel tool containers (docker/cloud modes) |
 | `GHCR_REGISTRY` | `ghcr.io/alexander-stage-hoco` | GHCR registry for `make docker-pull-all` |
 | `CALDERA_TOOL_IMAGE_PREFIX` | `caldera-tool-` | Docker image prefix for tool containers |
 | `CALDERA_RUNNER_IMAGE` | `caldera-runner` | Runner image (set to GHCR ref for pre-built) |
 | `CALDERA_ORCHESTRATOR_IMAGE` | `caldera-orchestrator` | Orchestrator image (set to GHCR ref for pre-built) |
-| `DOCKER_TEST_SKIP` | `coverage-ingest` | Comma-separated tools to skip in `make docker-test-all` |
+| `MAX_DURATION` | unset | Max analysis duration in seconds for `make cloud-run` |
+| `MAX_COST` | unset | Max estimated cost in EUR for `make cloud-run` |
+| `DOCKER_TEST_SKIP` | `coverage-ingest,git-blame-scanner` | Comma-separated tools to skip in `make docker-test-all` |
 
 ### Orchestrator
 

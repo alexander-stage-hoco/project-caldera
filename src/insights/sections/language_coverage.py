@@ -2,6 +2,8 @@
 Language coverage section showing distribution of languages in the codebase.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from .base import BaseSection, SectionConfig

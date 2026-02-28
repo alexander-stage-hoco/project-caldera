@@ -6,7 +6,7 @@ import pytest
 
 from persistence.adapters.scc_adapter import SccAdapter, SCHEMA_PATH as SCC_SCHEMA
 from persistence.adapters.lizard_adapter import LizardAdapter, SCHEMA_PATH as LIZARD_SCHEMA
-from persistence.adapters.layout_adapter import LayoutAdapter, SCHEMA_PATH as LAYOUT_SCHEMA
+from persistence.adapters.layout_adapter import LayoutScannerAdapter, SCHEMA_PATH as LAYOUT_SCHEMA
 from persistence.adapters.semgrep_adapter import SemgrepAdapter, SCHEMA_PATH as SEMGREP_SCHEMA
 
 
@@ -31,7 +31,7 @@ def test_lizard_schema_validation_fails() -> None:
 
 
 def test_layout_schema_validation_fails() -> None:
-    adapter = LayoutAdapter(object(), object(), Path("/tmp/repo"))
+    adapter = LayoutScannerAdapter(object(), object(), Path("/tmp/repo"))
     payload = _load_payload(LAYOUT_SCHEMA)
     with pytest.raises(ValueError):
         adapter.validate_schema(payload)

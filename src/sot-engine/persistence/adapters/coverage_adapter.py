@@ -56,7 +56,7 @@ TABLE_DDL = {
 QUALITY_RULES = ["paths", "ranges", "coverage_invariants", "required_fields"]
 
 
-class CoverageAdapter(BaseAdapter):
+class CoverageIngestAdapter(BaseAdapter):
     """Adapter for persisting coverage-ingest output to the landing zone."""
 
     @property

@@ -11,7 +11,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from persistence.adapters import LayoutAdapter
+from persistence.adapters import LayoutScannerAdapter
 from persistence.repositories import LayoutRepository, ToolRunRepository
 
 
@@ -25,7 +25,7 @@ def _load_layout_fixture() -> dict:
     return json.loads(fixture_path.read_text())
 
 
-class TestLayoutAdapterFingerprint:
+class TestLayoutScannerAdapterFingerprint:
     """Tests for stable_fingerprint mapping through the layout adapter."""
 
     def test_content_hash_maps_to_stable_fingerprint(self, tmp_path: Path) -> None:
@@ -43,7 +43,7 @@ class TestLayoutAdapterFingerprint:
 
         run_repo = ToolRunRepository(conn)
         layout_repo = LayoutRepository(conn)
-        adapter = LayoutAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
+        adapter = LayoutScannerAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
         adapter.persist(payload)
 
         row = conn.execute(
@@ -66,7 +66,7 @@ class TestLayoutAdapterFingerprint:
 
         run_repo = ToolRunRepository(conn)
         layout_repo = LayoutRepository(conn)
-        adapter = LayoutAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
+        adapter = LayoutScannerAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
         adapter.persist(payload)
 
         rows = conn.execute(
@@ -92,7 +92,7 @@ class TestLayoutAdapterFingerprint:
 
         run_repo = ToolRunRepository(conn)
         layout_repo = LayoutRepository(conn)
-        adapter = LayoutAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
+        adapter = LayoutScannerAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
         adapter.persist(payload)
 
         row_a = conn.execute(
@@ -121,7 +121,7 @@ class TestLayoutAdapterFingerprint:
 
         run_repo = ToolRunRepository(conn)
         layout_repo = LayoutRepository(conn)
-        adapter = LayoutAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
+        adapter = LayoutScannerAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
         adapter.persist(payload)
 
         row_a = conn.execute(
@@ -149,7 +149,7 @@ class TestLayoutAdapterFingerprint:
 
         run_repo = ToolRunRepository(conn)
         layout_repo = LayoutRepository(conn)
-        adapter = LayoutAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
+        adapter = LayoutScannerAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
         adapter.persist(payload)
 
         row = conn.execute(
@@ -184,7 +184,7 @@ class TestLayoutAdapterFingerprint:
 
         run_repo = ToolRunRepository(conn)
         layout_repo = LayoutRepository(conn)
-        adapter = LayoutAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
+        adapter = LayoutScannerAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
         adapter.persist(payload)
 
         total = conn.execute("SELECT COUNT(*) FROM lz_layout_files").fetchone()[0]
@@ -264,7 +264,7 @@ class TestLayoutAdapterFingerprint:
 
         run_repo = ToolRunRepository(conn)
         layout_repo = LayoutRepository(conn)
-        adapter = LayoutAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
+        adapter = LayoutScannerAdapter(run_repo, layout_repo, Path("/tmp/test-repo"), None)
         adapter.persist(payload)
 
         row = conn.execute(

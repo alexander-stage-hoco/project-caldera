@@ -98,6 +98,13 @@ class TestValidateLineRange:
         with pytest.raises(ValueError, match="line_end must be >= 1"):
             _validate_line_range(1, 0)
 
+    def test_start_greater_than_end(self) -> None:
+        with pytest.raises(ValueError, match="line_start .* must be <= line_end"):
+            _validate_line_range(10, 5)
+
+    def test_equal_start_and_end(self) -> None:
+        _validate_line_range(5, 5)  # should not raise
+
 
 # ── ToolRun ─────────────────────────────────────────────────────────────────
 

@@ -44,6 +44,8 @@ def _validate_line_range(
         raise ValueError(f"{prefix}line_start must be >= 1")
     if line_end is not None and line_end < 1:
         raise ValueError(f"{prefix}line_end must be >= 1")
+    if line_start is not None and line_end is not None and line_start > line_end:
+        raise ValueError(f"{prefix}line_start ({line_start}) must be <= line_end ({line_end})")
 
 
 def _validate_required_string(value: str | None, field_name: str) -> None:
