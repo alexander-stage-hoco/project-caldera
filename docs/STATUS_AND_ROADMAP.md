@@ -2,7 +2,7 @@
 
 ## Current State: v0.13.0-dev (2026-02-27)
 
-Core platform is production-ready. All 18 tools pass compliance, all 3 production modes work (LOCAL, BUNDLE, DOCKERIZED), CI/CD has 5 gates, cloud runs on Hetzner, and the dbt warehouse has 168 models + 2 snapshots + 25 analyses.
+Core platform is production-ready. All 18 tools pass compliance, all 3 production modes work (LOCAL, BUNDLE, DOCKERIZED), CI/CD has 5 gates, cloud runs on Hetzner, and the dbt warehouse has 168 models + 2 snapshots + 23 analyses.
 
 ### What's Complete
 
@@ -20,7 +20,7 @@ Core platform is production-ready. All 18 tools pass compliance, all 3 productio
 - LLM evaluation infrastructure (BaseJudge, observability)
 - GitHub IaC for branch protection and environments
 - All 18 tools have full dbt staging → mart → rollup models
-- 168 dbt models (51 staging + 117 marts) + 2 snapshots + 25 analyses
+- 168 dbt models (51 staging + 117 marts) + 2 snapshots + 23 analyses
 - `unified_directory_metrics` mart for cross-tool directory analysis
 - dbt snapshots for trend analysis (unified_run_summary, unified_repo_metrics)
 - Run-over-run comparison and file-level regression detection analyses
