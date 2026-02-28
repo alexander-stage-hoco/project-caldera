@@ -99,7 +99,7 @@ class BaseSection(ABC):
         try:
             return fetcher.fetch(query_name, run_pk, **kwargs)
         except Exception as exc:
-            key = (self.config.name, query_name)
+            key = (self.config.name, query_name, type(exc).__name__)
             if key not in BaseSection._warned:
                 BaseSection._warned.add(key)
                 warnings.warn(
