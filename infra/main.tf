@@ -201,10 +201,17 @@ resource "null_resource" "run_analysis" {
   depends_on = [hcloud_server.runner]
 
   triggers = {
-    # Re-run if any input changes
-    repo_url   = var.repo_url
-    server_id  = hcloud_server.runner.id
-    skip_tools = var.skip_tools
+    # Re-run if any analysis-affecting input changes
+    repo_url       = var.repo_url
+    server_id      = hcloud_server.runner.id
+    server_type    = var.server_type
+    skip_tools     = var.skip_tools
+    pipeline_llm   = var.pipeline_llm
+    max_parallel   = var.max_parallel
+    clone_depth    = var.clone_depth
+    max_duration   = var.max_duration
+    max_cost       = var.max_cost
+    caldera_branch = var.caldera_branch
   }
 
   connection {

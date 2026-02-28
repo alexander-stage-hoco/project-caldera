@@ -104,7 +104,7 @@ class BaseAdapter(ABC):
 
         Args:
             run_repo: Repository for tool run records
-            layout_repo: Repository for layout records (optional for LayoutAdapter)
+            layout_repo: Repository for layout records (optional for LayoutScannerAdapter)
             repo_root: Root path of the repository for path normalization
             logger: Optional logging callback function
             quality_checker: Optional centralized quality checker for post-persist checks

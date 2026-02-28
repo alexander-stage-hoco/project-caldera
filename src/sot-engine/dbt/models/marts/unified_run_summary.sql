@@ -21,7 +21,11 @@ select
     sum(u.loc_comment) as total_comment,
     sum(u.loc_blank) as total_blank,
     sum(u.complexity_total_ccn) as total_ccn,
-    avg(u.complexity_avg) as avg_ccn,
+    case
+        when sum(u.lizard_function_count) > 0
+        then round(cast(sum(u.complexity_total_ccn) as double) / sum(u.lizard_function_count), 2)
+        else null
+    end as avg_ccn,
     max(u.complexity_max) as max_ccn,
     avg(u.nloc) as avg_nloc,
     sum(case when u.loc_total is not null then 1 else 0 end) as scc_file_count,

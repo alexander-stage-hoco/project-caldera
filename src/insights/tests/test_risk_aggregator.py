@@ -49,8 +49,22 @@ class TestRiskAggregator:
         claims = [_claim("CLM-SECX-001", "security")]
         risks = agg.aggregate(claims)
         assert len(risks) >= 1
-        sec_risks = [r for r in risks if r.severity == "critical"]
+        sec_risks = [r for r in risks if "vulnerabilities" in r.description.lower()]
         assert len(sec_risks) == 1
+        assert sec_risks[0].severity == "high"
+
+    def test_security_risk_escalates_with_many_claims(self):
+        """3+ security claims (min_claims=1, threshold=1*3=3) escalate to critical."""
+        agg = RiskAggregator()
+        claims = [
+            _claim("CLM-SECX-001", "security"),
+            _claim("CLM-SECX-002", "security"),
+            _claim("CLM-SECX-003", "security"),
+        ]
+        risks = agg.aggregate(claims)
+        sec_risks = [r for r in risks if "vulnerabilities" in r.description.lower()]
+        assert len(sec_risks) == 1
+        assert sec_risks[0].severity == "critical"
 
     def test_change_amplification_requires_two(self):
         agg = RiskAggregator()
@@ -69,7 +83,8 @@ class TestRiskAggregator:
         claims = [_claim("CLM-SECX-001", "security", ("E-SEC-001",))]
         risks = agg.aggregate(claims, evidence=[ev1])
         assert len(risks) >= 1
-        sec_risk = [r for r in risks if r.severity == "critical"][0]
+        sec_risk = [r for r in risks if "vulnerabilities" in r.description.lower()][0]
+        assert sec_risk.severity == "high"
         assert "src/server.py" in sec_risk.manifests_in
 
     def test_severity_escalation(self):

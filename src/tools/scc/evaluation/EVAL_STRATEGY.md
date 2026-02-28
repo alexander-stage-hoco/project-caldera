@@ -2,7 +2,7 @@
 
 This document describes the evaluation framework for the scc (Sloc, Cloc, and Code) tool PoC, including the complete check catalog, scoring methodology, weight allocation, and decision thresholds.
 
-## Overview
+## Philosophy
 
 The evaluation framework assesses scc's fitness for integration into the DD Platform MVP across 10 dimensions with 63 individual checks.
 

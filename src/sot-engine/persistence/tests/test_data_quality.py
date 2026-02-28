@@ -5,7 +5,7 @@ import pytest
 
 import json
 
-from persistence.adapters.layout_adapter import LayoutAdapter
+from persistence.adapters.layout_adapter import LayoutScannerAdapter
 from persistence.adapters.lizard_adapter import LizardAdapter
 from persistence.adapters.scc_adapter import SccAdapter
 from persistence.adapters.semgrep_adapter import SemgrepAdapter
@@ -44,7 +44,7 @@ def test_lizard_adapter_rejects_invalid_paths() -> None:
 
 def test_layout_adapter_rejects_invalid_paths() -> None:
     messages, logger = _capture_logger()
-    adapter = LayoutAdapter(object(), object(), Path("/tmp/repo"), logger)
+    adapter = LayoutScannerAdapter(object(), object(), Path("/tmp/repo"), logger)
     fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "layout_output.json"
     payload = json.loads(fixture_path.read_text())
     payload["data"]["files"]["/tmp/otherrepo/src/app.py"] = payload["data"]["files"].pop("src/app.py")

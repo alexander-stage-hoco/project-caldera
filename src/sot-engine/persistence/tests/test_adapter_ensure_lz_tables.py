@@ -6,9 +6,9 @@ import pytest
 
 from persistence.adapters.scc_adapter import SccAdapter, TABLE_DDL as SCC_TABLE_DDL
 from persistence.adapters.lizard_adapter import LizardAdapter, TABLE_DDL as LIZARD_TABLE_DDL
-from persistence.adapters.layout_adapter import LayoutAdapter, TABLE_DDL as LAYOUT_TABLE_DDL
+from persistence.adapters.layout_adapter import LayoutScannerAdapter, TABLE_DDL as LAYOUT_TABLE_DDL
 from persistence.adapters.semgrep_adapter import SemgrepAdapter, TABLE_DDL as SEMGREP_TABLE_DDL
-from persistence.adapters.roslyn_adapter import RoslynAdapter, TABLE_DDL as ROSLYN_TABLE_DDL
+from persistence.adapters.roslyn_adapter import RoslynAnalyzersAdapter, TABLE_DDL as ROSLYN_TABLE_DDL
 from persistence.repositories import (
     ToolRunRepository,
     LayoutRepository,
@@ -182,13 +182,13 @@ class TestLizardAdapterEnsureLzTables:
         adapter.ensure_lz_tables()  # Should not raise
 
 
-class TestLayoutAdapterEnsureLzTables:
-    """Tests for LayoutAdapter.ensure_lz_tables()."""
+class TestLayoutScannerAdapterEnsureLzTables:
+    """Tests for LayoutScannerAdapter.ensure_lz_tables()."""
 
     def test_creates_missing_tables(self) -> None:
-        """LayoutAdapter should create lz_layout_* tables if missing."""
+        """LayoutScannerAdapter should create lz_layout_* tables if missing."""
         conn = duckdb.connect(":memory:")
-        adapter = LayoutAdapter(
+        adapter = LayoutScannerAdapter(
             ToolRunRepository(conn),
             LayoutRepository(conn),
         )
@@ -208,7 +208,7 @@ class TestLayoutAdapterEnsureLzTables:
     def test_idempotent(self) -> None:
         """Calling ensure_lz_tables twice should not error."""
         conn = duckdb.connect(":memory:")
-        adapter = LayoutAdapter(
+        adapter = LayoutScannerAdapter(
             ToolRunRepository(conn),
             LayoutRepository(conn),
         )
@@ -279,9 +279,9 @@ class TestValidateLzSchemaAfterEnsure:
         adapter.validate_lz_schema()  # Should not raise
 
     def test_layout_validate_passes_after_ensure(self) -> None:
-        """LayoutAdapter.validate_lz_schema should pass after ensure_lz_tables."""
+        """LayoutScannerAdapter.validate_lz_schema should pass after ensure_lz_tables."""
         conn = duckdb.connect(":memory:")
-        adapter = LayoutAdapter(
+        adapter = LayoutScannerAdapter(
             ToolRunRepository(conn),
             LayoutRepository(conn),
         )
@@ -302,9 +302,9 @@ class TestValidateLzSchemaAfterEnsure:
         adapter.validate_lz_schema()  # Should not raise
 
     def test_roslyn_validate_passes_after_ensure(self) -> None:
-        """RoslynAdapter.validate_lz_schema should pass after ensure_lz_tables."""
+        """RoslynAnalyzersAdapter.validate_lz_schema should pass after ensure_lz_tables."""
         conn = duckdb.connect(":memory:")
-        adapter = RoslynAdapter(
+        adapter = RoslynAnalyzersAdapter(
             ToolRunRepository(conn),
             LayoutRepository(conn),
             RoslynRepository(conn),
@@ -314,13 +314,13 @@ class TestValidateLzSchemaAfterEnsure:
         adapter.validate_lz_schema()  # Should not raise
 
 
-class TestRoslynAdapterEnsureLzTables:
-    """Tests for RoslynAdapter.ensure_lz_tables()."""
+class TestRoslynAnalyzersAdapterEnsureLzTables:
+    """Tests for RoslynAnalyzersAdapter.ensure_lz_tables()."""
 
     def test_creates_missing_tables(self) -> None:
-        """RoslynAdapter should create lz_roslyn_violations if missing."""
+        """RoslynAnalyzersAdapter should create lz_roslyn_violations if missing."""
         conn = duckdb.connect(":memory:")
-        adapter = RoslynAdapter(
+        adapter = RoslynAnalyzersAdapter(
             ToolRunRepository(conn),
             LayoutRepository(conn),
             RoslynRepository(conn),
@@ -341,7 +341,7 @@ class TestRoslynAdapterEnsureLzTables:
     def test_idempotent(self) -> None:
         """Calling ensure_lz_tables twice should not error."""
         conn = duckdb.connect(":memory:")
-        adapter = RoslynAdapter(
+        adapter = RoslynAnalyzersAdapter(
             ToolRunRepository(conn),
             LayoutRepository(conn),
             RoslynRepository(conn),
@@ -354,7 +354,7 @@ class TestRoslynAdapterEnsureLzTables:
         """ensure_lz_tables should log when tables are created."""
         conn = duckdb.connect(":memory:")
         log_messages = []
-        adapter = RoslynAdapter(
+        adapter = RoslynAnalyzersAdapter(
             ToolRunRepository(conn),
             LayoutRepository(conn),
             RoslynRepository(conn),

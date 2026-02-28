@@ -45,7 +45,7 @@ TABLE_DDL = {
             commit_hash VARCHAR,
             commit_author VARCHAR,
             commit_date VARCHAR,
-            fingerprint VARCHAR,
+            fingerprint VARCHAR NOT NULL,
             in_current_head BOOLEAN,
             entropy DOUBLE,
             description TEXT,

@@ -38,7 +38,7 @@ DEFAULT_PATTERNS: tuple[RiskPattern, ...] = (
         technical_cause="Unpatched dependencies or committed secrets.",
         categories=("security",),
         min_claims=1,
-        default_severity="critical",
+        default_severity="high",
     ),
     RiskPattern(
         name="Change amplification",

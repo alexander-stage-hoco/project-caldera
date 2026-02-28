@@ -70,10 +70,10 @@ _MIGRATION_SQL = [
 ]
 
 
-class LayoutAdapter(BaseAdapter):
+class LayoutScannerAdapter(BaseAdapter):
     """Adapts layout-scanner JSON output to entity objects for persistence.
 
-    Unlike other adapters, LayoutAdapter writes TO the layout repository
+    Unlike other adapters, LayoutScannerAdapter writes TO the layout repository
     rather than reading from it to resolve file IDs.
     """
 

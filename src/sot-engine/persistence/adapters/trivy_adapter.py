@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Iterable
 import hashlib
 
 from .base_adapter import BaseAdapter
-from ..entities import TrivyIacMisconfig, TrivyTarget, TrivyVulnerability, ToolRun
+from ..entities import TrivyIacMisconfig, TrivyTarget, TrivyVulnerability
 from ..repositories import LayoutRepository, ToolRunRepository, TrivyRepository
 from ..validation import (
     check_required,
@@ -175,23 +174,8 @@ class TrivyAdapter(BaseAdapter):
         results = payload.get("data") or payload.get("results", {})
         metadata = payload.get("metadata", {})
 
-        # Build ToolRun from available fields
-        # Timestamp can be in metadata.timestamp (envelope) or top-level generated_at (legacy)
-        timestamp_str = metadata.get("timestamp") or payload.get("generated_at") or datetime.now().isoformat()
-        run = ToolRun(
-            collection_run_id=metadata.get("run_id", payload.get("repo_name", "unknown")),
-            repo_id=metadata.get("repo_id", payload.get("repo_name", "unknown")),
-            run_id=metadata.get("run_id", payload.get("repo_name", "unknown")),
-            tool_name="trivy",
-            tool_version=results.get("tool_version") or metadata.get("tool_version", "unknown"),
-            schema_version=metadata.get("schema_version") or payload.get("schema_version", "1.0.0"),
-            branch=metadata.get("branch", "main"),
-            commit=metadata.get("commit", "0" * 40),
-            timestamp=datetime.fromisoformat(timestamp_str.replace("Z", "+00:00")),
-        )
-        run_pk = self._run_repo.insert(run)
-
-        layout_run_pk = self._get_layout_run_pk(run.collection_run_id)
+        run_pk = self._create_tool_run(metadata)
+        layout_run_pk = self._get_layout_run_pk(metadata["run_id"])
 
         # Extract data from Trivy output
         vulnerabilities_data = results.get("vulnerabilities", [])

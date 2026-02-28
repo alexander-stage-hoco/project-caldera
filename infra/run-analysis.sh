@@ -239,7 +239,11 @@ if rate <= 0:
     print('')
     sys.exit(0)
 max_hours = math.floor(float('${MAX_COST}') / rate)
-print(str(max(max_hours, 1) * 3600))
+# Hetzner bills in 1-hour increments; enforce 1h minimum with a warning
+if max_hours < 1:
+    print('WARN: MAX_COST below 1 billable hour; using 1h minimum', file=sys.stderr)
+max_hours = max(max_hours, 1)
+print(str(max_hours * 3600))
 " 2>/dev/null || echo "")
     if [ -n "${COST_DURATION}" ]; then
         echo "  Budget guard: --max-cost ${MAX_COST} EUR -> ${COST_DURATION}s for ${SERVER_TYPE}"

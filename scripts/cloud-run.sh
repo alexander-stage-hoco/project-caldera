@@ -30,6 +30,10 @@ if [ -f "${PROJECT_ROOT}/.env" ]; then
     set +a
 fi
 
+# Export Terraform variables from environment (so direct invocations work
+# without the Makefile's TF_VAR_ exports, and secrets stay out of CLI args).
+export TF_VAR_anthropic_api_key="${ANTHROPIC_API_KEY:-}"
+
 # ---------------------------------------------------------------------------
 # Parse arguments
 # ---------------------------------------------------------------------------
@@ -205,7 +209,6 @@ cleanup() {
             -var="max_parallel=${MAX_PARALLEL}" \
             -var="clone_depth=${CLONE_DEPTH}" \
             -var="results_dir=${RESULTS_DIR}" \
-            -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}" \
             -var="max_duration=${MAX_DURATION}" \
             -var="max_cost=${MAX_COST}"; then
             echo "    Server destroyed."
@@ -235,7 +238,15 @@ echo "=============================================="
 echo ""
 
 # Initialize Terraform (idempotent)
-terraform init -input=false -no-color 2>&1 | grep -E "^(Initializing|Terraform has been)" || true
+echo ">>> Initializing Terraform..."
+if ! terraform init -input=false -no-color; then
+    echo ""
+    echo "ERROR: terraform init failed."
+    echo "Common causes:"
+    echo "  1. Network connectivity issues"
+    echo "  2. Terraform state corruption (try: rm -rf infra/.terraform && rm -f infra/.terraform.lock.hcl)"
+    exit 1
+fi
 
 # Plan and apply (with retry for transient SSH/network failures)
 echo ">>> Creating server and running analysis..."
@@ -255,7 +266,6 @@ for attempt in $(seq 1 $MAX_RETRIES); do
         -var="max_parallel=${MAX_PARALLEL}" \
         -var="clone_depth=${CLONE_DEPTH}" \
         -var="results_dir=${RESULTS_DIR}" \
-        -var="anthropic_api_key=${ANTHROPIC_API_KEY:-}" \
         -var="max_duration=${MAX_DURATION}" \
         -var="max_cost=${MAX_COST}"; then
         break

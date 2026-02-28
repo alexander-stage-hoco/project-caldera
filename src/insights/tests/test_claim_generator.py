@@ -99,6 +99,18 @@ class TestCoverageGapRule:
         assert len(claims) == 1
         assert claims[0].confidence == "medium"
 
+    def test_does_not_fire_for_high_coverage(self):
+        rule = CoverageGapRule()
+        ev = _evidence("E-COV-001", "coverage", excerpt="coverage=80%, complexity_max=5, loc=200")
+        claims = rule.evaluate([ev], _mock_fetcher(), 1)
+        assert len(claims) == 0
+
+    def test_does_not_fire_for_low_ccn(self):
+        rule = CoverageGapRule()
+        ev = _evidence("E-COV-001", "coverage", excerpt="coverage=30%, complexity_max=10, loc=300")
+        claims = rule.evaluate([ev], _mock_fetcher(), 1)
+        assert len(claims) == 0
+
 
 class TestSecurityExposureRule:
     def test_fires_for_critical_vulns(self):

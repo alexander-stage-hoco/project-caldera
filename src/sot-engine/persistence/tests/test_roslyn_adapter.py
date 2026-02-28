@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from persistence.adapters import RoslynAdapter
+from persistence.adapters import RoslynAnalyzersAdapter
 from persistence.entities import LayoutDirectory, LayoutFile, ToolRun
 from persistence.repositories import (
     LayoutRepository,
@@ -40,7 +40,7 @@ def test_roslyn_adapter_inserts_violations(
     )
 
     roslyn_repo = RoslynRepository(duckdb_conn)
-    adapter = RoslynAdapter(
+    adapter = RoslynAnalyzersAdapter(
         tool_run_repo,
         layout_repo,
         roslyn_repo,
@@ -72,7 +72,7 @@ def test_roslyn_adapter_raises_on_missing_layout(
 
     # Don't seed layout - should raise KeyError
     roslyn_repo = RoslynRepository(duckdb_conn)
-    adapter = RoslynAdapter(
+    adapter = RoslynAnalyzersAdapter(
         tool_run_repo,
         layout_repo,
         roslyn_repo,
@@ -106,7 +106,7 @@ def test_roslyn_adapter_uses_layout_directory_id(
     )
 
     roslyn_repo = RoslynRepository(duckdb_conn)
-    adapter = RoslynAdapter(
+    adapter = RoslynAnalyzersAdapter(
         tool_run_repo,
         layout_repo,
         roslyn_repo,
@@ -155,7 +155,7 @@ def test_roslyn_adapter_skips_files_not_in_layout(
 
     logs: list[str] = []
     roslyn_repo = RoslynRepository(duckdb_conn)
-    adapter = RoslynAdapter(
+    adapter = RoslynAnalyzersAdapter(
         tool_run_repo,
         layout_repo,
         roslyn_repo,
@@ -207,7 +207,7 @@ def test_roslyn_adapter_deduplicates_violations(
 
     logs: list[str] = []
     roslyn_repo = RoslynRepository(duckdb_conn)
-    adapter = RoslynAdapter(
+    adapter = RoslynAnalyzersAdapter(
         tool_run_repo,
         layout_repo,
         roslyn_repo,

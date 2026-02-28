@@ -39,7 +39,7 @@ from execution import (
     ToolTask,
     get_backend,
 )
-from persistence.adapters import CoverageAdapter, DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitBlameScannerAdapter, GitFameAdapter, GitSizerAdapter, GitleaksAdapter, LayoutAdapter, LizardAdapter, PmdCpdAdapter, RoslynAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
+from persistence.adapters import CoverageIngestAdapter, DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitBlameScannerAdapter, GitFameAdapter, GitSizerAdapter, GitleaksAdapter, LayoutScannerAdapter, LizardAdapter, PmdCpdAdapter, RoslynAnalyzersAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
 from persistence.quality import DataQualityChecker
@@ -578,7 +578,7 @@ def _run_tools(
 TOOL_INGESTION_CONFIGS = [
     ToolIngestionConfig("scc", SccAdapter, SccRepository),
     ToolIngestionConfig("lizard", LizardAdapter, LizardRepository),
-    ToolIngestionConfig("roslyn-analyzers", RoslynAdapter, RoslynRepository),
+    ToolIngestionConfig("roslyn-analyzers", RoslynAnalyzersAdapter, RoslynRepository),
     ToolIngestionConfig("semgrep", SemgrepAdapter, SemgrepRepository),
     ToolIngestionConfig("sonarqube", SonarqubeAdapter, SonarqubeRepository, validate_metadata=False),
     ToolIngestionConfig("trivy", TrivyAdapter, TrivyRepository),
@@ -592,7 +592,7 @@ TOOL_INGESTION_CONFIGS = [
     ToolIngestionConfig("devskim", DevskimAdapter, DevskimRepository),
     ToolIngestionConfig("dotcover", DotcoverAdapter, DotcoverRepository),
     ToolIngestionConfig("dependensee", DependenseeAdapter, DependenseeRepository),
-    ToolIngestionConfig("coverage-ingest", CoverageAdapter, CoverageRepository),
+    ToolIngestionConfig("coverage-ingest", CoverageIngestAdapter, CoverageRepository),
 ]
 
 
@@ -640,7 +640,7 @@ def ingest_outputs(
         payload.get("metadata", {}), repo_id, run_id,
         expected_commit=commit,
     )
-    LayoutAdapter(run_repo, layout_repo, repo_path, log_fn).persist(payload)
+    LayoutScannerAdapter(run_repo, layout_repo, repo_path, log_fn).persist(payload)
 
     # Map tool names to output paths
     tool_outputs: dict[str, Path | None] = {
@@ -990,6 +990,11 @@ def main() -> int:
                 for name in (args.skip_tools.split(",") if args.skip_tools else [])
                 if name.strip()
             }
+            if skip_tools:
+                known_tool_names = {t.name for t in TOOL_CONFIGS}
+                for name in sorted(skip_tools):
+                    if name not in known_tool_names:
+                        _log.warning(f"Unknown tool in --skip-tools: '{name}' (known: {sorted(known_tool_names)})")
             try:
                 outputs, tool_summaries = _run_tools(
                     [tool for tool in TOOL_CONFIGS if tool.name not in skip_tools],
