@@ -108,6 +108,7 @@ class TechnicalClaim:
     implication: str
     confidence: ConfidenceLevel
     triggered_by: str
+    severity: RiskSeverity | None = None
 
     def __post_init__(self) -> None:
         if not _CLAIM_ID_RE.match(self.claim_id):
@@ -120,6 +121,10 @@ class TechnicalClaim:
             raise ValueError("statement must not be empty")
         if not self.triggered_by:
             raise ValueError("triggered_by must not be empty")
+        if self.severity is not None and self.severity not in (
+            "critical", "high", "medium", "low",
+        ):
+            raise ValueError(f"Invalid claim severity: {self.severity!r}")
 
 
 # ---------------------------------------------------------------------------

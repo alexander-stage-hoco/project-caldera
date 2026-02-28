@@ -127,7 +127,8 @@ help:
 	@echo "    make prune-outputs CONFIRM=1            Delete generated tool/report outputs"
 	@echo "    make export-results                     Export latest run to results repo"
 	@echo "    make clean-db               Remove database and start fresh"
-	@echo "    make test                   Run all project tests"
+	@echo "    make test                   Run fast unit tests (default)"
+	@echo "    make test-all               Run full suite (unit + tools + dbt)"
 	@echo ""
 	@echo "  Variables:"
 	@echo "    REPO=<path|url>   Repository to analyze (for 'analyze' target)"
@@ -402,7 +403,9 @@ test-integration:
 	@$(MAKE) dbt-run
 	@$(MAKE) dbt-test
 
-test: test-unit test-integration
+test: test-unit  ## Run fast unit tests (default)
+
+test-all: test-unit test-integration  ## Run full suite (unit + tools + dbt)
 
 # =============================================================================
 # Full E2E Pipeline: Repo -> Orchestrate -> Insights -> LLM Eval -> Top 3
@@ -559,6 +562,7 @@ cloud-setup:
 	@test -f infra/terraform.tfvars || (echo "ERROR: infra/terraform.tfvars not found."; echo "  cp infra/terraform.tfvars.example infra/terraform.tfvars"; echo "  # Then fill in your Hetzner API token and caldera_repo_url"; exit 1)
 	cd infra && terraform init
 
+cloud-run: PIPELINE_LLM = 0
 cloud-run:
 	@test -n "$(REPO)" || (echo "Usage: make cloud-run REPO=https://github.com/org/repo"; exit 1)
 	bash scripts/cloud-run.sh "$(REPO)" \

@@ -244,10 +244,6 @@ class PmdCpdAdapter(BaseAdapter):
 
             raw_occurrences = dup.get("occurrences", [])
 
-            # Determine if cross-file from raw input
-            files_in_dup = {occ.get("file", "") for occ in raw_occurrences}
-            is_cross_file = len(files_in_dup) > 1
-
             # Map occurrences first so occurrence_count reflects actual persisted rows
             valid_occs: list[PmdCpdOccurrence] = []
             for occ in raw_occurrences:
@@ -280,6 +276,14 @@ class PmdCpdAdapter(BaseAdapter):
                         column_end=occ.get("column_end"),
                     )
                 )
+
+            if len(valid_occs) < 2:
+                self._log(f"WARN: clone {clone_id} dropped — only {len(valid_occs)} valid occurrence(s) after filtering")
+                continue
+
+            # Determine cross-file status from filtered occurrences (not raw input)
+            filtered_files = {occ.relative_path for occ in valid_occs}
+            is_cross_file = len(filtered_files) > 1
 
             dup_entities.append(
                 PmdCpdDuplication(
