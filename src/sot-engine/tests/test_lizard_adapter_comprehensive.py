@@ -370,3 +370,46 @@ class TestLizardAdapter:
         assert row[2] == 1
 
         conn.close()
+
+    def test_skips_files_not_in_layout(self, tmp_path: Path) -> None:
+        """Files not present in layout should be skipped, not crash."""
+        db_path = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db_path))
+        _load_schema(conn)
+
+        repo_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        run_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+        _create_layout_run(conn, run_id, repo_id)
+
+        payload = _load_lizard_fixture()
+        payload["metadata"]["repo_id"] = repo_id
+        payload["metadata"]["run_id"] = run_id
+        payload["data"]["files"].append({
+            "path": "nonexistent/unknown_file.py",
+            "language": "Python",
+            "nloc": 30, "function_count": 1, "total_ccn": 3,
+            "avg_ccn": 3.0, "max_ccn": 3,
+            "functions": [{"name": "ghost_func", "ccn": 3, "nloc": 10,
+                           "params": 1, "token_count": 50,
+                           "start_line": 1, "end_line": 10}],
+        })
+
+        run_repo = ToolRunRepository(conn)
+        layout_repo = LayoutRepository(conn)
+        lizard_repo = LizardRepository(conn)
+
+        adapter = LizardAdapter(run_repo, layout_repo, lizard_repo, Path("/tmp/test-repo"), None)
+        run_pk = adapter.persist(payload)
+
+        file_count = conn.execute(
+            "SELECT COUNT(*) FROM lz_lizard_file_metrics WHERE run_pk = ?", [run_pk]
+        ).fetchone()[0]
+        assert file_count == 2  # Only the 2 known files, unknown skipped
+
+        func_count = conn.execute(
+            "SELECT COUNT(*) FROM lz_lizard_function_metrics WHERE run_pk = ?", [run_pk]
+        ).fetchone()[0]
+        # Functions from the unknown file should also be skipped
+        assert func_count >= 1  # At least the functions from known files
+
+        conn.close()
