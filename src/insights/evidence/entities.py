@@ -12,6 +12,22 @@ from typing import Any, Literal
 
 
 # ---------------------------------------------------------------------------
+# Text field size caps (P1 — upstream data limits)
+# ---------------------------------------------------------------------------
+
+MAX_EXCERPT_CHARS = 500
+MAX_OBSERVATION_CHARS = 500
+MAX_WHY_IT_MATTERS_CHARS = 500
+
+
+def _cap(value: str, max_len: int) -> str:
+    """Truncate *value* to *max_len* chars, appending ``…`` when trimmed."""
+    if len(value) <= max_len:
+        return value
+    return value[: max_len - 1] + "\u2026"
+
+
+# ---------------------------------------------------------------------------
 # ID format constants
 # ---------------------------------------------------------------------------
 
@@ -86,6 +102,11 @@ class EvidenceItem:
             raise ValueError("location must not be empty")
         if not self.tool_source:
             raise ValueError("tool_source must not be empty")
+
+        # Upstream text field size caps (frozen → object.__setattr__)
+        object.__setattr__(self, "excerpt", _cap(self.excerpt, MAX_EXCERPT_CHARS))
+        object.__setattr__(self, "observation", _cap(self.observation, MAX_OBSERVATION_CHARS))
+        object.__setattr__(self, "why_it_matters", _cap(self.why_it_matters, MAX_WHY_IT_MATTERS_CHARS))
 
 
 # ---------------------------------------------------------------------------

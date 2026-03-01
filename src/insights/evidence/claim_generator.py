@@ -371,7 +371,7 @@ class LLMSynthesisRule(ClaimRule):
             {
                 "file": loc,
                 "categories": sorted(cats),
-                "excerpts": [e.excerpt for e in items[:3]],
+                "excerpts": [e.excerpt[:500] for e in items[:3]],
             }
             for loc, cats, items in hotspots
         ]

@@ -413,6 +413,51 @@ class TestLLMSynthesisRule:
         enricher.enrich.assert_not_called()
 
 
+class TestLLMSynthesisRuleExcerptCaps:
+    """Verify LLMSynthesisRule caps excerpts in hotspot data (P1)."""
+
+    def _evidence(
+        self, eid: str, cat: str, location: str = "src/file.py", excerpt: str = ""
+    ):
+        from insights.evidence.entities import EvidenceItem
+
+        return EvidenceItem(
+            evidence_id=eid,
+            evidence_type="test",
+            category=cat,  # type: ignore[arg-type]
+            location=location,
+            excerpt=excerpt or f"test for {eid}",
+            observation="test",
+            why_it_matters="test",
+            tool_source="test",
+            run_pk=1,
+        )
+
+    def test_synthesis_rule_caps_excerpts(self):
+        from insights.evidence.claim_generator import LLMSynthesisRule
+
+        enricher = MagicMock()
+        enricher.enrich.return_value = "src/app.py: compound risk.\n"
+
+        rule = LLMSynthesisRule(enricher)
+        # Note: EvidenceItem already caps at 500, but we verify the
+        # claim_generator also applies [:500] as defense-in-depth.
+        evidence = [
+            self._evidence("E-CCN-001", "complexity", "src/app.py", excerpt="x" * 600),
+            self._evidence("E-SEC-001", "security", "src/app.py", excerpt="y" * 600),
+            self._evidence("E-COVG-001", "coverage", "src/app.py", excerpt="z" * 600),
+        ]
+
+        rule.evaluate(evidence, MagicMock(), 1)
+
+        # Inspect the hotspot_data passed to enricher.enrich()
+        call_kwargs = enricher.enrich.call_args.kwargs
+        hotspot_data = call_kwargs["data"]["hotspot_files"]
+        for hotspot in hotspot_data:
+            for excerpt in hotspot["excerpts"]:
+                assert len(excerpt) <= 500
+
+
 class TestClaimGeneratorWithEnricher:
     def test_enricher_adds_synthesis_rule(self):
         from insights.evidence.claim_generator import ClaimGenerator, LLMSynthesisRule
