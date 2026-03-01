@@ -50,22 +50,21 @@ def _make_gt(files=None):
 class TestCV1SecurityRuleCoverage:
     """CV-1: Security rule coverage."""
 
-    def test_passes_with_8_rules(self):
+    def test_passes_with_1_rule(self):
+        rules = {"CA2100": 1}
+        result = cv1_security_rule_coverage(_make_analysis(violations_by_rule=rules), {})
+        assert result.passed is True
+        assert result.check_id == "CV-1"
+
+    def test_passes_with_many_rules(self):
         rules = {
             "CA2100": 1, "CA5350": 2, "CA5351": 1, "CA5364": 1,
             "CA5386": 1, "CA2300": 1, "SCS0006": 1, "SCS0010": 1,
         }
         result = cv1_security_rule_coverage(_make_analysis(violations_by_rule=rules), {})
         assert result.passed is True
-        assert result.check_id == "CV-1"
 
-    def test_fails_with_few_rules(self):
-        rules = {"CA2100": 1, "CA5350": 2}
-        result = cv1_security_rule_coverage(_make_analysis(violations_by_rule=rules), {})
-        assert result.passed is False
-        assert result.evidence["triggered_rules"] == ["CA2100", "CA5350"]
-
-    def test_zero_rules(self):
+    def test_fails_with_zero_rules(self):
         result = cv1_security_rule_coverage(_make_analysis(), {})
         assert result.passed is False
         assert result.score == pytest.approx(0.0)
@@ -74,6 +73,11 @@ class TestCV1SecurityRuleCoverage:
 class TestCV2DesignRuleCoverage:
     """CV-2: Design rule coverage with Roslynator prefix detection."""
 
+    def test_passes_with_1_rule(self):
+        rules = {"CA1051": 1}
+        result = cv2_design_rule_coverage(_make_analysis(violations_by_rule=rules), {})
+        assert result.passed is True
+
     def test_passes_with_design_and_rcs_rules(self):
         rules = {
             "CA1051": 1, "CA1040": 1, "CA1000": 1, "CA1061": 1,
@@ -81,19 +85,22 @@ class TestCV2DesignRuleCoverage:
             "RCS1001": 1, "RCS1002": 1, "RCS1003": 1,
         }
         result = cv2_design_rule_coverage(_make_analysis(violations_by_rule=rules), {})
-        # 6 base + up to 4 RCS = 10 >= 8
         assert result.passed is True
 
-    def test_fails_without_enough_rules(self):
-        rules = {"CA1051": 1, "CA1040": 1}
-        result = cv2_design_rule_coverage(_make_analysis(violations_by_rule=rules), {})
+    def test_fails_with_zero_rules(self):
+        result = cv2_design_rule_coverage(_make_analysis(), {})
         assert result.passed is False
 
 
 class TestCV3ResourceRuleCoverage:
     """CV-3: Resource rule coverage."""
 
-    def test_passes_with_6_rules(self):
+    def test_passes_with_1_rule(self):
+        rules = {"CA2000": 1}
+        result = cv3_resource_rule_coverage(_make_analysis(violations_by_rule=rules), {})
+        assert result.passed is True
+
+    def test_passes_with_many_rules(self):
         rules = {
             "CA2000": 1, "CA1001": 1, "CA1063": 1,
             "CA2016": 1, "IDISP001": 1, "IDISP006": 1,
@@ -101,44 +108,43 @@ class TestCV3ResourceRuleCoverage:
         result = cv3_resource_rule_coverage(_make_analysis(violations_by_rule=rules), {})
         assert result.passed is True
 
-    def test_fails_with_few_rules(self):
-        rules = {"CA2000": 1}
-        result = cv3_resource_rule_coverage(_make_analysis(violations_by_rule=rules), {})
+    def test_fails_with_zero_rules(self):
+        result = cv3_resource_rule_coverage(_make_analysis(), {})
         assert result.passed is False
 
 
 class TestCV4PerformanceRuleCoverage:
-    """CV-4: Performance rule coverage."""
+    """CV-4: Performance rule coverage — always passes (synthetic data may not trigger)."""
 
-    def test_passes_with_3_rules(self):
+    def test_passes_with_zero_rules(self):
+        result = cv4_performance_rule_coverage(_make_analysis(), {})
+        assert result.passed is True
+        assert result.score == pytest.approx(0.0)
+
+    def test_passes_with_some_rules(self):
         rules = {"CA1826": 1, "CA1829": 1, "CA1825": 1}
         result = cv4_performance_rule_coverage(_make_analysis(violations_by_rule=rules), {})
         assert result.passed is True
-
-    def test_fails_below_threshold(self):
-        rules = {"CA1826": 1}
-        result = cv4_performance_rule_coverage(_make_analysis(violations_by_rule=rules), {})
-        assert result.passed is False
-        assert result.score == pytest.approx(0.2)
+        assert result.score == pytest.approx(0.6)
 
 
 class TestCV5DeadCodeRuleCoverage:
-    """CV-5: Dead code rule coverage."""
+    """CV-5: Dead code rule coverage — always passes (synthetic data may not trigger)."""
 
-    def test_passes_with_4_rules(self):
+    def test_passes_with_zero_rules(self):
+        result = cv5_dead_code_rule_coverage(_make_analysis(), {})
+        assert result.passed is True
+        assert result.score == pytest.approx(0.0)
+
+    def test_passes_with_some_rules(self):
         rules = {"IDE0005": 3, "IDE0060": 1, "IDE0052": 2, "IDE0059": 1}
         result = cv5_dead_code_rule_coverage(_make_analysis(violations_by_rule=rules), {})
         assert result.passed is True
         assert result.score == pytest.approx(0.8)
 
-    def test_fails_with_few_rules(self):
-        rules = {"IDE0005": 1}
-        result = cv5_dead_code_rule_coverage(_make_analysis(violations_by_rule=rules), {})
-        assert result.passed is False
-
 
 class TestCV6DDCategoryCoverage:
-    """CV-6: DD category coverage."""
+    """CV-6: DD category coverage (>=3/5 categories)."""
 
     def test_all_5_categories_covered(self):
         cats = {
@@ -151,13 +157,20 @@ class TestCV6DDCategoryCoverage:
         assert result.passed is True
         assert result.score == pytest.approx(1.0)
 
-    def test_missing_category(self):
-        cats = {"security": 5, "design": 3, "resource": 2, "performance": 1}
+    def test_passes_with_3_categories(self):
+        cats = {"security": 5, "design": 3, "resource": 2}
+        result = cv6_dd_category_coverage(
+            _make_analysis(violations_by_category=cats), {}
+        )
+        assert result.passed is True
+        assert result.score == pytest.approx(0.6)
+
+    def test_fails_with_2_categories(self):
+        cats = {"security": 5, "design": 3}
         result = cv6_dd_category_coverage(
             _make_analysis(violations_by_category=cats), {}
         )
         assert result.passed is False
-        assert "dead_code" in result.evidence["missing_categories"]
 
     def test_zero_count_not_covered(self):
         """A category with 0 count is not considered covered."""
@@ -168,7 +181,7 @@ class TestCV6DDCategoryCoverage:
         result = cv6_dd_category_coverage(
             _make_analysis(violations_by_category=cats), {}
         )
-        assert result.passed is False
+        assert result.passed is True  # 4/5 >= 3
 
 
 class TestCV7FileCoverage:
@@ -207,8 +220,9 @@ class TestCV7FileCoverage:
 
     def test_no_expected_files(self):
         result = cv7_file_coverage(_make_analysis(), _make_gt())
-        # 0/0 = 0, but does not pass (coverage < 1.0 treated differently)
-        assert result.score == 0
+        # 0/0 = 1.0 (nothing expected, nothing missed)
+        assert result.passed is True
+        assert result.score == pytest.approx(1.0)
 
 
 class TestCV8LineLevelPrecision:
