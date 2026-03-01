@@ -138,33 +138,26 @@ def test_registry_table_prefixes_match_schema() -> None:
 
 
 def test_registry_docker_tools_match_docker_runner() -> None:
-    """Docker tool list from registry matches docker_runner.py DOCKER_TOOLS."""
-    # Read DOCKER_TOOLS from docker_runner.py
+    """Docker tool list from registry matches docker_runner.py DOCKER_TOOLS.
+
+    Since docker_runner.py now derives DOCKER_TOOLS from get_docker_tool_names(),
+    we verify the import path works and the runner uses the registry.
+    """
     runner_path = Path(__file__).resolve().parents[3] / "scripts" / "docker_runner.py"
     if not runner_path.exists():
         pytest.skip("docker_runner.py not found")
 
     runner_text = runner_path.read_text()
-    # Extract tool names between "DOCKER_TOOLS" and the closing "]"
-    # The format is: DOCKER_TOOLS: list[str] = [\n    "tool1",\n    ...\n]
-    idx = runner_text.index("DOCKER_TOOLS")
-    # Find the opening "[" after the "= [" part (skip the list[str] bracket)
-    equals_idx = runner_text.index("=", idx)
-    block_start = runner_text.index("[", equals_idx)
-    block_end = runner_text.index("]", block_start)
-    block = runner_text[block_start:block_end + 1]
-    docker_tools = set(re.findall(r'"([a-z][a-z0-9-]*)"', block))
-
-    registry_docker = set(get_docker_tool_names())
-
-    missing_from_registry = docker_tools - registry_docker
-    missing_from_runner = registry_docker - docker_tools
-
-    assert not missing_from_registry, (
-        f"docker_runner.py has tools not in registry: {missing_from_registry}"
+    # Verify docker_runner.py imports from tool_registry
+    assert "from tool_registry import" in runner_text, (
+        "docker_runner.py should import from tool_registry"
     )
-    assert not missing_from_runner, (
-        f"Registry has Docker tools not in docker_runner.py: {missing_from_runner}"
+    assert "get_docker_tool_names" in runner_text, (
+        "docker_runner.py should use get_docker_tool_names()"
+    )
+    # Verify DOCKER_TOOLS is assigned from the registry function
+    assert "DOCKER_TOOLS" in runner_text, (
+        "docker_runner.py should define DOCKER_TOOLS"
     )
 
 

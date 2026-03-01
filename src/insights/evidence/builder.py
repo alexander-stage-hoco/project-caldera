@@ -16,7 +16,7 @@ from typing import Any
 
 from ..data_fetcher import DataFetcher
 from .claim_generator import ClaimGenerator
-from .collector import EvidenceCollector
+from .collector import EvidenceCollector, check_warning_budget
 from .entities import (
     EvidenceItem,
     EvidenceRegistry,
@@ -42,7 +42,18 @@ class EvidenceRegistryBuilder:
     def build(self, fetcher: DataFetcher, run_pk: int) -> EvidenceRegistry:
         """Run the full pipeline and return a populated registry."""
         try:
-            evidence = self._collector.collect(fetcher, run_pk)
+            collection_result = self._collector.collect_with_warnings(fetcher, run_pk)
+            evidence = collection_result.items
+
+            # Check warning budget and log violations
+            budget = check_warning_budget(collection_result)
+            if not budget.passed:
+                for v in budget.violations:
+                    warnings.warn(
+                        f"[EvidenceRegistryBuilder] Warning budget exceeded: "
+                        f"{v.category} has {v.actual} warnings (limit: {v.limit})",
+                        stacklevel=2,
+                    )
         except Exception as exc:
             warnings.warn(
                 f"[EvidenceRegistryBuilder] Evidence collection failed: {exc}",

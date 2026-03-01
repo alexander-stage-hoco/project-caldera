@@ -14,7 +14,10 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
+
+import yaml
 
 from ..data_fetcher import DataFetcher
 from .entities import EVIDENCE_CATEGORIES, EvidenceCategory, EvidenceItem
@@ -57,6 +60,50 @@ class CollectionResult:
         for w in self.warnings:
             counts[w.category] = counts.get(w.category, 0) + 1
         return counts
+
+
+@dataclass(frozen=True)
+class BudgetViolation:
+    """A single budget threshold exceeded."""
+
+    category: WarningCategory
+    actual: int
+    limit: int
+
+
+@dataclass
+class BudgetResult:
+    """Result of checking warning counts against the budget."""
+
+    passed: bool
+    violations: list[BudgetViolation] = field(default_factory=list)
+
+
+def _load_warning_budget() -> dict[WarningCategory, int]:
+    """Load warning budgets from ``warning_budget.yml``."""
+    budget_path = Path(__file__).resolve().parent.parent / "warning_budget.yml"
+    if not budget_path.exists():
+        return {"expected_missing": 10, "regression": 0, "degraded": 3}
+    with budget_path.open() as f:
+        data = yaml.safe_load(f)
+    budgets = data.get("budgets", {})
+    return {
+        "expected_missing": budgets.get("expected_missing", 10),
+        "regression": budgets.get("regression", 0),
+        "degraded": budgets.get("degraded", 3),
+    }
+
+
+def check_warning_budget(result: CollectionResult) -> BudgetResult:
+    """Compare warning counts against the configured budget thresholds."""
+    budgets = _load_warning_budget()
+    counts = result.warning_counts()
+    violations: list[BudgetViolation] = []
+    for category, limit in budgets.items():
+        actual = counts.get(category, 0)
+        if actual > limit:
+            violations.append(BudgetViolation(category=category, actual=actual, limit=limit))
+    return BudgetResult(passed=len(violations) == 0, violations=violations)
 
 
 # Known queries that map to optional tools — missing data is expected

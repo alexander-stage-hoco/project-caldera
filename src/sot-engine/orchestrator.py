@@ -39,6 +39,7 @@ from execution import (
     ToolTask,
     get_backend,
 )
+from tool_registry import TOOL_REGISTRY, get_docker_tool_names, get_execution_tools, get_ingestion_tools
 from persistence.adapters import CoverageIngestAdapter, DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitBlameScannerAdapter, GitFameAdapter, GitSizerAdapter, GitleaksAdapter, LayoutScannerAdapter, LizardAdapter, PmdCpdAdapter, RoslynAnalyzersAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
@@ -511,25 +512,10 @@ class ToolPhaseError(RuntimeError):
         self.tool_summaries = tool_summaries
 
 
-# Tool configurations for the orchestrator
+# Tool configurations derived from the unified tool registry
 TOOL_CONFIGS = [
-    ToolConfig("layout-scanner", "src/tools/layout-scanner", {"NO_GITIGNORE": "1"}),
-    ToolConfig("scc", "src/tools/scc"),
-    ToolConfig("lizard", "src/tools/lizard"),
-    ToolConfig("roslyn-analyzers", "src/tools/roslyn-analyzers"),
-    ToolConfig("semgrep", "src/tools/semgrep"),
-    ToolConfig("sonarqube", "src/tools/sonarqube"),
-    ToolConfig("trivy", "src/tools/trivy"),
-    ToolConfig("gitleaks", "src/tools/gitleaks"),
-    ToolConfig("symbol-scanner", "src/tools/symbol-scanner"),
-    ToolConfig("scancode", "src/tools/scancode"),
-    ToolConfig("pmd-cpd", "src/tools/pmd-cpd"),
-    ToolConfig("devskim", "src/tools/devskim"),
-    ToolConfig("dotcover", "src/tools/dotcover"),
-    ToolConfig("git-fame", "src/tools/git-fame"),
-    ToolConfig("git-sizer", "src/tools/git-sizer"),
-    ToolConfig("git-blame-scanner", "src/tools/git-blame-scanner"),
-    ToolConfig("dependensee", "src/tools/dependensee"),
+    ToolConfig(t.name, t.path, t.extra_env or None)
+    for t in get_execution_tools()
 ]
 
 
@@ -776,24 +762,39 @@ def _run_tools(
 
 
 # Tool ingestion configurations for tools with standard adapter pattern
+# Adapter/repository class lookup tables for registry-driven ingestion config
+_ADAPTER_CLASSES: dict[str, type[BaseAdapter]] = {
+    cls.__name__: cls
+    for cls in [
+        SccAdapter, LizardAdapter, RoslynAnalyzersAdapter, SemgrepAdapter,
+        SonarqubeAdapter, TrivyAdapter, GitleaksAdapter, SymbolScannerAdapter,
+        ScancodeAdapter, PmdCpdAdapter, DevskimAdapter, DotcoverAdapter,
+        GitFameAdapter, GitSizerAdapter, GitBlameScannerAdapter,
+        DependenseeAdapter, CoverageIngestAdapter,
+    ]
+}
+
+_REPO_CLASSES: dict[str, type[BaseRepository]] = {
+    cls.__name__: cls
+    for cls in [
+        SccRepository, LizardRepository, RoslynRepository, SemgrepRepository,
+        SonarqubeRepository, TrivyRepository, GitleaksRepository,
+        SymbolScannerRepository, ScancodeRepository, PmdCpdRepository,
+        DevskimRepository, DotcoverRepository, GitFameRepository,
+        GitSizerRepository, GitBlameRepository, DependenseeRepository,
+        CoverageRepository,
+    ]
+}
+
+# Ingestion configurations derived from the unified tool registry
 TOOL_INGESTION_CONFIGS = [
-    ToolIngestionConfig("scc", SccAdapter, SccRepository),
-    ToolIngestionConfig("lizard", LizardAdapter, LizardRepository),
-    ToolIngestionConfig("roslyn-analyzers", RoslynAnalyzersAdapter, RoslynRepository),
-    ToolIngestionConfig("semgrep", SemgrepAdapter, SemgrepRepository),
-    ToolIngestionConfig("sonarqube", SonarqubeAdapter, SonarqubeRepository, validate_metadata=False),
-    ToolIngestionConfig("trivy", TrivyAdapter, TrivyRepository),
-    ToolIngestionConfig("git-sizer", GitSizerAdapter, GitSizerRepository),
-    ToolIngestionConfig("git-fame", GitFameAdapter, GitFameRepository),
-    ToolIngestionConfig("git-blame-scanner", GitBlameScannerAdapter, GitBlameRepository),
-    ToolIngestionConfig("gitleaks", GitleaksAdapter, GitleaksRepository),
-    ToolIngestionConfig("symbol-scanner", SymbolScannerAdapter, SymbolScannerRepository),
-    ToolIngestionConfig("scancode", ScancodeAdapter, ScancodeRepository),
-    ToolIngestionConfig("pmd-cpd", PmdCpdAdapter, PmdCpdRepository),
-    ToolIngestionConfig("devskim", DevskimAdapter, DevskimRepository),
-    ToolIngestionConfig("dotcover", DotcoverAdapter, DotcoverRepository),
-    ToolIngestionConfig("dependensee", DependenseeAdapter, DependenseeRepository),
-    ToolIngestionConfig("coverage-ingest", CoverageIngestAdapter, CoverageRepository),
+    ToolIngestionConfig(
+        name=t.name,
+        adapter_class=_ADAPTER_CLASSES[t.adapter_class],
+        repo_class=_REPO_CLASSES.get(t.repo_class) if t.repo_class else None,
+        validate_metadata=t.validate_metadata,
+    )
+    for t in get_ingestion_tools()
 ]
 
 

@@ -4,11 +4,16 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import duckdb
 import pytest
 
 from insights.evidence.builder import EvidenceRegistryBuilder
 from insights.evidence.claim_generator import ClaimGenerator
-from insights.evidence.collector import EvidenceCollector
+from insights.evidence.collector import (
+    CollectionResult,
+    CollectorWarning,
+    EvidenceCollector,
+)
 from insights.evidence.entities import (
     EvidenceItem,
     EvidenceRegistry,
@@ -64,7 +69,7 @@ class TestEvidenceRegistryBuilder:
         risks = [_risk("RISK-001")]
 
         collector = MagicMock(spec=EvidenceCollector)
-        collector.collect.return_value = evidence
+        collector.collect_with_warnings.return_value = CollectionResult(items=evidence)
 
         generator = MagicMock(spec=ClaimGenerator)
         generator.generate.return_value = claims
@@ -83,14 +88,14 @@ class TestEvidenceRegistryBuilder:
         assert len(registry.evidence) == 1
         assert len(registry.claims) == 1
         assert len(registry.risks) == 1
-        collector.collect.assert_called_once_with(fetcher, 1)
+        collector.collect_with_warnings.assert_called_once_with(fetcher, 1)
         generator.generate.assert_called_once_with(evidence, fetcher, 1)
         aggregator.aggregate.assert_called_once_with(claims, evidence)
 
     def test_collector_failure_returns_empty_registry(self):
         """If collector raises, return empty registry — no crash."""
         collector = MagicMock(spec=EvidenceCollector)
-        collector.collect.side_effect = RuntimeError("DB down")
+        collector.collect_with_warnings.side_effect = RuntimeError("DB down")
 
         builder = EvidenceRegistryBuilder(collector=collector)
         fetcher = MagicMock()
@@ -107,7 +112,7 @@ class TestEvidenceRegistryBuilder:
         evidence = [_evidence("E-CCN-001", "complexity")]
 
         collector = MagicMock(spec=EvidenceCollector)
-        collector.collect.return_value = evidence
+        collector.collect_with_warnings.return_value = CollectionResult(items=evidence)
 
         generator = MagicMock(spec=ClaimGenerator)
         generator.generate.side_effect = RuntimeError("rule exploded")
@@ -136,7 +141,7 @@ class TestEvidenceRegistryBuilder:
         claims = [_claim("CLM-COUP-001", "coupling")]
 
         collector = MagicMock(spec=EvidenceCollector)
-        collector.collect.return_value = evidence
+        collector.collect_with_warnings.return_value = CollectionResult(items=evidence)
 
         generator = MagicMock(spec=ClaimGenerator)
         generator.generate.return_value = claims
@@ -161,7 +166,7 @@ class TestEvidenceRegistryBuilder:
     def test_custom_injection(self):
         """Custom collector/generator/aggregator are used when injected."""
         collector = MagicMock(spec=EvidenceCollector)
-        collector.collect.return_value = []
+        collector.collect_with_warnings.return_value = CollectionResult(items=[])
 
         generator = MagicMock(spec=ClaimGenerator)
         generator.generate.return_value = []
@@ -177,7 +182,7 @@ class TestEvidenceRegistryBuilder:
         fetcher = MagicMock()
         builder.build(fetcher, run_pk=42)
 
-        collector.collect.assert_called_once_with(fetcher, 42)
+        collector.collect_with_warnings.assert_called_once_with(fetcher, 42)
         generator.generate.assert_called_once()
         aggregator.aggregate.assert_called_once()
 
@@ -195,3 +200,213 @@ class TestEvidenceRegistryBuilder:
         assert len(registry.risks) == 0
         summary = registry.summary()
         assert summary["total_evidence"] == 0
+
+
+# =========================================================================
+# Evidence table DDLs for in-memory DuckDB
+# =========================================================================
+
+_EVIDENCE_DDLS = """
+CREATE TABLE lz_evidence (
+    collection_run_id VARCHAR NOT NULL,
+    evidence_id VARCHAR NOT NULL,
+    evidence_type VARCHAR NOT NULL,
+    category VARCHAR NOT NULL,
+    location VARCHAR NOT NULL,
+    excerpt TEXT,
+    observation TEXT,
+    why_it_matters TEXT,
+    tool_source VARCHAR NOT NULL,
+    run_pk BIGINT NOT NULL,
+    confidence VARCHAR NOT NULL DEFAULT 'high',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (collection_run_id, evidence_id)
+);
+
+CREATE TABLE lz_claims (
+    collection_run_id VARCHAR NOT NULL,
+    claim_id VARCHAR NOT NULL,
+    category VARCHAR NOT NULL,
+    statement TEXT NOT NULL,
+    evidence_ids VARCHAR NOT NULL,
+    implication TEXT,
+    confidence VARCHAR NOT NULL,
+    triggered_by VARCHAR NOT NULL,
+    severity VARCHAR,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (collection_run_id, claim_id)
+);
+
+CREATE TABLE lz_risks (
+    collection_run_id VARCHAR NOT NULL,
+    risk_id VARCHAR NOT NULL,
+    description TEXT NOT NULL,
+    technical_cause TEXT,
+    claim_ids VARCHAR NOT NULL,
+    manifests_in VARCHAR,
+    triggered_by VARCHAR NOT NULL,
+    severity VARCHAR NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (collection_run_id, risk_id)
+);
+"""
+
+
+class TestEvidenceRegistryBuilderPersist:
+    """Tests for EvidenceRegistryBuilder.persist() writing rows to DuckDB."""
+
+    def _make_conn(self) -> duckdb.DuckDBPyConnection:
+        conn = duckdb.connect(":memory:")
+        conn.execute(_EVIDENCE_DDLS)
+        return conn
+
+    def test_persist_writes_correct_row_counts(self):
+        """persist() writes evidence, claims, and risks to their tables."""
+        conn = self._make_conn()
+        registry = EvidenceRegistry(
+            evidence=[
+                _evidence("E-CCN-001", "complexity"),
+                _evidence("E-SEC-001", "security", location="src/sec.py"),
+            ],
+            claims=[_claim("CLM-COUP-001", "coupling")],
+            risks=[_risk("RISK-001")],
+        )
+
+        EvidenceRegistryBuilder.persist(registry, conn, "run-001")
+
+        ev_count = conn.execute("SELECT COUNT(*) FROM lz_evidence").fetchone()[0]
+        cl_count = conn.execute("SELECT COUNT(*) FROM lz_claims").fetchone()[0]
+        ri_count = conn.execute("SELECT COUNT(*) FROM lz_risks").fetchone()[0]
+        assert ev_count == 2
+        assert cl_count == 1
+        assert ri_count == 1
+
+        conn.close()
+
+    def test_persist_is_idempotent(self):
+        """Calling persist() twice yields same row counts (DELETE + re-INSERT)."""
+        conn = self._make_conn()
+        registry = EvidenceRegistry(
+            evidence=[
+                _evidence("E-CCN-001", "complexity"),
+                _evidence("E-SEC-001", "security", location="src/sec.py"),
+            ],
+            claims=[_claim("CLM-COUP-001", "coupling")],
+            risks=[_risk("RISK-001")],
+        )
+
+        EvidenceRegistryBuilder.persist(registry, conn, "run-001")
+        EvidenceRegistryBuilder.persist(registry, conn, "run-001")
+
+        ev_count = conn.execute("SELECT COUNT(*) FROM lz_evidence").fetchone()[0]
+        cl_count = conn.execute("SELECT COUNT(*) FROM lz_claims").fetchone()[0]
+        ri_count = conn.execute("SELECT COUNT(*) FROM lz_risks").fetchone()[0]
+        assert ev_count == 2
+        assert cl_count == 1
+        assert ri_count == 1
+
+        conn.close()
+
+    def test_persist_empty_registry(self):
+        """Persisting empty registry clears previous data without inserting."""
+        conn = self._make_conn()
+        # First persist with data
+        registry_full = EvidenceRegistry(
+            evidence=[_evidence("E-CCN-001", "complexity")],
+        )
+        EvidenceRegistryBuilder.persist(registry_full, conn, "run-001")
+        assert conn.execute("SELECT COUNT(*) FROM lz_evidence").fetchone()[0] == 1
+
+        # Then persist empty registry for same run
+        EvidenceRegistryBuilder.persist(EvidenceRegistry(), conn, "run-001")
+        assert conn.execute("SELECT COUNT(*) FROM lz_evidence").fetchone()[0] == 0
+
+        conn.close()
+
+    def test_persist_writes_correct_field_values(self):
+        """Spot-check that persisted fields match the entity values."""
+        conn = self._make_conn()
+        e = _evidence("E-CCN-001", "complexity")
+        registry = EvidenceRegistry(evidence=[e])
+
+        EvidenceRegistryBuilder.persist(registry, conn, "run-001")
+
+        row = conn.execute(
+            "SELECT collection_run_id, evidence_id, category, location, tool_source, run_pk "
+            "FROM lz_evidence"
+        ).fetchone()
+        assert row == ("run-001", "E-CCN-001", "complexity", "src/file.py", "test-tool", 1)
+
+        conn.close()
+
+
+class TestBuildWarningBudgetIntegration:
+    """Tests that builder.build() emits warnings when budget is exceeded."""
+
+    def test_build_emits_warning_on_budget_exceeded(self):
+        """If collector returns regressions, build() emits UserWarning."""
+        evidence = [_evidence("E-CCN-001", "complexity")]
+        # Create a CollectionResult with regression warnings that exceed the budget (limit=0)
+        result = CollectionResult(
+            items=evidence,
+            warnings=[
+                CollectorWarning(category="regression", source="_collect_quality", message="DB table missing"),
+                CollectorWarning(category="regression", source="_collect_security", message="query failed"),
+            ],
+        )
+
+        collector = MagicMock(spec=EvidenceCollector)
+        collector.collect_with_warnings.return_value = result
+
+        generator = MagicMock(spec=ClaimGenerator)
+        generator.generate.return_value = []
+
+        aggregator = MagicMock(spec=RiskAggregator)
+        aggregator.aggregate.return_value = []
+
+        builder = EvidenceRegistryBuilder(
+            collector=collector,
+            claim_generator=generator,
+            risk_aggregator=aggregator,
+        )
+        fetcher = MagicMock()
+
+        with pytest.warns(UserWarning, match="Warning budget exceeded"):
+            builder.build(fetcher, run_pk=1)
+
+    def test_build_no_warning_within_budget(self):
+        """No budget warning when all warnings are within limits."""
+        evidence = [_evidence("E-CCN-001", "complexity")]
+        # expected_missing has a budget of 10, so 2 is fine
+        result = CollectionResult(
+            items=evidence,
+            warnings=[
+                CollectorWarning(category="expected_missing", source="_collect_coupling", message="table missing"),
+                CollectorWarning(category="expected_missing", source="_collect_coverage", message="table missing"),
+            ],
+        )
+
+        collector = MagicMock(spec=EvidenceCollector)
+        collector.collect_with_warnings.return_value = result
+
+        generator = MagicMock(spec=ClaimGenerator)
+        generator.generate.return_value = []
+
+        aggregator = MagicMock(spec=RiskAggregator)
+        aggregator.aggregate.return_value = []
+
+        builder = EvidenceRegistryBuilder(
+            collector=collector,
+            claim_generator=generator,
+            risk_aggregator=aggregator,
+        )
+        fetcher = MagicMock()
+
+        # Should not emit any UserWarning about budget
+        import warnings as _warnings
+        with _warnings.catch_warnings():
+            _warnings.simplefilter("error", UserWarning)
+            # This should NOT raise — all within budget
+            registry = builder.build(fetcher, run_pk=1)
+
+        assert len(registry.evidence) == 1
