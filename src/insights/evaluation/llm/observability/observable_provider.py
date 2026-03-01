@@ -7,8 +7,10 @@ Wraps any LLMProvider with logging and tracing capabilities.
 from typing import Any
 import uuid
 
-from ..providers import LLMProvider, LLMResponse
+from shared.llm.prompt_guard import estimate_tokens
 from shared.observability import LLMLogger, get_llm_logger
+
+from ..providers import LLMProvider, LLMResponse
 
 
 class ObservableProvider(LLMProvider):
@@ -87,6 +89,7 @@ class ObservableProvider(LLMProvider):
         model: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 4096,
+        max_prompt_chars: int | None = None,
     ) -> LLMResponse:
         """
         Send a completion request with observability logging.
@@ -97,6 +100,7 @@ class ObservableProvider(LLMProvider):
             model: Optional model override
             temperature: Sampling temperature
             max_tokens: Maximum tokens to generate
+            max_prompt_chars: Maximum prompt character count before truncation
 
         Returns:
             LLMResponse from the wrapped provider
@@ -114,6 +118,8 @@ class ObservableProvider(LLMProvider):
             metadata={
                 "temperature": temperature,
                 "max_tokens": max_tokens,
+                "prompt_chars": len(prompt),
+                "estimated_prompt_tokens": estimate_tokens(prompt),
             },
         )
 
@@ -125,6 +131,7 @@ class ObservableProvider(LLMProvider):
                 model=model,
                 temperature=temperature,
                 max_tokens=max_tokens,
+                max_prompt_chars=max_prompt_chars,
             )
 
             # Log successful completion

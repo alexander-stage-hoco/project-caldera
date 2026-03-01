@@ -44,6 +44,7 @@ class LLMProvider(ABC):
         model: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 4096,
+        max_prompt_chars: int | None = None,
     ) -> LLMResponse:
         """
         Send a completion request.
@@ -54,6 +55,8 @@ class LLMProvider(ABC):
             model: Optional model override.
             temperature: Sampling temperature.
             max_tokens: Maximum tokens to generate.
+            max_prompt_chars: Maximum prompt character count before truncation
+                (None = use DEFAULT_MAX_PROMPT_CHARS from prompt_guard).
 
         Returns:
             LLMResponse with the completion.

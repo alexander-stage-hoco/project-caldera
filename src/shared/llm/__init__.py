@@ -9,6 +9,12 @@ from .client import (
     HAS_ANTHROPIC_SDK,
     validate_claude_cli,
 )
+from .prompt_guard import (
+    DEFAULT_MAX_PROMPT_CHARS,
+    check_prompt_size,
+    estimate_tokens,
+    guard_prompt,
+)
 
 __all__ = [
     "LLMClient",
@@ -16,4 +22,8 @@ __all__ = [
     "CLI_MODEL_MAP",
     "HAS_ANTHROPIC_SDK",
     "validate_claude_cli",
+    "DEFAULT_MAX_PROMPT_CHARS",
+    "check_prompt_size",
+    "estimate_tokens",
+    "guard_prompt",
 ]
