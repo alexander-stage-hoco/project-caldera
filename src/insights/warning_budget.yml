@@ -1,0 +1,14 @@
+# Warning budget configuration for evidence pipeline quality gates.
+#
+# Each category has a maximum allowed count per run.
+# CI will fail if regression warnings exceed the budget.
+#
+# Categories:
+#   expected_missing: Tool was not run or is not applicable to this repo
+#   regression:       Query that should return data failed unexpectedly
+#   degraded:         Partial results returned (some rows skipped)
+
+budgets:
+  expected_missing: 10   # generous — many tools are optional
+  regression: 0          # zero tolerance for unexpected failures
+  degraded: 3            # allow some partial results

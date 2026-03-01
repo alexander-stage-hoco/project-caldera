@@ -295,14 +295,17 @@ class BaseAdapter(ABC):
         # Post-persist: advisory quality report (never raises)
         if self._quality_checker:
             try:
-                self._run_post_persist_quality(run_pk, metadata_complete)
+                collection_run_id = payload.get("metadata", {}).get("run_id", "")
+                self._run_post_persist_quality(run_pk, metadata_complete, collection_run_id)
             except Exception as exc:
                 self._log(f"QUALITY_WARNING: post-persist checks failed: {exc}")
 
         return run_pk
 
-    def _run_post_persist_quality(self, run_pk: int, metadata_complete: bool) -> None:
-        """Run post-persist quality checks. Advisory only — never raises."""
+    def _run_post_persist_quality(
+        self, run_pk: int, metadata_complete: bool, collection_run_id: str = "",
+    ) -> None:
+        """Run post-persist quality checks and persist the report. Advisory only — never raises."""
         if not self._quality_checker:
             return
 
@@ -325,12 +328,16 @@ class BaseAdapter(ABC):
                 )
                 checks.append(result)
 
-        self._quality_checker.build_report(
+        report = self._quality_checker.build_report(
             self.tool_name,
             checks,
             schema_valid=True,
             metadata_complete=metadata_complete,
         )
+
+        # Persist the quality report to lz_quality_checks (advisory, never blocks)
+        if collection_run_id:
+            self._quality_checker.persist_report(report, collection_run_id)
 
     @abstractmethod
     def _do_persist(self, payload: dict) -> int:

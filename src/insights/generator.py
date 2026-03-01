@@ -4,10 +4,14 @@ InsightsGenerator - Main entry point for generating Caldera Insights reports.
 
 from __future__ import annotations
 
+import json
+import logging
 import warnings
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
+
+import duckdb
 
 from .data_fetcher import DataFetcher
 from .evidence.builder import EvidenceRegistryBuilder
@@ -57,6 +61,7 @@ from .sections.risk_register import RiskRegisterSection
 from .sections.evidence_pack import EvidencePackSection
 from .sections.claim_register import ClaimRegisterSection
 from .sections.rewrite_risk import RewriteRiskSection
+from .sections.delta_summary import DeltaSummarySection
 from .sections.sampling_rationale import SamplingRationaleSection
 from .profiles import StakeholderProfile, get_profile
 
@@ -69,6 +74,7 @@ class InsightsGenerator:
         "tool_readiness": ToolReadinessSection,
         "tool_coverage_dashboard": ToolCoverageDashboardSection,
         "executive_summary": ExecutiveSummarySection,
+        "delta_summary": DeltaSummarySection,
         "technical_debt_summary": TechnicalDebtSummarySection,
         "coupling_debt": CouplingDebtSection,
         "composite_risk": CompositeRiskSection,
@@ -205,6 +211,9 @@ class InsightsGenerator:
         # Build evidence registry once for all evidence-aware sections
         registry = self._evidence_builder.build(self.fetcher, run_pk)
 
+        # Persist evidence to landing zone (best-effort)
+        self._persist_evidence(registry, run_pk)
+
         # Render each section
         rendered_sections: list[SectionData] = []
         for name in section_names:
@@ -247,6 +256,9 @@ class InsightsGenerator:
             output_path = Path(output_path)
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_text(report)
+
+            # Emit warnings.json alongside the report
+            self._write_warnings_json(registry, output_path.parent)
 
         return report
 
@@ -299,6 +311,56 @@ class InsightsGenerator:
             content=content,
             data=data,
         )
+
+    def _persist_evidence(self, registry: Any, run_pk: int) -> None:
+        """Persist evidence registry to DuckDB landing zone (best-effort).
+
+        Also updates the warning_count in lz_run_quality_summary so the
+        actual count from the insights pipeline replaces the default 0.
+        """
+        try:
+            run_info = self.fetcher.get_run_info(run_pk)
+            collection_run_id = run_info.get("collection_run_id")
+            if not collection_run_id:
+                return
+            with duckdb.connect(str(self.db_path)) as conn:
+                EvidenceRegistryBuilder.persist(registry, conn, collection_run_id)
+                # Update warning_count in quality summary (replaces default 0)
+                warning_count = getattr(registry, "warning_count", 0)
+                if warning_count > 0:
+                    conn.execute(
+                        "UPDATE lz_run_quality_summary "
+                        "SET warning_count = ? "
+                        "WHERE collection_run_id = ?",
+                        [warning_count, collection_run_id],
+                    )
+        except Exception as exc:
+            logging.getLogger(__name__).debug(
+                "Evidence persistence skipped: %s", exc,
+            )
+
+    @staticmethod
+    def _write_warnings_json(registry: Any, output_dir: Path) -> None:
+        """Write warnings.json artifact alongside the report."""
+        details = getattr(registry, "warning_details", None)
+        if not details:
+            # No warning details available — write minimal artifact
+            details = {
+                "total": getattr(registry, "warning_count", 0),
+                "budget_passed": True,
+                "counts": {"expected_missing": 0, "regression": 0, "degraded": 0},
+                "budgets": {"expected_missing": 10, "regression": 0, "degraded": 3},
+                "warnings": [],
+            }
+        try:
+            warnings_path = output_dir / "warnings.json"
+            warnings_path.write_text(
+                json.dumps(details, indent=2), encoding="utf-8",
+            )
+        except Exception as exc:
+            logging.getLogger(__name__).debug(
+                "Failed to write warnings.json: %s", exc,
+            )
 
     def generate_by_collection(
         self,
@@ -393,6 +455,9 @@ class InsightsGenerator:
 
         # Build evidence registry
         registry = self._evidence_builder.build(self.fetcher, run_pk)
+
+        # Persist evidence to landing zone (best-effort)
+        self._persist_evidence(registry, run_pk)
 
         # Fetch raw data for each section (no template rendering)
         section_data: dict[str, dict[str, Any]] = {}

@@ -1,8 +1,8 @@
 # Project Caldera — Status & Forward Roadmap
 
-## Current State: v0.13.0-dev (2026-02-27)
+## Current State: v0.14.0-dev (2026-03-01)
 
-Core platform is production-ready. All 18 tools pass compliance, all 3 production modes work (LOCAL, BUNDLE, DOCKERIZED), CI/CD has 5 gates, cloud runs on Hetzner, and the dbt warehouse has 168 models + 2 snapshots + 23 analyses.
+Core platform is production-ready. All 18 tools pass compliance, all 3 production modes work (LOCAL, BUNDLE, DOCKERIZED), CI/CD has 5 gates with trust score enforcement, cloud runs on Hetzner, and the dbt warehouse has 168 models + 2 snapshots + 23 analyses.
 
 ### What's Complete
 
@@ -25,48 +25,52 @@ Core platform is production-ready. All 18 tools pass compliance, all 3 productio
 - dbt snapshots for trend analysis (unified_run_summary, unified_repo_metrics)
 - Run-over-run comparison and file-level regression detection analyses
 - Stakeholder report profiles (CTO, Investor, CEO) with tailored section selections
-- Unified `caldera` CLI with 10 subcommand groups (analyze, report, db, compliance, tools, dbt, export, cloud, docker, status)
-- Cloud operational improvements: cost tracking in manifests, orphan VM cleanup, server presets
+- Unified `caldera` CLI with 10 subcommand groups
+- Cloud operational improvements: cost tracking, orphan VM cleanup, server presets
+
+### Recently Completed (v0.13 → v0.14)
+
+| Feature | Description |
+|---------|-------------|
+| Trust score in reports | Trust score displayed in executive summary with trend indicator |
+| Warning count wired | Actual warning count from insights pipeline persisted (was hardcoded 0) |
+| CI trust gate | Gate C validates trust score >= 50 after pipeline runs |
+| Delta lead section | Delta summary promoted to priority 1 (lead actionable section) |
+| Trust score trend | Executive summary shows trust score trajectory across runs |
+| Adapter boundary tests | Schema-valid-but-entity-fails gap covered by integration tests |
 
 ### Gap Analysis
 
-All 6 product spec deliverables now have implementations. Remaining gaps are platform-level:
+All 6 product spec deliverables have implementations. Remaining gaps:
 
 | Gap | Status | Notes |
 |-----|--------|-------|
 | PDF report generation | Not started | Formal deliverable format for stakeholders |
-| Stakeholder report variants | **Done** | Profiles implemented (`caldera report list-profiles`), CTO/Investor/CEO |
-| Unified CLI | **Done** | `caldera` entry point with 10 subcommand groups, 65 tests |
-| Execution abstraction | Deferred | Only LocalBackend; DOCKER/VM handled externally |
 | Multi-platform Docker | Not started | amd64 only, no arm64 |
 | Incremental pipeline | Not started | No skip-unchanged-tools capability |
+| Action Layer | Not started | Risk register → assignable actions → ticket integration |
+| Policy Layer | Not started | Configurable quality gates, waivers, drift tracking |
+| Portfolio Layer | Not started | Multi-repo dashboards, cross-repo aggregation |
 
 ---
 
 ## Forward Roadmap
 
-### Near-term: v0.13 — Stakeholder Reports
+### Near-term: v0.14 — Platform Polish
 
-**Goal:** Deliver tailored reports for different audiences.
+**Goal:** Improve operational maturity and developer experience.
 
-- ~~Stakeholder report variants (CTO, Investor, CEO per product spec Appendix A)~~ **Done**
 - PDF generation for formal deliverables
+- Multi-platform Docker (arm64 for M-series Macs)
+- Incremental pipeline (skip unchanged tools, content-hash cache)
 
-### Mid-term: v0.14–v1.0 — Platform Polish
+### Mid-term: v0.15–v1.0 — Action & Policy Layers
 
-**Goal:** Improve developer experience and operational maturity.
+**Goal:** Close the loop from analysis to action.
 
-- ~~Unified `caldera` CLI~~ **Done** (10 subcommand groups, 65 tests)
-- Multi-platform Docker:
-  - arm64 support for M-series Macs
-  - `platforms: [linux/amd64, linux/arm64]` in docker-images.yml
-- Incremental pipeline:
-  - Skip unchanged tools on re-analysis of same repo
-  - Content-hash-based cache invalidation
-- ~~Cloud operational improvements~~ **Done**:
-  - ~~Embed Hetzner API cost per run in manifests~~ (cost fields in cloud manifest section)
-  - ~~Scheduled job to destroy orphaned VMs (TTL labels)~~ (`make cloud-cleanup` + `created_at` labels)
-  - ~~Expose server type presets (small/medium/large/xlarge)~~ (`infra/server_presets.json`)
+- **Action Layer**: Assignable actions from risk register, owner/SLA tracking, ticket integration (GitHub Issues, Jira)
+- **Policy Layer**: Configurable quality gates per repo/team, release/PR policy enforcement, policy waivers with expiry, policy drift tracking
+- **Portfolio Layer**: Multi-repo dashboards, cross-repo aggregation, comparative health scoring
 
 ---
 

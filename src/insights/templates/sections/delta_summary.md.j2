@@ -1,0 +1,28 @@
+## Run-over-Run Delta Summary
+
+{% if not has_previous_run %}
+> No previous run found for comparison. Delta analysis requires at least two completed runs for the same repository.
+{% else %}
+**Regressions detected:** {{ regression_count }}{% if regression_flags %} ({{ regression_flags | join(', ') }}){% endif %}
+
+| Metric | Delta |
+|--------|-------|
+| Files | {{ '%+d' | format(summary.delta_files | default(0)) }} ({{ summary.current_files | default(0) }} total) |
+| Code lines | {{ '%+d' | format(summary.delta_code_lines | default(0)) }} |
+| Complexity (CCN) | {{ '%+d' | format(summary.delta_ccn | default(0)) }} |
+| Coverage | {{ '%+.1f%%' | format(summary.delta_coverage_pct | default(0)) }} |
+| Secrets | {{ '%+d' | format(summary.delta_secrets | default(0)) }} |
+| Vulnerabilities | {{ '%+d' | format(summary.delta_trivy | default(0)) }} |
+
+{% if top_regressions %}
+### Top Regressed Files ({{ total_regressed_files }} total)
+
+| File | Type | CCN | Coverage | Issues | Score |
+|------|------|-----|----------|--------|-------|
+{% for row in top_regressions %}
+| `{{ row.relative_path }}` | {{ row.change_type }} | {{ '%+d' | format(row.delta_ccn | default(0)) }} | {{ '%+.0f' | format(row.delta_coverage | default(0)) }} | {{ '%+d' | format(row.delta_issues | default(0)) }} | {{ row.regression_score }} |
+{% endfor %}
+{% endif %}
+
+_Comparing commit `{{ summary.current_commit[:8] | default('?') }}` vs `{{ summary.previous_commit[:8] | default('?') }}`_
+{% endif %}

@@ -40,6 +40,7 @@ from .circular_dependencies import CircularDependenciesSection
 from .risk_register import RiskRegisterSection
 from .evidence_pack import EvidencePackSection
 from .claim_register import ClaimRegisterSection
+from .delta_summary import DeltaSummarySection
 from .sampling_rationale import SamplingRationaleSection
 
 __all__ = [
@@ -84,5 +85,6 @@ __all__ = [
     "RiskRegisterSection",
     "EvidencePackSection",
     "ClaimRegisterSection",
+    "DeltaSummarySection",
     "SamplingRationaleSection",
 ]

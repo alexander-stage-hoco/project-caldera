@@ -15,6 +15,7 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -22,28 +23,15 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Allow importing from src/sot-engine/
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src" / "sot-engine"))
 
-# ── Tool list (must match Makefile DOCKER_TOOLS) ─────────────────────────────
+from tool_registry import get_docker_tool_names  # noqa: E402
 
-DOCKER_TOOLS: list[str] = [
-    "layout-scanner",
-    "scc",
-    "lizard",
-    "semgrep",
-    "symbol-scanner",
-    "scancode",
-    "git-blame-scanner",
-    "git-fame",
-    "dependensee",
-    "coverage-ingest",
-    "trivy",
-    "gitleaks",
-    "git-sizer",
-    "pmd-cpd",
-    "roslyn-analyzers",
-    "devskim",
-    "dotcover",
-]
+
+# ── Tool list derived from the unified tool registry ─────────────────────────
+
+DOCKER_TOOLS: list[str] = get_docker_tool_names()
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────

@@ -95,6 +95,15 @@ jobs:
           fi
           echo "OK: LOCAL report.html exists ($SIZE bytes)"
 
+      - name: Check LOCAL trust score + warning budget
+        run: |
+          WARNINGS=$(find src/insights/output/pipeline -name "warnings.json" -type f | head -1)
+          WARN_FLAG=""
+          if [ -n "$WARNINGS" ]; then
+            WARN_FLAG="--check-warnings $WARNINGS"
+          fi
+          .venv/bin/python scripts/check_run_quality.py --db ~/.caldera/caldera_sot.duckdb --min-trust 50 $WARN_FLAG
+
       - name: Clean DB for BUNDLE mode
         run: make clean-db
 
@@ -127,6 +136,15 @@ jobs:
             exit 1
           fi
           echo "OK: BUNDLE report.html exists ($SIZE bytes)"
+
+      - name: Check BUNDLE trust score + warning budget
+        run: |
+          WARNINGS=$(find src/insights/output/pipeline -name "warnings.json" -type f | head -1)
+          WARN_FLAG=""
+          if [ -n "$WARNINGS" ]; then
+            WARN_FLAG="--check-warnings $WARNINGS"
+          fi
+          .venv/bin/python scripts/check_run_quality.py --db ~/.caldera/caldera_sot.duckdb --min-trust 50 $WARN_FLAG
 
   # ── Promotion Policy (main only) ───────────────────────────────────────
   promotion-check:

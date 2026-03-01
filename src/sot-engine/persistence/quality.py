@@ -342,3 +342,48 @@ class DataQualityChecker:
         )
 
         return report
+
+    def persist_report(
+        self,
+        report: QualityReport,
+        collection_run_id: str,
+    ) -> None:
+        """Persist a quality report to the lz_quality_checks table.
+
+        Advisory only — persistence failures are logged, never raised.
+        One row per check per tool per run; overall_score from QualityReport.score.overall.
+
+        Args:
+            report: The quality report to persist.
+            collection_run_id: The collection run this report belongs to.
+        """
+        try:
+            # Delete existing rows for this tool+run (idempotent)
+            self._conn.execute(
+                "DELETE FROM lz_quality_checks WHERE collection_run_id = ? AND tool_name = ?",
+                [collection_run_id, report.tool_name],
+            )
+            if report.checks:
+                self._conn.executemany(
+                    """
+                    INSERT INTO lz_quality_checks (
+                        collection_run_id, tool_name, check_name, level,
+                        passed, severity, message, overall_score
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    [
+                        (
+                            collection_run_id,
+                            report.tool_name,
+                            c.check_name,
+                            c.level.value,
+                            c.passed,
+                            c.severity.value,
+                            c.message,
+                            report.score.overall,
+                        )
+                        for c in report.checks
+                    ],
+                )
+        except Exception as exc:
+            self._log(f"QUALITY_WARNING: Failed to persist quality report for {report.tool_name}: {exc}")
