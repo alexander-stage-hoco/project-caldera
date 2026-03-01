@@ -395,8 +395,8 @@ arch-review:
 		--target $(ARCH_REVIEW_TARGET) \
 		--review-type $(ARCH_REVIEW_TYPE)
 
-test-unit:
-	@.venv/bin/python -m pytest -q
+test-unit:  ## Run fast unit tests (excludes slow/integration)
+	@.venv/bin/python -m pytest -m "not slow and not integration" --tb=short -q
 
 test-integration:
 	@$(MAKE) tools-test
