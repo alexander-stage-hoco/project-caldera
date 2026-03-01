@@ -8,6 +8,9 @@
             <span class="risk-description">{{ risk_summary.risk_description }}</span>
         </div>
         <div class="risk-indicators">
+            {% if trust_score is not none %}
+            <span class="indicator indicator-{{ 'critical' if trust_score < 50 else ('warning' if trust_score < 75 else 'good') }}">Trust: {{ trust_score }}/100</span>
+            {% endif %}
             {% if risk_summary.security_status == 'not_scanned' %}
             <span class="indicator indicator-unknown">Security: Not Scanned</span>
             {% else %}
@@ -75,6 +78,13 @@
     <div class="subsection">
         <h3>Quick Stats</h3>
         <div class="metric-grid">
+            {% if trust_score is not none %}
+            <div class="metric-card metric-{{ 'critical' if trust_score < 50 else ('warning' if trust_score < 75 else '') }}">
+                <div class="label">Trust Score</div>
+                <div class="value">{{ trust_score }}/100</div>
+                <div class="sublabel">{{ tools_completed }}/{{ tools_expected }} tools{% if warning_count > 0 %}, {{ warning_count }} warning{{ 's' if warning_count != 1 else '' }}{% endif %}{% if trust_trend_direction == 'improving' %} &#x2191; from {{ trust_trend_previous }}{% elif trust_trend_direction == 'declining' %} &#x2193; from {{ trust_trend_previous }}{% endif %}</div>
+            </div>
+            {% endif %}
             <div class="metric-card">
                 <div class="label">Total Files</div>
                 <div class="value">{{ total_files | format_number }}</div>

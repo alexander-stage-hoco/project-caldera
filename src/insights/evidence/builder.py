@@ -15,6 +15,7 @@ import warnings
 from typing import Any
 
 from ..data_fetcher import DataFetcher
+from .action_generator import ActionGenerator
 from .claim_generator import ClaimGenerator
 from .collector import EvidenceCollector, check_warning_budget
 from .entities import (
@@ -34,19 +35,45 @@ class EvidenceRegistryBuilder:
         collector: EvidenceCollector | None = None,
         claim_generator: ClaimGenerator | None = None,
         risk_aggregator: RiskAggregator | None = None,
+        action_generator: ActionGenerator | None = None,
     ) -> None:
         self._collector = collector or EvidenceCollector()
         self._claim_generator = claim_generator or ClaimGenerator()
         self._risk_aggregator = risk_aggregator or RiskAggregator()
+        self._action_generator = action_generator or ActionGenerator()
 
     def build(self, fetcher: DataFetcher, run_pk: int) -> EvidenceRegistry:
         """Run the full pipeline and return a populated registry."""
+        total_warnings = 0
+        warning_details: dict[str, object] = {}
         try:
             collection_result = self._collector.collect_with_warnings(fetcher, run_pk)
             evidence = collection_result.items
+            counts = collection_result.warning_counts()
+            total_warnings = sum(counts.values())
 
             # Check warning budget and log violations
             budget = check_warning_budget(collection_result)
+            budgets = {v.category: v.limit for v in budget.violations}
+            # Include all budget thresholds (not just violations)
+            from .collector import _load_warning_budget
+            all_budgets = _load_warning_budget()
+
+            warning_details = {
+                "total": total_warnings,
+                "budget_passed": budget.passed,
+                "counts": dict(counts),
+                "budgets": {k: v for k, v in all_budgets.items()},
+                "warnings": [
+                    {
+                        "category": w.category,
+                        "source": w.source,
+                        "message": w.message,
+                    }
+                    for w in collection_result.warnings
+                ],
+            }
+
             if not budget.passed:
                 for v in budget.violations:
                     warnings.warn(
@@ -79,10 +106,20 @@ class EvidenceRegistryBuilder:
             )
             risks = []
 
+        try:
+            risks = self._action_generator.enrich(risks)
+        except Exception as exc:
+            warnings.warn(
+                f"[EvidenceRegistryBuilder] Action enrichment failed: {exc}",
+                stacklevel=2,
+            )
+
         return EvidenceRegistry(
             evidence=evidence,
             claims=claims,
             risks=risks,
+            warning_count=total_warnings,
+            warning_details=warning_details,
         )
 
     @staticmethod
@@ -91,13 +128,13 @@ class EvidenceRegistryBuilder:
         conn: Any,
         collection_run_id: str,
     ) -> None:
-        """Persist evidence, claims, and risks to DuckDB landing zone tables.
+        """Persist evidence, claims, risks, and warnings to DuckDB landing zone tables.
 
         Idempotent: deletes existing data for the collection_run_id first.
         """
         try:
             # Clear previous data for this run
-            for table in ("lz_evidence", "lz_claims", "lz_risks"):
+            for table in ("lz_evidence", "lz_claims", "lz_risks", "lz_warnings"):
                 conn.execute(
                     f"DELETE FROM {table} WHERE collection_run_id = ?",
                     [collection_run_id],
@@ -164,8 +201,9 @@ class EvidenceRegistryBuilder:
                     INSERT INTO lz_risks (
                         collection_run_id, risk_id, description,
                         technical_cause, claim_ids, manifests_in,
-                        triggered_by, severity
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        triggered_by, severity,
+                        owner, action, sla_date, status
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     [
                         (
@@ -177,8 +215,32 @@ class EvidenceRegistryBuilder:
                             ",".join(r.manifests_in),
                             r.triggered_by,
                             r.severity,
+                            r.owner,
+                            r.action,
+                            r.sla_date,
+                            r.status,
                         )
                         for r in registry.risks
+                    ],
+                )
+
+            # Persist individual warnings
+            warning_list = registry.warning_details.get("warnings", [])
+            if warning_list:
+                conn.executemany(
+                    """
+                    INSERT INTO lz_warnings (
+                        collection_run_id, category, source, message
+                    ) VALUES (?, ?, ?, ?)
+                    """,
+                    [
+                        (
+                            collection_run_id,
+                            w["category"],
+                            w["source"],
+                            w["message"],
+                        )
+                        for w in warning_list
                     ],
                 )
 

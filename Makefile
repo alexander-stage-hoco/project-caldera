@@ -509,7 +509,8 @@ pipeline-eval:
 	    --db "$(ORCH_DB_PATH)" \
 	    --collection-run-id "$$RESOLVED_RUN_ID" \
 	    --out "$(CURDIR)/$(PIPELINE_RUN_DIR)/run_manifest.json" \
-	    --report "$(CURDIR)/$(PIPELINE_RUN_DIR)/report.html"; \
+	    --report "$(CURDIR)/$(PIPELINE_RUN_DIR)/report.html" \
+	    --warnings-json "$(CURDIR)/$(PIPELINE_RUN_DIR)/warnings.json"; \
 	  cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/run_manifest.json $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/run_manifest.json
 	@echo ""
 	@echo "=============================================="

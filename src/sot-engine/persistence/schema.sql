@@ -634,8 +634,41 @@ CREATE TABLE lz_run_quality_summary (
     tools_empty INTEGER NOT NULL,
     ingestion_errors INTEGER NOT NULL DEFAULT 0,
     warning_count INTEGER NOT NULL DEFAULT 0,
+    warnings_expected_missing INTEGER NOT NULL DEFAULT 0,
+    warnings_regression INTEGER NOT NULL DEFAULT 0,
+    warnings_degraded INTEGER NOT NULL DEFAULT 0,
+    budget_passed BOOLEAN NOT NULL DEFAULT TRUE,
     trust_score INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================================================
+-- Warnings: per-warning detail rows for trend analysis
+-- =============================================================================
+
+CREATE TABLE lz_warnings (
+    collection_run_id VARCHAR NOT NULL,
+    category VARCHAR NOT NULL,
+    source VARCHAR NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================================================
+-- Quality checks: per-tool data quality check results
+-- =============================================================================
+
+CREATE TABLE lz_quality_checks (
+    collection_run_id VARCHAR NOT NULL,
+    tool_name VARCHAR NOT NULL,
+    check_name VARCHAR NOT NULL,
+    level VARCHAR NOT NULL,
+    passed BOOLEAN NOT NULL,
+    severity VARCHAR NOT NULL,
+    message TEXT,
+    overall_score DOUBLE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (collection_run_id, tool_name, check_name)
 );
 
 -- =============================================================================
@@ -681,6 +714,10 @@ CREATE TABLE lz_risks (
     manifests_in VARCHAR,
     triggered_by VARCHAR NOT NULL,
     severity VARCHAR NOT NULL,
+    owner VARCHAR,
+    action TEXT,
+    sla_date VARCHAR,
+    status VARCHAR DEFAULT 'open',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (collection_run_id, risk_id)
 );

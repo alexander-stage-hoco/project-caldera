@@ -28,9 +28,18 @@
         <h3>{{ severity | upper }} Risks</h3>
         {% for risk in sev_risks %}
         <div class="risk-entry" style="border-left: 3px solid var(--color-{{ severity }}, #666); padding-left: 1rem; margin-bottom: 1.5rem;">
-            <h4>{{ risk.risk_id }}: {{ risk.triggered_by }}</h4>
+            <h4>{{ risk.risk_id }}: {{ risk.triggered_by }}
+                <span style="font-size: 0.8em; font-weight: normal; margin-left: 0.5em; padding: 0.1em 0.4em; border-radius: 3px; background: {% if risk.status == 'resolved' %}#2d6a2d{% elif risk.status == 'mitigating' %}#6a5f2d{% elif risk.status == 'accepted' %}#4a4a4a{% else %}#6a2d2d{% endif %}; color: #fff;">{{ risk.status | default('open') }}</span>
+            </h4>
             <p><strong>Description:</strong> {{ risk.description }}</p>
             <p><strong>Technical cause:</strong> {{ risk.technical_cause }}</p>
+            {% if risk.owner or risk.action or risk.sla_date %}
+            <p>
+                {% if risk.owner %}<strong>Owner:</strong> {{ risk.owner }} &nbsp;{% endif %}
+                {% if risk.action %}<strong>Action:</strong> {{ risk.action }} &nbsp;{% endif %}
+                {% if risk.sla_date %}<strong>SLA:</strong> {{ risk.sla_date }}{% endif %}
+            </p>
+            {% endif %}
             <p><strong>Supporting claims:</strong> {{ risk.claim_count }}</p>
 
             {% if risk.claims %}

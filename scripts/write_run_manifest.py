@@ -19,6 +19,25 @@ def main() -> int:
     parser.add_argument("--collection-run-id", required=True, help="collection_run_id (usually run_id)")
     parser.add_argument("--out", required=True, help="Output JSON path")
     parser.add_argument("--report", default=None, help="Optional report.html path")
+    parser.add_argument("--warnings-json", default=None, help="Optional warnings.json path")
+    parser.add_argument(
+        "--tool-outputs-included",
+        action="store_true",
+        default=False,
+        help="Mark that raw tool outputs are included in the export",
+    )
+    parser.add_argument(
+        "--dbt-artifacts-included",
+        action="store_true",
+        default=False,
+        help="Mark that dbt artifacts are included in the export",
+    )
+    parser.add_argument(
+        "--evidence-included",
+        action="store_true",
+        default=False,
+        help="Mark that evidence JSON is included in the export",
+    )
     args = parser.parse_args()
 
     db_path = Path(args.db).expanduser()
@@ -75,11 +94,26 @@ def main() -> int:
         except Exception:
             pass  # table may not exist in older databases
 
+        # Enrich trust with per-category warning counts from warnings.json
+        if trust and args.warnings_json:
+            warnings_path = Path(args.warnings_json).expanduser()
+            if warnings_path.exists():
+                try:
+                    wdata = json.loads(warnings_path.read_text(encoding="utf-8"))
+                    trust["warning_counts"] = wdata.get("counts", {})
+                    trust["warning_budgets"] = wdata.get("budgets", {})
+                    trust["budget_passed"] = wdata.get("budget_passed", True)
+                except Exception:
+                    pass  # best-effort
+
         manifest = {
             "schema_version": 2,
             "generated_at": _utc_now_iso(),
             "db_path": str(db_path),
             "report_path": str(Path(args.report).expanduser()) if args.report else None,
+            "tool_outputs_included": args.tool_outputs_included,
+            "dbt_artifacts_included": args.dbt_artifacts_included,
+            "evidence_included": args.evidence_included,
             "collection_run": {
                 "collection_run_id": cr[0],
                 "repo_id": cr[1],

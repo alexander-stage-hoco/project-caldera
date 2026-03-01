@@ -53,6 +53,10 @@ sources:
         description: Persisted technical claims derived from evidence
       - name: lz_risks
         description: Persisted execution risks aggregated from claims
+      - name: lz_warnings
+        description: Per-warning detail rows for trend analysis across runs
+      - name: lz_quality_checks
+        description: Per-tool data quality check results from ingestion
 
 models:
   - name: stg_lz_tool_runs

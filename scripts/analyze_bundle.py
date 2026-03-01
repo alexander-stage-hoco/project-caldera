@@ -174,21 +174,22 @@ def main() -> int:
                 check=True,
             )
 
-        subprocess.run(
-            [
-                sys.executable,
-                "scripts/write_run_manifest.py",
-                "--db",
-                str(db_path),
-                "--collection-run-id",
-                str(run_id),
-                "--out",
-                str(report_out.parent / "run_manifest.json"),
-                "--report",
-                str(report_out),
-            ],
-            check=True,
-        )
+        manifest_cmd = [
+            sys.executable,
+            "scripts/write_run_manifest.py",
+            "--db",
+            str(db_path),
+            "--collection-run-id",
+            str(run_id),
+            "--out",
+            str(report_out.parent / "run_manifest.json"),
+            "--report",
+            str(report_out),
+        ]
+        warnings_json = report_out.parent / "warnings.json"
+        if warnings_json.exists():
+            manifest_cmd.extend(["--warnings-json", str(warnings_json)])
+        subprocess.run(manifest_cmd, check=True)
 
         print(f"Report: {report_out}")
         return 0

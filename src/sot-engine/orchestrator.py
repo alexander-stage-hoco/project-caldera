@@ -358,6 +358,9 @@ def compute_run_quality(
     tool_summaries: list[dict[str, Any]],
     all_tool_names: list[str],
     ingestion_errors: int = 0,
+    warning_count: int = 0,
+    warning_counts: dict[str, int] | None = None,
+    budget_passed: bool = True,
     logger: OrchestratorLogger | None = None,
 ) -> dict[str, Any]:
     """Compute and persist a quality summary for the collection run.
@@ -411,6 +414,7 @@ def compute_run_quality(
         ingestion_penalty = min(ingestion_errors * 5, 20)
         trust_score = max(0, min(100, round(completeness * 100 - failure_penalty - ingestion_penalty)))
 
+    wc = warning_counts or {}
     quality = {
         "tools_expected": tools_expected,
         "tools_completed": tools_completed,
@@ -418,7 +422,11 @@ def compute_run_quality(
         "tools_failed": tools_failed,
         "tools_empty": tools_empty,
         "ingestion_errors": ingestion_errors,
-        "warning_count": 0,
+        "warning_count": warning_count,
+        "warnings_expected_missing": wc.get("expected_missing", 0),
+        "warnings_regression": wc.get("regression", 0),
+        "warnings_degraded": wc.get("degraded", 0),
+        "budget_passed": budget_passed,
         "trust_score": trust_score,
         "completed_tools": sorted(completed_names),
         "failed_tools": sorted(failed_names),
@@ -437,13 +445,17 @@ def compute_run_quality(
             INSERT INTO lz_run_quality_summary (
                 collection_run_id, tools_expected, tools_completed,
                 tools_skipped, tools_failed, tools_empty,
-                ingestion_errors, warning_count, trust_score
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ingestion_errors, warning_count,
+                warnings_expected_missing, warnings_regression,
+                warnings_degraded, budget_passed, trust_score
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 collection_run_id, tools_expected, tools_completed,
                 tools_skipped, tools_failed, tools_empty,
-                ingestion_errors, 0, trust_score,
+                ingestion_errors, warning_count,
+                wc.get("expected_missing", 0), wc.get("regression", 0),
+                wc.get("degraded", 0), budget_passed, trust_score,
             ],
         )
     except Exception as exc:

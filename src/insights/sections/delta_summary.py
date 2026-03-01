@@ -20,7 +20,7 @@ class DeltaSummarySection(BaseSection):
         name="delta_summary",
         title="Run-over-Run Delta Summary",
         description="Key metric changes compared to the previous analysis run.",
-        priority=3,  # After executive summary, before tool-specific sections
+        priority=1,  # "What changed" — lead actionable section after executive summary
     )
 
     def fetch_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:

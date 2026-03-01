@@ -246,8 +246,20 @@ CREATE TABLE lz_risks (
     manifests_in VARCHAR,
     triggered_by VARCHAR NOT NULL,
     severity VARCHAR NOT NULL,
+    owner VARCHAR,
+    action TEXT,
+    sla_date VARCHAR,
+    status VARCHAR DEFAULT 'open',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (collection_run_id, risk_id)
+);
+
+CREATE TABLE lz_warnings (
+    collection_run_id VARCHAR NOT NULL,
+    category VARCHAR NOT NULL,
+    source VARCHAR NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 """
 
