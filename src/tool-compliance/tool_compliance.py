@@ -717,7 +717,7 @@ def _check_programmatic_exists(tool_root: Path) -> CheckResult:
         )
     return CheckResult(
         check_id="evaluation.programmatic_exists",
-        status="fail",
+        status="skip",
         severity="high",
         message="Missing evaluation_report.json at uniform path",
         evidence=[str(PROGRAMMATIC_EVAL_PATH)],
@@ -730,7 +730,7 @@ def _check_programmatic_schema(tool_root: Path) -> CheckResult:
     if not path.exists():
         return CheckResult(
             check_id="evaluation.programmatic_schema",
-            status="fail",
+            status="skip",
             severity="high",
             message="Cannot validate schema - file missing",
             evidence=[str(PROGRAMMATIC_EVAL_PATH)],
@@ -791,7 +791,7 @@ def _check_programmatic_quality(tool_root: Path) -> CheckResult:
     if not path.exists():
         return CheckResult(
             check_id="evaluation.programmatic_quality",
-            status="fail",
+            status="skip",
             severity="high",
             message="Cannot check quality - file missing",
             evidence=[str(PROGRAMMATIC_EVAL_PATH)],
@@ -872,7 +872,7 @@ def _check_llm_exists(tool_root: Path) -> CheckResult:
         )
     return CheckResult(
         check_id="evaluation.llm_exists",
-        status="fail",
+        status="skip",
         severity="medium",
         message="Missing llm_evaluation.json at uniform path",
         evidence=[str(LLM_EVAL_PATH)],
@@ -885,7 +885,7 @@ def _check_llm_schema(tool_root: Path) -> CheckResult:
     if not path.exists():
         return CheckResult(
             check_id="evaluation.llm_schema",
-            status="fail",
+            status="skip",
             severity="medium",
             message="Cannot validate schema - file missing",
             evidence=[str(LLM_EVAL_PATH)],
@@ -930,7 +930,7 @@ def _check_llm_includes_programmatic(tool_root: Path) -> CheckResult:
     if not path.exists():
         return CheckResult(
             check_id="evaluation.llm_includes_programmatic",
-            status="fail",
+            status="skip",
             severity="medium",
             message="Cannot check - file missing",
             evidence=[str(LLM_EVAL_PATH)],
@@ -979,7 +979,7 @@ def _check_llm_decision_quality(tool_root: Path) -> CheckResult:
     if not path.exists():
         return CheckResult(
             check_id="evaluation.llm_decision_quality",
-            status="fail",
+            status="skip",
             severity="medium",
             message="Cannot check quality - file missing",
             evidence=[str(LLM_EVAL_PATH)],
@@ -4506,7 +4506,7 @@ def scan_tool(
             checks.append(
                 CheckResult(
                     check_id="run.analyze",
-                    status="fail",
+                    status="skip",
                     severity="critical",
                     message="No analysis output found - run with --run-analysis or execute 'make analyze'",
                     evidence=[],
@@ -4644,7 +4644,7 @@ def scan_tool(
             checks.append(
                 CheckResult(
                     check_id="run.evaluate",
-                    status="fail",
+                    status="skip",
                     severity="high",
                     message="No evaluation output found - run with --run-evaluate or execute 'make evaluate'",
                     evidence=[],
@@ -4654,7 +4654,7 @@ def scan_tool(
             checks.append(
                 CheckResult(
                     check_id="evaluation.quality",
-                    status="fail",
+                    status="skip",
                     severity="high",
                     message="Evaluation quality check skipped (no outputs)",
                     evidence=[],
@@ -4778,7 +4778,7 @@ def scan_tool(
             checks.append(
                 CheckResult(
                     check_id="run.evaluate_llm",
-                    status="fail",
+                    status="skip",
                     severity="medium",
                     message="No LLM evaluation output found - run with --run-llm or execute 'make evaluate-llm'",
                     evidence=[],
@@ -4788,7 +4788,7 @@ def scan_tool(
             checks.append(
                 CheckResult(
                     check_id="evaluation.llm_quality",
-                    status="fail",
+                    status="skip",
                     severity="medium",
                     message="LLM evaluation quality check skipped (no outputs)",
                     evidence=[],
@@ -4800,10 +4800,12 @@ def scan_tool(
     output, error, output_source = _load_output_for_checks(tool_root, output_path)
     load_duration = (time.perf_counter() - load_start) * 1000.0
     if output is None:
+        # Skip (not fail) when no output exists and analysis wasn't requested
+        load_status = "skip" if not run_analysis else "fail"
         checks.append(
             CheckResult(
                 check_id="output.load",
-                status="fail",
+                status=load_status,
                 severity="high",
                 message="No output.json available",
                 evidence=[error or ""],

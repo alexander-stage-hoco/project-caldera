@@ -68,7 +68,7 @@ class TestQualityPersist:
         # fk_integrity row
         assert rows[0][0] == "scc"
         assert rows[0][1] == "fk_integrity"
-        assert rows[0][2] == "L2"
+        assert rows[0][2] == "warning"
         assert rows[0][3] is False
         assert rows[0][4] == "warning"
         assert rows[0][6] == pytest.approx(score.overall, abs=0.001)

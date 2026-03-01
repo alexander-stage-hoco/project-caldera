@@ -376,7 +376,7 @@ class DataQualityChecker:
                             collection_run_id,
                             report.tool_name,
                             c.check_name,
-                            c.level.value,
+                            c.severity.value,
                             c.passed,
                             c.severity.value,
                             c.message,

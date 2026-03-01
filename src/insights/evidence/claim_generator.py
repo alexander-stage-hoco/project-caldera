@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import warnings
 from abc import ABC, abstractmethod
-from typing import Any
+from collections import defaultdict
+from typing import TYPE_CHECKING, Any
 
 from ..data_fetcher import DataFetcher
 from .entities import (
@@ -17,6 +18,9 @@ from .entities import (
     EvidenceItem,
     TechnicalClaim,
 )
+
+if TYPE_CHECKING:
+    from ..narrative.enricher import NarrativeEnricher
 
 
 class ClaimRule(ABC):
@@ -323,6 +327,106 @@ class PervasiveDebtRule(ClaimRule):
 
 
 # ---------------------------------------------------------------------------
+# LLM Synthesis Rule — cross-signal compound-risk detection
+# ---------------------------------------------------------------------------
+
+
+class LLMSynthesisRule(ClaimRule):
+    """Finds files appearing in 3+ evidence categories, generates compound-risk claims via LLM."""
+
+    category = "quality"
+    abbr = "SYNT"
+
+    def __init__(self, enricher: NarrativeEnricher) -> None:
+        self._enricher = enricher
+
+    def evaluate(
+        self,
+        evidence: list[EvidenceItem],
+        fetcher: DataFetcher,
+        run_pk: int,
+    ) -> list[TechnicalClaim]:
+        # Group evidence by location
+        by_location: dict[str, list[EvidenceItem]] = defaultdict(list)
+        for e in evidence:
+            if e.location:
+                by_location[e.location].append(e)
+
+        # Find hotspots: locations with evidence in 3+ distinct categories
+        hotspots: list[tuple[str, set[str], list[EvidenceItem]]] = []
+        for loc, items in by_location.items():
+            categories = {e.category for e in items}
+            if len(categories) >= 3:
+                hotspots.append((loc, categories, items))
+
+        if not hotspots:
+            return []
+
+        # Sort by number of categories descending, take top 10
+        hotspots.sort(key=lambda x: len(x[1]), reverse=True)
+        hotspots = hotspots[:10]
+
+        # Build data for LLM
+        hotspot_data = [
+            {
+                "file": loc,
+                "categories": sorted(cats),
+                "excerpts": [e.excerpt for e in items[:3]],
+            }
+            for loc, cats, items in hotspots
+        ]
+
+        result = self._enricher.enrich(
+            task=(
+                "For each file listed below, write one sentence describing the "
+                "compound risk from overlapping analysis signals. Each line should "
+                "start with the file path followed by a colon. Be specific about "
+                "the risk combination."
+            ),
+            data={"hotspot_files": hotspot_data},
+            max_tokens=400,
+        )
+
+        if not result:
+            return []
+
+        # Parse response lines into claims
+        claims: list[TechnicalClaim] = []
+        seq = 0
+        for line in result.strip().splitlines():
+            line = line.strip()
+            if not line or ":" not in line:
+                continue
+
+            # Find matching hotspot for this line
+            matched_hotspot = None
+            for loc, cats, items in hotspots:
+                if loc in line:
+                    matched_hotspot = (loc, cats, items)
+                    break
+
+            if not matched_hotspot:
+                continue
+
+            loc, cats, items = matched_hotspot
+            seq += 1
+            claims.append(
+                TechnicalClaim(
+                    claim_id=f"CLM-{self.abbr}-{seq:03d}",
+                    category=self.category,
+                    statement=line,
+                    evidence_ids=tuple(e.evidence_id for e in items[:10]),
+                    implication="Multiple independent analysis signals converge "
+                    "on this location, indicating compound risk.",
+                    confidence="high" if len(cats) >= 4 else "medium",
+                    triggered_by="LLMSynthesisRule",
+                )
+            )
+
+        return claims
+
+
+# ---------------------------------------------------------------------------
 # ClaimGenerator — orchestrates all rules
 # ---------------------------------------------------------------------------
 
@@ -341,9 +445,13 @@ class ClaimGenerator:
     """Evaluates all claim rules against collected evidence."""
 
     def __init__(
-        self, rules: tuple[type[ClaimRule], ...] | None = None
+        self,
+        rules: tuple[type[ClaimRule], ...] | None = None,
+        enricher: NarrativeEnricher | None = None,
     ) -> None:
-        self._rules = [cls() for cls in (rules or DEFAULT_RULES)]
+        self._rules: list[ClaimRule] = [cls() for cls in (rules or DEFAULT_RULES)]
+        if enricher is not None:
+            self._rules.append(LLMSynthesisRule(enricher))
 
     def generate(
         self,

@@ -9,7 +9,7 @@ import warnings
 from dataclasses import dataclass
 from typing import Any
 
-from .base import BaseSection, SectionConfig
+from .base import NarrativeAwareSection, SectionConfig
 from ..data_fetcher import DataFetcher
 
 
@@ -27,7 +27,7 @@ class Insight:
     files: list[str]  # affected files (up to 5)
 
 
-class ExecutiveSummarySection(BaseSection):
+class ExecutiveSummarySection(NarrativeAwareSection):
     """
     Executive summary section with prioritized insights.
 
@@ -78,6 +78,35 @@ class ExecutiveSummarySection(BaseSection):
             vuln_data, complexity_data, health_data
         )
 
+        # LLM narrative paragraph (when enricher is available)
+        narrative_paragraph = None
+        if self._enricher and top_insights:
+            narrative_paragraph = self._enricher.enrich(
+                task=(
+                    "Write a 3-4 sentence executive summary paragraph interpreting "
+                    "the top code analysis findings. Explain what they mean for the "
+                    "team, cross-reference signals when relevant, and suggest the "
+                    "most important first action. Use specific file names and metric values."
+                ),
+                data={
+                    "risk_level": risk_summary["overall_risk"],
+                    "top_insights": [
+                        {
+                            "title": i.title,
+                            "severity": i.severity,
+                            "description": i.description,
+                            "evidence": i.evidence,
+                            "files": i.files[:3],
+                        }
+                        for i in top_insights
+                    ],
+                    "total_files": health_data.get("total_files", 0),
+                    "total_loc": health_data.get("total_loc", 0),
+                    "trust_score": trust_data.get("trust_score"),
+                },
+                max_tokens=300,
+            )
+
         # Generate recommended actions from top insights
         recommended_actions = [
             {"priority": i + 1, "action": ins.remediation, "category": ins.category}
@@ -101,6 +130,7 @@ class ExecutiveSummarySection(BaseSection):
             "warning_count": trust_data.get("warning_count", 0),
             "trust_trend_direction": trust_data.get("trend_direction"),
             "trust_trend_previous": trust_data.get("trend_previous"),
+            "narrative_paragraph": narrative_paragraph,
         }
 
     def _fetch_vulnerability_data(
@@ -716,4 +746,5 @@ class ExecutiveSummarySection(BaseSection):
             "warning_count": 0,
             "trust_trend_direction": None,
             "trust_trend_previous": None,
+            "narrative_paragraph": None,
         }

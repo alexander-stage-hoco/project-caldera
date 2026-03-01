@@ -53,6 +53,18 @@ previous_agg AS (
     FROM unified_file_metrics uf
     JOIN previous_run pr ON pr.collection_run_id = uf.collection_run_id
     GROUP BY pr.collection_run_id, pr.commit
+),
+
+current_quality AS (
+    SELECT q.trust_score, q.warning_count, q.budget_passed
+    FROM lz_run_quality_summary q
+    JOIN current_run cr ON cr.collection_run_id = q.collection_run_id
+),
+
+previous_quality AS (
+    SELECT q.trust_score, q.warning_count, q.budget_passed
+    FROM lz_run_quality_summary q
+    JOIN previous_run pr ON pr.collection_run_id = q.collection_run_id
 )
 
 SELECT
@@ -69,7 +81,12 @@ SELECT
     CASE WHEN c.total_ccn > p.total_ccn THEN TRUE ELSE FALSE END AS regression_complexity,
     CASE WHEN c.avg_coverage_pct < p.avg_coverage_pct THEN TRUE ELSE FALSE END AS regression_coverage,
     CASE WHEN c.total_secrets > p.total_secrets THEN TRUE ELSE FALSE END AS regression_secrets,
-    CASE WHEN c.total_trivy > p.total_trivy THEN TRUE ELSE FALSE END AS regression_trivy
+    CASE WHEN c.total_trivy > p.total_trivy THEN TRUE ELSE FALSE END AS regression_trivy,
+    cq.trust_score - pq.trust_score AS delta_trust_score,
+    CASE WHEN cq.trust_score < pq.trust_score THEN TRUE ELSE FALSE END AS regression_trust,
+    CASE WHEN NOT cq.budget_passed AND pq.budget_passed THEN TRUE ELSE FALSE END AS regression_budget
 FROM current_agg c
 CROSS JOIN previous_agg p
+LEFT JOIN current_quality cq ON TRUE
+LEFT JOIN previous_quality pq ON TRUE
 LIMIT 1

@@ -19,7 +19,7 @@ from .formatters.base import BaseFormatter
 from .formatters.html import HtmlFormatter
 from .formatters.markdown import MarkdownFormatter
 from .formatters.pack import PackFormatter
-from .sections.base import BaseSection, EvidenceAwareSection, SectionData
+from .sections.base import BaseSection, EvidenceAwareSection, NarrativeAwareSection, SectionData
 from .sections.executive_summary import ExecutiveSummarySection
 from .sections.repo_health import RepoHealthSection
 from .sections.file_hotspots import FileHotspotsSection
@@ -68,6 +68,8 @@ from .profiles import StakeholderProfile, get_profile
 
 class InsightsGenerator:
     """Main entry point for generating Caldera Insights reports."""
+
+    _enricher = None  # Set by __init__ when report_llm=True
 
     # Available sections, ordered by priority
     SECTIONS: dict[str, type[BaseSection]] = {
@@ -121,6 +123,7 @@ class InsightsGenerator:
         db_path: Path,
         dbt_project_dir: Path | None = None,
         templates_dir: Path | None = None,
+        report_llm: bool = False,
     ):
         """
         Initialize the InsightsGenerator.
@@ -129,18 +132,26 @@ class InsightsGenerator:
             db_path: Path to the DuckDB database file.
             dbt_project_dir: Optional path to dbt project directory.
             templates_dir: Optional custom templates directory.
+            report_llm: Enable LLM narrative enrichment in reports.
         """
         self.db_path = Path(db_path)
         self.fetcher = DataFetcher(db_path, dbt_project_dir)
         self.templates_dir = templates_dir
+
+        # Initialize narrative enricher (only when flag is on)
+        self._enricher = None
+        if report_llm:
+            from .narrative import NarrativeEnricher
+
+            self._enricher = NarrativeEnricher()
 
         # Initialize section instances
         self.sections: dict[str, BaseSection] = {
             name: cls() for name, cls in self.SECTIONS.items()
         }
 
-        # Initialize evidence builder
-        self._evidence_builder = EvidenceRegistryBuilder()
+        # Initialize evidence builder (with optional enricher for LLM synthesis rule)
+        self._evidence_builder = EvidenceRegistryBuilder(enricher=self._enricher)
 
         # Initialize formatters
         self._formatters: dict[str, BaseFormatter] = {
@@ -220,6 +231,8 @@ class InsightsGenerator:
             section = self.sections[name]
             if isinstance(section, EvidenceAwareSection):
                 section.set_evidence_registry(registry)
+            if isinstance(section, NarrativeAwareSection) and self._enricher:
+                section.set_enricher(self._enricher)
             section_data = self._render_section(section, run_pk, formatter)
             rendered_sections.append(section_data)
 
@@ -466,6 +479,8 @@ class InsightsGenerator:
             section = self.sections[name]
             if isinstance(section, EvidenceAwareSection):
                 section.set_evidence_registry(registry)
+            if isinstance(section, NarrativeAwareSection) and self._enricher:
+                section.set_enricher(self._enricher)
             try:
                 data = section.fetch_data(self.fetcher, run_pk)
             except Exception as e:

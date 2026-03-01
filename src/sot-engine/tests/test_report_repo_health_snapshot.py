@@ -27,7 +27,11 @@ def test_report_health_snapshot_joins_lizard_run() -> None:
             total_ccn integer,
             avg_ccn double,
             max_ccn integer,
-            avg_nloc double
+            avg_nloc double,
+            trust_score integer,
+            warning_count integer,
+            budget_passed boolean,
+            tools_failed integer
         )
         """
     )
@@ -107,7 +111,7 @@ def test_report_health_snapshot_joins_lizard_run() -> None:
     conn.execute(
         """
         insert into unified_run_summary values
-            (10, 'collection-1', 'repo-1', 'run-1', 2, 20, 10, 5, 5, 9, 1.5, 3, 42.0)
+            (10, 'collection-1', 'repo-1', 'run-1', 2, 20, 10, 5, 5, 9, 1.5, 3, 42.0, 85, 2, true, 0)
         """
     )
     conn.execute(
@@ -132,4 +136,4 @@ def test_report_health_snapshot_joins_lizard_run() -> None:
 
     rows = conn.execute(sql_text).fetchall()
     assert rows
-    assert rows[0][16] == 7.0
+    assert rows[0][20] == 7.0
