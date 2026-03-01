@@ -248,6 +248,13 @@ def main() -> int:
             shutil.copy2(src, dest / optional_name)
             copied_files.append(optional_name)
 
+    # Copy LLM observability logs if present
+    llm_logs_src = run_dir / "llm_logs"
+    if llm_logs_src.is_dir() and any(llm_logs_src.iterdir()):
+        shutil.copytree(llm_logs_src, dest / "llm_logs", dirs_exist_ok=True)
+        log_count = sum(1 for _ in llm_logs_src.rglob("*.jsonl"))
+        copied_files.append(f"llm_logs/ ({log_count} files)")
+
     # Copy raw tool outputs if requested
     tool_outputs_included = False
     if args.include_tool_outputs:
@@ -358,6 +365,7 @@ def main() -> int:
     print(f"  Files:     {', '.join(copied_files)}")
     print(f"  dbt:       {'included' if dbt_artifacts_included else 'not found'}")
     print(f"  Evidence:  {'included' if evidence_included else 'not requested' if not args.include_evidence else 'empty'}")
+    print(f"  LLM logs:  {'included' if (dest / 'llm_logs').is_dir() else 'none'}")
     print(f"  Checksums: {len(checksums)} files hashed")
     print(f"  Commit:    {commit_sha}")
     print(f"  Pushed:    {'yes' if args.push else 'no'}")
