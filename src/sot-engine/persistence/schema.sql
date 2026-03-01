@@ -620,3 +620,67 @@ CREATE TABLE lz_coverage_summary (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (run_pk, file_id)
 );
+
+-- =============================================================================
+-- Run quality summary: per-collection-run trust signal
+-- =============================================================================
+
+CREATE TABLE lz_run_quality_summary (
+    collection_run_id VARCHAR NOT NULL PRIMARY KEY,
+    tools_expected INTEGER NOT NULL,
+    tools_completed INTEGER NOT NULL,
+    tools_skipped INTEGER NOT NULL,
+    tools_failed INTEGER NOT NULL,
+    tools_empty INTEGER NOT NULL,
+    ingestion_errors INTEGER NOT NULL DEFAULT 0,
+    warning_count INTEGER NOT NULL DEFAULT 0,
+    trust_score INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================================================
+-- Evidence, Claims, and Risks: persisted from the insights pipeline
+-- =============================================================================
+
+CREATE TABLE lz_evidence (
+    collection_run_id VARCHAR NOT NULL,
+    evidence_id VARCHAR NOT NULL,
+    evidence_type VARCHAR NOT NULL,
+    category VARCHAR NOT NULL,
+    location VARCHAR NOT NULL,
+    excerpt TEXT,
+    observation TEXT,
+    why_it_matters TEXT,
+    tool_source VARCHAR NOT NULL,
+    run_pk BIGINT NOT NULL,
+    confidence VARCHAR NOT NULL DEFAULT 'high',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (collection_run_id, evidence_id)
+);
+
+CREATE TABLE lz_claims (
+    collection_run_id VARCHAR NOT NULL,
+    claim_id VARCHAR NOT NULL,
+    category VARCHAR NOT NULL,
+    statement TEXT NOT NULL,
+    evidence_ids VARCHAR NOT NULL,
+    implication TEXT,
+    confidence VARCHAR NOT NULL,
+    triggered_by VARCHAR NOT NULL,
+    severity VARCHAR,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (collection_run_id, claim_id)
+);
+
+CREATE TABLE lz_risks (
+    collection_run_id VARCHAR NOT NULL,
+    risk_id VARCHAR NOT NULL,
+    description TEXT NOT NULL,
+    technical_cause TEXT,
+    claim_ids VARCHAR NOT NULL,
+    manifests_in VARCHAR,
+    triggered_by VARCHAR NOT NULL,
+    severity VARCHAR NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (collection_run_id, risk_id)
+);

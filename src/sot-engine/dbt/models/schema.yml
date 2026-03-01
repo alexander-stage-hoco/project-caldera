@@ -45,6 +45,14 @@ sources:
         description: Per-author aggregate statistics from git-blame-scanner
       - name: lz_coverage_summary
         description: Per-file coverage metrics from coverage-ingest (LCOV, Cobertura, JaCoCo, Istanbul)
+      - name: lz_run_quality_summary
+        description: Per-collection-run trust signal with tool completion counts and trust score
+      - name: lz_evidence
+        description: Persisted evidence items from the insights pipeline
+      - name: lz_claims
+        description: Persisted technical claims derived from evidence
+      - name: lz_risks
+        description: Persisted execution risks aggregated from claims
 
 models:
   - name: stg_lz_tool_runs

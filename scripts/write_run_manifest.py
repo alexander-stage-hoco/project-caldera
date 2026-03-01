@@ -48,8 +48,35 @@ def main() -> int:
             [args.collection_run_id],
         ).fetchall()
 
+        # Fetch trust / quality summary if available
+        trust = None
+        try:
+            qs = conn.execute(
+                """
+                SELECT tools_expected, tools_completed, tools_skipped,
+                       tools_failed, tools_empty, ingestion_errors,
+                       warning_count, trust_score
+                FROM lz_run_quality_summary
+                WHERE collection_run_id = ?
+                """,
+                [args.collection_run_id],
+            ).fetchone()
+            if qs:
+                trust = {
+                    "tools_expected": qs[0],
+                    "tools_completed": qs[1],
+                    "tools_skipped": qs[2],
+                    "tools_failed": qs[3],
+                    "tools_empty": qs[4],
+                    "ingestion_errors": qs[5],
+                    "warning_count": qs[6],
+                    "trust_score": qs[7],
+                }
+        except Exception:
+            pass  # table may not exist in older databases
+
         manifest = {
-            "schema_version": 1,
+            "schema_version": 2,
             "generated_at": _utc_now_iso(),
             "db_path": str(db_path),
             "report_path": str(Path(args.report).expanduser()) if args.report else None,
@@ -63,6 +90,7 @@ def main() -> int:
                 "completed_at": str(cr[6]) if cr[6] is not None else None,
                 "status": cr[7],
             },
+            "trust": trust,
             "tools": [
                 {
                     "run_pk": int(r[0]),

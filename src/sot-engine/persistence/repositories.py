@@ -89,6 +89,10 @@ _VALID_LZ_TABLES = frozenset([
     "lz_git_blame_summary",
     "lz_git_blame_author_stats",
     "lz_coverage_summary",
+    "lz_run_quality_summary",
+    "lz_evidence",
+    "lz_claims",
+    "lz_risks",
 ])
 
 

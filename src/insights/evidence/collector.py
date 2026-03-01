@@ -3,12 +3,18 @@
 Each ``collect_*`` method runs a query against an existing dbt mart and maps
 rows to ``EvidenceItem`` instances.  If the underlying table does not exist
 (because the tool was not run), the method silently returns an empty list.
+
+Warnings are classified into categories for budgeting:
+- ``expected_missing``: tool was not run or is not applicable
+- ``regression``: query that previously worked now fails
+- ``degraded``: partial results returned
 """
 
 from __future__ import annotations
 
 import warnings
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Literal
 
 from ..data_fetcher import DataFetcher
 from .entities import EVIDENCE_CATEGORIES, EvidenceCategory, EvidenceItem
@@ -23,6 +29,43 @@ _CATEGORY_ABBR: dict[EvidenceCategory, str] = {
     "quality": "QUAL",
 }
 
+WarningCategory = Literal["expected_missing", "regression", "degraded"]
+
+
+@dataclass
+class CollectorWarning:
+    """A classified warning emitted during evidence collection."""
+
+    category: WarningCategory
+    source: str
+    message: str
+
+
+@dataclass
+class CollectionResult:
+    """Result of evidence collection with classified warnings."""
+
+    items: list[EvidenceItem] = field(default_factory=list)
+    warnings: list[CollectorWarning] = field(default_factory=list)
+
+    def warning_counts(self) -> dict[WarningCategory, int]:
+        counts: dict[WarningCategory, int] = {
+            "expected_missing": 0,
+            "regression": 0,
+            "degraded": 0,
+        }
+        for w in self.warnings:
+            counts[w.category] = counts.get(w.category, 0) + 1
+        return counts
+
+
+# Known queries that map to optional tools — missing data is expected
+_OPTIONAL_QUERIES: frozenset[str] = frozenset({
+    "evidence_coupling",    # requires symbol-scanner (not always run)
+    "evidence_coverage",    # requires coverage-ingest (not always run)
+    "evidence_ownership",   # requires git-blame-scanner (not always run)
+})
+
 
 class EvidenceCollector:
     """Collects evidence items from SQL queries on existing marts."""
@@ -33,7 +76,16 @@ class EvidenceCollector:
         run_pk: int,
     ) -> list[EvidenceItem]:
         """Run all evidence source queries and return combined results."""
-        items: list[EvidenceItem] = []
+        result = self.collect_with_warnings(fetcher, run_pk)
+        return result.items
+
+    def collect_with_warnings(
+        self,
+        fetcher: DataFetcher,
+        run_pk: int,
+    ) -> CollectionResult:
+        """Run all evidence source queries and return items + classified warnings."""
+        result = CollectionResult()
 
         collectors = [
             self._collect_complexity,
@@ -46,14 +98,26 @@ class EvidenceCollector:
 
         for collector_fn in collectors:
             try:
-                items.extend(collector_fn(fetcher, run_pk))
+                result.items.extend(collector_fn(fetcher, run_pk))
             except Exception as exc:
+                source = collector_fn.__name__
+                # Classify warning based on query type
+                query_name = source.replace("_collect_", "evidence_")
+                if query_name in _OPTIONAL_QUERIES:
+                    category: WarningCategory = "expected_missing"
+                else:
+                    category = "regression"
+                result.warnings.append(CollectorWarning(
+                    category=category,
+                    source=source,
+                    message=str(exc),
+                ))
                 warnings.warn(
-                    f"[EvidenceCollector] {collector_fn.__name__} failed: {exc}",
+                    f"[EvidenceCollector] {source} failed ({category}): {exc}",
                     stacklevel=2,
                 )
 
-        return items
+        return result
 
     # -- Per-category collectors -------------------------------------------
 
@@ -236,8 +300,9 @@ class EvidenceCollector:
         try:
             return fetcher.fetch(query_name, run_pk)
         except Exception as exc:
+            category = "expected_missing" if query_name in _OPTIONAL_QUERIES else "regression"
             warnings.warn(
-                f"[EvidenceCollector] Query '{query_name}' failed: {exc}",
+                f"[EvidenceCollector] Query '{query_name}' failed ({category}): {exc}",
                 stacklevel=2,
             )
             return []
