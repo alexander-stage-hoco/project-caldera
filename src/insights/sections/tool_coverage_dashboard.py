@@ -25,7 +25,7 @@ class ToolCoverageDashboardSection(BaseSection):
         name="tool_coverage_dashboard",
         title="Tool Coverage Dashboard",
         description="Shows which analysis tools ran for this collection and files analyzed.",
-        priority=1,  # After tool_readiness (0), before executive_summary (2)
+        priority=2,  # After delta_summary (1), before tool-specific sections
     )
 
     # Critical tools that should always run for basic analysis

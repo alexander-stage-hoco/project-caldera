@@ -1,0 +1,72 @@
+<section id="{{ section_id }}" class="report-section">
+    <h2>Run-over-Run Delta Summary</h2>
+
+    {% if not has_previous_run %}
+    <p class="info-message">No previous run found for comparison. Delta analysis requires at least two completed runs for the same repository.</p>
+    {% else %}
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">Regressions Detected</div>
+            <div class="value {{ 'status-warning' if regression_count > 0 else 'status-ok' }}">{{ regression_count }}</div>
+            {% if regression_flags %}
+            <div class="sublabel">{{ regression_flags | join(', ') }}</div>
+            {% endif %}
+        </div>
+        <div class="metric-card">
+            <div class="label">Files Changed</div>
+            <div class="value">{{ summary.delta_files | default(0) | format_number }}</div>
+            <div class="sublabel">{{ summary.current_files | default(0) | format_number }} total</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Code Lines Delta</div>
+            <div class="value">{{ '%+d' | format(summary.delta_code_lines | default(0)) }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Complexity Delta</div>
+            <div class="value {{ 'status-warning' if (summary.delta_ccn | default(0)) > 0 else '' }}">{{ '%+d' | format(summary.delta_ccn | default(0)) }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Coverage Delta</div>
+            <div class="value {{ 'status-warning' if (summary.delta_coverage_pct | default(0)) < 0 else '' }}">{{ '%+.1f%%' | format(summary.delta_coverage_pct | default(0)) }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Secrets Delta</div>
+            <div class="value {{ 'status-critical' if (summary.delta_secrets | default(0)) > 0 else '' }}">{{ '%+d' | format(summary.delta_secrets | default(0)) }}</div>
+        </div>
+    </div>
+
+    {% if top_regressions %}
+    <h3>Top Regressed Files ({{ total_regressed_files }} total)</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Type</th>
+                <th>CCN</th>
+                <th>Coverage</th>
+                <th>Issues</th>
+                <th>Secrets</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in top_regressions %}
+            <tr>
+                <td class="file-path">{{ row.relative_path }}</td>
+                <td>{{ row.change_type }}</td>
+                <td class="{{ 'status-warning' if row.delta_ccn > 0 else '' }}">{{ '%+d' | format(row.delta_ccn | default(0)) }}</td>
+                <td class="{{ 'status-warning' if row.delta_coverage < 0 else '' }}">{{ '%+.0f' | format(row.delta_coverage | default(0)) }}</td>
+                <td class="{{ 'status-warning' if row.delta_issues > 0 else '' }}">{{ '%+d' | format(row.delta_issues | default(0)) }}</td>
+                <td class="{{ 'status-critical' if row.delta_secrets > 0 else '' }}">{{ '%+d' | format(row.delta_secrets | default(0)) }}</td>
+                <td>{{ row.regression_score | format_number }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <div class="comparison-info">
+        <small>Comparing commit <code>{{ summary.current_commit[:8] | default('?') }}</code> vs <code>{{ summary.previous_commit[:8] | default('?') }}</code></small>
+    </div>
+    {% endif %}
+</section>

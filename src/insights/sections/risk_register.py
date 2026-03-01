@@ -44,6 +44,10 @@ class RiskRegisterSection(EvidenceAwareSection):
                 "triggered_by": risk.triggered_by,
                 "claim_count": len(risk.claim_ids),
                 "manifests_in": list(risk.manifests_in[:5]),
+                "owner": risk.owner,
+                "action": risk.action,
+                "sla_date": risk.sla_date,
+                "status": risk.status,
                 "claims": [
                     {
                         "claim_id": c.claim_id,

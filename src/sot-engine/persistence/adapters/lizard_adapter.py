@@ -167,7 +167,11 @@ class LizardAdapter(BaseAdapter):
 
         for entry in files:
             relative_path = self._normalize_path(entry.get("path", ""))
-            file_id, _ = self._layout_repo.get_file_record(layout_run_pk, relative_path)
+            try:
+                file_id, _ = self._layout_repo.get_file_record(layout_run_pk, relative_path)
+            except KeyError:
+                self._log(f"WARN: skipping file not in layout: {relative_path}")
+                continue
 
             if file_tracker.is_duplicate(file_id, label=relative_path):
                 continue

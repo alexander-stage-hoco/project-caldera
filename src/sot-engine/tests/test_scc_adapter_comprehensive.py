@@ -367,3 +367,39 @@ class TestSccAdapter:
         assert count == 2  # Duplicate should be skipped
 
         conn.close()
+
+    def test_skips_files_not_in_layout(self, tmp_path: Path) -> None:
+        """Files not present in layout should be skipped, not crash."""
+        db_path = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db_path))
+        _load_schema(conn)
+
+        repo_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        run_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+        _create_layout_run(conn, run_id, repo_id)
+
+        payload = _load_scc_fixture()
+        payload["metadata"]["repo_id"] = repo_id
+        payload["metadata"]["run_id"] = run_id
+        payload["data"]["files"].append({
+            "path": "nonexistent/unknown_file.py",
+            "filename": "unknown_file.py",
+            "extension": "py",
+            "language": "Python",
+            "lines": 50, "code": 40, "comment": 5, "blank": 5,
+            "bytes": 1000, "complexity": 2,
+        })
+
+        run_repo = ToolRunRepository(conn)
+        layout_repo = LayoutRepository(conn)
+        scc_repo = SccRepository(conn)
+
+        adapter = SccAdapter(run_repo, layout_repo, scc_repo, Path("/tmp/test-repo"), None)
+        run_pk = adapter.persist(payload)
+
+        count = conn.execute(
+            "SELECT COUNT(*) FROM lz_scc_file_metrics WHERE run_pk = ?", [run_pk]
+        ).fetchone()[0]
+        assert count == 2  # Only the 2 known files, unknown skipped
+
+        conn.close()

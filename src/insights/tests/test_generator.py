@@ -42,6 +42,7 @@ class TestInsightsGenerator:
             "code_quality_rules",
             "sonarqube_deep_dive",
             "coverage_gap",
+            "delta_summary",
             "technical_debt_summary",
             "coupling_debt",
             "component_inventory",

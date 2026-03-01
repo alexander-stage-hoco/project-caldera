@@ -63,6 +63,7 @@ class ExecutiveSummarySection(BaseSection):
         size_data = self._fetch_size_data(fetcher, run_pk)
         health_data = self._fetch_health_data(fetcher, run_pk)
         smell_data = self._fetch_smell_data(fetcher, run_pk)
+        trust_data = self._fetch_trust_score(fetcher, run_pk)
 
         # Generate prioritized insights
         all_insights = self._generate_insights(
@@ -94,6 +95,12 @@ class ExecutiveSummarySection(BaseSection):
             "critical_vuln_count": vuln_data.get("critical_count", 0),
             "high_complexity_files": complexity_data.get("total_high_complexity", 0),
             "security_scanned": vuln_data.get("scan_ran", False),
+            "trust_score": trust_data.get("trust_score"),
+            "tools_completed": trust_data.get("tools_completed", 0),
+            "tools_expected": trust_data.get("tools_expected", 0),
+            "warning_count": trust_data.get("warning_count", 0),
+            "trust_trend_direction": trust_data.get("trend_direction"),
+            "trust_trend_previous": trust_data.get("trend_previous"),
         }
 
     def _fetch_vulnerability_data(
@@ -255,6 +262,33 @@ class ExecutiveSummarySection(BaseSection):
         except Exception as exc:
             warnings.warn(f"[{self.config.name}] Fetching health data failed: {exc}", stacklevel=2)
             return {}
+
+    def _fetch_trust_score(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
+        """Fetch trust score from lz_run_quality_summary with trend data."""
+        result: dict[str, Any] = {}
+        try:
+            rows = fetcher.fetch("trust_score", run_pk)
+            if rows:
+                result = dict(rows[0])
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Fetching trust score failed: {exc}", stacklevel=2)
+
+        # Fetch trend (recent runs for same repo)
+        try:
+            trend = fetcher.fetch("trust_score_trend", run_pk)
+            if len(trend) >= 2:
+                scores = [r.get("trust_score", 0) for r in trend]
+                result["trend_scores"] = scores
+                result["trend_direction"] = (
+                    "improving" if scores[0] > scores[1]
+                    else "declining" if scores[0] < scores[1]
+                    else "stable"
+                )
+                result["trend_previous"] = scores[1]
+        except Exception:
+            pass  # Trend is optional
+
+        return result
 
     def _fetch_smell_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
         """Fetch code smell data."""
@@ -676,4 +710,10 @@ class ExecutiveSummarySection(BaseSection):
             "vuln_count": 0,
             "critical_vuln_count": 0,
             "high_complexity_files": 0,
+            "trust_score": None,
+            "tools_completed": 0,
+            "tools_expected": 0,
+            "warning_count": 0,
+            "trust_trend_direction": None,
+            "trust_trend_previous": None,
         }

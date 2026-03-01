@@ -132,6 +132,9 @@ class TechnicalClaim:
 # ---------------------------------------------------------------------------
 
 
+RiskStatus = Literal["open", "mitigating", "accepted", "resolved"]
+
+
 @dataclass(frozen=True)
 class ExecutionRisk:
     """An aggregated execution risk derived from one or more claims.
@@ -146,6 +149,10 @@ class ExecutionRisk:
     manifests_in: tuple[str, ...]
     triggered_by: str
     severity: RiskSeverity
+    owner: str | None = None
+    action: str | None = None
+    sla_date: str | None = None
+    status: RiskStatus = "open"
 
     def __post_init__(self) -> None:
         if not _RISK_ID_RE.match(self.risk_id):
@@ -156,6 +163,8 @@ class ExecutionRisk:
             raise ValueError("A risk must reference at least one claim_id")
         if not self.description:
             raise ValueError("description must not be empty")
+        if self.status not in ("open", "mitigating", "accepted", "resolved"):
+            raise ValueError(f"Invalid risk status: {self.status!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -174,10 +183,14 @@ class EvidenceRegistry:
         evidence: list[EvidenceItem] | None = None,
         claims: list[TechnicalClaim] | None = None,
         risks: list[ExecutionRisk] | None = None,
+        warning_count: int = 0,
+        warning_details: dict[str, Any] | None = None,
     ) -> None:
         self._evidence: list[EvidenceItem] = list(evidence or [])
         self._claims: list[TechnicalClaim] = list(claims or [])
         self._risks: list[ExecutionRisk] = list(risks or [])
+        self.warning_count: int = warning_count
+        self.warning_details: dict[str, Any] = warning_details or {}
 
         # Build lookup indices
         self._evidence_by_id: dict[str, EvidenceItem] = {

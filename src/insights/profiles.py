@@ -38,6 +38,7 @@ CTO_PROFILE = StakeholderProfile(
             "tool_readiness",
             "tool_coverage_dashboard",
             "executive_summary",
+            "delta_summary",
             "technical_debt_summary",
             "coupling_debt",
             "composite_risk",

@@ -308,3 +308,38 @@ class TestGitBlameScannerAdapter:
         assert len(joined) == 3
 
         conn.close()
+
+    def test_skips_files_not_in_layout(self, tmp_path: Path) -> None:
+        """Files not present in layout should be skipped, not crash."""
+        db_path = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db_path))
+        _load_schema(conn)
+
+        repo_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        run_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+        _create_layout_run(conn, run_id, repo_id)
+
+        payload = _load_git_blame_fixture()
+        payload["metadata"]["repo_id"] = repo_id
+        payload["metadata"]["run_id"] = run_id
+        payload["data"]["files"].append({
+            "path": "nonexistent/unknown_file.py",
+            "total_lines": 100, "unique_authors": 1,
+            "top_author": "ghost@example.com", "top_author_lines": 100,
+            "top_author_pct": 100.0, "last_modified": "2025-01-01",
+            "churn_30d": 0, "churn_90d": 0,
+        })
+
+        run_repo = ToolRunRepository(conn)
+        layout_repo = LayoutRepository(conn)
+        git_blame_repo = GitBlameRepository(conn)
+
+        adapter = GitBlameScannerAdapter(run_repo, layout_repo, git_blame_repo, Path("/tmp/test-repo"), None)
+        run_pk = adapter.persist(payload)
+
+        count = conn.execute(
+            "SELECT COUNT(*) FROM lz_git_blame_summary WHERE run_pk = ?", [run_pk]
+        ).fetchone()[0]
+        assert count == 3  # Only the 3 known files, unknown skipped
+
+        conn.close()
