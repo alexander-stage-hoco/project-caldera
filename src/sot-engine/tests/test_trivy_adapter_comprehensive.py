@@ -467,12 +467,10 @@ class TestTrivyAdapter:
         conn.close()
 
     def test_iac_misconfig_string_line_values(self, tmp_path: Path) -> None:
-        """Test that IaC misconfigs with string line numbers are coerced or rejected.
-
-        When schema validation is unavailable (e.g. schema file missing), string
-        line numbers like start_line="10" should be coerced to int, while
-        non-numeric values like end_line="abc" should produce a quality error
-        instead of a TypeError.
+        """
+        Verify that IaC misconfigurations with string line numbers are validated and coerced appropriately when the JSON schema file is unavailable.
+        
+        When schema validation is skipped, string values that represent integers (e.g., "10") are accepted and coerced to integers, while non-numeric strings for line numbers (e.g., "abc") cause a quality validation failure.
         """
         db_path = tmp_path / "test.duckdb"
         conn = duckdb.connect(str(db_path))
@@ -515,6 +513,112 @@ class TestTrivyAdapter:
         )
 
         # Simulate schema file unavailable so string types reach quality validation
+        with patch.object(type(adapter), "schema_path", new_callable=lambda: property(lambda self: None)):
+            with pytest.raises(ValueError, match="quality validation failed"):
+                adapter.persist(trivy_payload)
+
+        conn.close()
+
+    def test_iac_misconfig_float_line_values(self, tmp_path: Path) -> None:
+        """Test that IaC misconfigs with float line numbers are rejected.
+
+        Float values like start_line=3.7 must not be silently truncated to 3
+        via int(). The adapter should reject them with a quality error.
+        """
+        db_path = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db_path))
+        _load_schema(conn)
+
+        repo_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        run_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+
+        _create_layout_run(conn, run_id, repo_id)
+
+        trivy_fixture = Path(__file__).resolve().parents[1] / "persistence" / "fixtures" / "trivy_output.json"
+        trivy_payload = json.loads(trivy_fixture.read_text())
+
+        # Inject an IaC misconfig with float line numbers
+        trivy_payload["data"]["iac_misconfigurations"]["misconfigurations"].append(
+            {
+                "id": "AVD-DS-0098",
+                "severity": "MEDIUM",
+                "title": "Float line numbers",
+                "description": "A misconfig with float start_line and end_line",
+                "resolution": "Use integer line numbers",
+                "target": "Dockerfile",
+                "target_type": "dockerfile",
+                "start_line": 3.7,
+                "end_line": 5.2,
+            }
+        )
+        trivy_payload["data"]["iac_misconfigurations"]["count"] = 3
+
+        run_repo = ToolRunRepository(conn)
+        layout_repo = LayoutRepository(conn)
+        trivy_repo = TrivyRepository(conn)
+
+        adapter = TrivyAdapter(
+            run_repo,
+            layout_repo,
+            trivy_repo,
+            Path("/tmp/test-repo"),
+            None,
+        )
+
+        # Bypass schema validation so float types reach quality validation
+        with patch.object(type(adapter), "schema_path", new_callable=lambda: property(lambda self: None)):
+            with pytest.raises(ValueError, match="quality validation failed"):
+                adapter.persist(trivy_payload)
+
+        conn.close()
+
+    def test_iac_misconfig_bool_line_values(self, tmp_path: Path) -> None:
+        """
+        Verify that IaC misconfigurations using boolean values for start_line/end_line are rejected by quality validation.
+        
+        This test injects a misconfiguration with boolean start_line and end_line into a Trivy payload and asserts that persisting the payload raises a ValueError with message "quality validation failed".
+        """
+        db_path = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db_path))
+        _load_schema(conn)
+
+        repo_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        run_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+
+        _create_layout_run(conn, run_id, repo_id)
+
+        trivy_fixture = Path(__file__).resolve().parents[1] / "persistence" / "fixtures" / "trivy_output.json"
+        trivy_payload = json.loads(trivy_fixture.read_text())
+
+        # Inject an IaC misconfig with boolean line numbers
+        trivy_payload["data"]["iac_misconfigurations"]["misconfigurations"].append(
+            {
+                "id": "AVD-DS-0099",
+                "severity": "MEDIUM",
+                "title": "Bool line numbers",
+                "description": "A misconfig with bool start_line and end_line",
+                "resolution": "Use integer line numbers",
+                "target": "Dockerfile",
+                "target_type": "dockerfile",
+                "start_line": True,
+                "end_line": False,
+            }
+        )
+        trivy_payload["data"]["iac_misconfigurations"]["count"] = 3
+
+        run_repo = ToolRunRepository(conn)
+        layout_repo = LayoutRepository(conn)
+        trivy_repo = TrivyRepository(conn)
+
+        adapter = TrivyAdapter(
+            run_repo,
+            layout_repo,
+            trivy_repo,
+            Path("/tmp/test-repo"),
+            None,
+        )
+
+        # Bypass schema validation so bool types reach quality validation
         with patch.object(type(adapter), "schema_path", new_callable=lambda: property(lambda self: None)):
             with pytest.raises(ValueError, match="quality validation failed"):
                 adapter.persist(trivy_payload)

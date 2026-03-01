@@ -135,16 +135,27 @@ class SccAdapter(BaseAdapter):
     def _map_file_metrics(
         self, run_pk: int, layout_run_pk: int, files: Iterable[dict]
     ) -> Iterable[SccFileMetric]:
-        """Map file entries to SccFileMetric entities with deduplication.
-
-        Deduplicates by (file_id) to match primary key constraint.
+        """
+        Create SccFileMetric entities from SCC file entries, skipping files absent from the layout and avoiding duplicates.
+        
+        Maps each input file entry to an SccFileMetric and yields the resulting entities. Files whose path is not present in the provided layout run are skipped (a warning is logged). Duplicate file records (by file_id) are omitted to respect the primary-key constraint.
+        
+        Parameters:
+            files (Iterable[dict]): Iterable of file entry dictionaries. Expected keys (any may be absent): "path", "filename", "extension", "language", "lines_total" or "lines", "lines_code" or "code", "lines_comment" or "comment", "lines_blank" or "blank", "bytes", "complexity", "uloc", "comment_ratio", "blank_ratio", "code_ratio", "complexity_density", "dryness", "bytes_per_loc", "is_minified" or "minified", "is_generated" or "generated", "is_binary", "classification".
+        
+        Returns:
+            Iterable[SccFileMetric]: Generated SccFileMetric objects for each mapped, non-duplicate file.
         """
         tracker = self._dedup_tracker("file")
         for entry in files:
             relative_path = self._normalize_path(entry.get("path", ""))
-            file_id, directory_id = self._layout_repo.get_file_record(
-                layout_run_pk, relative_path
-            )
+            try:
+                file_id, directory_id = self._layout_repo.get_file_record(
+                    layout_run_pk, relative_path
+                )
+            except KeyError:
+                self._log(f"WARN: skipping file not in layout: {relative_path}")
+                continue
 
             if tracker.is_duplicate(file_id, label=relative_path):
                 continue

@@ -156,9 +156,25 @@ class LizardAdapter(BaseAdapter):
     def _map_metrics(
         self, run_pk: int, layout_run_pk: int, files: Iterable[dict]
     ) -> tuple[list[LizardFileMetric], list[LizardFunctionMetric]]:
-        """Map file and function entries to entities with deduplication.
-
-        Deduplicates files by (file_id) and functions by (file_id, function_name, line_start).
+        """
+        Map lizard file and function entries into landing-zone metric entities with deduplication.
+        
+        Converts each file entry into a LizardFileMetric and each function entry into a LizardFunctionMetric,
+        skipping files not present in the layout and skipping pseudo-functions with invalid start lines.
+        Files are deduplicated by file_id; functions are deduplicated by (file_id, function_name, line_start).
+        
+        Parameters:
+            run_pk (int): Primary key of the tool run to associate with produced metrics.
+            layout_run_pk (int): Primary key of the layout run used to resolve file IDs.
+            files (Iterable[dict]): Iterable of lizard file dictionaries. Each file dict is expected to
+                include a "path" and may include "language", "nloc", "function_count", "total_ccn",
+                "avg_ccn", "max_ccn", and a "functions" list where each function dict may include
+                "name", "long_name", "ccn", "nloc", "params" or "parameter_count", "token_count",
+                and line positions ("line_start"/"line_end" or "start_line"/"end_line").
+        
+        Returns:
+            tuple[list[LizardFileMetric], list[LizardFunctionMetric]]: A pair where the first element is
+            the list of mapped file metrics and the second element is the list of mapped function metrics.
         """
         file_metrics: list[LizardFileMetric] = []
         function_metrics: list[LizardFunctionMetric] = []
@@ -167,7 +183,11 @@ class LizardAdapter(BaseAdapter):
 
         for entry in files:
             relative_path = self._normalize_path(entry.get("path", ""))
-            file_id, _ = self._layout_repo.get_file_record(layout_run_pk, relative_path)
+            try:
+                file_id, _ = self._layout_repo.get_file_record(layout_run_pk, relative_path)
+            except KeyError:
+                self._log(f"WARN: skipping file not in layout: {relative_path}")
+                continue
 
             if file_tracker.is_duplicate(file_id, label=relative_path):
                 continue

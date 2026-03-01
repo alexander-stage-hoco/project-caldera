@@ -3,12 +3,21 @@
 Each ``collect_*`` method runs a query against an existing dbt mart and maps
 rows to ``EvidenceItem`` instances.  If the underlying table does not exist
 (because the tool was not run), the method silently returns an empty list.
+
+Warnings are classified into categories for budgeting:
+- ``expected_missing``: tool was not run or is not applicable
+- ``regression``: query that previously worked now fails
+- ``degraded``: partial results returned
 """
 
 from __future__ import annotations
 
 import warnings
-from typing import Any
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Literal
+
+import yaml
 
 from ..data_fetcher import DataFetcher
 from .entities import EVIDENCE_CATEGORIES, EvidenceCategory, EvidenceItem
@@ -23,6 +32,112 @@ _CATEGORY_ABBR: dict[EvidenceCategory, str] = {
     "quality": "QUAL",
 }
 
+WarningCategory = Literal["expected_missing", "regression", "degraded"]
+
+
+@dataclass
+class CollectorWarning:
+    """A classified warning emitted during evidence collection."""
+
+    category: WarningCategory
+    source: str
+    message: str
+
+
+@dataclass
+class CollectionResult:
+    """Result of evidence collection with classified warnings."""
+
+    items: list[EvidenceItem] = field(default_factory=list)
+    warnings: list[CollectorWarning] = field(default_factory=list)
+
+    def warning_counts(self) -> dict[WarningCategory, int]:
+        """
+        Return a mapping of each warning category to the number of warnings in this result.
+        
+        Returns:
+            dict[WarningCategory, int]: Counts keyed by warning category. Categories with no warnings are present with a value of 0.
+        """
+        counts: dict[WarningCategory, int] = {
+            "expected_missing": 0,
+            "regression": 0,
+            "degraded": 0,
+        }
+        for w in self.warnings:
+            counts[w.category] = counts.get(w.category, 0) + 1
+        return counts
+
+
+@dataclass(frozen=True)
+class BudgetViolation:
+    """A single budget threshold exceeded."""
+
+    category: WarningCategory
+    actual: int
+    limit: int
+
+
+@dataclass
+class BudgetResult:
+    """Result of checking warning counts against the budget."""
+
+    passed: bool
+    violations: list[BudgetViolation] = field(default_factory=list)
+
+
+def _load_warning_budget() -> dict[WarningCategory, int]:
+    """
+    Load warning budget thresholds from the repository's warning_budget.yml.
+    
+    If the YAML file is missing or a specific category is absent, sensible defaults are used:
+    expected_missing = 10, regression = 0, degraded = 3. The function looks for
+    warning_budget.yml adjacent to the package (two levels up from this module) and
+    reads budgets under the top-level "budgets" mapping.
+    
+    Returns:
+        dict[WarningCategory, int]: A mapping from each warning category
+        ("expected_missing", "regression", "degraded") to its integer limit.
+    """
+    budget_path = Path(__file__).resolve().parent.parent / "warning_budget.yml"
+    if not budget_path.exists():
+        return {"expected_missing": 10, "regression": 0, "degraded": 3}
+    with budget_path.open() as f:
+        data = yaml.safe_load(f)
+    budgets = data.get("budgets", {})
+    return {
+        "expected_missing": budgets.get("expected_missing", 10),
+        "regression": budgets.get("regression", 0),
+        "degraded": budgets.get("degraded", 3),
+    }
+
+
+def check_warning_budget(result: CollectionResult) -> BudgetResult:
+    """
+    Determine whether the collected warnings stay within configured budgets.
+    
+    Parameters:
+        result (CollectionResult): The collection run result whose warning counts will be compared to budgets.
+    
+    Returns:
+        BudgetResult: `passed` is `true` if no warning category exceeded its configured limit, `false` otherwise; `violations` lists each exceeding category with its `actual` count and `limit`.
+    """
+    budgets = _load_warning_budget()
+    counts = result.warning_counts()
+    violations: list[BudgetViolation] = []
+    for category, limit in budgets.items():
+        actual = counts.get(category, 0)
+        if actual > limit:
+            violations.append(BudgetViolation(category=category, actual=actual, limit=limit))
+    return BudgetResult(passed=len(violations) == 0, violations=violations)
+
+
+# Known queries that map to optional tools — missing data is expected
+_OPTIONAL_QUERIES: frozenset[str] = frozenset({
+    "evidence_coupling",    # requires symbol-scanner (not always run)
+    "evidence_coverage",    # requires coverage-ingest (not always run)
+    "evidence_ownership",   # requires git-blame-scanner (not always run)
+})
+
 
 class EvidenceCollector:
     """Collects evidence items from SQL queries on existing marts."""
@@ -32,8 +147,33 @@ class EvidenceCollector:
         fetcher: DataFetcher,
         run_pk: int,
     ) -> list[EvidenceItem]:
-        """Run all evidence source queries and return combined results."""
-        items: list[EvidenceItem] = []
+        """
+        Collect evidence items from all configured sources.
+        
+        Returns:
+            items (list[EvidenceItem]): Aggregated EvidenceItem instances produced by all category collectors.
+        """
+        result = self.collect_with_warnings(fetcher, run_pk)
+        return result.items
+
+    def collect_with_warnings(
+        self,
+        fetcher: DataFetcher,
+        run_pk: int,
+    ) -> CollectionResult:
+        """
+        Run all per-category evidence collectors and aggregate collected items and classified warnings.
+        
+        Executes each internal collector (complexity, security, coupling, coverage, ownership, quality) using the provided DataFetcher and run primary key. If a collector raises an exception, the error is caught, a CollectorWarning is appended to the returned CollectionResult.warnings (category is "expected_missing" for queries in the optional set, otherwise "regression"), and a warnings.warn is emitted; collection then continues for remaining collectors.
+        
+        Parameters:
+            fetcher (DataFetcher): Data fetcher used to execute the per-category queries.
+            run_pk (int): Primary key of the run whose evidence is being collected.
+        
+        Returns:
+            CollectionResult: Aggregated evidence items and classified warnings produced during collection.
+        """
+        result = CollectionResult()
 
         collectors = [
             self._collect_complexity,
@@ -46,14 +186,26 @@ class EvidenceCollector:
 
         for collector_fn in collectors:
             try:
-                items.extend(collector_fn(fetcher, run_pk))
+                result.items.extend(collector_fn(fetcher, run_pk))
             except Exception as exc:
+                source = collector_fn.__name__
+                # Classify warning based on query type
+                query_name = source.replace("_collect_", "evidence_")
+                if query_name in _OPTIONAL_QUERIES:
+                    category: WarningCategory = "expected_missing"
+                else:
+                    category = "regression"
+                result.warnings.append(CollectorWarning(
+                    category=category,
+                    source=source,
+                    message=str(exc),
+                ))
                 warnings.warn(
-                    f"[EvidenceCollector] {collector_fn.__name__} failed: {exc}",
+                    f"[EvidenceCollector] {source} failed ({category}): {exc}",
                     stacklevel=2,
                 )
 
-        return items
+        return result
 
     # -- Per-category collectors -------------------------------------------
 
@@ -232,12 +384,24 @@ class EvidenceCollector:
         query_name: str,
         run_pk: int,
     ) -> list[dict[str, Any]]:
-        """Execute a query, returning empty list on failure."""
+        """
+        Run the specified query via the provided fetcher and return its result rows.
+        
+        On failure the function emits a warning and returns an empty list. Failures for queries listed in _OPTIONAL_QUERIES are classified as "expected_missing"; all other failures are classified as "regression" and included in the warning message.
+        
+        Parameters:
+            query_name (str): Name of the query to execute.
+            run_pk (int): Primary key of the run used as the query parameter.
+        
+        Returns:
+            list[dict[str, Any]]: Rows returned by the query; an empty list if the query failed.
+        """
         try:
             return fetcher.fetch(query_name, run_pk)
         except Exception as exc:
+            category = "expected_missing" if query_name in _OPTIONAL_QUERIES else "regression"
             warnings.warn(
-                f"[EvidenceCollector] Query '{query_name}' failed: {exc}",
+                f"[EvidenceCollector] Query '{query_name}' failed ({category}): {exc}",
                 stacklevel=2,
             )
             return []

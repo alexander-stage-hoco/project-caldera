@@ -342,3 +342,48 @@ class DataQualityChecker:
         )
 
         return report
+
+    def persist_report(
+        self,
+        report: QualityReport,
+        collection_run_id: str,
+    ) -> None:
+        """
+        Persist a QualityReport into the lz_quality_checks table for a specific collection run.
+        
+        Advisory only: persistence failures are logged and not raised. Existing rows for the same tool and collection_run_id are removed (idempotent), then one row is inserted per check in the report; `overall_score` is taken from `report.score.overall`.
+        
+        Parameters:
+            report (QualityReport): The quality report to persist.
+            collection_run_id (str): Identifier of the collection run this report belongs to.
+        """
+        try:
+            # Delete existing rows for this tool+run (idempotent)
+            self._conn.execute(
+                "DELETE FROM lz_quality_checks WHERE collection_run_id = ? AND tool_name = ?",
+                [collection_run_id, report.tool_name],
+            )
+            if report.checks:
+                self._conn.executemany(
+                    """
+                    INSERT INTO lz_quality_checks (
+                        collection_run_id, tool_name, check_name, level,
+                        passed, severity, message, overall_score
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    [
+                        (
+                            collection_run_id,
+                            report.tool_name,
+                            c.check_name,
+                            c.level.value,
+                            c.passed,
+                            c.severity.value,
+                            c.message,
+                            report.score.overall,
+                        )
+                        for c in report.checks
+                    ],
+                )
+        except Exception as exc:
+            self._log(f"QUALITY_WARNING: Failed to persist quality report for {report.tool_name}: {exc}")

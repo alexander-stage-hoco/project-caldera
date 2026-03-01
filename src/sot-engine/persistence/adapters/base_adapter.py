@@ -264,20 +264,16 @@ class BaseAdapter(ABC):
             raise ValueError(f"{self.tool_name} landing zone schema invalid ({len(errors)} errors)")
 
     def persist(self, payload: dict) -> int:
-        """Validate and persist tool output to database.
-
-        This is a template method that:
-        1. Validates the JSON schema
-        2. Ensures landing zone tables exist
-        3. Validates the landing zone schema
-        4. Delegates to _do_persist() for tool-specific persistence
-        5. Runs post-persist quality checks (if quality_checker is set)
-
-        Args:
-            payload: The JSON payload to persist
-
+        """
+        Validate and persist a tool's JSON payload to the landing zone and record a tool run.
+        
+        Performs schema validation, ensures landing-zone tables exist and match expected schema, delegates tool-specific persistence to `_do_persist`, and (if a quality checker is configured) runs post-persist quality checks. Post-persist quality check failures are logged as quality warnings and do not raise.
+        
+        Parameters:
+            payload (dict): Tool output containing at least `metadata` and tool-specific data.
+        
         Returns:
-            run_pk: Primary key of the inserted tool run
+            int: Primary key (`run_pk`) of the inserted tool run.
         """
         # Pre-persist: check metadata completeness if quality checker is set
         metadata_complete = True
@@ -295,14 +291,26 @@ class BaseAdapter(ABC):
         # Post-persist: advisory quality report (never raises)
         if self._quality_checker:
             try:
-                self._run_post_persist_quality(run_pk, metadata_complete)
+                collection_run_id = payload.get("metadata", {}).get("run_id", "")
+                self._run_post_persist_quality(run_pk, metadata_complete, collection_run_id)
             except Exception as exc:
                 self._log(f"QUALITY_WARNING: post-persist checks failed: {exc}")
 
         return run_pk
 
-    def _run_post_persist_quality(self, run_pk: int, metadata_complete: bool) -> None:
-        """Run post-persist quality checks. Advisory only — never raises."""
+    def _run_post_persist_quality(
+        self, run_pk: int, metadata_complete: bool, collection_run_id: str = "",
+    ) -> None:
+        """
+        Run post-persist data quality checks for landing-zone tables and persist a quality report when a collection_run_id is provided.
+        
+        Performs foreign-key integrity checks for any landing-zone table that includes a `file_id` column and uniqueness checks on a minimal set of key columns for each table, then builds an aggregated quality report. This operation is advisory only: it does nothing if no quality checker is configured and does not raise exceptions.
+        
+        Parameters:
+            run_pk (int): Primary key of the tool run to scope FK and uniqueness checks.
+            metadata_complete (bool): Whether the run's metadata was determined to be complete.
+            collection_run_id (str): Optional collection-wide run identifier; if provided the quality report is persisted.
+        """
         if not self._quality_checker:
             return
 
@@ -325,24 +333,27 @@ class BaseAdapter(ABC):
                 )
                 checks.append(result)
 
-        self._quality_checker.build_report(
+        report = self._quality_checker.build_report(
             self.tool_name,
             checks,
             schema_valid=True,
             metadata_complete=metadata_complete,
         )
 
+        # Persist the quality report to lz_quality_checks (advisory, never blocks)
+        if collection_run_id:
+            self._quality_checker.persist_report(report, collection_run_id)
+
     @abstractmethod
     def _do_persist(self, payload: dict) -> int:
-        """Perform tool-specific persistence logic.
-
-        Called by persist() after schema and table validation.
-
-        Args:
-            payload: The validated JSON payload
-
+        """
+        Persist tool-specific data from the validated payload and return the inserted tool run primary key.
+        
+        Parameters:
+            payload (dict): Validated JSON payload containing tool run data to persist.
+        
         Returns:
-            run_pk: Primary key of the inserted tool run
+            run_pk (int): Primary key of the newly inserted tool run.
         """
         ...
 

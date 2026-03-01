@@ -4,10 +4,14 @@ InsightsGenerator - Main entry point for generating Caldera Insights reports.
 
 from __future__ import annotations
 
+import json
+import logging
 import warnings
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
+
+import duckdb
 
 from .data_fetcher import DataFetcher
 from .evidence.builder import EvidenceRegistryBuilder
@@ -57,6 +61,7 @@ from .sections.risk_register import RiskRegisterSection
 from .sections.evidence_pack import EvidencePackSection
 from .sections.claim_register import ClaimRegisterSection
 from .sections.rewrite_risk import RewriteRiskSection
+from .sections.delta_summary import DeltaSummarySection
 from .sections.sampling_rationale import SamplingRationaleSection
 from .profiles import StakeholderProfile, get_profile
 
@@ -69,6 +74,7 @@ class InsightsGenerator:
         "tool_readiness": ToolReadinessSection,
         "tool_coverage_dashboard": ToolCoverageDashboardSection,
         "executive_summary": ExecutiveSummarySection,
+        "delta_summary": DeltaSummarySection,
         "technical_debt_summary": TechnicalDebtSummarySection,
         "coupling_debt": CouplingDebtSection,
         "composite_risk": CompositeRiskSection,
@@ -153,18 +159,19 @@ class InsightsGenerator:
         profile: str | StakeholderProfile | None = None,
     ) -> str:
         """
-        Generate a complete report.
-
-        Args:
-            run_pk: The collection run primary key.
-            format: Output format ('html' or 'md').
-            sections: Optional list of section names to include.
-            output_path: Optional path to write the report to.
-            title: Optional custom report title.
-            skip_validation: Skip data validation checks (not recommended).
-
+        Generate a complete insights report for a given tool run, assembling and formatting the requested sections.
+        
+        Parameters:
+            run_pk (int): The tool run primary key to generate the report for.
+            format (Literal["html", "md"]): Output format; either "html" or "md".
+            sections (list[str] | None): Optional list of section names to include; if omitted all available sections are used.
+            output_path (Path | None): Optional file path to write the generated report to; when provided, a warnings.json artifact is also written alongside it.
+            title (str | None): Optional custom report title; if omitted, the profile title template or a default title is used.
+            skip_validation (bool): If true, skip pre-generation data validation checks.
+            profile (str | StakeholderProfile | None): Optional stakeholder profile name or object to select and order sections.
+        
         Returns:
-            The generated report as a string.
+            str: The generated report content.
         """
         # Reset per-run warning dedup so each report generation sees fresh warnings
         BaseSection._warned.clear()
@@ -204,6 +211,9 @@ class InsightsGenerator:
 
         # Build evidence registry once for all evidence-aware sections
         registry = self._evidence_builder.build(self.fetcher, run_pk)
+
+        # Persist evidence to landing zone (best-effort)
+        self._persist_evidence(registry, run_pk)
 
         # Render each section
         rendered_sections: list[SectionData] = []
@@ -248,6 +258,9 @@ class InsightsGenerator:
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_text(report)
 
+            # Emit warnings.json alongside the report
+            self._write_warnings_json(registry, output_path.parent)
+
         return report
 
     def _render_section(
@@ -257,15 +270,17 @@ class InsightsGenerator:
         formatter: BaseFormatter,
     ) -> SectionData:
         """
-        Render a single section.
-
-        Args:
-            section: The section instance to render.
-            run_pk: The collection run primary key.
-            formatter: The formatter to use.
-
+        Render a section into formatted output for a specific run.
+        
+        Fetches the section's data for the given run; on fetch failure uses the section's fallback data and records the exception string under the `_error` key. Validates the data and, if validation errors are present, attaches them under `_validation_errors`. Selects the HTML template when given an HtmlFormatter, otherwise uses the section's markdown template, then formats the section via the provided formatter.
+        
+        Parameters:
+            section (BaseSection): The section instance to render.
+            run_pk (int): Primary key of the run used to fetch section data.
+            formatter (BaseFormatter): Formatter used to produce the section content.
+        
         Returns:
-            SectionData containing the rendered content.
+            SectionData: Contains the section id and title, the rendered content string, and the final data dictionary (which may include `_error` and/or `_validation_errors`).
         """
         # Fetch data
         try:
@@ -300,6 +315,68 @@ class InsightsGenerator:
             data=data,
         )
 
+    def _persist_evidence(self, registry: Any, run_pk: int) -> None:
+        """Persist evidence registry to DuckDB landing zone (best-effort).
+
+        Also updates the warning_count in lz_run_quality_summary so the
+        actual count from the insights pipeline replaces the default 0.
+        """
+        try:
+            run_info = self.fetcher.get_run_info(run_pk)
+            collection_run_id = run_info.get("collection_run_id")
+            if not collection_run_id:
+                return
+            with duckdb.connect(str(self.db_path)) as conn:
+                EvidenceRegistryBuilder.persist(registry, conn, collection_run_id)
+                # Update warning_count in quality summary (replaces default 0)
+                warning_count = getattr(registry, "warning_count", 0)
+                if warning_count > 0:
+                    conn.execute(
+                        "UPDATE lz_run_quality_summary "
+                        "SET warning_count = ? "
+                        "WHERE collection_run_id = ?",
+                        [warning_count, collection_run_id],
+                    )
+        except Exception as exc:
+            logging.getLogger(__name__).debug(
+                "Evidence persistence skipped: %s", exc,
+            )
+
+    @staticmethod
+    def _write_warnings_json(registry: Any, output_dir: Path) -> None:
+        """
+        Write a warnings.json artifact next to the generated report.
+        
+        Uses `registry.warning_details` if present; otherwise writes a minimal details object
+        (populating `total` from `registry.warning_count` when available) and serializes it
+        to `output_dir/warnings.json`. Failures to write the file are caught and logged at
+        debug level; the function does not raise on write errors.
+        
+        Parameters:
+            registry (Any): Object that may provide `warning_details` (dict) and/or
+                `warning_count` (int) for building the artifact.
+            output_dir (Path): Directory where `warnings.json` will be created.
+        """
+        details = getattr(registry, "warning_details", None)
+        if not details:
+            # No warning details available — write minimal artifact
+            details = {
+                "total": getattr(registry, "warning_count", 0),
+                "budget_passed": True,
+                "counts": {"expected_missing": 0, "regression": 0, "degraded": 0},
+                "budgets": {"expected_missing": 10, "regression": 0, "degraded": 3},
+                "warnings": [],
+            }
+        try:
+            warnings_path = output_dir / "warnings.json"
+            warnings_path.write_text(
+                json.dumps(details, indent=2), encoding="utf-8",
+            )
+        except Exception as exc:
+            logging.getLogger(__name__).debug(
+                "Failed to write warnings.json: %s", exc,
+            )
+
     def generate_by_collection(
         self,
         collection_run_id: str,
@@ -310,21 +387,18 @@ class InsightsGenerator:
         profile: str | StakeholderProfile | None = None,
     ) -> str:
         """
-        Generate a report for a collection run.
-
-        This method auto-resolves the correct tool run_pk (SCC anchor) for the
-        collection run, avoiding the confusion of needing to know which tool's
-        run_pk to use.
-
-        Args:
-            collection_run_id: The collection run ID (UUID).
-            format: Output format ('html' or 'md').
-            sections: Optional list of section names to include.
-            output_path: Optional path to write the report to.
-            title: Optional custom report title.
-
+        Generate a report for a collection run by resolving the collection's SCC tool run PK and delegating to generate.
+        
+        Parameters:
+            collection_run_id (str): The collection run UUID used to find the SCC (unified metrics) tool run.
+            format (Literal["html", "md"]): Output format, either "html" or "md".
+            sections (list[str] | None): Optional list of section names to include; if omitted all sections (or the profile) will be used.
+            output_path (Path | None): Optional path to write the rendered report file.
+            title (str | None): Optional custom report title; when omitted a profile template or repository-based title may be used.
+            profile (str | StakeholderProfile | None): Optional stakeholder profile name or object to select a subset of sections.
+        
         Returns:
-            The generated report as a string.
+            str: The rendered report content.
         """
         # Resolve collection_run_id to SCC's run_pk (anchor for unified metrics)
         run_pk = self.fetcher.get_scc_run_pk_for_collection(collection_run_id)
@@ -347,18 +421,22 @@ class InsightsGenerator:
         skip_validation: bool = False,
         profile: str | StakeholderProfile | None = None,
     ) -> Path:
-        """Generate an LLM context pack (directory of topic markdown files).
-
-        Args:
-            run_pk: The collection run primary key.
-            output_dir: Directory to write topic files into.
-            sections: Optional list of section names to include.
-            title: Optional custom report title.
-            skip_validation: Skip data validation checks.
-            profile: Stakeholder profile or profile name.
-
+        """
+        Generate an LLM context pack as a directory of topic Markdown files.
+        
+        Parameters:
+            run_pk (int): Primary key of the tool run to build the pack for.
+            output_dir (Path): Directory to write topic Markdown files into.
+            sections (list[str] | None): Optional explicit list of section names to include.
+            title (str | None): Optional custom report title to use in the pack.
+            skip_validation (bool): If true, skip pre-generation data validation checks.
+            profile (str | StakeholderProfile | None): Stakeholder profile name or object to select a predefined set of sections.
+        
         Returns:
-            The output directory path.
+            Path: The path to the output directory containing the generated pack.
+        
+        Raises:
+            ValueError: If both `profile` and `sections` are provided, or if any requested section name is unknown.
         """
         # Reset per-run warning dedup so each report generation sees fresh warnings
         BaseSection._warned.clear()
@@ -393,6 +471,9 @@ class InsightsGenerator:
 
         # Build evidence registry
         registry = self._evidence_builder.build(self.fetcher, run_pk)
+
+        # Persist evidence to landing zone (best-effort)
+        self._persist_evidence(registry, run_pk)
 
         # Fetch raw data for each section (no template rendering)
         section_data: dict[str, dict[str, Any]] = {}

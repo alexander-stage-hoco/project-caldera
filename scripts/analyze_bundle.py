@@ -56,6 +56,14 @@ def _get_run_pk(db_path: Path, run_id: str) -> int:
 
 
 def main() -> int:
+    """
+    Ingest a Caldera artifacts bundle, generate an HTML report (optionally run LLM evaluation), write a run manifest, and clean up any extracted temporary bundle.
+    
+    This function orchestrates processing of a collected bundle: it resolves and loads the bundle manifest, runs the engine orchestrator to populate the database, generates an HTML report, optionally runs evaluation and top-3 extraction when LLM evaluation is enabled, writes a run manifest (including warnings if present), and removes any temporary extracted bundle directory.
+    
+    Returns:
+        int: Exit code `0` on success.
+    """
     parser = argparse.ArgumentParser(description="Ingest a Caldera artifacts bundle and generate report.")
     parser.add_argument("--repo-path", required=True, help="Path to the repo that was analyzed")
     parser.add_argument("--bundle", required=True, help="Bundle directory or .tar.gz created by collect")
@@ -174,21 +182,22 @@ def main() -> int:
                 check=True,
             )
 
-        subprocess.run(
-            [
-                sys.executable,
-                "scripts/write_run_manifest.py",
-                "--db",
-                str(db_path),
-                "--collection-run-id",
-                str(run_id),
-                "--out",
-                str(report_out.parent / "run_manifest.json"),
-                "--report",
-                str(report_out),
-            ],
-            check=True,
-        )
+        manifest_cmd = [
+            sys.executable,
+            "scripts/write_run_manifest.py",
+            "--db",
+            str(db_path),
+            "--collection-run-id",
+            str(run_id),
+            "--out",
+            str(report_out.parent / "run_manifest.json"),
+            "--report",
+            str(report_out),
+        ]
+        warnings_json = report_out.parent / "warnings.json"
+        if warnings_json.exists():
+            manifest_cmd.extend(["--warnings-json", str(warnings_json)])
+        subprocess.run(manifest_cmd, check=True)
 
         print(f"Report: {report_out}")
         return 0

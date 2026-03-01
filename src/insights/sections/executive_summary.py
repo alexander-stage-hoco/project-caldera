@@ -50,12 +50,31 @@ class ExecutiveSummarySection(BaseSection):
 
     def fetch_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
         """
-        Fetch and synthesize data for executive summary.
-
+        Assemble data from multiple analyses and produce the executive summary payload.
+        
+        Gathers vulnerability, complexity, size, health, smell, and trust data; generates prioritized insights (top three), computes a risk summary, and derives recommended actions from the top insights.
+        
+        Parameters:
+            run_pk (int): Primary key of the analysis/run to fetch data for.
+        
         Returns:
-        - insights: Top 3 prioritized Insight objects
-        - risk_summary: Overall risk assessment
-        - recommended_actions: List of prioritized actions
+            dict: A payload with the following keys:
+                - insights (list[Insight]): Top 3 prioritized Insight objects.
+                - risk_summary (dict): Overall risk assessment (overall_risk, risk_description, security_status, stability_status, health_grade).
+                - recommended_actions (list[dict]): Ordered actions derived from top insights; each has `priority`, `action`, and `category`.
+                - has_insights (bool): True if any insights are present.
+                - total_files (int): Total number of files from health data.
+                - total_loc (int): Total lines of code from health data.
+                - vuln_count (int): Total vulnerability count.
+                - critical_vuln_count (int): Count of critical vulnerabilities.
+                - high_complexity_files (int): Count of high-complexity files.
+                - security_scanned (bool): True if a vulnerability scan was performed.
+                - trust_score (optional[float|int|None]): Repository trust score if available.
+                - tools_completed (int): Number of trust-related tools that completed.
+                - tools_expected (int): Number of trust-related tools expected.
+                - warning_count (int): Number of trust-related warnings.
+                - trust_trend_direction (optional[str|None]): Trend direction for trust score ("improving", "declining", "stable") if available.
+                - trust_trend_previous (optional[float|int|None]): Previous trust score value if trend data is available.
         """
         # Gather data from multiple sources
         vuln_data = self._fetch_vulnerability_data(fetcher, run_pk)
@@ -63,6 +82,7 @@ class ExecutiveSummarySection(BaseSection):
         size_data = self._fetch_size_data(fetcher, run_pk)
         health_data = self._fetch_health_data(fetcher, run_pk)
         smell_data = self._fetch_smell_data(fetcher, run_pk)
+        trust_data = self._fetch_trust_score(fetcher, run_pk)
 
         # Generate prioritized insights
         all_insights = self._generate_insights(
@@ -94,12 +114,36 @@ class ExecutiveSummarySection(BaseSection):
             "critical_vuln_count": vuln_data.get("critical_count", 0),
             "high_complexity_files": complexity_data.get("total_high_complexity", 0),
             "security_scanned": vuln_data.get("scan_ran", False),
+            "trust_score": trust_data.get("trust_score"),
+            "tools_completed": trust_data.get("tools_completed", 0),
+            "tools_expected": trust_data.get("tools_expected", 0),
+            "warning_count": trust_data.get("warning_count", 0),
+            "trust_trend_direction": trust_data.get("trend_direction"),
+            "trust_trend_previous": trust_data.get("trend_previous"),
         }
 
     def _fetch_vulnerability_data(
         self, fetcher: DataFetcher, run_pk: int
     ) -> dict[str, Any]:
-        """Fetch vulnerability summary data."""
+        """
+        Collect vulnerability totals, top CVEs, and whether a vulnerability scan ran for the given run.
+        
+        Parameters:
+            fetcher (DataFetcher): Data access helper used to query vulnerability summary and top CVEs.
+            run_pk (int): Primary key identifying the analysis run to fetch data for.
+        
+        Returns:
+            dict[str, Any]: A dictionary with the following keys:
+                - summary: list of vulnerability summary entries as returned by the data layer.
+                - total_count: int, total number of vulnerabilities across severities.
+                - critical_count: int, count of vulnerabilities with severity "CRITICAL".
+                - high_count: int, count of vulnerabilities with severity "HIGH".
+                - top_cves: list of top CVE entries (limited to 5).
+                - scan_ran: bool, True if a vulnerability scan was detected for the run, False otherwise.
+        
+        Notes:
+            If an exception occurs while fetching data, the function warns and returns default empty/zero values.
+        """
         try:
             summary = fetcher.fetch("vulnerability_summary", run_pk)
             total = sum(s.get("count", 0) for s in summary)
@@ -246,7 +290,12 @@ class ExecutiveSummarySection(BaseSection):
             }
 
     def _fetch_health_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
-        """Fetch overall repository health data."""
+        """
+        Retrieve the repository health summary from the data source.
+        
+        Returns:
+            A dictionary containing the first repository health record if available; otherwise an empty dict (also returned when fetching fails).
+        """
         try:
             health = fetcher.fetch("repo_health", run_pk)
             if health:
@@ -256,8 +305,57 @@ class ExecutiveSummarySection(BaseSection):
             warnings.warn(f"[{self.config.name}] Fetching health data failed: {exc}", stacklevel=2)
             return {}
 
+    def _fetch_trust_score(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
+        """
+        Retrieve the repository trust score and, if available, recent trend information.
+        
+        The returned dictionary contains the fields from the `trust_score` row (e.g., `trust_score`, `tools_completed`, `tools_expected`, `warning_count`) and may include the following trend keys when recent-run data is available:
+        - `trend_scores`: list of trust scores ordered most-recent-first.
+        - `trend_direction`: one of `"improving"`, `"declining"`, or `"stable"`.
+        - `trend_previous`: the previous run's trust score.
+        
+        Returns:
+            result (dict): A mapping of trust score fields and optional trend fields. Returns an empty dict when no trust data could be fetched.
+        """
+        result: dict[str, Any] = {}
+        try:
+            rows = fetcher.fetch("trust_score", run_pk)
+            if rows:
+                result = dict(rows[0])
+        except Exception as exc:
+            warnings.warn(f"[{self.config.name}] Fetching trust score failed: {exc}", stacklevel=2)
+
+        # Fetch trend (recent runs for same repo)
+        try:
+            trend = fetcher.fetch("trust_score_trend", run_pk)
+            if len(trend) >= 2:
+                scores = [r.get("trust_score", 0) for r in trend]
+                result["trend_scores"] = scores
+                result["trend_direction"] = (
+                    "improving" if scores[0] > scores[1]
+                    else "declining" if scores[0] < scores[1]
+                    else "stable"
+                )
+                result["trend_previous"] = scores[1]
+        except Exception:
+            pass  # Trend is optional
+
+        return result
+
     def _fetch_smell_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
-        """Fetch code smell data."""
+        """
+        Collects file-level code smell hotspots and aggregates smell counts.
+        
+        Returns:
+            dict: A dictionary with the following keys:
+                - hotspots (list[dict]): Up to 10 hotspot records ordered by smell count as returned by the fetcher.
+                - total_smells (int): Sum of the `smell_count` values across the returned hotspots.
+                - top_file (str | None): Relative path of the hotspot with the highest smell count, or `None` if no hotspots.
+                - top_smell_count (int): Smell count of the top file, or `0` if no hotspots.
+        
+        Description:
+            If data fetching fails, returns defaults: empty `hotspots`, `total_smells` 0, `top_file` None, and `top_smell_count` 0.
+        """
         try:
             hotspots = fetcher.fetch("file_hotspots", run_pk, order_by="smells", limit=10)
             total_smells = sum(h.get("smell_count", 0) for h in hotspots)
@@ -659,7 +757,32 @@ class ExecutiveSummarySection(BaseSection):
         return errors
 
     def get_fallback_data(self) -> dict[str, Any]:
-        """Return fallback data when the section cannot be rendered."""
+        """
+        Provide default data used when the executive summary section cannot be rendered.
+        
+        Returns:
+            fallback (dict[str, Any]): A dictionary containing default values for the executive summary renderer. Keys:
+                - insights: empty list of Insight objects.
+                - risk_summary: dict with keys:
+                    - overall_risk: "unknown" (string)
+                    - risk_description: human-readable explanation why risk is unavailable
+                    - security_status: "unknown"
+                    - stability_status: "unknown"
+                    - health_grade: "N/A"
+                - recommended_actions: empty list of action dicts.
+                - has_insights: False
+                - total_files: 0
+                - total_loc: 0
+                - vuln_count: 0
+                - critical_vuln_count: 0
+                - high_complexity_files: 0
+                - trust_score: None (no trust data)
+                - tools_completed: 0
+                - tools_expected: 0
+                - warning_count: 0
+                - trust_trend_direction: None
+                - trust_trend_previous: None
+        """
         return {
             "insights": [],
             "risk_summary": {
@@ -676,4 +799,10 @@ class ExecutiveSummarySection(BaseSection):
             "vuln_count": 0,
             "critical_vuln_count": 0,
             "high_complexity_files": 0,
+            "trust_score": None,
+            "tools_completed": 0,
+            "tools_expected": 0,
+            "warning_count": 0,
+            "trust_trend_direction": None,
+            "trust_trend_previous": None,
         }

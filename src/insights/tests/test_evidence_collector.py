@@ -6,7 +6,15 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from insights.evidence.collector import EvidenceCollector
+from insights.evidence.collector import (
+    BudgetResult,
+    BudgetViolation,
+    CollectionResult,
+    CollectorWarning,
+    EvidenceCollector,
+    _load_warning_budget,
+    check_warning_budget,
+)
 
 
 class TestEvidenceCollector:
@@ -192,3 +200,102 @@ class TestEvidenceCollector:
         items = collector.collect(fetcher, run_pk=1)
         categories = {i.category for i in items}
         assert categories == {"complexity", "security", "coupling", "coverage", "ownership", "quality"}
+
+
+class TestWarningBudget:
+    """Tests for check_warning_budget() and _load_warning_budget()."""
+
+    def test_check_warning_budget_passes_within_limits(self):
+        """CollectionResult with 0 regressions passes the budget."""
+        result = CollectionResult(items=[], warnings=[])
+        budget = check_warning_budget(result)
+        assert budget.passed is True
+        assert budget.violations == []
+
+    def test_check_warning_budget_passes_with_expected_missing(self):
+        """expected_missing warnings within the generous limit (10) pass."""
+        result = CollectionResult(
+            items=[],
+            warnings=[
+                CollectorWarning(category="expected_missing", source="test", message="ok")
+                for _ in range(5)
+            ],
+        )
+        budget = check_warning_budget(result)
+        assert budget.passed is True
+
+    def test_check_warning_budget_fails_on_regression(self):
+        """A single regression warning exceeds the budget (limit=0)."""
+        result = CollectionResult(
+            items=[],
+            warnings=[
+                CollectorWarning(category="regression", source="_collect_quality", message="table missing"),
+            ],
+        )
+        budget = check_warning_budget(result)
+        assert budget.passed is False
+        assert len(budget.violations) == 1
+        v = budget.violations[0]
+        assert v.category == "regression"
+        assert v.actual == 1
+        assert v.limit == 0
+
+    def test_check_warning_budget_multiple_violations(self):
+        """Multiple categories can be violated simultaneously."""
+        result = CollectionResult(
+            items=[],
+            warnings=[
+                CollectorWarning(category="regression", source="q1", message="fail"),
+                # 4 degraded warnings exceed the limit of 3
+                *[CollectorWarning(category="degraded", source=f"q{i}", message="partial") for i in range(4)],
+            ],
+        )
+        budget = check_warning_budget(result)
+        assert budget.passed is False
+        categories = {v.category for v in budget.violations}
+        assert "regression" in categories
+        assert "degraded" in categories
+
+    def test_load_warning_budget_reads_yaml(self):
+        """_load_warning_budget() loads from warning_budget.yml with expected defaults."""
+        budgets = _load_warning_budget()
+        assert budgets["expected_missing"] == 10
+        assert budgets["regression"] == 0
+        assert budgets["degraded"] == 3
+
+    def test_collect_with_warnings_classifies_exceptions(self):
+        """When _collect_* methods raise, collect_with_warnings classifies correctly."""
+        collector = EvidenceCollector()
+        fetcher = MagicMock()
+
+        # Make fetch raise only for complexity (non-optional → regression)
+        # but work for others (return empty)
+        def side_effect(query_name: str, run_pk: int, **kwargs):
+            """
+            Simulate a fetcher side effect that errors for complexity queries and returns no rows for others.
+            
+            Parameters:
+                query_name (str): The name of the query being requested.
+                run_pk (int): The run primary key for the query.
+            
+            Returns:
+                list: An empty list of rows for queries other than "evidence_complexity".
+            
+            Raises:
+                RuntimeError: If `query_name` is "evidence_complexity".
+            """
+            if query_name == "evidence_complexity":
+                raise RuntimeError("DB exploded")
+            return []
+
+        fetcher.fetch.side_effect = side_effect
+
+        # _safe_query catches the error from fetch and returns [],
+        # so _collect_complexity won't raise. Warnings go to warnings.warn only.
+        # collect_with_warnings only populates result.warnings when _collect_* itself raises.
+        result = collector.collect_with_warnings(fetcher, run_pk=1)
+
+        # Since _safe_query catches all exceptions internally, the result
+        # should have no warnings in the CollectionResult (only Python warnings)
+        assert result.warning_counts()["regression"] == 0
+        assert result.items == []

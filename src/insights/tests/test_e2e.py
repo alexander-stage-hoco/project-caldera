@@ -31,10 +31,15 @@ def test_db_path(tmp_path: Path) -> Path:
 @pytest.fixture
 def seeded_db(test_db_path: Path) -> Path:
     """
-    Create a test database with landing zone tables and sample data.
-
-    This simulates a database after orchestrator has run tools and
-    persisted results to the landing zone.
+    Create a test DuckDB database populated with landing zone tables and representative sample data.
+    
+    Creates landing-zone tables (collection runs, tool runs, layout files, SCC and Lizard metrics, semgrep smells, trivy vulnerabilities, evidence, claims, risks, and run quality summary) and inserts sample rows that simulate results persisted by an orchestrator.
+    
+    Parameters:
+        test_db_path (Path): Filesystem path where the DuckDB database file will be created.
+    
+    Returns:
+        db_path (Path): The same Path passed in, pointing to the created database file.
     """
     conn = duckdb.connect(str(test_db_path))
 
@@ -141,6 +146,62 @@ def seeded_db(test_db_path: Path) -> Path:
             cvss_score DOUBLE,
             title VARCHAR,
             PRIMARY KEY (run_pk, target_key, vulnerability_id, package_name)
+        );
+
+        CREATE TABLE lz_evidence (
+            collection_run_id VARCHAR NOT NULL,
+            evidence_id VARCHAR NOT NULL,
+            evidence_type VARCHAR NOT NULL,
+            category VARCHAR NOT NULL,
+            location VARCHAR NOT NULL,
+            excerpt TEXT,
+            observation TEXT,
+            why_it_matters TEXT,
+            tool_source VARCHAR NOT NULL,
+            run_pk BIGINT NOT NULL,
+            confidence VARCHAR NOT NULL DEFAULT 'high',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (collection_run_id, evidence_id)
+        );
+
+        CREATE TABLE lz_claims (
+            collection_run_id VARCHAR NOT NULL,
+            claim_id VARCHAR NOT NULL,
+            category VARCHAR NOT NULL,
+            statement TEXT NOT NULL,
+            evidence_ids VARCHAR NOT NULL,
+            implication TEXT,
+            confidence VARCHAR NOT NULL,
+            triggered_by VARCHAR NOT NULL,
+            severity VARCHAR,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (collection_run_id, claim_id)
+        );
+
+        CREATE TABLE lz_risks (
+            collection_run_id VARCHAR NOT NULL,
+            risk_id VARCHAR NOT NULL,
+            description TEXT NOT NULL,
+            technical_cause TEXT,
+            claim_ids VARCHAR NOT NULL,
+            manifests_in VARCHAR,
+            triggered_by VARCHAR NOT NULL,
+            severity VARCHAR NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (collection_run_id, risk_id)
+        );
+
+        CREATE TABLE lz_run_quality_summary (
+            collection_run_id VARCHAR NOT NULL PRIMARY KEY,
+            tools_expected INTEGER NOT NULL,
+            tools_completed INTEGER NOT NULL,
+            tools_skipped INTEGER NOT NULL,
+            tools_failed INTEGER NOT NULL,
+            tools_empty INTEGER NOT NULL,
+            ingestion_errors INTEGER NOT NULL DEFAULT 0,
+            warning_count INTEGER NOT NULL DEFAULT 0,
+            trust_score INTEGER NOT NULL DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
 

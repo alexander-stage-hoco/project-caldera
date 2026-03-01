@@ -203,7 +203,30 @@ class TrivyAdapter(BaseAdapter):
         return run_pk
 
     def validate_quality(self, vulnerabilities: Any, targets: Any = None, iac_misconfigs: Any = None) -> None:
-        """Validate data quality rules for Trivy vulnerabilities and IaC misconfigs."""
+        """
+        Validate data-quality rules for Trivy scan results.
+        
+        Performs checks on vulnerabilities, targets, and IaC misconfigurations and raises on any data-quality violations.
+        - Vulnerabilities: require `id` and `package`; if present, `severity` must be one of VALID_SEVERITIES; `cvss_score` must be numeric and between 0 and 10.
+        - Targets: validates file paths (field `path`) and requires a non-empty `path` for each entry.
+        - IaC misconfigs: validates file paths (field `target`) and requires a non-empty `target`; validates `start_line` and `end_line` with these rules:
+          - boolean values for line fields are rejected;
+          - float values are rejected as non-integer;
+          - numeric strings and other numeric-like values are coerced to `int` when possible, otherwise rejected;
+          - line values must be >= 0;
+          - `start_line` and `end_line` must both be file-level (0 or None) or both positive; if both positive, `end_line` must be >= `start_line`.
+        
+        Parameters:
+            vulnerabilities (Any): Iterable of vulnerability entries to validate.
+            targets (Any, optional): Iterable of target entries to validate (each must include a `path` field). Defaults to None.
+            iac_misconfigs (Any, optional): Iterable of IaC misconfiguration entries to validate (each must include a `target` field and optional `start_line`/`end_line`). Defaults to None.
+        
+        Returns:
+            None
+        
+        Raises:
+            ValueError: If any data-quality checks fail; the adapter logs each error and raises with the total error count.
+        """
         errors: list[str] = []
 
         for vuln_idx, vuln in enumerate(vulnerabilities):
@@ -265,22 +288,44 @@ class TrivyAdapter(BaseAdapter):
                 line_start = iac.get("start_line")
                 line_end = iac.get("end_line")
                 # Coerce to int or reject non-numeric values
-                if line_start is not None and not isinstance(line_start, int):
-                    try:
-                        line_start = int(line_start)
-                    except (ValueError, TypeError):
+                if line_start is not None and isinstance(line_start, bool):
+                    errors.append(
+                        f"iac_misconfigs[{iac_idx}].start_line must be integer, not bool"
+                    )
+                    line_start = None
+                elif line_start is not None and not isinstance(line_start, int):
+                    if isinstance(line_start, float):
                         errors.append(
-                            f"iac_misconfigs[{iac_idx}].start_line must be numeric"
+                            f"iac_misconfigs[{iac_idx}].start_line must be integer, not float"
                         )
                         line_start = None
-                if line_end is not None and not isinstance(line_end, int):
-                    try:
-                        line_end = int(line_end)
-                    except (ValueError, TypeError):
+                    else:
+                        try:
+                            line_start = int(line_start)
+                        except (ValueError, TypeError):
+                            errors.append(
+                                f"iac_misconfigs[{iac_idx}].start_line must be numeric"
+                            )
+                            line_start = None
+                if line_end is not None and isinstance(line_end, bool):
+                    errors.append(
+                        f"iac_misconfigs[{iac_idx}].end_line must be integer, not bool"
+                    )
+                    line_end = None
+                elif line_end is not None and not isinstance(line_end, int):
+                    if isinstance(line_end, float):
                         errors.append(
-                            f"iac_misconfigs[{iac_idx}].end_line must be numeric"
+                            f"iac_misconfigs[{iac_idx}].end_line must be integer, not float"
                         )
                         line_end = None
+                    else:
+                        try:
+                            line_end = int(line_end)
+                        except (ValueError, TypeError):
+                            errors.append(
+                                f"iac_misconfigs[{iac_idx}].end_line must be numeric"
+                            )
+                            line_end = None
                 if line_start is not None and line_start < 0:
                     errors.append(f"iac_misconfigs[{iac_idx}].line_start must be >= 0")
                 if line_end is not None and line_end < 0:

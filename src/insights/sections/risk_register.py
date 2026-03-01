@@ -19,6 +19,36 @@ class RiskRegisterSection(EvidenceAwareSection):
     )
 
     def fetch_data(self, fetcher: DataFetcher, run_pk: int) -> dict[str, Any]:
+        """
+        Collects execution risks from the evidence registry and organizes them by severity for template rendering.
+        
+        Returns:
+            data (dict[str, Any]): A mapping with the following keys:
+                - risks: List of risk entries in order of severity: "critical", "high", "medium", "low".
+                - risks_by_severity: Dict mapping each severity ("critical", "high", "medium", "low") to a list of risk entries.
+                - summary: Summary object returned by the evidence registry (e.g., totals for evidence, claims, risks).
+                - total_risks: Total number of risks found.
+                - critical_count: Number of risks with severity "critical".
+                - high_count: Number of risks with severity "high".
+                - medium_count: Number of risks with severity "medium".
+                - low_count: Number of risks with severity "low".
+                - has_data: `True` if any risks were found, `False` otherwise.
+                - has_critical: `True` if any critical risks were found, `False` otherwise.
+        
+            Each risk entry is a dict containing:
+                - risk_id: Risk identifier.
+                - description: Human-readable description of the risk.
+                - technical_cause: Technical root cause or explanation.
+                - severity: Severity string ("critical", "high", "medium", "low").
+                - triggered_by: Source or trigger for the risk.
+                - claim_count: Number of associated claim IDs.
+                - manifests_in: List (up to 5 items) of where the risk manifests.
+                - owner: Owner of the risk.
+                - action: Recommended or assigned action.
+                - sla_date: SLA or target date related to the action.
+                - status: Current status of the risk/action.
+                - claims: List (up to 5) of supporting claims, each a dict with `claim_id`, `statement`, and `confidence`.
+        """
         registry = self._evidence_registry
         if not registry:
             return self.get_fallback_data()
@@ -44,6 +74,10 @@ class RiskRegisterSection(EvidenceAwareSection):
                 "triggered_by": risk.triggered_by,
                 "claim_count": len(risk.claim_ids),
                 "manifests_in": list(risk.manifests_in[:5]),
+                "owner": risk.owner,
+                "action": risk.action,
+                "sla_date": risk.sla_date,
+                "status": risk.status,
                 "claims": [
                     {
                         "claim_id": c.claim_id,

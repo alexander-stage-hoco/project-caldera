@@ -39,6 +39,7 @@ from execution import (
     ToolTask,
     get_backend,
 )
+from tool_registry import TOOL_REGISTRY, get_docker_tool_names, get_execution_tools, get_ingestion_tools
 from persistence.adapters import CoverageIngestAdapter, DependenseeAdapter, DevskimAdapter, DotcoverAdapter, GitBlameScannerAdapter, GitFameAdapter, GitSizerAdapter, GitleaksAdapter, LayoutScannerAdapter, LizardAdapter, PmdCpdAdapter, RoslynAnalyzersAdapter, ScancodeAdapter, SccAdapter, SemgrepAdapter, SonarqubeAdapter, SymbolScannerAdapter, TrivyAdapter
 from persistence.adapters.base_adapter import BaseAdapter
 from persistence.entities import CollectionRun, ToolRun
@@ -116,6 +117,60 @@ def ensure_schema(conn: duckdb.DuckDBPyConnection, schema_path: Path) -> None:
 
 _MIGRATIONS: tuple[str, ...] = (
     "ALTER TABLE lz_layout_files ADD COLUMN IF NOT EXISTS stable_fingerprint VARCHAR",
+    # P1: Run quality summary table
+    """CREATE TABLE IF NOT EXISTS lz_run_quality_summary (
+        collection_run_id VARCHAR NOT NULL PRIMARY KEY,
+        tools_expected INTEGER NOT NULL,
+        tools_completed INTEGER NOT NULL,
+        tools_skipped INTEGER NOT NULL,
+        tools_failed INTEGER NOT NULL,
+        tools_empty INTEGER NOT NULL,
+        ingestion_errors INTEGER NOT NULL DEFAULT 0,
+        warning_count INTEGER NOT NULL DEFAULT 0,
+        trust_score INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )""",
+    # P3: Evidence, claims, risks tables
+    """CREATE TABLE IF NOT EXISTS lz_evidence (
+        collection_run_id VARCHAR NOT NULL,
+        evidence_id VARCHAR NOT NULL,
+        evidence_type VARCHAR NOT NULL,
+        category VARCHAR NOT NULL,
+        location VARCHAR NOT NULL,
+        excerpt TEXT,
+        observation TEXT,
+        why_it_matters TEXT,
+        tool_source VARCHAR NOT NULL,
+        run_pk BIGINT NOT NULL,
+        confidence VARCHAR NOT NULL DEFAULT 'high',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (collection_run_id, evidence_id)
+    )""",
+    """CREATE TABLE IF NOT EXISTS lz_claims (
+        collection_run_id VARCHAR NOT NULL,
+        claim_id VARCHAR NOT NULL,
+        category VARCHAR NOT NULL,
+        statement TEXT NOT NULL,
+        evidence_ids VARCHAR NOT NULL,
+        implication TEXT,
+        confidence VARCHAR NOT NULL,
+        triggered_by VARCHAR NOT NULL,
+        severity VARCHAR,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (collection_run_id, claim_id)
+    )""",
+    """CREATE TABLE IF NOT EXISTS lz_risks (
+        collection_run_id VARCHAR NOT NULL,
+        risk_id VARCHAR NOT NULL,
+        description TEXT NOT NULL,
+        technical_cause TEXT,
+        claim_ids VARCHAR NOT NULL,
+        manifests_in VARCHAR,
+        triggered_by VARCHAR NOT NULL,
+        severity VARCHAR NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (collection_run_id, risk_id)
+    )""",
 )
 
 
@@ -291,10 +346,204 @@ def _discover_outputs(output_root: Path) -> dict[str, Path]:
 
 
 def _safe_write_json(path: Path, payload: dict[str, Any]) -> None:
+    """
+    Atomically writes a JSON-serializable mapping to a file, ensuring parent directories exist.
+    
+    Writes the given payload as pretty-printed JSON to a temporary file next to the target and atomically replaces the target with that temporary file to avoid partially-written outputs.
+    
+    Parameters:
+    	path (Path): Destination file path for the JSON output.
+    	payload (dict[str, Any]): JSON-serializable mapping to write.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     tmp.replace(path)
+
+
+def compute_run_quality(
+    conn: duckdb.DuckDBPyConnection,
+    collection_run_id: str,
+    tool_summaries: list[dict[str, Any]],
+    all_tool_names: list[str],
+    ingestion_errors: int = 0,
+    warning_count: int = 0,
+    warning_counts: dict[str, int] | None = None,
+    budget_passed: bool = True,
+    logger: OrchestratorLogger | None = None,
+) -> dict[str, Any]:
+    """
+    Compute and persist a run-level quality summary and return a metrics dictionary.
+    
+    Parameters:
+        conn (duckdb.DuckDBPyConnection): DuckDB connection used to persist the summary row.
+        collection_run_id (str): Identifier of the collection run to summarize.
+        tool_summaries (list[dict[str, Any]]): Per-tool summary objects (expected keys include `tool_name`, `status`, and `output_bytes`) used to classify tools as completed, failed, provided, or empty.
+        all_tool_names (list[str]): All tool names expected for the run; used to determine skipped tools.
+        ingestion_errors (int): Number of ingestion errors to factor into the trust score and persisted summary.
+        warning_count (int): Total number of warnings to include in the persisted summary.
+        warning_counts (dict[str, int] | None): Optional breakdown of warnings; expected keys: `"expected_missing"`, `"regression"`, `"degraded"`.
+        budget_passed (bool): Whether the run passed any configured quality budget; persisted as-is.
+        logger (OrchestratorLogger | None): Optional logger for informational messages if persistence fails.
+    
+    Returns:
+        quality (dict): A dictionary of computed metrics suitable for manifests, including:
+            - tools_expected, tools_completed, tools_skipped, tools_failed, tools_empty (int)
+            - ingestion_errors, warning_count (int)
+            - warnings_expected_missing, warnings_regression, warnings_degraded (int)
+            - budget_passed (bool)
+            - trust_score (int): integer score in range 0–100
+            - completed_tools, failed_tools, empty_tools, skipped_tools (list[str]) — sorted lists of tool names
+    """
+    tools_expected = len(all_tool_names)
+
+    # Classify tool outcomes from summaries
+    completed_names: set[str] = set()
+    failed_names: set[str] = set()
+    empty_names: set[str] = set()
+
+    for ts in tool_summaries:
+        name = ts.get("tool_name", "")
+        status = ts.get("status", "")
+        if status == "success":
+            output_bytes = ts.get("output_bytes", 0) or 0
+            if output_bytes < 10:  # essentially empty output
+                empty_names.add(name)
+            else:
+                completed_names.add(name)
+        elif status == "provided":
+            # Bundle/discover mode — count as completed
+            completed_names.add(name)
+        else:
+            failed_names.add(name)
+
+    # Check for tools that produced output but had zero data rows
+    for name in list(completed_names):
+        row_count = _count_tool_rows(conn, collection_run_id, name)
+        if row_count == 0:
+            completed_names.discard(name)
+            empty_names.add(name)
+
+    summarized_names = completed_names | failed_names | empty_names
+    skipped_names = {n for n in all_tool_names if n not in summarized_names}
+
+    tools_completed = len(completed_names)
+    tools_failed = len(failed_names)
+    tools_empty = len(empty_names)
+    tools_skipped = len(skipped_names)
+
+    # Compute trust score (0-100)
+    # Base: completeness ratio. Penalties for failures and empty outputs.
+    if tools_expected == 0:
+        trust_score = 0
+    else:
+        completeness = tools_completed / tools_expected
+        failure_penalty = (tools_failed * 10 + tools_empty * 5) / max(tools_expected, 1)
+        ingestion_penalty = min(ingestion_errors * 5, 20)
+        trust_score = max(0, min(100, round(completeness * 100 - failure_penalty - ingestion_penalty)))
+
+    wc = warning_counts or {}
+    quality = {
+        "tools_expected": tools_expected,
+        "tools_completed": tools_completed,
+        "tools_skipped": tools_skipped,
+        "tools_failed": tools_failed,
+        "tools_empty": tools_empty,
+        "ingestion_errors": ingestion_errors,
+        "warning_count": warning_count,
+        "warnings_expected_missing": wc.get("expected_missing", 0),
+        "warnings_regression": wc.get("regression", 0),
+        "warnings_degraded": wc.get("degraded", 0),
+        "budget_passed": budget_passed,
+        "trust_score": trust_score,
+        "completed_tools": sorted(completed_names),
+        "failed_tools": sorted(failed_names),
+        "empty_tools": sorted(empty_names),
+        "skipped_tools": sorted(skipped_names),
+    }
+
+    # Persist to lz_run_quality_summary
+    try:
+        conn.execute(
+            "DELETE FROM lz_run_quality_summary WHERE collection_run_id = ?",
+            [collection_run_id],
+        )
+        conn.execute(
+            """
+            INSERT INTO lz_run_quality_summary (
+                collection_run_id, tools_expected, tools_completed,
+                tools_skipped, tools_failed, tools_empty,
+                ingestion_errors, warning_count,
+                warnings_expected_missing, warnings_regression,
+                warnings_degraded, budget_passed, trust_score
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                collection_run_id, tools_expected, tools_completed,
+                tools_skipped, tools_failed, tools_empty,
+                ingestion_errors, warning_count,
+                wc.get("expected_missing", 0), wc.get("regression", 0),
+                wc.get("degraded", 0), budget_passed, trust_score,
+            ],
+        )
+    except Exception as exc:
+        if logger:
+            logger.info(f"WARNING: Failed to persist run quality summary: {exc}")
+
+    return quality
+
+
+def _count_tool_rows(
+    conn: duckdb.DuckDBPyConnection,
+    collection_run_id: str,
+    tool_name: str,
+) -> int:
+    """
+    Determine how many data rows the specified tool produced for the given collection run.
+    
+    If there is no recorded tool run for the collection_run_id and tool_name, returns 0. If the tool is not recognized by the internal mapping, returns 1 to indicate a presumed non-empty result. If the count cannot be determined due to an error, returns -1.
+    
+    Returns:
+        int: Number of data rows for the tool (0 for no run, 1 for unknown tool assumed non-empty, -1 if indeterminate).
+    """
+    try:
+        row = conn.execute(
+            "SELECT run_pk FROM lz_tool_runs WHERE collection_run_id = ? AND tool_name = ?",
+            [collection_run_id, tool_name],
+        ).fetchone()
+        if not row:
+            return 0
+        run_pk = row[0]
+        # Check the first matching data table
+        _tool_table_map = {
+            "scc": "lz_scc_file_metrics",
+            "lizard": "lz_lizard_file_metrics",
+            "roslyn-analyzers": "lz_roslyn_violations",
+            "semgrep": "lz_semgrep_smells",
+            "sonarqube": "lz_sonarqube_issues",
+            "trivy": "lz_trivy_targets",
+            "gitleaks": "lz_gitleaks_secrets",
+            "symbol-scanner": "lz_code_symbols",
+            "scancode": "lz_scancode_file_licenses",
+            "pmd-cpd": "lz_pmd_cpd_file_metrics",
+            "devskim": "lz_devskim_findings",
+            "dotcover": "lz_dotcover_assembly_coverage",
+            "git-fame": "lz_git_fame_authors",
+            "git-sizer": "lz_git_sizer_metrics",
+            "git-blame-scanner": "lz_git_blame_summary",
+            "dependensee": "lz_dependensee_projects",
+            "coverage-ingest": "lz_coverage_summary",
+            "layout-scanner": "lz_layout_files",
+        }
+        table = _tool_table_map.get(tool_name)
+        if not table:
+            return 1  # unknown tool, assume non-empty
+        result = conn.execute(
+            f"SELECT count(*) FROM {table} WHERE run_pk = ?", [run_pk]
+        ).fetchone()
+        return result[0] if result else 0
+    except Exception:
+        return -1  # can't determine, don't penalize
 
 
 class ToolPhaseError(RuntimeError):
@@ -305,30 +554,23 @@ class ToolPhaseError(RuntimeError):
         outputs: dict[str, Path],
         tool_summaries: list[dict[str, Any]],
     ) -> None:
+        """
+        Initialize the ToolPhaseError with a message and execution results.
+        
+        Parameters:
+            message (str): Human-readable error message describing the tool phase failure.
+            outputs (dict[str, Path]): Mapping from tool name to the Path of the output file each tool produced.
+            tool_summaries (list[dict[str, Any]]): List of per-tool summary dictionaries produced during execution.
+        """
         super().__init__(message)
         self.outputs = outputs
         self.tool_summaries = tool_summaries
 
 
-# Tool configurations for the orchestrator
+# Tool configurations derived from the unified tool registry
 TOOL_CONFIGS = [
-    ToolConfig("layout-scanner", "src/tools/layout-scanner", {"NO_GITIGNORE": "1"}),
-    ToolConfig("scc", "src/tools/scc"),
-    ToolConfig("lizard", "src/tools/lizard"),
-    ToolConfig("roslyn-analyzers", "src/tools/roslyn-analyzers"),
-    ToolConfig("semgrep", "src/tools/semgrep"),
-    ToolConfig("sonarqube", "src/tools/sonarqube"),
-    ToolConfig("trivy", "src/tools/trivy"),
-    ToolConfig("gitleaks", "src/tools/gitleaks"),
-    ToolConfig("symbol-scanner", "src/tools/symbol-scanner"),
-    ToolConfig("scancode", "src/tools/scancode"),
-    ToolConfig("pmd-cpd", "src/tools/pmd-cpd"),
-    ToolConfig("devskim", "src/tools/devskim"),
-    ToolConfig("dotcover", "src/tools/dotcover"),
-    ToolConfig("git-fame", "src/tools/git-fame"),
-    ToolConfig("git-sizer", "src/tools/git-sizer"),
-    ToolConfig("git-blame-scanner", "src/tools/git-blame-scanner"),
-    ToolConfig("dependensee", "src/tools/dependensee"),
+    ToolConfig(t.name, t.path, t.extra_env or None)
+    for t in get_execution_tools()
 ]
 
 
@@ -575,24 +817,39 @@ def _run_tools(
 
 
 # Tool ingestion configurations for tools with standard adapter pattern
+# Adapter/repository class lookup tables for registry-driven ingestion config
+_ADAPTER_CLASSES: dict[str, type[BaseAdapter]] = {
+    cls.__name__: cls
+    for cls in [
+        SccAdapter, LizardAdapter, RoslynAnalyzersAdapter, SemgrepAdapter,
+        SonarqubeAdapter, TrivyAdapter, GitleaksAdapter, SymbolScannerAdapter,
+        ScancodeAdapter, PmdCpdAdapter, DevskimAdapter, DotcoverAdapter,
+        GitFameAdapter, GitSizerAdapter, GitBlameScannerAdapter,
+        DependenseeAdapter, CoverageIngestAdapter,
+    ]
+}
+
+_REPO_CLASSES: dict[str, type[BaseRepository]] = {
+    cls.__name__: cls
+    for cls in [
+        SccRepository, LizardRepository, RoslynRepository, SemgrepRepository,
+        SonarqubeRepository, TrivyRepository, GitleaksRepository,
+        SymbolScannerRepository, ScancodeRepository, PmdCpdRepository,
+        DevskimRepository, DotcoverRepository, GitFameRepository,
+        GitSizerRepository, GitBlameRepository, DependenseeRepository,
+        CoverageRepository,
+    ]
+}
+
+# Ingestion configurations derived from the unified tool registry
 TOOL_INGESTION_CONFIGS = [
-    ToolIngestionConfig("scc", SccAdapter, SccRepository),
-    ToolIngestionConfig("lizard", LizardAdapter, LizardRepository),
-    ToolIngestionConfig("roslyn-analyzers", RoslynAnalyzersAdapter, RoslynRepository),
-    ToolIngestionConfig("semgrep", SemgrepAdapter, SemgrepRepository),
-    ToolIngestionConfig("sonarqube", SonarqubeAdapter, SonarqubeRepository, validate_metadata=False),
-    ToolIngestionConfig("trivy", TrivyAdapter, TrivyRepository),
-    ToolIngestionConfig("git-sizer", GitSizerAdapter, GitSizerRepository),
-    ToolIngestionConfig("git-fame", GitFameAdapter, GitFameRepository),
-    ToolIngestionConfig("git-blame-scanner", GitBlameScannerAdapter, GitBlameRepository),
-    ToolIngestionConfig("gitleaks", GitleaksAdapter, GitleaksRepository),
-    ToolIngestionConfig("symbol-scanner", SymbolScannerAdapter, SymbolScannerRepository),
-    ToolIngestionConfig("scancode", ScancodeAdapter, ScancodeRepository),
-    ToolIngestionConfig("pmd-cpd", PmdCpdAdapter, PmdCpdRepository),
-    ToolIngestionConfig("devskim", DevskimAdapter, DevskimRepository),
-    ToolIngestionConfig("dotcover", DotcoverAdapter, DotcoverRepository),
-    ToolIngestionConfig("dependensee", DependenseeAdapter, DependenseeRepository),
-    ToolIngestionConfig("coverage-ingest", CoverageIngestAdapter, CoverageRepository),
+    ToolIngestionConfig(
+        name=t.name,
+        adapter_class=_ADAPTER_CLASSES[t.adapter_class],
+        repo_class=_REPO_CLASSES.get(t.repo_class) if t.repo_class else None,
+        validate_metadata=t.validate_metadata,
+    )
+    for t in get_ingestion_tools()
 ]
 
 
@@ -800,6 +1057,14 @@ def run_dbt(
 
 
 def main() -> int:
+    """
+    Orchestrates the end-to-end run: executes configured analysis tools (or discovers their outputs), ingests tool outputs into DuckDB, optionally runs dbt, computes and persists a run quality/trust score, and writes a JSON run summary and logs.
+    
+    Performs CLI parsing, validates identifiers, manages logging, creates or updates a collection run record in the database, runs tools (or discovers outputs), ingests outputs, invokes dbt when requested, persists run status and a trust summary to the database, and writes summary and dbt summary JSON files plus log output.
+    
+    Returns:
+        int: Exit code. `0` on success, non-zero on failure.
+    """
     parser = argparse.ArgumentParser(description="Caldera SoT orchestrator.")
     parser.add_argument("--repo-path", required=True)
     parser.add_argument("--repo-id", required=True)
@@ -1132,6 +1397,23 @@ def main() -> int:
         logger.info(
             f"Ingested into {args.db_path} in {_format_duration(time.perf_counter() - start)}"
         )
+
+        # Compute and persist run quality / trust score
+        all_tool_names = [t.name for t in TOOL_CONFIGS] + ["coverage-ingest"]
+        tool_sums = summary["steps"]["tools"].get("tools", [])
+        ingestion_err_count = len([
+            e for e in tool_sums if e.get("status") == "failed"
+        ]) if not tool_sums else 0
+        quality = compute_run_quality(
+            conn, collection_run_id, tool_sums, all_tool_names,
+            ingestion_errors=ingestion_err_count, logger=logger,
+        )
+        summary["trust"] = quality
+        logger.info(
+            f"Trust score: {quality['trust_score']}/100 "
+            f"({quality['tools_completed']}/{quality['tools_expected']} tools completed)"
+        )
+
         conn.close()
         conn = None
 

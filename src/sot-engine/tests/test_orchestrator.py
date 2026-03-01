@@ -20,6 +20,7 @@ from orchestrator import (
     _format_duration,
     _is_fallback_commit,
     _resolve_dbt_cmd,
+    compute_run_quality,
     main,
     ingest_outputs,
     ensure_schema,
@@ -625,3 +626,157 @@ def test_format_duration_very_small() -> None:
     """Sub-second values should show two decimal places."""
     assert _format_duration(0.001) == "0.00s"
     assert _format_duration(0.005) == "0.01s"
+
+
+# =============================================================================
+# compute_run_quality trust score tests (P1)
+# =============================================================================
+
+
+def test_compute_run_quality_trust_score() -> None:
+    """
+    Verify compute_run_quality calculates and persists a run quality summary for a mix of completed, failed, and empty tool runs.
+    
+    Sets up an in-memory DuckDB with a collection run, tool runs, and sample data rows so that two tools are completed with data, one tool failed, and one tool succeeded with no data (empty). Calls compute_run_quality and asserts the computed counts (tools_expected, tools_completed, tools_failed, tools_empty) and the computed trust_score are persisted to lz_run_quality_summary.
+    """
+    conn = duckdb.connect(":memory:")
+    _load_schema(conn)
+
+    # Use real tool names so _count_tool_rows finds their LZ tables
+    all_tools = ["layout-scanner", "scc", "lizard", "semgrep"]
+    # 2 completed (with data), 1 failed, 1 empty (success but no rows)
+    summaries = [
+        {"tool_name": "layout-scanner", "status": "success", "output_bytes": 5000},
+        {"tool_name": "scc", "status": "success", "output_bytes": 3000},
+        {"tool_name": "lizard", "status": "failed", "output_bytes": 0},
+        {"tool_name": "semgrep", "status": "success", "output_bytes": 2000},
+    ]
+
+    coll_id = "test-coll-001"
+    conn.execute(
+        "INSERT INTO lz_collection_runs VALUES (?, 'repo', 'run', 'main', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'running')",
+        [coll_id, "a" * 40],
+    )
+    # Insert tool runs for the 3 "success" tools
+    conn.execute(
+        "INSERT INTO lz_tool_runs (run_pk, collection_run_id, repo_id, run_id, tool_name, tool_version, schema_version, branch, commit, timestamp) "
+        "VALUES (1, ?, 'repo', 'run', 'layout-scanner', '1.0', '1.0', 'main', ?, CURRENT_TIMESTAMP)",
+        [coll_id, "a" * 40],
+    )
+    conn.execute(
+        "INSERT INTO lz_tool_runs (run_pk, collection_run_id, repo_id, run_id, tool_name, tool_version, schema_version, branch, commit, timestamp) "
+        "VALUES (2, ?, 'repo', 'run', 'scc', '1.0', '1.0', 'main', ?, CURRENT_TIMESTAMP)",
+        [coll_id, "a" * 40],
+    )
+    conn.execute(
+        "INSERT INTO lz_tool_runs (run_pk, collection_run_id, repo_id, run_id, tool_name, tool_version, schema_version, branch, commit, timestamp) "
+        "VALUES (3, ?, 'repo', 'run', 'semgrep', '1.0', '1.0', 'main', ?, CURRENT_TIMESTAMP)",
+        [coll_id, "a" * 40],
+    )
+
+    # Insert data rows for layout-scanner and scc (they are truly completed)
+    conn.execute(
+        "INSERT INTO lz_layout_files (run_pk, file_id, relative_path, directory_id, filename, extension, language, category, size_bytes, line_count, is_binary) "
+        "VALUES (1, 'f1', 'a.py', 'd1', 'a.py', '.py', 'Python', 'source', 100, 10, FALSE)"
+    )
+    conn.execute(
+        "INSERT INTO lz_scc_file_metrics (run_pk, file_id, directory_id, relative_path, filename, extension, language, lines_total, code_lines, comment_lines, blank_lines, bytes, complexity) "
+        "VALUES (2, 'f1', 'd1', 'a.py', 'a.py', '.py', 'Python', 10, 8, 1, 1, 100, 1)"
+    )
+    # semgrep has no rows → reclassified as empty
+
+    quality = compute_run_quality(conn, coll_id, summaries, all_tools, ingestion_errors=0)
+
+    # 2 completed (layout-scanner, scc), 1 failed (lizard), 1 empty (semgrep: 0 rows)
+    assert quality["tools_expected"] == 4
+    assert quality["tools_completed"] == 2
+    assert quality["tools_failed"] == 1
+    assert quality["tools_empty"] == 1
+
+    # trust = max(0, min(100, round(2/4*100 - (1*10+1*5)/4 - 0)))
+    #       = max(0, min(100, round(50 - 15/4)))
+    #       = max(0, min(100, round(50 - 3.75)))
+    #       = round(46.25) = 46
+    assert quality["trust_score"] == 46
+
+    # Verify row was persisted
+    row = conn.execute(
+        "SELECT trust_score, tools_expected, tools_completed, tools_failed, tools_empty "
+        "FROM lz_run_quality_summary WHERE collection_run_id = ?",
+        [coll_id],
+    ).fetchone()
+    assert row is not None
+    assert row == (46, 4, 2, 1, 1)
+
+    conn.close()
+
+
+def test_compute_run_quality_perfect_score() -> None:
+    """All tools completed with data → trust score 100."""
+    conn = duckdb.connect(":memory:")
+    _load_schema(conn)
+
+    # Use just 2 tools to keep it simple
+    all_tools = ["layout-scanner", "scc"]
+    summaries = [
+        {"tool_name": "layout-scanner", "status": "success", "output_bytes": 5000},
+        {"tool_name": "scc", "status": "success", "output_bytes": 3000},
+    ]
+
+    coll_id = "test-coll-perfect"
+    conn.execute(
+        "INSERT INTO lz_collection_runs VALUES (?, 'repo', 'run', 'main', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'running')",
+        [coll_id, "b" * 40],
+    )
+    # Insert tool runs
+    for i, tool_name in enumerate(all_tools, start=1):
+        conn.execute(
+            "INSERT INTO lz_tool_runs (run_pk, collection_run_id, repo_id, run_id, tool_name, tool_version, schema_version, branch, commit, timestamp) "
+            "VALUES (?, ?, 'repo', 'run', ?, '1.0', '1.0', 'main', ?, CURRENT_TIMESTAMP)",
+            [i, coll_id, tool_name, "b" * 40],
+        )
+    # Insert actual data rows so tools count as completed
+    conn.execute(
+        "INSERT INTO lz_layout_files (run_pk, file_id, relative_path, directory_id, filename, extension, language, category, size_bytes, line_count, is_binary) "
+        "VALUES (1, 'f1', 'src/a.py', 'd1', 'a.py', '.py', 'Python', 'source', 100, 10, FALSE)"
+    )
+    conn.execute(
+        "INSERT INTO lz_scc_file_metrics (run_pk, file_id, directory_id, relative_path, filename, extension, language, lines_total, code_lines, comment_lines, blank_lines, bytes, complexity) "
+        "VALUES (2, 'f1', 'd1', 'src/a.py', 'a.py', '.py', 'Python', 10, 8, 1, 1, 100, 1)"
+    )
+
+    quality = compute_run_quality(conn, coll_id, summaries, all_tools)
+
+    # 2/2 completed, 0 failed, 0 empty → 100*1.0 - 0 - 0 = 100
+    assert quality["trust_score"] == 100
+    assert quality["tools_completed"] == 2
+    assert quality["tools_failed"] == 0
+    assert quality["tools_empty"] == 0
+
+    conn.close()
+
+
+def test_compute_run_quality_idempotent() -> None:
+    """Calling compute_run_quality twice does not duplicate the row."""
+    conn = duckdb.connect(":memory:")
+    _load_schema(conn)
+
+    coll_id = "test-coll-idem"
+    conn.execute(
+        "INSERT INTO lz_collection_runs VALUES (?, 'repo', 'run', 'main', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'running')",
+        [coll_id, "c" * 40],
+    )
+
+    summaries = [{"tool_name": "scc", "status": "provided", "output_bytes": 1000}]
+    all_tools = ["scc"]
+
+    compute_run_quality(conn, coll_id, summaries, all_tools)
+    compute_run_quality(conn, coll_id, summaries, all_tools)
+
+    count = conn.execute(
+        "SELECT COUNT(*) FROM lz_run_quality_summary WHERE collection_run_id = ?",
+        [coll_id],
+    ).fetchone()[0]
+    assert count == 1
+
+    conn.close()

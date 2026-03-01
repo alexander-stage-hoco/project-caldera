@@ -132,6 +132,9 @@ class TechnicalClaim:
 # ---------------------------------------------------------------------------
 
 
+RiskStatus = Literal["open", "mitigating", "accepted", "resolved"]
+
+
 @dataclass(frozen=True)
 class ExecutionRisk:
     """An aggregated execution risk derived from one or more claims.
@@ -146,8 +149,24 @@ class ExecutionRisk:
     manifests_in: tuple[str, ...]
     triggered_by: str
     severity: RiskSeverity
+    owner: str | None = None
+    action: str | None = None
+    sla_date: str | None = None
+    status: RiskStatus = "open"
 
     def __post_init__(self) -> None:
+        """
+        Validate ExecutionRisk fields after the dataclass is initialized.
+        
+        Performs post-initialization validation and raises ValueError for any invalid field:
+        - `risk_id` must match the pattern "RISK-{SEQ}" (numeric sequence).
+        - `claim_ids` must contain at least one claim identifier.
+        - `description` must not be empty.
+        - `status` must be one of "open", "mitigating", "accepted", or "resolved".
+        
+        Raises:
+            ValueError: If any of the above validations fail.
+        """
         if not _RISK_ID_RE.match(self.risk_id):
             raise ValueError(
                 f"risk_id must match RISK-NNN, got: {self.risk_id!r}"
@@ -156,6 +175,8 @@ class ExecutionRisk:
             raise ValueError("A risk must reference at least one claim_id")
         if not self.description:
             raise ValueError("description must not be empty")
+        if self.status not in ("open", "mitigating", "accepted", "resolved"):
+            raise ValueError(f"Invalid risk status: {self.status!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -174,10 +195,27 @@ class EvidenceRegistry:
         evidence: list[EvidenceItem] | None = None,
         claims: list[TechnicalClaim] | None = None,
         risks: list[ExecutionRisk] | None = None,
+        warning_count: int = 0,
+        warning_details: dict[str, Any] | None = None,
     ) -> None:
+        """
+        Initialize the registry with optional evidence, claims, risks, and warning metadata.
+        
+        Parameters:
+            evidence (list[EvidenceItem] | None): Iterable of EvidenceItem to populate the registry; a shallow copy is stored (defaults to an empty list).
+            claims (list[TechnicalClaim] | None): Iterable of TechnicalClaim to populate the registry; a shallow copy is stored (defaults to an empty list).
+            risks (list[ExecutionRisk] | None): Iterable of ExecutionRisk to populate the registry; a shallow copy is stored (defaults to an empty list).
+            warning_count (int): Number of warnings associated with the registry (defaults to 0).
+            warning_details (dict[str, Any] | None): Optional mapping of additional warning metadata; stored as an empty dict when None.
+        
+        Details:
+            Builds internal lookup indices for evidence, claims, and risks keyed by their respective IDs to enable O(1) retrieval by identifier.
+        """
         self._evidence: list[EvidenceItem] = list(evidence or [])
         self._claims: list[TechnicalClaim] = list(claims or [])
         self._risks: list[ExecutionRisk] = list(risks or [])
+        self.warning_count: int = warning_count
+        self.warning_details: dict[str, Any] = warning_details or {}
 
         # Build lookup indices
         self._evidence_by_id: dict[str, EvidenceItem] = {

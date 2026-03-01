@@ -249,12 +249,28 @@ class GitBlameScannerAdapter(BaseAdapter):
     def _map_file_summaries(
         self, run_pk: int, layout_run_pk: int, files: Iterable[dict]
     ) -> Iterable[GitBlameFileSummary]:
-        """Map raw file entries to GitBlameFileSummary entities."""
+        """
+        Map raw per-file dictionaries to GitBlameFileSummary entities for persistence.
+        
+        Each yielded summary corresponds to a file present in the provided layout; entries whose paths are not found in the layout are skipped. If an entry's `last_modified` is the string `"unknown"`, it is converted to `None` in the resulting summary.
+        
+        Parameters:
+            run_pk (int): Primary key of the current tool run to associate with each summary.
+            layout_run_pk (int): Primary key of the layout run used to resolve file and directory IDs.
+            files (Iterable[dict]): Iterable of raw file records produced by the tool.
+        
+        Returns:
+            Iterable[GitBlameFileSummary]: An iterator of mapped GitBlameFileSummary objects for files found in the layout.
+        """
         for entry in files:
             relative_path = self._normalize_path(entry.get("path", ""))
-            file_id, directory_id = self._layout_repo.get_file_record(
-                layout_run_pk, relative_path
-            )
+            try:
+                file_id, directory_id = self._layout_repo.get_file_record(
+                    layout_run_pk, relative_path
+                )
+            except KeyError:
+                self._log(f"WARN: skipping file not in layout: {relative_path}")
+                continue
 
             # Handle last_modified - convert "unknown" to None
             last_modified = entry.get("last_modified")
