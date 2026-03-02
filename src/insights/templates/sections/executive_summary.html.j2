@@ -24,6 +24,12 @@
     </div>
     {% endif %}
 
+    {% if narrative_paragraph %}
+    <div class="subsection narrative-summary">
+        <p>{{ narrative_paragraph }}</p>
+    </div>
+    {% endif %}
+
     {% if has_insights %}
     <div class="subsection">
         <h3>Key Findings</h3>

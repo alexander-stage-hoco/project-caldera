@@ -15,6 +15,11 @@ from .orchestrator import (
     EvaluationResult,
     LLMEvaluatorBase,
 )
+from .evidence_sampling import (
+    sample_dict_values,
+    sample_list,
+    truncate_nested_strings,
+)
 
 __all__ = [
     "BaseJudge",
@@ -31,6 +36,10 @@ __all__ = [
     "verify_interactions_logged",
     "get_observability_summary",
     "get_recent_interactions",
+    # Evidence sampling
+    "sample_dict_values",
+    "sample_list",
+    "truncate_nested_strings",
 ]
 
 # Re-export HAS_OBSERVABILITY flag for tools to check

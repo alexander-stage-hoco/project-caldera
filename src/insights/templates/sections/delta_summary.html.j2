@@ -35,6 +35,13 @@
         </div>
     </div>
 
+    {% if delta_narrative %}
+    <div class="subsection narrative-summary">
+        <h3>Analysis</h3>
+        <p>{{ delta_narrative }}</p>
+    </div>
+    {% endif %}
+
     {% if top_regressions %}
     <h3>Top Regressed Files ({{ total_regressed_files }} total)</h3>
     <table class="data-table">

@@ -10,6 +10,7 @@ to the observability module for debugging and analysis.
 
 from __future__ import annotations
 
+import copy
 import json
 import uuid
 from abc import ABC, abstractmethod
@@ -506,6 +507,72 @@ Respond with ONLY a JSON object:
         # Fallback to legacy format (direct summary)
         return analysis.get("summary", {})
 
+    @staticmethod
+    def truncate_evidence(
+        evidence: dict[str, Any],
+        max_chars: int = 80_000,
+    ) -> dict[str, Any]:
+        """Truncate an evidence dict so its JSON serialization fits *max_chars*.
+
+        If the serialized size is already within the limit the dict is returned
+        unchanged.  Otherwise the method iteratively finds the longest string
+        value (depth-first) and truncates it in half until the total size fits,
+        appending ``…[truncated]`` to each trimmed value.
+
+        Args:
+            evidence: Evidence dictionary from ``collect_evidence()``.
+            max_chars: Maximum allowed JSON-serialized length (default 80 000).
+
+        Returns:
+            A (possibly deep-copied and trimmed) evidence dict.
+        """
+        serialized = json.dumps(evidence, indent=2, default=str)
+        if len(serialized) <= max_chars:
+            return evidence
+
+        # Work on a deep copy so callers keep their original data intact.
+        result = copy.deepcopy(evidence)
+
+        # Collect mutable references: list of (parent, key, value_len)
+        def _string_entries(
+            obj: Any, parent: Any = None, key: Any = None,
+        ) -> list[tuple[Any, Any, int]]:
+            entries: list[tuple[Any, Any, int]] = []
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    if isinstance(v, str):
+                        entries.append((obj, k, len(v)))
+                    else:
+                        entries.extend(_string_entries(v, obj, k))
+            elif isinstance(obj, list):
+                for i, v in enumerate(obj):
+                    if isinstance(v, str):
+                        entries.append((obj, i, len(v)))
+                    else:
+                        entries.extend(_string_entries(v, obj, i))
+            return entries
+
+        _TRUNCATION_MARKER = "\u2026[truncated]"
+
+        for _ in range(200):  # safety bound
+            serialized = json.dumps(result, indent=2, default=str)
+            if len(serialized) <= max_chars:
+                break
+
+            entries = _string_entries(result)
+            if not entries:
+                break  # nothing left to trim
+
+            # Pick the longest string
+            entries.sort(key=lambda e: e[2], reverse=True)
+            parent, key, length = entries[0]
+
+            # Trim to half its current length (minimum 20 chars + marker)
+            new_len = max(length // 2, 20)
+            parent[key] = parent[key][:new_len] + _TRUNCATION_MARKER
+
+        return result
+
     def build_prompt(self, evidence: dict[str, Any]) -> str:
         """Build the complete prompt with evidence.
 
@@ -519,6 +586,8 @@ Respond with ONLY a JSON object:
         Returns:
             Complete prompt string ready for LLM invocation
         """
+        evidence = self.truncate_evidence(evidence)
+
         template = self.load_prompt_template()
 
         # Replace {{ evidence }} with entire dict if present

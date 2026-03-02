@@ -174,6 +174,12 @@ def main() -> int:
                 check=True,
             )
 
+        # Copy LLM observability logs if present
+        llm_logs_src = Path("src/output/llm_logs")
+        llm_logs_dest = report_out.parent / "llm_logs"
+        if llm_logs_src.is_dir() and any(llm_logs_src.iterdir()):
+            shutil.copytree(llm_logs_src, llm_logs_dest, dirs_exist_ok=True)
+
         manifest_cmd = [
             sys.executable,
             "scripts/write_run_manifest.py",
@@ -189,6 +195,8 @@ def main() -> int:
         warnings_json = report_out.parent / "warnings.json"
         if warnings_json.exists():
             manifest_cmd.extend(["--warnings-json", str(warnings_json)])
+        if llm_logs_dest.is_dir():
+            manifest_cmd.extend(["--llm-logs", str(llm_logs_dest)])
         subprocess.run(manifest_cmd, check=True)
 
         print(f"Report: {report_out}")

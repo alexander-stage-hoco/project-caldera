@@ -38,6 +38,7 @@ def generate(
     sections: str | None = typer.Option(None, "--sections", "-s", help="Comma-separated section names"),
     profile: str | None = typer.Option(None, "--profile", "-p", help="Stakeholder profile (cto, investor, ceo)"),
     title: str | None = typer.Option(None, "--title", "-t", help="Custom report title"),
+    report_llm: bool = typer.Option(False, "--report-llm", help="Enable LLM narrative enrichment in reports"),
 ) -> None:
     """Generate an insights report for a collection run.
 
@@ -69,7 +70,7 @@ def generate(
         console.print(f"[red]Error:[/red] Database not found: {db}")
         raise typer.Exit(1)
 
-    generator = InsightsGenerator(db_path=db)
+    generator = InsightsGenerator(db_path=db, report_llm=report_llm)
 
     # Validate database
     validation = generator.validate_database()

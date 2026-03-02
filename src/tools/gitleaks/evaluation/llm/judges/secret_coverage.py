@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from shared.evaluation.evidence_sampling import sample_dict_values, truncate_nested_strings
+
 from .base import BaseJudge, JudgeResult
 
 
@@ -91,21 +93,24 @@ Respond with ONLY a JSON object:
             },
         }
 
-        # Load all analysis results
+        # Load all analysis results (sampled to bound evidence size)
         all_results = self.load_all_analysis_results()
         if all_results:
-            evidence["analysis_outputs"] = all_results
+            evidence["analysis_outputs"] = sample_dict_values(all_results, max_entries=10)
 
-        # Load ALL ground truth files (not just the first one)
+        # Load ALL ground truth files (sampled to bound evidence size)
         all_ground_truth = self.load_all_ground_truth()
         if all_ground_truth:
-            evidence["ground_truth"] = all_ground_truth
+            evidence["ground_truth"] = sample_dict_values(all_ground_truth, max_entries=10)
 
-        # Aggregate coverage information across all scenarios
+        # Aggregate coverage information across all scenarios (only sampled keys)
+        sampled_gt = evidence["ground_truth"]
         rule_types_detected = set()
         expected_rule_types = set()
 
-        for scenario, gt in all_ground_truth.items():
+        for scenario, gt in sampled_gt.items():
+            if scenario.startswith("_") or not isinstance(gt, dict):
+                continue
             expected = gt.get("expected", {})
 
             # Track expected rule types
@@ -133,4 +138,4 @@ Respond with ONLY a JSON object:
         evidence["coverage_summary"]["rule_types_detected"] = list(rule_types_detected)
         evidence["coverage_summary"]["expected_rule_types"] = list(expected_rule_types)
 
-        return evidence
+        return truncate_nested_strings(evidence, max_str_len=300)

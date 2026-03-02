@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from shared.evaluation.evidence_sampling import sample_dict_values, truncate_nested_strings
+
 from .base import BaseJudge, JudgeResult
 
 
@@ -86,18 +88,21 @@ Respond with ONLY a JSON object:
             "false_positive_analysis": {},
         }
 
-        # Load all analysis results
+        # Load all analysis results (sampled to bound evidence size)
         all_results = self.load_all_analysis_results()
         if all_results:
-            evidence["analysis_outputs"] = all_results
+            evidence["analysis_outputs"] = sample_dict_values(all_results, max_entries=10)
 
-        # Load ALL ground truth files (not just the first one)
+        # Load ALL ground truth files (sampled to bound evidence size)
         all_ground_truth = self.load_all_ground_truth()
         if all_ground_truth:
-            evidence["ground_truth"] = all_ground_truth
+            evidence["ground_truth"] = sample_dict_values(all_ground_truth, max_entries=10)
 
-        # Analyze potential false positives for each scenario
-        for scenario, gt in all_ground_truth.items():
+        # Analyze potential false positives for each scenario (only sampled keys)
+        sampled_gt = evidence["ground_truth"]
+        for scenario, gt in sampled_gt.items():
+            if scenario.startswith("_") or not isinstance(gt, dict):
+                continue
             expected = gt.get("expected", {})
             analysis = all_results.get(scenario, {})
             if analysis:
@@ -116,4 +121,4 @@ Respond with ONLY a JSON object:
                     "clean_repo_passed": is_clean_repo and actual_count == 0,
                 }
 
-        return evidence
+        return truncate_nested_strings(evidence, max_str_len=300)

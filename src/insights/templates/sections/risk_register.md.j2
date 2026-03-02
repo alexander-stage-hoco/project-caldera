@@ -16,7 +16,7 @@
 {% for risk in sev_risks %}
 #### {{ risk.risk_id }}: {{ risk.triggered_by }}
 
-- **Description:** {{ risk.description }}
+- **Description:** {{ risk.description_narrative or risk.description }}
 - **Technical cause:** {{ risk.technical_cause }}
 - **Supporting claims:** {{ risk.claim_count }}
 

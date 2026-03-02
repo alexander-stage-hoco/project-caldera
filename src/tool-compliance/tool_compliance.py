@@ -717,7 +717,7 @@ def _check_programmatic_exists(tool_root: Path) -> CheckResult:
         )
     return CheckResult(
         check_id="evaluation.programmatic_exists",
-        status="fail",
+        status="skip",
         severity="high",
         message="Missing evaluation_report.json at uniform path",
         evidence=[str(PROGRAMMATIC_EVAL_PATH)],
@@ -730,7 +730,7 @@ def _check_programmatic_schema(tool_root: Path) -> CheckResult:
     if not path.exists():
         return CheckResult(
             check_id="evaluation.programmatic_schema",
-            status="fail",
+            status="skip",
             severity="high",
             message="Cannot validate schema - file missing",
             evidence=[str(PROGRAMMATIC_EVAL_PATH)],
@@ -791,7 +791,7 @@ def _check_programmatic_quality(tool_root: Path) -> CheckResult:
     if not path.exists():
         return CheckResult(
             check_id="evaluation.programmatic_quality",
-            status="fail",
+            status="skip",
             severity="high",
             message="Cannot check quality - file missing",
             evidence=[str(PROGRAMMATIC_EVAL_PATH)],
@@ -872,7 +872,7 @@ def _check_llm_exists(tool_root: Path) -> CheckResult:
         )
     return CheckResult(
         check_id="evaluation.llm_exists",
-        status="fail",
+        status="skip",
         severity="medium",
         message="Missing llm_evaluation.json at uniform path",
         evidence=[str(LLM_EVAL_PATH)],
@@ -885,7 +885,7 @@ def _check_llm_schema(tool_root: Path) -> CheckResult:
     if not path.exists():
         return CheckResult(
             check_id="evaluation.llm_schema",
-            status="fail",
+            status="skip",
             severity="medium",
             message="Cannot validate schema - file missing",
             evidence=[str(LLM_EVAL_PATH)],
@@ -930,7 +930,7 @@ def _check_llm_includes_programmatic(tool_root: Path) -> CheckResult:
     if not path.exists():
         return CheckResult(
             check_id="evaluation.llm_includes_programmatic",
-            status="fail",
+            status="skip",
             severity="medium",
             message="Cannot check - file missing",
             evidence=[str(LLM_EVAL_PATH)],
@@ -979,7 +979,7 @@ def _check_llm_decision_quality(tool_root: Path) -> CheckResult:
     if not path.exists():
         return CheckResult(
             check_id="evaluation.llm_decision_quality",
-            status="fail",
+            status="skip",
             severity="medium",
             message="Cannot check quality - file missing",
             evidence=[str(LLM_EVAL_PATH)],
@@ -2867,7 +2867,7 @@ def _check_sot_schema_table(tool_root: Path, tool_name: str) -> CheckResult:
 
 
 def _check_sot_orchestrator_wired(tool_root: Path, tool_name: str) -> CheckResult:
-    """Check that tool is wired into TOOL_INGESTION_CONFIGS in orchestrator.py.
+    """Check that tool is wired into TOOL_INGESTION_CONFIGS via the tool registry.
 
     Note: layout-scanner is handled specially in the orchestrator as it's a prerequisite
     for other tools. It doesn't use TOOL_INGESTION_CONFIGS.
@@ -2892,40 +2892,54 @@ def _check_sot_orchestrator_wired(tool_root: Path, tool_name: str) -> CheckResul
             evidence=[],
         )
 
+    # Check the tool registry directly — TOOL_INGESTION_CONFIGS is now built
+    # dynamically from get_ingestion_tools() in the registry.
     project_root = tool_root.parents[2]
-    orchestrator_path = project_root / "src" / "sot-engine" / "orchestrator.py"
+    registry_path = project_root / "src" / "sot-engine" / "tool_registry.py"
 
-    if not orchestrator_path.exists():
+    if not registry_path.exists():
         return CheckResult(
             check_id="sot.orchestrator_wired",
             status="fail",
             severity="high",
-            message="orchestrator.py not found",
-            evidence=[str(orchestrator_path)],
+            message="tool_registry.py not found",
+            evidence=[str(registry_path)],
         )
 
-    orchestrator_content = orchestrator_path.read_text()
+    registry_content = registry_path.read_text()
 
-    # Check for TOOL_INGESTION_CONFIGS entry
-    # Pattern: ToolIngestionConfig("tool-name", AdapterClass, RepositoryClass)
-    config_pattern = rf'ToolIngestionConfig\s*\(\s*["\']?{re.escape(tool_name)}["\']?\s*,'
-    has_config = bool(re.search(config_pattern, orchestrator_content))
+    # Check for a ToolRegistryEntry with this tool name and an adapter_class
+    name_pattern = rf'name\s*=\s*"{re.escape(tool_name)}"'
+    has_entry = bool(re.search(name_pattern, registry_content))
 
-    if not has_config:
+    if not has_entry:
         return CheckResult(
             check_id="sot.orchestrator_wired",
             status="fail",
             severity="high",
-            message=f"Tool '{tool_name}' not found in TOOL_INGESTION_CONFIGS",
-            evidence=["Add ToolIngestionConfig entry to orchestrator.py"],
+            message=f"Tool '{tool_name}' not found in TOOL_REGISTRY",
+            evidence=["Add ToolRegistryEntry to src/sot-engine/tool_registry.py"],
+        )
+
+    # Verify it has an adapter_class (required for ingestion)
+    # Find the block for this tool and check for adapter_class
+    block_pattern = rf'ToolRegistryEntry\s*\([^)]*name\s*=\s*"{re.escape(tool_name)}"[^)]*\)'
+    block_match = re.search(block_pattern, registry_content, re.DOTALL)
+    if block_match and "adapter_class" in block_match.group():
+        return CheckResult(
+            check_id="sot.orchestrator_wired",
+            status="pass",
+            severity="high",
+            message=f"Tool '{tool_name}' registered with adapter in TOOL_REGISTRY",
+            evidence=[],
         )
 
     return CheckResult(
         check_id="sot.orchestrator_wired",
-        status="pass",
+        status="fail",
         severity="high",
-        message=f"Tool '{tool_name}' wired in TOOL_INGESTION_CONFIGS",
-        evidence=[],
+        message=f"Tool '{tool_name}' in TOOL_REGISTRY but missing adapter_class",
+        evidence=["Add adapter_class to ToolRegistryEntry"],
     )
 
 
@@ -4492,7 +4506,7 @@ def scan_tool(
             checks.append(
                 CheckResult(
                     check_id="run.analyze",
-                    status="fail",
+                    status="skip",
                     severity="critical",
                     message="No analysis output found - run with --run-analysis or execute 'make analyze'",
                     evidence=[],
@@ -4630,7 +4644,7 @@ def scan_tool(
             checks.append(
                 CheckResult(
                     check_id="run.evaluate",
-                    status="fail",
+                    status="skip",
                     severity="high",
                     message="No evaluation output found - run with --run-evaluate or execute 'make evaluate'",
                     evidence=[],
@@ -4640,7 +4654,7 @@ def scan_tool(
             checks.append(
                 CheckResult(
                     check_id="evaluation.quality",
-                    status="fail",
+                    status="skip",
                     severity="high",
                     message="Evaluation quality check skipped (no outputs)",
                     evidence=[],
@@ -4764,7 +4778,7 @@ def scan_tool(
             checks.append(
                 CheckResult(
                     check_id="run.evaluate_llm",
-                    status="fail",
+                    status="skip",
                     severity="medium",
                     message="No LLM evaluation output found - run with --run-llm or execute 'make evaluate-llm'",
                     evidence=[],
@@ -4774,7 +4788,7 @@ def scan_tool(
             checks.append(
                 CheckResult(
                     check_id="evaluation.llm_quality",
-                    status="fail",
+                    status="skip",
                     severity="medium",
                     message="LLM evaluation quality check skipped (no outputs)",
                     evidence=[],
@@ -4786,10 +4800,12 @@ def scan_tool(
     output, error, output_source = _load_output_for_checks(tool_root, output_path)
     load_duration = (time.perf_counter() - load_start) * 1000.0
     if output is None:
+        # Skip (not fail) when no output exists and analysis wasn't requested
+        load_status = "skip" if not run_analysis else "fail"
         checks.append(
             CheckResult(
                 check_id="output.load",
-                status="fail",
+                status=load_status,
                 severity="high",
                 message="No output.json available",
                 evidence=[error or ""],

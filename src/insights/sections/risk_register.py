@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import Any
 
 from ..data_fetcher import DataFetcher
-from .base import EvidenceAwareSection, SectionConfig
+from .base import EvidenceAwareSection, NarrativeAwareSection, SectionConfig
 
 
-class RiskRegisterSection(EvidenceAwareSection):
+class RiskRegisterSection(NarrativeAwareSection, EvidenceAwareSection):
     """Renders execution risks with technical causes and supporting claims."""
 
     config = SectionConfig(
@@ -34,6 +34,7 @@ class RiskRegisterSection(EvidenceAwareSection):
             "low": [],
         }
 
+        enriched_count = 0
         for risk in risks:
             supporting_claims = registry.claims_for_risk(risk)
             entry: dict[str, Any] = {
@@ -57,6 +58,27 @@ class RiskRegisterSection(EvidenceAwareSection):
                     for c in supporting_claims[:5]
                 ],
             }
+
+            # Enrich top 5 risks with LLM narrative descriptions
+            if self._enricher and enriched_count < 5:
+                narrative = self._enricher.enrich(
+                    task=(
+                        "Rewrite this risk description in 2 sentences, citing specific "
+                        "files, CVE IDs, and metric values from the claims."
+                    ),
+                    data={
+                        "risk_name": risk.triggered_by,
+                        "generic_description": risk.description,
+                        "severity": risk.severity,
+                        "manifests_in": list(risk.manifests_in[:5]),
+                        "supporting_claims": [c["statement"] for c in entry["claims"]],
+                    },
+                    max_tokens=150,
+                )
+                if narrative:
+                    entry["description_narrative"] = narrative
+                enriched_count += 1
+
             by_severity[risk.severity].append(entry)
 
         return {

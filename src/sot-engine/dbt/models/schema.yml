@@ -708,6 +708,24 @@ models:
       - name: total_files
         tests:
           - not_null
+      - name: trust_score
+        description: "Overall trust score for the collection run (0-100)"
+      - name: warning_count
+        description: "Total number of warnings raised during the run"
+      - name: warnings_expected_missing
+        description: "Number of expected-missing warnings (tools that should have run but didn't)"
+      - name: warnings_regression
+        description: "Number of regression warnings (metrics degraded vs previous run)"
+      - name: warnings_degraded
+        description: "Number of degraded warnings (quality below threshold)"
+      - name: budget_passed
+        description: "Whether the run passed all warning budget thresholds"
+      - name: tools_expected
+        description: "Number of tools expected to run"
+      - name: tools_failed
+        description: "Number of tools that failed during the run"
+      - name: ingestion_errors
+        description: "Number of errors encountered during data ingestion"
 
   - name: stg_lz_semgrep_smells
     description: "Staged Semgrep code smell findings"
@@ -6677,5 +6695,44 @@ models:
         description: "Total line churn in last 90 days (git-blame-scanner)"
       - name: sources
         description: "Comma-separated list of tools contributing data to this row"
+        tests:
+          - not_null
+
+  - name: stg_warnings
+    description: "Staging model for per-warning detail rows"
+    columns:
+      - name: collection_run_id
+        tests:
+          - not_null
+      - name: category
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['expected_missing', 'regression', 'degraded']
+      - name: source
+        tests:
+          - not_null
+      - name: message
+        tests:
+          - not_null
+
+  - name: stg_quality_checks
+    description: "Staging model for per-tool data quality check results"
+    columns:
+      - name: collection_run_id
+        tests:
+          - not_null
+      - name: tool_name
+        tests:
+          - not_null
+      - name: check_name
+        tests:
+          - not_null
+      - name: level
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['error', 'warning', 'info']
+      - name: passed
         tests:
           - not_null

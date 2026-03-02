@@ -13,6 +13,7 @@ from ..data_fetcher import DataFetcher
 
 if TYPE_CHECKING:
     from ..evidence.entities import EvidenceRegistry
+    from ..narrative.enricher import NarrativeEnricher
 
 
 @dataclass
@@ -128,6 +129,21 @@ class BaseSection(ABC):
             Dictionary with minimal/empty data for graceful degradation.
         """
         return {}
+
+
+class NarrativeAwareSection(BaseSection):
+    """Mixin for sections that use LLM narrative enrichment.
+
+    The generator injects the enricher via ``set_enricher()``
+    before calling ``fetch_data()``.  Subclasses access it through
+    ``self._enricher``.
+    """
+
+    _enricher: NarrativeEnricher | None = None
+
+    def set_enricher(self, enricher: NarrativeEnricher) -> None:
+        """Inject the narrative enricher for this render pass."""
+        self._enricher = enricher
 
 
 class EvidenceAwareSection(BaseSection):
