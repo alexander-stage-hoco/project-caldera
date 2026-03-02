@@ -8,9 +8,9 @@ concurrency:
   group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
-# Tools to skip in smoke tests (keep scc + layout-scanner for insights anchor)
+# Tools to skip in smoke tests (sonarqube needs a running Docker server)
 env:
-  CI_SKIP_TOOLS: "lizard,semgrep,roslyn-analyzers,sonarqube,trivy,gitleaks,symbol-scanner,scancode,pmd-cpd,devskim,dotcover,git-fame,git-sizer,git-blame-scanner,dependensee,coverage-ingest"
+  CI_SKIP_TOOLS: "sonarqube"
 
 jobs:
   # ── Gate A — Fast Quality (always runs) ──────────────────────────────────
@@ -65,7 +65,7 @@ jobs:
     name: "Gate C — Production Smoke"
     if: github.base_ref == 'release'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
 

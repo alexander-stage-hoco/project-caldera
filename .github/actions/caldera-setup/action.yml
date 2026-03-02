@@ -33,6 +33,36 @@ runs:
       shell: bash
       run: make setup-core
 
+    - name: Set up Java 17 (for pmd-cpd)
+      if: inputs.setup-tools == 'true'
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "17"
+
+    - name: Set up .NET 8.0 (for roslyn-analyzers, devskim, dotcover)
+      if: inputs.setup-tools == 'true'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: "8.0.x"
+
+    - name: Install DevSkim CLI
+      if: inputs.setup-tools == 'true'
+      shell: bash
+      run: |
+        dotnet tool install --global Microsoft.CST.DevSkim.CLI
+        echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+    - name: Install Trivy
+      if: inputs.setup-tools == 'true'
+      shell: bash
+      run: |
+        sudo apt-get install -y wget apt-transport-https gnupg
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+        echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install -y trivy
+
     - name: Cache tool venvs
       if: inputs.setup-tools == 'true'
       uses: actions/cache@v4
@@ -49,6 +79,13 @@ runs:
           src/tools/git-sizer/bin
           src/tools/gitleaks/bin
         key: tool-bins-${{ runner.os }}-${{ hashFiles('src/tools/*/Makefile') }}
+
+    - name: Cache PMD binary
+      if: inputs.setup-tools == 'true'
+      uses: actions/cache@v4
+      with:
+        path: src/tools/pmd-cpd/.pmd
+        key: pmd-${{ runner.os }}-${{ hashFiles('src/tools/pmd-cpd/Makefile') }}
 
     - name: Set up tool environments
       if: inputs.setup-tools == 'true'
