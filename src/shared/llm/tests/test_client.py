@@ -185,7 +185,7 @@ class TestLLMClientPromptGuard:
             # CLI received the truncated prompt
             called_prompt = mock_cli.call_args[0][0]
             assert "[INPUT TRUNCATED" in called_prompt
-            assert len(called_prompt) < len(large_prompt) + 100  # truncated + marker
+            assert len(called_prompt) <= 100  # fits within max_prompt_chars
 
     def test_invoke_respects_custom_max_chars(self, tmp_path):
         """invoke should respect a custom max_prompt_chars value."""
@@ -197,7 +197,7 @@ class TestLLMClientPromptGuard:
                 client.invoke(prompt)
 
         called_prompt = mock_cli.call_args[0][0]
-        assert called_prompt.startswith("y" * 50)
+        assert len(called_prompt) <= 50
         assert "[INPUT TRUNCATED" in called_prompt
 
     def test_invoke_no_truncation_within_limit(self, tmp_path):
