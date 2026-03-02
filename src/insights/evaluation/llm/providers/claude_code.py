@@ -67,6 +67,7 @@ class ClaudeCodeHeadlessProvider(LLMProvider):
 
         Uses `claude -p` for headless operation.
         """
+        prompt = guard_prompt(prompt, max_prompt_chars, context="ClaudeCode")
         effective_model = model or self._model
 
         # Build the command
