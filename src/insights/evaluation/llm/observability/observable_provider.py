@@ -3,6 +3,7 @@ Observable provider wrapper for LLM providers.
 
 Wraps any LLMProvider with logging and tracing capabilities.
 """
+from __future__ import annotations
 
 from typing import Any
 import uuid
