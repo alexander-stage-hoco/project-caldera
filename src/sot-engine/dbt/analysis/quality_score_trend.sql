@@ -8,8 +8,8 @@ with repo_runs as (
     select
         cr.collection_run_id,
         cr.repo_id,
-        cr.created_at as started_at,
-        row_number() over (order by cr.created_at desc) as run_rank
+        cr.started_at,
+        row_number() over (order by cr.started_at desc) as run_rank
     from {{ source('lz', 'lz_collection_runs') }} cr
     where cr.repo_id = '{{ repo_id }}'
       and cr.status = 'completed'

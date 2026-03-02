@@ -264,7 +264,7 @@ class TestWarningBudget:
         assert budgets["degraded"] == 3
 
     def test_collect_with_warnings_classifies_exceptions(self):
-        """When _collect_* methods raise, collect_with_warnings classifies correctly."""
+        """When _safe_query catches failures, they are tracked as CollectorWarnings."""
         collector = EvidenceCollector()
         fetcher = MagicMock()
 
@@ -277,12 +277,10 @@ class TestWarningBudget:
 
         fetcher.fetch.side_effect = side_effect
 
-        # _safe_query catches the error from fetch and returns [],
-        # so _collect_complexity won't raise. Warnings go to warnings.warn only.
-        # collect_with_warnings only populates result.warnings when _collect_* itself raises.
+        # _safe_query catches the error and returns [], but now also records
+        # a CollectorWarning so collect_with_warnings can track the failure.
         result = collector.collect_with_warnings(fetcher, run_pk=1)
 
-        # Since _safe_query catches all exceptions internally, the result
-        # should have no warnings in the CollectionResult (only Python warnings)
-        assert result.warning_counts()["regression"] == 0
+        # The complexity query failure is classified as a regression warning
+        assert result.warning_counts()["regression"] == 1
         assert result.items == []
