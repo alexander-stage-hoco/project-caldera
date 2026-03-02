@@ -74,7 +74,7 @@ def main() -> int:
         return result.returncode
 
     # ── Copy LLM observability logs if present ───────────────────────────
-    llm_logs_src = Path("src/output/llm_logs")
+    llm_logs_src = workspace / "src" / "output" / "llm_logs"
     if llm_logs_src.is_dir() and any(llm_logs_src.iterdir()):
         import shutil
         shutil.copytree(llm_logs_src, results_dir / "llm_logs", dirs_exist_ok=True)
