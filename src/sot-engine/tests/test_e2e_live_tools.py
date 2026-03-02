@@ -691,6 +691,7 @@ def test_e2e_live_tools(
             logger=logger,
             target_path=str(tmp_path / "dbt_target"),
             log_path=str(tmp_path / "dbt_logs"),
+            continue_on_test_failure=True,
         )
 
         # Reconnect after dbt

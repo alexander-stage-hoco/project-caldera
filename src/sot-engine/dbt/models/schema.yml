@@ -6732,7 +6732,7 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['error', 'warning', 'info']
+              values: ['L1', 'L2']
       - name: passed
         tests:
           - not_null
