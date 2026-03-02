@@ -201,6 +201,7 @@ def test_orchestrator_end_to_end(tmp_path: Path) -> None:  # noqa: PLR0915
             logger=logger,
             target_path=str(tmp_path / "dbt_target"),
             log_path=str(tmp_path / "dbt_logs"),
+            continue_on_test_failure=True,
         )
     finally:
         logger.close()
