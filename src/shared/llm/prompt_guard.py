@@ -44,8 +44,8 @@ def check_prompt_size(
     if len(prompt) <= max_chars:
         return prompt, False
 
-    truncated = prompt[:max_chars]
-    truncated += f"\n\n[INPUT TRUNCATED — exceeded {max_chars} chars]"
+    marker = f"\n\n[INPUT TRUNCATED — exceeded {max_chars} chars]"
+    truncated = prompt[: max(max_chars - len(marker), 0)] + marker
     return truncated, True
 
 

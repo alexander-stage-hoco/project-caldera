@@ -1,6 +1,7 @@
 """
 Anthropic API provider for direct API access.
 """
+from __future__ import annotations
 
 import os
 from typing import Any
@@ -26,7 +27,7 @@ class AnthropicAPIProvider(LLMProvider):
         model: str = "claude-3-5-sonnet-latest",
         api_key: str | None = None,
         base_url: str | None = None,
-    ):
+    ) -> None:
         """
         Initialize Anthropic API provider.
 

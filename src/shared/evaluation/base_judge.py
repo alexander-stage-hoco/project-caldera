@@ -567,9 +567,13 @@ Respond with ONLY a JSON object:
             entries.sort(key=lambda e: e[2], reverse=True)
             parent, key, length = entries[0]
 
-            # Trim to half its current length (minimum 20 chars + marker)
-            new_len = max(length // 2, 20)
-            parent[key] = parent[key][:new_len] + _TRUNCATION_MARKER
+            # Trim to half its current length, accounting for marker length
+            # to guarantee the result is strictly shorter each iteration.
+            marker_len = len(_TRUNCATION_MARKER)
+            target_len = max(length // 2, marker_len + 1)
+            target_len = min(target_len, length - 1)  # always shrink
+            content_len = max(target_len - marker_len, 1)
+            parent[key] = parent[key][:content_len] + _TRUNCATION_MARKER
 
         return result
 
