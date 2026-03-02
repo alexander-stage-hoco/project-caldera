@@ -38,6 +38,11 @@ def main() -> int:
         default=False,
         help="Mark that evidence JSON is included in the export",
     )
+    parser.add_argument(
+        "--llm-logs",
+        default=None,
+        help="Path to LLM observability logs directory",
+    )
     args = parser.parse_args()
 
     db_path = Path(args.db).expanduser()
@@ -114,6 +119,7 @@ def main() -> int:
             "tool_outputs_included": args.tool_outputs_included,
             "dbt_artifacts_included": args.dbt_artifacts_included,
             "evidence_included": args.evidence_included,
+            "llm_logs_included": args.llm_logs is not None and Path(args.llm_logs).is_dir(),
             "collection_run": {
                 "collection_run_id": cr[0],
                 "repo_id": cr[1],

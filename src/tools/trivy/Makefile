@@ -18,10 +18,8 @@ REPO_NAME ?= vulnerable-npm
 COMMIT ?= $(shell git -C $(REPO_PATH) rev-parse HEAD 2>/dev/null || echo "0000000000000000000000000000000000000000")
 
 # Trivy settings
-TRIVY_VERSION ?= 0.58.0
+TRIVY_VERSION ?= 0.69.1
 TRIVY_TIMEOUT ?= 600
-TRIVY_INSTALL_URL := https://raw.githubusercontent.com/aquasecurity/trivy/v$(TRIVY_VERSION)/contrib/install.sh
-TRIVY_INSTALL_SH_SHA256 := 2304dcc0c1883e802d376eae1b514c923b7427a7d88091dfcaf83967e6f55a7c
 
 help:  ## Show this help message
 	@echo "Trivy Vulnerability Scanner"
@@ -40,21 +38,15 @@ setup: $(VENV_READY) install-trivy  ## Set up virtual environment and install tr
 
 install-trivy:  ## Install trivy binary
 	@if ! command -v trivy &> /dev/null; then \
-		echo "Installing trivy..."; \
+		echo "Installing trivy $(TRIVY_VERSION)..."; \
 		if [ "$$(uname)" = "Darwin" ]; then \
-			brew install trivy || { \
-				curl -sfL $(TRIVY_INSTALL_URL) -o /tmp/trivy-install.sh && \
-				echo "$(TRIVY_INSTALL_SH_SHA256)  /tmp/trivy-install.sh" | $(SHA256_CMD) -c - || \
-					{ echo "ERROR: checksum mismatch for trivy install script"; rm -f /tmp/trivy-install.sh; exit 1; }; \
-				sh /tmp/trivy-install.sh -b /usr/local/bin v$(TRIVY_VERSION) && \
-				rm -f /tmp/trivy-install.sh; \
-			}; \
+			brew install trivy; \
 		else \
-			curl -sfL $(TRIVY_INSTALL_URL) -o /tmp/trivy-install.sh && \
-			echo "$(TRIVY_INSTALL_SH_SHA256)  /tmp/trivy-install.sh" | $(SHA256_CMD) -c - || \
-				{ echo "ERROR: checksum mismatch for trivy install script"; rm -f /tmp/trivy-install.sh; exit 1; }; \
-			sh /tmp/trivy-install.sh -b /usr/local/bin v$(TRIVY_VERSION) && \
-			rm -f /tmp/trivy-install.sh; \
+			sudo apt-get install -y wget apt-transport-https gnupg && \
+			wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null && \
+			echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list && \
+			sudo apt-get update && \
+			sudo apt-get install -y trivy; \
 		fi \
 	else \
 		echo "trivy already installed: $$(trivy --version | head -1)"; \

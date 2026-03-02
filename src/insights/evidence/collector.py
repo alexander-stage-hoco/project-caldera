@@ -117,6 +117,9 @@ _OPTIONAL_QUERIES: frozenset[str] = frozenset({
 class EvidenceCollector:
     """Collects evidence items from SQL queries on existing marts."""
 
+    def __init__(self) -> None:
+        self._query_warnings: list[CollectorWarning] = []
+
     def collect(
         self,
         fetcher: DataFetcher,
@@ -144,6 +147,7 @@ class EvidenceCollector:
         ]
 
         for collector_fn in collectors:
+            self._query_warnings = []
             try:
                 result.items.extend(collector_fn(fetcher, run_pk))
             except Exception as exc:
@@ -163,6 +167,8 @@ class EvidenceCollector:
                     f"[EvidenceCollector] {source} failed ({category}): {exc}",
                     stacklevel=2,
                 )
+            result.warnings.extend(self._query_warnings)
+            self._query_warnings = []
 
         return result
 
@@ -337,17 +343,24 @@ class EvidenceCollector:
 
     # -- Helpers -----------------------------------------------------------
 
-    @staticmethod
     def _safe_query(
+        self,
         fetcher: DataFetcher,
         query_name: str,
         run_pk: int,
     ) -> list[dict[str, Any]]:
-        """Execute a query, returning empty list on failure."""
+        """Execute a query, returning empty list on failure and tracking warnings."""
         try:
             return fetcher.fetch(query_name, run_pk)
         except Exception as exc:
-            category = "expected_missing" if query_name in _OPTIONAL_QUERIES else "regression"
+            category: WarningCategory = (
+                "expected_missing" if query_name in _OPTIONAL_QUERIES else "regression"
+            )
+            self._query_warnings.append(CollectorWarning(
+                category=category,
+                source=query_name,
+                message=str(exc),
+            ))
             warnings.warn(
                 f"[EvidenceCollector] Query '{query_name}' failed ({category}): {exc}",
                 stacklevel=2,

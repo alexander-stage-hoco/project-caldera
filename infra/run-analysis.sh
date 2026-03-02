@@ -353,6 +353,14 @@ fi
 # Copy run log
 cp /tmp/caldera-run.log "${EXPORT_DIR}/run.log"
 
+# Copy LLM observability logs if present
+LLM_LOG_DIR="${CALDERA_DIR}/src/output/llm_logs"
+if [ -d "${LLM_LOG_DIR}" ] && [ -n "$(ls -A "${LLM_LOG_DIR}" 2>/dev/null)" ]; then
+    mkdir -p "${EXPORT_DIR}/llm_logs"
+    cp -r "${LLM_LOG_DIR}"/* "${EXPORT_DIR}/llm_logs/"
+    echo "  Copied LLM observability logs"
+fi
+
 # Resolve commit from cloned repo
 TARGET_COMMIT=$(cd "${CLONE_DIR}" 2>/dev/null && git rev-parse HEAD 2>/dev/null || printf '%0.s0' {1..40})
 
@@ -441,6 +449,7 @@ manifest = {
         'database': 'database/caldera_sot.duckdb' if os.path.isdir('${EXPORT_DIR}/database') else None,
         'reports': 'reports/' if os.path.isdir('${EXPORT_DIR}/reports') else None,
         'run_log': 'run.log',
+        'llm_logs': 'llm_logs/' if os.path.isdir('${EXPORT_DIR}/llm_logs') else None,
     },
 }
 with open('${EXPORT_DIR}/manifest.json', 'w') as f:

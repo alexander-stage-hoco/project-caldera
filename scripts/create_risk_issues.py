@@ -64,9 +64,15 @@ def _fetch_risks(
             SELECT r.risk_id, r.description, r.technical_cause, r.manifests_in,
                    r.triggered_by, r.severity, r.action, r.sla_date, r.status
             FROM lz_risks r
-            JOIN lz_collection_runs cr ON r.collection_run_id = cr.collection_run_id
             WHERE r.severity IN ({placeholders})
-            ORDER BY cr.started_at DESC,
+              AND r.collection_run_id = (
+                  SELECT cr2.collection_run_id
+                  FROM lz_collection_runs cr2
+                  WHERE cr2.status = 'completed'
+                  ORDER BY cr2.started_at DESC
+                  LIMIT 1
+              )
+            ORDER BY
                 CASE r.severity
                     WHEN 'critical' THEN 0
                     WHEN 'high' THEN 1
