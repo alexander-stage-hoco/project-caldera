@@ -1348,7 +1348,16 @@ def main() -> int:
         )
 
         # Compute and persist run quality / trust score
-        all_tool_names = [t.name for t in TOOL_CONFIGS] + ["coverage-ingest"]
+        # Exclude explicitly skipped tools so the trust score denominator
+        # reflects only the tools that were expected to run.
+        _skip = {
+            n.strip()
+            for n in (args.skip_tools.split(",") if args.skip_tools else [])
+            if n.strip()
+        }
+        all_tool_names = [
+            t.name for t in TOOL_CONFIGS if t.name not in _skip
+        ] + (["coverage-ingest"] if "coverage-ingest" not in _skip else [])
         tool_sums = summary["steps"]["tools"].get("tools", [])
         ingestion_err_count = len([
             e for e in tool_sums if e.get("status") == "failed"
