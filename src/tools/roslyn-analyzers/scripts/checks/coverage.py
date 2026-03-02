@@ -61,7 +61,8 @@ def cv2_design_rule_coverage(analysis: dict, ground_truth: dict) -> CheckResult:
     if rcs_triggered:
         triggered_rules.extend(rcs_triggered[:4])  # Count up to 4 RCS rules
 
-    coverage = len(triggered_rules) / (len(design_rules) + 4)  # +4 for RCS
+    total_rules = len(design_rules) + 4  # +4 for RCS
+    coverage = len(triggered_rules) / total_rules
     passed = len(triggered_rules) >= 1  # At least 1 design rule in synthetic data
 
     return CheckResult(
@@ -72,7 +73,7 @@ def cv2_design_rule_coverage(analysis: dict, ground_truth: dict) -> CheckResult:
         score=coverage,
         threshold=0.06,  # 1/16
         actual_value=coverage,
-        message=f"{len(triggered_rules)}/{len(design_rules)} design rules triggered",
+        message=f"{len(triggered_rules)}/{total_rules} design rules triggered",
         evidence={
             "triggered_rules": triggered_rules,
             "missing_rules": [r for r in design_rules if r not in triggered_rules],

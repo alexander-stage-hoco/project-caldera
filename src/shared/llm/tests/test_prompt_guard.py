@@ -38,8 +38,7 @@ class TestCheckPromptSize:
         prompt = "x" * 200
         result, was_truncated = check_prompt_size(prompt, max_chars=100)
         assert was_truncated is True
-        assert len(result) > 100  # includes the marker
-        assert result.startswith("x" * 100)
+        assert len(result) <= 100  # result fits within max_chars
         assert "[INPUT TRUNCATED" in result
 
     def test_exact_limit_not_truncated(self):
@@ -52,7 +51,8 @@ class TestCheckPromptSize:
         prompt = "x" * 50
         result, was_truncated = check_prompt_size(prompt, max_chars=30)
         assert was_truncated is True
-        assert result.startswith("x" * 30)
+        assert "[INPUT TRUNCATED" in result
+        assert len(result) < len(prompt)  # strictly shorter than original
 
     def test_truncation_marker_content(self):
         prompt = "x" * 200

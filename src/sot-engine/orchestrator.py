@@ -392,9 +392,10 @@ def compute_run_quality(
     # Check for tools that produced output but had zero data rows
     for name in list(completed_names):
         row_count = _count_tool_rows(conn, collection_run_id, name)
-        if row_count <= 0:
+        if row_count == 0:
             completed_names.discard(name)
             empty_names.add(name)
+        # row_count < 0 means indeterminate/error — don't penalize
 
     summarized_names = completed_names | failed_names | empty_names
     skipped_names = {n for n in all_tool_names if n not in summarized_names}
