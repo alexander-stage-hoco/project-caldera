@@ -288,6 +288,10 @@ class SccFileMetric:
 # Bad: "/Users/foo/repo/src/main.py", "./src/main.py", "src\\main.py"
 ```
 
+## Post-Commit Workflow
+
+After committing changes, **always use the `/promote` skill** to push and create PRs. Never run `git push` manually. The promote skill handles the full promotion pipeline: push → PR creation → CI watch → merge, following the branch strategy (develop → release → main).
+
 ## Key Files Reference
 
 ### Documentation

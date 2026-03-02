@@ -136,6 +136,11 @@ def main() -> int:
             check=True,
         )
 
+        # Clear stale LLM logs before evaluation so only current-run logs are captured
+        llm_logs_src = Path("src/output/llm_logs")
+        if llm_logs_src.is_dir():
+            shutil.rmtree(llm_logs_src)
+
         if int(args.llm) == 1:
             run_pk = _get_run_pk(db_path, run_id)
             eval_out = report_out.parent / "evaluation.json"

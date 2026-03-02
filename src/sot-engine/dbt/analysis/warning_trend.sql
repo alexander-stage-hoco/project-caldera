@@ -38,7 +38,8 @@ quality_summary as (
 select
     rr.collection_run_id,
     rr.repo_id,
-    rr.commit as run_id,
+    rr.collection_run_id as run_id,
+    rr.commit,
     rr.started_at,
     coalesce(wc.cnt_expected_missing, 0) as cnt_expected_missing,
     coalesce(wc.cnt_regression, 0) as cnt_regression,

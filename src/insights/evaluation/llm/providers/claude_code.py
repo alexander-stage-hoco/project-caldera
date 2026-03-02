@@ -3,6 +3,7 @@ Claude Code Headless provider using Opus 4.5.
 
 This is the default and recommended provider for evaluation.
 """
+from __future__ import annotations
 
 import json
 import subprocess
@@ -76,10 +77,11 @@ class ClaudeCodeHeadlessProvider(LLMProvider):
         if effective_model != self.default_model:
             cmd.extend(["--model", effective_model])
 
-        # Combine system and user prompt
+        # Combine system and user prompt, then guard the full composed prompt
         full_prompt = prompt
         if system:
             full_prompt = f"System: {system}\n\nUser: {prompt}"
+        full_prompt = guard_prompt(full_prompt, max_prompt_chars, context="ClaudeCode")
 
         # Execute Claude Code
         try:

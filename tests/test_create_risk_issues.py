@@ -113,6 +113,32 @@ class TestFetchRisks:
         assert len(risks) == 1
         assert risks[0]["risk_id"] == "RISK-001"
 
+    def test_fetch_risks_latest_run_when_no_id(self, tmp_path: Path) -> None:
+        """When collection_run_id is None, fetch from latest completed run."""
+        db_path = _create_db(tmp_path)
+        # Insert two completed runs and one failed run
+        conn = duckdb.connect(str(db_path))
+        conn.execute(
+            "INSERT INTO lz_collection_runs (collection_run_id, repo_id, commit, status, started_at) VALUES "
+            "('old-run', 'test', 'aaa', 'completed', '2026-01-01 00:00:00'), "
+            "('new-run', 'test', 'bbb', 'completed', '2026-02-01 00:00:00'), "
+            "('failed-run', 'test', 'ccc', 'failed', '2026-03-01 00:00:00')"
+        )
+        conn.execute(
+            "INSERT INTO lz_risks (collection_run_id, risk_id, severity, description) VALUES "
+            "('old-run', 'RISK-OLD', 'high', 'old risk'), "
+            "('new-run', 'RISK-NEW', 'high', 'new risk'), "
+            "('failed-run', 'RISK-FAIL', 'high', 'failed risk')"
+        )
+        conn.close()
+
+        conn = duckdb.connect(str(db_path), read_only=True)
+        risks = _fetch_risks(conn, None, "high")
+        conn.close()
+
+        assert len(risks) == 1
+        assert risks[0]["risk_id"] == "RISK-NEW"
+
     def test_fetch_risks_empty_table(self, tmp_path: Path) -> None:
         db_path = _create_db(tmp_path)
         conn = duckdb.connect(str(db_path), read_only=True)

@@ -492,6 +492,7 @@ pipeline-eval:
 	    $(if $(filter 1,$(REPORT_LLM)),--report-llm,) \
 	    --output $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html); \
 	  cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html; \
+	  rm -rf src/output/llm_logs; \
 	  if [ "$(PIPELINE_LLM)" = "1" ]; then \
 	    RUN_PK=$$($(PYTHON_VENV) scripts/get_run_pk.py --db "$(ORCH_DB_PATH)" --run-id "$$RESOLVED_RUN_ID"); \
 	    echo ""; \
