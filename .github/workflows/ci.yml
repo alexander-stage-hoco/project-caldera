@@ -8,9 +8,11 @@ concurrency:
   group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
-# Tools to skip in smoke tests (sonarqube needs a running Docker server)
+# Tools to skip in smoke tests:
+#   sonarqube — needs a running Docker server
+#   roslyn-analyzers, dotcover — CI fixture has no .NET code
 env:
-  CI_SKIP_TOOLS: "sonarqube"
+  CI_SKIP_TOOLS: "sonarqube,roslyn-analyzers,dotcover"
 
 jobs:
   # ── Gate A — Fast Quality (always runs) ──────────────────────────────────
@@ -72,6 +74,17 @@ jobs:
       - uses: ./.github/actions/caldera-setup
         with:
           setup-tools: "true"
+
+      # Initialise ci-repo as a real git repository so git-based tools
+      # (git-fame, git-sizer, git-blame-scanner) can analyze it.
+      - name: Prepare CI fixture repo
+        run: |
+          cd tests/fixtures/ci-repo
+          git init
+          git config user.email "ci@caldera.dev"
+          git config user.name "CI"
+          git add -A
+          git commit -m "initial commit"
 
       # ── LOCAL mode ──────────────────────────────────────────────────────
       - name: Run pipeline (LOCAL mode, LLM off)
