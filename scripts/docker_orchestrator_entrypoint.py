@@ -73,6 +73,13 @@ def main() -> int:
         print(f"ERROR: analyze_bundle.py exited with code {result.returncode}", file=sys.stderr)
         return result.returncode
 
+    # ── Copy LLM observability logs if present ───────────────────────────
+    llm_logs_src = Path("src/output/llm_logs")
+    if llm_logs_src.is_dir() and any(llm_logs_src.iterdir()):
+        import shutil
+        shutil.copytree(llm_logs_src, results_dir / "llm_logs", dirs_exist_ok=True)
+        print(f"  LLM logs: {results_dir / 'llm_logs'}")
+
     # ── Optional: export to results repo ─────────────────────────────────
     if results_repo:
         run_dir = report_out.parent

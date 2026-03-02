@@ -772,3 +772,52 @@ class TestSyntheticContext:
         assert "vulnerable-npm" in patterns
         assert "null-safety" in patterns
         assert "synthetic" in patterns
+
+
+class TestTruncateEvidence:
+    """Tests for BaseJudge.truncate_evidence() (P1)."""
+
+    def test_within_limit_unchanged(self):
+        """Evidence within the limit should be returned as-is."""
+        evidence = {"key": "short value", "num": 42}
+        result = BaseJudge.truncate_evidence(evidence, max_chars=10_000)
+        assert result == evidence
+
+    def test_over_limit_truncated(self):
+        """Large evidence should be truncated to fit within max_chars."""
+        evidence = {
+            "big": "x" * 100_000,
+            "small": "ok",
+        }
+        result = BaseJudge.truncate_evidence(evidence, max_chars=1_000)
+        serialized = json.dumps(result, indent=2, default=str)
+        assert len(serialized) <= 1_000
+        assert "\u2026[truncated]" in result["big"]
+        assert result["small"] == "ok"
+
+    def test_result_is_valid_json(self):
+        """Truncated evidence should still serialize to valid JSON."""
+        evidence = {"nested": {"data": "y" * 200_000}}
+        result = BaseJudge.truncate_evidence(evidence, max_chars=500)
+        serialized = json.dumps(result, indent=2, default=str)
+        assert len(serialized) <= 500
+        roundtrip = json.loads(serialized)
+        assert isinstance(roundtrip, dict)
+
+    def test_original_unchanged(self):
+        """Truncation should not mutate the original dict."""
+        original_value = "z" * 100_000
+        evidence = {"big": original_value}
+        BaseJudge.truncate_evidence(evidence, max_chars=500)
+        assert evidence["big"] == original_value
+
+    def test_build_prompt_truncates_large_evidence(self, tmp_path):
+        """build_prompt() should truncate oversized evidence before injection."""
+        judge = SampleJudge(working_dir=tmp_path)
+        evidence = {"huge_field": "a" * 200_000}
+
+        prompt = judge.build_prompt(evidence)
+
+        # The prompt should not contain the full 200k string
+        assert len(prompt) < 200_000
+        assert "{{ evidence }}" not in prompt

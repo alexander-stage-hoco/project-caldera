@@ -48,7 +48,6 @@ runs:
           src/tools/scc/bin
           src/tools/git-sizer/bin
           src/tools/gitleaks/bin
-          src/tools/trivy/bin
         key: tool-bins-${{ runner.os }}-${{ hashFiles('src/tools/*/Makefile') }}
 
     - name: Set up tool environments

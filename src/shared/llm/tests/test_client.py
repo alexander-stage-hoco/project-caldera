@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -162,6 +163,58 @@ class TestLLMClientInvoke:
 
                 assert result == "CLI response"
                 mock_cli.assert_called_once()
+
+
+class TestLLMClientPromptGuard:
+    """Tests for prompt size guard rails in LLMClient."""
+
+    def test_invoke_truncates_large_prompt(self, tmp_path):
+        """invoke should truncate oversized prompts and emit a warning."""
+        client = LLMClient(working_dir=tmp_path, max_prompt_chars=100)
+        large_prompt = "x" * 200
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            with patch.object(client, "_invoke_via_sdk", return_value=None):
+                with patch.object(client, "_invoke_via_cli", return_value="ok") as mock_cli:
+                    client.invoke(large_prompt)
+
+            # Warning emitted
+            assert any("Prompt truncated" in str(warning.message) for warning in w)
+
+            # CLI received the truncated prompt
+            called_prompt = mock_cli.call_args[0][0]
+            assert "[INPUT TRUNCATED" in called_prompt
+            assert len(called_prompt) < len(large_prompt) + 100  # truncated + marker
+
+    def test_invoke_respects_custom_max_chars(self, tmp_path):
+        """invoke should respect a custom max_prompt_chars value."""
+        client = LLMClient(working_dir=tmp_path, max_prompt_chars=50)
+        prompt = "y" * 80
+
+        with patch.object(client, "_invoke_via_sdk", return_value=None):
+            with patch.object(client, "_invoke_via_cli", return_value="ok") as mock_cli:
+                client.invoke(prompt)
+
+        called_prompt = mock_cli.call_args[0][0]
+        assert called_prompt.startswith("y" * 50)
+        assert "[INPUT TRUNCATED" in called_prompt
+
+    def test_invoke_no_truncation_within_limit(self, tmp_path):
+        """invoke should not modify prompts within the limit."""
+        client = LLMClient(working_dir=tmp_path, max_prompt_chars=1000)
+        prompt = "short prompt"
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            with patch.object(client, "_invoke_via_sdk", return_value=None):
+                with patch.object(client, "_invoke_via_cli", return_value="ok") as mock_cli:
+                    client.invoke(prompt)
+
+            assert not any("Prompt truncated" in str(warning.message) for warning in w)
+
+        called_prompt = mock_cli.call_args[0][0]
+        assert called_prompt == prompt
 
 
 class TestLLMClientErrorDetection:

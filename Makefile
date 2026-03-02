@@ -3,7 +3,7 @@
 	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-migrate dbt-run dbt-test \
 	orchestrate test test-all test-unit test-integration pipeline-eval arch-review \
-	collect analyze-bundle prune-outputs export-results \
+	collect analyze-bundle prune-outputs export-results create-risk-issues \
 	cloud-setup cloud-run cloud-status cloud-destroy cloud-cleanup \
 	docker-build-base docker-build-tool docker-build-tools docker-test-tool \
 	docker-build-runner docker-build-orchestrator docker-build-all \
@@ -49,6 +49,7 @@ DBT_PROJECT_DIR ?= src/sot-engine/dbt
 DB_PATH ?= $(HOME)/.caldera/caldera_sot.duckdb
 SKIP_TOOLS ?=
 PIPELINE_LLM ?= 1
+REPORT_LLM ?= 0
 PIPELINE_PROVIDER ?= claude_code
 CONTINUE_ON_TOOL_FAILURE ?= 0
 COLLECTION_RUN_ID ?=
@@ -234,6 +235,7 @@ report:
 	    --collection-run-id $$COLL_RUN_ID \
 	    --db $(ORCH_DB_PATH) \
 	    --format html \
+	    $(if $(filter 1,$(REPORT_LLM)),--report-llm,) \
 	    --output $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html); \
 	  echo "Report: $(PIPELINE_OUTPUT_DIR)/report.html"
 
@@ -300,6 +302,13 @@ export-results:  ## Export latest run to results repository
 	    --db "$(ORCH_DB_PATH)" \
 	    --results-repo "$(RESULTS_REPO_URL)" \
 	    $(if $(PUSH),--push,)
+
+create-risk-issues:  ## Create GitHub issues from risk register (dry-run by default, APPLY=1 to create)
+	$(PYTHON_VENV) scripts/create_risk_issues.py \
+	    --db $(ORCH_DB_PATH) \
+	    $(if $(filter 1,$(APPLY)),--apply,) \
+	    $(if $(COLLECTION_RUN_ID),--collection-run-id $(COLLECTION_RUN_ID),) \
+	    $(if $(MIN_SEVERITY),--min-severity $(MIN_SEVERITY),)
 
 # =============================================================================
 # Tool and Infrastructure Targets
@@ -480,6 +489,7 @@ pipeline-eval:
 	    --collection-run-id $$RESOLVED_RUN_ID \
 	    --db $(ORCH_DB_PATH) \
 	    --format html \
+	    $(if $(filter 1,$(REPORT_LLM)),--report-llm,) \
 	    --output $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html); \
 	  cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/report.html $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/report.html; \
 	  if [ "$(PIPELINE_LLM)" = "1" ]; then \
@@ -505,12 +515,18 @@ pipeline-eval:
 	    echo ""; \
 	    echo "=== Skipping LLM phases (PIPELINE_LLM=$(PIPELINE_LLM)) ==="; \
 	  fi; \
+	  LLM_LOGS_FLAG=""; \
+	  if [ -d "src/output/llm_logs" ] && [ -n "$$(ls -A src/output/llm_logs 2>/dev/null)" ]; then \
+	    cp -r src/output/llm_logs $(CURDIR)/$(PIPELINE_RUN_DIR)/llm_logs; \
+	    LLM_LOGS_FLAG="--llm-logs $(CURDIR)/$(PIPELINE_RUN_DIR)/llm_logs"; \
+	  fi; \
 	  $(PYTHON_VENV) scripts/write_run_manifest.py \
 	    --db "$(ORCH_DB_PATH)" \
 	    --collection-run-id "$$RESOLVED_RUN_ID" \
 	    --out "$(CURDIR)/$(PIPELINE_RUN_DIR)/run_manifest.json" \
 	    --report "$(CURDIR)/$(PIPELINE_RUN_DIR)/report.html" \
-	    --warnings-json "$(CURDIR)/$(PIPELINE_RUN_DIR)/warnings.json"; \
+	    --warnings-json "$(CURDIR)/$(PIPELINE_RUN_DIR)/warnings.json" \
+	    $$LLM_LOGS_FLAG; \
 	  cp -f $(CURDIR)/$(PIPELINE_RUN_DIR)/run_manifest.json $(CURDIR)/$(PIPELINE_OUTPUT_DIR)/run_manifest.json
 	@echo ""
 	@echo "=============================================="
@@ -523,6 +539,9 @@ pipeline-eval:
 	  echo "Top 3 (this run):      $(PIPELINE_RUN_DIR)/top3_insights.json"; \
 	fi
 	@echo "Manifest (this run): $(PIPELINE_RUN_DIR)/run_manifest.json"
+	@if [ -d "$(PIPELINE_RUN_DIR)/llm_logs" ]; then \
+	  echo "LLM logs (this run):   $(PIPELINE_RUN_DIR)/llm_logs/"; \
+	fi
 	@echo "=============================================="
 
 # =============================================================================

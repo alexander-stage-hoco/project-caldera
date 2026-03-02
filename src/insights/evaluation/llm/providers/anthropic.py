@@ -5,6 +5,8 @@ Anthropic API provider for direct API access.
 import os
 from typing import Any
 
+from shared.llm.prompt_guard import guard_prompt
+
 from . import LLMProvider, LLMResponse
 
 
@@ -75,8 +77,10 @@ class AnthropicAPIProvider(LLMProvider):
         model: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 4096,
+        max_prompt_chars: int | None = None,
     ) -> LLMResponse:
         """Send a completion request to Anthropic API."""
+        prompt = guard_prompt(prompt, max_prompt_chars, context="AnthropicAPI")
         client = self._get_client()
         effective_model = model or self._model
 

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from shared.evaluation.evidence_sampling import sample_dict_values, truncate_nested_strings
+
 from .base import BaseJudge, JudgeResult
 
 
@@ -90,27 +92,36 @@ Respond with ONLY a JSON object:
             },
         }
 
-        # Load all analysis results
+        # Load all analysis results (sampled to bound evidence size)
         all_results = self.load_all_analysis_results()
         if all_results:
-            evidence["analysis_outputs"] = all_results
+            evidence["analysis_outputs"] = sample_dict_values(all_results, max_entries=10)
 
-        # Load ALL ground truth files (not just the first one)
+        # Load ALL ground truth files (sampled to bound evidence size)
         all_ground_truth = self.load_all_ground_truth()
         if all_ground_truth:
-            evidence["ground_truth"] = all_ground_truth
+            evidence["ground_truth"] = sample_dict_values(all_ground_truth, max_entries=10)
 
-        # Aggregate severity information across all scenarios
+        # Aggregate severity information across all scenarios (sampled)
         total_by_severity = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
 
-        for scenario, analysis in all_results.items():
+        sampled_results = evidence["analysis_outputs"]
+        sampled_gt = evidence["ground_truth"]
+
+        for scenario, analysis in sampled_results.items():
+            if scenario.startswith("_"):
+                continue
+            if not isinstance(analysis, dict):
+                continue
             severity_dist = analysis.get("secrets_by_severity", {})
             for sev, count in severity_dist.items():
                 if sev in total_by_severity:
                     total_by_severity[sev] += count
 
             # Check for expected severities in ground truth
-            gt = all_ground_truth.get(scenario, {})
+            gt = sampled_gt.get(scenario, {})
+            if not isinstance(gt, dict):
+                continue
             expected = gt.get("expected", {})
             expected_findings = expected.get("findings", [])
 
@@ -125,4 +136,4 @@ Respond with ONLY a JSON object:
 
         evidence["severity_analysis"]["severity_distribution"] = total_by_severity
 
-        return evidence
+        return truncate_nested_strings(evidence, max_str_len=300)

@@ -1,9 +1,13 @@
 ARG BASE_IMAGE=caldera-python-base:latest
 FROM ${BASE_IMAGE}
 
-ARG TRIVY_VERSION=0.58.0
-RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-    | sh -s -- -b /usr/local/bin v${TRIVY_VERSION}
+RUN apt-get update && \
+    apt-get install -y wget apt-transport-https gnupg && \
+    wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor > /usr/share/keyrings/trivy.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" > /etc/apt/sources.list.d/trivy.list && \
+    apt-get update && \
+    apt-get install -y trivy && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Pre-cache vulnerability DB so scans don't need network access
 RUN trivy filesystem --download-db-only --cache-dir /root/.cache/trivy || true

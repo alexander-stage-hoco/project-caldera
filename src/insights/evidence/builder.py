@@ -12,7 +12,7 @@ Usage::
 from __future__ import annotations
 
 import warnings
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ..data_fetcher import DataFetcher
 from .action_generator import ActionGenerator
@@ -26,6 +26,9 @@ from .entities import (
 )
 from .risk_aggregator import RiskAggregator
 
+if TYPE_CHECKING:
+    from ..narrative.enricher import NarrativeEnricher
+
 
 class EvidenceRegistryBuilder:
     """Orchestrates the full evidence → claim → risk pipeline."""
@@ -36,9 +39,10 @@ class EvidenceRegistryBuilder:
         claim_generator: ClaimGenerator | None = None,
         risk_aggregator: RiskAggregator | None = None,
         action_generator: ActionGenerator | None = None,
+        enricher: NarrativeEnricher | None = None,
     ) -> None:
         self._collector = collector or EvidenceCollector()
-        self._claim_generator = claim_generator or ClaimGenerator()
+        self._claim_generator = claim_generator or ClaimGenerator(enricher=enricher)
         self._risk_aggregator = risk_aggregator or RiskAggregator()
         self._action_generator = action_generator or ActionGenerator()
 

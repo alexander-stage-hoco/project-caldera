@@ -14,6 +14,12 @@
 | Secrets | {{ '%+d' | format(summary.delta_secrets | default(0)) }} |
 | Vulnerabilities | {{ '%+d' | format(summary.delta_trivy | default(0)) }} |
 
+{% if delta_narrative %}
+### Analysis
+
+{{ delta_narrative }}
+
+{% endif %}
 {% if top_regressions %}
 ### Top Regressed Files ({{ total_regressed_files }} total)
 

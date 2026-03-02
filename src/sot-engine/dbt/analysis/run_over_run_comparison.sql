@@ -82,6 +82,25 @@ previous_summary as (
     join previous_run pr on pr.collection_run_id = uf.collection_run_id
     join repo_runs rr on rr.collection_run_id = pr.collection_run_id
     group by pr.collection_run_id, rr.commit, rr.created_at
+),
+
+-- Quality/trust data from run quality summary
+current_quality as (
+    select
+        q.trust_score,
+        q.warning_count,
+        q.budget_passed
+    from {{ source('lz', 'lz_run_quality_summary') }} q
+    join current_run cr on cr.collection_run_id = q.collection_run_id
+),
+
+previous_quality as (
+    select
+        q.trust_score,
+        q.warning_count,
+        q.budget_passed
+    from {{ source('lz', 'lz_run_quality_summary') }} q
+    join previous_run pr on pr.collection_run_id = q.collection_run_id
 )
 
 select
@@ -134,8 +153,22 @@ select
     case when c.total_semgrep_high_plus > p.total_semgrep_high_plus then true else false end as regression_semgrep_high,
     case when c.total_gitleaks_secrets > p.total_gitleaks_secrets then true else false end as regression_secrets,
     case when c.total_trivy_findings > p.total_trivy_findings then true else false end as regression_trivy,
-    case when c.total_duplicate_lines > p.total_duplicate_lines then true else false end as regression_duplication
+    case when c.total_duplicate_lines > p.total_duplicate_lines then true else false end as regression_duplication,
+
+    -- Trust / quality deltas
+    cq.trust_score as current_trust_score,
+    pq.trust_score as previous_trust_score,
+    cq.trust_score - pq.trust_score as delta_trust_score,
+    cq.warning_count as current_warning_count,
+    pq.warning_count as previous_warning_count,
+    cq.warning_count - pq.warning_count as delta_warning_count,
+    cq.budget_passed as current_budget_passed,
+    pq.budget_passed as previous_budget_passed,
+    case when cq.trust_score < pq.trust_score then true else false end as regression_trust,
+    case when not cq.budget_passed and pq.budget_passed then true else false end as regression_budget
 
 from current_summary c
 cross join previous_summary p
+left join current_quality cq on true
+left join previous_quality pq on true
 limit {{ limit_rows }}

@@ -13,6 +13,8 @@ import subprocess
 from pathlib import Path
 from typing import Any, Callable
 
+from .prompt_guard import guard_prompt
+
 try:
     import anthropic  # type: ignore
     HAS_ANTHROPIC_SDK = True
@@ -71,6 +73,7 @@ class LLMClient:
         working_dir: Path | None = None,
         logger: Callable[[str, str, str, Any], None] | None = None,
         system_prompt: str | None = None,
+        max_prompt_chars: int | None = None,
     ):
         """Initialize the LLM client.
 
@@ -80,11 +83,14 @@ class LLMClient:
             working_dir: Working directory for CLI invocation
             logger: Optional callback for logging (signature: logger(event, data, ...))
             system_prompt: Default system prompt for CLI invocations
+            max_prompt_chars: Maximum prompt character count before truncation
+                (None = use DEFAULT_MAX_PROMPT_CHARS)
         """
         self.model = model
         self.timeout = timeout
         self.working_dir = working_dir or Path.cwd()
         self._logger = logger
+        self._max_prompt_chars = max_prompt_chars
         self._system_prompt = system_prompt or (
             "You are an LLM judge performing automated code quality evaluation. "
             "Analyze the evidence provided and return a JSON response with score, "
@@ -240,6 +246,9 @@ class LLMClient:
         Returns:
             Response text
         """
+        # Guard against oversized prompts
+        prompt = guard_prompt(prompt, self._max_prompt_chars, context="LLMClient")
+
         # Try SDK first
         sdk_response = self._invoke_via_sdk(prompt, system_prompt)
         if sdk_response is not None:

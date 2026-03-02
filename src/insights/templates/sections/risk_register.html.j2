@@ -31,7 +31,7 @@
             <h4>{{ risk.risk_id }}: {{ risk.triggered_by }}
                 <span style="font-size: 0.8em; font-weight: normal; margin-left: 0.5em; padding: 0.1em 0.4em; border-radius: 3px; background: {% if risk.status == 'resolved' %}#2d6a2d{% elif risk.status == 'mitigating' %}#6a5f2d{% elif risk.status == 'accepted' %}#4a4a4a{% else %}#6a2d2d{% endif %}; color: #fff;">{{ risk.status | default('open') }}</span>
             </h4>
-            <p><strong>Description:</strong> {{ risk.description }}</p>
+            <p><strong>Description:</strong> {{ risk.description_narrative or risk.description }}</p>
             <p><strong>Technical cause:</strong> {{ risk.technical_cause }}</p>
             {% if risk.owner or risk.action or risk.sla_date %}
             <p>
