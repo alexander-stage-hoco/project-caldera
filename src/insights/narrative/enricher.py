@@ -70,6 +70,7 @@ class NarrativeEnricher:
         task: str,
         data: dict[str, Any],
         max_tokens: int = 512,
+        max_data_chars: int | None = None,
     ) -> str | None:
         """Generate a narrative enrichment from structured data.
 
@@ -77,10 +78,17 @@ class NarrativeEnricher:
             task: Description of what narrative to produce.
             data: Structured data to feed the LLM.
             max_tokens: Maximum tokens for the response.
+            max_data_chars: Character budget for data serialization.
+                Defaults to ``DEFAULT_MAX_DATA_CHARS`` (30 000).
 
         Returns:
             Narrative text on success, ``None`` on any failure.
         """
+        from shared.llm.tiered_detail import fit_to_budget, DEFAULT_MAX_DATA_CHARS
+
+        budget = max_data_chars if max_data_chars is not None else DEFAULT_MAX_DATA_CHARS
+        data = fit_to_budget(data, max_chars=budget)
+
         prompt = f"{task}\n\nData:\n{json.dumps(data, indent=2, default=str)}"
 
         try:

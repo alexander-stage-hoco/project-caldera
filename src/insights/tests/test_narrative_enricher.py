@@ -129,8 +129,8 @@ class TestNarrativeEnricher:
         assert enricher.trace_id == "test-trace"
 
     def test_enrich_truncates_large_data(self):
-        """Verify that oversized data triggers a truncation warning via the provider."""
-        from shared.llm.prompt_guard import DEFAULT_MAX_PROMPT_CHARS
+        """Verify that oversized data is compressed by fit_to_budget before prompt."""
+        from shared.llm.tiered_detail import DEFAULT_MAX_DATA_CHARS
 
         provider = MagicMock()
         provider.complete.return_value = LLMResponse(
@@ -139,22 +139,80 @@ class TestNarrativeEnricher:
         )
         enricher = self._make_enricher(provider)
 
-        # Create data large enough to exceed the default limit
-        large_data = {"big_field": "x" * (DEFAULT_MAX_PROMPT_CHARS + 1000)}
+        # Create data large enough to exceed the default data budget
+        large_data = {"big_field": "x" * (DEFAULT_MAX_DATA_CHARS + 10_000)}
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            result = enricher.enrich(task="Summarize", data=large_data)
+        result = enricher.enrich(task="Summarize", data=large_data)
 
         assert result == "Summary of truncated data."
-        # The provider's complete() receives the prompt; the concrete provider
-        # (or ObservableProvider → concrete) applies the guard. In this mock
-        # scenario the warning comes from the concrete provider layer. Since
-        # we're using a raw MagicMock (not a real provider), the guard won't
-        # fire here — but we verify the prompt was constructed and passed.
+        # fit_to_budget compresses the data, so the prompt should be
+        # significantly smaller than the raw input
         call_kwargs = provider.complete.call_args
         prompt_arg = call_kwargs.kwargs.get("prompt") or call_kwargs[0][0]
-        assert len(prompt_arg) > DEFAULT_MAX_PROMPT_CHARS
+        assert len(prompt_arg) < DEFAULT_MAX_DATA_CHARS + 1000
+
+
+class TestNarrativeEnricherBudgeting:
+    """Verify enrich() applies fit_to_budget to data."""
+
+    def _make_enricher(self, mock_provider: MagicMock) -> NarrativeEnricher:
+        enricher = NarrativeEnricher.__new__(NarrativeEnricher)
+        enricher._trace_id = "test-trace"
+        enricher._provider = mock_provider
+        return enricher
+
+    def test_enrich_applies_fit_to_budget(self):
+        """Large data triggers tiered compression before prompt construction."""
+        provider = MagicMock()
+        provider.complete.return_value = LLMResponse(
+            content="Summary.", model="claude-sonnet-4",
+        )
+        enricher = self._make_enricher(provider)
+
+        # Create data large enough to exceed default budget (30k chars)
+        large_data = {"items": [{"text": "x" * 500} for _ in range(200)]}
+
+        result = enricher.enrich(task="Summarize", data=large_data)
+        assert result == "Summary."
+
+        # The prompt should be much smaller than the raw serialization
+        import json
+        raw_size = len(json.dumps(large_data, indent=2))
+        call_kwargs = provider.complete.call_args
+        prompt_arg = call_kwargs.kwargs.get("prompt") or call_kwargs[0][0]
+        assert len(prompt_arg) < raw_size
+
+    def test_enrich_custom_max_data_chars(self):
+        """Custom max_data_chars is forwarded to fit_to_budget."""
+        provider = MagicMock()
+        provider.complete.return_value = LLMResponse(
+            content="OK.", model="claude-sonnet-4",
+        )
+        enricher = self._make_enricher(provider)
+
+        data = {"items": list(range(100))}
+
+        with patch("shared.llm.tiered_detail.fit_to_budget") as mock_fit:
+            mock_fit.return_value = data
+            enricher.enrich(task="Test", data=data, max_data_chars=5000)
+            mock_fit.assert_called_once_with(data, max_chars=5000)
+
+    def test_enrich_small_data_unchanged(self):
+        """Data under budget passes through unchanged."""
+        provider = MagicMock()
+        provider.complete.return_value = LLMResponse(
+            content="OK.", model="claude-sonnet-4",
+        )
+        enricher = self._make_enricher(provider)
+
+        small_data = {"key": "value", "count": 42}
+        enricher.enrich(task="Test", data=small_data)
+
+        call_kwargs = provider.complete.call_args
+        prompt_arg = call_kwargs.kwargs.get("prompt") or call_kwargs[0][0]
+        # Small data should appear verbatim in prompt
+        assert '"key": "value"' in prompt_arg
+        assert '"count": 42' in prompt_arg
 
 
 # ---------------------------------------------------------------------------

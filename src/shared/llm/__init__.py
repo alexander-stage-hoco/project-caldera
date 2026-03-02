@@ -15,6 +15,10 @@ from .prompt_guard import (
     estimate_tokens,
     guard_prompt,
 )
+from .tiered_detail import (
+    DEFAULT_MAX_DATA_CHARS,
+    fit_to_budget,
+)
 
 __all__ = [
     "LLMClient",
@@ -26,4 +30,6 @@ __all__ = [
     "check_prompt_size",
     "estimate_tokens",
     "guard_prompt",
+    "DEFAULT_MAX_DATA_CHARS",
+    "fit_to_budget",
 ]
