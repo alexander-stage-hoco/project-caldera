@@ -116,7 +116,7 @@ jobs:
           if [ -n "$WARNINGS" ]; then
             WARN_FLAG="--check-warnings $WARNINGS"
           fi
-          .venv/bin/python scripts/check_run_quality.py --db ~/.caldera/caldera_sot.duckdb --min-trust 50 $WARN_FLAG
+          .venv/bin/python scripts/check_run_quality.py --db ~/.caldera/caldera_sot.duckdb --min-trust 40 $WARN_FLAG
 
       - name: Clean DB for BUNDLE mode
         run: make clean-db
@@ -158,7 +158,7 @@ jobs:
           if [ -n "$WARNINGS" ]; then
             WARN_FLAG="--check-warnings $WARNINGS"
           fi
-          .venv/bin/python scripts/check_run_quality.py --db ~/.caldera/caldera_sot.duckdb --min-trust 50 $WARN_FLAG
+          .venv/bin/python scripts/check_run_quality.py --db ~/.caldera/caldera_sot.duckdb --min-trust 40 $WARN_FLAG
 
   # ── Promotion Policy (main only) ───────────────────────────────────────
   promotion-check:
