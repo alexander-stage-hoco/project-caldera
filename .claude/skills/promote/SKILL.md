@@ -1,53 +1,73 @@
 ---
 name: promote
-description: Automated branch promotion with tiered local validation, CI monitoring, and chain promotion. Handles feature→develop→release→main→tag. Use when the user says /promote, "open a PR", or "promote this branch".
-allowed-tools: Bash(git *), Bash(make compliance*), Bash(make dbt-*), Bash(make test*), Bash(make promote*), Bash(make release*), Bash(.venv/bin/python -m pytest*), Bash(.venv/bin/python scripts/check_observability*), Bash(gh pr *), Bash(gh run *)
+description: Fully automated promotion pipeline. Creates feature branches when needed, runs tiered validation, creates PRs, watches CI, merges, and chains through develop→release→main. Only stops on failures or when review is needed.
+allowed-tools: Bash(git *), Bash(make compliance*), Bash(make dbt-*), Bash(make test*), Bash(make release*), Bash(.venv/bin/python -m pytest*), Bash(.venv/bin/python scripts/check_observability*), Bash(gh pr *), Bash(gh run *), Bash(sleep *)
 ---
 
-# Automated Promotion Pipeline
+# Fully Automated Promotion Pipeline
 
-Push the current branch, run tiered local validation, create a PR, monitor CI, and offer chain promotion.
+Single invocation takes code from wherever it is all the way through to `main`, only stopping on failures or when human review is needed (PR to main).
 
-## Phase 1 — Pre-flight
+## Phase 1 — Pre-flight & State Detection
 
-1. Check that the working tree is clean:
+Print `=== Phase 1: Pre-flight & State Detection ===`
+
+1. Verify `gh` is installed and authenticated:
+   ```
+   gh auth status
+   ```
+   If not installed → STOP: "Install gh: `brew install gh`"
+   If not authenticated → STOP: "Run `gh auth login`"
+
+2. Verify clean working tree:
    ```
    git status --porcelain
    ```
-   If dirty, stop and tell the user to commit or stash first.
+   If dirty → STOP: "Commit or stash your changes first."
 
-2. Detect the current branch and target:
+3. Detect current branch:
    ```
    git rev-parse --abbrev-ref HEAD
    ```
+   If detached HEAD → STOP: "Checkout a branch first."
 
-3. Determine the promotion target using this map:
+4. Fetch latest:
+   ```
+   git fetch origin --prune --quiet
+   ```
 
-   | Current branch pattern | PR target |
-   |------------------------|-----------|
-   | `feature/*`, `fix/*`, `tool/*/**`, `infra/*` | `develop` |
-   | `develop` | `release` |
-   | `release` | `main` |
-   | `main` | Error — cannot promote main (offer `make release` for tagging instead) |
+5. Determine starting scenario and set `SOURCE` and `TARGET`:
 
-4. Check commits ahead of target:
+   | Condition | Action |
+   |-----------|--------|
+   | On `main` | Ask user for `RELEASE_TYPE` (major/minor/patch, default patch), run `make release RELEASE_TYPE=<choice>`, STOP |
+   | On `release`, `origin/release` ahead of `origin/main` | SOURCE=`release`, TARGET=`main` |
+   | On `develop`, commits ahead of `origin/develop` | Create branch `promote/<YYYYMMDD-HHMMSS>` from HEAD, push it, SOURCE=`promote/*`, TARGET=`develop` |
+   | On `develop`, synced with origin, `origin/develop` ahead of `origin/release` | SOURCE=`develop`, TARGET=`release` |
+   | On `feature/*`, `fix/*`, `tool/*/**`, `infra/*` | SOURCE=current branch, TARGET=`develop` |
+   | None of the above | STOP: "Nothing to promote." |
+
+   To check "commits ahead":
    ```
    git rev-list --count origin/<target>..HEAD
    ```
-   If 0 commits ahead, stop — nothing to promote.
+   or for cross-branch:
+   ```
+   git rev-list --count origin/release..origin/develop
+   ```
 
-5. Show a summary to the user:
-   - Current branch → target branch
-   - Number of commits ahead
-   - One-line log of those commits: `git log --oneline origin/<target>..HEAD`
+6. Print summary and proceed immediately (no confirmation):
+   - `SOURCE → TARGET`
+   - Number of commits
+   - `git log --oneline origin/<target>..HEAD` (or equivalent for cross-branch)
 
-## Phase 2 — Local Validation (tiered)
+## Phase 2 — Local Validation (tiered by target)
 
-Run checks based on the target branch. Stop on the **first failure** — report which check failed and its output.
+Print `=== Phase 2: Local Validation (target: <TARGET>) ===`
 
-### Target: `develop` (full QA — new code entering integration)
+Run checks in order. Stop on **first failure**. Print `[N/M] <check name>...` before each, then `PASSED` or `FAILED` after.
 
-Run these checks in order, stopping on first failure:
+### Target: `develop` (full QA)
 
 1. **Compliance preflight** (~1s):
    ```
@@ -64,11 +84,9 @@ Run these checks in order, stopping on first failure:
    .venv/bin/python -m pytest --tb=short -q
    ```
 
-4. **dbt run + dbt test** (~1min):
+4. **dbt run + test** (~1min):
    ```
-   make dbt-migrate
-   make dbt-run
-   make dbt-test
+   make dbt-migrate && make dbt-run && make dbt-test
    ```
 
 5. **Observability compliance** (~5s):
@@ -81,50 +99,66 @@ Run these checks in order, stopping on first failure:
    make compliance
    ```
 
-### Target: `release` (lighter — Gate A already passed on feature→develop)
+### Target: `release` (full regression)
 
-1. **Compliance preflight**:
+1. **Compliance preflight** (~1s):
    ```
    make compliance-preflight
    ```
 
-2. **Fast pytest**:
+2. **Fast pytest** (~30s):
    ```
    .venv/bin/python -m pytest -m "not slow and not integration" --tb=short -q
    ```
 
-3. **Full compliance**:
+3. **Full pytest** (~2min):
+   ```
+   .venv/bin/python -m pytest --tb=short -q
+   ```
+
+4. **dbt run + test** (~1min):
+   ```
+   make dbt-migrate && make dbt-run && make dbt-test
+   ```
+
+5. **Observability compliance** (~5s):
+   ```
+   .venv/bin/python scripts/check_observability_compliance.py
+   ```
+
+6. **Full compliance** (~10s):
    ```
    make compliance
    ```
 
-### Target: `main` (lightest — Gate C smoke already passed on develop→release)
+### Target: `main` (smoke only)
 
-1. **Compliance preflight**:
+1. **Compliance preflight** (~1s):
    ```
    make compliance-preflight
    ```
 
-2. **Observability compliance**:
+2. **Observability compliance** (~5s):
    ```
    .venv/bin/python scripts/check_observability_compliance.py
    ```
 
 ## Phase 3 — Push & PR
 
+Print `=== Phase 3: Push & PR ===`
+
 1. Push the branch:
    ```
    git push -u origin HEAD
    ```
 
-2. Check for an existing PR from this branch to the target:
+2. Check for existing open PR:
    ```
-   gh pr list --head <branch> --base <target> --state open --json url,number --jq '.[0]'
+   gh pr list --head <branch> --base <target> --state open --json number --jq '.[0].number'
    ```
-   If a PR already exists, report its URL and skip PR creation. Continue to Phase 4.
+   If a PR exists, print `PR #<N> already exists: <url>` and skip creation.
 
-3. Create the PR. Build the title from the branch name (strip prefix, humanize). Include a validation summary in the body:
-
+3. If no existing PR, create one. Build the title from the branch name (strip prefix, humanize). Include a validation summary table in the body:
    ```
    gh pr create --base <target> --title "<title>" --body "$(cat <<'EOF'
    ## Summary
@@ -133,8 +167,8 @@ Run these checks in order, stopping on first failure:
    ## Local Validation
    | Check | Result |
    |-------|--------|
-   | Compliance preflight | Passed |
-   | Fast pytest | Passed |
+   | Compliance preflight | PASSED |
+   | Fast pytest | PASSED |
    | ... | ... |
 
    All <N> local checks passed before PR creation.
@@ -144,66 +178,86 @@ Run these checks in order, stopping on first failure:
    )"
    ```
 
-4. Report the PR URL to the user.
+4. Print `PR #<N>: <url>`
 
-## Phase 4 — CI Monitoring
+5. **For `main` target**: Print "PR to main requires review before merging. After merge, run `/promote` from main to tag a release." → **STOP here. Do NOT watch CI or merge.**
 
-1. Watch CI checks with a 20-minute timeout:
+6. **For `develop` and `release` targets**: proceed to Phase 4.
+
+## Phase 4 — CI Watch & Merge
+
+Print `=== Phase 4: CI Watch & Merge (PR #<N>) ===`
+
+Only for PRs to `develop` and `release`. Never for `main`.
+
+1. Print `Watching CI (timeout: 20min)...`
+
+2. Watch CI checks:
    ```
-   gh pr checks <pr-number> --watch --fail-fast 2>&1
+   gh pr checks <number> --watch --fail-fast
    ```
-   Use a timeout of 1200 seconds (20 minutes) on the bash command.
+   Use a Bash timeout of 1200000 ms (20 minutes).
 
-2. Expected CI checks by target:
+3. **If checks pass** → merge immediately:
+   ```
+   gh pr merge <number> --squash --delete-branch
+   ```
+   Print `PR #<N> merged.`
 
-   | Target | Expected checks |
-   |--------|----------------|
-   | `develop` | Gate A — Quality |
-   | `release` | Gate A — Quality, Gate B — Compliance Report, Gate C — Production Smoke |
-   | `main` | Gate A — Quality, Gate B — Compliance Report, Promotion Policy |
+4. **If checks fail** → print which checks failed + PR URL → **STOP**
 
-3. Report results:
-   - **All passed**: Report success, proceed to Phase 5.
-   - **Any failed**: Report which checks failed. Do NOT offer chain promotion.
-   - **Timeout**: Stop, give the PR URL for manual monitoring.
+5. **If timeout** → print PR URL, say "CI still running" → **STOP**
+
+6. **If merge fails** (conflicts, etc.) → print error + PR URL → **STOP**
 
 ## Phase 5 — Chain Promotion
 
-Only offer this if CI passed in Phase 4.
+Print `--- Continuing: <next source> → <next target> ---`
 
-1. Based on the current promotion, offer the next step:
+After successful merge, determine the next leg:
 
-   | Just completed | Offer next |
-   |---------------|------------|
-   | feature → develop | "Merge the PR, then run `/promote` from `develop` to continue to release" |
-   | develop → release | "Merge the PR, then run `/promote` from `release` to continue to main" |
-   | release → main | "Merge the PR, then run `/promote` from `main` to create a release tag" |
+| Just merged | Next action |
+|-------------|-------------|
+| `<feature>` or `promote/*` → `develop` | `git checkout develop && git pull origin develop` → check if `origin/develop` ahead of `origin/release` → if yes, promote `develop` → `release` (loop to Phase 2) |
+| `develop` → `release` | `git checkout release && git pull origin release` → check if `origin/release` ahead of `origin/main` → if yes, promote `release` → `main` (loop to Phase 2) |
+| `release` → `main` | N/A — handled in Phase 3 (stops at PR creation) |
 
-2. For `main` (tagging): If the user is on `main` and asks to promote, offer:
-   ```
-   make release
-   ```
-   This creates and pushes a version tag. Ask the user for `RELEASE_TYPE=major|minor|patch` (default: `patch`).
+If the next target has no new commits → print "Chain complete. Nothing more to promote." → **STOP**
+
+If there are commits → set new SOURCE/TARGET, loop back to Phase 2 with the new target's validation tier.
+
+## Final Summary
+
+At the very end (whether stopped early or completed), print a summary:
+
+```
+=== Promotion Summary ===
+PRs created: #X (<source> → <target>), #Y (...)
+PRs merged:  #X, #Y
+Stopped: <reason or "Chain complete">
+```
 
 ## Error Handling
 
 | Condition | Action |
 |-----------|--------|
-| Dirty working tree | Stop, tell user to commit or stash |
-| Detached HEAD | Stop, tell user to checkout a branch |
-| No commits ahead of target | Stop, nothing to promote |
-| Cannot detect target branch | Stop, show branch naming conventions |
-| Local check fails | Stop, name the check, show its output |
-| Existing open PR | Show URL, skip to Phase 4 (CI monitoring) |
-| CI check fails | Report which checks failed, do NOT offer chain promotion |
-| CI timeout (20 min) | Stop, give PR URL for manual monitoring |
-| `gh` CLI not installed | Stop, tell user to install: `brew install gh` |
-| Not authenticated with `gh` | Stop, tell user to run `gh auth login` |
+| Dirty working tree | STOP: "Commit or stash your changes first." |
+| Detached HEAD | STOP: "Checkout a branch first." |
+| No commits ahead | STOP: "Nothing to promote." |
+| Local check fails | STOP: show check name + output |
+| Push fails | STOP: show git error |
+| CI fails | STOP: show failed checks + PR URL |
+| Merge fails | STOP: show error + PR URL |
+| CI timeout (20 min) | STOP: show PR URL, say "CI still running" |
+| `gh` not installed | STOP: "Install gh: `brew install gh`" |
+| `gh` not authenticated | STOP: "Run `gh auth login`" |
 
 ## Important Notes
 
-- Always run phases sequentially — do not skip validation
-- Show progress as you go: name each check before running it, report pass/fail after
-- For chain promotion, the user must merge the PR themselves first — do not merge PRs automatically
-- When on `main`, the only valid action is `make release` for tagging
-- Pass `--fail-fast` to `gh pr checks --watch` so it stops as soon as any check fails
+- Always run phases sequentially — never skip validation
+- Show progress as you go with phase headers and check counters
+- **Auto-merge PRs to `develop` and `release`** — do NOT ask for confirmation
+- **Never auto-merge PRs to `main`** — stop at PR creation, require human review
+- Proceed immediately after state detection — no user confirmation needed
+- When creating a `promote/*` branch from `develop`, use timestamp format: `promote/YYYYMMDD-HHMMSS`
+- Chain promotion is automatic: after merging to `develop`, immediately start promoting to `release`, etc.
