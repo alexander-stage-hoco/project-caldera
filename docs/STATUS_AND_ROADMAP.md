@@ -1,6 +1,6 @@
 # Project Caldera — Status & Forward Roadmap
 
-## Current State: v0.14.0-dev (2026-03-01)
+## Current State: v0.14.0-dev (2026-03-06)
 
 Core platform is production-ready. All 18 tools pass compliance, all 3 production modes work (LOCAL, BUNDLE, DOCKERIZED), CI/CD has 5 gates with trust score enforcement, cloud runs on Hetzner, and the dbt warehouse has 168 models + 2 snapshots + 23 analyses.
 
@@ -11,9 +11,17 @@ Core platform is production-ready. All 18 tools pass compliance, all 3 productio
 - 3 production modes (LOCAL, BUNDLE, DOCKERIZED)
 - CI/CD gates (0, A, B, C, E) with branch promotion (develop → release → main)
 - Cloud infrastructure (Hetzner Terraform)
-- Insights component with 42 report sections covering all 6 product spec deliverables
+- Insights component with 43 report sections covering all 6 product spec deliverables
 - 95 SQL insight queries with 84 Jinja2 templates (HTML + Markdown)
-- Evidence & Claim framework (entities, builder, collector, risk aggregator, claim generator)
+- Evidence & Claim framework — full end-to-end chain:
+  - EvidenceCollector (6 categories: complexity, security, coupling, coverage, ownership, quality)
+  - ClaimGenerator (7 rules + LLM synthesis)
+  - RiskAggregator (5 patterns with severity escalation)
+  - ActionGenerator (remediation actions with SLA dates)
+  - Persistence (lz_evidence, lz_claims, lz_risks, lz_warnings)
+  - Report sections: EvidencePack, ClaimRegister, RiskRegister
+- Symbol-scanner integration: BlastRadius, CouplingAnalysis, CouplingDebt, ComponentInventory, ImportDependencies, CircularDependencies sections
+- Cross-tool compound queries: composite risk scoring, coverage gap analysis, complex+smelly, complex+vulnerable
 - Sampling rationale with composite risk scoring
 - Rewrite risk assessment (structural vs addressable constraint detection)
 - Artifact bundle workflow + results export
@@ -38,8 +46,53 @@ Core platform is production-ready. All 18 tools pass compliance, all 3 productio
 | Delta lead section | Delta summary promoted to priority 1 (lead actionable section) |
 | Trust score trend | Executive summary shows trust score trajectory across runs |
 | Adapter boundary tests | Schema-valid-but-entity-fails gap covered by integration tests |
+| Product spec reconciled | INSIGHTS_PRODUCT_SPEC.md updated: 9→18 tools, 12→43 sections, gap analysis refreshed |
 
-### Gap Analysis
+---
+
+## Forward Roadmap
+
+### Phase 1: Deliverables & Polish (v0.14.x — near-term)
+
+**Goal:** Produce stakeholder-ready outputs and improve operational maturity.
+
+| Item | Description | Priority |
+|------|-------------|----------|
+| PDF report generation | WeasyPrint integration for formal deliverables (CTO detailed, Investor summary, CEO one-pager) | P1 |
+| Incremental pipeline | Content-hash cache per tool (hash repo state + tool config → skip if unchanged), `--force` override | P2 |
+| Orchestrator refactor | Split 1,454-line orchestrator.py into phase modules (tool_execution, ingestion, dbt_phase, reporting) | P2 |
+| Multi-platform Docker | arm64 builds for M-series Macs, multi-arch manifests on GHCR | P3 |
+
+### Phase 2: Close the Loop (v0.15 — mid-term)
+
+**Goal:** Go from "analysis" to "action."
+
+| Item | Description | Priority |
+|------|-------------|----------|
+| Action Layer v1 | Risk register → GitHub Issues integration (extend `scripts/create_risk_issues.py`), owner assignment, SLA tracking, status sync | P1 |
+| Policy Layer v1 | Configurable quality gates per repo (trust score thresholds, zero-critical-vuln policies), policy waivers with expiry, drift detection | P2 |
+
+### Phase 3: Scale (v1.0 — longer-term)
+
+**Goal:** Multi-repo and enterprise readiness.
+
+| Item | Description | Priority |
+|------|-------------|----------|
+| Portfolio Layer | Multi-repo aggregation (per-repo DBs + portfolio aggregation layer), cross-repo comparison dashboards, comparative health scoring | P1 |
+| LLM provider abstraction | Support Claude, GPT-4, local models for judge evaluations via provider-agnostic interface | P2 |
+| Results retention | TTL-based cleanup with configurable keep-last-N | P3 |
+
+### Open Design Decisions
+
+| Decision | Options | Recommendation |
+|----------|---------|----------------|
+| PDF engine | WeasyPrint vs wkhtmltopdf vs Playwright | WeasyPrint (pure Python, good CSS support) |
+| Multi-repo storage | Single DuckDB vs per-repo DBs with federation | Per-repo DBs + portfolio aggregation layer |
+| Results export format | Git LFS for DuckDB vs Parquet export | Parquet export (portable, no LFS dependency) |
+
+---
+
+## Gap Analysis
 
 All 6 product spec deliverables have implementations. Remaining gaps:
 
@@ -51,26 +104,6 @@ All 6 product spec deliverables have implementations. Remaining gaps:
 | Action Layer | Not started | Risk register → assignable actions → ticket integration |
 | Policy Layer | Not started | Configurable quality gates, waivers, drift tracking |
 | Portfolio Layer | Not started | Multi-repo dashboards, cross-repo aggregation |
-
----
-
-## Forward Roadmap
-
-### Near-term: v0.14 — Platform Polish
-
-**Goal:** Improve operational maturity and developer experience.
-
-- PDF generation for formal deliverables
-- Multi-platform Docker (arm64 for M-series Macs)
-- Incremental pipeline (skip unchanged tools, content-hash cache)
-
-### Mid-term: v0.15–v1.0 — Action & Policy Layers
-
-**Goal:** Close the loop from analysis to action.
-
-- **Action Layer**: Assignable actions from risk register, owner/SLA tracking, ticket integration (GitHub Issues, Jira)
-- **Policy Layer**: Configurable quality gates per repo/team, release/PR policy enforcement, policy waivers with expiry, policy drift tracking
-- **Portfolio Layer**: Multi-repo dashboards, cross-repo aggregation, comparative health scoring
 
 ---
 

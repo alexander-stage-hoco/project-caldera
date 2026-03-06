@@ -96,10 +96,15 @@ class ComplexityConcentrationRule(ClaimRule):
 
 
 class HighCouplingRule(ClaimRule):
-    """Fires when fan_out > fan_in * 3 (high outbound coupling)."""
+    """Fires when fan_out > fan_in * N (high outbound coupling)."""
 
     category = "coupling"
     abbr = "COUP"
+
+    def __init__(self, params: dict[str, Any] | None = None) -> None:
+        p = params or {}
+        self._fan_out_multiplier = p.get("fan_out_multiplier", 3)
+        self._min_fan_out = p.get("min_fan_out", 5)
 
     def evaluate(
         self,
@@ -113,9 +118,12 @@ class HighCouplingRule(ClaimRule):
         claims: list[TechnicalClaim] = []
 
         for i, ev in enumerate(coupling_evidence, start=1):
-            # Parse fan_in/fan_out from excerpt
-            fan_in, fan_out = _parse_fan(ev.excerpt)
-            if fan_out > fan_in * 3 and fan_out > 5:
+            # Parse fan_in/fan_out from metadata or excerpt
+            fan_in = ev.metadata.get("fan_in") if ev.metadata else None
+            fan_out = ev.metadata.get("fan_out") if ev.metadata else None
+            if fan_in is None or fan_out is None:
+                fan_in, fan_out = _parse_fan(ev.excerpt)
+            if fan_out > fan_in * self._fan_out_multiplier and fan_out > self._min_fan_out:
                 claims.append(
                     TechnicalClaim(
                         claim_id=f"CLM-{self.abbr}-{i:03d}",
@@ -134,10 +142,15 @@ class HighCouplingRule(ClaimRule):
 
 
 class KnowledgeSiloRule(ClaimRule):
-    """Fires when unique_authors = 1 AND total_lines > 500."""
+    """Fires when unique_authors <= max_authors AND total_lines > min_lines."""
 
     category = "ownership"
     abbr = "SILO"
+
+    def __init__(self, params: dict[str, Any] | None = None) -> None:
+        p = params or {}
+        self._max_authors = p.get("max_authors", 1)
+        self._min_lines = p.get("min_lines", 500)
 
     def evaluate(
         self,
@@ -152,9 +165,13 @@ class KnowledgeSiloRule(ClaimRule):
         seq = 0
 
         for ev in ownership_evidence:
-            authors = _parse_int_from_excerpt(ev.excerpt, "authors=")
-            lines = _parse_int_from_excerpt(ev.excerpt, "lines=")
-            if authors == 1 and lines > 500:
+            authors = ev.metadata.get("unique_authors") if ev.metadata else None
+            lines = ev.metadata.get("total_lines") if ev.metadata else None
+            if authors is None:
+                authors = _parse_int_from_excerpt(ev.excerpt, "authors=")
+            if lines is None:
+                lines = _parse_int_from_excerpt(ev.excerpt, "lines=")
+            if authors <= self._max_authors and lines > self._min_lines:
                 seq += 1
                 claims.append(
                     TechnicalClaim(
@@ -173,10 +190,15 @@ class KnowledgeSiloRule(ClaimRule):
 
 
 class CoverageGapRule(ClaimRule):
-    """Fires when coverage < 50 AND ccn > 15."""
+    """Fires when coverage < max_coverage AND ccn > min_ccn."""
 
     category = "coverage"
     abbr = "COVG"
+
+    def __init__(self, params: dict[str, Any] | None = None) -> None:
+        p = params or {}
+        self._max_coverage = p.get("max_coverage", 50)
+        self._min_ccn = p.get("min_ccn", 15)
 
     def evaluate(
         self,
@@ -191,9 +213,13 @@ class CoverageGapRule(ClaimRule):
 
         seq = 0
         for ev in coverage_evidence:
-            coverage = _parse_float_from_excerpt(ev.excerpt, "coverage=")
-            ccn = _parse_int_from_excerpt(ev.excerpt, "complexity_max=")
-            if coverage >= 50 or ccn <= 15:
+            coverage = ev.metadata.get("coverage_line_pct") if ev.metadata else None
+            ccn = ev.metadata.get("complexity_max") if ev.metadata else None
+            if coverage is None:
+                coverage = _parse_float_from_excerpt(ev.excerpt, "coverage=")
+            if ccn is None:
+                ccn = _parse_int_from_excerpt(ev.excerpt, "complexity_max=")
+            if coverage >= self._max_coverage or ccn <= self._min_ccn:
                 continue
             seq += 1
             claims.append(
@@ -440,6 +466,13 @@ DEFAULT_RULES: tuple[type[ClaimRule], ...] = (
     PervasiveDebtRule,
 )
 
+# Rules that accept a params dict in __init__
+_PARAMETERIZED_RULES: frozenset[type[ClaimRule]] = frozenset({
+    HighCouplingRule,
+    KnowledgeSiloRule,
+    CoverageGapRule,
+})
+
 
 class ClaimGenerator:
     """Evaluates all claim rules against collected evidence."""
@@ -448,8 +481,17 @@ class ClaimGenerator:
         self,
         rules: tuple[type[ClaimRule], ...] | None = None,
         enricher: NarrativeEnricher | None = None,
+        claim_params: dict[str, dict[str, Any]] | None = None,
     ) -> None:
-        self._rules: list[ClaimRule] = [cls() for cls in (rules or DEFAULT_RULES)]
+        cp = claim_params or {}
+        rule_classes = rules or DEFAULT_RULES
+        self._rules: list[ClaimRule] = []
+        for cls in rule_classes:
+            if cls in _PARAMETERIZED_RULES:
+                params = cp.get(cls.__name__, {})
+                self._rules.append(cls(params=params))  # type: ignore[call-arg]
+            else:
+                self._rules.append(cls())
         if enricher is not None:
             self._rules.append(LLMSynthesisRule(enricher))
 

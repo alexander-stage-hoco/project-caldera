@@ -28,7 +28,8 @@ class EvidencePackSection(EvidenceAwareSection):
         summary = registry.summary()
         categories_data: list[dict[str, Any]] = []
 
-        for cat in ("complexity", "security", "coupling", "coverage", "ownership", "quality"):
+        from ..evidence.entities import EVIDENCE_CATEGORIES
+        for cat in EVIDENCE_CATEGORIES:
             items = registry.evidence_by_category(cat)
             total = len(items)
             displayed = items[: self.MAX_PER_CATEGORY]

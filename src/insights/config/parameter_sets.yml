@@ -1,0 +1,50 @@
+parameter_sets:
+  default:
+    description: "Standard thresholds (matches original hardcoded values)"
+    query_params:
+      evidence_complexity: {threshold: 15, limit: 100}
+      evidence_security: {limit: 50}
+      evidence_coupling: {limit: 50}
+      evidence_coverage: {coverage_threshold: 50, ccn_threshold: 15, limit: 50}
+      evidence_ownership: {limit: 50}
+      evidence_quality: {density_threshold: 20, limit: 50}
+      evidence_maintainability: {loc_threshold: 500, limit: 50}
+      evidence_architecture: {limit: 50}
+      evidence_dependencies: {limit: 50}
+      evidence_duplication: {limit: 50}
+      claim_complexity_concentration: {gini_threshold: 0.7, min_files: 10}
+      claim_pervasive_smells: {pct_threshold: 50}
+    claim_params:
+      HighCouplingRule: {fan_out_multiplier: 3, min_fan_out: 5}
+      KnowledgeSiloRule: {max_authors: 1, min_lines: 500}
+      CoverageGapRule: {max_coverage: 50, min_ccn: 15}
+      LLMSynthesisRule: {min_categories: 3}
+    risk_params:
+      "Security exposure": {min_claims: 1, default_severity: high}
+      "Change amplification": {min_claims: 2, default_severity: high}
+      "Knowledge concentration": {min_claims: 2, default_severity: high}
+      "Untested complexity": {min_claims: 2, default_severity: high}
+      "Systemic debt": {min_claims: 3, default_severity: medium}
+    action_params: {}
+
+  conservative:
+    description: "Higher thresholds - only most critical findings"
+    query_params:
+      evidence_complexity: {threshold: 25, limit: 50}
+      evidence_coverage: {coverage_threshold: 30, ccn_threshold: 25}
+      evidence_quality: {density_threshold: 40}
+    claim_params:
+      KnowledgeSiloRule: {min_lines: 1000}
+    risk_params: {}
+    action_params: {}
+
+  pe_due_diligence:
+    description: "Lower thresholds for thorough due diligence"
+    query_params:
+      evidence_complexity: {threshold: 10, limit: 200}
+      evidence_coverage: {coverage_threshold: 70, ccn_threshold: 10}
+      evidence_quality: {density_threshold: 10, limit: 100}
+    claim_params: {}
+    risk_params:
+      "Security exposure": {min_claims: 1, default_severity: critical}
+    action_params: {}

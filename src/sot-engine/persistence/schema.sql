@@ -687,8 +687,78 @@ CREATE TABLE lz_evidence (
     tool_source VARCHAR NOT NULL,
     run_pk BIGINT NOT NULL,
     confidence VARCHAR NOT NULL DEFAULT 'high',
+    metadata_json TEXT,
+    evidence_set_id VARCHAR,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (collection_run_id, evidence_id)
+);
+
+CREATE TABLE lz_evidence_sets (
+    evidence_set_id VARCHAR NOT NULL,
+    collection_run_id VARCHAR NOT NULL,
+    parameter_set_name VARCHAR NOT NULL,
+    parameter_set_json TEXT NOT NULL,  -- DEPRECATED: use lz_evidence_*_params tables instead
+    status VARCHAR NOT NULL DEFAULT 'open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    closed_at TIMESTAMP,
+    total_items INTEGER DEFAULT 0,
+    reviewed_items INTEGER DEFAULT 0,
+    accepted_items INTEGER DEFAULT 0,
+    rejected_items INTEGER DEFAULT 0,
+    PRIMARY KEY (evidence_set_id)
+);
+
+-- Structured parameter storage (system of record for parameter values)
+CREATE TABLE lz_evidence_query_params (
+    evidence_set_id    VARCHAR NOT NULL,
+    query_name         VARCHAR NOT NULL,
+    threshold          INTEGER,
+    limit_rows         INTEGER,
+    coverage_threshold INTEGER,
+    ccn_threshold      INTEGER,
+    density_threshold  INTEGER,
+    loc_threshold      INTEGER,
+    min_files          INTEGER,
+    min_depth          INTEGER,
+    gini_threshold     DOUBLE,
+    pct_threshold      INTEGER,
+    PRIMARY KEY (evidence_set_id, query_name),
+    FOREIGN KEY (evidence_set_id) REFERENCES lz_evidence_sets(evidence_set_id)
+);
+
+CREATE TABLE lz_evidence_claim_params (
+    evidence_set_id    VARCHAR NOT NULL,
+    rule_name          VARCHAR NOT NULL,
+    fan_out_multiplier INTEGER,
+    min_fan_out        INTEGER,
+    max_authors        INTEGER,
+    min_lines          INTEGER,
+    max_coverage       INTEGER,
+    min_ccn            INTEGER,
+    min_categories     INTEGER,
+    PRIMARY KEY (evidence_set_id, rule_name),
+    FOREIGN KEY (evidence_set_id) REFERENCES lz_evidence_sets(evidence_set_id)
+);
+
+CREATE TABLE lz_evidence_risk_params (
+    evidence_set_id  VARCHAR NOT NULL,
+    pattern_name     VARCHAR NOT NULL,
+    min_claims       INTEGER,
+    default_severity VARCHAR,
+    PRIMARY KEY (evidence_set_id, pattern_name),
+    FOREIGN KEY (evidence_set_id) REFERENCES lz_evidence_sets(evidence_set_id)
+);
+
+CREATE TABLE lz_evidence_reviews (
+    evidence_set_id VARCHAR NOT NULL,
+    evidence_id VARCHAR NOT NULL,
+    verdict VARCHAR NOT NULL DEFAULT 'pending',
+    reviewer VARCHAR,
+    reviewed_at TIMESTAMP,
+    notes TEXT,
+    enhanced_observation TEXT,
+    enhanced_why_it_matters TEXT,
+    PRIMARY KEY (evidence_set_id, evidence_id)
 );
 
 CREATE TABLE lz_claims (
@@ -701,6 +771,7 @@ CREATE TABLE lz_claims (
     confidence VARCHAR NOT NULL,
     triggered_by VARCHAR NOT NULL,
     severity VARCHAR,
+    evidence_set_id VARCHAR,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (collection_run_id, claim_id)
 );
@@ -718,6 +789,7 @@ CREATE TABLE lz_risks (
     action TEXT,
     sla_date VARCHAR,
     status VARCHAR DEFAULT 'open',
+    evidence_set_id VARCHAR,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (collection_run_id, risk_id)
 );

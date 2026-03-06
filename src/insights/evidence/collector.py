@@ -20,16 +20,26 @@ from typing import Any, Literal
 import yaml
 
 from ..data_fetcher import DataFetcher
-from .entities import EVIDENCE_CATEGORIES, EvidenceCategory, EvidenceItem
+from .entities import (
+    CategoryRegistry,
+    EVIDENCE_CATEGORIES,
+    EvidenceItem,
+    ParameterSet,
+)
+from .mappers import MAPPER_REGISTRY, EvidenceMapper, safe_map_rows
 
-# Category abbreviations for evidence IDs
-_CATEGORY_ABBR: dict[EvidenceCategory, str] = {
+# Category abbreviations for evidence IDs (legacy — now also in mappers)
+_CATEGORY_ABBR: dict[str, str] = {
     "complexity": "CCN",
     "security": "SEC",
     "coupling": "COUP",
     "coverage": "COV",
     "ownership": "OWN",
     "quality": "QUAL",
+    "maintainability": "MAINT",
+    "architecture": "ARCH",
+    "dependencies": "DEP",
+    "duplication": "DUP",
 }
 
 WarningCategory = Literal["expected_missing", "regression", "degraded"]
@@ -111,14 +121,27 @@ _OPTIONAL_QUERIES: frozenset[str] = frozenset({
     "evidence_coupling",    # requires symbol-scanner (not always run)
     "evidence_coverage",    # requires coverage-ingest (not always run)
     "evidence_ownership",   # requires git-blame-scanner (not always run)
+    "evidence_dependencies",  # requires dependensee (not always run)
+    "evidence_duplication",   # requires pmd-cpd (not always run)
 })
 
 
 class EvidenceCollector:
-    """Collects evidence items from SQL queries on existing marts."""
+    """Collects evidence items from SQL queries on existing marts.
 
-    def __init__(self) -> None:
+    Supports both the legacy hardcoded path and the new registry-driven
+    parameterized path. When ``category_registry`` and ``parameter_set``
+    are provided, collection is driven by configuration.
+    """
+
+    def __init__(
+        self,
+        category_registry: CategoryRegistry | None = None,
+        parameter_set: ParameterSet | None = None,
+    ) -> None:
         self._query_warnings: list[CollectorWarning] = []
+        self._category_registry = category_registry
+        self._parameter_set = parameter_set
 
     def collect(
         self,
@@ -135,6 +158,70 @@ class EvidenceCollector:
         run_pk: int,
     ) -> CollectionResult:
         """Run all evidence source queries and return items + classified warnings."""
+        if self._category_registry is not None:
+            return self._collect_registry_driven(fetcher, run_pk)
+        return self._collect_legacy(fetcher, run_pk)
+
+    # -- Registry-driven collection (new path) --------------------------------
+
+    def _collect_registry_driven(
+        self,
+        fetcher: DataFetcher,
+        run_pk: int,
+    ) -> CollectionResult:
+        """Collect evidence using category registry and parameter set."""
+        result = CollectionResult()
+        optional_queries = (
+            self._category_registry.optional_query_names()
+            if self._category_registry
+            else _OPTIONAL_QUERIES
+        )
+
+        for cat_def in self._category_registry:  # type: ignore[union-attr]
+            mapper_cls = MAPPER_REGISTRY.get(cat_def.name)
+            if mapper_cls is None:
+                continue
+
+            query_params = {}
+            if self._parameter_set:
+                query_params = self._parameter_set.query_params_for(cat_def.query_name)
+
+            self._query_warnings = []
+            try:
+                rows = self._safe_query(
+                    fetcher, cat_def.query_name, run_pk,
+                    optional_queries=optional_queries,
+                    **query_params,
+                )
+                mapper = mapper_cls()
+                result.items.extend(safe_map_rows(mapper, rows, run_pk))
+            except Exception as exc:
+                warn_cat: WarningCategory = (
+                    "expected_missing" if cat_def.query_name in optional_queries
+                    else "regression"
+                )
+                result.warnings.append(CollectorWarning(
+                    category=warn_cat,
+                    source=cat_def.name,
+                    message=str(exc),
+                ))
+                warnings.warn(
+                    f"[EvidenceCollector] {cat_def.name} failed ({warn_cat}): {exc}",
+                    stacklevel=2,
+                )
+            result.warnings.extend(self._query_warnings)
+            self._query_warnings = []
+
+        return result
+
+    # -- Legacy collection (backward compatible) ------------------------------
+
+    def _collect_legacy(
+        self,
+        fetcher: DataFetcher,
+        run_pk: int,
+    ) -> CollectionResult:
+        """Original hardcoded collection path for backward compatibility."""
         result = CollectionResult()
 
         collectors = [
@@ -172,7 +259,7 @@ class EvidenceCollector:
 
         return result
 
-    # -- Per-category collectors -------------------------------------------
+    # -- Per-category collectors (legacy) -------------------------------------
 
     def _collect_complexity(
         self, fetcher: DataFetcher, run_pk: int
@@ -194,6 +281,7 @@ class EvidenceCollector:
                 "and makes the file harder to test and modify safely.",
                 tool_source="lizard",
                 run_pk=r.get("tool_run_pk", run_pk),
+                metadata={"complexity_max": r.get("complexity_max", 0), "function_count": r.get("function_count", 0), "loc_total": r.get("loc_total", 0)},
             ), i, "complexity")
         return items
 
@@ -218,6 +306,7 @@ class EvidenceCollector:
                     tool_source="gitleaks",
                     run_pk=r.get("tool_run_pk", run_pk),
                     confidence="high",
+                    metadata={"finding_type": "secret", "finding_id": r.get("finding_id", "")},
                 ), i, "security")
             else:
                 severity = row.get("severity", "HIGH")
@@ -237,6 +326,7 @@ class EvidenceCollector:
                     tool_source="trivy",
                     run_pk=r.get("tool_run_pk", run_pk),
                     confidence="high",
+                    metadata={"finding_type": "cve", "severity": sev, "finding_id": r.get("finding_id", "")},
                 ), i, "security")
         return items
 
@@ -263,6 +353,7 @@ class EvidenceCollector:
                 "modifications propagate across the codebase.",
                 tool_source="symbol-scanner",
                 run_pk=r.get("tool_run_pk", run_pk),
+                metadata={"fan_in": r.get("fan_in", 0), "fan_out": r.get("fan_out", 0)},
             ), i, "coupling")
         return items
 
@@ -287,6 +378,7 @@ class EvidenceCollector:
                 "high regression risk — defects are likely latent.",
                 tool_source="coverage-ingest",
                 run_pk=r.get("tool_run_pk", run_pk),
+                metadata={"coverage_line_pct": cov, "complexity_max": r.get("complexity_max", 0)},
             ), i, "coverage")
         return items
 
@@ -313,6 +405,7 @@ class EvidenceCollector:
                 "incident response time.",
                 tool_source="git-blame-scanner",
                 run_pk=r.get("tool_run_pk", run_pk),
+                metadata={"unique_authors": r.get("unique_authors", 0), "total_lines": r.get("total_lines", 0)},
             ), i, "ownership")
         return items
 
@@ -338,6 +431,7 @@ class EvidenceCollector:
                 "elevated defect rates and higher maintenance cost.",
                 tool_source="semgrep",
                 run_pk=r.get("tool_run_pk", run_pk),
+                metadata={"smell_density_per_kloc": sd, "issue_density_per_kloc": id_},
             ), i, "quality")
         return items
 
@@ -348,13 +442,16 @@ class EvidenceCollector:
         fetcher: DataFetcher,
         query_name: str,
         run_pk: int,
+        optional_queries: frozenset[str] | None = None,
+        **params: Any,
     ) -> list[dict[str, Any]]:
         """Execute a query, returning empty list on failure and tracking warnings."""
+        opt_set = optional_queries or _OPTIONAL_QUERIES
         try:
-            return fetcher.fetch(query_name, run_pk)
+            return fetcher.fetch(query_name, run_pk, **params)
         except Exception as exc:
             category: WarningCategory = (
-                "expected_missing" if query_name in _OPTIONAL_QUERIES else "regression"
+                "expected_missing" if query_name in opt_set else "regression"
             )
             self._query_warnings.append(CollectorWarning(
                 category=category,

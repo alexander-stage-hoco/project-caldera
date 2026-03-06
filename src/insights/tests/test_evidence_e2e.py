@@ -402,6 +402,46 @@ def _create_evidence_persistence_tables(conn: duckdb.DuckDBPyConnection) -> None
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    conn.execute("""
+        CREATE TABLE lz_evidence_query_params (
+            evidence_set_id VARCHAR NOT NULL,
+            query_name VARCHAR NOT NULL,
+            threshold INTEGER,
+            limit_rows INTEGER,
+            coverage_threshold INTEGER,
+            ccn_threshold INTEGER,
+            density_threshold INTEGER,
+            loc_threshold INTEGER,
+            min_files INTEGER,
+            min_depth INTEGER,
+            gini_threshold DOUBLE,
+            pct_threshold INTEGER,
+            PRIMARY KEY (evidence_set_id, query_name)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE lz_evidence_claim_params (
+            evidence_set_id VARCHAR NOT NULL,
+            rule_name VARCHAR NOT NULL,
+            fan_out_multiplier INTEGER,
+            min_fan_out INTEGER,
+            max_authors INTEGER,
+            min_lines INTEGER,
+            max_coverage INTEGER,
+            min_ccn INTEGER,
+            min_categories INTEGER,
+            PRIMARY KEY (evidence_set_id, rule_name)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE lz_evidence_risk_params (
+            evidence_set_id VARCHAR NOT NULL,
+            pattern_name VARCHAR NOT NULL,
+            min_claims INTEGER,
+            default_severity VARCHAR,
+            PRIMARY KEY (evidence_set_id, pattern_name)
+        )
+    """)
 
 
 # ---------------------------------------------------------------------------
@@ -1062,6 +1102,117 @@ class TestEvidencePersistenceE2E:
             [crid],
         ).fetchone()[0]
         assert count == 18
+        conn.close()
+
+
+# ===========================================================================
+# Structured Parameter Persistence E2E
+# ===========================================================================
+
+
+class TestStructuredParameterPersistenceE2E:
+    """Test auto-creation of evidence sets with structured parameter storage."""
+
+    def test_persist_creates_evidence_set(self, synth_db, default_registry, default_params):
+        crid = f"param-e2e-{uuid.uuid4().hex[:8]}"
+        conn = duckdb.connect(synth_db)
+        es_id = EvidenceRegistryBuilder.persist(
+            default_registry, conn, crid, parameter_set=default_params,
+        )
+        assert es_id is not None
+        row = conn.execute(
+            "SELECT parameter_set_name, status, total_items FROM lz_evidence_sets WHERE evidence_set_id = ?",
+            [es_id],
+        ).fetchone()
+        assert row is not None
+        assert row[0] == "default"
+        assert row[1] == "open"
+        assert row[2] == len(default_registry.evidence)
+        conn.close()
+
+    def test_persist_query_params(self, synth_db, default_registry, default_params):
+        crid = f"param-qp-{uuid.uuid4().hex[:8]}"
+        conn = duckdb.connect(synth_db)
+        es_id = EvidenceRegistryBuilder.persist(
+            default_registry, conn, crid, parameter_set=default_params,
+        )
+        rows = conn.execute(
+            "SELECT query_name, threshold, limit_rows FROM lz_evidence_query_params WHERE evidence_set_id = ?",
+            [es_id],
+        ).fetchall()
+        names = {r[0] for r in rows}
+        assert "evidence_complexity" in names
+        ccn_row = next(r for r in rows if r[0] == "evidence_complexity")
+        assert ccn_row[1] == 15  # threshold
+        assert ccn_row[2] == 100  # limit_rows
+        conn.close()
+
+    def test_persist_claim_params(self, synth_db, default_registry, default_params):
+        crid = f"param-cp-{uuid.uuid4().hex[:8]}"
+        conn = duckdb.connect(synth_db)
+        es_id = EvidenceRegistryBuilder.persist(
+            default_registry, conn, crid, parameter_set=default_params,
+        )
+        rows = conn.execute(
+            "SELECT rule_name, fan_out_multiplier FROM lz_evidence_claim_params WHERE evidence_set_id = ?",
+            [es_id],
+        ).fetchall()
+        names = {r[0] for r in rows}
+        assert "HighCouplingRule" in names
+        hc = next(r for r in rows if r[0] == "HighCouplingRule")
+        assert hc[1] == 3
+        conn.close()
+
+    def test_persist_risk_params(self, synth_db, default_registry, default_params):
+        crid = f"param-rp-{uuid.uuid4().hex[:8]}"
+        conn = duckdb.connect(synth_db)
+        es_id = EvidenceRegistryBuilder.persist(
+            default_registry, conn, crid, parameter_set=default_params,
+        )
+        rows = conn.execute(
+            "SELECT pattern_name, min_claims, default_severity FROM lz_evidence_risk_params WHERE evidence_set_id = ?",
+            [es_id],
+        ).fetchall()
+        names = {r[0] for r in rows}
+        assert "Security exposure" in names
+        sec = next(r for r in rows if r[0] == "Security exposure")
+        assert sec[1] == 1
+        assert sec[2] == "high"
+        conn.close()
+
+    def test_roundtrip_parameter_set(self, synth_db, default_registry, default_params):
+        from insights.evidence.param_persistence import load_parameter_set_from_db
+
+        crid = f"param-rt-{uuid.uuid4().hex[:8]}"
+        conn = duckdb.connect(synth_db)
+        es_id = EvidenceRegistryBuilder.persist(
+            default_registry, conn, crid, parameter_set=default_params,
+        )
+        loaded = load_parameter_set_from_db(conn, es_id)
+        assert loaded is not None
+        assert loaded.query_params == default_params.query_params
+        assert loaded.claim_params == default_params.claim_params
+        assert loaded.risk_params == default_params.risk_params
+        conn.close()
+
+    def test_evidence_linked_to_set(self, synth_db, default_registry, default_params):
+        crid = f"param-link-{uuid.uuid4().hex[:8]}"
+        conn = duckdb.connect(synth_db)
+        es_id = EvidenceRegistryBuilder.persist(
+            default_registry, conn, crid, parameter_set=default_params,
+        )
+        count = conn.execute(
+            "SELECT COUNT(*) FROM lz_evidence WHERE collection_run_id = ? AND evidence_set_id = ?",
+            [crid, es_id],
+        ).fetchone()[0]
+        assert count == len(default_registry.evidence)
+        conn.close()
+
+    def test_persist_without_params_returns_none(self, synth_db, default_registry):
+        crid = f"param-none-{uuid.uuid4().hex[:8]}"
+        conn = duckdb.connect(synth_db)
+        result = EvidenceRegistryBuilder.persist(default_registry, conn, crid)
+        assert result is None
         conn.close()
 
 

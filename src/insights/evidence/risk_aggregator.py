@@ -80,14 +80,47 @@ DEFAULT_PATTERNS: tuple[RiskPattern, ...] = (
 )
 
 
+def build_patterns(
+    risk_params: dict[str, dict[str, Any]] | None = None,
+) -> tuple[RiskPattern, ...]:
+    """Build risk patterns from defaults, overriding with ``risk_params``.
+
+    Each key in *risk_params* should match a pattern ``name`` (e.g.
+    ``"Security exposure"``). Supported overrides: ``min_claims``,
+    ``default_severity``.
+    """
+    if not risk_params:
+        return DEFAULT_PATTERNS
+
+    result: list[RiskPattern] = []
+    for pattern in DEFAULT_PATTERNS:
+        overrides = risk_params.get(pattern.name, {})
+        if not overrides:
+            result.append(pattern)
+            continue
+        result.append(RiskPattern(
+            name=pattern.name,
+            description=pattern.description,
+            technical_cause=pattern.technical_cause,
+            categories=pattern.categories,
+            min_claims=overrides.get("min_claims", pattern.min_claims),
+            default_severity=overrides.get("default_severity", pattern.default_severity),
+        ))
+    return tuple(result)
+
+
 class RiskAggregator:
     """Groups claims by theme and creates ``ExecutionRisk`` entries."""
 
     def __init__(
         self,
         patterns: tuple[RiskPattern, ...] | None = None,
+        risk_params: dict[str, dict[str, Any]] | None = None,
     ) -> None:
-        self._patterns = patterns or DEFAULT_PATTERNS
+        if patterns is not None:
+            self._patterns = patterns
+        else:
+            self._patterns = build_patterns(risk_params)
 
     def aggregate(
         self,
