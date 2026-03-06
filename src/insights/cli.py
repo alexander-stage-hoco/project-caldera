@@ -39,6 +39,7 @@ def generate(
     profile: str | None = typer.Option(None, "--profile", "-p", help="Stakeholder profile (cto, investor, ceo)"),
     title: str | None = typer.Option(None, "--title", "-t", help="Custom report title"),
     report_llm: bool = typer.Option(False, "--report-llm", help="Enable LLM narrative enrichment in reports"),
+    parameter_set_name: str | None = typer.Option(None, "--parameter-set", help="Named parameter set for evidence thresholds"),
 ) -> None:
     """Generate an insights report for a collection run.
 
@@ -70,7 +71,7 @@ def generate(
         console.print(f"[red]Error:[/red] Database not found: {db}")
         raise typer.Exit(1)
 
-    generator = InsightsGenerator(db_path=db, report_llm=report_llm)
+    generator = InsightsGenerator(db_path=db, report_llm=report_llm, parameter_set=parameter_set_name)
 
     # Validate database
     validation = generator.validate_database()
@@ -412,6 +413,374 @@ def tool_readiness_report(
     except Exception as e:
         console.print(f"[red]Error generating report:[/red] {e}")
         raise typer.Exit(1)
+
+
+# ---------------------------------------------------------------------------
+# Evidence subcommand group
+# ---------------------------------------------------------------------------
+
+evidence_app = typer.Typer(
+    name="evidence",
+    help="Manage evidence sets: generate, review, accept, compare.",
+)
+app.add_typer(evidence_app, name="evidence")
+
+
+@evidence_app.command("list-sets")
+def evidence_list_sets(
+    db: Path = typer.Option(..., "--db", "-d", help="Path to DuckDB database"),
+    collection_run_id: str | None = typer.Option(None, "--collection-run-id", "-c", help="Filter by collection run"),
+) -> None:
+    """List evidence sets."""
+    import duckdb
+    from .evidence.reviewer import EvidenceReviewer
+
+    if not db.exists():
+        console.print(f"[red]Error:[/red] Database not found: {db}")
+        raise typer.Exit(1)
+
+    with duckdb.connect(str(db)) as conn:
+        reviewer = EvidenceReviewer(conn)
+        sets = reviewer.list_sets(collection_run_id)
+
+    if not sets:
+        console.print("[yellow]No evidence sets found.[/yellow]")
+        return
+
+    table = Table(title="Evidence Sets")
+    table.add_column("Set ID", style="cyan")
+    table.add_column("Collection Run")
+    table.add_column("Parameter Set")
+    table.add_column("Status")
+    table.add_column("Items", justify="right")
+    table.add_column("Reviewed", justify="right")
+    table.add_column("Accepted", justify="right")
+
+    for s in sets:
+        table.add_row(
+            s.evidence_set_id[:12] + "...",
+            s.collection_run_id[:12] + "...",
+            s.parameter_set_name,
+            s.status,
+            str(s.total_items),
+            str(s.reviewed_items),
+            str(s.accepted_items),
+        )
+
+    console.print(table)
+
+
+@evidence_app.command("generate")
+def evidence_generate(
+    db: Path = typer.Option(..., "--db", "-d", help="Path to DuckDB database"),
+    collection_run_id: str = typer.Option(..., "--collection-run-id", "-c", help="Collection run ID"),
+    parameter_set: str = typer.Option("default", "--parameter-set", "-p", help="Parameter set name"),
+) -> None:
+    """Generate an evidence set with a specific parameter set."""
+    import duckdb
+
+    from .config import ConfigLoader
+    from .data_fetcher import DataFetcher
+    from .evidence.builder import EvidenceRegistryBuilder
+
+    if not db.exists():
+        console.print(f"[red]Error:[/red] Database not found: {db}")
+        raise typer.Exit(1)
+
+    try:
+        ps = ConfigLoader.load_parameter_set(parameter_set)
+        registry_cfg = ConfigLoader.load_categories()
+    except ValueError as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(1)
+
+    fetcher = DataFetcher(db_path=db)
+    run_pk = fetcher.get_scc_run_pk_for_collection(collection_run_id)
+
+    builder = EvidenceRegistryBuilder(
+        parameter_set=ps,
+        category_registry=registry_cfg,
+    )
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        evidence_registry = builder.build(fetcher, run_pk)
+
+    for w in caught:
+        console.print(f"[yellow]Warning:[/yellow] {w.message}")
+
+    with duckdb.connect(str(db)) as conn:
+        # Persist evidence with auto-created evidence set + structured params
+        evidence_set_id = EvidenceRegistryBuilder.persist(
+            evidence_registry, conn, collection_run_id, parameter_set=ps,
+        )
+
+        if evidence_set_id is None:
+            console.print("[red]Error:[/red] Failed to create evidence set")
+            raise typer.Exit(1)
+
+        # Create pending reviews for all items
+        for e in evidence_registry.evidence:
+            conn.execute(
+                "INSERT INTO lz_evidence_reviews (evidence_set_id, evidence_id, verdict) VALUES (?, ?, ?)",
+                [evidence_set_id, e.evidence_id, "pending"],
+            )
+
+    console.print(f"[green]Evidence set created:[/green] {evidence_set_id}")
+    console.print(f"  Parameter set: {parameter_set}")
+    console.print(f"  Evidence items: {len(evidence_registry.evidence)}")
+    console.print(f"  Claims: {len(evidence_registry.claims)}")
+    console.print(f"  Risks: {len(evidence_registry.risks)}")
+
+
+@evidence_app.command("show")
+def evidence_show(
+    set_id: str = typer.Argument(..., help="Evidence set ID"),
+    db: Path = typer.Option(..., "--db", "-d", help="Path to DuckDB database"),
+    category: str | None = typer.Option(None, "--category", help="Filter by category"),
+    status: str | None = typer.Option(None, "--status", help="Filter by review status"),
+) -> None:
+    """Show evidence items in a set."""
+    import duckdb
+
+    if not db.exists():
+        console.print(f"[red]Error:[/red] Database not found: {db}")
+        raise typer.Exit(1)
+
+    with duckdb.connect(str(db), read_only=True) as conn:
+        sql = (
+            "SELECT e.evidence_id, e.category, e.location, e.observation, "
+            "e.confidence, COALESCE(r.verdict, 'pending') AS verdict "
+            "FROM lz_evidence e "
+            "LEFT JOIN lz_evidence_reviews r "
+            "  ON r.evidence_set_id = e.evidence_set_id AND r.evidence_id = e.evidence_id "
+            "WHERE e.evidence_set_id = ?"
+        )
+        params: list = [set_id]
+        if category:
+            sql += " AND e.category = ?"
+            params.append(category)
+        if status:
+            sql += " AND COALESCE(r.verdict, 'pending') = ?"
+            params.append(status)
+        sql += " ORDER BY e.category, e.evidence_id"
+
+        rows = conn.execute(sql, params).fetchall()
+        cols = [d[0] for d in conn.execute(sql, params).description] if rows else []
+
+    if not rows:
+        console.print("[yellow]No evidence items found.[/yellow]")
+        return
+
+    table = Table(title=f"Evidence Set: {set_id}")
+    table.add_column("ID", style="cyan")
+    table.add_column("Category")
+    table.add_column("Location")
+    table.add_column("Observation")
+    table.add_column("Confidence")
+    table.add_column("Verdict", style="bold")
+
+    for row in rows:
+        r = dict(zip(cols, row))
+        verdict_style = {
+            "accepted": "green",
+            "rejected": "red",
+            "enhanced": "blue",
+            "pending": "yellow",
+        }.get(r["verdict"], "")
+        table.add_row(
+            r["evidence_id"],
+            r["category"],
+            r["location"][:40],
+            r["observation"][:60],
+            r["confidence"],
+            f"[{verdict_style}]{r['verdict']}[/{verdict_style}]" if verdict_style else r["verdict"],
+        )
+
+    console.print(table)
+
+
+@evidence_app.command("review")
+def evidence_review(
+    set_id: str = typer.Argument(..., help="Evidence set ID"),
+    db: Path = typer.Option(..., "--db", "-d", help="Path to DuckDB database"),
+    batch_accept: bool = typer.Option(False, "--batch-accept", help="Accept all pending items"),
+    reviewer_name: str = typer.Option("cli-user", "--reviewer", help="Reviewer name"),
+) -> None:
+    """Review evidence items in a set (batch-accept or interactive)."""
+    import duckdb
+    from .evidence.reviewer import EvidenceReviewer
+
+    if not db.exists():
+        console.print(f"[red]Error:[/red] Database not found: {db}")
+        raise typer.Exit(1)
+
+    with duckdb.connect(str(db)) as conn:
+        rv = EvidenceReviewer(conn)
+        es = rv.get_set(set_id)
+        if es is None:
+            console.print(f"[red]Error:[/red] Evidence set not found: {set_id}")
+            raise typer.Exit(1)
+
+        if batch_accept:
+            count = rv.batch_accept(set_id, reviewer_name)
+            console.print(f"[green]Batch-accepted {count} evidence items.[/green]")
+            return
+
+        # Interactive review
+        pending = rv.get_pending(set_id)
+        if not pending:
+            console.print("[green]All items already reviewed.[/green]")
+            return
+
+        console.print(f"[bold]{len(pending)} items pending review.[/bold]")
+
+        for eid in pending:
+            row = conn.execute(
+                "SELECT * FROM lz_evidence WHERE evidence_set_id = ? AND evidence_id = ?",
+                [set_id, eid],
+            ).fetchone()
+            if not row:
+                continue
+            cols = [d[0] for d in conn.execute(
+                "SELECT * FROM lz_evidence LIMIT 0"
+            ).description]
+            item = dict(zip(cols, row))
+
+            from rich.panel import Panel
+            panel_content = (
+                f"[bold]Category:[/bold] {item['category']}\n"
+                f"[bold]Location:[/bold] {item['location']}\n"
+                f"[bold]Excerpt:[/bold] {item.get('excerpt', '')}\n"
+                f"[bold]Observation:[/bold] {item.get('observation', '')}\n"
+                f"[bold]Why it matters:[/bold] {item.get('why_it_matters', '')}\n"
+                f"[bold]Tool:[/bold] {item['tool_source']}  [bold]Confidence:[/bold] {item['confidence']}"
+            )
+            console.print(Panel(panel_content, title=f"Evidence: {eid}", border_style="blue"))
+
+            verdict = typer.prompt(
+                "Verdict (a=accept, r=reject, e=enhance, s=skip)",
+                default="a",
+            )
+            verdict_map = {"a": "accepted", "r": "rejected", "e": "enhanced", "s": None}
+            mapped = verdict_map.get(verdict)
+            if mapped is None:
+                continue
+
+            notes = None
+            if mapped in ("enhanced", "rejected"):
+                notes = typer.prompt("Notes (optional)", default="")
+
+            rv.submit_review(set_id, eid, mapped, reviewer_name, notes=notes or None)
+            console.print(f"  [{mapped}] {eid}")
+
+
+@evidence_app.command("accept")
+def evidence_accept(
+    set_id: str = typer.Argument(..., help="Evidence set ID"),
+    db: Path = typer.Option(..., "--db", "-d", help="Path to DuckDB database"),
+) -> None:
+    """Accept an evidence set (transition to accepted status)."""
+    import duckdb
+    from .evidence.reviewer import EvidenceReviewer
+
+    if not db.exists():
+        console.print(f"[red]Error:[/red] Database not found: {db}")
+        raise typer.Exit(1)
+
+    with duckdb.connect(str(db)) as conn:
+        rv = EvidenceReviewer(conn)
+        try:
+            rv.transition_status(set_id, "accepted")
+        except ValueError as e:
+            console.print(f"[red]Error:[/red] {e}")
+            raise typer.Exit(1)
+
+    console.print(f"[green]Evidence set accepted:[/green] {set_id}")
+
+
+@evidence_app.command("compare")
+def evidence_compare(
+    set_id_1: str = typer.Argument(..., help="First evidence set ID"),
+    set_id_2: str = typer.Argument(..., help="Second evidence set ID"),
+    db: Path = typer.Option(..., "--db", "-d", help="Path to DuckDB database"),
+) -> None:
+    """Compare two evidence sets."""
+    import duckdb
+
+    if not db.exists():
+        console.print(f"[red]Error:[/red] Database not found: {db}")
+        raise typer.Exit(1)
+
+    with duckdb.connect(str(db), read_only=True) as conn:
+        def _get_items(sid: str) -> dict[str, dict]:
+            rows = conn.execute(
+                "SELECT evidence_id, category, location, observation FROM lz_evidence WHERE evidence_set_id = ?",
+                [sid],
+            ).fetchall()
+            cols = ["evidence_id", "category", "location", "observation"]
+            return {r[0]: dict(zip(cols, r)) for r in rows}
+
+        items1 = _get_items(set_id_1)
+        items2 = _get_items(set_id_2)
+
+    locs1 = {v["location"] for v in items1.values()}
+    locs2 = {v["location"] for v in items2.values()}
+    only1 = locs1 - locs2
+    only2 = locs2 - locs1
+    shared = locs1 & locs2
+
+    console.print(f"[bold]Set 1:[/bold] {set_id_1} ({len(items1)} items)")
+    console.print(f"[bold]Set 2:[/bold] {set_id_2} ({len(items2)} items)")
+    console.print()
+    console.print(f"Shared locations: {len(shared)}")
+    console.print(f"Only in set 1: {len(only1)}")
+    console.print(f"Only in set 2: {len(only2)}")
+
+    if only1:
+        console.print("\n[bold]Locations only in set 1:[/bold]")
+        for loc in sorted(only1)[:20]:
+            console.print(f"  {loc}")
+
+    if only2:
+        console.print("\n[bold]Locations only in set 2:[/bold]")
+        for loc in sorted(only2)[:20]:
+            console.print(f"  {loc}")
+
+
+# Claims subcommand group
+claims_app = typer.Typer(
+    name="claims",
+    help="Manage claim generation from accepted evidence sets.",
+)
+app.add_typer(claims_app, name="claims")
+
+
+@claims_app.command("generate")
+def claims_generate(
+    set_id: str = typer.Argument(..., help="Evidence set ID (must be accepted)"),
+    db: Path = typer.Option(..., "--db", "-d", help="Path to DuckDB database"),
+) -> None:
+    """Generate claims from an accepted evidence set."""
+    import duckdb
+    from .evidence.reviewer import EvidenceReviewer
+
+    if not db.exists():
+        console.print(f"[red]Error:[/red] Database not found: {db}")
+        raise typer.Exit(1)
+
+    with duckdb.connect(str(db)) as conn:
+        rv = EvidenceReviewer(conn)
+        es = rv.get_set(set_id)
+        if es is None:
+            console.print(f"[red]Error:[/red] Evidence set not found: {set_id}")
+            raise typer.Exit(1)
+        if es.status != "accepted":
+            console.print(f"[red]Error:[/red] Evidence set must be accepted (current: {es.status})")
+            raise typer.Exit(1)
+
+    console.print(f"[green]Claims can be generated from accepted set:[/green] {set_id}")
+    console.print("[dim]Full claim generation will use the stored parameter set.[/dim]")
 
 
 def main() -> None:
