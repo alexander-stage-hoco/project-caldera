@@ -124,6 +124,7 @@ class InsightsGenerator:
         dbt_project_dir: Path | None = None,
         templates_dir: Path | None = None,
         report_llm: bool = False,
+        parameter_set: str | None = None,
     ):
         """
         Initialize the InsightsGenerator.
@@ -133,6 +134,7 @@ class InsightsGenerator:
             dbt_project_dir: Optional path to dbt project directory.
             templates_dir: Optional custom templates directory.
             report_llm: Enable LLM narrative enrichment in reports.
+            parameter_set: Named parameter set for evidence thresholds.
         """
         self.db_path = Path(db_path)
         self.fetcher = DataFetcher(db_path, dbt_project_dir)
@@ -150,8 +152,19 @@ class InsightsGenerator:
             name: cls() for name, cls in self.SECTIONS.items()
         }
 
-        # Initialize evidence builder (with optional enricher for LLM synthesis rule)
-        self._evidence_builder = EvidenceRegistryBuilder(enricher=self._enricher)
+        # Initialize evidence builder (with optional enricher and parameter set)
+        ps = None
+        cat_registry = None
+        if parameter_set:
+            from .config import ConfigLoader
+            ps = ConfigLoader.load_parameter_set(parameter_set)
+            cat_registry = ConfigLoader.load_categories()
+
+        self._evidence_builder = EvidenceRegistryBuilder(
+            enricher=self._enricher,
+            parameter_set=ps,
+            category_registry=cat_registry,
+        )
 
         # Initialize formatters
         self._formatters: dict[str, BaseFormatter] = {
