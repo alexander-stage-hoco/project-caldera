@@ -35,6 +35,91 @@ _EVIDENCE_ID_RE = re.compile(r"^E-[A-Z]+-\d{3,}$")
 _CLAIM_ID_RE = re.compile(r"^CLM-[A-Z]+-\d{3,}$")
 _RISK_ID_RE = re.compile(r"^RISK-\d{3,}$")
 
+
+# ---------------------------------------------------------------------------
+# Category & Parameter Set definitions
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class CategoryDefinition:
+    """Definition of an evidence category loaded from configuration."""
+
+    name: str
+    abbreviation: str
+    description: str
+    tools: tuple[str, ...]
+    query_name: str
+    optional: bool = False
+
+
+class CategoryRegistry:
+    """Runtime registry of evidence categories.
+
+    Replaces the hardcoded ``Literal`` type with a dynamic registry that
+    validates categories at runtime while remaining extensible via YAML.
+    """
+
+    def __init__(self, categories: dict[str, CategoryDefinition]) -> None:
+        self._categories = dict(categories)
+
+    def get(self, name: str) -> CategoryDefinition:
+        if name not in self._categories:
+            raise KeyError(f"Unknown evidence category: {name!r}")
+        return self._categories[name]
+
+    def abbreviation(self, name: str) -> str:
+        return self.get(name).abbreviation
+
+    def all_names(self) -> tuple[str, ...]:
+        return tuple(self._categories.keys())
+
+    def is_valid(self, name: str) -> bool:
+        return name in self._categories
+
+    def optional_query_names(self) -> frozenset[str]:
+        """Return query names for optional categories."""
+        return frozenset(
+            cat.query_name for cat in self._categories.values() if cat.optional
+        )
+
+    def __len__(self) -> int:
+        return len(self._categories)
+
+    def __iter__(self):
+        return iter(self._categories.values())
+
+
+@dataclass(frozen=True)
+class ParameterSet:
+    """A named set of thresholds for evidence collection, claims, and risks."""
+
+    name: str
+    description: str
+    query_params: dict[str, dict[str, Any]]
+    claim_params: dict[str, dict[str, Any]]
+    risk_params: dict[str, dict[str, Any]]
+    action_params: dict[str, dict[str, Any]]
+
+    def query_params_for(self, query_name: str) -> dict[str, Any]:
+        """Return parameters for a specific query, or empty dict."""
+        return dict(self.query_params.get(query_name, {}))
+
+    def claim_params_for(self, rule_name: str) -> dict[str, Any]:
+        """Return parameters for a specific claim rule, or empty dict."""
+        return dict(self.claim_params.get(rule_name, {}))
+
+    def risk_params_for(self, pattern_name: str) -> dict[str, Any]:
+        """Return parameters for a specific risk pattern, or empty dict."""
+        return dict(self.risk_params.get(pattern_name, {}))
+
+
+# ---------------------------------------------------------------------------
+# Backward-compatible category types
+# ---------------------------------------------------------------------------
+
+# Deprecated: use CategoryRegistry.is_valid() for runtime validation.
+# Kept for backward compatibility with existing type annotations.
 EvidenceCategory = Literal[
     "complexity",
     "security",
@@ -42,15 +127,23 @@ EvidenceCategory = Literal[
     "coverage",
     "ownership",
     "quality",
+    "maintainability",
+    "architecture",
+    "dependencies",
+    "duplication",
 ]
 
-EVIDENCE_CATEGORIES: tuple[EvidenceCategory, ...] = (
+EVIDENCE_CATEGORIES: tuple[str, ...] = (
     "complexity",
     "security",
     "coupling",
     "coverage",
     "ownership",
     "quality",
+    "maintainability",
+    "architecture",
+    "dependencies",
+    "duplication",
 )
 
 ClaimCategory = Literal[
@@ -60,11 +153,150 @@ ClaimCategory = Literal[
     "coverage",
     "security",
     "quality",
+    "maintainability",
+    "architecture",
+    "dependencies",
+    "duplication",
 ]
 
 RiskSeverity = Literal["critical", "high", "medium", "low"]
 
+_VALID_SEVERITIES = {"critical", "high", "medium", "low"}
+
+
+# ---------------------------------------------------------------------------
+# Structured parameter records (DB system-of-record for parameter values)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class QueryParamRecord:
+    """One row in ``lz_evidence_query_params``."""
+
+    evidence_set_id: str
+    query_name: str
+    threshold: int | None = None
+    limit_rows: int | None = None
+    coverage_threshold: int | None = None
+    ccn_threshold: int | None = None
+    density_threshold: int | None = None
+    loc_threshold: int | None = None
+    min_files: int | None = None
+    min_depth: int | None = None
+    gini_threshold: float | None = None
+    pct_threshold: int | None = None
+
+    def __post_init__(self) -> None:
+        if not self.evidence_set_id:
+            raise ValueError("evidence_set_id must not be empty")
+        if not self.query_name:
+            raise ValueError("query_name must not be empty")
+
+
+@dataclass(frozen=True)
+class ClaimParamRecord:
+    """One row in ``lz_evidence_claim_params``."""
+
+    evidence_set_id: str
+    rule_name: str
+    fan_out_multiplier: int | None = None
+    min_fan_out: int | None = None
+    max_authors: int | None = None
+    min_lines: int | None = None
+    max_coverage: int | None = None
+    min_ccn: int | None = None
+    min_categories: int | None = None
+
+    def __post_init__(self) -> None:
+        if not self.evidence_set_id:
+            raise ValueError("evidence_set_id must not be empty")
+        if not self.rule_name:
+            raise ValueError("rule_name must not be empty")
+
+
+@dataclass(frozen=True)
+class RiskParamRecord:
+    """One row in ``lz_evidence_risk_params``."""
+
+    evidence_set_id: str
+    pattern_name: str
+    min_claims: int | None = None
+    default_severity: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.evidence_set_id:
+            raise ValueError("evidence_set_id must not be empty")
+        if not self.pattern_name:
+            raise ValueError("pattern_name must not be empty")
+        if self.default_severity is not None and self.default_severity not in _VALID_SEVERITIES:
+            raise ValueError(
+                f"Invalid default_severity: {self.default_severity!r}. "
+                f"Must be one of {sorted(_VALID_SEVERITIES)}"
+            )
+
 ConfidenceLevel = Literal["high", "medium", "low"]
+
+
+# ---------------------------------------------------------------------------
+# Evidence Set & Review entities (multi-set, human-reviewable)
+# ---------------------------------------------------------------------------
+
+EvidenceSetStatus = Literal["open", "in_review", "closed", "accepted"]
+ReviewVerdict = Literal["pending", "accepted", "enhanced", "rejected"]
+
+
+@dataclass(frozen=True)
+class EvidenceSetMetadata:
+    """Metadata for an evidence set — one parameter-set run within a collection."""
+
+    evidence_set_id: str
+    collection_run_id: str
+    parameter_set_name: str
+    status: EvidenceSetStatus
+    created_at: str
+    closed_at: str | None = None
+    total_items: int = 0
+    reviewed_items: int = 0
+    accepted_items: int = 0
+    rejected_items: int = 0
+
+
+@dataclass(frozen=True)
+class EvidenceReview:
+    """A human review verdict for a single evidence item."""
+
+    evidence_id: str
+    verdict: ReviewVerdict
+    reviewer: str
+    reviewed_at: str
+    notes: str | None = None
+    enhanced_observation: str | None = None
+    enhanced_why_it_matters: str | None = None
+
+
+# ---------------------------------------------------------------------------
+# Default category registry (built from EVIDENCE_CATEGORIES for compat)
+# ---------------------------------------------------------------------------
+
+def _build_default_registry() -> CategoryRegistry:
+    """Build the default registry matching the original 6 hardcoded categories."""
+    try:
+        from ..config.loader import ConfigLoader
+        return ConfigLoader.load_categories()
+    except Exception:
+        # Fallback for when config files are not available (e.g. in tests)
+        _LEGACY_DEFS = {
+            "complexity": CategoryDefinition("complexity", "CCN", "Cyclomatic complexity", ("lizard",), "evidence_complexity"),
+            "security": CategoryDefinition("security", "SEC", "Security vulnerabilities", ("trivy", "gitleaks"), "evidence_security"),
+            "coupling": CategoryDefinition("coupling", "COUP", "Symbol coupling", ("symbol-scanner",), "evidence_coupling", optional=True),
+            "coverage": CategoryDefinition("coverage", "COV", "Test coverage gaps", ("coverage-ingest",), "evidence_coverage", optional=True),
+            "ownership": CategoryDefinition("ownership", "OWN", "Knowledge risk", ("git-blame-scanner",), "evidence_ownership", optional=True),
+            "quality": CategoryDefinition("quality", "QUAL", "Code quality issues", ("semgrep", "devskim"), "evidence_quality"),
+        }
+        return CategoryRegistry(_LEGACY_DEFS)
+
+
+DEFAULT_CATEGORY_REGISTRY: CategoryRegistry = _build_default_registry()
 
 
 # ---------------------------------------------------------------------------
@@ -82,7 +314,7 @@ class EvidenceItem:
 
     evidence_id: str
     evidence_type: str
-    category: EvidenceCategory
+    category: str
     location: str
     excerpt: str
     observation: str
@@ -90,6 +322,7 @@ class EvidenceItem:
     tool_source: str
     run_pk: int
     confidence: ConfidenceLevel = "high"
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not _EVIDENCE_ID_RE.match(self.evidence_id):
@@ -107,6 +340,9 @@ class EvidenceItem:
         object.__setattr__(self, "excerpt", _cap(self.excerpt, MAX_EXCERPT_CHARS))
         object.__setattr__(self, "observation", _cap(self.observation, MAX_OBSERVATION_CHARS))
         object.__setattr__(self, "why_it_matters", _cap(self.why_it_matters, MAX_WHY_IT_MATTERS_CHARS))
+        # Ensure metadata is a proper dict (frozen → object.__setattr__)
+        if not isinstance(self.metadata, dict):
+            object.__setattr__(self, "metadata", {})
 
 
 # ---------------------------------------------------------------------------
@@ -248,12 +484,12 @@ class EvidenceRegistry:
         return self._risks_by_id.get(risk_id)
 
     def evidence_by_category(
-        self, category: EvidenceCategory
+        self, category: str,
     ) -> list[EvidenceItem]:
         return [e for e in self._evidence if e.category == category]
 
     def claims_by_category(
-        self, category: ClaimCategory
+        self, category: str,
     ) -> list[TechnicalClaim]:
         return [c for c in self._claims if c.category == category]
 
@@ -294,17 +530,21 @@ class EvidenceRegistry:
 
     def summary(self) -> dict[str, Any]:
         """Return a summary dict suitable for template rendering."""
+        # Collect all categories present in evidence + the standard set
+        all_cats = sorted(
+            set(EVIDENCE_CATEGORIES) | {e.category for e in self._evidence}
+        )
         return {
             "total_evidence": len(self._evidence),
             "total_claims": len(self._claims),
             "total_risks": len(self._risks),
             "evidence_by_category": {
                 cat: len(self.evidence_by_category(cat))
-                for cat in EVIDENCE_CATEGORIES
+                for cat in all_cats
             },
             "claims_by_category": {
                 cat: len(self.claims_by_category(cat))
-                for cat in EVIDENCE_CATEGORIES
+                for cat in all_cats
             },
             "risks_by_severity": {
                 sev: len(self.risks_by_severity(sev))

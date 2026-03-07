@@ -91,6 +91,9 @@ credentials.json
 # Claude artifacts
 .claude/
 
+# GitNexus knowledge graph (large binary)
+.gitnexus/
+
 # Build artifacts
 *.scannerwork/
 .sonarqube/

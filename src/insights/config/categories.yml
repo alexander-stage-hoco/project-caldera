@@ -1,0 +1,61 @@
+categories:
+  complexity:
+    abbreviation: CCN
+    description: "Cyclomatic complexity and function-level metrics"
+    tools: [lizard]
+    query_name: evidence_complexity
+    optional: false
+  security:
+    abbreviation: SEC
+    description: "Vulnerabilities and secret detection"
+    tools: [trivy, gitleaks]
+    query_name: evidence_security
+    optional: false
+  coupling:
+    abbreviation: COUP
+    description: "Symbol coupling and dependency metrics"
+    tools: [symbol-scanner]
+    query_name: evidence_coupling
+    optional: true
+  coverage:
+    abbreviation: COV
+    description: "Test coverage gaps in complex code"
+    tools: [coverage-ingest]
+    query_name: evidence_coverage
+    optional: true
+  ownership:
+    abbreviation: OWN
+    description: "Knowledge risk and bus factor analysis"
+    tools: [git-blame-scanner]
+    query_name: evidence_ownership
+    optional: true
+  quality:
+    abbreviation: QUAL
+    description: "Code smell density and static analysis issues"
+    tools: [semgrep, devskim]
+    query_name: evidence_quality
+    optional: false
+  maintainability:
+    abbreviation: MAINT
+    description: "File size hotspots and maintainability issues"
+    tools: [scc]
+    query_name: evidence_maintainability
+    optional: false
+  architecture:
+    abbreviation: ARCH
+    description: "Directory structure and layout issues"
+    tools: [layout-scanner]
+    query_name: evidence_architecture
+    optional: false
+  dependencies:
+    abbreviation: DEP
+    description: "Dependency health and freshness"
+    tools: [dependensee, trivy]
+    query_name: evidence_dependencies
+    optional: true
+  duplication:
+    abbreviation: DUP
+    description: "Code duplication and copy-paste detection"
+    tools: [pmd-cpd]
+    query_name: evidence_duplication
+    optional: true

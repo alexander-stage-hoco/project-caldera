@@ -42,6 +42,10 @@ from .evidence_pack import EvidencePackSection
 from .claim_register import ClaimRegisterSection
 from .delta_summary import DeltaSummarySection
 from .sampling_rationale import SamplingRationaleSection
+from .devskim_security import DevskimSecuritySection
+from .dotcover_coverage import DotcoverCoverageSection
+from .git_sizer import GitSizerSection
+from .rewrite_risk import RewriteRiskSection
 
 __all__ = [
     "BaseSection",
@@ -87,4 +91,8 @@ __all__ = [
     "ClaimRegisterSection",
     "DeltaSummarySection",
     "SamplingRationaleSection",
+    "DevskimSecuritySection",
+    "DotcoverCoverageSection",
+    "GitSizerSection",
+    "RewriteRiskSection",
 ]

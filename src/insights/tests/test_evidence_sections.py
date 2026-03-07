@@ -100,7 +100,7 @@ class TestEvidencePackSection:
         data = section.fetch_data(_mock_fetcher(), 1)
         assert data["has_data"] is True
         assert data["total_evidence"] == 1
-        assert len(data["categories"]) == 6  # all 6 categories
+        assert len(data["categories"]) == 10  # all 10 categories
 
     def test_categories_include_items(self):
         section = EvidencePackSection()
