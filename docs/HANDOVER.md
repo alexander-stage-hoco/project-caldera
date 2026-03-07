@@ -1377,7 +1377,6 @@ make github-apply   # Apply (requires GITHUB_TOKEN)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| Action Layer | Not started | Risk register → assignable tickets with owner/SLA; GitHub Issues + Jira integration |
 | Policy Layer | Not started | Configurable quality gates per repo/team; PR/release enforcement; waivers with expiry; drift tracking |
 | Portfolio Layer | Not started | Multi-repo dashboards; cross-repo health scoring; organizational metrics |
 

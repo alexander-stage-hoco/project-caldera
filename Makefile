@@ -3,7 +3,7 @@
 	tools-setup tools-analyze tools-evaluate \
 	tools-evaluate-llm tools-test tools-clean dbt-migrate dbt-run dbt-test \
 	orchestrate test test-all test-unit test-integration pipeline-eval arch-review \
-	collect analyze-bundle prune-outputs export-results create-risk-issues \
+	collect analyze-bundle prune-outputs export-results \
 	cloud-setup cloud-run cloud-status cloud-destroy cloud-cleanup \
 	docker-build-base docker-build-tool docker-build-tools docker-test-tool \
 	docker-build-runner docker-build-orchestrator docker-build-all \
@@ -302,13 +302,6 @@ export-results:  ## Export latest run to results repository
 	    --db "$(ORCH_DB_PATH)" \
 	    --results-repo "$(RESULTS_REPO_URL)" \
 	    $(if $(PUSH),--push,)
-
-create-risk-issues:  ## Create GitHub issues from risk register (dry-run by default, APPLY=1 to create)
-	$(PYTHON_VENV) scripts/create_risk_issues.py \
-	    --db $(ORCH_DB_PATH) \
-	    $(if $(filter 1,$(APPLY)),--apply,) \
-	    $(if $(COLLECTION_RUN_ID),--collection-run-id $(COLLECTION_RUN_ID),) \
-	    $(if $(MIN_SEVERITY),--min-severity $(MIN_SEVERITY),)
 
 # =============================================================================
 # Tool and Infrastructure Targets

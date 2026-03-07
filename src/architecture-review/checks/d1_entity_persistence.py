@@ -24,6 +24,10 @@ def check_d1(tool_files: ToolFiles, project_root: Path) -> list[Finding]:
     adapter_content = _read(tool_files.adapter_file) if tool_files.adapter_file else None
     init_content = _read(tool_files.adapter_init)
     orch_content = _read(tool_files.orchestrator_file)
+    # TOOL_INGESTION_CONFIGS may live in phases/ingestion.py (refactored orchestrator)
+    ingestion_phase = tool_files.orchestrator_file.parent / "phases" / "ingestion.py"
+    if ingestion_phase.exists():
+        orch_content += _read(ingestion_phase)
     schema_sql_content = _read(tool_files.schema_sql)
     repo_content = _read(tool_files.repositories_file)
 

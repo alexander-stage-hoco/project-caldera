@@ -1,0 +1,29 @@
+You are evaluating the coherence of an execution risk identified by a code analysis pipeline.
+
+Risk: {{ risk.risk_id }} ({{ risk.severity }})
+Description: {{ risk.description }}
+Technical cause: {{ risk.technical_cause }}
+Pattern: {{ risk.triggered_by }}
+Manifests in: {{ risk.manifests_in }}
+
+Supporting claims:
+{% for claim in claims %}
+- **{{ claim.claim_id }}** [{{ claim.confidence }}]: {{ claim.statement }}
+{% endfor %}
+
+Evaluate this risk on two dimensions:
+
+1. **Coherence score** (1-5): Do the supporting claims justify this risk severity and description? Is the risk well-defined and actionable?
+   - 5: Claims strongly justify the risk; severity is well-calibrated
+   - 3: Risk is plausible but claims only partially support it
+   - 1: Claims do not justify this risk at all
+
+2. **Narrative**: Write a 2-sentence narrative that rewrites the risk description, citing specific files, metric values, or CVE IDs from the claims.
+
+Respond with ONLY a JSON object (no markdown fencing):
+{
+  "score": <1-5 integer>,
+  "confidence": <0.0-1.0 float>,
+  "reasoning": "<1 sentence explaining the coherence score>",
+  "narrative": "<2-sentence risk narrative citing specifics>"
+}

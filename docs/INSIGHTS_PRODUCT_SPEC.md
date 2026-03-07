@@ -199,8 +199,6 @@ ClaimGenerator (7 rules + LLM synthesis) ← ──────────┘
         ↓
 TechnicalClaims → RiskAggregator (5 patterns) → ExecutionRisks
                                                        ↓
-                        ActionGenerator (SLA dates, remediation) → Enriched Risks
-                                                       ↓
                         EvidenceRegistry → Report Sections (Evidence Pack, Claim Register, Risk Register)
                                                        ↓
                         Persistence (lz_evidence, lz_claims, lz_risks, lz_warnings)
@@ -469,7 +467,6 @@ Structural vs addressable constraint detection. Identifies where incremental evo
 
 | Gap | Impact | Priority |
 |-----|--------|----------|
-| Action Layer | No path from risk findings to assignable work (tickets, owners, SLAs) | P2 |
 | Policy Layer | No configurable quality gates, waivers, or drift tracking | P3 |
 | Portfolio Layer | Single-repo only; no multi-repo dashboards or cross-repo comparison | P3 |
 
