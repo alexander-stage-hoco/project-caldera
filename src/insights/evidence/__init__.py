@@ -1,5 +1,7 @@
 """Evidence & Claim framework for auditable insights reports."""
 
+from __future__ import annotations
+
 from .entities import (
     CategoryDefinition,
     CategoryRegistry,

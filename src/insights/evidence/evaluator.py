@@ -113,10 +113,11 @@ class EvidenceEvaluator:
                 return None
             # Strip markdown fencing if present
             if content.startswith("```"):
-                content = content.split("\n", 1)[1] if "\n" in content else content[3:]
-                if content.endswith("```"):
-                    content = content[:-3]
-                content = content.strip()
+                lines = content.split("\n")
+                lines = lines[1:]  # Remove opening fence (```json or ```)
+                if lines and lines[-1].strip() == "```":
+                    lines = lines[:-1]
+                content = "\n".join(lines).strip()
             return json.loads(content)
         except Exception as exc:
             warnings.warn(

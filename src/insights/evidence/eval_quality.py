@@ -154,15 +154,15 @@ def _check_score_severity_contradictions(
     registry: EvidenceRegistry,
     threshold: float,
 ) -> EvalQualityFlag:
-    """Flag critical/high risks scored 5/5 or low risks scored 1/5."""
+    """Flag critical/high risks scored 5/5 (incoherent) or low risks scored 1/5 (suspicious)."""
     contradictions = 0
     for risk in registry.risks:
         evaluation = registry.evaluation_for(risk.risk_id)
         if not evaluation:
             continue
-        if risk.severity in ("critical", "high") and evaluation.score == 5:
+        if risk.severity in ("critical", "high") and evaluation.score == 1:
             contradictions += 1
-        if risk.severity == "low" and evaluation.score == 1:
+        if risk.severity == "low" and evaluation.score == 5:
             contradictions += 1
     passed = contradictions <= threshold
     return EvalQualityFlag(
@@ -171,7 +171,7 @@ def _check_score_severity_contradictions(
         metric=float(contradictions),
         threshold=threshold,
         message=(
-            f"No score-severity contradictions"
+            "No score-severity contradictions"
             if passed
             else f"{contradictions} score-severity contradiction(s) found (max {int(threshold)})"
         ),
@@ -191,7 +191,8 @@ def _check_confidence_calibration(
         )
     well_calibrated = sum(1 for s in extreme if s.confidence >= threshold)
     metric = well_calibrated / len(extreme)
-    passed = metric >= 0.8  # at least 80% of extreme scores meet the bar
+    pass_rate = 0.8
+    passed = metric >= pass_rate
     return EvalQualityFlag(
         check="confidence_calibration",
         passed=passed,

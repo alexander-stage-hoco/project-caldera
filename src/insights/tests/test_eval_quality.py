@@ -159,23 +159,23 @@ class TestReasoningPresence(unittest.TestCase):
 
 
 class TestScoreSeverityContradictions(unittest.TestCase):
-    def test_critical_risk_score_5_flags(self):
+    def test_critical_risk_score_1_flags(self):
         registry = EvidenceRegistry(
             risks=[_make_risk("RISK-001", severity="critical")],
         )
         registry.add_evaluation(
-            _make_score("RISK-001", "risk", "coherence", score=5),
+            _make_score("RISK-001", "risk", "coherence", score=1),
         )
         flag = _check_score_severity_contradictions(registry, 0)
         self.assertFalse(flag.passed)
         self.assertEqual(flag.metric, 1.0)
 
-    def test_low_risk_score_1_flags(self):
+    def test_low_risk_score_5_flags(self):
         registry = EvidenceRegistry(
             risks=[_make_risk("RISK-001", severity="low")],
         )
         registry.add_evaluation(
-            _make_score("RISK-001", "risk", "coherence", score=1),
+            _make_score("RISK-001", "risk", "coherence", score=5),
         )
         flag = _check_score_severity_contradictions(registry, 0)
         self.assertFalse(flag.passed)

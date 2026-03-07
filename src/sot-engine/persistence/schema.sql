@@ -771,7 +771,7 @@ CREATE TABLE lz_evidence_evaluations (
     reasoning TEXT,
     batch_id VARCHAR,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (collection_run_id, entity_id, dimension)
+    PRIMARY KEY (collection_run_id, entity_type, entity_id, dimension)
 );
 
 

@@ -568,6 +568,10 @@ class EvidenceRegistry:
     def evaluation_for(self, entity_id: str) -> EvaluationScore | None:
         return self._evaluations.get(entity_id)
 
+    @property
+    def all_evaluations(self) -> list[EvaluationScore]:
+        return list(self._evaluations.values())
+
     def evaluations_by_type(self, entity_type: str) -> list[EvaluationScore]:
         return [e for e in self._evaluations.values() if e.entity_type == entity_type]
 

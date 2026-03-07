@@ -91,9 +91,9 @@ TOOL_INGESTION_CONFIGS = [
 def ingest_outputs(
     conn: duckdb.DuckDBPyConnection,
     repo_id: str,
-    collection_run_id: str,
+    collection_run_id: str,  # noqa: ARG001
     run_id: str,
-    branch: str,
+    branch: str,  # noqa: ARG001
     commit: str,
     repo_path: Path,
     layout_output: Path | None,
@@ -114,7 +114,7 @@ def ingest_outputs(
     git_blame_scanner_output: Path | None = None,
     dependensee_output: Path | None = None,
     coverage_output: Path | None = None,
-    schema_path: Path = None,
+    schema_path: Path | None = None,
     logger: OrchestratorLogger | None = None,
     continue_on_failure: bool = False,
 ) -> None:

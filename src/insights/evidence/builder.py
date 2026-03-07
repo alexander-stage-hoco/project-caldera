@@ -19,6 +19,7 @@ Usage::
 from __future__ import annotations
 
 import json
+import logging
 import uuid
 import warnings
 from typing import TYPE_CHECKING, Any
@@ -358,7 +359,7 @@ class EvidenceRegistryBuilder:
                 )
 
             # Persist evaluations (graceful — table may not exist on older DBs)
-            evaluations = list(registry._evaluations.values()) if hasattr(registry, '_evaluations') else []
+            evaluations = registry.all_evaluations if hasattr(registry, 'all_evaluations') else []
             if evaluations:
                 try:
                     conn.execute(
@@ -387,7 +388,10 @@ class EvidenceRegistryBuilder:
                         ],
                     )
                 except Exception:
-                    pass  # Table may not exist yet on older schemas
+                    logging.getLogger(__name__).debug(
+                        "Evaluation persistence skipped (table may not exist)",
+                        exc_info=True,
+                    )
 
             # Persist individual warnings
             warning_list = registry.warning_details.get("warnings", [])

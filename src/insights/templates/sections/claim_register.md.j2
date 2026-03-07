@@ -21,7 +21,7 @@
 | Claim ID | Statement | Confidence | Validation | Evidence | Rule |
 |----------|-----------|------------|------------|----------|------|
 {% for claim in cat.claims %}
-| `{{ claim.claim_id }}` | {{ claim.statement }} | {{ claim.confidence }} | {% if claim.validation_score is defined and claim.validation_score %}{{ claim.validation_score }}/5{% else %}&mdash;{% endif %} | {{ claim.evidence_count }} | {{ claim.triggered_by }} |
+| `{{ claim.claim_id }}` | {{ claim.statement }} | {{ claim.confidence }} | {% if claim.validation_score is defined and claim.validation_score %}{{ claim.validation_score }}/5{% else %}—{% endif %} | {{ claim.evidence_count }} | {{ claim.triggered_by }} |
 {% endfor %}
 
 {% endfor %}
