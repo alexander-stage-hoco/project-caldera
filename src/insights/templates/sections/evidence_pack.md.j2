@@ -5,7 +5,7 @@
 
 {% for cat in categories %}
 {% if cat.evidence_items %}
-### {{ cat.category | title }} ({{ cat.total_count }}{% if cat.truncated %}, showing {{ cat.displayed_count }}{% endif %})
+### {{ cat.category | title }} ({{ cat.total_count }}{% if cat.truncated %}, showing {{ cat.displayed_count }}{% endif %}){% if cat.category_quality_score %} — quality: {{ cat.category_quality_score }}/5{% endif %}
 
 | ID | Location | Observation | Tool | Confidence |
 |----|----------|-------------|------|------------|

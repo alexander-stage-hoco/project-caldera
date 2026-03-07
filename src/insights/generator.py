@@ -140,12 +140,17 @@ class InsightsGenerator:
         self.fetcher = DataFetcher(db_path, dbt_project_dir)
         self.templates_dir = templates_dir
 
-        # Initialize narrative enricher (only when flag is on)
+        # Initialize narrative enricher and evaluator (only when flag is on)
         self._enricher = None
+        self._evaluator = None
         if report_llm:
             from .narrative import NarrativeEnricher
 
             self._enricher = NarrativeEnricher()
+
+            from .evidence.evaluator import EvidenceEvaluator
+
+            self._evaluator = EvidenceEvaluator(trace_id=self._enricher.trace_id)
 
         # Initialize section instances
         self.sections: dict[str, BaseSection] = {
@@ -162,6 +167,7 @@ class InsightsGenerator:
 
         self._evidence_builder = EvidenceRegistryBuilder(
             enricher=self._enricher,
+            evaluator=self._evaluator,
             parameter_set=ps,
             category_registry=cat_registry,
         )

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..data_fetcher import DataFetcher
+from ..evidence.evaluator import extract_narrative
 from .base import EvidenceAwareSection, NarrativeAwareSection, SectionConfig
 
 
@@ -59,8 +60,15 @@ class RiskRegisterSection(NarrativeAwareSection, EvidenceAwareSection):
                 ],
             }
 
-            # Enrich top 5 risks with LLM narrative descriptions
-            if self._enricher and enriched_count < 5:
+            # Use evaluation narrative if available, fall back to enricher
+            evaluation = registry.evaluation_for(risk.risk_id)
+            if evaluation:
+                entry["coherence_score"] = evaluation.score
+                narrative = extract_narrative(evaluation)
+                if narrative:
+                    entry["description_narrative"] = narrative
+                enriched_count += 1
+            elif self._enricher and enriched_count < 5:
                 narrative = self._enricher.enrich(
                     task=(
                         "Rewrite this risk description in 2 sentences, citing specific "
@@ -81,6 +89,10 @@ class RiskRegisterSection(NarrativeAwareSection, EvidenceAwareSection):
 
             by_severity[risk.severity].append(entry)
 
+        eval_quality_passed = None
+        if registry.eval_quality is not None:
+            eval_quality_passed = registry.eval_quality.passed
+
         return {
             "risks": [r for sev in ("critical", "high", "medium", "low") for r in by_severity[sev]],
             "risks_by_severity": by_severity,
@@ -90,6 +102,7 @@ class RiskRegisterSection(NarrativeAwareSection, EvidenceAwareSection):
             "high_count": len(by_severity["high"]),
             "medium_count": len(by_severity["medium"]),
             "low_count": len(by_severity["low"]),
+            "eval_quality_passed": eval_quality_passed,
             "has_data": len(risks) > 0,
             "has_critical": len(by_severity["critical"]) > 0,
         }

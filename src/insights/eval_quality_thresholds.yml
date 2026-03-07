@@ -1,0 +1,14 @@
+# Evaluation quality thresholds for LLM judge output validation.
+#
+# These thresholds define the programmatic quality gate applied after
+# EvidenceEvaluator.evaluate_all() returns scores.  Each check catches
+# a different class of systematic judge failure.
+
+thresholds:
+  coverage: 0.7           # >= 70% of expected entities must have scores
+  uniformity: 0.8         # <= 80% of scores may be the same value
+  reasoning_presence: 0.8 # >= 80% of scores must have non-empty reasoning
+  contradictions: 0       # 0 score-severity contradictions allowed
+  confidence_calibration: 0.6  # extreme scores (1 or 5) need confidence >= 0.6
+  avg_score_min: 2.0      # average score must be >= 2.0
+  avg_score_max: 4.5      # average score must be <= 4.5

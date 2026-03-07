@@ -1,8 +1,11 @@
 """Evidence & Claim framework for auditable insights reports."""
 
+from __future__ import annotations
+
 from .entities import (
     CategoryDefinition,
     CategoryRegistry,
+    EvaluationScore,
     EvidenceItem,
     EvidenceRegistry,
     EvidenceReview,
@@ -15,6 +18,7 @@ from .entities import (
 __all__ = [
     "CategoryDefinition",
     "CategoryRegistry",
+    "EvaluationScore",
     "EvidenceItem",
     "EvidenceRegistry",
     "EvidenceReview",

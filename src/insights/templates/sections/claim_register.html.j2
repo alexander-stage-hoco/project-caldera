@@ -19,6 +19,22 @@
             <div class="label">Low Confidence</div>
             <div class="value">{{ confidence_distribution.low }}</div>
         </div>
+        {% if validation_summary and validation_summary.claims_evaluated > 0 %}
+        <div class="metric-card">
+            <div class="label">Validation Pass Rate</div>
+            <div class="value">{{ "%.0f" | format(validation_summary.claims_pass_rate * 100) }}%</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">Avg Validation Score</div>
+            <div class="value">{{ "%.1f" | format(validation_summary.claims_avg_score) }}/5</div>
+        </div>
+        {% endif %}
+        {% if eval_quality_passed is not none %}
+        <div class="metric-card">
+            <div class="label">Eval Quality</div>
+            <div class="value" style="color: {% if eval_quality_passed %}#2d6a2d{% else %}#b8860b{% endif %};">{% if eval_quality_passed %}PASS{% else %}CAUTION{% endif %}</div>
+        </div>
+        {% endif %}
     </div>
 
     {% for cat in categories %}
@@ -30,6 +46,7 @@
                     <th>Claim ID</th>
                     <th>Statement</th>
                     <th>Confidence</th>
+                    <th>Validation</th>
                     <th>Evidence</th>
                     <th>Rule</th>
                 </tr>
@@ -45,6 +62,7 @@
                         {% endif %}
                     </td>
                     <td>{{ claim.confidence }}</td>
+                    <td>{% if claim.validation_score is defined and claim.validation_score %}<span title="{{ claim.validation_reasoning or '' }}">{{ claim.validation_score }}/5</span>{% else %}&mdash;{% endif %}</td>
                     <td>{{ claim.evidence_count }} item(s)</td>
                     <td><small>{{ claim.triggered_by }}</small></td>
                 </tr>

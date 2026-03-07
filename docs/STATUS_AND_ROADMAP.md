@@ -17,7 +17,6 @@ Core platform is production-ready. All 18 tools pass compliance, all 3 productio
   - EvidenceCollector (6 categories: complexity, security, coupling, coverage, ownership, quality)
   - ClaimGenerator (7 rules + LLM synthesis)
   - RiskAggregator (5 patterns with severity escalation)
-  - ActionGenerator (remediation actions with SLA dates)
   - Persistence (lz_evidence, lz_claims, lz_risks, lz_warnings)
   - Report sections: EvidencePack, ClaimRegister, RiskRegister
 - Symbol-scanner integration: BlastRadius, CouplingAnalysis, CouplingDebt, ComponentInventory, ImportDependencies, CircularDependencies sections
@@ -69,7 +68,6 @@ Core platform is production-ready. All 18 tools pass compliance, all 3 productio
 
 | Item | Description | Priority |
 |------|-------------|----------|
-| Action Layer v1 | Risk register → GitHub Issues integration (extend `scripts/create_risk_issues.py`), owner assignment, SLA tracking, status sync | P1 |
 | Policy Layer v1 | Configurable quality gates per repo (trust score thresholds, zero-critical-vuln policies), policy waivers with expiry, drift detection | P2 |
 
 ### Phase 3: Scale (v1.0 — longer-term)
@@ -101,7 +99,6 @@ All 6 product spec deliverables have implementations. Remaining gaps:
 | PDF report generation | Not started | Formal deliverable format for stakeholders |
 | Multi-platform Docker | Not started | amd64 only, no arm64 |
 | Incremental pipeline | Not started | No skip-unchanged-tools capability |
-| Action Layer | Not started | Risk register → assignable actions → ticket integration |
 | Policy Layer | Not started | Configurable quality gates, waivers, drift tracking |
 | Portfolio Layer | Not started | Multi-repo dashboards, cross-repo aggregation |
 

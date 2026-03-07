@@ -19,12 +19,12 @@ Usage::
 from __future__ import annotations
 
 import json
+import logging
 import uuid
 import warnings
 from typing import TYPE_CHECKING, Any
 
 from ..data_fetcher import DataFetcher
-from .action_generator import ActionGenerator
 from .claim_generator import ClaimGenerator
 from .collector import EvidenceCollector, check_warning_budget
 from .entities import (
@@ -41,6 +41,7 @@ from .risk_aggregator import RiskAggregator
 
 if TYPE_CHECKING:
     from ..narrative.enricher import NarrativeEnricher
+    from .evaluator import EvidenceEvaluator
 
 
 class EvidenceRegistryBuilder:
@@ -56,13 +57,14 @@ class EvidenceRegistryBuilder:
         collector: EvidenceCollector | None = None,
         claim_generator: ClaimGenerator | None = None,
         risk_aggregator: RiskAggregator | None = None,
-        action_generator: ActionGenerator | None = None,
         enricher: NarrativeEnricher | None = None,
+        evaluator: EvidenceEvaluator | None = None,
         parameter_set: ParameterSet | None = None,
         category_registry: CategoryRegistry | None = None,
     ) -> None:
         self._parameter_set = parameter_set
         self._category_registry = category_registry
+        self._evaluator = evaluator
 
         if collector is not None:
             self._collector = collector
@@ -88,8 +90,6 @@ class EvidenceRegistryBuilder:
         else:
             risk_params = parameter_set.risk_params if parameter_set else None
             self._risk_aggregator = RiskAggregator(risk_params=risk_params)
-
-        self._action_generator = action_generator or ActionGenerator()
 
     def build(self, fetcher: DataFetcher, run_pk: int) -> EvidenceRegistry:
         """Run the full pipeline and return a populated registry."""
@@ -155,21 +155,40 @@ class EvidenceRegistryBuilder:
             )
             risks = []
 
-        try:
-            risks = self._action_generator.enrich(risks)
-        except Exception as exc:
-            warnings.warn(
-                f"[EvidenceRegistryBuilder] Action enrichment failed: {exc}",
-                stacklevel=2,
-            )
-
-        return EvidenceRegistry(
+        registry = EvidenceRegistry(
             evidence=evidence,
             claims=claims,
             risks=risks,
             warning_count=total_warnings,
             warning_details=warning_details,
         )
+
+        # LLM evaluation of evidence, claims, and risks
+        if self._evaluator is not None:
+            try:
+                eval_scores = self._evaluator.evaluate_all(registry)
+                for score in eval_scores:
+                    registry.add_evaluation(score)
+
+                # Post-evaluation quality gate
+                from .eval_quality import check_evaluation_quality
+
+                quality_report = check_evaluation_quality(eval_scores, registry)
+                registry.eval_quality = quality_report
+                if not quality_report.passed:
+                    for flag in quality_report.flags:
+                        if not flag.passed:
+                            warnings.warn(
+                                f"[EvidenceRegistryBuilder] Eval quality: {flag.message}",
+                                stacklevel=2,
+                            )
+            except Exception as exc:
+                warnings.warn(
+                    f"[EvidenceRegistryBuilder] LLM evaluation failed: {exc}",
+                    stacklevel=2,
+                )
+
+        return registry
 
     @staticmethod
     def persist(
@@ -338,6 +357,41 @@ class EvidenceRegistryBuilder:
                         for r in registry.risks
                     ],
                 )
+
+            # Persist evaluations (graceful — table may not exist on older DBs)
+            evaluations = registry.all_evaluations if hasattr(registry, 'all_evaluations') else []
+            if evaluations:
+                try:
+                    conn.execute(
+                        "DELETE FROM lz_evidence_evaluations WHERE collection_run_id = ?",
+                        [collection_run_id],
+                    )
+                    conn.executemany(
+                        """
+                        INSERT INTO lz_evidence_evaluations (
+                            collection_run_id, entity_type, entity_id,
+                            dimension, score, confidence, reasoning, batch_id
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        [
+                            (
+                                collection_run_id,
+                                ev.entity_type,
+                                ev.entity_id,
+                                ev.dimension,
+                                ev.score,
+                                ev.confidence,
+                                ev.reasoning,
+                                ev.batch_id,
+                            )
+                            for ev in evaluations
+                        ],
+                    )
+                except Exception:
+                    logging.getLogger(__name__).debug(
+                        "Evaluation persistence skipped (table may not exist)",
+                        exc_info=True,
+                    )
 
             # Persist individual warnings
             warning_list = registry.warning_details.get("warnings", [])

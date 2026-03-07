@@ -7,14 +7,21 @@
 | High Confidence | {{ confidence_distribution.high }} |
 | Medium Confidence | {{ confidence_distribution.medium }} |
 | Low Confidence | {{ confidence_distribution.low }} |
+{% if validation_summary and validation_summary.claims_evaluated > 0 %}
+| Validation Pass Rate | {{ "%.0f" | format(validation_summary.claims_pass_rate * 100) }}% |
+| Avg Validation Score | {{ "%.1f" | format(validation_summary.claims_avg_score) }}/5 |
+{% endif %}
+{% if eval_quality_passed is not none %}
+| Eval Quality | {% if eval_quality_passed %}PASS{% else %}CAUTION{% endif %} |
+{% endif %}
 
 {% for cat in categories %}
 ### {{ cat.category | title }} ({{ cat.claim_count }})
 
-| Claim ID | Statement | Confidence | Evidence | Rule |
-|----------|-----------|------------|----------|------|
+| Claim ID | Statement | Confidence | Validation | Evidence | Rule |
+|----------|-----------|------------|------------|----------|------|
 {% for claim in cat.claims %}
-| `{{ claim.claim_id }}` | {{ claim.statement }} | {{ claim.confidence }} | {{ claim.evidence_count }} | {{ claim.triggered_by }} |
+| `{{ claim.claim_id }}` | {{ claim.statement }} | {{ claim.confidence }} | {% if claim.validation_score is defined and claim.validation_score %}{{ claim.validation_score }}/5{% else %}—{% endif %} | {{ claim.evidence_count }} | {{ claim.triggered_by }} |
 {% endfor %}
 
 {% endfor %}
