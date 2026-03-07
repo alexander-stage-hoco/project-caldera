@@ -19,6 +19,12 @@
             <div class="label">Medium</div>
             <div class="value">{{ medium_count }}</div>
         </div>
+        {% if eval_quality_passed is not none %}
+        <div class="metric-card">
+            <div class="label">Eval Quality</div>
+            <div class="value" style="color: {% if eval_quality_passed %}#2d6a2d{% else %}#b8860b{% endif %};">{% if eval_quality_passed %}PASS{% else %}CAUTION{% endif %}</div>
+        </div>
+        {% endif %}
     </div>
 
     {% for severity in ["critical", "high", "medium", "low"] %}
@@ -30,6 +36,7 @@
         <div class="risk-entry" style="border-left: 3px solid var(--color-{{ severity }}, #666); padding-left: 1rem; margin-bottom: 1.5rem;">
             <h4>{{ risk.risk_id }}: {{ risk.triggered_by }}
                 <span style="font-size: 0.8em; font-weight: normal; margin-left: 0.5em; padding: 0.1em 0.4em; border-radius: 3px; background: {% if risk.status == 'resolved' %}#2d6a2d{% elif risk.status == 'mitigating' %}#6a5f2d{% elif risk.status == 'accepted' %}#4a4a4a{% else %}#6a2d2d{% endif %}; color: #fff;">{{ risk.status | default('open') }}</span>
+                {% if risk.coherence_score is defined and risk.coherence_score %}<span style="font-size: 0.8em; font-weight: normal; margin-left: 0.5em; padding: 0.1em 0.4em; border-radius: 3px; background: {% if risk.coherence_score >= 4 %}#2d6a2d{% elif risk.coherence_score >= 3 %}#6a5f2d{% else %}#6a2d2d{% endif %}; color: #fff;">coherence {{ risk.coherence_score }}/5</span>{% endif %}
             </h4>
             <p><strong>Description:</strong> {{ risk.description_narrative or risk.description }}</p>
             <p><strong>Technical cause:</strong> {{ risk.technical_cause }}</p>

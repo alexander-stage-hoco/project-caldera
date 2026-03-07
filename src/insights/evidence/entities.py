@@ -389,6 +389,38 @@ class TechnicalClaim:
 # ---------------------------------------------------------------------------
 
 
+EvaluationDimension = Literal["quality", "validity", "coherence"]
+EvaluationEntityType = Literal["evidence", "claim", "risk"]
+
+
+@dataclass(frozen=True)
+class EvaluationScore:
+    """An LLM-evaluated quality/validity/coherence score for an entity.
+
+    Scores are 1-5 (1 = weak, 5 = strong), with a confidence in [0.0, 1.0].
+    """
+
+    entity_id: str
+    entity_type: EvaluationEntityType
+    dimension: EvaluationDimension
+    score: int
+    confidence: float
+    reasoning: str | None = None
+    batch_id: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.entity_id:
+            raise ValueError("entity_id must not be empty")
+        if self.entity_type not in ("evidence", "claim", "risk"):
+            raise ValueError(f"Invalid entity_type: {self.entity_type!r}")
+        if self.dimension not in ("quality", "validity", "coherence"):
+            raise ValueError(f"Invalid dimension: {self.dimension!r}")
+        if not (1 <= self.score <= 5):
+            raise ValueError(f"score must be 1-5, got {self.score}")
+        if not (0.0 <= self.confidence <= 1.0):
+            raise ValueError(f"confidence must be 0.0-1.0, got {self.confidence}")
+
+
 RiskStatus = Literal["open", "mitigating", "accepted", "resolved"]
 
 
@@ -446,8 +478,10 @@ class EvidenceRegistry:
         self._evidence: list[EvidenceItem] = list(evidence or [])
         self._claims: list[TechnicalClaim] = list(claims or [])
         self._risks: list[ExecutionRisk] = list(risks or [])
+        self._evaluations: dict[str, EvaluationScore] = {}
         self.warning_count: int = warning_count
         self.warning_details: dict[str, Any] = warning_details or {}
+        self.eval_quality: Any | None = None  # EvalQualityReport, set after evaluation
 
         # Build lookup indices
         self._evidence_by_id: dict[str, EvidenceItem] = {
@@ -525,6 +559,59 @@ class EvidenceRegistry:
     def add_risk(self, risk: ExecutionRisk) -> None:
         self._risks.append(risk)
         self._risks_by_id[risk.risk_id] = risk
+
+    # -- Evaluation helpers ------------------------------------------------
+
+    def add_evaluation(self, score: EvaluationScore) -> None:
+        self._evaluations[score.entity_id] = score
+
+    def evaluation_for(self, entity_id: str) -> EvaluationScore | None:
+        return self._evaluations.get(entity_id)
+
+    def evaluations_by_type(self, entity_type: str) -> list[EvaluationScore]:
+        return [e for e in self._evaluations.values() if e.entity_type == entity_type]
+
+    def validation_summary(self) -> dict[str, Any]:
+        """Return aggregate evaluation statistics."""
+        claim_evals = self.evaluations_by_type("claim")
+        risk_evals = self.evaluations_by_type("risk")
+        evidence_evals = self.evaluations_by_type("evidence")
+        all_evals = list(self._evaluations.values())
+        result: dict[str, Any] = {
+            "total_evaluations": len(all_evals),
+            "claims_evaluated": len(claim_evals),
+            "claims_pass_rate": (
+                sum(1 for e in claim_evals if e.score >= 3) / len(claim_evals)
+                if claim_evals else 0.0
+            ),
+            "claims_avg_score": (
+                sum(e.score for e in claim_evals) / len(claim_evals)
+                if claim_evals else 0.0
+            ),
+            "risks_evaluated": len(risk_evals),
+            "risks_avg_score": (
+                sum(e.score for e in risk_evals) / len(risk_evals)
+                if risk_evals else 0.0
+            ),
+            "evidence_categories_evaluated": len(evidence_evals),
+            "evidence_avg_score": (
+                sum(e.score for e in evidence_evals) / len(evidence_evals)
+                if evidence_evals else 0.0
+            ),
+        }
+        if self.eval_quality is not None:
+            result["eval_quality_passed"] = self.eval_quality.passed
+            result["eval_quality_flags"] = [
+                {
+                    "check": f.check,
+                    "passed": f.passed,
+                    "metric": f.metric,
+                    "threshold": f.threshold,
+                    "message": f.message,
+                }
+                for f in self.eval_quality.flags
+            ]
+        return result
 
     # -- Summary ------------------------------------------------------------
 
