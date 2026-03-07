@@ -7,6 +7,9 @@
 | Critical | {{ critical_count }} |
 | High | {{ high_count }} |
 | Medium | {{ medium_count }} |
+{% if eval_quality_passed is not none %}
+| Eval Quality | {% if eval_quality_passed %}PASS{% else %}CAUTION{% endif %} |
+{% endif %}
 
 {% for severity in ["critical", "high", "medium", "low"] %}
 {% set sev_risks = risks_by_severity[severity] %}
@@ -14,7 +17,7 @@
 ### {{ severity | upper }} Risks
 
 {% for risk in sev_risks %}
-#### {{ risk.risk_id }}: {{ risk.triggered_by }}
+#### {{ risk.risk_id }}: {{ risk.triggered_by }}{% if risk.coherence_score is defined and risk.coherence_score %} (coherence: {{ risk.coherence_score }}/5){% endif %}
 
 - **Description:** {{ risk.description_narrative or risk.description }}
 - **Technical cause:** {{ risk.technical_cause }}

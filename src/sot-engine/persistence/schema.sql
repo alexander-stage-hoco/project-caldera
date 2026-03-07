@@ -761,6 +761,19 @@ CREATE TABLE lz_evidence_reviews (
     PRIMARY KEY (evidence_set_id, evidence_id)
 );
 
+CREATE TABLE lz_evidence_evaluations (
+    collection_run_id VARCHAR NOT NULL,
+    entity_type VARCHAR NOT NULL,
+    entity_id VARCHAR NOT NULL,
+    dimension VARCHAR NOT NULL,
+    score INTEGER NOT NULL,
+    confidence DOUBLE NOT NULL,
+    reasoning TEXT,
+    batch_id VARCHAR,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (collection_run_id, entity_id, dimension)
+);
+
 CREATE TABLE lz_claims (
     collection_run_id VARCHAR NOT NULL,
     claim_id VARCHAR NOT NULL,

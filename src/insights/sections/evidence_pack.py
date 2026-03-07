@@ -34,11 +34,16 @@ class EvidencePackSection(EvidenceAwareSection):
             total = len(items)
             displayed = items[: self.MAX_PER_CATEGORY]
 
+            # Look up quality score for this category from evaluations
+            cat_eval = registry.evaluation_for(f"CAT-{cat.upper()}")
+            category_quality_score = cat_eval.score if cat_eval else None
+
             categories_data.append({
                 "category": cat,
                 "total_count": total,
                 "displayed_count": len(displayed),
                 "truncated": total > self.MAX_PER_CATEGORY,
+                "category_quality_score": category_quality_score,
                 "evidence_items": [
                     {
                         "evidence_id": e.evidence_id,

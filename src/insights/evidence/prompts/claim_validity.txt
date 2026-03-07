@@ -1,0 +1,38 @@
+You are validating technical claims derived from code analysis evidence.
+
+For each claim below, assess whether the claim logically follows from its linked evidence and whether the severity is justified.
+
+Claims in this batch:
+
+{% for claim in claims %}
+- **{{ claim.claim_id }}** [{{ claim.category }}, {{ claim.confidence }} confidence]
+  Statement: {{ claim.statement }}
+  Implication: {{ claim.implication }}
+  Triggered by rule: {{ claim.triggered_by }}
+  Supporting evidence ({{ claim.evidence_count }} items): {{ claim.evidence_ids }}
+  {% if claim.evidence_summaries %}
+  Evidence summaries:
+  {% for es in claim.evidence_summaries %}
+    - {{ es.evidence_id }}: {{ es.observation }}
+  {% endfor %}
+  {% endif %}
+{% endfor %}
+
+For EACH claim, provide a validity score (1-5):
+- 5: Claim clearly follows from evidence, severity well-calibrated
+- 4: Claim is sound, minor quibbles about wording or severity
+- 3: Claim is plausible but evidence link is weak
+- 2: Claim overstates what evidence supports
+- 1: Claim is not supported by the evidence shown
+
+Respond with ONLY a JSON object (no markdown fencing):
+{
+  "evaluations": [
+    {
+      "claim_id": "<id>",
+      "score": <1-5>,
+      "confidence": <0.0-1.0>,
+      "reasoning": "<1 sentence>"
+    }
+  ]
+}

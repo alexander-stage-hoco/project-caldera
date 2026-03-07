@@ -31,21 +31,27 @@ class ClaimRegisterSection(EvidenceAwareSection):
             if not claims:
                 continue
 
+            claim_entries = []
+            for c in claims:
+                entry: dict[str, Any] = {
+                    "claim_id": c.claim_id,
+                    "statement": c.statement,
+                    "confidence": c.confidence,
+                    "triggered_by": c.triggered_by,
+                    "implication": c.implication,
+                    "evidence_count": len(c.evidence_ids),
+                    "evidence_ids": list(c.evidence_ids[:5]),
+                }
+                evaluation = registry.evaluation_for(c.claim_id)
+                if evaluation:
+                    entry["validation_score"] = evaluation.score
+                    entry["validation_reasoning"] = evaluation.reasoning
+                claim_entries.append(entry)
+
             categories_data.append({
                 "category": cat,
                 "claim_count": len(claims),
-                "claims": [
-                    {
-                        "claim_id": c.claim_id,
-                        "statement": c.statement,
-                        "confidence": c.confidence,
-                        "triggered_by": c.triggered_by,
-                        "implication": c.implication,
-                        "evidence_count": len(c.evidence_ids),
-                        "evidence_ids": list(c.evidence_ids[:5]),
-                    }
-                    for c in claims
-                ],
+                "claims": claim_entries,
             })
 
         # Confidence distribution
@@ -56,11 +62,19 @@ class ClaimRegisterSection(EvidenceAwareSection):
             "low": sum(1 for c in all_claims if c.confidence == "low"),
         }
 
+        validation_summary = registry.validation_summary()
+
+        eval_quality_passed = None
+        if registry.eval_quality is not None:
+            eval_quality_passed = registry.eval_quality.passed
+
         return {
             "categories": categories_data,
             "summary": summary,
             "total_claims": summary["total_claims"],
             "confidence_distribution": confidence_dist,
+            "validation_summary": validation_summary,
+            "eval_quality_passed": eval_quality_passed,
             "has_data": summary["total_claims"] > 0,
         }
 

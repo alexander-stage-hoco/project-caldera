@@ -12,7 +12,7 @@
     {% for cat in categories %}
     {% if cat.evidence_items %}
     <div class="subsection">
-        <h3>{{ cat.category | title }} ({{ cat.total_count }}{% if cat.truncated %}, showing {{ cat.displayed_count }}{% endif %})</h3>
+        <h3>{{ cat.category | title }} ({{ cat.total_count }}{% if cat.truncated %}, showing {{ cat.displayed_count }}{% endif %}){% if cat.category_quality_score %} <span style="font-size: 0.8em; font-weight: normal; padding: 0.1em 0.4em; border-radius: 3px; background: {% if cat.category_quality_score >= 4 %}#2d6a2d{% elif cat.category_quality_score >= 3 %}#6a5f2d{% else %}#6a2d2d{% endif %}; color: #fff;">quality {{ cat.category_quality_score }}/5</span>{% endif %}</h3>
         <table>
             <thead>
                 <tr>

@@ -1,0 +1,25 @@
+You are evaluating the quality of evidence items from a code analysis tool pipeline.
+
+Category: {{ category }}
+Items in this batch (sampled from {{ total_in_category }} total):
+
+{% for item in items %}
+- **{{ item.evidence_id }}** ({{ item.evidence_type }})
+  Location: {{ item.location }}
+  Observation: {{ item.observation }}
+  Excerpt: {{ item.excerpt }}
+  Confidence: {{ item.confidence }}
+  Tool: {{ item.tool_source }}
+{% endfor %}
+
+Score this batch on a 1-5 scale across these criteria:
+1. **Accuracy** - Are the observations factually consistent with the excerpts shown?
+2. **Specificity** - Do the excerpts cite concrete files, metrics, or values (not vague)?
+3. **Confidence calibration** - Are the stated confidence levels appropriate for the evidence strength?
+
+Respond with ONLY a JSON object (no markdown fencing):
+{
+  "score": <1-5 integer>,
+  "confidence": <0.0-1.0 float>,
+  "reasoning": "<1-2 sentences explaining the score>"
+}
